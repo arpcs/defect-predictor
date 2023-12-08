@@ -157,7 +157,7 @@ def runner(number_of_problems, number_of_solutions):
                 time.sleep(2)
             print(f"\t\tfor {verdict} done {solution_couter} out of {num_to_fetch}")
             solution_couter_sum += solution_couter
-            time.sleep(1)
+            time.sleep(2)
         is_good = "Good" if number_of_solutions == solution_couter_sum else "Bad"
         print(f"{is_good}: Overall done {solution_couter_sum} out of {number_of_solutions}")
         # Respect the API request limit

@@ -1,0 +1,36 @@
+{
+    "id": 224179400,
+    "contestId": 856,
+    "creationTimeSeconds": 1695218996,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 856,
+        "index": "C",
+        "name": "Eleventh Birthday",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 856,
+        "members": [
+            {
+                "handle": "propane"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1505050500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 26,
+    "timeConsumedMillis": 109,
+    "memoryConsumedBytes": 307200,
+    "source": "#include<iostream>\r\n#include<cstring>\r\n#include<vector>\r\n#include<array>\r\nusing namespace std;\r\nusing LL = long long;\r\ntemplate<const int T>\r\nstruct ModInt {\r\n    const static int mod = T;\r\n    int x;\r\n    ModInt(int x = 0) : x(x % mod) {}\r\n    ModInt(long long x) : x(int(x % mod)) {} \r\n    int val() { return x; }\r\n    ModInt operator + (const ModInt &a) const { int x0 = x + a.x; return ModInt(x0 < mod ? x0 : x0 - mod); }\r\n    ModInt operator - (const ModInt &a) const { int x0 = x - a.x; return ModInt(x0 < 0 ? x0 + mod : x0); }\r\n    ModInt operator * (const ModInt &a) const { return ModInt(1LL * x * a.x % mod); }\r\n    ModInt operator / (const ModInt &a) const { return *this * a.inv(); }\r\n    bool operator == (const ModInt &a) const { return x == a.x; };\r\n    bool operator != (const ModInt &a) const { return x != a.x; };\r\n    void operator += (const ModInt &a) { x += a.x; if (x >= mod) x -= mod; }\r\n    void operator -= (const ModInt &a) { x -= a.x; if (x < 0) x += mod; }\r\n    void operator *= (const ModInt &a) { x = 1LL * x * a.x % mod; }\r\n    void operator /= (const ModInt &a) { *this = *this / a; }\r\n    friend ModInt operator + (int y, const ModInt &a){ int x0 = y + a.x; return ModInt(x0 < mod ? x0 : x0 - mod); }\r\n    friend ModInt operator - (int y, const ModInt &a){ int x0 = y - a.x; return ModInt(x0 < 0 ? x0 + mod : x0); }\r\n    friend ModInt operator * (int y, const ModInt &a){ return ModInt(1LL * y * a.x % mod);}\r\n    friend ModInt operator / (int y, const ModInt &a){ return ModInt(y) / a;}\r\n    friend ostream &operator<<(ostream &os, const ModInt &a) { return os << a.x;}\r\n    friend istream &operator>>(istream &is, ModInt &t){return is >> t.x;}\r\n\r\n    ModInt pow(int64_t n) const {\r\n        ModInt res(1), mul(x);\r\n        while(n){\r\n            if (n & 1) res *= mul;\r\n            mul *= mul;\r\n            n >>= 1;\r\n        }\r\n        return res;\r\n    }\r\n    \r\n    ModInt inv() const {\r\n        int a = x, b = mod, u = 1, v = 0;\r\n        while (b) {\r\n            int t = a / b;\r\n            a -= t * b; swap(a, b);\r\n            u -= t * v; swap(u, v);\r\n        }\r\n        if (u < 0) u += mod;\r\n        return u;\r\n    }\r\n    \r\n};\r\nusing mint = ModInt<998244353>;\r\n\r\nconst int maxn = 2005;\r\nmint fact[maxn];\r\n\r\nint main(){\r\n\r\n#ifdef LOCAL\r\n    freopen(\"data.in\", \"r\", stdin);\r\n    freopen(\"data.out\", \"w\", stdout);\r\n#endif\r\n\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n    ios::sync_with_stdio(0);\r\n\r\n    fact[0] = 1;\r\n    for(int i = 1; i < maxn; i++)\r\n        fact[i] = fact[i - 1] * i;\r\n\r\n    int T;\r\n    cin >> T;\r\n    while(T--){\r\n        int n;\r\n        cin >> n;\r\n        vector<array<int, 2> > p[2];\r\n        for(int i = 0; i < n; i++){\r\n            string s;\r\n            cin >> s;\r\n            reverse(s.begin(), s.end());\r\n            int v1 = 0, v2 = 0;\r\n            for(int j = 0; j < s.size(); j++){\r\n                int x = s[j] - '0';\r\n                if (j % 2 == 0){\r\n                    v1 = (v1 + x) % 11;\r\n                    v2 = (v2 + 10 * x) % 11;\r\n                }\r\n                else{\r\n                    v1 = (v1 + 10 * x) % 11;\r\n                    v2 = (v2 + x) % 11;\r\n                }\r\n            }\r\n            p[s.size() % 2].push_back({v1, v2});\r\n        }\r\n        const int m = (p[1].size() + 1) / 2;\r\n        vector<array<mint, 11> > dp(m + 1);\r\n        dp[0][0] = 1;\r\n        for(auto &a : p[1]){\r\n            vector<array<mint, 11> > ndp(m + 1);\r\n            for(int i = 0; i <= m; i++){\r\n                for(int j = 0; j < 11; j++){\r\n                    if (i + 1 <= m){\r\n                        ndp[i + 1][(j + a[0]) % 11] += dp[i][j];\r\n                    }\r\n                    ndp[i][(j + a[1]) % 11] += dp[i][j];\r\n                }\r\n            }\r\n            dp.swap(ndp);\r\n        }\r\n        vector<array<mint, 11> > f(n + 2);\r\n        for(int i = 0; i < 11; i++){\r\n            f[m][i] = dp[m][i] * fact[m] * fact[p[1].size() - m];\r\n        }\r\n        int tot = p[1].size() + 1;\r\n        for(auto &a : p[0]){\r\n            vector<array<mint, 11> > nf(n + 2);\r\n            for(int i = 0; i <= tot; i++){\r\n                for(int j = 0; j < 11; j++){\r\n                    int k = tot - i;\r\n                    nf[i + 1][(j + a[0]) % 11] += i * f[i][j];\r\n                    nf[i][(j + a[1]) % 11] += k * f[i][j];\r\n                }\r\n            }\r\n            tot++;\r\n            f.swap(nf);\r\n        }\r\n        mint ans = 0;\r\n        for(int i = 0; i <= n + 1; i++) ans += f[i][0];\r\n        cout << ans << '\\n';\r\n    }\r\n\r\n}"
+}

@@ -1,0 +1,35 @@
+{
+    "id": 192097042,
+    "contestId": 976,
+    "creationTimeSeconds": 1675485912,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 976,
+        "index": "F",
+        "name": "Minimal k-covering",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 976,
+        "members": [
+            {
+                "handle": "Dr_Gilbert"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1525099200
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 33,
+    "timeConsumedMillis": 218,
+    "memoryConsumedBytes": 18944000,
+    "source": "// LUOGU_RID: 101404161\n#include <bits/stdc++.h>\r\n#pragma GCC optimize(\"Ofast\")\r\n#define int long long\r\nusing namespace std;\r\nconst int N=5e3+10,M=2e4;\r\nconst int inf=1e9;\r\nstruct edge{\r\n\tint v,val,ops,id;\r\n}e[M<<1];\r\nvector<vector<int>> G,ans;\r\nint dep[N],deg[N],x[N],y[N];\r\nint num[N],s,t,tot;\r\nbool bfs(){\r\n\tmemset(dep,0,sizeof(dep));\r\n\tqueue<int> que;que.push(s);dep[s]=1;\r\n\twhile (que.size()){\r\n\t\tint x=que.front();que.pop();\r\n\t\tfor (int id:G[x]){\r\n\t\t\tauto p=e[id];int v=p.v,w=p.val;\r\n\t\t\tif (w>0&&!dep[v]){\r\n\t\t\t\tdep[v]=dep[x]+1;que.push(v);\r\n\t\t\t}\r\n\t\t}\r\n\t}return dep[t];\r\n}\r\nint dinic(int x, int in){\r\n\tif (x==t) return in;\r\n\tint out=0;\r\n\tfor (int id:G[x]){\r\n\t\tauto p=e[id];int v=p.v,w=p.val,ops=p.ops;\r\n\t\tif (w>0&&dep[v]==dep[x]+1){\r\n\t\t\tint tmp=dinic(v,min(w,in));\r\n\t\t\te[id].val-=tmp;e[ops].val+=tmp;\r\n\t\t\tin-=tmp;out+=tmp;\r\n\t\t}\r\n\t}if (!out) dep[x]=0;\r\n\treturn out;\r\n}\r\nvoid add(int u, int v, int w, int id){\r\n\t++tot;e[tot]={v,w,tot+1,id};\r\n\t++tot;e[tot]={u,0,tot-1,id};\r\n\tG[u].emplace_back(tot-1);\r\n\tG[v].emplace_back(tot);return;\r\n}\r\nsigned main(){\r\n\tios::sync_with_stdio(0);\r\n\tcin.tie(nullptr);cout.tie(nullptr);\r\n\tint n,m,k;cin>>n>>m>>k;\r\n\tassert(n<=2000&&m<=2000&&k<=2000);\r\n\tG.resize(n+m+10);s=0,t=n+m+1;\r\n\tfor (int i=1;i<=k;i++){\r\n\t\tint u,v;cin>>u>>v;x[i]=u,y[i]=v;\r\n\t\tdeg[u]++;deg[v+n]++;\r\n\t}cout<<0<<endl;int val=k*2;\r\n\tfor (int i=1;i<=n+m;i++){\r\n\t\tval=min(val,deg[i]);\r\n\t}ans.resize(val+10);\r\n\tfor (int j=k;j>=1;j--) add(x[j],y[j]+n,1,j);\r\n\tfor (int j=1;j<=n;j++) add(s,j,deg[j]-val,0);\r\n\tfor (int j=1;j<=m;j++) add(j+n,t,deg[j+n]-val,0);\r\n\tfor (int i=val;i>=1;i--){\r\n\t\twhile (bfs()) dinic(s,inf);\r\n\t\tfor (int id:G[s]) e[id].val++;\r\n\t\tfor (int id:G[t]){\r\n\t\t\tint rev=e[id].ops;\r\n\t\t\te[rev].val++;\r\n\t\t}vector<int> vec;\r\n\t\tfor (int i=1;i<=n;i++){\r\n\t\t\tfor (int id:G[i]){\r\n\t\t\t\tif (e[id].val&&e[id].v) vec.emplace_back(e[id].id);\r\n\t\t\t}\r\n\t\t}sort(vec.begin(),vec.end());ans[i]=vec;\r\n\t}for (int i=1;i<=val;i++){\r\n\t\tcout<<ans[i].size()<<' ';\r\n\t\tfor (int x:ans[i]) cout<<x<<' ';\r\n\t\tcout<<endl;\r\n\t}return 0;\r\n} "
+}

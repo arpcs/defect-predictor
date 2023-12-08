@@ -1,0 +1,35 @@
+{
+    "id": 229681150,
+    "contestId": 976,
+    "creationTimeSeconds": 1698233299,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 976,
+        "index": "F",
+        "name": "Minimal k-covering",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 976,
+        "members": [
+            {
+                "handle": "MCxiaomengxin"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1525099200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 33,
+    "timeConsumedMillis": 264,
+    "memoryConsumedBytes": 11878400,
+    "source": "// LUOGU_RID: 131560577\n//\uff1f\uff1f\uff1f\uff1f\uff1f\n\n#include <iostream>\n#include <cstring>\n#include <vector>\n#include <queue>\n\nusing namespace std;\n\nconst int N=8100,INF=1e9;\nint n1,n2,m,S,T;\nint h[N],e[2*N],nxt[2*N],f[N*2],idx;\nint deg[N];\nint mdeg=INF;\nint dep[N];\nint cur[N];\nint q[N];\n\nvector<int> ans[N];\n\nvoid add(int a,int b,int c){\n\tnxt[idx]=h[a],e[idx]=b,f[idx]=c,h[a]=idx++;\n\tnxt[idx]=h[b],e[idx]=a,f[idx]=0,h[b]=idx++;\n} \n\nbool bfs(){\n\tmemset(dep,-1,sizeof(dep));\n\tqueue<int> q;\n\tq.push(S),dep[S]=0,cur[S]=h[S];\n\twhile(!q.empty()){\n\t\tint u=q.front();\n\t\tq.pop();\n\t\tfor(int i=h[u];~i;i=nxt[i]){\n\t\t\tint v=e[i];\n\t\t\tif(dep[v]==-1 && f[i]){\n\t\t\t\tdep[v]=dep[u]+1;\n\t\t\t\tcur[v]=h[v];\n\t\t\t\tq.push(v);\n\t\t\t\tif(v==T)\n\t\t\t\t\treturn 1;\n\t\t\t\t}\n\t\t}\n\t}\n\treturn 0;\n}\n\nint find(int u,int limit){\n\tif(u==T)\n\t\treturn limit;\n\tint flow=0;\n\tfor(int i=cur[u];~i && flow<limit;i=nxt[i]){\n\t\tcur[u]=i;\n\t\tint v=e[i];\n\t\tif(dep[v]!=dep[u]+1 || !f[i])\n\t\t\tcontinue;\n\t\tint r=find(v,min(limit-flow,f[i]));\n\t\tif(!r)\n\t\t\tdep[v]=-1;\n\t\tf[i]-=r,f[i^1]+=r,flow+=r;\n\t}\n\treturn flow;\n}\n\nint dinic(){\n\tint flow=0;\n\twhile(bfs()){\n\t\tflow+=find(S,INF);\n\t//\tcout<<\"!!\"<<flow<<endl;\n\t}\n\treturn flow;\n}\n\nint main(){\n\tios::sync_with_stdio(false);\n\tcin.tie(0);\n\tcout.tie(0);\n\tmemset(h,-1,sizeof(h));\n\tcin>>n1>>n2>>m;\n\tS=0,T=n1+n2+1;\n\tfor(int i=1;i<=m;++i){\n\t\tint a,b;\n\t\tcin>>a>>b;\n\t\tadd(a,b+n1,1);\n\t\tdeg[a]++,deg[b+n1]++;\n\t}\n\tfor(int i=1;i<=n1+n2;++i)\n\t\tmdeg=min(mdeg,deg[i]);\n\tfor(int i=1;i<=n1;++i)\t\n\t\tadd(S,i,deg[i]-mdeg);\n\tfor(int i=n1+1;i<=n1+n2;++i)\n\t\tadd(i,T,deg[i]-mdeg);\n//\tcout<<\"QWQ\"<<mdeg<<endl;\n\tfor(int i=mdeg;i>=0;--i){\n\t\tdinic();\n\t\t//cout<<\"??\"<<i<<endl;\n\t\tfor(int j=0;j<2*m;j+=2)\n\t\t\tif(f[j])\t\n\t\t\t\tans[i].push_back(j/2+1); \n\t\tfor(int j=m*2;j<idx;j+=2)\n\t\t\t++f[j];\n\t}\n\tfor(int i=0;i<=mdeg;++i){\n\t\tcout<<ans[i].size()<<\" \";\n\t\tfor(int j=0;j<ans[i].size();++j)\n\t\t\tcout<<ans[i][j]<<\" \";\n\t\tcout<<\"\\n\";\n\t}\n\treturn 0;\n} "
+}

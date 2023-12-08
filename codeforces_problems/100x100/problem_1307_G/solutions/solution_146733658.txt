@@ -1,0 +1,37 @@
+{
+    "id": 146733658,
+    "contestId": 1307,
+    "creationTimeSeconds": 1645101336,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "vjudge1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 614400,
+    "source": "#include <bits/stdc++.h>\n\n#define rep(i,n) for(int i=0;i<n;++i)\n#define repn(i,n) for(int i=1;i<=n;++i)\n#define LL long long\n#define pii pair <int,int>\n#define pb push_back\n#define fi first\n#define se second\n#define mpr make_pair\n\nusing namespace std;\n\nvector <pii> v;\n\nstruct edge\n{\n\tint to,flow,cost,rev;\n\tedge(int a,int b,int c,int d):to(a),flow(b),cost(c),rev(d){}\n};\nnamespace minCostFlow\n{\n\tvector <edge> g[10010];\n\tint n,dist[10010],cur[10010];\n  bool inq[10010],vis[10010];\n\tqueue <int> q;\n\tvoid add_edge(int x,int y,int flow,int cost)\n\t{\n\t\tg[x].pb(edge(y,flow,cost,(int)g[y].size()));\n\t\tg[y].pb(edge(x,0,-cost,(int)g[x].size()-1));\n\t}\n  bool relax(int to,int fr,int e)\n  {\n    if(dist[to]>dist[fr]+e)\n    {\n      dist[to]=dist[fr]+e;\n      return true;\n    }\n    return false;\n  }\n  bool spfa(int s,int t)\n  {\n    rep(i,n+3) dist[i]=1e9;\n    dist[s]=0;inq[s]=true;q.push(s);\n    while(!q.empty())\n    {\n      int p=q.front();q.pop();inq[p]=false;\n      rep(i,g[p].size()) if(g[p][i].flow>0)\n      {\n        if(relax(g[p][i].to,p,g[p][i].cost)&& !inq[g[p][i].to])\n        {\n          inq[g[p][i].to]=true;\n          q.push(g[p][i].to);\n        }\n      }\n    }\n    return dist[t]<1e9;\n  }\n  pii dfs(int pos,int t,int fl)\n  {\n    if(pos==t) return mpr(fl,0);\n    vis[pos]=true;\n    for(int i=cur[pos];i<g[pos].size();++i,++cur[pos]) if(!vis[g[pos][i].to]&&g[pos][i].flow>0&&dist[g[pos][i].to]==dist[pos]+g[pos][i].cost)\n    {\n      pii res=dfs(g[pos][i].to,t,min(fl,g[pos][i].flow));\n      if(res.fi>0)\n      {\n        res.se+=g[pos][i].cost*res.fi;\n        g[pos][i].flow-=res.fi;g[g[pos][i].to][g[pos][i].rev].flow+=res.fi;\n        vis[pos]=false;\n        return res;\n      }\n    }\n    vis[pos]=false;\n    return mpr(0,0);\n  }\n  pii mcmf(int s,int t)\n  {\n    pii ret=mpr(0,0);\n    while(spfa(s,t))\n    {\n      rep(i,n+3) cur[i]=0;\n      while(true)\n      {\n        pii val=dfs(s,t,1e9);\n        if(val.fi==0) break;\n        ret.fi+=val.fi;ret.se+=val.se;\n        v.pb(ret);\n      }\n    }\n    return ret;\n  }\n}\n\nint n,m,q;\n\ndouble calc(int mid,int x){return (double)(v[mid].se+x)/(double)v[mid].fi;}\n\nint main()\n{\n  cin>>n>>m;\n  int x,y,z;\n  rep(i,m)\n  {\n    scanf(\"%d%d%d\",&x,&y,&z);\n    minCostFlow::add_edge(x,y,1,z);\n  }\n  minCostFlow::n=n;\n  minCostFlow::mcmf(1,n);\n  cin>>q;\n  rep(qn,q)\n  {\n    scanf(\"%d\",&x);\n    int lb=0,ub=v.size()-1;\n    while(ub-lb>5)\n    {\n      int d=(ub-lb)/3,mid=lb+d,mid2=ub-d;\n      if(calc(mid2,x)<=calc(mid,x)) lb=mid;\n      else ub=mid2;\n    }\n    double ans=1e18;\n    for(int i=lb;i<=ub;++i) ans=min(ans,calc(i,x));\n    printf(\"%.10lf\\n\",ans);\n  }\n  return 0;\n}\n \t\t  \t \t\t  \t\t\t\t         \t \t   \t"
+}

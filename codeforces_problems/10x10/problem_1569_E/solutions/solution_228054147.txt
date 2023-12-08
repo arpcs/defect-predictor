@@ -1,0 +1,38 @@
+{
+    "id": 228054147,
+    "contestId": 1569,
+    "creationTimeSeconds": 1697212486,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "E",
+        "name": "Playoff Restoration",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "bitmasks",
+            "brute force",
+            "hashing",
+            "implementation",
+            "meet-in-the-middle"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "stkwill"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\n\n#include <modint.hpp>\n\nusing MInt = StK::ModInt<int, 998244353, int64_t>;\n\nconstexpr int K = 5;\nconstexpr int C = 1 << K - 1;\nconstexpr int N = 1 << C - 1;\nconstexpr int M = 1 << K;\n\nint k, c, n, m;\nint rank[K + 1];\nint peo[K + 1][C];\n\nMInt A, H;\nMInt prk[K + 1];\n\nint ans[N << 1 | 1];\n\nstd::pair<MInt, int> vals00[N], vals01[N], vals10[N], vals11[N];\n\nbool cmp(std::pair<MInt, int> a, std::pair<MInt, int> b) { return a.first < b.first; }\n\nvoid dfs(std::pair<MInt, int> *vals, int u1, int u2, MInt val, int id, bool f) {\n    // if (u2) std::cerr << \"dfs(\" << u1 << \", \" << u2 << \", \" << val << \", \" << id << \", \" << f << \")\" << '\\n';\n    if (u1 == 1) return vals[id] = {val + peo[1][0] * prk[f], id}, void(0);\n    if (u2 == 1 << u1 - 2) return dfs(vals, u1 - 1, 0, val, id, f);\n    // std::cerr << peo[u1][u2 << 1 | 0] << \" & \";\n    // std::cerr << peo[u1][u2 << 1 | 1] << \" choose \";\n    // std::cerr << peo[u1][u2 << 1 | 0] << \": \";\n    peo[u1 - 1][u2] = peo[u1][u2 << 1 | 0], dfs(vals, u1, u2 + 1, val + peo[u1][u2 << 1 | 1] * prk[u1], id << 1 | 0, f);\n    // std::cerr << peo[u1][u2 << 1 | 0] << \" & \";\n    // std::cerr << peo[u1][u2 << 1 | 1] << \" choose \";\n    // std::cerr << peo[u1][u2 << 1 | 1] << \": \";\n    peo[u1 - 1][u2] = peo[u1][u2 << 1 | 1], dfs(vals, u1, u2 + 1, val + peo[u1][u2 << 1 | 0] * prk[u1], id << 1 | 1, f);\n}\n\nvoid getans(int num, bool first) {\n    for (int u1 = k, t = c - 2; u1 > 1; --u1) {\n        for (int u2 = 0; u2 < 1 << u1 - 2; ++u2) {\n            // std::cerr << peo[u1][u2 << 1 | 0] << \" & \";\n            // std::cerr << peo[u1][u2 << 1 | 1] << \" choose \";\n            // std::cerr << peo[u1][u2 << 1 | num >> t & 1] << '\\n';\n            peo[u1 - 1][u2] = peo[u1][u2 << 1 | num >> t & 1];\n            ans[peo[u1][u2 << 1 | !(num >> t & 1)]] = rank[u1];\n            --t;\n        }\n    }\n    ans[peo[1][0]] = rank[first];\n}\n\nint main() {\n    std::ios::sync_with_stdio(false);\n    std::cin.tie(nullptr), std::cout.tie(nullptr);\n\n    std::cin >> k >> A >> H;\n    c = 1 << k - 1;\n    n = 1 << c - 1;\n    m = 1 << k;\n\n    rank[0] = 1;\n    for (int i = 1; i <= k; ++i) rank[i] = (1 << i - 1) + 1;\n    for (int i = 0; i <= k; ++i) prk[i] = A.pow(rank[i]);\n\n    for (int i = 0; i < c; ++i) peo[k][i] = i + 1;\n    dfs(vals00, k, 0, 0, 0, 0);\n    dfs(vals01, k, 0, 0, 0, 1);\n    for (int i = 0; i < c; ++i) peo[k][i] = c + i + 1;\n    dfs(vals10, k, 0, 0, 0, 0);\n    dfs(vals11, k, 0, 0, 0, 1);\n\n    // std::cerr << \"vals00 = \" << '\\n';\n    // for (int i = 0; i < n; ++i) std::cerr << vals00[i].first << ' ' << vals00[i].second << '\\n';\n    // std::cerr << \"vals01 = \" << '\\n';\n    // for (int i = 0; i < n; ++i) std::cerr << vals01[i].first << ' ' << vals01[i].second << '\\n';\n    // std::cerr << \"vals10 = \" << '\\n';\n    // for (int i = 0; i < n; ++i) std::cerr << vals10[i].first << ' ' << vals10[i].second << '\\n';\n    // std::cerr << \"vals11 = \" << '\\n';\n    // for (int i = 0; i < n; ++i) std::cerr << vals11[i].first << ' ' << vals11[i].second << '\\n';\n\n    for (int i = 0; i < n; ++i) {\n        vals10[i].first = H - vals10[i].first;\n        vals11[i].first = H - vals11[i].first;\n    }\n\n    std::sort(vals00, vals00 + n, cmp);\n    std::sort(vals01, vals01 + n, cmp);\n    std::sort(vals10, vals10 + n, cmp);\n    std::sort(vals11, vals11 + n, cmp);\n\n    for (int i = 0, j = 0; i < n; ++i) {\n        while (j + 1 < n && vals11[j].first < vals00[i].first) ++j;\n        if (vals00[i].first == vals11[j].first) {\n            // std::cerr << \"fetch \" << vals00[i].first << ' ' << H - vals11[j].first << '\\n';\n            for (int i = 0; i < c; ++i) peo[k][i] = i + 1;\n            getans(vals00[i].second, 0);\n            for (int i = 0; i < c; ++i) peo[k][i] = c + i + 1;\n            getans(vals11[j].second, 1);\n            for (int k = 1; k <= m; ++k) std::cout << ans[k] << \" \\n\"[k == m];\n            return 0;\n        }\n    }\n\n    for (int i = 0, j = 0; i < n; ++i) {\n        while (j + 1 < n && vals10[j].first < vals01[i].first) ++j;\n        if (vals01[i].first == vals10[j].first) {\n            // std::cerr << \"fetch \" << vals01[i].first << ' ' << H - vals10[j].first << '\\n';\n            for (int i = 0; i < c; ++i) peo[k][i] = i + 1;\n            getans(vals01[i].second, 1);\n            for (int i = 0; i < c; ++i) peo[k][i] = c + i + 1;\n            getans(vals10[j].second, 0);\n            for (int k = 1; k <= m; ++k) std::cout << ans[k] << \" \\n\"[k == m];\n            return 0;\n        }\n    }\n\n    std::cout << -1 << '\\n';\n\n    return 0;\n}\n\n\t  \t  \t  \t\t\t \t\t \t\t \t \t\t \t  \t"
+}

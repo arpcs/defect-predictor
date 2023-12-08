@@ -1,0 +1,37 @@
+{
+    "id": 188957991,
+    "contestId": 1307,
+    "creationTimeSeconds": 1673507974,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "sjc061031"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 187,
+    "memoryConsumedBytes": 307200,
+    "source": "#pragma GCC optimize(\"Ofast\",\"inline\",\"-ffast-math\")\r\n#pragma GCC target(\"avx,sse2,sse3,sse4,mmx\")\r\n#include <bits/stdc++.h>\r\n#include<ext/pb_ds/assoc_container.hpp>\r\n#include<ext/pb_ds/hash_policy.hpp>\r\n#define INF 1000000007 \r\nusing namespace __gnu_pbds;\r\nusing namespace std;\r\n\r\nstruct custom_hash {\r\n    static uint64_t splitmix64(uint64_t x) {\r\n        x += 0x9e3779b97f4a7c15;\r\n        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;\r\n        x = (x ^ (x >> 27)) * 0x94d049bb133111eb;\r\n        return x ^ (x >> 31);\r\n    }\r\n\r\n    size_t operator()(uint64_t x) const {\r\n        static const uint64_t FIXED_RANDOM = chrono::steady_clock::now().time_since_epoch().count();\r\n        return splitmix64(x + FIXED_RANDOM);\r\n    }\r\n};\r\n\r\nint n,m,q;\r\nlong long f[60];\r\nvector<pair<pair<int,int>,pair<int,int> > > g[60];\r\nint dist[60],pre[60],edge[60],vis[60];\r\n\r\ninline void add_edge(int x,int y,int c,int num)\r\n{\r\n\tg[x].push_back(make_pair(make_pair(y,c),make_pair(num,g[y].size())));\r\n\tg[y].push_back(make_pair(make_pair(x,0),make_pair(-num,g[x].size()-1)));\r\n}\r\n\r\ninline int min_cost_flow(int f)\r\n{\r\n\tint res=0;\r\n\twhile(f>0){\r\n\t\tfor(int i=1;i<=n;i++) dist[i]=INF;\r\n\t\tdist[1]=0;\r\n\t\tqueue<int> q;\r\n\t\tq.push(1);vis[1]=1;\r\n\t\twhile(!q.empty()){\r\n\t\t\tint u=q.front();q.pop();vis[u]=0;\r\n\t\t\tfor(int i=0;i<(int)g[u].size();i++){\r\n\t\t\t\tpair<pair<int,int>,pair<int,int> > e=g[u][i];\r\n\t\t\t\tif(e.first.second>0&&dist[e.first.first]>dist[u]+e.second.first){\r\n\t\t\t\t\tdist[e.first.first]=dist[u]+e.second.first;\r\n\t\t\t\t\tpre[e.first.first]=u;\r\n\t\t\t\t\tedge[e.first.first]=i;\r\n\t\t\t\t\tif(!vis[e.first.first]){\r\n\t\t\t\t\t\tvis[e.first.first]=1;\r\n\t\t\t\t\t\tq.push(e.first.first);\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tif(dist[n]==INF) return -1;\r\n\t\tint flow=f;\r\n\t\tfor(int i=n;i!=1;i=pre[i]){\r\n\t\t\tflow=min(flow,g[pre[i]][edge[i]].first.second);\r\n\t\t}\r\n\t\tf-=flow;\r\n\t\tres+=flow*dist[n];\r\n\t\tfor(int i=n;i!=1;i=pre[i]){\r\n\t\t\tg[pre[i]][edge[i]].first.second-=flow;\r\n\t\t\tg[i][g[pre[i]][edge[i]].second.second].first.second+=flow;\r\n\t\t}\r\n\t}\r\n\treturn res;\r\n}\r\n\r\nsigned main()\r\n{\r\n\tios::sync_with_stdio(false);cin.tie(0);\r\n\tcin>>n>>m;\r\n\tfor(int i=1;i<=m;i++){\r\n\t\tint x,y,w;cin>>x>>y>>w;\r\n\t\tadd_edge(x,y,1,w);\r\n\t}\r\n\tint pos=n;f[0]=0ll;\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tint now=min_cost_flow(1);\r\n\t\tif(now==-1){\r\n\t\t\tpos=i-1;break;\r\n\t\t}\r\n\t\tf[i]=f[i-1]+1ll*now;\r\n\t}\r\n\tcin>>q;\r\n\tfor(int i=1;i<=q;i++){\r\n\t\tint x;cin>>x;\r\n\t\tdouble ans=(f[1]+1ll*x)*1.0;\r\n\t\tfor(int j=2;j<=pos;j++) ans=min(ans,(f[j]+1ll*x)*1.0/j);\r\n\t\tcout<<fixed<<setprecision(10)<<ans<<'\\n';\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

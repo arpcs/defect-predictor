@@ -1,0 +1,36 @@
+{
+    "id": 229877886,
+    "contestId": 1000,
+    "creationTimeSeconds": 1698328585,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "Desh01"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 701,
+    "memoryConsumedBytes": 51916800,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nconst int N = 3e5, lg = 19;\r\nlong long dp_down[N], dp_up[N], f[N], par[N];\r\nint a[N], d[N], top[N], sz[N];\r\nvector<pair<int, int>> g[N];\r\n\r\nvoid dfs(int u) {\r\n    sz[u] = 1;\r\n    for (int i = 0; i < g[u].size(); i++) {\r\n        auto &[v, w] = g[u][i];\r\n        g[v].erase(find(g[v].begin(), g[v].end(), make_pair(u, w)));\r\n        d[v] = d[u] + 1;\r\n        par[v] = u;\r\n        dfs(v);\r\n        sz[u] += sz[v];\r\n        dp_down[u] +=  max(0LL, dp_down[v] + a[v] - 2 * w);\r\n        if (sz[v] > sz[g[u][0].first]) swap(g[u][0], g[u][i]);\r\n    }\r\n}\r\n\r\nvoid dfs_up(int u) {\r\n    for (auto &[v, w] : g[u]) {\r\n        f[v] = f[u] + dp_down[u] - max(0LL, dp_down[v] + a[v] - 2 * w) + a[v] - w;\r\n        dp_up[v] = max(0LL, dp_up[u] + dp_down[u] - max(0LL, dp_down[v] + a[v] - 2 * w) + a[u] - 2 * w);\r\n        top[v] = v == g[u][0].first ? top[u] : v;\r\n        dfs_up(v);\r\n    }\r\n}\r\n\r\nint lca(int u, int v) {\r\n    while (top[u] != top[v]) {\r\n        if (d[top[u]] < d[top[v]]) swap(u, v);\r\n        u = par[top[u]];\r\n    }\r\n    return d[u] < d[v] ? u : v;\r\n}\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    int n, q;\r\n    cin >> n >> q;\r\n    for (int i = 0; i < n; i++) {\r\n        cin >> a[i];\r\n    }\r\n    for (int i = 0; i < n - 1; i++) {\r\n        int u, v, w;\r\n        cin >> u >> v >> w;\r\n        g[--u].push_back({--v, w});\r\n        g[v].push_back({u, w});\r\n    }\r\n    dfs(0);\r\n    dfs_up(0);\r\n    while (q--) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        int lc = lca(--u, --v);\r\n        cout << f[u] + f[v] - 2 * f[lc] + dp_down[u] + dp_down[v] + dp_up[lc] + a[lc] - dp_down[lc] << '\\n';\r\n    }\r\n    return 0;\r\n}\r\n"
+}

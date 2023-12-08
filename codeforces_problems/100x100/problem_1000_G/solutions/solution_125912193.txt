@@ -1,0 +1,36 @@
+{
+    "id": 125912193,
+    "contestId": 1000,
+    "creationTimeSeconds": 1629018507,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "ppc_qjd"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 2246,
+    "memoryConsumedBytes": 102297600,
+    "source": "#include<bits/stdc++.h>\n#define LL long long\n#define mp make_pair\n#define pb push_back\nusing namespace std;\nconst int Maxn=300005;\ninline int read(){\n    int x;\n    scanf(\"%d\",&x);\n    return x;\n}\nint n,q;\nint a[Maxn],par[Maxn][20],st[Maxn],ed[Maxn],ks,uw[Maxn];\nLL Mx[Maxn],Up[Maxn];\nvector<pair<int,int> > G[Maxn],Son[Maxn];\nbool isanc(int u,int v){\n    return st[u]<=st[v] && ed[v]<=ed[u];\n}\nint lca(int u,int v){\n    if (isanc(u,v)) return u;\n    for (int i=19;i>=0;i--){\n        if (par[u][i]!=-1 && !isanc(par[u][i],v)){\n            u=par[u][i];\n        }\n    }\n    return par[u][0];\n}\nstruct PS{\n    LL val[Maxn],Sval[Maxn];\n    void dfs(int x,int p){\n        Sval[x]=val[x]+((p==-1)?0:Sval[p]);\n        for (int i=0;i<G[x].size();i++){\n            int v=G[x][i].first;\n            if (v!=p){\n                dfs(v,x);\n            }\n        }\n    }\n    void build(){\n        dfs(1,-1);\n    }\n    LL query(int u,int v){\n        int l=lca(u,v);\n        return Sval[u]+Sval[v]-Sval[l]-((par[l][0]==-1)?0:Sval[par[l][0]]);\n    }\n}S1,W,SW;\n\nvoid dfs1(int x,int p){\n    st[x]=ks++;par[x][0]=p;\n    for (int i=0;i<G[x].size();i++){\n        int v=G[x][i].first;\n        if (v!=p){\n            Son[x].pb(G[x][i]);\n            uw[v]=G[x][i].second;\n            dfs1(v,x);\n            Mx[x]+=max(0ll,Mx[v]+a[v]-2*G[x][i].second);\n        }\n    }\n    ed[x]=ks;\n}\nvoid dfs2(int x,int p,LL cv){\n    Up[x]=cv;\n    for (int i=0;i<G[x].size();i++){\n        int v=G[x][i].first;\n        if (v==p) continue;\n        LL nv=max(((cv+SW.val[x]-W.val[v])+a[x]-2ll*G[x][i].second),0ll);\n        \n        dfs2(v,x,nv);\n    }\n}\nint main(){\n    n=read();q=read();\n    for (int i=1;i<=n;i++){\n        a[i]=read();\n    }\n    for (int i=0;i<n-1;i++){\n        int u,v,w;\n        u=read();v=read();w=read();\n        G[u].pb(mp(v,w));\n        G[v].pb(mp(u,w));\n    }\n    dfs1(1,-1);\n    for (int i=1;i<20;i++){\n        for (int j=1;j<=n;j++){\n            if (par[j][i-1]==-1) par[j][i]=-1;\n            else par[j][i]=par[par[j][i-1]][i-1];\n        }\n    }\n    \n    for (int i=1;i<=n;i++){\n        W.val[i]=max(0ll,a[i]+Mx[i]-uw[i]*2);\n        S1.val[i]=a[i]-uw[i];\n    }\n    for (int i=1;i<=n;i++){\n        SW.val[i]=0;\n        for (int j=0;j<Son[i].size();j++){\n            SW.val[i]+=W.val[Son[i][j].first];\n        }\n    }\n    W.build();SW.build();S1.build();\n    \n    dfs2(1,-1,0);\n    \n    while (q--){\n        int u,v;\n        u=read();v=read();\n        \n        int l=lca(u,v);\n        \n        LL ans=S1.query(u,v)+uw[l];\n        ans+=SW.query(u,v);\n        ans-=W.query(u,v);\n        ans+=W.val[l];\n        ans+=Up[l];\n        printf(\"%lld\\n\",ans);\n    }\n    return 0;\n}\n"
+}

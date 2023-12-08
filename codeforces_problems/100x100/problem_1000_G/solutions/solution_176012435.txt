@@ -1,0 +1,36 @@
+{
+    "id": 176012435,
+    "contestId": 1000,
+    "creationTimeSeconds": 1665677677,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "AlexLorintz"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 951,
+    "memoryConsumedBytes": 93593600,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nconst int kN = 3e5;\r\nconst int kQ = 4e5;\r\nint n, q, a[1 + kN], lca[1 + kQ], d[1 + kN];\r\nint64_t down[1 + kN], up[1 + kN], sol[1 + kQ], sum[1 + kN], sumEdges[1 + kN], sub[1 + kN];\r\npair<int, int> v[1 + kQ];\r\nvector<pair<int, int>> g[1 + kN], queries[1 + kN];\r\nbitset<1 + kN> vis;\r\n\r\nstruct DSU {\r\n  int n;\r\n  vector<int> p, r, anc;\r\n\r\n  void init(int N) {\r\n    n = N;\r\n    p.resize(n + 1);\r\n    iota(p.begin(), p.end(), 0);\r\n    r.assign(n + 1, 1);\r\n    anc.resize(n + 1);\r\n    iota(anc.begin(), anc.end(), 0);\r\n  }\r\n\r\n  int root(int x) {\r\n    if (x == p[x]) {\r\n      return x;\r\n    }\r\n    return p[x] = root(p[x]);\r\n  }\r\n\r\n  bool unite(int u, int v) {\r\n    int x = root(u), y = root(v);\r\n    if (x == y) {\r\n      return false;\r\n    }\r\n    if (r[y] < r[x]) {\r\n      swap(x, y);\r\n    }\r\n    p[x] = y;\r\n    r[y] += r[x];\r\n    return true;\r\n  }\r\n} dsu;\r\n\r\nvoid dfs1(int u) {\r\n  vis[u] = true;\r\n  down[u] = a[u];\r\n  for (auto it : g[u]) {\r\n    int v, w;\r\n    tie(v, w) = it;\r\n    if (!vis[v]) {\r\n      dfs1(v);\r\n      dsu.unite(u, v);\r\n      dsu.anc[dsu.root(u)] = u;\r\n      down[u] += max(0LL, down[v] - 2 * w);\r\n    }\r\n  }\r\n  for (auto it : queries[u]) {\r\n    int v, index;\r\n    tie(v, index) = it;\r\n    if (vis[v]) {\r\n      lca[index] = dsu.anc[dsu.root(v)];\r\n    }\r\n  }\r\n}\r\n\r\nvoid dfs2(int u, int par) {\r\n  for (auto it : g[u]) {\r\n    int v, w;\r\n    tie(v, w) = it;\r\n    if (v != par) {\r\n      up[v] = max(0LL, up[u] - 2 * w + down[u] - max(0LL, down[v] - 2 * w));\r\n      dfs2(v, u);\r\n    }\r\n  }\r\n}\r\n\r\nvoid solve(int u, int par, int dep) {\r\n  d[u] = dep;\r\n  sum[dep] = sum[dep - 1] + down[u];\r\n  for (auto it : queries[u]) {\r\n    int l, index;\r\n    tie(l, index) = it;\r\n    sol[index] += sum[dep] - sum[d[l]] - sub[l] - (sumEdges[dep] - sumEdges[d[l]]);\r\n  }\r\n  for (auto it : g[u]) {\r\n    int v, w;\r\n    tie(v, w) = it;\r\n    if (v != par) {\r\n      sub[u] = max(0LL, down[v] - 2 * w);\r\n      sum[dep] -= sub[u];\r\n      sumEdges[dep + 1] = sumEdges[dep] + w;\r\n      solve(v, u, dep + 1);\r\n      sum[dep] += sub[u];\r\n    }\r\n  }\r\n}\r\n\r\nint main() {\r\n  ios_base::sync_with_stdio(false);\r\n  cin.tie(nullptr);\r\n  cin >> n >> q;\r\n  for (int i = 1; i <= n; ++i) {\r\n    cin >> a[i];\r\n  }\r\n  for (int i = 1; i < n; ++i) {\r\n    int u, v, w;\r\n    cin >> u >> v >> w;\r\n    g[u].emplace_back(v, w);\r\n    g[v].emplace_back(u, w);\r\n  }\r\n  for (int i = 1; i <= q; ++i) {\r\n    cin >> v[i].first >> v[i].second;\r\n    if (v[i].first != v[i].second) {\r\n      queries[v[i].first].emplace_back(v[i].second, i);\r\n      queries[v[i].second].emplace_back(v[i].first, i);\r\n    }\r\n  }\r\n  dsu.init(n);\r\n  dfs1(1);\r\n  dfs2(1, 0);\r\n  for (int i = 1; i <= n; ++i) {\r\n    queries[i].clear();\r\n  }\r\n  for (int i = 1; i <= q; ++i) {\r\n    if (v[i].first == v[i].second) {\r\n      sol[i] = down[v[i].first] + up[v[i].first];\r\n    } else {\r\n      sol[i] = down[lca[i]] + up[lca[i]];\r\n      if (v[i].first != lca[i]) {\r\n        queries[v[i].first].emplace_back(lca[i], i);\r\n      }\r\n      if (v[i].second != lca[i]) {\r\n        queries[v[i].second].emplace_back(lca[i], i);\r\n      }\r\n    }\r\n  }\r\n  solve(1, 0, 1);\r\n  for (int i = 1; i <= q; ++i) {\r\n    cout << sol[i] << '\\n';\r\n  }\r\n  return 0;\r\n}\r\n"
+}

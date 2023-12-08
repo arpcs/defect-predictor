@@ -1,0 +1,38 @@
+{
+    "id": 228004533,
+    "contestId": 1569,
+    "creationTimeSeconds": 1697189150,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "E",
+        "name": "Playoff Restoration",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "bitmasks",
+            "brute force",
+            "hashing",
+            "implementation",
+            "meet-in-the-middle"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "hellojim"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 1945600,
+    "source": "#include<bits/stdc++.h>\r\n#define ll long long\r\n#define pii pair<int,int>\r\n#define fi first\r\n#define se second\r\nusing namespace std;\r\nconst int mod=998244353;\r\nll qpow(ll n,ll k){\r\n    ll ans=1;\r\n    while(k){\r\n        if(k&1)ans=ans*n%mod;\r\n        n=n*n%mod;\r\n        k>>=1;\r\n    }\r\n    return ans;\r\n}\r\nint k,c;\r\nll H;\r\nint p[10];\r\nll A[10];\r\nvector<pair<ll,pii> >vec[2];\r\nvector<int>vv;\r\nint pp[33];\r\nvoid get(int l,int r,int i){\r\n    queue<int>q;while(q.size())q.pop();\r\n    for(int j=l;j<=r;j++)q.push(j);\r\n    int cnt=(c+1)>>1,cur=k+1;\r\n    for(int j=0;j<c;j++){\r\n        int op=i>>j&1;\r\n        int u=q.front();q.pop();\r\n        int v=q.front();q.pop();\r\n        if(op){//u win\r\n            pp[v]=p[cur];\r\n            q.push(u);\r\n        }\r\n        else{\r\n            pp[u]=p[cur];\r\n            q.push(v);\r\n        }\r\n        cnt--;\r\n        if(cnt==0){\r\n            cur--;\r\n            cnt=1<<(cur-3);\r\n        }\r\n    }\r\n}\r\nint main(){\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0);cout.tie(0);\r\n    p[1]=1;p[2]=2;p[3]=3;p[4]=5;p[5]=9;p[6]=17;\r\n    cin>>k>>A[1]>>H;\r\n    for(int i=2;i<=6;i++){\r\n        A[i]=qpow(A[1],p[i]);\r\n    }\r\n    c=(1<<k-1)-1;\r\n    for(int i=0;i<(1<<c);i++){\r\n        ll res=0;\r\n        queue<int>q;while(q.size())q.pop();\r\n        for(int j=1;j<=(1<<k-1);j++)q.push(j);\r\n        int cnt=(c+1)>>1,cur=k+1;\r\n        for(int j=0;j<c;j++){\r\n            int op=i>>j&1;\r\n            int u=q.front();q.pop();\r\n            int v=q.front();q.pop();\r\n            if(op){//u win\r\n                res=(res+A[cur]*v%mod)%mod;\r\n                q.push(u);\r\n            }\r\n            else{\r\n                res=(res+A[cur]*u%mod)%mod;\r\n                q.push(v);\r\n            }\r\n            cnt--;\r\n            if(cnt==0){\r\n                cur--;\r\n                cnt=1<<(cur-3);\r\n            }\r\n        }\r\n        int u=q.front();q.pop();\r\n        ll lose=(res+A[2]*u)%mod;\r\n        ll win=(res+A[1]*u)%mod;\r\n        vec[0].push_back({lose,{u,i}});\r\n        vec[1].push_back({win,{u,i}});\r\n    }\r\n    sort(vec[0].begin(),vec[0].end());\r\n    sort(vec[1].begin(),vec[1].end());\r\n    for(int i=0;i<(1<<c);i++){\r\n        ll res=0;\r\n        queue<int>q;while(q.size())q.pop();\r\n        for(int j=1;j<=(1<<k-1);j++)q.push(j+(1<<k-1));\r\n        int cnt=(c+1)>>1,cur=k+1;\r\n        for(int j=0;j<c;j++){\r\n            int op=i>>j&1;\r\n            int u=q.front();q.pop();\r\n            int v=q.front();q.pop();\r\n            if(op){\r\n                res=(res+A[cur]*v%mod)%mod;\r\n                q.push(u);\r\n            }\r\n            else{\r\n                res=(res+A[cur]*u%mod)%mod;\r\n                q.push(v);\r\n            }\r\n            cnt--;\r\n            if(cnt==0){\r\n                cur--;\r\n                cnt=1<<(cur-3);\r\n            }\r\n        }\r\n        int u=q.front();q.pop();\r\n        ll win=(res+A[1]*u%mod)%mod;win=(mod+H-win)%mod;\r\n        pair<ll,pii>qwq={win,{0,0}};\r\n        int id=lower_bound(vec[0].begin(),vec[0].end(),qwq)-vec[0].begin();\r\n        if(id<vec[0].size()){\r\n            auto pr=vec[0][id];\r\n            if(pr.fi==win){\r\n                get(1,1<<k-1,pr.se.se);\r\n                get((1<<k-1)+1,1<<k,i);\r\n                pp[u]=1;pp[pr.se.fi]=2;\r\n                for(int j=1;j<=(1<<k);j++)cout<<pp[j]<<\" \";cout<<\"\\n\";\r\n                return 0;\r\n            }\r\n        }\r\n        ll lose=(res+A[2]*u%mod)%mod;lose=(mod+H-lose)%mod;\r\n        qwq={lose,{0,0}};\r\n        id=lower_bound(vec[1].begin(),vec[1].end(),qwq)-vec[1].begin();\r\n        if(id<vec[1].size()){\r\n            auto pr=vec[1][id];\r\n            if(pr.fi==lose){\r\n                get(1,1<<k-1,pr.se.se);\r\n                get((1<<k-1)+1,1<<k,i);\r\n                pp[u]=2;pp[pr.se.fi]=1;\r\n                for(int j=1;j<=(1<<k);j++)cout<<pp[j]<<\" \";cout<<\"\\n\";\r\n                return 0;\r\n            }\r\n        }\r\n    }\r\n    cout<<\"-1\\n\";\r\n    return 0;\r\n}\r\n"
+}

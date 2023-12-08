@@ -1,0 +1,35 @@
+{
+    "id": 223628530,
+    "contestId": 976,
+    "creationTimeSeconds": 1694874579,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 976,
+        "index": "F",
+        "name": "Minimal k-covering",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 976,
+        "members": [
+            {
+                "handle": "zbceyond"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1525099200
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 33,
+    "timeConsumedMillis": 186,
+    "memoryConsumedBytes": 8704000,
+    "source": "#include<bits/stdc++.h>\r\n\r\n#define rep(i, x, y) for(int i=x;i<=y;i++)\r\n#define per(i, x, y) for(int i=x;i>=y;i--)\r\nusing namespace std;\r\n\r\n#define dbg(x...) \\\r\n    do { \\\r\n        std::cout << #x << \" -> \"; \\\r\n        err(x); \\\r\n    } while (0)\r\n\r\nvoid err() {\r\n    std::cout << std::endl;\r\n}\r\n\r\ntemplate<class T, class... Ts>\r\nvoid err(T arg, Ts &... args) {\r\n    std::cout << arg << ' ';\r\n    err(args...);\r\n}\r\n\r\n//#define int long long\r\n\r\nconst int mod = 998244353;\r\n\r\nint qmi(int a, int b) {\r\n    int res = 1;\r\n    for (; b; b >>= 1, a = a * a % mod) {\r\n        if (b & 1)res = res * a % mod;\r\n    }\r\n    return res;\r\n}\r\n\r\nusing pll = pair<long long, long long>;\r\nconst int N = 1e5 + 10;\r\nconst int inf = 1e18;\r\nint n1, n2, m;\r\nnamespace Dinic {//totv S T\u8bb0\u5f97\u521d\u59cb\u5316\r\n    const int V = 5e3, E = 1e4, inf = 2147483647;\r\n    int S, T, totv, tote = 1;\r\n    int fir[V], to[E], nxt[E], w[E];\r\n\r\n    inline void adde(int x, int y, int z) {\r\n        to[++tote] = y, nxt[tote] = fir[x], fir[x] = tote, w[tote] = z;\r\n        to[++tote] = x, nxt[tote] = fir[y], fir[y] = tote, w[tote] = 0;\r\n    }\r\n\r\n    int now;\r\n\r\n    void work() {\r\n        for (int i = 2; i <= 2 * (n1 + n2); i += 2)w[i]++;\r\n    }\r\n\r\n    inline void init(int S_, int T_, int totv_) {\r\n        S = S_, T = T_, totv = totv_;\r\n    }\r\n\r\n    inline void clear() {\r\n        memset(fir, 0, sizeof(fir)), tote = 1;\r\n    }\r\n\r\n    int dis[V], q[V];\r\n\r\n    bool bfs() {\r\n        int l = 1, r = 0;\r\n        memset(dis, 0, sizeof(int) * (totv + 1));\r\n        dis[q[++r] = S] = 1;\r\n        while (l <= r) {\r\n            int u = q[l++];\r\n            for (int i = fir[u]; i; i = nxt[i])\r\n                if (w[i] && !dis[to[i]]) {\r\n                    dis[q[++r] = to[i]] = dis[u] + 1;\r\n                    if (to[i] == T)return 1;\r\n                }\r\n        }\r\n        return 0;\r\n    }\r\n\r\n    int cur[V];\r\n\r\n    int dfs(int u, int flow) {\r\n        if (u == T || !flow)return flow;\r\n        int nowf = flow;\r\n        for (int &i = cur[u]; i; i = nxt[i])\r\n            if (w[i] && dis[to[i]] == dis[u] + 1) {\r\n                int f = dfs(to[i], min(nowf, w[i]));\r\n                w[i] -= f, w[i ^ 1] += f;\r\n                if (!(nowf -= f))return flow;\r\n            }\r\n        return flow - nowf;\r\n    }\r\n\r\n    int solve() {\r\n        int res = 0, f;\r\n        while (bfs()) {\r\n            memcpy(cur, fir, sizeof(fir));\r\n            while ((f = dfs(S, inf)))res += f;\r\n        }\r\n        return res;\r\n    }\r\n}\r\nusing namespace Dinic;\r\nint d[N];\r\n\r\nvoid elysira() {\r\n    cin >> n1 >> n2 >> m;\r\n    S = n1 + n2 + 1, T = S + 1;\r\n    init(S, T, T);\r\n    rep(i, 1, n1)adde(S, i, 0);\r\n    rep(i, 1, n2)adde(i + n1, T, 0);\r\n    now = tote;\r\n    rep(i, 1, m) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        v += n1;\r\n        adde(u, v, 1);\r\n        d[u]++, d[v]++;\r\n    }\r\n    int mn = 1e9;\r\n    rep(i, 1, n1 + n2)mn = min(mn, d[i]);\r\n    for (int i = 2, j = 1; i <= 2 * (n1 + n2); i += 2, j++)w[i] += d[j] - mn;\r\n    cout << 0 << \"\\n\";\r\n    vector<vector<int>> ans;\r\n    per(_, mn, 1) {\r\n        solve();\r\n        vector<int> tmp;\r\n        for (int i = now + 1, j = 1; i <= tote; i += 2, j++) {\r\n            if (w[i])tmp.push_back(j);\r\n        }\r\n        ans.push_back(tmp);\r\n        work();\r\n    }\r\n    reverse(ans.begin(), ans.end());\r\n    for (auto x: ans) {\r\n        cout << x.size() << \" \";\r\n        for (auto y: x)cout << y << \" \";\r\n        cout << \"\\n\";\r\n    }\r\n}\r\n\r\nsigned main() {\r\n    cin.tie(nullptr)->sync_with_stdio(false);\r\n    int tc = 1;\r\n    //cin >> tc;\r\n    for (int i = 1; i <= tc; i++) {\r\n        elysira();\r\n    }\r\n}\r\n/*\r\n\r\n*/"
+}

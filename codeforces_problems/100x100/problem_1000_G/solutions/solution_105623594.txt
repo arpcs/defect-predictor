@@ -1,0 +1,36 @@
+{
+    "id": 105623594,
+    "contestId": 1000,
+    "creationTimeSeconds": 1611797224,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "W4P3R"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 1731,
+    "memoryConsumedBytes": 123494400,
+    "source": "//W4P3R\r\n#include<bits/stdc++.h>\r\n#define inf 1e9\r\n#define eps 1e-6\r\n#define mp make_pair\r\n#define pb push_back\r\n#define re register ll\r\n#define fr first\r\n#define sd second\r\n#define pa pair<ll,ll>\r\n#define FOR(i,a,b) for(re i=a;i<=b;i++)\r\n#define REP(i,a,b) for(re i=a;i>=b;i--)\r\n#define MEM(a) memset(a,0LL,sizeof(a))\r\n#define N 300010\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef unsigned long long ull;\r\ntypedef double db;\r\ninline ll read()\r\n{\r\n\tchar ch=getchar();\r\n\tll s=0LL,w=1;\r\n\twhile(ch<'0'||ch>'9'){if(ch=='-')w=-1;ch=getchar();}\r\n\twhile(ch>='0'&&ch<='9'){s=s*10+ch-'0';ch=getchar();}\r\n\treturn s*w;\r\n}\r\ninline ll lowbit(ll x){return x&(-x);}\r\nvector<pa>e[N];\r\nll top[N],P[N],Q[N],Ti;\r\nll F[N][21],D[N];\r\nll fa[N],fv[N];\r\nll sum[N];\r\nll f[N],g[N],s[N],h[N],sz[N],son[N],deep[N];\r\nll n,q,w[N];\r\nvoid dfs1(ll x,ll father,ll fav)\r\n{\r\n\tfa[x]=father;fv[x]=fav;F[x][0]=father;\r\n\tFOR(i,1,20)F[x][i]=F[F[x][i-1]][i-1];\r\n\tsz[x]=1;D[x]=D[father]+w[x]-fav;deep[x]=deep[father]+1;\r\n\tfor(auto tmp:e[x])\r\n\t{\r\n\t\tll y=tmp.fr,val=tmp.sd;\r\n\t\tif(y==father)continue;\r\n\t\tdfs1(y,x,val);if(sz[y]>sz[son[x]])son[x]=y;\r\n\t\tsz[x]+=sz[y];\r\n\t\ts[x]+=max(f[y]-2*val,0LL);\r\n\t}\r\n\tf[x]=s[x]+w[x];\r\n}\r\nvoid dfs2(ll x,ll topu,ll father)\r\n{\r\n\ttop[x]=topu;P[x]=++Ti,Q[Ti]=x;\r\n\tif(son[x])dfs2(son[x],topu,x);\r\n\tfor(auto tmp:e[x])if(tmp.fr!=father&&tmp.fr!=son[x])\r\n\t{\r\n\t\tll y=tmp.fr,val=tmp.sd;\r\n\t\tdfs2(y,y,x);g[x]+=max(f[y]-2*val,0LL);\r\n\t}\r\n}\r\nvoid dfs3(ll x,ll father,ll v)\r\n{\r\n//\tcout<<\"WTF:\"<<x<<\" \"<<v<<\" \"<<w[x]<<endl;\r\n\th[x]=v;v+=w[x];ll S=0LL;\r\n\tfor(auto tmp:e[x])if(tmp.fr!=father)S+=max(f[tmp.fr]-2*tmp.sd,0LL);\r\n\tfor(auto tmp:e[x])if(tmp.fr!=father)\r\n\t{\r\n\t\tll y=tmp.fr,val=tmp.sd;ll g=v+S-max(f[y]-2*val,0LL);\r\n\t\t//cout<<\"EEE:\"<<x<<\" \"<<y<<\" \"<<g<<\" \"<<v<<\" \"<<S<<\" \"<<max(f[y]-2*val,0LL)<<endl;\r\n\t\tdfs3(y,x,max(g-2*val,0LL));\r\n\t}\r\n}\r\ninline ll lca(ll u,ll v)\r\n{\r\n\tif(deep[u]<deep[v])swap(u,v);\r\n\tREP(i,20,0LL)if(deep[F[u][i]]>=deep[v])u=F[u][i];\r\n\tif(u==v)return u;\r\n\tREP(i,20,0LL)if(F[u][i]!=F[v][i])u=F[u][i],v=F[v][i];\r\n\treturn F[u][0LL];\r\n}\r\ninline ll dis(ll x,ll y){return D[x]+D[y]-2*D[lca(x,y)];}\r\ninline ll qs(ll l,ll r){return sum[r-1]-sum[l-1];}\r\ninline ll qry(ll u,ll v)\r\n{\r\n\tll ans=0LL;ll tu=top[u],tv=top[v];\r\n\twhile(tu!=tv)\r\n\t{\r\n\t\tif(deep[tu]<deep[tv])swap(u,v),swap(tu,tv);\r\n\t\tans+=qs(P[tu],P[u]);u=fa[tu];ans+=s[u]-max(f[tu]-2*fv[tu],0LL);tu=top[u];\r\n\t}\r\n\tif(deep[u]<deep[v])swap(u,v);\r\n\tans+=qs(P[v],P[u]);return ans;\r\n}\r\nint main()\r\n{\r\n\t//ios::sync_with_stdio(false);\r\n\t//freopen(\".in\",\"r\",stdin);\r\n\t//freopen(\".out\",\"w\",stdout);\r\n\tn=read(),q=read();\r\n\tFOR(i,1,n)w[i]=read();\r\n\tFOR(i,1,n-1)\r\n\t{\r\n\t\tll x=read(),y=read(),val=read();\r\n\t\te[x].pb(mp(y,val));e[y].pb(mp(x,val));\r\n\t}\r\n\tdfs1(1,0,0);dfs2(1,1,0);dfs3(1,0,0);\r\n\tFOR(i,1,n)sum[i]=sum[i-1]+g[Q[i]];\r\n\twhile(q--)\r\n\t{\r\n\t\tll x=read(),y=read();ll ans;\r\n\t\tif(deep[x]<deep[y])swap(x,y);\r\n\t\tif(lca(x,y)==y){ans=dis(x,y)+w[y]+s[x]+h[y]+qry(x,y);}\r\n\t\telse \r\n\t\t{\r\n\t\t\tans=dis(x,y)+w[lca(x,y)]+s[x]+s[y]+h[lca(x,y)];\r\n\t\t\tll tx=x,ty=y,z=lca(x,y);\r\n\t\t\tREP(i,20,0)if(deep[F[tx][i]]>deep[z])tx=F[tx][i];\r\n\t\t\tREP(i,20,0)if(deep[F[ty][i]]>deep[z])ty=F[ty][i];\r\n\t\t\tans+=qry(x,tx);ans+=qry(y,ty);\r\n\t\t//\tcout<<\"EEE:\"<<ans<<\" \"<<s[z]<<\" \"<<tx<<\" \"<<ty<<\" \"<<max(f[tx]-2*fv[tx],0LL)<<\" \"<<max(f[ty]-2*fv[ty],0LL)<<\" \"<<w[7]-2*fv[7]<<endl;\r\n\t\t\tans+=s[z]-max(f[tx]-2*fv[tx],0LL)-max(f[ty]-2*fv[ty],0LL);\r\n\t\t}\r\n\t\tcout<<ans<<'\\n';\r\n\t}\r\n\treturn 0;\r\n}\r\n//gl"
+}
