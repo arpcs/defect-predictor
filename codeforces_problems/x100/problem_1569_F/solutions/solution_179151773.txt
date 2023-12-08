@@ -1,0 +1,38 @@
+{
+    "id": 179151773,
+    "contestId": 1569,
+    "creationTimeSeconds": 1667546499,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "HausyHinu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 920,
+    "memoryConsumedBytes": 6246400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define N 17\r\n#define M 71\r\n#define LL long long\r\n#define INF 0x3f3f3f3f\r\n#define fi first\r\n#define se second\r\nint n,m,k,p[N],p1[N],p2[N];\r\nbool g[N][N],f[M][N];\r\nmap<LL,bool>mp;\r\nLL ans,fc[N];\r\nvoid work(int nc){\r\n\tmemset(f,0,sizeof f);\r\n\tmemset(p1,-1,sizeof p1);\r\n\tmemset(p2,-1,sizeof p2);\r\n\tfor(int i=0;i<n;++i)\r\n\t\tp2[p[i]]=p1[p[i]],p1[p[i]]=i;\r\n\tfor(int i=0;i<nc;++i)\r\n\t\tif(g[p1[i]][p2[i]]) f[1<<i][i]=1;\r\n\tint s=1<<nc;\r\n\tfor(int i=0;i<s;++i)\r\n\t\tfor(int j=0;j<nc;++j) if(f[i][j])\r\n\t\t\tfor(int k=0;k<nc;++k) if(!(i>>k&1))\r\n\t\t\t\tf[i|1<<k][k]|=(g[p1[j]][p1[k]]&&g[p2[j]][p2[k]]),\r\n\t\t\t\tf[i|1<<k][k]|=(g[p1[j]][p2[k]]&&g[p2[j]][p1[k]]);\r\n\tfor(int i=0;i<nc;++i)\r\n\t\tif(f[s-1][i]){\r\n\t\t\tLL nm=0;\r\n\t\t\tfor(int j=0;j<n;++j)\r\n\t\t\t\tnm=nm*6+p[j];\r\n\t\t\tmp[nm]=true;\r\n\t\t\tbreak;\r\n\t\t}\r\n}\r\nvoid pre(int nc){\r\n\tint nw=n;\r\n\tfor(int i=0;i<n;++i)\r\n\t\tif(p[i]==-1){nw=i;break;}\r\n\tif(nw==n) return work(nc);\r\n\tfor(int i=nw+1;i<n;++i)\r\n\t\tif(p[i]==-1)\r\n\t\t\tp[nw]=p[i]=nc,pre(nc+1),p[nw]=p[i]=-1;\r\n}\r\nbool dfs(int p[]){\r\n\tint pp[N],ct[N]={},q[N]={},cnt=0;\r\n\tmemset(pp,-1,sizeof pp);\r\n\tfor(int i=0;i<n;++i)\r\n\t\tif(pp[p[i]]==-1) pp[p[i]]=cnt++;\r\n\tfor(int i=0;i<n;++i)\r\n\t\tq[i]=pp[p[i]],ct[q[i]]++;\r\n\tLL nm=0;\r\n\tfor(int i=0;i<n;++i) nm=nm*6+q[i];\r\n\tif(mp.count(nm)) return mp[nm];\r\n\tbool fl=false;\r\n\tfor(int i=0;i<n;++i){\r\n\t\tif(ct[q[i]]<=2) continue;\r\n\t\tfor(int j=i+1;j<n;++j)\r\n\t\t\tif(q[i]==q[j]){\r\n\t\t\t\tint tmp=q[i];\r\n\t\t\t\tq[i]=q[j]=cnt;\r\n\t\t\t\tfl|=dfs(q);\r\n\t\t\t\tq[i]=q[j]=tmp;\r\n\t\t\t\tif(fl) break;\r\n\t\t\t}\r\n\t\tif(fl) break;\r\n\t}\r\n\treturn mp[nm]=fl;\r\n}\r\nvoid solve(int nc){\r\n\tint nw=n;\r\n\tfor(int i=0;i<n;++i)\r\n\t\tif(p[i]==-1){nw=i;break;}\r\n\tif(nw==n) return dfs(p),void();\r\n\tfor(int c=0;c<=nc;++c)\r\n\t\tfor(int i=nw+1;i<n;++i)\r\n\t\t\tif(p[i]==-1)\r\n\t\t\t\tp[nw]=p[i]=c,\r\n\t\t\t\tsolve(max(c+1,nc)),\r\n\t\t\t\tp[nw]=p[i]=-1;\r\n}\r\nint main(){\r\n\tscanf(\"%d%d%d\",&n,&m,&k);\r\n\tfor(int i=1;i<=m;++i){\r\n\t\tint u,v;scanf(\"%d%d\",&u,&v);\r\n\t\tg[u-1][v-1]=g[v-1][u-1]=true;\r\n\t}\r\n\tmemset(p,-1,sizeof p);\r\n\tpre(0),solve(0),fc[0]=1;\r\n\tfor(int i=1;i<=k;++i) fc[i]=fc[i-1]*i;\r\n\tfor(auto tmp:mp)\r\n\t\tif(tmp.se){\r\n\t\t\tLL nm=tmp.fi,mx=1;\r\n\t\t\twhile(nm)\r\n\t\t\t\tmx=max(mx,nm%6+1),nm/=6;\r\n\t\t\tif(mx<=k) ans+=fc[k]/fc[k-mx];\r\n\t\t}\r\n\tprintf(\"%lld\\n\",ans);\r\n\treturn 0;\r\n}\r\n"
+}

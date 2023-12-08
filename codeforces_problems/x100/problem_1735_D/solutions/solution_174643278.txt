@@ -1,0 +1,39 @@
+{
+    "id": 174643278,
+    "contestId": 1735,
+    "creationTimeSeconds": 1664897974,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1735,
+        "index": "D",
+        "name": "Meta-set",
+        "type": "PROGRAMMING",
+        "points": 1750.0,
+        "rating": 1700,
+        "tags": [
+            "brute force",
+            "combinatorics",
+            "data structures",
+            "hashing",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1735,
+        "members": [
+            {
+                "handle": "7oSkaaa"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1664721300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define cin_2d(vec, n, m) for(int i = 0; i < n; i++) for(int j = 0; j < m && cin >> vec[i][j]; j++);\r\n#define cout_2d(vec, n, m) for(int i = 0; i < n; i++, cout << \"\\n\") for(int j = 0; j < m && cout << vec[i][j] << \" \"; j++);\r\n#define fixed(n) fixed << setprecision(n)\r\n#define ceil(n, m) (((n) / (m)) + ((n) % (m) ? 1 : 0))\r\n#define fill(vec, value) memset(vec, value, sizeof(vec));\r\n#define add_mod(a, b, m) (((a % m) + (b % m)) % m)\r\n#define sub_mod(a, b, m) (((a % m) - (b % m) + m) % m)\r\n#define mul_mod(a, b, m) (((a % m) * (b % m)) % m)\r\n#define all(vec) vec.begin(), vec.end()\r\n#define rall(vec) vec.rbegin(), vec.rend()\r\n#define sz(x) int(x.size())\r\n#define debug(x) cout << #x << \": \" << (x) << \"\\n\";\r\n#define fi first\r\n#define se second\r\n#define ll long long\r\n#define ull unsigned long long\r\n#define Mod  1'000'000'007\r\n#define OO 2'000'000'000\r\n#define EPS 1e-9\r\n#define PI acos(-1)\r\ntemplate < typename T = int > using Pair = pair < T, T >;\r\nvector < string > RET = {\"NO\", \"YES\"};\r\n\r\ntemplate < typename T = int > istream& operator >> (istream &in, vector < T > &v) {\r\n    for (auto &x : v) in >> x;\r\n    return in;\r\n}\r\n\r\ntemplate < typename T = int > ostream& operator << (ostream &out, const vector < T > &v) { \r\n    for (const T &x : v) out << x << ' '; \r\n    return out;\r\n}\r\n\r\nconstexpr ll Base = 20, MOD = 1e9 + 7;\r\n \r\nll BinPow(ll b, ll e){\r\n    ll res = 1;\r\n    while(e){\r\n        if(e & 1) res = mul_mod(res, b, MOD);\r\n        b = mul_mod(b, b, MOD);\r\n        e >>= 1;\r\n    }\r\n    return res;\r\n}\r\n \r\nll val(char c){\r\n    return c - 'a';\r\n}\r\n \r\nll removeAt(ll hashVal, int idx, int val){\r\n    return sub_mod(hashVal, mul_mod(val, BinPow(Base, idx), MOD), MOD);\r\n}\r\n \r\nll addAt(ll hashVal, int idx, int val){\r\n    return add_mod(hashVal, mul_mod(val, BinPow(Base, idx), MOD), MOD);\r\n}\r\n \r\nll shiftLeft(ll hashVal){\r\n    return mul_mod(hashVal, Base, MOD);\r\n}\r\n \r\nll shiftRight(ll hashVal){\r\n    return mul_mod(hashVal, BinPow(Base, MOD - 2), MOD);\r\n} \r\n \r\nll HashString(string &s){\r\n    ll hashVal = 0;\r\n    for(int i = 0; i < sz(s); i++){\r\n        hashVal = shiftLeft(hashVal);\r\n        hashVal = addAt(hashVal, 0, val(s[i]));\r\n    }\r\n    return hashVal;\r\n}\r\n \r\nll HashVector(vector < ll >& vec){\r\n    ll hashVal = 0;\r\n    for(int i = 0; i < sz(vec); i++){\r\n        hashVal = shiftLeft(hashVal);\r\n        hashVal = addAt(hashVal, 0, vec[i]);\r\n    }\r\n    return hashVal;\r\n}\r\n\r\nvoid Solve(){\r\n    int n, k;\r\n    cin >> n >> k;\r\n    vector < vector < ll > > grid(n, vector < ll > (k));\r\n    map < ll, ll > adj;\r\n    vector < ll > intersect(n + 5);\r\n    for(int i = 0; i < n; i++){\r\n        cin >> grid[i];\r\n        adj[HashVector(grid[i])] = (i);\r\n    }\r\n    set < ll > sets;\r\n    for(int i = 0; i < n; i++){\r\n        for(int j = i + 1; j < n; j++){\r\n            vector < ll > required(k);\r\n            for(int f = 0; f < k; f++){\r\n                if(grid[i][f] == grid[j][f]) required[f] = grid[i][f];\r\n                else {\r\n                    if(grid[i][f] != 0 && grid[j][f] != 0) required[f] = 0;\r\n                    else if(grid[i][f] != 1 && grid[j][f] != 1) required[f] = 1;\r\n                    else required[f] = 2;\r\n                }\r\n            }\r\n            ll reqHash = HashVector(required);\r\n            if(!adj.count(reqHash)) continue;\r\n            ll thirdCard = adj[reqHash];\r\n            vector < ll > curr_set = {i, j, thirdCard};\r\n            sort(all(curr_set));\r\n            ll currSetHash = HashVector(curr_set);\r\n            if(sets.count(currSetHash)) continue;\r\n            sets.insert(currSetHash);\r\n            intersect[i]++, intersect[j]++, intersect[thirdCard]++;\r\n        }\r\n    }\r\n    ll ans = 0;\r\n    for(int i = 0; i < n; i++)\r\n        ans += (intersect[i] * (intersect[i] - 1)) / 2;\r\n    cout << ans << \"\\n\";\r\n}\r\n\r\nint main(){\r\n    ios_base::sync_with_stdio(false), cin.tie(nullptr), cout.tie(nullptr);\r\n    int t = 1;\r\n    // cin >> t;\r\n    while(t--)\r\n        Solve();\r\n    return 0;\r\n}"
+}

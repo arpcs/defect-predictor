@@ -1,0 +1,35 @@
+{
+    "id": 156978871,
+    "contestId": 477,
+    "creationTimeSeconds": 1652423121,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 477,
+        "index": "E",
+        "name": "Dreamoon and Notepad",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3100,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 477,
+        "members": [
+            {
+                "handle": "Tyyyyyy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1413122400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 20,
+    "timeConsumedMillis": 1029,
+    "memoryConsumedBytes": 118886400,
+    "source": "#include<bits/stdc++.h>\r\n#define ll long long\r\n#define lll __int128\r\n#define db double\r\n#define ld long double\r\n#define pii pair<int,int>\r\n#define fi first\r\n#define se second\r\nusing namespace std;\r\nnamespace IO\r\n{\r\n\tconst int SZ=1<<20;\r\n\tchar gchar()\r\n\t{\r\n\t    static char buf[SZ];\r\n\t    static int i=SZ;\r\n\t    if(i==SZ)i=0,fread(buf,1,SZ,stdin);\r\n\t    return buf[i++];\r\n\t}\r\n\tvoid pchar(char c)\r\n\t{\r\n\t    static char buf[SZ];\r\n\t    static int i=0;\r\n\t    if(c)buf[i++]=c;\r\n\t    if(!c||i==SZ)fwrite(buf,1,i,stdout),i=0;\r\n\t}\r\n\tvoid pstr(string s,char end='\\n')\r\n\t{\r\n\t\tfor(char c:s)pchar(c);\r\n\t\tpchar(end);\r\n\t}\r\n\ttemplate<typename T>void read(T &x)\r\n\t{\r\n\t    x=0;int f=1;\r\n\t    static char c;\r\n\t    while((c=gchar())>'9'||c<'0')if(c=='-')f=-1;\r\n\t    x=c-'0';\r\n\t    while((c=gchar())>='0'&&c<='9')\r\n\t\t\tx=(x<<1)+(x<<3)+(c^48);\r\n\t\tx*=f;\r\n\t}\r\n\ttemplate<typename T>void i_write(T x)\r\n\t{\r\n\t    if(x>9)i_write(x/10);\r\n\t    pchar(x%10+'0');\r\n\t}\r\n\ttemplate<typename T>void write(T x,char end='\\n')\r\n\t{\r\n\t    if(x<0)pchar('-'),x=-x;\r\n\t    if(x>9)i_write(x/10);\r\n\t    pchar(x%10+'0');\r\n\t    pchar(end);\r\n\t}\r\n}\r\nusing IO::read;\r\nusing IO::write;\r\nconst int N=4e5+10,INF=1e9;\r\nint n,q,a[N],sx,sy,tx,ty,ans[N];\r\nint f[N][20],lg[N],stk[N],top;\r\nint ask(int l,int r)\r\n{\r\n\tif(l>r)swap(l,r);\r\n\tint k=lg[r-l+1];\r\n\treturn min(f[l][k],f[r-(1<<k)+1][k]);\r\n}\r\nstruct node\r\n{\r\n\tint p,q,k,w,*v;\r\n\tint F(int x){return k*x+(a[x]>q)+abs(a[x]-p);}\r\n\tvoid upd(int x){*v=min(*v,F(x)+w);}\r\n};\r\nvector<node>vec[N][2];\r\nint G(int x){return x<0?-x:a[x];}\r\nbool cmp(int x,int y){return G(x)<G(y);}\r\nvoid calc(node &it,int k)\r\n{\r\n\tint l=1,r=it.q>INF?lower_bound(stk+1,stk+top+1,INF-it.q,cmp)-stk:top,m1,m2,dlt;\r\n\tif(it.q>INF)l=r,r=top;\r\n\twhile(r-l>9)\r\n\t{\r\n\t\tdlt=(r-l)/3,m1=l+dlt,m2=r-dlt;\r\n\t\tif(it.F(stk[m1])>it.F(stk[m2]))l=m1;\r\n\t\telse r=m2;\r\n\t}\r\n\tfor(;l<=r;l++)it.upd(stk[l]);\r\n}\r\nvoid solve(int k)\r\n{\r\n\tint i=!k?1:n;top=0;\r\n\tfor(;i>=1&&i<=n;i+=(!k?1:-1))\r\n\t{\r\n\t\twhile(top&&a[stk[top]]>=a[i])top--;\r\n\t\tstk[++top]=i;\r\n\t\tfor(auto it:vec[i][k])calc(it,k);\r\n\t}\r\n}\r\nint main()\r\n{\r\n\tfor(int i=2;i<N;i++)lg[i]=lg[i>>1]+1;\r\n\tscanf(\"%d\",&n);\r\n\tfor(int i=1;i<=n;i++)scanf(\"%d\",&a[i]),f[i][0]=a[i];\r\n\tfor(int i=1;i<=lg[n];i++)\r\n\t\tfor(int j=1;j+(1<<i)-1<=n;j++)\r\n\t\t\tf[j][i]=min(f[j][i-1],f[j+(1<<i-1)][i-1]);\r\n\tscanf(\"%d\",&q);\r\n\tfor(int i=1;i<=q;i++)\r\n\t{\r\n\t\tscanf(\"%d%d%d%d\",&sx,&sy,&tx,&ty),ans[i]=INF;\r\n\t\tint fv=min(sy,ask(sx,tx));\r\n\t\tans[i]=abs(sx-tx)+min(min(ty+1,a[tx]-ty+1),abs(ty-fv));\r\n\t\tif(sx>=tx)\r\n\t\t{\r\n\t\t\tfv=ask(sx,tx);\r\n\t\t\tif(fv>=ty)vec[sx+1][1].push_back((node){ty,sy,2,-tx-sx,ans+i});\r\n\t\t\tvec[tx][1].push_back((node){ty,fv+INF,0,abs(sx-tx)+1,ans+i});\r\n\t\t\tfv=min(ask(sx,tx),sy);\r\n\t\t\tvec[tx][0].push_back((node){ty,fv,-2,tx+sx,ans+i});\r\n\t\t}\r\n\t\tif(sx<=tx)\r\n\t\t{\r\n\t\t\tfv=ask(sx,tx);\r\n\t\t\tif(fv>=ty)vec[sx-1][0].push_back((node){ty,sy,-2,tx+sx,ans+i});\r\n\t\t\tvec[tx][0].push_back((node){ty,fv+INF,0,abs(sx-tx)+1,ans+i});\r\n\t\t\tfv=min(ask(sx,tx),sy);\r\n\t\t\tvec[tx][1].push_back((node){ty,fv,2,-tx-sx,ans+i});\r\n\t\t}\r\n\t}\r\n\tsolve(0),solve(1);\r\n\tfor(int i=1;i<=q;i++)printf(\"%d\\n\",ans[i]);\r\n\tIO::pchar(0);\r\n\treturn 0;\r\n}\r\n"
+}

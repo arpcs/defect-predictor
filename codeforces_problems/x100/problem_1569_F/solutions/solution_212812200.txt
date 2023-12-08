@@ -1,0 +1,38 @@
+{
+    "id": 212812200,
+    "contestId": 1569,
+    "creationTimeSeconds": 1688813963,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "vanwij"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 234,
+    "memoryConsumedBytes": 7782400,
+    "source": "// author : sentheta aka vanwij\n#ifdef VANWIJ\n\t#include\"/home/user/code/bits/stdc++.h\"\n#else\n\t#include\"bits/stdc++.h\"\n#endif\nusing namespace std;\n\n#define Int long long\n#define V vector\n#define pii pair<int,int>\n#define ff first\n#define ss second\n\nstatic mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());\n\n#define pow2(x) (1LL<<(x))\n#define msb(x) (63-__builtin_clzll(x))\n#define bitcnt(x) (__builtin_popcountll(x))\n\n#define nl '\\n'\n#define _ << ' ' <<\n#define all(x) (x).begin(), (x).end()\n#define rep(i,a,b) for(int i = (int)(a); i < (int)(b); i++)\n#define dbg(x) if(1) cout << \"?\" << #x << \" : \" << (x) << endl << flush;\n\n#define int long long\n// const Int MOD = 1e9+7;\nconst Int MOD = 998244353;\nInt bpow(Int a,Int b){\n\tInt ret = 1;\n\tfor(;b; a=a*a%MOD,b/=2) if(b&1) ret = ret*a%MOD;\n\treturn ret;\n}\nInt inv(Int a){return bpow(a,MOD-2);}\n\nvoid solve(); int TC, ALLTC;\nsigned main(){\n\tios::sync_with_stdio(0); cin.tie(0); cout.tie(0); cout << fixed << setprecision(7);\n\t// cin >> ALLTC; for(TC=1; TC<=ALLTC; TC++) solve(); return 0;\n\tsolve();\n}\n\n\n\n\n\n\n\n\n\n\n\n\n\nconst int N = 12;\n\nint n, m, k;\n\n// graph adj matrix\nbool g[N][N];\n// dp[s][t][msk] = can or not path msk from s to t\nbool dp[N][N][1<<N];\n\n// set<string> st[6];\nunordered_set<int> st[6];\nint h[256];\n\nint pr[N];\nV<int> v;\n\nstring str;\n// generate all possible colorcodes\nvoid bf_code(int i=0,int c=-1){\n\tif(i==n/2){\n\t\t// assert(0<=c && c<6);\n\t\t// assert(str[0]=='0');\n\t\t// dbg(str);\n\t\tint hsh = 0;\n\t\trep(j,0,n){\n\t\t\thsh ^= h[j]*h[str[j]];\n\t\t}\n\t\tst[c].insert(hsh);\n\t\t// st[c].insert(str);\n\t\treturn;\n\t}\n\n\t// old color\n\tfor(int x=0; x<=c; x++){\n\t\tstr[v[i]] = str[pr[v[i]]] = '0'+x;\n\t\tbf_code(i+1, c);\n\t}\n\n\t// new color\n\tc++;\n\tstr[v[i]] = str[pr[v[i]]] = '0'+c;\n\tbf_code(i+1, c);\n}\n\n// generate all possible pair matching\nint matchcnt = 0;\nvoid bf_match(int i=0){\n\t// everyone had been matched\n\tif(i==n){\n\n\t\t// check if the matching has a valid path\n\t\tbool ok = 0;\n\t\tint permcnt = 0;\n\t\tdo{\n\t\t\tpermcnt++;\n\t\t\tint msk = (1<<n)-1, prv=-1;\n\t\t\tfor(int x : v){\n\t\t\t\tif(dp[x][pr[x]][msk] && (prv==-1\n\t\t\t\t\t|| (g[prv][x] && g[pr[x]][pr[prv]])\n\t\t\t\t\t|| (g[prv][pr[x]] && g[x][pr[prv]])\n\t\t\t\t)\n\t\t\t\t){\n\t\t\t\t\tmsk ^= 1<<x ^ 1<<pr[x];\n\t\t\t\t\tprv = x;\n\t\t\t\t}\n\t\t\t\telse break;\n\t\t\t}\n\t\t\t// ok += msk==0;\n\t\t\tif(msk==0){\n\t\t\t\tok = 1; break;\n\t\t\t}\n\n\n\t\t}while(next_permutation(all(v)));\n\t\t// assert(ok || permcnt==720);\n\n\t\t// dbg(ok);\n\t\tif(ok){\n\t\t\t// dbg(ok);\n\t\t\t// cout << \"pr[] \";\n\t\t\t// rep(x,0,n) cout << pr[x] << \" \";\n\t\t\t// cout << nl;\n\n\t\t\tsort(all(v));\n\t\t\tbf_code();\n\t\t}\n\n\t\tsort(all(v));\n\t\treturn;\n\t}\n\n\t// i is already matched\n\tif(pr[i]!=-1){\n\t\tbf_match(i+1); return;\n\t}\n\n\t// i is not matched yet\n\t// find match for i\n\t// assert(v.empty() || v.back()<i);\n\tv.push_back(i);\n\trep(j,i+1,n) if(pr[j]==-1){\n\t\tpr[i] = j; pr[j] = i;\n\t\tbf_match(i+1);\n\t\tpr[i] = -1; pr[j] = -1;\n\t}\n\tv.pop_back();\n}\n\nvoid solve(){\n\t\n\tcin >> n >> m >> k;\n\trep(i,0,256){\n\t\th[i] = rng();\n\t}\n\n\trep(i,0,m){\n\t\tint a, b;\n\t\tcin >> a >> b;\n\t\ta--; b--;\n\t\t// cout << a _ b << nl;\n\n\t\tg[a][b] = g[b][a] = 1;\n\t\tdp[a][b][1<<a|1<<b] = dp[b][a][1<<a|1<<b] = 1;\n\t}\n\n\trep(msk,0,1<<n)\n\trep(s,0,n) if(msk&1<<s)\n\trep(t,0,n) if(msk&1<<t) if(t!=s) if(dp[s][t][msk]){\n\t\trep(nxt,0,n) if(~msk&1<<nxt) if(g[t][nxt]){\n\t\t\tdp[s][nxt][msk|1<<nxt] = 1;\n\t\t}\n\t}\n\n\t// dbg(dp[0][n][(1<<n)-1]);\n\t// dbg(dp[2][8][(1<<n)-1]);\n\n\tstr = string(n,'-');\n\trep(i,0,n) pr[i] = -1;\n\tbf_match();\n\n\tint ans = 0;\n\tint colorPick = 1;\n\trep(c,0,6){\n\t\t// dbg(st[c].size());\n\t\tcolorPick *= k-c;\n\t\tans += st[c].size() * colorPick;\n\t}\n\tcout << ans << nl;\n\t\n\t\n\t// dbg(matchcnt);\n\t\n}"
+}

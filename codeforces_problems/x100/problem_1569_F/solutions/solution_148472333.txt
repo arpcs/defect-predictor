@@ -1,0 +1,38 @@
+{
+    "id": 148472333,
+    "contestId": 1569,
+    "creationTimeSeconds": 1646489738,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "luogu_bot2"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 296,
+    "memoryConsumedBytes": 41062400,
+    "source": "#include <stdio.h>\n#include <map>\nusing namespace std;\n#define MS 10395\n#define MD 150000\n#define ll long long\nint encode(int n,int pp[15])\n{\n    int st[15],jg=0;bool bk[15]={0};\n    for(int i=n/2;i>=1;i--)\n    {\n        int w[15],s=0,o;\n        for(int x=0;x<n;x++)\n            if(!bk[x])\n            {\n                if(s==0)o=x;\n                w[x]=s++;\n            }\n        st[i]=w[pp[o]]-1;\n        bk[o]=bk[pp[o]]=1;\n    }\n    for(int i=1;i<=n/2;i++)\n        jg=jg*(i+i-1)+st[i];\n    return jg;\n}\nvoid decode(int x,int n,int pp[15])\n{ \n    bool bk[15]={0};\n    for(int i=n/2;i>=1;i--)\n    {\n        int w[15],s=0;\n        for(int x=0;x<n;x++)\n            if(!bk[x])w[s++]=x;\n        int z=x%(i+i-1)+1;x/=i+i-1;\n        int a=w[0],b=w[z];\n        pp[a]=b;pp[b]=a;\n        bk[a]=bk[b]=1;\n    }\n}\nint cc[15],cn[1<<12],trs[13][MS][13],P[13][MS][13];ll jc[15];\nmap<ll,int> mp;\nvoid yucl(int n,int k)\n{\n    cc[0]=jc[0]=1;\n    for(int i=1;i<=k;i++)jc[i]=i*jc[i-1];\n    for(int i=1;i<=n;i++)\n        cc[i]=(i&1?i*cc[i-1]:cc[i-1]);\n    for(int i=1;i<(1<<n);i++)\n        cn[i]=cn[i/2]+i%2;\n    for(int s=2;s<=n;s+=2)\n    {\n        for(int x=0;x<cc[s];x++)\n        {\n            int pp[15];decode(x,s,pp);\n            for(int y=0;y<s;y++)\n            {\n                P[s][x][y]=pp[y];\n                int w[15],o=0,np[15];\n                for(int i=0;i<s;i++)\n                    if(i!=y&&i!=pp[y])w[i]=o++;\n                for(int i=0;i<s;i++)\n                    if(i!=y&&i!=pp[y])np[w[i]]=w[pp[i]];\n                trs[s][x][y]=encode(s-2,np);\n            }\n            if(s==n)\n            {\n                ll H=0;\n                for(int i=0;i<n;i++)H|=(1ll*pp[i])<<(i*4);\n                mp[H]=x;\n            }\n        }\n    }\n}\nbool g[15][15],dp[MD][13][13],kx[MS];int su[1<<12],K;\nint Hash(int x,int y)\n{\n    return (x?su[x-1]:0)+y;\n}\nbool dfs2(int s,int m,int n,int sl[10],ll H,ll ad[10][MS])\n{\n    if(s>m)return kx[mp[H]];\n    for(int x=0;x<cc[sl[s]];x++)\n        if(dfs2(s+1,m,n,sl,H|ad[s][x],ad))return 1;\n    return 0;\n}\nll ad[10][MS];\nll dfs(int s,int n,int m,int wz[10][15],int sl[10])\n{\n    if(m>6||m>K)return 0;\n    if(s==n+1)\n    {\n        int zz[10];\n        for(int i=1;i<=m;i++)\n            if(sl[i]&1)return 0;\n        for(int i=1;i<=m;i++)\n        {\n            for(int x=0;x<cc[sl[i]];x++)\n            {\n                ll H=0;\n                for(int j=0;j<sl[i];j++)\n                    H|=(1ll*wz[i][P[sl[i]][x][j]])<<(4*wz[i][j]);\n                ad[i][x]=H;\n            }\n        }\n        if(!dfs2(1,m,n,sl,0,ad))return 0;\n        return jc[K]/jc[K-m];\n    }\n    ll jg=0;\n    for(int x=1;x<=m+1;x++)\n    {\n        wz[x][sl[x]++]=s-1;\n        jg+=dfs(s+1,n,x>m?x:m,wz,sl);sl[x]-=1;\n    }\n    return jg;\n}\nint main()\n{\n    int n,m;\n    scanf(\"%d%d%d\",&n,&m,&K);\n    yucl(n,K);\n    for(int i=0;i<m;i++)\n    {\n        int a,b;\n        scanf(\"%d%d\",&a,&b);\n        a-=1;b-=1;\n        g[a][b]=g[b][a]=1;\n    }\n    for(int z=0;z<(1<<n);z++)\n    {\n        su[z]=(z?su[z-1]:0);\n        if(cn[z]%2==0)su[z]+=cc[cn[z]];\n    }\n    for(int z=0;z<(1<<n);z++)\n    {\n        if(cn[z]&1)continue;\n        int w1[15],s1=0;\n        for(int i=0;i<n;i++)\n            if((z>>i)&1)w1[s1++]=i;\n        for(int s=0;s<cc[s1];s++)\n        {\n            int u=Hash(z,s);\n            for(int a=0;a<n;a++)\n            {\n                if((z>>a)&1)continue;\n                for(int b=a+1;b<n;b++)\n                {\n                    if((z>>b)&1)continue;\n                    if(z==0)\n                    {\n                        dp[z][a][b]=1;\n                        continue;\n                    }\n                    for(int c=0;c<s1;c++)\n                    {\n                        int i=w1[c],j=w1[P[s1][s][c]];\n                        if(g[i][a]&&g[b][j]&&dp[Hash(z^(1<<i)^(1<<j),trs[s1][s][c])][i][j])\n                            {dp[u][a][b]=1;break;}\n                    }\n                }\n                for(int b=0;b<a;b++)dp[u][a][b]=dp[u][b][a];\n            }\n        }\n    }\n    for(int s=0;s<cc[n];s++)\n    {\n        for(int x=0;x<n;x++)\n        {\n            int y=P[n][s][x];\n            if(g[x][y]&&dp[Hash(((1<<n)-1)^(1<<x)^(1<<y),trs[n][s][x])][x][y])\n                {kx[s]=1;break;}\n        }\n    }\n    int wz[10][15],sl[10]={0};\n    ll ans=dfs(1,n,0,wz,sl);\n    printf(\"%lld\",ans);\n    return 0;\n}"
+}

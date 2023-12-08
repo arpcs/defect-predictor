@@ -1,0 +1,35 @@
+{
+    "id": 192513381,
+    "contestId": 477,
+    "creationTimeSeconds": 1675705548,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 477,
+        "index": "E",
+        "name": "Dreamoon and Notepad",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3100,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 477,
+        "members": [
+            {
+                "handle": "Azimjonm0012"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1413122400
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 20,
+    "timeConsumedMillis": 530,
+    "memoryConsumedBytes": 52224000,
+    "source": "#include<cstdio>\r\r\n#include<algorithm>\r\r\n#include<cctype>\r\r\n#include<string.h>\r\r\n#include<cmath>\r\r\n#include<vector>\r\r\n\r\r\nusing namespace std;\r\r\n#define ll long long\r\r\n\r\r\ninline char read() {\r\r\n\tstatic const int IN_LEN = 1000000;\r\r\n\tstatic char buf[IN_LEN], *s, *t;\r\r\n\treturn (s==t?t=(s=buf)+fread(buf,1,IN_LEN,stdin),(s==t?-1:*s++):*s++);\r\r\n}\r\r\ntemplate<class T>\r\r\ninline void read(T &x) {\r\r\n\tstatic bool iosig;\r\r\n\tstatic char c;\r\r\n\tfor (iosig=false, c=read(); !isdigit(c); c=read()) {\r\r\n\t\tif (c == '-') iosig=true;\r\r\n\t\tif (c == -1) return;\r\r\n\t}\r\r\n\tfor (x=0; isdigit(c); c=read()) x=((x+(x<<2))<<1)+(c^'0');\r\r\n\tif (iosig) x=-x;\r\r\n}\r\r\nconst int OUT_LEN = 10000000;\r\r\nchar obuf[OUT_LEN], *ooh=obuf;\r\r\ninline void print(char c) {\r\r\n\tif (ooh==obuf+OUT_LEN) fwrite(obuf, 1, OUT_LEN, stdout), ooh=obuf;\r\r\n\t*ooh++=c;\r\r\n}\r\r\ntemplate<class T>\r\r\ninline void print(T x) {\r\r\n\tstatic int buf[30], cnt;\r\r\n\tif (x==0) print('0');\r\r\n\telse {\r\r\n\t\tif (x<0) print('-'), x=-x;\r\r\n\t\tfor (cnt=0; x; x/=10) buf[++cnt]=x%10+48;\r\r\n\t\twhile(cnt) print((char)buf[cnt--]);\r\r\n\t}\r\r\n}\r\r\ninline void flush() { fwrite(obuf, 1, ooh - obuf, stdout); }\r\r\n\r\r\nconst int N = 400005, inf = 1e9;\r\r\nint n, q, now, top, f[N], ans[N], len[N], stk[N], mn[N<<2], lmn[N<<2], rmn[N<<2];\r\r\nvector<pair<int,int>> q1[N], q2[N];\r\r\nvoid build(int l, int r, int t){\r\r\n\tif(l==r) return (void)(mn[t]=f[l], lmn[t]=f[l]-l*2, rmn[t]=f[l]+l*2);\r\r\n\tint mid=(l+r)>>1, k=t<<1;\r\r\n\tbuild(l, mid, k), build(mid+1, r, k|1), mn[t]=min(mn[k], mn[k|1]);\r\r\n\tlmn[t]=min(lmn[k], lmn[k|1]), rmn[t]=min(rmn[k], rmn[k|1]);\r\r\n}\r\r\nint getmin(int l, int r, int t, int L, int R){\r\r\n\tif(L<=l && r<=R) return mn[t];\r\r\n\tint mid=(l+r)>>1, k=t<<1;\r\r\n\tif(R<=mid) return getmin(l, mid, k, L, R);\r\r\n\tif(L>mid) return getmin(mid+1, r, k|1, L, R);\r\r\n\treturn min(getmin(l, mid, k, L, R), getmin(mid+1, r, k|1, L, R));\r\r\n}\r\r\nint queryl(int l, int r, int t, int R, int x){\r\r\n\tif(l==r && mn[t]<=x) return now=l, inf;\r\r\n\tif(r<=R && mn[t]>x) return lmn[t];\r\r\n\tint mid=(l+r)>>1, k=t<<1;\r\r\n\tif(R<=mid) return queryl(l, mid, k, R, x);\r\r\n\tint ans=queryl(mid+1, r, k|1, R, x);\r\r\n\tif(!now) ans=min(ans, queryl(l, mid, k, R, x));\r\r\n\treturn ans;\r\r\n}\r\r\nint queryr(int l, int r, int t, int L, int x){\r\r\n\tif(l==r && mn[t]<=x) return now=l, inf;\r\r\n\tif(L<=l && mn[t]>x) return rmn[t];\r\r\n\tint mid=(l+r)>>1, k=t<<1;\r\r\n\tif(L>mid) return queryr(mid+1, r, k|1, L, x);\r\r\n\tint ans=queryr(l, mid, k, L, x);\r\r\n\tif(!now) ans=min(ans, queryr(mid+1, r, k|1, L, x));\r\r\n\treturn ans;\r\r\n}\r\r\ninline int calcl(int a, int b, int c){\r\r\n\tint ans=min(min(c, f[a]-c)+1, abs(b-c));\r\r\n\tif(a==1) return ans;\r\r\n\tnow=0;\r\r\n\tint x=queryl(1, n, 1, a-1, c);\r\r\n\tif(now) ans=min(ans, (a-now)*2+c-f[now]+(b<c));\r\r\n\tans=min(ans, x+a*2-c+(b<c));\r\r\n\treturn ans;\r\r\n}\r\r\ninline int calcr(int a, int b, int c){\r\r\n\tint ans=min(min(c, f[a]-c)+1, abs(b-c));\r\r\n\tif(a==n) return ans;\r\r\n\tnow=0;\r\r\n\tint x=queryr(1, n, 1, a+1, c);\r\r\n\tif(now) ans=min(ans, (now-a)*2+c-f[now]+(b<c));\r\r\n\tans=min(ans, x-a*2-c+(b<c));\r\r\n\treturn ans;\r\r\n}\r\r\nint main() {\r\r\n\tread(n);\r\r\n\tfor(int i=1; i<=n; ++i) read(f[i]);\r\r\n\tbuild(1, n, 1);\r\r\n\tread(q);\r\r\n\tfor(int i=1, a=0, b=0, c=0, d=0; i<=q; ++i){\r\r\n\t\tread(a), read(b), read(c), read(d), len[i]=abs(c-a);\r\r\n\t\tif(a<=c){\r\r\n\t\t\tint x=getmin(1, n, 1, a, c);\r\r\n\t\t\tans[i]=c-a+calcr(c, min(b, x), d);\r\r\n\t\t\tif(d<x) ans[i]=min(min(ans[i], c-a+calcl(a, b, d)), c-a+x-d+1);\r\r\n\t\t\telse q1[c].push_back(make_pair(d, i));\r\r\n\t\t}\r\r\n\t\telse{\r\r\n\t\t\tint x=getmin(1, n, 1, c, a);\r\r\n\t\t\tans[i]=a-c+calcl(c, min(b, x), d);\r\r\n\t\t\tif(d<x) ans[i]=min(min(ans[i], a-c+calcr(a, b, d)), a-c+x-d+1);\r\r\n\t\t\telse q2[c].push_back(make_pair(d, i));\r\r\n\t\t}\r\r\n\t}\r\r\n\tfor(int i=1; i<=n; ++i){\r\r\n\t\twhile(top && f[i]<=stk[top]) --top;\r\r\n\t\tstk[++top]=f[i];\r\r\n\t\tfor(auto j:q1[i]){\r\r\n\t\t\tint x=lower_bound(stk+1, stk+top+1, j.first)-stk;\r\r\n\t\t\tans[j.second]=min(ans[j.second], len[j.second]+1+min(stk[x]-j.first, j.first-stk[x-1]));\r\r\n\t\t}\r\r\n\t}\r\r\n\ttop=0;\r\r\n\tfor(int i=n; i; --i){\r\r\n\t\twhile(top && f[i]<=stk[top]) --top;\r\r\n\t\tstk[++top]=f[i];\r\r\n\t\tfor(auto j:q2[i]){\r\r\n\t\t\tint x=lower_bound(stk+1, stk+top+1, j.first)-stk;\r\r\n\t\t\tans[j.second]=min(ans[j.second], len[j.second]+1+min(stk[x]-j.first, j.first-stk[x-1]));\r\r\n\t\t}\r\r\n\t}\r\r\n\tfor(int i=1; i<=q; ++i) print(ans[i]), print('\\n');\r\r\n\treturn flush(), 0;\r\r\n}\r\r\n"
+}

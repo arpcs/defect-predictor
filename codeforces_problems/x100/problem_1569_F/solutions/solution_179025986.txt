@@ -1,0 +1,38 @@
+{
+    "id": 179025986,
+    "contestId": 1569,
+    "creationTimeSeconds": 1667455423,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "realskc"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 2074,
+    "memoryConsumedBytes": 191078400,
+    "source": "// LUOGU_RID: 92642364\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nconstexpr int N=12,N1=114514,N2=3e6;\r\nint n,g[N+10][N+10],vis[N+10],ok[N1+10];\r\nstruct _{\r\n\tstruct __{\r\n\t\tint l,r;\r\n\t\tbool operator<(const __ &ob)const{\r\n\t\t\treturn l<ob.l;\r\n\t\t}\r\n\t};\r\n\tvector<__> vec;\r\n}a[N1+10];\r\nvector<_::__> vec;\r\nint atop;\r\nvoid dfs(int step){\r\n\tif(!step){\r\n\t\ta[++atop]={vec};\r\n\t\treturn;\r\n\t}\r\n\tint i;\r\n\tfor(i=1;i<=n;++i) if(!vis[i]) break;\r\n\tint l=i;\r\n\tvis[l]=1;\r\n\tfor(i=l+1;i<=n;++i){\r\n\t\tif(!vis[i]){\r\n\t\t\tvis[i]=1;\r\n\t\t\tvec.push_back({l,i});\r\n\t\t\tdfs(step-1);\r\n\t\t\tvec.pop_back();\r\n\t\t\tvis[i]=0;\r\n\t\t}\r\n\t}\r\n\tvis[l]=0;\r\n}\r\nvector<int> c[N2+10];\r\nint b[N+10],ctop,max_;\r\nvoid dfs1(int step){\r\n\tif(step==n>>1){\r\n\t\t++ctop;\r\n\t\tfor(int i=1;i<=n;++i) c[ctop].push_back(b[i]);\r\n\t\treturn;\r\n\t}\r\n\tint tmp=max_,i;\r\n\tfor(i=1;i<=tmp+1;++i){\r\n\t\tmax_=max(max_,i);\r\n\t\tb[vec[step].l]=b[vec[step].r]=i;\r\n\t\tdfs1(step+1);\r\n\t\tmax_=tmp;\r\n\t}\r\n}\r\nint C[N+10][N+10],fac[N+10];\r\nvoid initC(int n){\r\n\tC[0][0]=1;\r\n\tint i,j;\r\n\tfac[0]=1;\r\n\tfor(i=1;i<=n;++i) fac[i]=fac[i-1]*i;\r\n\tfor(i=1;i<=n;++i){\r\n\t\tC[i][0]=C[i][i]=1;\r\n\t\tfor(j=1;j<i;++j) C[i][j]=C[i-1][j-1]+C[i-1][j];\r\n\t}\r\n}\r\nint main(){\r\n\tinitC(N);\r\n\tios::sync_with_stdio(0);\r\n\tcin.tie(0);\r\n\tint m,K;\r\n\tcin>>n>>m>>K;\r\n\tint i,j;\r\n\tfor(i=1;i<=m;++i){\r\n\t\tint u,v;\r\n\t\tcin>>u>>v;\r\n\t\tg[u][v]=g[v][u]=1;\r\n\t}\r\n\tdfs(n>>1);\r\n\tfor(i=1;i<=atop;++i){\r\n\t\twhile(1){\r\n\t\t\tif(!g[a[i].vec[0].l][a[i].vec[0].r]){\r\n\t\t\t\tif(!next_permutation(a[i].vec.begin(),a[i].vec.end())) break;\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\tmemset(vis,0,n+2<<2);\r\n\t\t\tvis[0]=1;\r\n\t\t\tfor(j=1;j<a[i].vec.size();++j){\r\n\t\t\t\tif(g[a[i].vec[j-1].l][a[i].vec[j].l]&&g[a[i].vec[j-1].r][a[i].vec[j].r]) vis[j]=1;\r\n\t\t\t\tif(g[a[i].vec[j-1].l][a[i].vec[j].r]&&g[a[i].vec[j-1].r][a[i].vec[j].l]) vis[j]=1;\r\n\t\t\t\tif(!vis[j]) break;\r\n\t\t\t}\r\n\t\t\tif(j==(n>>1)){\r\n\t\t\t\tok[i]=1;\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t\tif(!next_permutation(a[i].vec.begin(),a[i].vec.end())) break;\r\n\t\t}\r\n\t}\r\n\tfor(i=1;i<=atop;++i){\r\n\t\tif(!ok[i]) continue;\r\n\t\tsort(a[i].vec.begin(),a[i].vec.end());\r\n\t\tvec=a[i].vec;\r\n\t\tdfs1(0);\r\n\t}\r\n\tsort(c+1,c+1+ctop);\r\n\tctop=unique(c+1,c+1+ctop)-c-1;\r\n\tlong long ans=0;\r\n\tfor(i=1;i<=ctop;++i){\r\n\t\tint max_=0;\r\n\t\tfor(j=0;j<n;++j) max_=max(max_,c[i][j]);\r\n\t\tans+=C[K][max_]*fac[max_];\r\n\t}\r\n\tcout<<ans<<'\\n';\r\n\treturn 0;\r\n}\r\n"
+}

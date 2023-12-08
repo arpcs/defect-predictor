@@ -1,0 +1,38 @@
+{
+    "id": 203614214,
+    "contestId": 1569,
+    "creationTimeSeconds": 1682560086,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "PurpleCrayon"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 18,
+    "timeConsumedMillis": 468,
+    "memoryConsumedBytes": 9728000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define sz(v) int(v.size())\r\n#define ar array\r\ntypedef long long ll;\r\nconst int N = 12, MOD = 1e9+7;\r\nconst int P = N / 2;\r\n\r\n// generate all possible pairings\r\n// generate all possible groups of the pairings\r\n\r\nint n, m, k;\r\nint adj[N];\r\nbool dp[1 << P][P];\r\n\r\n\r\nbool can(pair<int, int> one, pair<int, int> two) {\r\n    return ((adj[one.first] >> two.first) & 1) && ((adj[one.second] >> two.second) & 1) ||\r\n            ((adj[one.first] >> two.second) & 1) && ((adj[one.second] >> two.first) & 1);\r\n}\r\n\r\nconst int B = 6;\r\nll my_hash(vector<int> v) {\r\n    ll h = 0;\r\n    for (int x : v) {\r\n        h *= B;\r\n        h += x;\r\n    }\r\n    return h;\r\n}\r\n\r\nmap<ll, int> cnt;\r\nvoid rec_bell(int c, int use, const vector<pair<int, int>>& pairs, vector<int>& v) {\r\n    if (c == sz(pairs)) {\r\n        cnt[my_hash(v)]++;\r\n        return;\r\n    }\r\n\r\n    auto [a, b] = pairs[c];\r\n    for (int i = 0; i <= use; i++) {\r\n        v[a] = v[b] = i;\r\n        rec_bell(c + 1, max(use, i + 1), pairs, v);\r\n    }\r\n    v[a] = v[b] = -1;\r\n}\r\n\r\nvoid add(vector<pair<int, int>>& pairs) {\r\n    int p = sz(pairs);\r\n    memset(dp, 0, sizeof(dp));\r\n    for (int i = 0; i < p; i++) {\r\n        dp[1 << i][i] = 1;\r\n    }\r\n\r\n    for (int mask = 1; mask < (1 << p); mask++) {\r\n        for (int i = 0; i < p; i++) if (dp[mask][i]) { \r\n            for (int j = 0; j < p; j++) if (((mask >> j) & 1 ^ 1) && can(pairs[i], pairs[j])) {\r\n                dp[mask ^ (1 << j)][j] = 1;\r\n            }\r\n        }\r\n    }\r\n\r\n    bool bad = 1;\r\n    for (int i = 0; i < p; i++) if (dp[(1 << p) - 1][i] && ((adj[pairs[i].first] >> pairs[i].second) & 1))\r\n        bad = 0;\r\n\r\n    if (bad) return;\r\n\r\n    vector<int> store(n, -1);\r\n    rec_bell(0, 0, pairs, store);\r\n}\r\n\r\nvoid rec(int mask, vector<pair<int, int>> pairs) {\r\n    if (__builtin_popcount(mask) == n) {\r\n        add(pairs);\r\n        return;\r\n    }\r\n\r\n    int a = 0;\r\n    while ((mask >> a) & 1) a++;\r\n    for (int b = a+1; b < n; b++) if ((mask >> b) & 1 ^ 1) {\r\n        pairs.emplace_back(a, b);\r\n        rec(mask | (1 << a) | (1 << b), pairs);\r\n        pairs.pop_back();\r\n    }\r\n}\r\n\r\nint get_cnt(ll x) {\r\n    static bool has[B];\r\n    memset(has, 0, sizeof(has));\r\n    for (int i = 0; i < n; i++) {\r\n        has[x % B] = 1;\r\n        x /= B;\r\n    }\r\n    return accumulate(has, has + B, 0);\r\n}\r\n\r\nvoid solve() {\r\n    cin >> n >> m >> k;\r\n    for (int i = 0; i < m; i++) {\r\n        int a, b; cin >> a >> b, --a, --b;\r\n        adj[a] |= 1 << b;\r\n        adj[b] |= 1 << a;\r\n    }\r\n\r\n    vector<ll> po(k + 1, 1), fact(k + 1, 1);\r\n    for (int i = 1; i <= k; i++) po[i] = po[i-1] * k, fact[i] = fact[i-1] * i;\r\n    vector<vector<ll>> C(k + 1, vector<ll>(k + 1));\r\n    for (int i = 0; i <= k; i++) {\r\n        for (int j = 0; j <= i; j++) {\r\n            if (j == 0 || j == i) {\r\n                C[i][j] = 1;\r\n            } else {\r\n                C[i][j] = C[i-1][j] + C[i-1][j-1];\r\n            }\r\n        }\r\n    }\r\n\r\n    rec(0, {});\r\n\r\n    ll ans = 0;\r\n    for (auto [x, _] : cnt) {\r\n        ans += C[k][get_cnt(x)] * fact[get_cnt(x)];\r\n    }\r\n    cout << ans << '\\n';\r\n}\r\n\r\nint main() {\r\n    ios::sync_with_stdio(false); cin.tie(0);\r\n    int T = 1;\r\n    // cin >> T;\r\n    while (T--) solve();\r\n}\r\n"
+}

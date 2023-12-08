@@ -1,0 +1,36 @@
+{
+    "id": 225185813,
+    "contestId": 191,
+    "creationTimeSeconds": 1695679004,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 191,
+        "index": "D",
+        "name": "Metro Scheme",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2700,
+        "tags": [
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 191,
+        "members": [
+            {
+                "handle": "arvindr9"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1338132600
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntypedef int int2;\r\n#define int long long\r\n#define pi pair<int, int>\r\n#define vi vector<int>\r\n#define vii vector<vector<int>>\r\n#define vpi vector<pi>\r\n#define lep(i,l,r) for(int i=l;i<=r;++i)\r\n#define rep(i,r,l) for(int i=r;i>=l;--i)\r\n#define pb push_back\r\n#define mp make_pair\r\n#define eb emplace_back\r\n#define f first\r\n#define s second\r\nconst int inf = 1e18;\r\n\r\nint t;\r\n\r\n/*\r\n\r\nIn a rooted tree, number of created paths = floor(num children / 2) (except for root where it's ceil)\r\n\r\nNum paths = (num vertices w/ odd degree) / 2\r\n\r\n*/\r\n\r\n\r\nint2 main() {\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    int n, m;\r\n    cin >> n >> m;\r\n    vector<vector<int>> adj(n+1);\r\n    lep(i,1,m) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        adj[u].pb(v);\r\n        adj[v].pb(u);\r\n    }\r\n    vector<bool> cyc(n+1);\r\n    vector<vector<int>> cycles;\r\n    int timer = 0;\r\n    vector<int> pre(n+1);\r\n    vector<int> par(n+1);\r\n    function<void(int,int)> dfs = [&](int u, int p) {\r\n        // cout << \"u: \" << u << \", p: \" << p << \"\\n\";\r\n        pre[u] = ++timer;\r\n        par[u] = p;\r\n        for (int v: adj[u]) {\r\n            if (v != p) {\r\n                if (pre[v] and pre[v] < pre[u]) {\r\n                    // cout << \"u: \" << u << \", v: \" << v << \"\\n\";\r\n                    // process cycle\r\n                    int cur = u;\r\n                    vector<int> cur_cycle;\r\n                    while (true) {\r\n                        cur_cycle.pb(cur);\r\n                        cyc[cur] = true;\r\n                        if (cur == v) break;\r\n                        cur = par[cur];\r\n                    }\r\n                    cycles.pb(cur_cycle);\r\n                } else if (!pre[v]) {\r\n                    dfs(v,u);\r\n                }\r\n            }\r\n        }\r\n    };\r\n\r\n    dfs(1,1);\r\n\r\n    // if ((int)cycles.size() == 0) {\r\n    //     cout << \"no cycles\\n\";\r\n    //     int ans = 1;\r\n    //     lep(i,1,n) {\r\n    //         if ((int)adj[i].size() > 2) {\r\n    //             ans += ((int)adj[i].size()-2);\r\n    //         }\r\n    //     }\r\n    //     cout << ans << \" \" << m << \"\\n\";\r\n    //     return 0;\r\n    // }\r\n\r\n    // cout << \"num cycles: \" << (int)cycles.size() << \"\\n\";\r\n\r\n    int ans = 0;\r\n    for (vector<int> cycle: cycles) {\r\n        vector<int> excess;\r\n        for (int x: cycle) {\r\n            if ((int)adj[x].size() > 2) excess.pb((int)adj[x].size()-2);\r\n        }\r\n        // cout << \"excess: \\n\";\r\n        // for (int x: excess) {\r\n        //     cout << x << \" \";\r\n        // }\r\n        // cout << \"\\n\";\r\n\r\n        if ((int)excess.empty()) { // lone cycle\r\n            ans++;\r\n        } else if ((int)excess.size() == 1) {\r\n            ans += 1 + (excess[0]+1)/2;\r\n        } else {\r\n            // excess size >= 2\r\n            // case 1: cycle, then interlace\r\n\r\n            // case 2: no cycle\r\n            for (int x: excess) {\r\n                ans += (x+1)/2;\r\n            }\r\n        }\r\n    }\r\n\r\n    int num_odd = 0;\r\n    lep(i,1,n) {\r\n        int deg = (int)adj[i].size();\r\n        if (cyc[i]) {\r\n            if (deg > 2) {\r\n                num_odd += (deg - 2);\r\n            }\r\n        } else {\r\n            if (deg % 2 == 1) {\r\n                num_odd++;\r\n            }\r\n        }\r\n    }\r\n\r\n    // cout << \"num_odd: \" << num_odd << \"\\n\";\r\n    ans += num_odd/2;\r\n    lep(i,1,n) {\r\n        if (cyc[i] and (int)adj[i].size() > 2) {\r\n            ans -= ((int)adj[i].size()-2);\r\n        }\r\n    }\r\n    int num_cycles = cycles.size();\r\n    if (num_cycles) {\r\n        ans -= (num_cycles - 1);\r\n    }\r\n\r\n    cout << ans << \" \" << m << \"\\n\";\r\n\r\n    \r\n} \r\n\r\n/* stuff you should look for\r\n\t* int overflow, array bounds\r\n\t* special cases (n=1?)\r\n\t* do smth instead of nothing and stay organized\r\n\t* WRITE STUFF DOWN\r\n\t* DON'T GET STUCK ON ONE APPROACH\r\n*/"
+}

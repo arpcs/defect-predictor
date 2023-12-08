@@ -1,0 +1,35 @@
+{
+    "id": 109949308,
+    "contestId": 477,
+    "creationTimeSeconds": 1615708251,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 477,
+        "index": "E",
+        "name": "Dreamoon and Notepad",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3100,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 477,
+        "members": [
+            {
+                "handle": "deafff"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1413122400
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 498,
+    "memoryConsumedBytes": 33177600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define ll long long\r\nconst int maxn = 400005;\r\nint n, q, a[maxn];\r\n\r\nnamespace SGT {\r\n\tint Min[maxn << 2];\r\n\tvoid modify(int l, int r, int id, int x, int y) {\r\n\t\tif(l == r) {\r\n\t\t\tMin[id] = y;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint mid = (l + r) >> 1;\r\n\t\tif(x <= mid)\r\n\t\t\tmodify(l, mid, id << 1, x, y);\r\n\t\telse\r\n\t\t\tmodify(mid + 1, r, id << 1 | 1, x, y);\r\n\t\tMin[id] = min(Min[id << 1], Min[id << 1 | 1]); \r\n\t}\r\n\tint query(int l, int r, int id, int L, int R) {\r\n\t\tif(L <= l && r <= R) return Min[id];\r\n\t\tint mid = (l + r) >> 1, res = 1e9;\r\n\t\tif(L <= mid) res = min(res, query(l, mid, id << 1, L, R));\r\n\t\tif(R > mid) res = min(res, query(mid + 1, r, id << 1 | 1, L, R));\r\n\t\treturn res;\r\n\t}\r\n}\r\n\r\nstruct query {\r\n\tint r1, c1, c2, id;\r\n\tquery() {}\r\n\tquery(int _r1, int _c1, int _c2, int _i) {\r\n\t\tr1 = _r1, c1 = _c1, c2 = _c2, id = _i;\r\n\t}\r\n};\r\nint ans[maxn], now[maxn];\r\nvector<query> Q[2][maxn];\r\nvoid solve(vector<query> *Q) {\r\n\tstatic int st[maxn], num[maxn], top;\r\n\ttop = 0;\r\n\tfor(int i = 1; i <= n; i++) {\r\n\t\twhile(top && num[top] >= a[i]) top--;\r\n\t\tst[++top] = i;\r\n\t\tnum[top] = a[i];\r\n\t\tSGT :: modify(1, n, 1, top, -2 * i + a[i]);\r\n\t\t\r\n\t\tfor(auto u : Q[i]) {\r\n\t\t\tint r1 = u.r1, c1 = u.c1, r2 = i, c2 = u.c2, id = u.id;\r\n\t\t\tint res = r2 - r1 + c2 + 1; // part 1\r\n\t\t\t\r\n\t\t\t// part 2\r\n\t\t\tint L = lower_bound(st + 1, st + top + 1, r1) - st, R = top;\r\n\t\t\t\r\n\t\t\tnow[id] = min(c1, num[L]);\r\n\t\t\tres = min(res, r2 - r1 + abs(c2 - now[id]));\r\n\t\t\t\r\n\t\t\tint pos = lower_bound(num + L, num + R + 1, c2) - num;\r\n\t\t\tif(pos <= R) res = min(res, r2 - r1 + 1 + abs(c2 - num[pos]));\r\n\t\t\tif(pos > L) \r\n\t\t\t\tres = min(res, r2 - r1 + 1 + abs(c2 - num[pos - 1]));\r\n\t\t\telse {\r\n\t\t\t\tassert(pos == L);\r\n\t\t\t\tpos = upper_bound(num + 1, num + R + 1, c2) - num - 1; \r\n\t\t\t\tif(pos) res = min(res, r1 + r2 - 2 * st[pos] + (c1 < num[pos]) + abs(c2 - num[pos]));\r\n\t\t\t}\r\n\t\t\t\r\n\t\t\t// part 3\r\n\t\t\tif(pos + 1 < L) {\r\n\t\t\t\tR = L - 1, L = pos + 1;\r\n\t\t\t\tint mid = upper_bound(num + L, num + R + 1, c1) - num;\r\n\t\t\t\tif(mid <= R) res = min(res, r1 + r2 + 1 + SGT :: query(1, n, 1, mid, R) - c2);\r\n\t\t\t\tif(L < mid) res = min(res, r1 + r2 + SGT :: query(1, n, 1, L, mid - 1) - c2);\r\n\t\t\t}\r\n\t\t\t\r\n\t\t\tif(res == 6646) exit(-1);\r\n\t\t\tans[id] = res;\r\n\t\t}\r\n\t}\r\n\ttop = 0;\r\n\tfor(int i = n; i >= 1; i--) {\r\n\t\twhile(top && num[top] >= a[i]) top--;\r\n\t\tst[++top] = i;\r\n\t\tnum[top] = a[i];\r\n\t\tSGT :: modify(1, n, 1, top, 2 * i + a[i]);\r\n\t\t\r\n\t\t// part 4\r\n\t\tfor(auto u : Q[i]) {\r\n\t\t\tint r1 = u.r1, r2 = i, c2 = u.c2, id = u.id;\r\n\t\t\tint pos = upper_bound(num + 1, num + top + 1, c2) - num - 1, res = 1e9;\r\n\t\t\tif(pos) res = -(r1 + r2) + 2 * st[pos] + (now[id] < num[pos]) + abs(c2 - num[pos]);\r\n\t\t\t\r\n\t\t\tif(pos + 1 <= top) {\r\n\t\t\t\tint L = pos + 1, R = top;\r\n\t\t\t\tint mid = upper_bound(num + L, num + R + 1, now[id]) - num;\r\n\t\t\t\tif(mid <= R) res = min(res, -(r1 + r2) + 1 + SGT :: query(1, n, 1, mid, R) - c2);\r\n\t\t\t\tif(L < mid) res = min(res, -(r1 + r2) + SGT :: query(1, n, 1, L, mid - 1) - c2);\r\n\t\t\t}\r\n\t\t\t\r\n\t\t\tans[id] = min(ans[id], res);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nint main() {\r\n\tscanf(\"%d\", &n);\r\n\tfor(int i = 1; i <= n; i++) scanf(\"%d\", &a[i]);\r\n\t\r\n\tscanf(\"%d\", &q);\r\n\tfor(int i = 1, r1, c1, r2, c2; i <= q; i++) {\r\n\t\tscanf(\"%d%d%d%d\", &r1, &c1, &r2, &c2);\r\n\t\tif(r1 <= r2) \r\n\t\t\tQ[0][r2].push_back(query(r1, c1, c2, i));\r\n\t\telse \r\n\t\t\tQ[1][n - r2 + 1].push_back(query(n - r1 + 1, c1, c2, i));\r\n\t}\r\n\t\r\n\tsolve(Q[0]);\r\n\t\r\n\treverse(a + 1, a + n + 1);\r\n\t\r\n\tsolve(Q[1]);\r\n\t\r\n\tfor(int i = 1; i <= q; i++) printf(\"%d\\n\", ans[i]);\r\n\treturn 0;\r\n}"
+}

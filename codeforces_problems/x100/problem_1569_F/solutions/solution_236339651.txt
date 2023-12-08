@@ -1,0 +1,38 @@
+{
+    "id": 236339651,
+    "contestId": 1569,
+    "creationTimeSeconds": 1702038652,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "244mhq"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 421,
+    "memoryConsumedBytes": 0,
+    "source": "#ifdef DEBUG\r\n#define _GLIBCXX_DEBUG\r\n#endif\r\n//#pragma GCC optimize(\"O3\")\r\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define pb push_back\r\n\r\ntypedef long long ll;\r\ntypedef long double ld;\r\nint n, m, k;\r\nint e[14];\r\nint A[12], B[12];\r\nbool good[1 << 7][7];\r\nint clr[12];\r\nll TOT = 0;\r\nbool can[15000];\r\nbool used[12];\r\nbool OK;\r\nint NA[12], NB[12];\r\nvoid calc(int v) {\r\n    if (v == -1) {\r\n        int val = 0;\r\n        for (int p = n / 2 - 1; p >= 0; p--) {\r\n            NA[p] = A[p];\r\n            NB[p] = B[p];\r\n        }\r\n        for (int p = n / 2 - 1; p >= 0; p--) {\r\n            val *= (2 * p + 1);\r\n            assert(A[p] == 2 * p + 1);\r\n            val += B[p];\r\n            for (int r = p - 1; r >= 0; r--) {\r\n                if (A[r] >= B[p]) A[r]--;\r\n                if (B[r] >= B[p]) B[r]--;\r\n            }\r\n        }\r\n        for (int p = n / 2 - 1; p >= 0; p--) {\r\n            A[p] = NA[p];\r\n            B[p] = NB[p];\r\n        }\r\n        if (can[val]) {\r\n            OK = true;\r\n        }\r\n    }\r\n    else {\r\n        int z = n - 1;\r\n        while (used[z]) z--;\r\n        A[v] = z;\r\n        used[z] = true;\r\n        for (int d = z - 1; d >= 0; d--) {\r\n            if (!used[d] && clr[z] == clr[d]) {\r\n                B[v] = d;\r\n                used[d] = true;\r\n                calc(v - 1);\r\n                used[d] = false;\r\n            }\r\n        }\r\n        used[z] = false;\r\n    }\r\n}\r\nbool check() {\r\n    memset(used, 0, sizeof used);\r\n    OK = false;\r\n    calc(n / 2 - 1);\r\n    return OK;\r\n}\r\nvoid rec(int lft, int cur, int al, int ans) {\r\n    if (lft == 0) {\r\n        if (check()) TOT += ans;\r\n        return;\r\n    }\r\n    for (int sb = lft; sb > 0; sb = lft & (sb - 1)) {\r\n        if (sb > ((lft ^ sb))) {\r\n            if (__builtin_popcount(sb) % 2 == 0) {\r\n                for (int p = 0; p < n; p++) {\r\n                    if (sb & (1 << p)) clr[p] = cur;\r\n                }\r\n                rec(lft ^ sb, cur + 1, al - 1, ans * al);\r\n            }\r\n        }\r\n    }\r\n}\r\nint main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n#ifdef DEBUG\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n#endif\r\n    cin >> n >> m >> k;\r\n    for (int i = 0; i < m; i++) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        --u; --v;\r\n        e[u] |= (1 << v);\r\n        e[v] |= (1 << u);\r\n    }\r\n    vector<int> Q(n / 2);\r\n    int cnt = 1;\r\n    for (int i = 0; i < n / 2; i++) {\r\n        Q[i] = 2 * i + 1;\r\n        cnt *= Q[i];\r\n    }\r\n    for (int i = 0; i < cnt; i++) {\r\n        int F = i;\r\n        for (int d = 0; d < n / 2; d++) {\r\n            A[d] = 2 * d + 1;\r\n            B[d] = (F % Q[d]);\r\n            F /= Q[d];\r\n            for (int p = 0; p < d; p++) {\r\n                if (A[p] >= B[d]) A[p]++;\r\n                if (B[p] >= B[d]) B[p]++;\r\n            }\r\n        }\r\n        memset(good, 0, sizeof good);\r\n        for (int d = 0; d < n / 2; d++) {\r\n            if (e[A[d]] & (1 << B[d])) {\r\n                good[1 << d][d] = true;\r\n            }\r\n        }\r\n        for (int mask = 1; mask < (1 << (n / 2)); mask++) {\r\n            for (int last = 0; last < n / 2; last++) {\r\n                if (!good[mask][last]) continue;\r\n                for (int nlast = 0; nlast < n / 2; nlast++) {\r\n                    if (mask & (1 << nlast)) continue;\r\n                    int x0 = A[last], y0 = B[last];\r\n                    int x1 = A[nlast], y1 = B[nlast];\r\n                    if (((e[x0] & (1 << x1)) && (e[y0] & (1 << y1))) || ((e[x0] & (1 << y1)) && (e[y0] & (1 << x1)))) {\r\n                        good[mask | (1 << nlast)][nlast] |= good[mask][last];\r\n                    }\r\n                }\r\n            }\r\n        }\r\n        for (int z = 0; z < n / 2; z++) {\r\n            if (good[(1 << (n / 2)) - 1][z]) can[i] = true;\r\n        }\r\n    }\r\n    rec((1 << n) - 1, 0, k, 1);\r\n    cout << TOT << '\\n';\r\n    return 0;\r\n}"
+}

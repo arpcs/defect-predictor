@@ -1,0 +1,37 @@
+{
+    "id": 224200255,
+    "contestId": 1870,
+    "creationTimeSeconds": 1695228311,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1870,
+        "index": "D",
+        "name": "Prefix Purchase",
+        "type": "PROGRAMMING",
+        "points": 1750.0,
+        "rating": 1800,
+        "tags": [
+            "greedy",
+            "implementation",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1870,
+        "members": [
+            {
+                "handle": "NickZu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1695047700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\n#define S second\r\n#define F first\r\ntypedef long long ll;\r\nusing namespace std;\r\n\r\nstruct tree_of_segments {\r\n    int sz = 1, E = 1 << 30;\r\n    vector<int> a, tree;\r\n    tree_of_segments(vector<int> ar) {\r\n        a = ar;\r\n        while (sz <= a.size()) sz <<= 1;\r\n        while (sz > a.size()) a.push_back(E);\r\n        tree.resize(2 * sz, sz - 1);\r\n        build(1, 0, sz);\r\n    }\r\n\r\n    void build(int v, int vl, int vr) {\r\n        if (v >= sz) {\r\n            tree[v] = v - sz;\r\n            return;\r\n        }\r\n        int vm = (vl + vr) / 2;\r\n        build(2 * v, vl, vm);\r\n        build(2 * v + 1, vm, vr);\r\n        tree[v] = a[tree[2 * v]] < a[tree[2 * v + 1]] ? tree[2 * v] : tree[2 * v + 1];\r\n    }\r\n\r\n    int get(int l, int r, int v = 1, int vl = 0, int vr = -1) {\r\n        if (vr == -1) vr = sz;\r\n        if (vl >= r || vr <= l) return sz - 1;\r\n        if (l <= vl && vr <= r) return tree[v];\r\n        int vm = (vl + vr) / 2;\r\n        int res_l = get(l, r, 2 * v, vl, vm), res_r = get(l, r, 2 * v + 1, vm, vr);\r\n        return a[res_l] < a[res_r] ? res_l : res_r;\r\n    }\r\n    \r\n};\r\n\r\n\r\nvoid solve()\r\n{\r\n    int n; cin >> n;\r\n    vector<int> c(n); for (int& i : c) cin >> i;\r\n    int k; cin >> k;\r\n    vector<int> pref(n, 0);\r\n    tree_of_segments tos(c);\r\n    int i = -1, cnt = 0;\r\n    do {\r\n        int ind_mn = tos.get(i + 1, n);\r\n        //if (ind_mn < 0 || ind_mn > n) for (;;)\r\n        c[ind_mn] -= cnt;\r\n        pref[ind_mn] = k / c[ind_mn];\r\n        k %= c[ind_mn];\r\n        cnt += c[ind_mn];\r\n        i = ind_mn;\r\n    } while (i < n && k != 0 && pref[i] != 0);\r\n    vector<int> a(n, 0);\r\n    for (int i = n - 1; i > -1; --i) {\r\n        a[i] = pref[i];\r\n        if (i != n - 1) a[i] = max(a[i], a[i + 1]);\r\n    }\r\n    for (int i : a) cout << i << \" \"; cout << endl;\r\n}\r\n\r\nint main()\r\n{\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    //freopen(\"input.txt\", \"r\", stdin); freopen(\"output.txt\", \"w\", stdout);\r\n    int t = 1;\r\n    cin >> t;\r\n    while (t--) solve();\r\n}"
+}

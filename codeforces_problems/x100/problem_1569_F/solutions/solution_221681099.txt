@@ -1,0 +1,38 @@
+{
+    "id": 221681099,
+    "contestId": 1569,
+    "creationTimeSeconds": 1693744650,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "CHK6666"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 96,
+    "timeConsumedMillis": 951,
+    "memoryConsumedBytes": 6246400,
+    "source": "// LUOGU_RID: 123741932\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define int long long\r\nconst int N=13,M=(1<<7)+5;\r\nint f[M][N],n,m,k,g[N][N],p1[N],p2[N],p[N],fac[N],ans;\r\nmap<int,int>dp;\r\nvoid dfs(int t){\r\n\tint x=n;\r\n\tfor(int i=0;i<n;i++)\r\n\t\tif(p[i]==-1){x=i;break;}\r\n\tif(x==n){\r\n\t\tfor(int i=0;i<(1<<t);i++)\r\n\t\t\tfor(int j=0;j<t;j++)\r\n\t\t\t\tf[i][j]=0;\r\n\t\tfor(int j=0;j<t;j++)p1[j]=p2[j]=0;\r\n\t\tfor(int i=0;i<n;i++){p2[p[i]]=p1[p[i]];p1[p[i]]=i;}\r\n\t\tfor(int i=0;i<t;i++)\r\n\t\t\tif(g[p1[i]][p2[i]])f[1<<i][i]=1;\r\n\t\tfor(int i=0;i<(1<<t);i++)\r\n\t\t\tfor(int j=0;j<t;j++)if(f[i][j])\r\n\t\t\t\tfor(int k=0;k<t;k++)if(!(i>>k&1)){\r\n\t\t\t\t\tf[i|(1<<k)][k]|=(g[p1[j]][p1[k]]&&g[p2[j]][p2[k]]);\r\n\t\t\t\t\tf[i|(1<<k)][k]|=(g[p1[j]][p2[k]]&&g[p2[j]][p1[k]]);\r\n\t\t\t\t}\r\n\t\tfor(int i=0;i<t;i++)if(f[(1<<t)-1][i]){\r\n\t\t\tint num=0;\r\n\t\t\tfor(int j=0;j<n;j++)num=num*6+p[j];\r\n\t\t\tdp[num]=1;return;\r\n\t\t}return;\r\n\t}\r\n\tfor(int i=x+1;i<n;i++)if(p[i]==-1){\r\n\t\tp[x]=p[i]=t;dfs(t+1);\r\n\t\tp[x]=p[i]=-1;\r\n\t}\r\n}\r\nint chk(int a[]){\r\n\tint val[7],cnt=0,p[13],gg[7];\r\n\tfor(int i=0;i<n;i++)p[i]=a[i];\r\n\tfor(int i=0;i<7;i++)val[i]=-1,gg[i]=0;\r\n\tfor(int i=0;i<n;i++)\r\n\t\tif(val[p[i]]==-1)val[p[i]]=cnt++;\r\n\tfor(int i=0;i<n;i++)p[i]=val[p[i]],gg[p[i]]++;\r\n\tint num=0,flag=0;\r\n\tfor(int i=0;i<n;i++)num=num*6+p[i];\r\n\tif(dp.count(num))return dp[num];\r\n\tfor(int i=0;i<n&&!flag;i++)if(gg[p[i]]>2)\r\n\t\tfor(int j=i+1;j<n;j++)if(p[i]==p[j]){\r\n\t\t\tint vv=p[i];\r\n\t\t\tp[i]=p[j]=cnt;\r\n\t\t\tflag|=chk(p);\r\n\t\t\tp[i]=p[j]=vv;\r\n\t\t\tif(flag)break;\r\n\t\t} \r\n//\tfor(int i=0;i<n;i++)cout<<p[i]<<' ';cout<<num<<' ';cout<<\"fuck\\n\";\r\n\treturn dp[num]=flag;\r\n}\r\nvoid dfs2(int t){\r\n\tint x=n;\r\n\tfor(int i=0;i<n;i++)\r\n\t\tif(p[i]==-1){x=i;break;}\r\n\tif(x==n)return chk(p),void();\r\n\tfor(int c=0;c<=t;c++)\r\n\t\tfor(int i=x+1;i<n;i++)\r\n\t\t\tif(p[i]==-1){\r\n\t\t\t\tp[i]=p[x]=c;\r\n\t\t\t\tdfs2(max(t,c+1));\r\n\t\t\t\tp[i]=p[x]=-1;\r\n\t\t\t} \r\n}\r\nsigned main(){\r\n\tscanf(\"%lld%lld%lld\",&n,&m,&k);\r\n\tfor(int i=1,u,v;i<=m;i++){\r\n\t\tscanf(\"%lld%lld\",&u,&v);\r\n\t\tu--;v--;g[u][v]=g[v][u]=1;\r\n\t}memset(p,-1,sizeof p);dfs(0);dfs2(0);\r\n\tfac[0]=1;\r\n\tfor(int i=1;i<=n;i++)fac[i]=fac[i-1]*i;\r\n\tfor(auto w:dp){\r\n\t\tint a=w.first,b=w.second,mx=1;\r\n\t\tif(!b)continue;\r\n\t\twhile(a>0){\r\n\t\t\tmx=max(mx,a%6+1);\r\n\t\t\ta/=6;\r\n\t\t}if(mx<=k)ans+=fac[k]/fac[k-mx];\t\r\n\t}printf(\"%lld\\n\",ans);\r\n}"
+}
