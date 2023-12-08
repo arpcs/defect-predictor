@@ -1,0 +1,36 @@
+{
+    "id": 224529876,
+    "contestId": 508,
+    "creationTimeSeconds": 1695327808,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 508,
+        "index": "D",
+        "name": "Tanya and Password",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2500,
+        "tags": [
+            "dfs and similar",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 508,
+        "members": [
+            {
+                "handle": "silxi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1422376200
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 12902400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing ll = long long;\r\n\r\n// Template {{{\r\n#define REP(n) for (int _=0; _<(n); _++)\r\n#define FOR(i, a, b) for (int i=a; i<(b); i++)\r\n#define F0R(i, a) for (int i=0; i<(a); i++)\r\n#define FORd(i,a,b) for (int i = (b)-1; i >= a; i--)\r\n#define F0Rd(i,a) for (int i = (a)-1; i >= 0; i--)\r\n \r\n#define sz(x) (int)(x).size()\r\n#define all(x) x.begin(), x.end()\r\n \r\ntemplate<class T> bool ckmin(T& a, const T& b) { return b < a ? a = b, 1 : 0; }\r\ntemplate<class T> bool ckmax(T& a, const T& b) { return a < b ? a = b, 1 : 0; }\r\n\r\nnamespace std {\r\n  template<class Fun>\r\n  class y_combinator_result {\r\n    Fun fun_;\r\n  public:\r\n    template<class T>\r\n    explicit y_combinator_result(T &&fun): fun_(std::forward<T>(fun)) {}\r\n   \r\n    template<class ...Args>\r\n    decltype(auto) operator()(Args &&...args) {\r\n      return fun_(std::ref(*this), std::forward<Args>(args)...);\r\n    }\r\n  };\r\n   \r\n  template<class Fun>\r\n  decltype(auto) y_combinator(Fun &&fun) {\r\n    return y_combinator_result<std::decay_t<Fun>>(std::forward<Fun>(fun));\r\n  }\r\n} // namespace std\r\n\r\n#define DEBUG(x) cerr << #x << \": \" << x << '\\n'\r\ntemplate<typename A, typename B> \r\nostream& operator<<(ostream &os, const pair<A, B> &p) { \r\n  return os << '(' << p.first << \", \" << p.second << ')'; \r\n}\r\ntemplate<typename T_container, \r\n  typename T = typename enable_if<!is_same<T_container, string>::value, \r\n  typename T_container::value_type>::type> \r\nostream& operator<<(ostream &os, const T_container &v) { \r\n  os << '['; string sep; \r\n  for (const T &x : v) \r\n    os << sep << x, sep = \", \"; \r\n  return os << ']'; \r\n}\r\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\r\n// }}}\r\n\r\n#define pb push_back\r\n#define f first\r\n#define s second\r\n\r\nusing vpi = vector<pair<int, int>>;\r\n\r\nconst int MX = 400005;\r\nint N, M;\r\nvector<vpi> graph(MX); //{ed, edNum}\r\nvector<vpi::iterator> its(MX);\r\nvector<bool> used(MX);\r\n\r\nvpi eulerPath(int r) {\r\n  F0R(i, N) its[i] = begin(graph[i]);\r\n  F0R(i, M) used[i] = false;\r\n  vpi ans, s{{r, -1}};\r\n  int lst = -1;\r\n  while (sz(s)) {\r\n    int x = s.back().f; auto &it = its[x], en = end(graph[x]);\r\n    while (it != en && used[it->s]) it++;\r\n\r\n    if (it == en) {\r\n      if (lst != -1 && lst != x) return {};\r\n      ans.pb(s.back()); s.pop_back(); if (sz(s)) lst = s.back().f;\r\n    } else {\r\n      s.pb(*it);\r\n      used[it->s] = 1;\r\n    }\r\n  }\r\n  if (sz(ans) != M+1) return {};\r\n  return ans;\r\n}\r\n\r\n\r\nint main() {\r\n  ios_base::sync_with_stdio(false); cin.tie(NULL);\r\n  int n; cin >> n;\r\n  map<string, int> mp;\r\n  int c = 0;\r\n  vector<string> vs(n);\r\n  map<int, int> degree;\r\n  F0R(t, n) {\r\n    string s; cin >> s;\r\n    vs[t] = s;\r\n    string a = s.substr(0, 2);\r\n    string b = s.substr(1, 2);\r\n    if (!mp.count(a)) mp[a] = c++;\r\n    if (!mp.count(b)) mp[b] = c++;\r\n    int i = mp[a], j = mp[b];\r\n\r\n    graph[i].emplace_back(j, t);\r\n    degree[i]++;\r\n    degree[j]--;\r\n    // cout << i << ' ' << j << endl;\r\n    // graph[j].emplace_back(i, t);\r\n  }\r\n\r\n  N = c;\r\n  M = n;\r\n  int start = 0;\r\n  while (start + 1 < N && degree[start] == 0) start++;\r\n  auto path = eulerPath(start);\r\n  // cout << path << endl;\r\n\r\n  if (sz(path) == M+1) {\r\n    string ans = vs[path[0].second];\r\n    for (int i = 1; i < M; i++) {\r\n      ans += vs[path[i].second][2];\r\n    }\r\n    cout << \"YES\\n\";\r\n    cout << ans << '\\n';\r\n  }\r\n  else {\r\n    cout << \"NO\\n\";\r\n  }\r\n}\r\n"
+}

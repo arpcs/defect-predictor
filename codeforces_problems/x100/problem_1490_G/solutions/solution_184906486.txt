@@ -1,0 +1,36 @@
+{
+    "id": 184906486,
+    "contestId": 1490,
+    "creationTimeSeconds": 1670855774,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1490,
+        "index": "G",
+        "name": "Old Floppy Drive ",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "binary search",
+            "data structures",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1490,
+        "members": [
+            {
+                "handle": "wonderful_trip"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1613486100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 15,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 13516800,
+    "source": "/**\r\n *    author:  longvu\r\n *    created: 12/12/22 20:25:26\r\n**/\r\n#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define int long long\r\n#define sz(x) ((int)x.size())\r\n#define all(x) (x).begin(), (x).end()\r\nconst int INF = 4e18;\r\nconst int nax = (int)(290001);\r\nconst int mod = 1e9 + 7;\r\n\r\ntemplate<class X, class Y>\r\nbool maximize(X& x, const Y y) {\r\n    if (y > x) {x = y; return true;}\r\n    return false;\r\n}\r\ntemplate<class X, class Y>\r\nbool minimize(X& x, const Y y) {\r\n    if (y < x) {x = y; return true;}\r\n    return false;\r\n}\r\n\r\nstruct Fenwick_tree {\r\n    int n, BIT[nax];\r\n    void reseter(int _n) {\r\n        n = _n;\r\n        for (int i = 1; i <= n + 90; ++i) {\r\n            BIT[i] = INF;\r\n        }\r\n    }\r\n\r\n    void update(int idx, int val) {\r\n        assert(idx);\r\n        for (int i = idx; i <= n; i += i & (-i)) {\r\n            minimize(BIT[i], val);\r\n        }\r\n    }\r\n\r\n    int get(int r) {\r\n        int res = INF;\r\n        for (int i = r; i > 0; i -= i & (-i)) {\r\n            minimize(res, BIT[i]);\r\n        }\r\n        return res;\r\n    }\r\n};\r\n\r\nint a[nax], pre[nax], X[nax];\r\nFenwick_tree fen;\r\nint32_t main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    int tt;\r\n    cin >> tt;\r\n    while (tt--) {\r\n        int n, m;\r\n        cin >> n >> m;\r\n        vector<int> value = { -INF};\r\n        for (int i = 1; i <= n; ++i) {\r\n            cin >> a[i];\r\n            pre[i] = a[i] + pre[i - 1];\r\n            value.push_back(pre[i]);\r\n        }\r\n        for (int i = 1; i <= m; ++i) {\r\n            cin >> X[i];\r\n        }\r\n        sort(all(value));\r\n        value.resize(unique(all(value)) - value.begin());\r\n        auto rev_IDX = [&](int x) {\r\n            return sz(value) - x + 1;\r\n        };\r\n        fen.reseter(sz(value));\r\n        for (int i = 1; i <= n; ++i) {\r\n            pre[i] = lower_bound(all(value), pre[i]) - value.begin();\r\n            fen.update(rev_IDX(pre[i]), i);\r\n        }\r\n        for (int i = 1; i <= m; ++i) {\r\n            int x = lower_bound(all(value), X[i]) - value.begin(), ans = fen.get(rev_IDX(x)) - 1;\r\n            if (value[pre[n]] > 0) {\r\n                x = lower_bound(all(value), X[i] / value[pre[n]] * n + X[i] % value[pre[n]]) - value.begin();\r\n                minimize(ans, X[i] / value[pre[n]] * n + fen.get(rev_IDX(x)) - 1);\r\n                int l = 1, r = X[i] / value[pre[n]] + 1;\r\n                while (l <= r) {\r\n                    int mid = (l + r) >> 1, x = lower_bound(all(value), X[i] - mid * value[pre[n]]) - value.begin();\r\n                    if (mid * n + fen.get(rev_IDX(x)) - 1 < 2e18) {\r\n                        r = mid - 1;\r\n                    } else {\r\n                        l = mid + 1;\r\n                    }\r\n                }\r\n                r++;\r\n                x = lower_bound(all(value), X[i] - r * value[pre[n]]) - value.begin();\r\n                minimize(ans, r * n + fen.get(rev_IDX(x)) - 1);\r\n            }\r\n            cout << (ans < 2e18 ? ans : -1) << \" \";\r\n        }\r\n        cout << '\\n';\r\n    }\r\n    return 0;\r\n}"
+}

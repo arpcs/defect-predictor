@@ -1,0 +1,37 @@
+{
+    "id": 158475283,
+    "contestId": 1685,
+    "creationTimeSeconds": 1653516205,
+    "relativeTimeSeconds": 6205,
+    "problem": {
+        "contestId": 1685,
+        "index": "C",
+        "name": "Bring Balance",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1685,
+        "members": [
+            {
+                "handle": "Meijer"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1653510000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 26,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 18227200,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\n#define fi first\n#define se second\n#define pb push_back\n#define all(a) a.begin(), a.end()\n\nconst int N = (1<<20);\nconst int mod = 1e9+7;\n\nint t, n; string s;\nint a[N];\nint sm[N];\n\nint seg[N*2];\nint comb(int x, int y) {\n    return sm[x] >= sm[y] ? x : y;\n}\nvoid buildseg(int i, int j, int p=1, int l=0, int r=N-1) {\n    if (i > r || j < l) return;\n    if (l == r) {\n        seg[p] = l;\n        return;\n    }\n    int m=(l+r)/2;\n    buildseg(i,j,p*2,l,m);\n    buildseg(i,j,p*2+1,m+1,r);\n    seg[p] = comb(seg[p*2], seg[p*2+1]);\n}\nint getseg(int i, int j, int p=1, int l=0, int r=N-1) {\n    if (i > j)\n        return i;\n    if (i <= l && j >= r) return seg[p];\n    int m=(l+r)/2;\n    if (j <= m) return getseg(i,j,p*2  ,l,m);\n    if (i >  m) return getseg(i,j,p*2+1,m+1,r);\n    return comb(getseg(i,j,p*2,l,m), getseg(i,j,p*2+1,m+1,r));\n}\nint getleft(int i, int j, int v, int p=1, int l=0, int r=N-1) {\n    if (sm[seg[p]] < v) return -1;\n    if (j < l || i > r) return -1;\n    if (l == r) return seg[p];\n\n    int m=(l+r)/2;\n    if (i <= l && j >= r) {\n        if (sm[seg[p*2]] >= v)\n            return getleft(i,j,v,p*2,l,m);\n        return getleft(i,j,v,p*2+1,m+1,r);\n    }\n    int res = getleft(i,j,v,p*2,l,m);\n    if (res != -1)\n        return res;\n    return getleft(i,j,v,p*2+1,m+1,r);\n}\nint getright(int i, int j, int v, int p=1, int l=0, int r=N-1) {\n    if (sm[seg[p]] < v) return -1;\n    if (j < l || i > r) return -1;\n    if (l == r) return seg[p];\n\n    int m=(l+r)/2;\n    if (i <= l && j >= r) {\n        if (sm[seg[p*2+1]] >= v)\n            return getright(i,j,v,p*2+1,m+1,r);\n        return getright(i,j,v,p*2,l,m);\n    }\n    int res = getright(i,j,v,p*2+1,m+1,r);\n    if (res != -1)\n        return res;\n    return getright(i,j,v,p*2,l,m);\n}\n\nsigned main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    cin >> t;\n    while (t--) {\n        cin >> n >> s;\n        vector<array<int,2>> ans;\n\n        for (int i=0; i<n*2; i++)\n            a[i] = s[i] == '(' ? 1 : -1;\n\n        sm[0] = 0;\n        for (int i=0; i<n*2; i++)\n            sm[i+1] = sm[i] + a[i];\n        buildseg(0,n*2);\n\n        vector<int> neg;\n        for (int i=0; i<=n*2; i++)\n            if (sm[i] < 0)\n                neg.push_back(i);\n        // for (int i=0; i<=n*2; i++)\n            // cout << sm[i] << ' ';\n        // cout << endl;\n        \n        int x = 0;\n        while (x < neg.size()) {\n            int y = x;\n            while (y+1 < neg.size()\n                && sm[getseg(neg[x], neg[y+1])] <= sm[getseg(0, neg[x]-1)] + sm[getseg(neg[y+1]+1,n*2)]) {\n                y++;\n            }\n            int val = sm[getseg(neg[x], neg[y])];\n            int lsm = sm[getseg(0,neg[x]-1)];\n            if (lsm >= val) lsm = val;\n            int rsm = val - lsm;\n            ans.push_back({getright(0, neg[x]-1, lsm), getleft(neg[y]+1, n*2, rsm)});\n            x = y+1;\n        }\n\n        cout << ans.size() << endl;\n        for (auto p : ans)\n            cout << p[0]+1 << \" \" << p[1] << endl;\n    }\n}\n"
+}

@@ -1,0 +1,34 @@
+{
+    "id": 57956709,
+    "contestId": 1192,
+    "creationTimeSeconds": 1564427214,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "lumibons"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 185,
+    "timeConsumedMillis": 2074,
+    "memoryConsumedBytes": 99225600,
+    "points": 100.0,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define sz(x) ((int) ((x).size()))\r\ntypedef long long ll;\r\ntypedef long double ld;\r\n\r\nconst ll mul = 2000100100LL;\r\n\r\nint n, m, outs;\r\nll pos[9 * 150000];\r\nbool sc[9 * 150000];\r\nunordered_map<ll, int> pti;\r\n\r\nbool isPoint(ll p) {\r\n  return pti.find(p) != pti.end();\r\n}\r\n\r\nll point(int i, int j) {\r\n  return i + j * mul;\r\n}\r\n\r\nint getX(ll p) {\r\n  return p % mul;\r\n}\r\n\r\nint getY(ll p) {\r\n  return p / mul;\r\n}\r\n\r\nint par[9 * 150000];\r\nvector<int> ot[9 * 150000];\r\npriority_queue<int> pq;\r\n\r\nvoid init(int n) {\r\n  for (int i = 0; i < n; i++)\r\n    par[i] = i;\r\n}\r\n\r\nint findSet(int i) {\r\n  return i == par[i] ? i : (par[i] = findSet(par[i]));\r\n}\r\n\r\nbool inSameSet(int i, int j) {\r\n  return findSet(i) == findSet(j);\r\n}\r\n\r\nvoid unionSet(int i, int j) {\r\n  i = findSet(i);\r\n  j = findSet(j);\r\n  if (i == j)\r\n    return;\r\n  if (sz(ot[j]) < sz(ot[i]))\r\n    swap(ot[j], ot[i]);\r\n  for (int k : ot[i])\r\n    ot[j].push_back(k);\r\n  par[i] = j;\r\n}\r\n\r\nvoid toPQ(int i) {\r\n  i = findSet(i);\r\n  for (int j : ot[i])\r\n    pq.push(j);\r\n  ot[i].clear();\r\n}\r\n\r\nvoid removeS(int i) {\r\n  sc[i] = false;\r\n  for (int dx = -1; dx < 2; dx += 2) {\r\n    ll p = point(getX(pos[i]) + dx, getY(pos[i]));\r\n    if (isPoint(p) && !sc[pti[p]])\r\n      unionSet(i, pti[p]);\r\n    if (inSameSet(pti[p], outs))\r\n      toPQ(pti[p]);\r\n  }\r\n  for (int dy = -1; dy < 2; dy += 2) {\r\n    ll p = point(getX(pos[i]), getY(pos[i]) + dy);\r\n    if (isPoint(p) && !sc[pti[p]])\r\n      unionSet(i, pti[p]);\r\n    if (inSameSet(pti[p], outs))\r\n      toPQ(pti[p]);\r\n  }\r\n  if (inSameSet(i, outs))\r\n    toPQ(i);\r\n}\r\n\r\nint ddx[8] = {1, 1, 0, -1, -1, -1, 0, 1}, ddy[8] = {0, 1, 1, 1, 0, -1, -1, -1};\r\n\r\nbool canRemove(int i) {\r\n  bool canReachOutside = false;\r\n  for (int jj = 0; jj < 8; jj++) {\r\n    int j = pti[point(getX(pos[i]) + ddx[jj], getY(pos[i]) + ddy[jj])];\r\n    if (!sc[j]) {\r\n      if (inSameSet(j, outs) && (ddx[jj] == 0 || ddy[jj] == 0))\r\n        canReachOutside = true;\r\n      continue;\r\n    }\r\n    for (int kk = (jj + 1) % 8; kk != jj; kk = (kk + 1) % 8) {\r\n      if (ddx[kk] != 0 && ddy[kk] != 0)\r\n        continue;\r\n      int k = pti[point(getX(pos[i]) + ddx[kk], getY(pos[i]) + ddy[kk])];\r\n      if (sc[k])\r\n        continue;\r\n      for (int ll = (kk + 1) % 8; ll != jj; ll = (ll + 1) % 8) {\r\n        int l = pti[point(getX(pos[i]) + ddx[ll], getY(pos[i]) + ddy[ll])];\r\n        if (!sc[l])\r\n          continue;\r\n        for (int oo = (ll + 1) % 8; oo != jj; oo = (oo + 1) % 8) {\r\n          if (ddx[oo] != 0 && ddy[oo] != 0)\r\n            continue;\r\n          int o = pti[point(getX(pos[i]) + ddx[oo], getY(pos[i]) + ddy[oo])];\r\n          if (sc[o])\r\n            continue;\r\n          if (inSameSet(k, o))\r\n            return false;\r\n        }\r\n      }\r\n    }\r\n  }\r\n  return canReachOutside;\r\n}\r\n\r\nint main() {\r\n  ios_base::sync_with_stdio(false);\r\n  cin.tie(0);\r\n  cout << fixed << setprecision(10);\r\n  cin >> n;\r\n  int tt;\r\n  cin >> tt;\r\n  int r, c;\r\n  for (int i = 0; i < n; i++) {\r\n    cin >> r >> c;\r\n    r += 1000000100;\r\n    c += 1000000100;\r\n    pos[i] = point(r, c);\r\n    pti[pos[i]] = i;\r\n    sc[i] = true;\r\n  }\r\n  init(n);\r\n  m = n;\r\n  int minx = mul;\r\n  for (int i = 0; i < n; i++)\r\n    for (int dx = -1; dx < 2; dx++)\r\n      for (int dy = -1; dy < 2; dy++) {\r\n        ll p = point(getX(pos[i]) + dx, getY(pos[i]) + dy);\r\n        if (isPoint(p) && sc[pti[p]])\r\n          unionSet(i, pti[p]);\r\n        else if (!isPoint(p))\r\n          pos[m] = p, pti[p] = m++;\r\n        if (dx == 0 || dy == 0)\r\n          ot[pti[p]].push_back(i);\r\n        if (getX(p) < minx)\r\n          minx = getX(p), outs = m - 1;\r\n      }\r\n  for (int i = 0; i < n; i++)\r\n    if (!inSameSet(0, i)) {\r\n      cout << \"NO\\n\";\r\n      return 0;\r\n    }\r\n  init(m);\r\n  for (int i = n; i < m; i++)\r\n    removeS(i);\r\n  vector<int> res;\r\n  for (int i = 0; i < n; i++)\r\n    pq.push(i);\r\n  while (!pq.empty()) {\r\n    while (!pq.empty() && (!sc[pq.top()] || !canRemove(pq.top())))\r\n      pq.pop();\r\n    if (pq.empty())\r\n      break;\r\n    int i = pq.top();\r\n    pq.pop();\r\n    removeS(i);\r\n    res.push_back(i);\r\n    for (int dx = -1; dx < 2; dx++)\r\n      for (int dy = -1; dy < 2; dy++) {\r\n        ll p = point(getX(pos[i]) + dx, getY(pos[i]) + dy);\r\n        if (sc[pti[p]])\r\n          pq.push(pti[p]);\r\n      }\r\n  }\r\n  cout << \"YES\\n\";\r\n  for (int i = sz(res) - 1; i >= 0; i--)\r\n    cout << res[i] + 1 << \"\\n\";\r\n}\r\n"
+}

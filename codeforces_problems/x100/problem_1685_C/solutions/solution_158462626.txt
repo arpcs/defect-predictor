@@ -1,0 +1,38 @@
+{
+    "id": 158462626,
+    "contestId": 1685,
+    "creationTimeSeconds": 1653506812,
+    "relativeTimeSeconds": 6712,
+    "problem": {
+        "contestId": 1685,
+        "index": "C",
+        "name": "Bring Balance",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1685,
+        "members": [
+            {
+                "handle": "gmusya"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "room": 1,
+        "startTimeSeconds": 1653500100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "PRETESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 2764800,
+    "source": "#pragma GCC optimize(\"O3\")\n\n#include <iostream>\n#include <vector>\n#include <random>\n#include <string>\n\nusing namespace std;\n\nconst int INF = 1e9;\n\nstruct node {\n    bool rev;\n    int x, y, min, size;\n    node *l, *r;\n    node() {}\n    node(int _x) {\n        min = x = _x;\n        y = (rand() << 16) + rand();\n        size = 1;\n        l = r = nullptr;\n    }\n};\n\nint size(node* p) {\n    return p ? p->size : 0;\n}\n\nvoid upd_size(node *p) {\n    p->size = 1 + size(p->l) + size(p->r);\n}\n\nint min(node *p) {\n    return p ? p->min : INF;\n}\n\nvoid upd_min(node *p) {\n    p->min = min(p->x, min(min(p->l), min(p->r)));\n}\n\nvoid push(node* p) {\n    if (p->rev) {\n        swap(p->l, p->r);\n        if (p->l) {\n            p->l->rev ^= 1;\n            upd_min(p->l);\n        }\n        if (p->r) {\n            upd_min(p->r);\n            p->r->rev ^= 1;\n        }\n    }\n    p->rev = 0;\n}\n\nnode* T = 0;\n\npair <node*, node*> split(node* p, int x) {\n    if (!p) return {};\n    push(p);\n    if (size(p->l) + 1 <= x) {\n        pair <node*, node*> q = split(p->r, x - size(p->l) - 1);\n        p->r = q.first;\n        upd_min(p);\n        upd_size(p);\n        return { p, q.second };\n    }\n    pair <node*, node*> q = split(p->l, x);\n    p->l = q.second;\n    upd_min(p);\n    upd_size(p);\n    return { q.first, p };\n}\n\nnode* merge(node* l, node* r) {\n    if (!l) return r;\n    if (!r) return l;\n    push(l);\n    push(r);\n    if (l->y > r->y) {\n        l->r = merge(l->r, r);\n        upd_min(l);\n        upd_size(l);\n        return l;\n    }\n    r->l = merge(l, r->l);\n    upd_min(r);\n    upd_size(r);\n    return r;\n}\n\nvoid insert(int val, int x) {\n    pair <node*, node*> q = split(T, x);\n    node *t = new node(val);\n    T = merge(q.first, merge(t, q.second));\n}\n\nvoid reverse(int l, int r) {\n    pair <node*, node*> q1 = split(T, r);\n    pair <node*, node*> q2 = split(q1.first, l);\n    q2.second->rev ^= 1;\n    T = merge(q2.first, merge(q2.second, q1.second));\n}\n\nint query(node* p, int l, int r) {\n    if (r < l)\n        return INF;\n    if (p) {\n        push(p);\n        upd_min(p);\n    }\n    if (size(p) == (r - l + 1))\n        return min(p);\n    int ans = INF;\n    if (l <= size(p->l))\n        ans = min(ans, query(p->l, l, min(r, size(p->l))));\n    if (l <= size(p->l) + 1 && r >= size(p->l) + 1)\n        ans = min(ans, p->x);\n    if (r > size(p->l) + 1)\n        ans = min(ans, query(p->r, max((int)1, l - size(p->l) - 1), r - size(p->l) - 1));\n    return ans;\n}\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(0);\n    int t;\n    cin >> t;\n    while (t--) {\n        T = nullptr;\n        int n;\n        cin >> n;\n        string s;\n        cin >> s;\n        for (int i = 1; i <= 2 * n; i++) {\n            char ch = s[i - 1];\n            int x = (ch == '(' ? 1 : -1);\n            insert(x, i);\n        }\n        /*\n        for (int i = 1; i <= 2 * n; ++i) {\n            cout << query(T, i, i) << ' ';\n        }\n        cout << '\\n';\n         */\n        vector<pair<int, int>> answer;\n        while (true) {\n            int bal = 0;\n            bool good = true;\n            for (int i = 1; i <= 2 * n; ++i) {\n                bal += query(T, i, i);\n                if (bal < 0) {\n                    good = false;\n                }\n            }\n            if (good) {\n                break;\n            }\n            int first_bad = 1;\n            while (query(T, first_bad, first_bad) == 1) {\n                ++first_bad;\n            }\n            int last_bad = 2 * n;\n            while (query(T, last_bad, last_bad) == -1) {\n                --last_bad;\n            }\n            answer.emplace_back(first_bad, last_bad);\n            reverse(first_bad - 1, last_bad);\n        }\n        cout << answer.size() << '\\n';\n        for (auto& now : answer) {\n            cout << now.first << ' ' << now.second << '\\n';\n        }\n    }\n    return 0;\n}"
+}
