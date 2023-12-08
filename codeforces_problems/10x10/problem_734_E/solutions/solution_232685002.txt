@@ -1,0 +1,37 @@
+{
+    "id": 232685002,
+    "contestId": 734,
+    "creationTimeSeconds": 1699912016,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 734,
+        "index": "E",
+        "name": "Anton and Tree",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2100,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 734,
+        "members": [
+            {
+                "handle": "SriniV"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1479227700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef unsigned long long ull;\r\ntypedef __int128 lll;\r\n#define PI 3.14159265358979323846\r\n#define sbits(x) __builtin_popcount(x)\r\n#define tbits(total_size , num) total_size - __builtin_clz(num)\r\n#define pb push_back\r\n#define f first\r\n#define s second\r\n#define clr(ds) ds.clear()\r\n#define all(ds) ds.begin() , ds.end()\r\n#define pi pair<ll , ll>\r\n#define vi vector<int>\r\n#define vll vector<ll>\r\n#define vpi vector<pi>\r\n#define sz(i) (int)i.size()\r\nint xP[] = {0,0,1,-1,1,1,-1,-1} , yP[] = {1,-1,0,0,1,-1,-1,1};\r\nusing namespace std;\r\nuint64_t time() {\r\n  using namespace std::chrono;\r\n  return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();\r\n}\r\nvoid setIO(string name = \"\") {\r\n\tcin.tie(0)->sync_with_stdio(0);\r\n\tif (name.size()) {\r\n\t\tfreopen((name + \".in\").c_str(), \"r\", stdin);\r\n\t\tfreopen((name + \".out\").c_str(), \"w\", stdout);\r\n\t}\r\n}\r\nbool ckmin(auto& a , auto b){if(a<=b)return 0; else {a=b;return 1;}}\r\nbool ckmax(auto& a , auto b){if(a>=b)return 0; else {a=b;return 1;}}\r\n/*\r\n _______________________________________\r\n( If you don't fail at least 90% of the )\r\n( time, you're not aiming high enough.  )\r\n(                                       )\r\n( - Alan Kay                            )\r\n ---------------------------------------\r\n        o   ^__^\r\n         o  (oo)\\_______\r\n            (__)\\       )\\/\\\r\n                ||----w |\r\n                ||     ||\r\n*/\r\nstruct dsu{\r\n\tvi parent;// -size or +parent\r\n\tvoid reset(int n , vi& arr){parent.assign(n , -1);for(int i = 0;i<n;i++)parent[i]= -arr[i];}\r\n\tint get(int a){return parent[a]>=0?parent[a] = get(parent[a]):a;}\r\n\tint size(int a){return -parent[get(a)];}\r\n\tbool connected(int a , int b){return get(a) == get(b);}\r\n\tbool connect(int a,  int b){\r\n\t\ta = get(a) , b = get(b);\r\n\t\tif(a==b)return 0;\r\n\t\tbool first = parent[a] > parent[b];\r\n\t\tif(parent[a] > parent[b])// a is smaller, swap -> maintain a > b\r\n\t\t\tswap(a , b);\r\n\t\t// merge smaller to larger\r\n\t\tparent[a] += parent[b];\r\n\t\tparent[b] = a;\r\n\t\treturn first;\r\n\t}\r\n};\r\nconst int MAXN = 2e5+1;\r\nint n;\r\nvi adj[MAXN] , adj1[MAXN];\r\nbool visited[MAXN];\r\nbool color[MAXN];\r\ndsu graph;\r\nvoid build(int curr = 0 , int parent = -1){\r\n\t// cout << curr+1 << \" \" << parent+1 << \"\\n\";\r\n\tfor(auto& child : adj[curr])if(child!=parent){\r\n\t\tif(color[child] == color[curr]){\r\n\t\t\tint a = graph.get(curr) , b = graph.get(child);\r\n\t\t\tbool f = graph.connect(a , b);\r\n\t\t\tif(f){\r\n\t\t\t\t// curr is smaller than child\r\n\t\t\t\tfor(auto& d : adj1[a])adj1[b].pb(d);\r\n\t\t\t\tclr(adj1[a]);\r\n\t\t\t} else {\r\n\t\t\t\tfor(auto& d : adj1[b])adj1[a].pb(d);\r\n\t\t\t\tclr(adj1[b]);\r\n\t\t\t}\r\n\t\t}\r\n\t\tbuild(child , curr);\r\n\t}\r\n}\r\nvoid dfs(int curr , int currDist ,  int& maxDist , int& maxNode){\r\n\tif(ckmax(maxDist , currDist))maxNode = curr;\r\n\tvisited[curr] = 1;\r\n\tfor(auto& d : adj1[curr]){\r\n\t\tint p = graph.get(d);\r\n\t\tif(!visited[p]){\r\n\t\t\tdfs(p , currDist + 1 , maxDist , maxNode);\r\n\t\t}\r\n\t}\r\n}\r\nint dist[MAXN];\r\nvoid distance(int curr , int currDist){\r\n\tckmax(dist[curr] , currDist);\r\n\tvisited[curr] = 1;\r\n\tfor(auto& d : adj1[curr]){\r\n\t\tint p = graph.get(d);\r\n\t\tif(!visited[p]){\r\n\t\t\tdistance(p , currDist + 1);\r\n\t\t}\r\n\t}\r\n}\r\nvoid solve(){\r\n\tcin >> n;\r\n\tfor(int i =0 ;i<n;i++)cin >> color[i];\r\n\tfor(int i = 0;i<n-1;i++){\r\n\t\tint a , b;\r\n\t\tcin >> a >> b , --a , --b;\r\n\t\tadj[a].pb(b) , adj[b].pb(a) , adj1[a].pb(b) , adj1[b].pb(a);\r\n\t}\r\n\tif(n==1){\r\n\t\tcout << 0 << \"\\n\";\r\n\t\treturn;\r\n\t}\r\n\tvi sizes(n);\r\n\tfor(int i =0 ;i<n;i++)sizes[i] = sz(adj[i]);\r\n\t// find connected components of same color\r\n\tgraph.reset(n , sizes);\r\n\tbuild(); // built graph\r\n\r\n\t// for(auto& d : adj1[graph.get(0)])cout << d+1 << \"\\n\";\r\n\t// exit(0);\r\n\r\n\r\n\r\n\t// for(int i = 0;i<n;i++)cout << i+1 << \" \" << graph.get(i)+1 << \"\\n\";\r\n\t// find diameter\r\n\tint maxNode = -1 , maxDist = -1;\r\n\tdfs(graph.get(0) ,0 , maxDist , maxNode);\r\n\tmaxDist = -1;\r\n\tmemset(visited , 0x000 , sizeof(bool) * n);\r\n\tint otherNode = -1;\r\n\tdfs(maxNode , 0 , maxDist , otherNode);\r\n\tmemset(visited , 0x000 , sizeof(bool) * n);\r\n\tdistance(maxNode , 0);\r\n\tmemset(visited , 0x000 , sizeof(bool) * n);\r\n\tdistance(otherNode , 0);\r\n\tint ans = INT_MAX;\r\n\t// cout << \"\\n\";\r\n\t// for(int i = 0;i<n;i++)cout << i+1 << \" \" << dist[graph.get(i)] << \"\\n\";\r\n\tfor(int i = 0 ;i<n;i++)ckmin(ans , dist[graph.get(i)]);\r\n\tcout << ans << \"\\n\";\r\n}\r\nint main(){\r\n\tsetIO();\r\n\tint t = 1;\r\n\t//cin >> t;\r\n\twhile(t--){\r\n\t\tsolve();\r\n\t}\t\r\n}\r\n\r\n\u00a0"
+}

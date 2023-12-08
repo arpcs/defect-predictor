@@ -1,0 +1,40 @@
+{
+    "id": 106068775,
+    "contestId": 1182,
+    "creationTimeSeconds": 1612064999,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "Wolfycz"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 78,
+    "memoryConsumedBytes": 15974400,
+    "source": "/*program from Wolfycz*/\r\n#include<map>\r\n#include<cmath>\r\n#include<cstdio>\r\n#include<vector>\r\n#include<cstring>\r\n#include<iostream>\r\n#include<algorithm>\r\n#define Fi first\r\n#define Se second\r\n#define ll_inf 1e18\r\n#define MK make_pair\r\n#define sqr(x) ((x)*(x))\r\n#define pii pair<int,int>\r\n#define int_inf 0x7f7f7f7f\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef unsigned int ui;\r\ntypedef unsigned long long ull;\r\ninline char gc(){\r\n\tstatic char buf[1000000],*p1=buf,*p2=buf;\r\n\treturn p1==p2&&(p2=(p1=buf)+fread(buf,1,1000000,stdin),p1==p2)?EOF:*p1++;\r\n}\r\ntemplate<typename T>inline T frd(T x){\r\n\tint f=1; char ch=gc();\r\n\tfor (;ch<'0'||ch>'9';ch=gc())\tif (ch=='-')    f=-1;\r\n\tfor (;ch>='0'&&ch<='9';ch=gc())\tx=(x<<1)+(x<<3)+ch-'0';\r\n\treturn x*f;\r\n}\r\ntemplate<typename T>inline T read(T x){\r\n\tint f=1; char ch=getchar();\r\n\tfor (;ch<'0'||ch>'9';ch=getchar())\tif (ch=='-')\tf=-1;\r\n\tfor (;ch>='0'&&ch<='9';ch=getchar())\tx=(x<<1)+(x<<3)+ch-'0';\r\n\treturn x*f;\r\n}\r\ninline void print(int x){\r\n\tif (x<0)    putchar('-'),x=-x;\r\n\tif (x>9)\tprint(x/10);\r\n\tputchar(x%10+'0');\r\n}\r\nconst int N=1e5;\r\nint pre[(N<<1)+10],now[N+10],child[(N<<1)+10];\r\nint Rem[N+10],sz[N+10],Deg[N+10],dis[N+10],vis[N+10],Endl[N+10];\r\nint tot,root,Min,Max,n;\r\nvoid join(int x,int y){pre[++tot]=now[x],now[x]=tot,child[tot]=y;}\r\nvoid insert(int x,int y){join(x,y),join(y,x);}\r\nvoid Dfs(int x,int fa){\r\n\tsz[x]=1;\r\n\tfor (int p=now[x];p;p=pre[p]){\r\n\t\tint son=child[p];\r\n\t\tif (son==fa)\tcontinue;\r\n\t\tDfs(son,x);\r\n\t\tsz[x]+=sz[son];\r\n\t\tif (sz[Rem[x]]<sz[son])\tRem[x]=son;\r\n\t}\r\n\tif (Min>max(sz[Rem[x]],n-sz[x])){\r\n\t\troot=x;\r\n\t\tMin=max(sz[Rem[x]],n-sz[x]);\r\n\t}\r\n}\r\nvoid Dfs_Line(int x,int fa,int distance){\r\n\tif (Deg[x]>2)\treturn;\r\n\tif (Deg[x]==1){\r\n\t\tEndl[x]=distance;\r\n\t\treturn;\r\n\t}\r\n\tfor (int p=now[x];p;p=pre[p]){\r\n\t\tint son=child[p];\r\n\t\tif (son==fa)\tcontinue;\r\n\t\tDfs_Line(son,x,distance+1);\r\n\t}\r\n}\r\nint H[N+10];\r\nbool check(int x){\r\n\tmemset(vis,-1,sizeof(vis));\r\n\tmemset(dis,-1,sizeof(dis));\r\n\tint head=0,tail=1;\r\n\tdis[H[1]=x]=0;\r\n\twhile (head!=tail){\r\n\t\tint Now=H[++head];\r\n\t\tfor (int p=now[Now];p;p=pre[p]){\r\n\t\t\tint son=child[p];\r\n\t\t\tif (~dis[son])\tcontinue;\r\n\t\t\tdis[son]=dis[Now]+1;\r\n\t\t\tif (!~vis[dis[son]])\tvis[dis[son]]=Deg[son];\r\n\t\t\tif (vis[dis[son]]!=Deg[son])\treturn false;\r\n\t\t\tH[++tail]=son;\r\n\t\t}\r\n\t}\r\n\treturn true;\r\n}\r\nint main(){\r\n//\tfreopen(\".in\",\"r\",stdin);\r\n//\tfreopen(\".out\",\"w\",stdout);\r\n\tn=read(0),Min=int_inf;\r\n\tif (n==1){\r\n\t\tprintf(\"1\\n\");\r\n\t\treturn 0;\r\n\t}\r\n\tfor (int i=1;i<n;i++){\r\n\t\tint x=read(0),y=read(0);\r\n\t\tinsert(x,y);\r\n\t\tDeg[x]++,Deg[y]++;\r\n\t}\r\n\tDfs(1,0);\r\n//\tprintf(\"root=%d\\n\",root);\r\n\tif (check(root)){\r\n\t\tprintf(\"%d\\n\",root);\r\n\t\treturn 0;\r\n\t}\r\n\tfor (int p=now[root];p;p=pre[p]){\r\n\t\tint son=child[p];\r\n\t\tDfs_Line(son,root,1);\r\n\t}\r\n//\tDfs_Line(root,0,0);\r\n\tMax=-int_inf,Min=int_inf;\r\n\tint Max_ID=0,Min_ID=0;\r\n\tfor (int i=1;i<=n;i++){\r\n\t\tif (!Endl[i])\tcontinue;\r\n\t\tif (Max<Endl[i])\tMax=Endl[Max_ID=i];\r\n\t\tif (Min>Endl[i])\tMin=Endl[Min_ID=i];\r\n\t}\r\n\tif (Max_ID&&check(Max_ID)){\r\n\t\tprintf(\"%d\\n\",Max_ID);\r\n\t\treturn 0;\r\n\t}\r\n\tif (Min_ID&&check(Min_ID)){\r\n\t\tprintf(\"%d\\n\",Min_ID);\r\n\t\treturn 0;\r\n\t}\r\n\tprintf(\"-1\\n\");\r\n\treturn 0;\r\n}"
+}

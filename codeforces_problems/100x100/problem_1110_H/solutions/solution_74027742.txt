@@ -1,0 +1,36 @@
+{
+    "id": 74027742,
+    "contestId": 1110,
+    "creationTimeSeconds": 1584958567,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "vjudge2"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 935,
+    "memoryConsumedBytes": 389836800,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\n#define maxn 2010\n#define maxm 810\n#define maxs 16100\ntemplate <typename T>inline T read()\n{\n    register T sum=0;\n    register char cc=getchar();\n    int sym=1;\n    while(cc!='-'&&(cc>'9'||cc<'0'))cc=getchar();\n    if(cc=='-')sym=-1,cc=getchar();\n    sum=sum*10+cc-'0';\n    cc=getchar();\n    while(cc>='0'&&cc<='9')sum=sum*10+cc-'0',cc=getchar();\n    return sym*sum;\n}\ntemplate <typename T>inline T read(T &a)\n{\n    a=read<T>();\n    return a;\n}\ntemplate <typename T,typename... Others> inline void read(T& a, Others&... b)\n{\n    a=read(a);\n\tread(b...);\n}\nint n,l1,l2,cnt=1,ans,ch[maxs][10],sum[maxs][maxn],fail[maxs],f[maxn][maxs],can[maxn][maxs];\nchar L[maxm],R[maxm];\nint Get(int x,int y)\n{\n\tif(!ch[x][y])\n\t\tch[x][y]=++cnt;\n\treturn ch[x][y];\n}\nvoid init()\n{\n\tl1=strlen(L+1),l2=strlen(R+1);\n\tint x=1,y=1;\n\tif(l1==l2)\n\t{\n\t\tfor(int j=1;j<=l1;j++)\n\t\t{\n\t\t\tif(x==y)\n\t\t\t{\n\t\t\t\tfor(int k=L[j]-'0'+1;k<R[j]-'0';k++)\n\t\t\t\t\tsum[Get(x,k)][l1-j]+=1;\n\t\t\t\tx=Get(x,L[j]-'0');\n\t\t\t\ty=Get(y,R[j]-'0');\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tfor(int k=L[j]-'0'+1;k<10;k++)\n\t\t\t\t\tsum[Get(x,k)][l1-j]+=1;\n\t\t\t\tx=Get(x,L[j]-'0');\n\t\t\t\tfor(int k=j==1;k<R[j]-'0';k++)\n\t\t\t\t\tsum[Get(y,k)][l2-j]+=1;\n\t\t\t\ty=Get(y,R[j]-'0');\n\t\t\t}\n\t\t}\n\t\tsum[x][0]+=1;\n\t\tsum[y][0]+=x!=y;\n\t}\n\telse\n\t{\n\t\tfor(int j=1;j<=l1;j++)\n\t\t{\n\t\t\tfor(int k=L[j]-'0'+1;k<10;k++)\n\t\t\t\tsum[Get(x,k)][l1-j]+=1;\n\t\t\tx=Get(x,L[j]-'0');\n\t\t}\n\t\tfor(int j=1;j<=l2;j++)\n\t\t{\n\t\t\tfor(int k=j==1;k<R[j]-'0';k++)\n\t\t\t\tsum[Get(y,k)][l2-j]+=1;\n\t\t\ty=Get(y,R[j]-'0');\n\t\t}\n\t\tfor(int j=l1+1;j<l2;j++)\n\t\t\tfor(int k=1;k<10;k++)\n\t\t\t\tsum[Get(1,k)][j-1]+=1;\n\t\tsum[x][0]+=1;\n\t\tsum[y][0]+=1;\n\t}\n}\nvoid build()\n{\n\tqueue<int>Q;\n\tfor(int i=0;i<10;i++)\n\t{\n\t\tif(ch[1][i])\n\t\t{\n\t\t\tfail[ch[1][i]]=1;\n\t\t\tQ.push(ch[1][i]);\n\t\t}\n\t\telse\n\t\t\tch[1][i]=1;\n\t}\n\twhile(!Q.empty())\n\t{\n\t\tint t=Q.front();\n\t\tQ.pop();\n\t\tfor(int i=0;i<l2;i++)\n\t\t\tsum[t][i]+=sum[fail[t]][i];\n\t\tfor(int i=0;i<10;i++)\n\t\t{\n\t\t\tif(ch[t][i])\n\t\t\t{\n\t\t\t\tfail[ch[t][i]]=ch[fail[t]][i];\n\t\t\t\tQ.push(ch[t][i]);\n\t\t\t}\n\t\t\telse\n\t\t\t\tch[t][i]=ch[fail[t]][i];\n\t\t}\n\t}\n\tfor(int i=1;i<=cnt;i++)\n\t\tfor(int j=1;j<n;j++)\n\t\t\tsum[i][j]+=sum[i][j-1];\n}\nint main()\n{\n\tscanf(\"%s%s\",L+1,R+1);\n\tread(n);\n\tinit();\n\tbuild();\n\tmemset(f,-0x3f,sizeof(f));\n\tf[0][1]=0;\n\tfor(int i=0;i<n;i++)\n\t\tfor(int j=1;j<=cnt;j++)\n\t\t\tif(f[i][j]>=0)\n\t\t\t\tfor(int k=0;k<10;k++)\n\t\t\t\t\tf[i+1][ch[j][k]]=max(f[i+1][ch[j][k]],f[i][j]+sum[ch[j][k]][n-i-1]);\n\tfor(int i=1;i<=cnt;i++)\n\t\tans=max(ans,f[n][i]);\n\tprintf(\"%d\\n\",ans);\n\tfor(int i=1;i<=cnt;i++)\n\t\tcan[n][i]=f[n][i]==ans;\n\tfor(int i=n-1;i>=0;i--)\n\t\tfor(int j=1;j<=cnt;j++)\n\t\t\tif(f[i][j]>=0)\n\t\t\t\tfor(int k=0;!can[i][j]&&k<10;k++)\n\t\t\t\t\tcan[i][j]=can[i+1][ch[j][k]]&&(f[i+1][ch[j][k]]==f[i][j]+sum[ch[j][k]][n-i-1]);\n\tint u=1;\n\tfor(int i=1;i<=n;i++)\n\t\tfor(int j=0;j<10;j++)\n\t\t\tif(can[i][ch[u][j]]&&(f[i][ch[u][j]]==f[i-1][u]+sum[ch[u][j]][n-i]))\n\t\t\t{\n\t\t\t\tputchar(j+'0');\n\t\t\t\tu=Get(u,j);\n\t\t\t\tbreak;\n\t\t\t}\n    return 0;\n}\n\n \t  \t   \t\t \t\t  \t\t\t\t \t \t\t\t    \t\t"
+}

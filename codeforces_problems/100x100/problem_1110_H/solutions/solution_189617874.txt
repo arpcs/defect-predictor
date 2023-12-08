@@ -1,0 +1,36 @@
+{
+    "id": 189617874,
+    "contestId": 1110,
+    "creationTimeSeconds": 1674030999,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "jiaosiyuan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 858,
+    "memoryConsumedBytes": 359936000,
+    "source": "// LUOGU_RID: 100170055\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int N = 2020;\r\ntypedef long long LL;\r\nLL dp[N][N];\r\nLL earning[N][10][N];//\u67d0\u4e2a\u8282\u70b9\uff0c\u8f6c\u79fb\u8fb9\uff0c\u9650\u5236\r\nint tr[N][10];\r\nint tot=0;\r\nchar s[N];\r\nint L[N],R[N],lenL=0,lenR=0,n=0;\r\nvoid Ins(int *a,int len)\r\n{\r\n    int p=0;\r\n    for(int i=1;i<=len;i++)\r\n    {\r\n        int c=a[i];\r\n        if(!tr[p][c])tr[p][c]=++tot;\r\n        p=tr[p][c];\r\n    }\r\n}\r\nqueue<int> q;\r\nint fail[N];\r\nvoid getfail()\r\n{\r\n    for(int c=0;c<10;c++)\r\n    if(tr[0][c])q.push(tr[0][c]);\r\n    while(!q.empty())\r\n    {\r\n        int x=q.front();\r\n        q.pop();\r\n        for(int c=0;c<10;c++)\r\n        {\r\n            if(!tr[x][c])tr[x][c]=tr[fail[x]][c];\r\n            else\r\n            {\r\n                fail[tr[x][c]]=tr[fail[x]][c];\r\n                q.push(tr[x][c]);\r\n            }\r\n        }\r\n    }\r\n}\r\nvoid Get(int *a,int len,int v)\r\n{\r\n    int p=0;\r\n    for(int i=1;i<=len;i++)\r\n    {\r\n        int c=a[i];\r\n        for(int d=(p==0);d<c;d++)earning[p][d][len-i+1]+=v;//\u7b97<R\u7684\r\n        if(i==len)earning[p][c][1]+=v;//=R\u7684\r\n        p=tr[p][c];\r\n    }\r\n}\r\nint main()\r\n{\r\n    //freopen(\"substr.in\",\"r\",stdin);\r\n    //freopen(\"substr.out\",\"w\",stdout);\r\n    scanf(\"%s\",s+1);lenL=strlen(s+1);for(int i=1;i<=lenL;i++)L[i]=s[i]-'0';\r\n    scanf(\"%s\",s+1);lenR=strlen(s+1);for(int i=1;i<=lenR;i++)R[i]=s[i]-'0';\r\n    cin>>n;\r\n    L[lenL]--;\r\n    for(int i=lenL;i>=1;i--)\r\n    if(L[i]<0)\r\n    {\r\n        L[i-1]--;\r\n        L[i]+=10;\r\n    }\r\n    int p=0;\r\n    for(int i=1;i<lenL;i++)\r\n    if(L[i]==0)p=i;\r\n    else break;\r\n    for(int i=p+1;i<=lenL;i++)L[i-p]=L[i];lenL-=p;\r\n    Ins(L,lenL);\r\n    Ins(R,lenR);\r\n    getfail();\r\n    if(L[1]>0)\r\n    Get(L,lenL,-1);\r\n    Get(R,lenR,1);\r\n    for(int x=1;x<=tot;x++)\r\n    for(int c=0;c<10;c++)\r\n    for(int i=1;i<=n;i++)\r\n    earning[x][c][i]+=earning[fail[x]][c][i];//\u7b97\u4ee5\u6bcf\u4e2a\u4f4d\u7f6e\u7ed3\u675f\u7684\u8d21\u732e\r\n    for(int x=0;x<=tot;x++)\r\n    for(int c=1;c<10;c++)\r\n    for(int i=1;i<lenL;i++)\r\n    earning[x][c][i]--;//\u7b97\u4ee5\u6bcf\u4e2a\u4f4d\u7f6e\u5f00\u5934\u7684\u8d21\u732e(<R)\r\n    for(int x=0;x<=tot;x++)\r\n    for(int c=1;c<10;c++)\r\n    for(int i=1;i<lenR;i++)\r\n    earning[x][c][i]++;\r\n    for(int x=0;x<=tot;x++)\r\n    for(int c=0;c<10;c++)\r\n    for(int i=1;i<=n;i++)\r\n    earning[x][c][i]+=earning[x][c][i-1];\r\n    for(int i=n-1;i>=0;i--)\r\n    for(int x=0;x<=tot;x++)\r\n    {\r\n        dp[i][x]=-1e18;\r\n        for(int c=0;c<10;c++)\r\n        dp[i][x]=max(dp[i][x],dp[i+1][tr[x][c]]+earning[x][c][n-i]);\r\n    }\r\n    cout<<dp[0][0]<<endl;\r\n    p=0;\r\n    for(int i=1;i<=n;i++)\r\n    {\r\n        for(int c=0;c<10;c++)\r\n        if(dp[i-1][p]==dp[i][tr[p][c]]+earning[p][c][n-i+1])\r\n        {\r\n            p=tr[p][c];\r\n            printf(\"%d\",c);\r\n            break;\r\n        }\r\n    }\r\n    return 0;\r\n}\r\n"
+}

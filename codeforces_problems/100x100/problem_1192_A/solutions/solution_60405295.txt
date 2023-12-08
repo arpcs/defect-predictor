@@ -1,0 +1,34 @@
+{
+    "id": 60405295,
+    "contestId": 1192,
+    "creationTimeSeconds": 1568226111,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "hjc20032003"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 185,
+    "timeConsumedMillis": 2386,
+    "memoryConsumedBytes": 151654400,
+    "points": 100.0,
+    "source": "#include<bits/stdc++.h>\r\n#define REP(i,s,t) for(int i=s;i<=t;i++)\r\nusing namespace std;\r\nconst int maxn=2e6+5;\r\ntypedef pair<int,int> pii;\r\nmap<pii,int> mp;\r\nmap<pii,int>::iterator it;\r\nset<int> st;\r\nint n,scc_cnt,p[maxn],rc[maxn][8],ans[maxn],ans_cnt;\r\nint dx[8]={0,1,1,1,0,-1,-1,-1},dy[8]={1,1,0,-1,-1,-1,0,1};\r\nint fp(int x){return x==p[x]?x:p[x]=fp(p[x]);}\r\nstruct Data{\r\n\tint scc,x,y;\r\n\tbool full;\r\n}dat[maxn];\r\nbool vis[maxn];\r\nvoid dfs1(int id){\r\n\tvis[id]=true;\r\n\tREP(w,0,7) if(mp.find(make_pair(dat[id].x+dx[w],dat[id].y+dy[w]))!=mp.end()){\r\n\t\tint to=mp[make_pair(dat[id].x+dx[w],dat[id].y+dy[w])];\r\n\t\tif(!vis[to]) dfs1(to);\r\n\t}\r\n}\r\nvoid dfs2(int id){\r\n\tdat[id].scc=scc_cnt;\r\n\tREP(w,0,3) if(rc[id][w*2]>n&&dat[rc[id][w*2]].scc==-1) dfs2(rc[id][w*2]);\r\n}\r\nbool chk(int id){\r\n\tbool flg=false;\r\n\tREP(w,0,3) if(!dat[rc[id][w*2]].full&&!fp(dat[rc[id][w*2]].scc)) flg=true;\r\n\tif(!flg) return false;\r\n\tREP(w,0,7) if(dat[rc[id][w]].full){\r\n\t\tint rg[8]={0},rg_cnt=0;\r\n\t\tfor(int i=(w+1)%8;i!=w;i=(i+1)%8) if(!dat[rc[id][i]].full){\r\n\t\t\tint j=i;\r\n\t\t\trg_cnt++;\r\n\t\t\twhile(!dat[rc[id][(j+1)%8]].full)\r\n\t\t\t\trg[j]=rg_cnt,j=(j+1)%8;\r\n\t\t\trg[j]=rg_cnt;\r\n\t\t\ti=j;\r\n\t\t}\r\n\t\tREP(w1,0,3) REP(w2,w1+1,3) if(!dat[rc[id][w1*2]].full&&!dat[rc[id][w2*2]].full&&rg[w1*2]!=rg[w2*2]&&fp(dat[rc[id][w1*2]].scc)==fp(dat[rc[id][w2*2]].scc)) return false;\r\n\t\treturn true;\r\n\t}\r\n\treturn true;\r\n}\r\nvector<int> vec;\r\nvoid dfs3(int id){\r\n\tdat[id].scc=0;\r\n\tREP(w,0,3) if(rc[id][w*2])\r\n\t\tif(dat[rc[id][w*2]].full) vec.push_back(rc[id][w*2]);\r\n\t\telse if(dat[rc[id][w*2]].scc) dfs3(rc[id][w*2]);\r\n}\r\nvoid solve(int id){\r\n\tREP(w,0,3) if(!dat[rc[id][w*2]].full&&!dat[rc[id][w*2]].scc){\r\n\t\tvec.clear();\r\n\t\tdfs3(id);\r\n\t\tfor(int i:vec) if(chk(i)) st.insert(i);\r\n\t\treturn;\r\n\t}\r\n\tREP(w,0,3) if(!dat[rc[id][w*2]].full)\r\n\t\tif(dat[id].scc==-1) dat[id].scc=fp(dat[rc[id][w*2]].scc);\r\n\t\telse p[fp(dat[rc[id][w*2]].scc)]=dat[id].scc;\r\n}\r\nint main(){\r\n//\tfreopen(\"sky.in\",\"r\",stdin);\r\n\tint Num;\r\n\tcin>>n>>Num;\r\n\tREP(i,1,n){\r\n\t\tcin>>dat[i].x>>dat[i].y;\r\n\t\tdat[i].full=true;\r\n\t\tmp[make_pair(dat[i].x,dat[i].y)]=i;\r\n\t}\r\n\tdfs1(1);\r\n\tREP(i,1,n) if(!vis[i]){cout<<\"NO\"; return 0;}\r\n\tcout<<\"YES\"<<'\\n';\r\n\tREP(i,1,n) REP(w,0,7) if(mp.find(make_pair(dat[i].x+dx[w],dat[i].y+dy[w]))==mp.end()){\r\n\t\tint siz=mp.size()+1;\r\n\t\tmp[make_pair(dat[i].x+dx[w],dat[i].y+dy[w])]=siz;\r\n\t\tdat[siz].x=dat[i].x+dx[w];\r\n\t\tdat[siz].y=dat[i].y+dy[w];\r\n\t}\r\n\tREP(id,1,mp.size()) REP(w,0,7){\r\n\t\tint cx=dat[id].x+dx[w],cy=dat[id].y+dy[w];\r\n\t\tif(mp.find(make_pair(cx,cy))!=mp.end()) rc[id][w]=mp[make_pair(cx,cy)];\r\n\t}\r\n\tREP(i,1,mp.size()) dat[i].scc=-1;\r\n\tscc_cnt=-1;\r\n\tfor(it=mp.begin();it!=mp.end();it++)\r\n\t\tif(it->second>n&&dat[it->second].scc==-1){\r\n\t\t\tp[++scc_cnt]=scc_cnt;\r\n\t\t\tdfs2(it->second);\r\n\t\t}\r\n\tREP(i,1,n) if(chk(i)) st.insert(i);\r\n\twhile(!st.empty()){\r\n\t\tint id=*st.rbegin(); st.erase(id);\r\n\t\tif(!chk(id)) continue;\r\n\t\tans[++ans_cnt]=id;\r\n\t\tdat[id].full=false;\r\n\t\tsolve(id);\r\n\t\tREP(w,0,7) if(dat[rc[id][w]].full&&chk(rc[id][w])) st.insert(rc[id][w]);\r\n\t}\r\n\tfor(int i=n;i;i--) cout<<ans[i]<<'\\n';\r\n\treturn 0;\r\n}"
+}

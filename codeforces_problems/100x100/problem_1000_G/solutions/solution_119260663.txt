@@ -1,0 +1,36 @@
+{
+    "id": 119260663,
+    "contestId": 1000,
+    "creationTimeSeconds": 1623511413,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "cutx64"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "D",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 2293,
+    "memoryConsumedBytes": 139366400,
+    "source": "// code by cutx64\r\n\r\nmodule main;\r\n\r\nimport std.string, std.array, std.container, std.typecons;\r\nimport std.stdio, std.format, std.file;\r\nimport std.algorithm, std.conv, std.functional, std.range, core.bitop;\r\n// import std.bigint, std.complex, std.bitmanip;\r\n// import std.math, std.mathspecial, std.numeric;\r\n\r\nvoid main() {\r\n\r\n  int n, q;\r\n  readf!\"%s %s\\n\"(n, q);\r\n  int[] a = new int[n + 1];\r\n  a[1 .. n + 1] = readln.splitter.map!(to!int).array;\r\n  alias Edge = Tuple!(int, \"to\", long, \"w\");\r\n  Edge[][] g = new Edge[][n + 1];\r\n  foreach(i; 1 .. n) {\r\n    int u, v; long w;\r\n    readf!\"%s %s %s\\n\"(u, v, w);\r\n    g[u] ~= Edge(v, w);\r\n    g[v] ~= Edge(u, w);\r\n  }\r\n  const LOG = bsr(n) + 1;\r\n  int[] dep = new int[n + 1];\r\n  int[][] par;\r\n  par.length = LOG;\r\n  foreach(i; 0 .. LOG)\r\n    par[i].length = n + 1;\r\n  void dfs(int u, int fa, int depth, ref int[][] par, ref int[] dep) {\r\n    dep[u] = depth;\r\n    par[0][u] = fa;\r\n    for (int j = 1; j < LOG; ++j) {\r\n      par[j][u] = par[j - 1][par[j - 1][u]];\r\n    }\r\n    foreach(const E; g[u]) {\r\n      const int v = E.to;\r\n      if (v == fa) continue;\r\n      dfs(v, u, depth + 1, par, dep);\r\n    }\r\n  }\r\n  dfs(1, 0, 1, par, dep);\r\n  long[] f = new long[n + 1];\r\n  long[][] F;\r\n  F.length = LOG;\r\n  foreach(i; 0 .. LOG)\r\n    F[i].length = n + 1;\r\n  long[] up = new long[n + 1];\r\n  void dfs_down(int u, int fa, ref long[] f) {\r\n    f[u] = a[u];\r\n    foreach(const E; g[u]) {\r\n      const int v = E.to;\r\n      const long w = E.w;\r\n      if (v == fa) continue;\r\n      dfs_down(v, u, f);\r\n      if (f[v] > 2 * w)\r\n        f[u] += f[v] - 2 * w;\r\n    }\r\n  }\r\n  dfs_down(1, 0, f);\r\n  void dfs_jump(int u, int fa, ref long[][] F, ref long[] up, const ref long[] f) {\r\n    foreach(j; 1 .. LOG)\r\n      F[j][u] = F[j - 1][u] + F[j - 1][par[j - 1][u]] - f[par[j - 1][u]];\r\n    foreach(const E; g[u]) {\r\n      const int v = E.to;\r\n      const long w = E.w;\r\n      if (v == fa) continue;\r\n      F[0][v] = f[u] + f[v] - w;\r\n      if (f[v] > 2 * w) F[0][v] -= (f[v] - 2 * w);\r\n      up[v] = max(up[v], up[u] + F[0][v] - w - f[v]);\r\n      dfs_jump(v, u, F, up, f);\r\n    }\r\n  }\r\n  dfs_jump(1, 0, F, up, f);\r\n  long query(int u, int v) {\r\n    long ans = 0;\r\n    int U = u, V = v;\r\n    if (dep[u] < dep[v]) swap(u, v);\r\n    for (int i = LOG - 1; i >= 0; --i)\r\n      if (dep[par[i][u]] >= dep[v]) {\r\n        ans += F[i][u] - f[u];\r\n        u = par[i][u]; \r\n      }\r\n    if (u == v) {\r\n      return ans + up[u] + (dep[U] > dep[V] ? f[U] : f[V]);\r\n    }\r\n    for (int i = LOG - 1; i >= 0; --i)\r\n      if (par[i][u] != par[i][v]) {\r\n        ans += F[i][u] - f[u];\r\n        ans += F[i][v] - f[v];\r\n        u = par[i][u];\r\n        v = par[i][v];\r\n      }\r\n    return ans + F[0][u] - f[u] + F[0][v] - f[v] - f[par[0][u]] + up[par[0][u]] + f[U] + f[V];\r\n  }\r\n\r\n  foreach(_q; 0 .. q) {\r\n    int u, v;\r\n    readf!\"%s %s\\n\"(u, v);\r\n    query(u, v).writeln;\r\n  }\r\n\r\n} // main"
+}

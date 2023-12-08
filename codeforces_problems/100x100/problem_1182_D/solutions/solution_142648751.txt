@@ -1,0 +1,40 @@
+{
+    "id": 142648751,
+    "contestId": 1182,
+    "creationTimeSeconds": 1642109004,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "queen"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 14438400,
+    "source": "#include <bits/stdc++.h>\r\n//#include <ext/pb_ds/assoc_container.hpp>\r\n\r\n#define x first\r\n#define y second\r\n#define ndl '\\n'\r\n#define mp make_pair\r\n#define mt make_tuple\r\n#define pb push_back\r\n#define up_b upper_bound\r\n#define low_b lower_bound\r\n#define sz(x) (int)x.size()\r\n#define all(x) x.begin(), x.end()\r\n#define rall(x) x.rbegin(), x.rend()\r\n\r\nusing namespace std;\r\n//using namespace __gnu_pbds;\r\n\r\n//template<typename T> using indexed_set = tree <T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;\r\nmt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());//uniform_int_distribution<int> (l, r)\r\n\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef unsigned int uint;\r\ntypedef unsigned long long ull;\r\ntypedef pair<ll, ll> pll;\r\ntypedef pair<int, int> pii;\r\ntypedef pair<int, ll> pil;\r\ntypedef pair<ll, int> pli;\r\ntypedef pair<int, ull> piu;\r\ntypedef vector<vector<int>> matrix;\r\n\r\nconst ll INF = 1e18 + 123;\r\nconst ld EPS = 1e-9;\r\nconst int inf = 1e9 + 123;\r\nconst int MOD = 1e9 + 7;\r\nconst int N = 1e5 + 123;\r\nconst int M = 1e6 + 123;\r\nconst double pi = 3.14159265359;\r\nconst int dx[] = {0, 0, 1, -1};\r\nconst int dy[] = {1, -1, 0, 0};\r\n\r\nvector<int> g[N];\r\n\r\nint sz[N];\r\npii mxh[N]; \r\n\r\nvoid dfs(int v, int p = 0){\r\n    sz[v] = 1;\r\n    mxh[v].y = v;\r\n\r\n    for (int to : g[v]) if (to != p){\r\n        dfs(to, v);\r\n        sz[v] += sz[to];\r\n        mxh[v] = max(mxh[v], mxh[to]);\r\n    }\r\n\r\n    mxh[v].x++;\r\n}\r\n\r\npii t[N];\r\nint timer;\r\n\r\nbool check_dfs(int v, int p = 0, int d = 0){\r\n    if (t[d].y != timer){\r\n        t[d] = {sz(g[v]), timer};\r\n    }\r\n    if (t[d].x != sz(g[v])) return 0;\r\n\r\n    for (int to : g[v]) if (to != p){\r\n        if (!check_dfs(to, v, d+1)) return 0;\r\n    }\r\n    return 1;\r\n}\r\n\r\nint d[N];\r\n\r\nvoid solve(){\r\n    int n;\r\n    cin >> n;\r\n    if (n == 1){\r\n        cout << 1;\r\n        return;\r\n    }\r\n    for (int i = 1, u, v; i < n; i++){\r\n        cin >> u >> v;\r\n        g[u].pb(v);\r\n        g[v].pb(u);\r\n    }\r\n    vector<int> l;\r\n    for (int i = 1; i <= n; i++){\r\n        d[i] = sz(g[i]);\r\n        if (sz(g[i]) == 1){\r\n            l.pb(i);\r\n        }\r\n    }\r\n    int rem = n;\r\n    while (rem > 2){\r\n        rem -= sz(l);\r\n        vector<int> nl;\r\n        for (int v : l){\r\n            d[v] = 0;\r\n            int p = 0;\r\n            for (int u : g[v]){\r\n                if (d[u]){\r\n                    p = u;\r\n                    break;\r\n                }\r\n            }\r\n            d[p]--;\r\n            if (d[p] == 1){\r\n                nl.pb(p);\r\n            }\r\n        }\r\n\r\n        l = nl;\r\n    }\r\n    int root = l[0];\r\n    timer++;\r\n    if (check_dfs(root)){\r\n        cout << root;\r\n        return;\r\n    }\r\n    dfs(root);\r\n    map<pii, int> cnt;\r\n    for (int v : g[root]){\r\n        cnt[{sz[v], mxh[v].x}]++;\r\n    }\r\n    if (sz(cnt) <= 2){\r\n        for (int v : g[root]){\r\n            if (cnt[{sz[v], mxh[v].x}] == 1){\r\n                timer++;\r\n                if (check_dfs(mxh[v].y)){\r\n                    cout << mxh[v].y;\r\n                    return;\r\n                }\r\n            }\r\n        }\r\n    }\r\n    cout << -1;\r\n}\r\n\r\nint main(){\r\n    #ifdef me\r\n        freopen(\"input.txt\", \"r\", stdin);\r\n        freopen(\"output.txt\", \"w\", stdout);\r\n    #endif\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    int t = 1;  \r\n   // cin >> t;\r\n    for (int i = 1; i <= t; i++){\r\n        //cout << \"Case #\" << i << \": \";\r\n        solve();\r\n    }\r\n    #ifdef KAZAKH\r\n      //  cout << endl << 1.0 * clock() / CLOCKS_PER_SEC << endl;\r\n    #endif\r\n    return 0;\r\n}\r\n"
+}

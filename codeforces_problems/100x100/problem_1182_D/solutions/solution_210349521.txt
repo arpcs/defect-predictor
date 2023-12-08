@@ -1,0 +1,40 @@
+{
+    "id": 210349521,
+    "contestId": 1182,
+    "creationTimeSeconds": 1687267667,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "alex.kudryashov"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 5120000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nsigned main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    int n;\r\n    cin >> n;\r\n    vector<vector<int>> g(n);\r\n    for(int i = 0; i < n - 1; i++){\r\n        int a, b;\r\n        cin >> a >> b;\r\n        a--; b--;\r\n        g[a].push_back(b);\r\n        g[b].push_back(a);\r\n    }\r\n    vector<pair<int, int>> val(n);\r\n    map<vector<int>, pair<int, int>> mp; mp[{}] = {1, 1};\r\n    int sz = 2;\r\n    function<void(int, int)> calc = [&](int v, int parent){\r\n        int good = 1;\r\n        vector<int> vec;\r\n        for(int to : g[v]){\r\n            if(to == parent) continue;\r\n            calc(to, v);\r\n            if(val[to].second == 0) good = 0;\r\n            vec.push_back(val[to].first);\r\n        }\r\n        for(int i = 1; i < vec.size(); i++) good &= vec[i] == vec[i-1];\r\n        if(!mp.count(vec)) mp[vec] = {sz++, good};\r\n        val[v] = mp[vec];\r\n    };\r\n    calc(0, 0);\r\n    function<void(int, int, int)> dfs = [&](int v, int parent, int root){\r\n        deque<pair<int, int>> vec;\r\n        int good = val[v].second;\r\n        for(int to : g[v]){\r\n            if(to == parent) continue;\r\n            vec.push_back({val[to].first, to});\r\n        }\r\n        if(v != parent) vec.push_back({root, parent});\r\n        int id = -1;\r\n        for(int i = 1; i < vec.size(); i++) if(vec[i] != vec[i-1]) {if(id == -1) id = i; else {id = -2; break;}}\r\n        if(id == -1 && good){\r\n            cout << v + 1 << \"\\n\";\r\n            exit(0);\r\n        }\r\n        if(id == -2 || id == vec.size() - 1) return ;\r\n        vector<int> nw;\r\n        for(int i = 0; i < vec.size(); i++) if(i == id) continue; else nw.push_back(vec[i].first);\r\n        if(mp.count(nw) && mp[nw].second) dfs(vec[id].second, v, mp[nw].first);\r\n    };\r\n    dfs(0, 0, 0);\r\n    cout << \"-1\\n\";\r\n}"
+}

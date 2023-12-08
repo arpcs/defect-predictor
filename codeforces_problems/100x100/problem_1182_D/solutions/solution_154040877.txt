@@ -1,0 +1,40 @@
+{
+    "id": 154040877,
+    "contestId": 1182,
+    "creationTimeSeconds": 1650341848,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "Naitnal"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define ll long long\r\n#define mp make_pair\r\n#define fi first\r\n#define se second\r\n#define pii pair<int, int>\r\n#define pll pair<ll, ll>\r\n#define pb push_back\r\n#define rep(a, b, c) for (int a = b; a <= c; a++)\r\n#define per(a, b, c) for (int a = c; a >= b; a--)\r\n#define all(a) a.begin() + 1, a.end()\r\n#define all_(a) a.begin(), a.end()\r\n#define vi vector<int>\r\n#define vl vector<ll>\r\n#define vpii vector<pii>\r\n#define vpll vector<pll>\r\nconst int mod = 998244353;\r\nll gcd(ll a, ll b) {return b == 0 ? a : gcd(b, a % b);}\r\nll lcm(ll a, ll b) {return a / gcd(a, b) * b;}\r\ninline ll fp (ll a, ll n) {\r\n    a %= mod;\r\n    ll res = 1; while (n) { if (n & 1) res = res * a % mod; a = a * a % mod; n >>= 1; } return res;\r\n}\r\ninline ll inv(ll x) {return fp(x, mod - 2);}\r\ntemplate<typename T, typename... Args>\r\nvoid debug(string name, T value, Args &&...arg) {\r\n    cout << name;\r\n    (..., (cout << '[' << arg << ']'));\r\n    cout << \" = \" << value << '\\n';\r\n}\r\ntemplate<typename T>\r\nvoid array_debug(string name, const T& tar, int length) {\r\n    for (int i = 1; i <= length; i++) {\r\n        debug(name, tar[i], i);\r\n    }\r\n}\r\nsigned main() {\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0); cout.tie(0);\r\n    int n; cin >> n;\r\n    vector<vector<int>> vec(n + 1);\r\n    for (int i = 1; i < n; i++) {\r\n        int u, v; cin >> u >> v;\r\n        vec[u].pb(v);\r\n        vec[v].pb(u);\r\n    }\r\n    if (n == 2) {\r\n        cout << 1 << '\\n';\r\n        return 0;\r\n    }\r\n    int mi_part = 1e9 + 7;\r\n    vector<int> mi(n + 1), siz(n + 1);\r\n    function<void(int, int)> dfs = [&] (int x, int fa) {\r\n        int mx = -1;\r\n        for (int i = 0; i < vec[x].size(); i++) {\r\n            int y = vec[x][i];\r\n            if (y == fa) continue;\r\n            dfs(y, x);\r\n            siz[x] += siz[y];\r\n            mx = max(mx, siz[y]);\r\n        }\r\n        mx = max(mx, n - siz[x]);\r\n        mi[x] = mx;\r\n        if (mx < mi_part) {\r\n            mi_part = mx;\r\n        }\r\n    };\r\n    vector<int> son(n + 1);\r\n    bool fl = 1;\r\n    function<void(int, int, int)> dfs2 = [&] (int x, int fa, int deep) {\r\n        if (son[deep] == 0) {\r\n            son[deep] = vec[x].size();\r\n        }\r\n        else {\r\n            if (son[deep] != (int)vec[x].size()) {\r\n                fl = 0;\r\n            }\r\n        }   \r\n        for (int i = 0; i < vec[x].size(); i++) {\r\n            int y = vec[x][i];\r\n            if (y == fa) continue;\r\n            dfs2(y, x, deep + 1);\r\n        }\r\n    };\r\n    dfs(1, 0);\r\n    int ans = -1;\r\n    function<pair<int, int>(int, int, int )> dfs3 = [&] (int x, int fa, int len) {\r\n        if (vec[x].size() == 1) {\r\n            // cout << \"x : \" << x << '\\n';\r\n            return mp(x, len);\r\n        }\r\n        else if (vec[x].size() >= 3) {\r\n            // cout << \"0 : \" << 0 << '\\n';\r\n            return mp(0, 0);\r\n        }\r\n        for (int i = 0; i < vec[x].size(); i++) {\r\n            int y = vec[x][i];\r\n            if (y == fa) continue;\r\n            return dfs3(y, x, len + 1);\r\n        }\r\n    };\r\n    int weight = 0;\r\n    for (int i = 1; i <= n; i++) {\r\n        if (mi[i] == mi_part) {\r\n            weight++;\r\n            assert(weight <= 2);\r\n            fill(son.begin(), son.end(), 0);\r\n            fl = 1;\r\n            dfs2(i, 0, 1);\r\n            if (fl) {\r\n                ans = i;\r\n                break;\r\n            }\r\n            else {\r\n                // cout << \"into : \" << '\\n';\r\n                vector<pair<int, int>> line;\r\n                for (int j = 0; j < vec[i].size(); j++) {\r\n                    int t = vec[i][j];\r\n                    auto [id, len] = dfs3(t, i, 1);\r\n                    // cout << \"id, len : \" << id << ' ' << len << '\\n';\r\n                    if (id != 0) line.pb({id, len});\r\n                }\r\n                if (line.size() == 0) {\r\n                }\r\n                else if (line.size() == 1) {\r\n                    fill(son.begin(), son.end(), 0);\r\n                    fl = 1;\r\n                    dfs2(line[0].fi, 0, 1);\r\n                    if (fl) {\r\n                        ans = line[0].fi;\r\n                        break;\r\n                    }\r\n                }\r\n                else if (line.size() == vec[i].size()) {\r\n                    map<int, int> cnt;\r\n                    int dif = 0;\r\n                    for (int j = 0; j < (int)line.size(); j++) {\r\n                        auto [id, len] = line[j];\r\n                        // cout << \"id, len : \" << id << ' ' << len << '\\n';\r\n                        if (!cnt.count(len)) {\r\n                            cnt[len]++;\r\n                            dif++;\r\n                        }\r\n                    }\r\n                    if (dif == 1) {\r\n                        ans = line[0].first;\r\n                        break;\r\n                    }\r\n                    else if (dif == 2) {\r\n                        int t = 0;\r\n                        for (auto [key, value] : cnt) {\r\n                            if (value == 1) t = key;\r\n                        }\r\n                        if (t == 0) continue;\r\n                        for (int j = 0; j < (int)line.size(); j++) {\r\n                            auto [id, len] = line[j];\r\n                            if (len == t) {\r\n                                ans = id;\r\n                            }\r\n                        }\r\n                        if (ans) break;\r\n                    }\r\n                    else {\r\n                    }\r\n                }\r\n                else {\r\n                }\r\n            }\r\n        }\r\n    }\r\n    cout << ans << '\\n';\r\n    return 0;\r\n}\r\n/*\r\n6\r\n1 2\r\n2 3\r\n3 4\r\n4 5\r\n4 6\r\n\r\n7\r\n1 2\r\n2 3\r\n3 4\r\n4 5\r\n3 6\r\n6 7\r\n*/"
+}

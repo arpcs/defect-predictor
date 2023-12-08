@@ -1,0 +1,36 @@
+{
+    "id": 209536995,
+    "contestId": 1110,
+    "creationTimeSeconds": 1686645466,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "Chinese_zjc_"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 514,
+    "memoryConsumedBytes": 193740800,
+    "source": "// LUOGU_RID: 112634448\n// This Code was made by Chinese_zjc_.\r\n#include <bits/stdc++.h>\r\nstd::string l, r;\r\nint n, root, cnt, son[2005][10], fa[2005], dp[2005][2005], to[2005][2005], val[2005][10][2005];\r\nvoid insert(std::string &x, std::size_t pos, int value, int &now)\r\n{\r\n    if (!now)\r\n        now = ++cnt;\r\n    if (pos == x.size())\r\n        return;\r\n    for (int i = now == root; i != x[pos] - '0'; ++i)\r\n        for (int j = x.size() - pos; j <= 2000; ++j)\r\n            val[now][i][j] += value;\r\n    insert(x, pos + 1, value, son[now][x[pos] - '0']);\r\n}\r\nint dfs(std::size_t len, int now)\r\n{\r\n    if (len == 0)\r\n        return 0;\r\n    int &res = dp[len][now];\r\n    if (~res)\r\n        return res;\r\n    for (int i = 0; i != 10; ++i)\r\n    {\r\n        int tmp = dfs(len - 1, son[now][i]) + (i ? std::min(r.size() - 1, len) - std::min(l.size() - 1, len) : 0) + val[now][i][len];\r\n        if (res < tmp)\r\n            res = tmp, to[len][now] = i;\r\n    }\r\n    return res;\r\n}\r\nsigned main()\r\n{\r\n    std::ios::sync_with_stdio(false);\r\n    std::cin >> l >> r >> n;\r\n    for (int i = r.size(); i--;)\r\n        if (r[i] == '9')\r\n            r[i] = '0';\r\n        else\r\n        {\r\n            ++r[i];\r\n            break;\r\n        }\r\n    if (r.front() == '0')\r\n        r.insert(r.begin(), '1');\r\n    insert(l, 0, -1, root);\r\n    insert(r, 0, +1, root);\r\n    std::queue<int> que;\r\n    for (int i = 0; i != 10; ++i)\r\n        if (int &to = son[root][i])\r\n            fa[to] = root, que.push(son[root][i]);\r\n        else\r\n            to = root;\r\n    while (!que.empty())\r\n    {\r\n        int now = que.front();\r\n        que.pop();\r\n        for (int i = 0; i != 10; ++i)\r\n            for (int j = 0; j <= 2000; ++j)\r\n                val[now][i][j] += val[fa[now]][i][j];\r\n        for (int i = 0; i != 10; ++i)\r\n            if (int &to = son[now][i])\r\n                fa[to] = son[fa[now]][i], que.push(to);\r\n            else\r\n                to = son[fa[now]][i];\r\n    }\r\n    std::memset(dp, -1, sizeof(dp));\r\n    int len = n, cur = root;\r\n    std::cout << dfs(len, cur) << std::endl;\r\n    while (len)\r\n    {\r\n        std::cout << to[len][cur];\r\n        cur = son[cur][to[len][cur]];\r\n        --len;\r\n    }\r\n    std::cout << std::endl;\r\n    return 0;\r\n}"
+}

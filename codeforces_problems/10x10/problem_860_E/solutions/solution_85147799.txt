@@ -1,0 +1,37 @@
+{
+    "id": 85147799,
+    "contestId": 860,
+    "creationTimeSeconds": 1593189947,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 860,
+        "index": "E",
+        "name": "Arkady and a Nobody-men",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 860,
+        "members": [
+            {
+                "handle": "Mr.Robot_28"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1505653500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 36,
+    "timeConsumedMillis": 1091,
+    "memoryConsumedBytes": 183296000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define int long long\r\nconst int N = 5e5;\r\nconst int t = 20;\r\nint ans[N], tin[N], tout[N], h[N];\r\nint predm[t][N];\r\nvector <int> g[N];\r\nint timer = 0;\r\nint dsu[N], rang[N];\r\nint left1[N], right1[N];\r\nint max(int a, int b)\r\n{\r\n\tif(a > b)\r\n\t{\r\n\t\treturn a;\r\n\t}\r\n\treturn b;\r\n}\r\nint pred(int a)\r\n{\r\n\tif(a == dsu[a]) return a;\r\n\treturn dsu[a] = pred(dsu[a]);\r\n}\r\nvoid unite(int a, int b)\r\n{\r\n\tif(rang[a] < rang[b])\r\n\t{\r\n\t\tswap(a, b);\r\n\t}\r\n\tdsu[b] = a;\r\n\trang[a] += rang[b];\r\n\tleft1[a] = min(left1[a], left1[b]);\r\n\tright1[a] = max(right1[a], right1[b]);\r\n}\r\nvoid dfs(int v, int p = -1)\r\n{\r\n\ttin[v] = timer++;\r\n\tfor(int i = 0; i < g[v].size(); i++)\r\n\t{\r\n\t\tint to = g[v][i];\r\n\t\tif(to == p)\r\n\t\t{\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tpredm[0][to] = v;\r\n\t\th[to] = h[v] + 1;\r\n\t\tdfs(to, v);\r\n\t}\r\n\ttout[v] = timer - 1;\r\n}\r\nbool pr(int a, int b)\r\n{\r\n\treturn tin[a] <= tin[b] && tout[a] >= tout[b];\r\n}\r\nint lca(int a, int b)\r\n{\r\n\tif(pr(a, b))\r\n\t{\r\n\t\treturn a;\r\n\t}\r\n\tfor(int j = t - 1; j >= 0; j--)\r\n\t{\r\n\t\tif(!pr(predm[j][a], b))\r\n\t\t{\r\n\t\t\ta = predm[j][a];\r\n\t\t}\r\n\t}\r\n\ta = predm[0][a];\r\n\treturn a;\r\n}\r\nvoid dfs1(int v)\r\n{\r\n\tfor(int i = 0; i < g[v].size(); i++)\r\n\t{\r\n\t\tint to = g[v][i];\r\n\t\tans[to] += ans[v];\r\n\t\tdfs1(to);\r\n\t}\r\n}\r\nsigned main()\r\n{\r\n\tios_base::sync_with_stdio(false);\r\n\tcin.tie(NULL);\r\n\tcout.tie(NULL);\r\n\tint n;\r\n\tcin >> n;\r\n\tint st = 0;\r\n\tfor(int i = 0; i < n; i++)\r\n\t{\r\n\t\tint p;\r\n\t\tcin >> p;\r\n\t\tp--;\r\n\t\tif(p == -1)\r\n\t\t{\r\n\t\t\tst = i;\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tg[p].push_back(i);\r\n\t\t}\r\n\t}\r\n\tpredm[0][st] = st;\r\n\tdfs(st);\r\n\tfor(int i = 1; i < t; i++)\r\n\t{\r\n\t\tfor(int j = 0; j < n; j++)\r\n\t\t{\r\n\t\t\tpredm[i][j] = predm[i - 1][predm[i - 1][j]];\r\n\t\t}\r\n\t}\r\n\tvector <pair <int, int> > vec;\r\n\tfor(int i = 0; i < n; i++)\r\n\t{\r\n\t\tdsu[i] = i;\r\n\t\trang[i] = 1;\r\n\t\tvec.push_back({h[i], i});\r\n\t}\r\n\tvector <bool> used(n, false);\r\n\tsort(vec.begin(), vec.end());\r\n\tfor(int i = 0; i < n; i++){\r\n\t\tint j = i;\r\n\t\tvector <int> add;\r\n\t\tvector <pair < int, int> > s1;\r\n\t\tvector <pair <pair <int, int>, pair <int, int> > > p1;\r\n\t\twhile(j < n && vec[j].first == vec[i].first)\r\n\t\t{\r\n\t\t\tint ind = vec[j].second;\r\n\t\t\tans[ind] += 1 + h[ind];\r\n\t\t\ts1.push_back({tin[ind], ind});\r\n\t\t\tj++;\r\n\t\t}\r\n\t\tsort(s1.begin(), s1.end());\r\n\t\tadd.resize(s1.size() + 1, 0);\r\n\t\tfor(int k = 0; k < s1.size(); k++){\r\n\t\t\tleft1[s1[k].second] = k;\r\n\t\t\tright1[s1[k].second] = k;\r\n\t\t}\r\n\t\tfor(int k = 0; k < s1.size() - 1; k++)\r\n\t\t{\r\n\t\t\tint v = lca(s1[k].second,s1[k + 1].second);\r\n\t\t\tp1.push_back({{h[v], v}, {s1[k].second, s1[k + 1].second}});\r\n\t\t}\r\n\t\tif(p1.size() != 0)\r\n\t\t{\r\n\t\tsort(p1.begin(), p1.end());\r\n\t\tfor(int k = p1.size() - 1; k >= 0; k--)\r\n\t\t{\r\n\t\t\tint j = k;\r\n\t\t\tint h1 = p1[j].first.first + 1;\r\n\t\t\tint allsz = 0;\r\n\t\t\twhile(j >= 0 && p1[j].first == p1[k].first)\r\n\t\t\t{\r\n\t\t\t\tint a = pred(p1[j].second.first);\r\n\t\t\t\tint b = pred(p1[j].second.second);\r\n\t\t\t\tif(!used[b])\r\n\t\t\t\t{\r\n\t\t\t\t\tused[b] = true;\r\n\t\t\t\t\tallsz += rang[b];\r\n\t\t\t\t}\r\n\t\t\t\tif(!used[a])\r\n\t\t\t\t{\r\n\t\t\t\t\tused[a] = true;\r\n\t\t\t\t\tallsz += rang[a];\r\n\t\t\t\t}\r\n\t\t\t\tj--;\r\n\t\t\t}\r\n\t\t\tj = k;\r\n\t\t\twhile(j >= 0 && p1[j].first == p1[k].first)\r\n\t\t\t{\r\n\t\t\t\tint a = pred(p1[j].second.first);\r\n\t\t\t\tint b = pred(p1[j].second.second);\r\n\t\t\t\tused[a] = used[b] = false;\r\n\t\t\t\tj--;\r\n\t\t\t}\r\n\t\t\tj = k;\r\n\t\t\twhile(j >= 0 && p1[j].first == p1[k].first){\r\n\t\t\t\tint a = pred(p1[j].second.first);\r\n\t\t\t\tint b = pred(p1[j].second.second);\r\n\t\t\t\tif(!used[b]){\r\n\t\t\t\t\tused[b] = true;\r\n\t\t\t\tadd[left1[b]] += (allsz - rang[b]) * h1;\r\n\t\t\t\tadd[right1[b] + 1] -= (allsz - rang[b]) * h1;\r\n\t\t\t\t}\r\n\t\t\t\tif(!used[a])\r\n\t\t\t\t{\r\n\t\t\t\t\tused[a] = true;\r\n\t\t\t\tadd[left1[a]] += (allsz - rang[a]) * h1;\r\n\t\t\t\tadd[right1[a] + 1] -= (allsz - rang[a]) * h1;\r\n\t\t\t\t}\r\n\t\t\t\tj--;\r\n\t\t\t}\r\n\t\t\tj = k;\r\n\t\t\twhile(j >= 0 && p1[j].first == p1[k].first)\r\n\t\t\t{\r\n\t\t\t\tint a = pred(p1[j].second.first);\r\n\t\t\t\tint b = pred(p1[j].second.second);\r\n\t\t\t\tused[a] = used[b] = false;\r\n\t\t\t\tunite(a, b);\r\n\t\t\t\tj--;\r\n\t\t\t}\r\n\t\t\tk = j + 1;\r\n\t\t}\r\n\t\t}\r\n\t\tint sum = 0;\r\n\t\tfor(int k = 0; k < s1.size(); k++)\r\n\t\t{\r\n\t\t\tsum += add[k];\r\n\t\t\tans[s1[k].second] += sum;\r\n\t\t}\r\n\t\ti = j - 1;\r\n\t}\r\n\tdfs1(st);\r\n\tfor(int i = 0; i < n; i++){\r\n\t\tcout << ans[i] - h[i] - 1 << \" \";\r\n\t}\r\n\treturn 0;\r\n}\r\n\r\n"
+}

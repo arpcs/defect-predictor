@@ -1,0 +1,36 @@
+{
+    "id": 62513007,
+    "contestId": 1110,
+    "creationTimeSeconds": 1570974316,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "gongsuidashen"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 1232,
+    "memoryConsumedBytes": 363622400,
+    "source": "#include<bits/stdc++.h>\r\n#define pb push_back\r\n#define mp make_pair\r\n#define FL \"a\"\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef long double dd;\r\nconst int N=2e3+10;\r\nconst int M=2e4+10;\r\nconst int inf=2147483647;\r\nconst dd pi=acos(-1);\r\nconst ll INF=1ll<<60;\r\ninline ll read(){\r\n  ll data=0,w=1;char ch=getchar();\r\n  while(ch!='-'&&(ch<'0'||ch>'9'))ch=getchar();\r\n  if(ch=='-')w=-1,ch=getchar();\r\n  while(ch<='9'&&ch>='0')data=data*10+ch-48,ch=getchar();\r\n  return data*w;\r\n}\r\ninline void file(){\r\n  freopen(FL\".in\",\"r\",stdin);\r\n  freopen(FL\".out\",\"w\",stdout);\r\n}\r\n\r\nchar sl[N],sr[N];\r\nint n,lenl,lenr,cnt,vis[M][10],fail[M],g[M][N],f[N][M];\r\ninline void upd(int &a,int b){a=a>b?a:b;}\r\ninline void getpre(){\r\n  scanf(\"%s\",sl+1);lenl=strlen(sl+1);\r\n  scanf(\"%s\",sr+1);lenr=strlen(sr+1);\r\n  n=read();\r\n  if(lenl==lenr){\r\n    int ul,ur;ul=ur=0;\r\n    for(int i=1;i<=lenl;i++)\r\n      if(ul==ur){\r\n    for(int c=sl[i]-48+1;c<sr[i]-48;c++){\r\n      if(!vis[ul][c])vis[ul][c]=++cnt;\r\n      g[vis[ul][c]][lenl-i]++;\r\n    }\r\n    if(!vis[ul][sl[i]-48])vis[ul][sl[i]-48]=++cnt;\r\n    if(!vis[ur][sr[i]-48])vis[ur][sr[i]-48]=++cnt;\r\n    ul=vis[ul][sl[i]-48];ur=vis[ur][sr[i]-48];\r\n      }\r\n      else{\r\n    for(int c=sl[i]-48+1;c<10;c++){\r\n      if(!vis[ul][c])vis[ul][c]=++cnt;\r\n      g[vis[ul][c]][lenl-i]++;\r\n    }\r\n    for(int c=0;c<sr[i]-48;c++){\r\n      if(!vis[ur][c])vis[ur][c]=++cnt;\r\n      g[vis[ur][c]][lenr-i]++;\r\n    }\r\n    if(!vis[ul][sl[i]-48])vis[ul][sl[i]-48]=++cnt;\r\n    if(!vis[ur][sr[i]-48])vis[ur][sr[i]-48]=++cnt;\r\n    ul=vis[ul][sl[i]-48];ur=vis[ur][sr[i]-48];\r\n      }\r\n    g[ul][0]++;if(ul!=ur)g[ur][0]++;\r\n  }\r\n  else{\r\n    int u;u=0;\r\n    for(int i=1;i<=lenl;i++){\r\n      for(int c=sl[i]-48+1;c<10;c++){\r\n    if(!vis[u][c])vis[u][c]=++cnt;\r\n    g[vis[u][c]][lenl-i]++;\r\n      }\r\n      if(!vis[u][sl[i]-48])vis[u][sl[i]-48]=++cnt;\r\n      u=vis[u][sl[i]-48];\r\n    }\r\n    g[u][0]++;u=0;\r\n    for(int i=1;i<=lenr;i++){\r\n      for(int c=0;c<sr[i]-48;c++){\r\n    if(!vis[u][c])vis[u][c]=++cnt;\r\n    g[vis[u][c]][lenr-i]++;\r\n      }\r\n      if(!vis[u][sr[i]-48])vis[u][sr[i]-48]=++cnt;\r\n      u=vis[u][sr[i]-48];\r\n    }\r\n    g[u][0]++;\r\n    for(int i=lenl+1;i<lenr;i++)\r\n      for(int c=1;c<10;c++){\r\n    if(!vis[0][c])vis[0][c]=++cnt;\r\n    g[vis[0][c]][i-1]++;\r\n      }\r\n  }\r\n  for(int i=0;i<=cnt;i++)vis[0][0]=0;\r\n}\r\n\r\ninline void getfail(){\r\n  static queue<int>Q;while(!Q.empty())Q.pop();\r\n  for(int c=0;c<10;c++)if(vis[0][c])Q.push(vis[0][c]);\r\n  while(!Q.empty()){\r\n    int u=Q.front();Q.pop();\r\n    for(int c=0;c<10;c++){\r\n      int &v=vis[u][c];\r\n      if(v){\r\n    Q.push(v);fail[v]=vis[fail[u]][c];\r\n    for(int i=0;i<=n;i++)g[v][i]+=g[fail[v]][i];\r\n      }\r\n      else v=vis[fail[u]][c];\r\n    }\r\n  }\r\n  for(int u=0;u<=cnt;u++)\r\n    for(int i=0;i<=n;i++)\r\n      g[u][i]+=g[u][i-1];\r\n}\r\ninline void init(){\r\n  getpre();\r\n  getfail();\r\n}\r\n\r\nbool could[N][M];\r\ninline void solve(){\r\n  memset(f,128,sizeof(f));f[0][0]=0;\r\n  for(int i=0;i<=n;i++)\r\n    for(int u=0;u<=cnt;u++)\r\n      if(f[i][u]>=0){\r\n    f[i][u]+=g[u][n-i];\r\n    for(int c=0;c<10;c++)\r\n      upd(f[i+1][vis[u][c]],f[i][u]);\r\n      }\r\n  int ans=0;\r\n  for(int u=0;u<=cnt;u++)upd(ans,f[n][u]);\r\n  printf(\"%d\\n\",ans);\r\n  for(int u=0;u<=cnt;u++)if(f[n][u]==ans)could[n][u]=1;\r\n  for(int i=n-1;~i;i--)\r\n    for(int u=0;u<=cnt;u++)\r\n      if(f[i][u]>=0)\r\n    for(int c=0;c<10;c++)\r\n      if(could[i+1][vis[u][c]]&&\r\n         f[i+1][vis[u][c]]==f[i][u]+g[vis[u][c]][n-i-1]){\r\n        could[i][u]=1;break;\r\n      }\r\n  assert(could[0][0]==1);\r\n  int u=0;\r\n  for(int i=0;i<n;i++)\r\n    for(int c=0;c<10;c++)\r\n      if(could[i+1][vis[u][c]]&&f[i+1][vis[u][c]]==f[i][u]+g[vis[u][c]][n-i-1]){\r\n    putchar(48+c);u=vis[u][c];break;\r\n      }\r\n}\r\n\r\nint main()\r\n{\r\n  init();\r\n  solve();\r\n  return 0;\r\n}"
+}

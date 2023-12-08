@@ -1,0 +1,40 @@
+{
+    "id": 188002045,
+    "contestId": 1182,
+    "creationTimeSeconds": 1672904669,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "vjudge3"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 33280000,
+    "source": "#include <bits/stdc++.h>\n\nusing namespace std;\nusing ll = long long;\nusing P = pair <int, int>;\n\ntemplate <typename T>\ninline void read(T &x) {\n    x = 0; char c = getchar();\n    int f = 0;\n    for (; !isdigit(c); c = getchar()) f |= c == '-';\n    for (; isdigit(c); c = getchar()) x = x * 10 + (c ^ 48);\n    if (f) x = -x;\n}\n\ntemplate <typename T, typename ...Args>\ninline void read(T &x, Args &...args) {\n    read(x), read(args...);\n}\ntemplate <typename T>\ninline void write(T x, char ch) {\n    if (x < 0) x = -x, putchar('-');\n    static short st[70], tp;\n    do st[++tp] = x % 10, x /= 10; while (x);\n    while (tp) putchar(st[tp--] | 48);\n    putchar(ch);\n}\n\ntemplate <typename T, typename ...Args>\ninline void write(T x, char ch, Args ...args) {\n    write(x, ch), write(args...);\n}\n\n#define Fr(i,l,r) for (int i = (l); i <= (r); ++i)\n#define Rf(i,r,l) for (int i = (r); i >= (l); --i)\n\nconst int N = 1e6 + 5;\n\nusing namespace std;\n\nstruct edge {\n    int to, nxt;\n} e[N];\n\nint head[N], cnt;\n\ninline void add(int u, int v) {\n    e[++cnt] = {v, head[u]};\n    head[u] = cnt;\n}\nint siz[N], dep[N], n;\n\ninline void dfs(int u, int ff) {\n    siz[u] = 1, dep[u] = dep[ff] + 1;\n    for (int i = head[u]; i; i = e[i].nxt) {\n        int v = e[i].to;\n        if (v == ff) continue;\n        dfs(v, u);\n        siz[u] += siz[v];\n    }\n}\n\nint maxp[N];\n\ninline int findroot() {\n    dfs(1, 0);\n    int rt = 0;\n    Fr (u, 1, n) {\n        for (int i = head[u]; i; i = e[i].nxt) {\n            int v = e[i].to;\n            if (dep[v] < dep[u]) continue;\n            maxp[u] = max(maxp[u], siz[v]);\n        }\n        maxp[u] = max(maxp[u], n - siz[u]);\n        if (maxp[u] < maxp[rt]) rt = u;\n    }\n    return rt;\n}\nint tmp[N];\ninline bool check(int rt) {\n    memset(siz, 0, sizeof(siz));\n    memset(dep, 0, sizeof(dep));\n    memset(tmp, 0, sizeof(tmp));\n    dep[rt] = 1;\n    dfs(rt, 0);\n    Fr (u, 1, n) {\n        int deg = 0;\n        for (int i = head[u]; i; i = e[i].nxt) ++deg;\n        if (!tmp[dep[u]]) tmp[dep[u]] = deg;\n        if (tmp[dep[u]] != deg) return false;\n    }\n    return true;\n}\n\ninline int line(int u, int ff) {\n    if (!e[head[u]].nxt) return u;\n    if (e[e[head[u]].nxt].nxt) return 0;\n    int i = head[u];\n    if (e[i].to == ff) i = e[i].nxt;\n    return line(e[i].to, u);\n}\n\nint len[N];\nsigned main() {\n    read(n);\n    Fr (i, 1, n - 1) {\n        int u, v;\n        read(u, v);\n        add(u, v);\n        add(v, u);\n    }\n    maxp[0] = 2e9;\n    int rt = findroot();\n    if (check(rt)) return write(rt, '\\n'), 0;\n    for (int i = head[rt]; i; i = e[i].nxt) len[++len[0]] = line(e[i].to, rt);\n    sort(len + 1, len + len[0] + 1, [](int x, int y) { return dep[x] < dep[y]; });\n    if (len[1] && check(len[1])) return write(len[1], '\\n'), 0;\n    if (len[len[0]] && check(len[len[0]])) return write(len[len[0]], '\\n'), 0;\n    write(-1, '\\n');\n    return 0;\n}\n\n\t\t \t \t    \t\t \t\t   \t\t \t\t\t \t\t\t  \t"
+}

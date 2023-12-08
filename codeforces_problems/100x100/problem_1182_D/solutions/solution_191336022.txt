@@ -1,0 +1,40 @@
+{
+    "id": 191336022,
+    "contestId": 1182,
+    "creationTimeSeconds": 1675143026,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "llcd2709"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 171,
+    "memoryConsumedBytes": 30003200,
+    "source": "#include<bits/stdc++.h>\r\n//it is a MIRROR graph\r\n//is all v is same is mirror or u has no child it is mirror\r\n//there no child: it is brance but we dfs 2 times\r\n\r\nusing namespace std;\r\nconst int base = 31, mod = 1e9+7;\r\n//hash: f[v] = 0 it's a leaf (default if not leaf it will be update), \r\n//f[v] = hash(f[mirror child], cnt child), f[v] = -1 wrong mirror\r\n//s[v]: set of f[mirror] and count. if have more than 2 distinct f[mirror] it's wrong\r\n//dfs1 + dfs2 = ancestor + child. inclusion\r\n\r\nvector<int> edge[100005];\r\nint n, f[100005], res = -1;\r\nmap<int,int> s[100005];\r\n\r\nvoid calc(int u){ //calculating f[u]\r\n\tif (s[u].size()==0){\r\n\t\tf[u] = 0;\r\n\t\treturn;\r\n\t}\r\n\tif (s[u].size()>1){\r\n\t\tf[u] = -1;\r\n\t\treturn;\r\n\t}\r\n\tauto it = s[u].begin();\r\n\tif (it->first==-1){\r\n\t\tf[u] = -1;\r\n\t\treturn;\r\n\t}\r\n\tf[u] = (1ll*base*it->first+it->second)%mod; //f[] = hash of the subtree from 1 \r\n}\r\n\r\nvoid dfs1(int u, int p = -1){\r\n\tfor (int v: edge[u]) if (v!=p){\r\n\t\tdfs1(v,u);\r\n\t\ts[u][f[v]]++;\r\n\t}\r\n\tcalc(u);\r\n}\r\nvoid dfs2(int u, int p = -1){\r\n\tif (p!=-1){\r\n\t\ts[u][f[p]]++;\r\n\t\tcalc(u);\r\n\t}\r\n\tif (f[u]!=-1){\r\n\t\tres = u;\r\n\t}\r\n\tfor (int v: edge[u]) if (v!=p){\r\n\t\ts[u][f[v]]--; //exclusion\r\n\t\tif (s[u][f[v]]==0) s[u].erase(f[v]);\r\n\t\tcalc(u);\r\n\t\tdfs2(v,u);\r\n\t\ts[u][f[v]]++;\r\n\t\tcalc(u);\r\n\t}\r\n\tif (p!=-1){\r\n\t\ts[u][f[p]]--;\r\n\t\tif (s[u][f[p]]==0) s[u].erase(f[p]);\r\n\t\tcalc(u);\r\n\t}\r\n}\r\n\r\nint main (){\r\n\tios::sync_with_stdio(0);\r\n\tcin.tie(0); cout.tie(0);\r\n\tcin >> n;\r\n\tfor (int i = 1, u, v; i < n; i++){\r\n\t\tcin >> u >> v;\r\n\t\tedge[u].push_back(v);\r\n\t\tedge[v].push_back(u);\r\n\t}\r\n\tdfs1(1);\r\n\tdfs2(1);\r\n\tcout << res;\r\n\treturn 0;\r\n}"
+}

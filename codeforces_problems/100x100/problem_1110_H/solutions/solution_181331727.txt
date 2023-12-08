@@ -1,0 +1,36 @@
+{
+    "id": 181331727,
+    "contestId": 1110,
+    "creationTimeSeconds": 1668700402,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "bkifhr7"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 1216,
+    "memoryConsumedBytes": 267366400,
+    "source": "#include<iostream>\n#include<stdio.h>\n#include<vector>\n#include<queue>\n#include<set>\n#include<cstring>\n#define pii std::pair<int,int>\n#define mp std::make_pair\n#define vi std::vector<int>\n#define N 2010\n#define L 810\n#define NODE 20010\nint n;\nchar Left[L],Right[L];\nint Len1,Len2;\nint son[NODE][10],fail[NODE],tnt;\nint Value[NODE][L];\nvoid dfs1(int &now,int dep,bool Lim1,bool Lim2) {\n    if(!now)now=++tnt;\n    if((!Lim1&&!Lim2)||dep==Len1+1) {\n\tValue[now][Len1+1-dep]++;\n\treturn;\n    }\n    for (int i=0;i<10;i++)\n\tif(Lim1&&(Left[dep]-'0')>i)continue; else if(Lim2&&(Right[dep]-'0')<i)break; else dfs1(son[now][i],dep+1,Lim1&&((Left[dep]-'0')==i),Lim2&&((Right[dep]-'0')==i));\n}\nvoid dfs2(int &now,int dep,bool Lim) {\n    if(!now)now=++tnt;\n    if(!Lim||dep==Len2+1) {\n\tValue[now][Len2+1-dep]++;\n\treturn;\n    }\n    for (int i=0;i<10;i++)\n\tif(Lim&&(Right[dep]-'0')<i)break; else dfs2(son[now][i],dep+1,Lim&&((Right[dep]-'0')==i));\n}\nvoid dfs3(int &now,int dep,bool Lim) {\n    if(!now)now=++tnt;\n    if(!Lim||dep==Len1+1) {\n\tValue[now][Len1+1-dep]++;\n\treturn;\n    }\n    for (int i=0;i<10;i++)\n\tif(Lim&&(Left[dep]-'0')>i)continue; else dfs3(son[now][i],dep+1,Lim&&((Left[dep]-'0')==i));\n}\nvoid init() {\n    if(Len1==Len2)\n\tfor (int i=1;i<10;i++)\n\t    if((Left[1]-'0')>i)continue; else if((Right[1]-'0')<i)break; else dfs1(son[0][i],2,(Left[1]-'0')==i,(Right[1]-'0')==i); else {\n\tfor (int i=Len1+1;i<Len2;i++)Value[0][i-1]++;\n\tfor (int i=1;i<10;i++)\n\t    if((Right[1]-'0')<i)break; else dfs2(son[0][i],2,Right[1]-'0'==i);\n\tfor (int i=1;i<10;i++)\n\t    if((Left[1]-'0')>i)continue; else dfs3(son[0][i],2,Left[1]-'0'==i);\n    }\n}\nvoid build() {\n    std::queue<int>Q;\n    for (int i=0;i<10;i++)\n\tif(son[0][i])Q.push(son[0][i]);\n    while(!Q.empty()) {\n\tint x=Q.front();\n\tQ.pop(); {\n\t    int y=fail[x];\n\t    for (int j=0;j<=Len2;j++)\n\t\tValue[x][j]+=Value[y][j];\n\t}\n\tfor (int i=0;i<10;i++)\n\t    if(son[x][i]) {\n\t\tfail[son[x][i]]=son[fail[x]][i];\n\t\tQ.push(son[x][i]);\n\t    } else son[x][i]=son[fail[x]][i];\n    }\n    for (int i=0;i<=tnt;i++)\n\tfor (int j=1;j<=Len2;j++)\n\t    Value[i][j]+=Value[i][j-1];\n}\nint F[N][NODE];\nbool vis[N][NODE];\nvoid Print(int WEI,int STA) {\n    if(WEI==n)return;\n    for (int j=0;j<10;j++)\n\tif(vis[WEI+1][son[STA][j]]) {\n#define NXT std::min(Len2-1,n-WEI-1)\n\t    int CALC=F[WEI][STA]+Value[son[STA][j]][NXT];\n#undef NXT\n\t    if(CALC^F[WEI+1][son[STA][j]])continue;\n\t    putchar('0'+j);\n\t    Print(WEI+1,son[STA][j]);\n\t    break;\n\t}\n}\nint main() {\n    scanf(\"%s\",Left+1);\n    Len1=strlen(Left+1);\n    scanf(\"%s\",Right+1);\n    Len2=strlen(Right+1);\n    scanf(\"%d\",&n);\n    init();\n    build();\n    for (int i=0;i<=n;i++)\n\tfor (int j=0;j<=tnt;j++)\n\t    F[i][j]=-(int)1e9;\n    F[0][0]=0;\n    for (int i=1;i<=n;i++)\n\tfor (int j=0;j<=tnt;j++)\n\t    for (int k=0;k<10;k++) {\n#define NXT std::min(Len2-1,n-i)\n\t\tint CALC=F[i-1][j]+Value[son[j][k]][NXT];\n#undef NXT\n\t\tF[i][son[j][k]]=std::max(F[i][son[j][k]],CALC);\n\t    }\n    int Ans=0;\n    for (int i=0;i<=tnt;i++)Ans=std::max(Ans,F[n][i]);\n    printf(\"%d\\n\",Ans); {\n\tfor (int i=0;i<=tnt;i++)if(Ans==F[n][i])vis[n][i]=true;\n\tfor (int i=n;i;i--)\n\t    for (int j=0;j<=tnt;j++)\n\t\tfor (int k=0;k<10;k++) {\n\t\t    if(!vis[i][son[j][k]])continue;\n#define NXT std::min(Len2-1,n-i)\n\t\t    if(F[i-1][j]+Value[son[j][k]][NXT]==F[i][son[j][k]])vis[i-1][j]=true;\n#undef NXT\n\t\t}\n    }\n    Print(0,0);\n    puts(\"\");\n    exit(0);\n}\n\n     \t\t \t \t \t  \t\t    \t\t\t \t\t  \t\t"
+}

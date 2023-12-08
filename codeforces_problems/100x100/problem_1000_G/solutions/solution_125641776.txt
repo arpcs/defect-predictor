@@ -1,0 +1,36 @@
+{
+    "id": 125641776,
+    "contestId": 1000,
+    "creationTimeSeconds": 1628752128,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "Mike4235"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 1544,
+    "memoryConsumedBytes": 153600000,
+    "source": "/*#pragma GCC optimize(\"Ofast\")\r\n#pragma GCC optimize(\"unroll-loops\")\r\n#pragma GCC target(\"avx,avx2,fma\")*/\r\n// only when really needed\r\n\r\n/* GNU G++17 7.3.0: No long long for faster code\r\n   GNU G++17 9.2.0 (64 bit, msys 2): Long long only for faster code */\r\n \r\n#include <bits/stdc++.h>\r\n  \r\n#define for1(i,a,b) for (int i = a; i <= b; i++)\r\n#define for2(i,a,b) for (int i = a; i >= b; i--)\r\n#define int long long\r\n\r\n#define sz(a) (int)a.size()\r\n#define pii pair<int,int>\r\n \r\n/*\r\n__builtin_popcountll(x) : Number of 1-bit\r\n__builtin_ctzll(x) : Number of trailing 0\r\n*/\r\n \r\n#define PI 3.1415926535897932384626433832795\r\n#define INF 1000000000000000000\r\n#define MOD 1000000007\r\n#define MOD2 1000000009\r\n#define EPS 1e-6\r\n\r\nusing namespace std;\r\n\r\nint n, q;\r\nint a[300005], dp_child[300005], dp_par[300005], con[300005];\r\nint now, tin[300005], tout[300005], up[300005][19], val[300005][19];\r\nvector<pii> g[300005];\r\n\r\nvoid get_child(int u, int p) {\r\n    for (auto e : g[u]) if (e.first != p) {\r\n        int v = e.first, w = e.second;\r\n        get_child(v, u);\r\n        dp_child[u] += max(0ll, dp_child[v] + a[v] - 2 * w);\r\n        con[v] = max(0ll, dp_child[v] + a[v] - 2 * w);\r\n    }\r\n}\r\n\r\nvoid get_par(int u, int p) {\r\n    for (auto e : g[u]) if (e.first != p) {\r\n        int v = e.first, w = e.second;\r\n        int t = max(0ll, dp_child[u] - con[v]);\r\n        dp_par[v] = max(0ll, dp_par[u] + a[u] - 2 * w + t);\r\n        get_par(v, u);\r\n    }\r\n}\r\n\r\nvoid dfs(int u, int p) {\r\n    tin[u] = ++now;\r\n    for1(i,1,18) {\r\n        up[u][i] = up[up[u][i - 1]][i - 1];\r\n        val[u][i] = val[u][i - 1] + val[up[u][i - 1]][i - 1];\r\n    }\r\n\r\n    for (auto e : g[u]) if (e.first != p) {\r\n        int v = e.first, w = e.second;\r\n        up[v][0] = u;\r\n        val[v][0] = a[v] - w + dp_child[v] - con[v];\r\n        dfs(v, u);\r\n    }\r\n    tout[u] = now;\r\n}\r\n\r\nbool is_ancestor(int u, int v) {\r\n    return (tin[u] <= tin[v] && tout[u] >= tout[v]);\r\n}\r\n\r\nint lca(int u, int v) {\r\n    if (is_ancestor(u, v)) return u;\r\n    if (is_ancestor(v, u)) return v;\r\n\r\n    for2(i,18,0) if (!is_ancestor(up[u][i], v)) u = up[u][i];\r\n    return up[u][0];\r\n}\r\n\r\nint solve(int u, int v) {\r\n    int r = lca(u, v), res = 0;\r\n\r\n    for2(i,18,0) {\r\n        if (!is_ancestor(up[u][i], r)) {\r\n            res += val[u][i];\r\n            u = up[u][i];\r\n        }\r\n        if (!is_ancestor(up[v][i], r)) {\r\n            res += val[v][i];\r\n            v = up[v][i];\r\n        }\r\n    }\r\n\r\n    if (u != r) res += val[u][0];\r\n    if (v != r) res += val[v][0];\r\n\r\n    return res + a[r] + dp_child[r] + dp_par[r];\r\n}\r\n\r\nsigned main() {\r\n    \r\n    ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);\r\n\r\n    // freopen(\"cf.inp\", \"r\", stdin);\r\n    // freopen(\"cf.out\", \"w\", stdout);\r\n\r\n    cin >> n >> q;\r\n\r\n    for1(i,1,n) cin >> a[i];\r\n    for1(i,1,n - 1) {\r\n        int u, v, w;\r\n        cin >> u >> v >> w;\r\n        g[u].push_back({v, w});\r\n        g[v].push_back({u, w});\r\n    }\r\n\r\n    get_child(1, 0);\r\n    get_par(1, 0);\r\n    tin[0] = -INF; tout[0] = INF;\r\n    dfs(1, 0);\r\n\r\n    // for1(i,1,n) cout << dp_child[i] << \" \";\r\n    // cout << \"\\n\";\r\n    // for1(i,1,n) cout << dp_par[i] << \" \";\r\n    // cout << \"\\n\";\r\n\r\n    while (q--) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        cout << solve(u, v) << \"\\n\";\r\n    }\r\n\r\n}"
+}

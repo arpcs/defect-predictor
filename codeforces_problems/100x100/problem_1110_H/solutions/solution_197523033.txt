@@ -1,0 +1,36 @@
+{
+    "id": 197523033,
+    "contestId": 1110,
+    "creationTimeSeconds": 1678889789,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "_ShAdoW_is_here_"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <string>\r\n#include <algorithm>\r\nusing namespace std;\r\n\r\nconst int MAXN = 2005;\r\nconst int BASE = 17;\r\nconst int MOD = 1e9 + 7;\r\n\r\nint l, r, n;\r\nvector<int> modest;\r\nint cnt[MAXN];\r\nint pows[MAXN];\r\n\r\nvoid generate_modest() {\r\n    for (int k = to_string(l).length(); k <= to_string(r).length(); k++) {\r\n        int lo = max(l, (int) pow(10, k - 1));\r\n        int hi = min(r, (int) pow(10, k) - 1);\r\n        for (int x = lo; x <= hi; x++) {\r\n            modest.push_back(x);\r\n        }\r\n    }\r\n}\r\n\r\nint hash_string(const string& s) {\r\n    int h = 0;\r\n    for (int i = 0; i < s.length(); i++) {\r\n        h = (h * BASE + s[i]) % MOD;\r\n    }\r\n    return h;\r\n}\r\n\r\nint main() {\r\n    cin >> l >> r >> n;\r\n\r\n    generate_modest();\r\n\r\n    // Compute powers of BASE\r\n    pows[0] = 1;\r\n    for (int i = 1; i < MAXN; i++) {\r\n        pows[i] = (pows[i-1] * BASE) % MOD;\r\n    }\r\n\r\n    // Compute counts of modest strings\r\n    for (int i = 0; i < modest.size(); i++) {\r\n        string s = to_string(modest[i]);\r\n        int h = hash_string(s);\r\n        for (int j = 0; j <= n - s.length(); j++) {\r\n            string t = to_string(j) + s + to_string(j);\r\n            int ht = hash_string(t);\r\n            for (int k = 0; k <= t.length() - s.length(); k++) {\r\n                if (ht == h * pows[k] % MOD) {\r\n                    cnt[j]++;\r\n                }\r\n                ht = ((ht - t[k] * pows[k]) * BASE + t[k+s.length()]) % MOD;\r\n            }\r\n        }\r\n    }\r\n\r\n    // Find index of string with maximum count\r\n    int idx = 0;\r\n    for (int i = 1; i <= n; i++) {\r\n        if (cnt[i] > cnt[idx]) {\r\n            idx = i;\r\n        }\r\n    }\r\n\r\n    // Construct string with maximum count\r\n    string ans(n, '0');\r\n    for (int i = 0; i < modest.size(); i++) {\r\n        string s = to_string(modest[i]);\r\n        for (int j = 0; j <= n - s.length(); j++) {\r\n            string t = to_string(j) + s + to_string(j);\r\n            int ht = hash_string(t);\r\n            for (int k = 0; k <= t.length() - s.length(); k++) {\r\n                if (ht == hash_string(s) * pows[k] % MOD) {\r\n                    if (cnt[j] > cnt[idx] || (cnt[j] == cnt[idx] && t < ans)) {\r\n                        ans.replace(j, s.length(), s);\r\n                        idx = j;\r\n                    }\r\n                }\r\n                ht = ((ht - t[k] * pows[k]) * BASE + t[k+s.length()]) % MOD;\r\n            }\r\n        }\r\n    }\r\n\r\n    cout << cnt[idx] << endl;\r\n    cout << ans << endl;\r\n\r\n    return 0;\r\n}\r\n"
+}

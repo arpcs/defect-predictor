@@ -1,0 +1,36 @@
+{
+    "id": 197890978,
+    "contestId": 1110,
+    "creationTimeSeconds": 1679133096,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "Cafard"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 4960,
+    "memoryConsumedBytes": 549478400,
+    "source": "// LUOGU_RID: 105086625\n#include<bits/stdc++.h>\r\n#define ll long long \r\n#define uit unsigned int \r\nusing namespace std;\r\nconst int N=8010*2;\r\nint n,al=0,bl=0,A[N],B[N],ch[N][12],idx=0,q[N],fail[N];ll g[N][2010],dp[N][2010];char in[N];bool used[N][2010];\r\ninline void NwNode(int rt,int c){\r\n\tif(!ch[rt][c]) ch[rt][c]=++idx;\r\n}\r\ninline void Mov(int &rt,int c){\r\n\tNwNode(rt,c);rt=ch[rt][c];\r\n}\r\ninline void MagicPoint(int rt,int l,int r,int len){\r\n\tif(l>r) return ;\r\n\tfor(int i=l;i<=r;i++){\r\n\t\tNwNode(rt,i);\r\n\t\t++g[ch[rt][i]][len];\r\n\t}\r\n}\r\nvoid Input(){\r\n\tscanf(\"%s\",in+1);al=strlen(in+1);\r\n\tfor(int i=1;i<=al;i++) A[i]=in[i]-'0';\r\n\tscanf(\"%s\",in+1);bl=strlen(in+1);\r\n\tfor(int i=1;i<=bl;i++) B[i]=in[i]-'0';\r\n\tscanf(\"%d\",&n);\r\n//\tfor(int i=1;i<=al;i++) printf(\"%d\",A[i]);printf(\"\\n\");\r\n//\tfor(int i=1;i<=bl;i++) printf(\"%d\",B[i]);printf(\"\\n\");\r\n}\r\nvoid Build(){\r\n\tint ap=0,bp=0;\r\n\tif(al==bl){\r\n\t\tfor(int i=1;i<=al;i++){\r\n\t\t\tint au=A[i],bu=B[i];\r\n\t\t\tif(ap==bp){\r\n\t\t\t\tMagicPoint(ap,au+1,bu-1,al-i);\r\n\t\t\t\tMov(ap,au);Mov(bp,bu);\r\n\t\t\t}\r\n\t\t\telse{\r\n\t\t\t\tMagicPoint(ap,au+1,9,al-i);MagicPoint(bp,0,bu-1,bl-i);\r\n\t\t\t\tMov(ap,au);Mov(bp,bu);\r\n\t\t\t}\r\n\t\t}\r\n\t\t++g[ap][0];if(ap!=bp) ++g[bp][0];\r\n\t}\r\n\telse{\r\n\t\tfor(int i=1;i<=al;i++){\r\n\t\t\tint au=A[i];\r\n\t\t\tMagicPoint(ap,au+1,9,al-i);Mov(ap,au);\r\n\t\t}\r\n\t\tfor(int i=1;i<=bl;i++){\r\n\t\t\tint bu=B[i];\r\n\t\t\tMagicPoint(bp,0,bu-1,bl-i);Mov(bp,bu);\r\n\t\t}\r\n\t\t++g[ap][0];++g[bp][0];\r\n\t\tfor(int i=al+1;i<bl;i++){\r\n\t\t\tfor(int c=0;c<=9;c++){\r\n\t\t\t\tNwNode(0,c);++g[ch[0][c]][i-1];\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tch[0][0]=0;;\r\n}\r\nvoid GetFail(){\r\n\tint hh=0,tt=-1;\r\n\tfor(int c=0;c<=9;c++){\r\n\t\tif(ch[0][c]) q[++tt]=ch[0][c],fail[ch[0][c]]=0;\r\n\t\telse ch[0][c]=0;\r\n\t}\r\n\twhile(hh<=tt){\r\n\t\tint x=q[hh++];\r\n\t\tfor(int i=0;i<=n;i++) g[x][i]+=g[fail[x]][i];\r\n\t\tfor(int c=0;c<=9;c++){\r\n\t\t\tif(ch[x][c]) fail[ch[x][c]]=ch[fail[x]][c],q[++tt]=ch[x][c];\r\n\t\t\telse ch[x][c]=ch[fail[x]][c];\r\n\t\t}\r\n\t}\r\n\tfor(int i=0;i<=idx;i++){\r\n\t\tfor(int j=1;j<=n;j++){\r\n\t\t\tg[i][j]+=g[i][j-1];\r\n\t\t}\r\n\t}\r\n}\r\nvoid Dp(){\r\n\tfor(int i=0;i<=idx;i++) for(int j=0;j<=n;j++) dp[i][j]=-1;\r\n\tdp[0][0]=0;\r\n\tfor(int j=0;j<=n;j++){\r\n\t\tfor(int i=0;i<=idx;i++){\r\n\t\t\tif(dp[i][j]==-1) continue;\r\n\t\t\tdp[i][j]+=g[i][n-j];\r\n\t\t\tif(j==n) continue;\r\n\t\t\tfor(int c=0;c<=9;c++){\r\n\t\t\t\tdp[ch[i][c]][j+1]=max(dp[ch[i][c]][j+1],dp[i][j]);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\nvoid Out(){\r\n\tll ans=0;\r\n\tfor(int i=0;i<=idx;i++) ans=max(ans,dp[i][n]);\r\n\tfor(int i=0;i<=idx;i++) if(dp[i][n]==ans) used[i][n]=1;\r\n\tfor(int j=n-1;j>=0;j--){\r\n\t\tfor(int i=0;i<=idx;i++){\r\n\t\t\tif(dp[i][j]==-1) continue;\r\n\t\t\tfor(int c=0;c<=9;c++){\r\n\t\t\t\tif(used[ch[i][c]][j+1]&&dp[ch[i][c]][j+1]==dp[i][j]+g[ch[i][c]][n-j-1]){\r\n\t\t\t\t\tused[i][j]=1;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tprintf(\"%lld\\n\",ans);\r\n\tint now=0;\r\n\tfor(int i=0;i<n;i++){\r\n\t\tfor(int c=0;c<=9;c++){\r\n\t\t\tif(used[ch[now][c]][i+1]&&dp[ch[now][c]][i+1]==dp[now][i]+g[ch[now][c]][n-i-1]){\r\n\t\t\t\tprintf(\"%d\",c);now=ch[now][c];break;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\nint main(){\r\n//\tfreopen(\"substring.in\",\"r\",stdin);2222\r\n//\tfreopen(\"substring.out\",\"w\",stdout);\r\n\tInput();Build();GetFail();Dp();Out();\r\n\treturn 0;\r\n}"
+}

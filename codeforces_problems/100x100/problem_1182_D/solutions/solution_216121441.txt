@@ -1,0 +1,40 @@
+{
+    "id": 216121441,
+    "contestId": 1182,
+    "creationTimeSeconds": 1690563033,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "I_hate_Dasha_Lobas"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 202,
+    "memoryConsumedBytes": 18432000,
+    "source": "/*\r\n* powered by ANDRIY POPYK\r\n* in honor of DASHA LOBAS and SEGMENT DECOMPOSITION and N^(log(N)) and hate_club_Dasha_Lobas and Juice WRlD\r\n* 999\r\n*/\r\n\r\n#include <iostream>\r\n#include <vector>\r\n#include <map>\r\n#include <stack>\r\n#include <set>\r\n#include <algorithm>\r\n#include <queue>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\n\r\nvector <vector <int>> g;\r\n\r\nint mx_d = -1;\r\nint mx_ind = -1;\r\nvoid dfs(int ind, int d, int last)\r\n{\r\n\tif (mx_d < d)\r\n\t{\r\n\t\tmx_ind = ind;\r\n\t\tmx_d = d;\r\n\t}\r\n\r\n\tfor (int i = 0; i < g[ind].size(); i++)\r\n\t{\r\n\t\tint ind_s = g[ind][i];\r\n\t\tif (last != ind_s)\r\n\t\t{\r\n\t\t\tdfs(ind_s, d + 1, ind);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nint d = 0;\r\nint ind_s_;\r\nint ans = -1;\r\nbool dfs2(int ind, int last)\r\n{\r\n\tif (ind == ind_s_)\r\n\t\treturn true;\r\n\tbool f = false;\r\n\tfor (int i = 0; i < g[ind].size(); i++)\r\n\t{\r\n\t\tint ind_s = g[ind][i];\r\n\t\tif (last != ind_s)\r\n\t\t{\r\n\t\t\tif (dfs2(ind_s, ind) == true)\r\n\t\t\t\tf = true;\r\n\t\t}\r\n\t}\r\n\td -= f;\r\n\tif ((d == 0) and (f == true))\r\n\t\tans = ind;\r\n\treturn f;\r\n}\r\n\r\nvector <int> deep_mx;\r\nvector <int> deep_mn;\r\n\r\nvoid dfs3(int ind, int d, int last)\r\n{\r\n\tdeep_mx[ind] = 1;\r\n\tdeep_mn[ind] = 1000000000;\r\n\r\n\tfor (int i = 0; i < g[ind].size(); i++)\r\n\t{\r\n\t\tint ind_s = g[ind][i];\r\n\t\tif (last != ind_s)\r\n\t\t{\r\n\t\t\tdfs3(ind_s, d + 1, ind);\r\n\t\t\tdeep_mx[ind] = max(deep_mx[ind], deep_mx[ind_s] + 1);\r\n\t\t\tdeep_mn[ind] = min(deep_mn[ind], deep_mn[ind_s] + 1);\r\n\t\t}\r\n\t}\r\n\tif (deep_mn[ind] == 1000000000)\r\n\t\tdeep_mn[ind] = 1;\r\n}\r\n\r\nint d_mx;\r\nmap <int, vector <int>> leafs;\r\nvoid dfs4(int ind, int last , int d)\r\n{\r\n\tdeep_mx[ind] = 1;\r\n\tdeep_mn[ind] = 1000000000;\r\n\r\n\tif (g[ind].size() == 1)\r\n\t{\r\n\t\tleafs[d].push_back(ind);\r\n\t}\r\n\r\n\r\n\tfor (int i = 0; i < g[ind].size(); i++)\r\n\t{\r\n\t\tint ind_s = g[ind][i];\r\n\t\tif (last != ind_s)\r\n\t\t{\r\n\t\t\tif (g[ind_s].size() <= 2)\r\n\t\t\t{\r\n\t\t\t\td_mx++;\r\n\t\t\t\tdfs4(ind_s, ind , d+1);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\n\r\nvector <vector <int>> deep__;\r\n\r\nbool dfs_checer(int ind, int last, int deep)\r\n{\r\n\tif (deep__[deep].size() == 0)\r\n\t{\r\n\t\tdeep__[deep].push_back(ind);\r\n\t}\r\n\telse\r\n\t{\r\n\t\tif (g[deep__[deep][deep__[deep].size() - 1]].size() != g[ind].size())\r\n\t\t{\r\n\t\t\treturn false;\r\n\t\t}\r\n\t\tdeep__[deep].push_back(ind);\r\n\t}\r\n\r\n\r\n\tfor (int i = 0; i < g[ind].size(); i++)\r\n\t{\r\n\t\tint ind_s = g[ind][i];\r\n\t\tif (ind_s != last)\r\n\t\t{\r\n\t\t\tbool f = dfs_checer(ind_s, ind, deep + 1);\r\n\t\t\tif (f == false)\r\n\t\t\t\treturn false;\r\n\t\t}\r\n\t}\r\n\treturn true;\r\n}\r\n\r\nsigned main()\r\n{\r\n\tios_base::sync_with_stdio(false);\r\n\tcin.tie(nullptr);\r\n\tcout.tie(nullptr);\r\n\r\n\tint n;\r\n\tcin >> n;\r\n\tif (n == 1)\r\n\t{\r\n\t\tcout << 1;\r\n\t\treturn 0;\r\n\t}\r\n\tg.resize(n);\r\n\tdeep__.resize(n);\r\n\tdeep_mx.resize(n);\r\n\tdeep_mn.resize(n);\r\n\r\n\tfor (int i = 0; i < n - 1; i++)\r\n\t{\r\n\t\tint u, v;\r\n\t\tcin >> u >> v;\r\n\t\tu--;\r\n\t\tv--;\r\n\t\tg[u].push_back(v);\r\n\t\tg[v].push_back(u);\r\n\t}\r\n\r\n\tdfs(0, 0, 0);\r\n\tmx_d = -1;\r\n\tint ind1 = mx_ind;\r\n\tdfs(ind1, 0, ind1);\r\n\td_mx = mx_d / 2;\r\n\r\n\tint ind2 = mx_ind;\r\n\r\n\tif (dfs_checer(ind1, ind1, 0) == true)\r\n\t{\r\n\t\tcout << ind1 + 1 << \"\\n\";\r\n\t\treturn 0;\r\n\t}\r\n\r\n\tfor (int i = 0; i < n; i++)\r\n\t\tdeep__[i].clear();\r\n\r\n\tif (dfs_checer(ind2, ind2, 0) == true)\r\n\t{\r\n\t\tcout << ind2 + 1 << \"\\n\";\r\n\t\treturn 0;\r\n\t}\r\n\r\n\tfor (int i = 0; i < n; i++)\r\n\t\tdeep__[i].clear();\r\n\td = mx_d / 2;\r\n\tind_s_ = ind2;\r\n\tdfs2(ind1, ind1);\r\n\r\n\r\n\tdfs3(ans, 0, ans);\r\n\r\n\r\n\tif (dfs_checer(ans, ans, 0) == true)\r\n\t{\r\n\t\tcout << ans + 1 << \"\\n\";\r\n\t\treturn 0;\r\n\t}\r\n\tfor (int i = 0; i < n; i++)\r\n\t\tdeep__[i].clear();\r\n\tdfs4(ans, ans , 0);\r\n\r\n\tfor (auto i : leafs)\r\n\t{\r\n\t\tif (i.second.size() == 1)\r\n\t\t{\r\n\t\t\tif (dfs_checer(i.second[0] , i.second[0], 0) == true)\r\n\t\t\t{\r\n\t\t\t\tcout << i.second[0] + 1 << \"\\n\";\r\n\t\t\t\treturn 0;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tcout << -1;\r\n}\r\n/*\r\n\r\n8\r\n1 8\r\n7 8\r\n2 8\r\n2 6\r\n2 3\r\n3 5\r\n3 4\r\n\r\n*/"
+}

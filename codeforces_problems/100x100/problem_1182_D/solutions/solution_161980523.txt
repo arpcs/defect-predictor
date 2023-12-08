@@ -1,0 +1,40 @@
+{
+    "id": 161980523,
+    "contestId": 1182,
+    "creationTimeSeconds": 1656352916,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "Olympia"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 43315200,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nint dfs (vector<vector<int> > &adj, vector<int>&sub, int curNode, int prevNode) {\r\n    for (int i: adj[curNode]) {\r\n        if (i != prevNode) {\r\n            sub[curNode] += dfs(adj, sub, i, curNode);\r\n        }\r\n    }\r\n    return sub[curNode];\r\n}\r\nvoid find_centroid (vector<vector<int> > &adj, vector<int>& sub, vector<int>& centroids, int curNode, int prevNode) {\r\n    int n = adj.size();\r\n    bool fine = !(n - sub[curNode] > n/2);\r\n    for (int i: adj[curNode]) {\r\n        if (i != prevNode) {\r\n            find_centroid(adj, sub, centroids, i, curNode);\r\n            if (sub[i] > n/2) {\r\n                fine = false;\r\n            }\r\n        }\r\n    }\r\n    if (fine) {\r\n        centroids.push_back(curNode);\r\n    }\r\n}\r\nbool check (vector<vector<int> > &adj, int curNode) {\r\n    queue<pair<int,int> > q;\r\n    q.push(make_pair(curNode, 0));\r\n    vector<int> depth;\r\n    depth.assign(adj.size(), -1);\r\n    while (!q.empty()) {\r\n        pair<int,int> p = q.front();\r\n        q.pop();\r\n        if (depth[p.first] != -1) {\r\n            continue;\r\n        }\r\n        depth[p.first] = p.second;\r\n        for (int i: adj[p.first]) {\r\n            q.push(make_pair(i, p.second + 1));\r\n        }\r\n    }\r\n    vector<vector<int> > d;\r\n    for (int i = 0; i < adj.size(); i++) {\r\n        while (d.size() <= depth[i]) {\r\n            vector<int> dummy;\r\n            d.push_back(dummy);\r\n        }\r\n        d[depth[i]].push_back(i);\r\n    }\r\n    for (int i = 0; i < d.size(); i++) {\r\n        set<int> s;\r\n        for (int j: d[i]) {\r\n            s.insert(adj[j].size());\r\n        }\r\n        if (s.size() > 1) {\r\n            return false;\r\n        }\r\n    }\r\n    return true;\r\n}\r\nvector<int64_t> id;\r\nvector<bool> okay;\r\nvector<int> leaves;\r\nvector<int64_t> powr;\r\nconst int MOD = 1e9 + 7;\r\nint first = -1;\r\nvoid rec (vector<vector<int> >&adj, vector<int>& sub, int curNode, int prevNode) {\r\n    okay[curNode] = true;\r\n    vector<pair<int,int> > nodes;\r\n    set<int> s;\r\n    leaves[curNode] = -10;\r\n    for (int i: adj[curNode]) {\r\n        if (i != prevNode) {\r\n            rec(adj, sub, i, curNode);\r\n            nodes.push_back(make_pair(id[i], i));\r\n            s.insert(id[i]);\r\n            if (!okay[i]) {\r\n                okay[curNode] = false;\r\n            }\r\n            if (leaves[curNode] == -10) {\r\n                leaves[curNode] = leaves[i];\r\n            } else {\r\n                leaves[curNode] = -1;\r\n            }\r\n        }\r\n    }\r\n    if (leaves[curNode] == -10) {\r\n        leaves[curNode] = curNode;\r\n    }\r\n    if (s.size() > 1) {\r\n        okay[curNode] = false;\r\n        if (first == -1) {\r\n            first = curNode;\r\n        }\r\n    } \r\n    sort(nodes.begin(), nodes.end());\r\n    id[curNode] = 1;\r\n    for (auto& p: nodes) {\r\n        id[curNode] = ((powr[sub[p.second] + 1] * id[curNode]) % MOD + id[p.second]) % MOD;\r\n    }\r\n    id[curNode] *= 2, id[curNode] %= MOD;\r\n    //cout << curNode + 1 << \" <-> \" << id[curNode] << '\\n';\r\n}\r\nint main() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n    int n;\r\n    cin >> n;\r\n    vector<vector<int> > adj(n);\r\n    for (int i = 0; i < n - 1; i++) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        u--, v--;\r\n        adj[u].push_back(v), adj[v].push_back(u);\r\n    }\r\n    vector<int> sub; \r\n    sub.assign(n, 1);\r\n    int leaf = 0;\r\n    for (int i = 0; i < n; i++) {\r\n        if (adj[i].size() == 1) {\r\n            leaf = i;\r\n        }\r\n    }\r\n    dfs(adj, sub, leaf, leaf);\r\n    assert(sub[leaf] == n);\r\n    vector<int> centroids;\r\n    \r\n    find_centroid(adj, sub, centroids, leaf, leaf);\r\n    for (int i: centroids) {\r\n        if (check(adj, i)) {\r\n            cout << i + 1 << '\\n';\r\n            exit(0);\r\n        } \r\n    }\r\n    \r\n    id.resize(n);\r\n    powr.push_back(1);\r\n    while (powr.size() != n + 5) {\r\n        powr.push_back(powr.back() * 2);\r\n        powr.back() %= MOD;\r\n    }\r\n    okay.resize(n);\r\n    leaves.assign(n, 0);\r\n    rec(adj, sub, leaf, leaf);\r\n    if (check(adj, leaf)) {\r\n        cout << leaf + 1 << '\\n';\r\n        exit(0);\r\n    }\r\n    set<int> s;\r\n    for (int i = first; i <= first; i++) {\r\n        if (!okay[i]) {\r\n            map<int,pair<int,int> > myMap;\r\n            for (int j: adj[i]) {\r\n                if (leaves[j] != -1) {\r\n                    myMap[id[j]].first++;\r\n                    myMap[id[j]].second = leaves[j];\r\n                }\r\n            }\r\n            for (auto& p: myMap) {\r\n                if (p.second.first == 1 && !s.count(p.second.second)) {\r\n                    s.insert(p.second.second);\r\n                    if (check(adj, p.second.second)) {\r\n                        cout << p.second.second + 1 << '\\n';\r\n                        exit(0);\r\n                    }\r\n                }\r\n            }\r\n\r\n        }\r\n    }\r\n    cout << -1;\r\n}"
+}

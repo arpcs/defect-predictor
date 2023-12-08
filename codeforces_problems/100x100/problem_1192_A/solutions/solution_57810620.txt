@@ -1,0 +1,34 @@
+{
+    "id": 57810620,
+    "contestId": 1192,
+    "creationTimeSeconds": 1564160899,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "krijgertje"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 185,
+    "timeConsumedMillis": 1356,
+    "memoryConsumedBytes": 150323200,
+    "points": 100.0,
+    "source": "#include <algorithm>  \r\n#include <iostream>  \r\n#include <sstream>  \r\n#include <string>  \r\n#include <vector>  \r\n#include <queue>  \r\n#include <set>  \r\n#include <map>  \r\n#include <cstdio>  \r\n#include <cstdlib>  \r\n#include <cctype>  \r\n#include <cmath>  \r\n#include <cstring>\r\n#include <list>  \r\n#include <cassert>\r\n#include <climits>\r\n#include <bitset>\r\nusing namespace std;  \r\n\r\n#define PB push_back  \r\n#define MP make_pair  \r\n#define SZ(v) ((int)(v).size())  \r\n#define FOR(i,a,b) for(int i=(a);i<(b);++i)  \r\n#define REP(i,n) FOR(i,0,n)  \r\n#define FORE(i,a,b) for(int i=(a);i<=(b);++i)  \r\n#define REPE(i,n) FORE(i,0,n)  \r\n#define FORSZ(i,a,v) FOR(i,a,SZ(v))  \r\n#define REPSZ(i,v) REP(i,SZ(v))  \r\ntypedef long long ll;  \r\nint gcd(int a,int b) { return b==0?a:gcd(b,a%b); }\r\n\r\nconst int MAXFLAT=150000;\r\nconst int MAXCELL=9*MAXFLAT;\r\nconst int DX[]={-1,-1,-1,0,+1,+1,+1,0},DY[]={-1,0,+1,+1,+1,0,-1,-1};\r\nstruct P { int x,y; P() {} P(int x,int y):x(x),y(y) {} };\r\nbool operator<(const P &a,const P &b) { if(a.x!=b.x) return a.x<b.x; return a.y<b.y; }\r\nbool operator==(const P &a,const P &b) { return a.x==b.x&&a.y==b.y; }\r\n\r\nint nflat,subtask;\r\nP flat[MAXFLAT];\r\nint ans[MAXFLAT];\r\n\r\nP cell[MAXCELL]; int ncell;\r\nvector<int> adj8[MAXCELL],adj4[MAXCELL];\r\nint flatid[MAXCELL],cellid[MAXFLAT];\r\n\r\nint comp[MAXCELL],ncomp; // 8-connected components of empty cells\r\nint outsidecomp;\r\nvector<int> cells[MAXCELL];\r\n\r\nint q[MAXCELL],qhead,qtail;\r\n\r\nbool isreachable[MAXFLAT],isarticulation[MAXFLAT],isavailable[MAXFLAT];\r\nset<int> available;\r\n\r\nvoid recalc(int fid) {\r\n\t//printf(\"recalc(%d)\\n\",fid);\r\n\tint at=cellid[fid];\r\n\tisreachable[fid]=false; REPSZ(i,adj4[at]) { int to=adj4[at][i]; if(comp[to]==outsidecomp) isreachable[fid]=true; }\r\n\tisarticulation[fid]=false;\r\n\tREPSZ(i,adj8[at]) {\r\n\t\tint fst=adj8[at][i]; if(comp[fst]!=-1) continue;\r\n\t\tint last=-1; bool added=false; vector<int> seen; REPSZ(j,adj8[at]) { int to=adj8[at][(i+j+1)%SZ(adj8[at])]; if(last!=comp[to]) last=comp[to],added=false; if((i+j+1)%2==1&&!added&&last!=-1) seen.PB(last),added=true; }\r\n\t\t//printf(\"seen:\"); REPSZ(j,seen) printf(\" %d\",seen[j]); puts(\"\");\r\n\t\tREPSZ(j,seen) FORSZ(k,j+1,seen) if(seen[j]==seen[k]) isarticulation[fid]=true;\r\n\t\tbreak;\r\n\t}\r\n\t//printf(\"recalc(%d) -> %s %s\\n\",fid,isreachable[fid]?\"reachable\":\"no\",isarticulation[fid]?\"articulation\":\"ok\");\r\n\tif((isreachable[fid]&&!isarticulation[fid])!=isavailable[fid]) { isavailable[fid]=!isavailable[fid]; if(isavailable[fid]) available.insert(fid); else available.erase(fid); }\r\n}\r\n\r\nvoid mergecomp(int a,int b) {\r\n\tif(SZ(cells[a])<SZ(cells[b])) swap(a,b);\r\n\tif(b==outsidecomp) swap(a,b);\r\n\tREPSZ(i,cells[b]) { int at=cells[b][i]; comp[at]=a; cells[a].PB(at); }\r\n\tREPSZ(i,cells[b]) { int at=cells[b][i]; REPSZ(j,adj8[at]) { int to=adj8[at][j]; if(comp[to]!=-1) continue; assert(flatid[to]!=-1); recalc(flatid[to]); } }\r\n\tcells[b].clear();\r\n}\r\n\r\nbool solve() {\r\n\tncell=0; REP(i,nflat) FORE(dx,-1,+1) FORE(dy,-1,+1) cell[ncell++]=P(flat[i].x+dx,flat[i].y+dy);\r\n\tsort(cell,cell+ncell); ncell=unique(cell,cell+ncell)-cell;\r\n\t//printf(\"cell:\"); REP(i,ncell) printf(\" (%d,%d)\",cell[i].x,cell[i].y); puts(\"\");\r\n\t\r\n\tREP(i,ncell) { adj4[i].clear(),adj8[i].clear(); REP(k,8) { P pj=P(cell[i].x+DX[k],cell[i].y+DY[k]); int j=lower_bound(cell,cell+ncell,pj)-cell; if(j>=ncell||!(cell[j]==pj)) continue; adj8[i].PB(j); if(DX[k]==0||DY[k]==0) adj4[i].PB(j); } }\r\n\t//REP(i,ncell) { printf(\"adj4[%d]:\",i); REPSZ(j,adj4[i]) printf(\" %d\",adj4[i][j]); puts(\"\"); }\r\n\t//REP(i,ncell) { printf(\"adj8[%d]:\",i); REPSZ(j,adj8[i]) printf(\" %d\",adj8[i][j]); puts(\"\"); }\r\n\t\r\n\tREP(i,ncell) flatid[i]=-1; REP(i,nflat) cellid[i]=lower_bound(cell,cell+ncell,flat[i])-cell,flatid[cellid[i]]=i;\r\n\tncomp=0; REP(i,ncell) comp[i]=flatid[i]==-1?-1:-2;\r\n\tREP(i,ncell) if(comp[i]==-2) { comp[i]=ncomp++; qhead=qtail=0; q[qhead++]=i; while(qtail<qhead) { int at=q[qtail++]; REPSZ(j,adj8[at]) { int to=adj8[at][j]; if(comp[to]==-2) comp[to]=comp[at],q[qhead++]=to; } } }\r\n\tif(ncomp>=2) return false;\r\n\tncomp=0; REP(i,ncell) comp[i]=flatid[i]==-1?-2:-1;\r\n\tREP(i,ncell) if(comp[i]==-2) { comp[i]=ncomp++; qhead=qtail=0; q[qhead++]=i; while(qtail<qhead) { int at=q[qtail++]; REPSZ(j,adj4[at]) { int to=adj4[at][j]; if(comp[to]==-2) comp[to]=comp[at],q[qhead++]=to; } } }\r\n\tREP(i,ncomp) cells[i].clear(); REP(i,ncell) if(comp[i]!=-1) cells[comp[i]].PB(i);\r\n\tassert(ncell>=1&&flatid[0]==-1); outsidecomp=comp[0];\r\n\t\r\n\t\r\n\tavailable.clear();\r\n\tREP(i,nflat) isavailable[i]=false,recalc(i);\r\n\tREP(i,nflat) {\r\n\t\tassert(SZ(available)>=1);\r\n\t\tint fid=*available.rbegin(),at=cellid[fid]; available.erase(fid); ans[nflat-i-1]=fid;\r\n\t\t//printf(\"at=%d (fid=%d)\\n\",at,fid);\r\n\t\tREPSZ(j,adj4[at]) { int to=adj4[at][j]; if(comp[to]==-1) continue; comp[at]=comp[to],cells[comp[at]].PB(at); break; } assert(comp[at]!=-1);\r\n\t\tREPSZ(j,adj8[at]) { int to=adj8[at][j]; if(comp[to]!=-1) continue; assert(flatid[to]!=-1); recalc(flatid[to]); }\r\n\t\tREPSZ(j,adj4[at]) { int to=adj4[at][j]; if(comp[to]==-1||comp[to]==comp[at]) continue; mergecomp(comp[at],comp[to]); }\r\n\t}\r\n\treturn true;\r\n}\r\n\r\nvoid run() {\r\n\tscanf(\"%d%d\",&nflat,&subtask);\r\n\tREP(i,nflat) scanf(\"%d%d\",&flat[i].x,&flat[i].y);\r\n\tif(!solve()) { printf(\"NO\\n\"); return; }\r\n\tprintf(\"YES\\n\"); REP(i,nflat) printf(\"%d\\n\",ans[i]+1);\r\n}\r\n\r\nint main() {\r\n\trun();\r\n\treturn 0;\r\n}\r\n"
+}

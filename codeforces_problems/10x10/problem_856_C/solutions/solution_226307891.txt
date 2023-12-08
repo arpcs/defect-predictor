@@ -1,0 +1,36 @@
+{
+    "id": 226307891,
+    "contestId": 856,
+    "creationTimeSeconds": 1696255911,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 856,
+        "index": "C",
+        "name": "Eleventh Birthday",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 856,
+        "members": [
+            {
+                "handle": "prvocislo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1505050500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 204800,
+    "source": "#include <algorithm>\r\n#include <deque>\r\n#include <iomanip>\r\n#include <iostream>\r\n#include <map>\r\n#include <queue>\r\n#include <random>\r\n#include <set>\r\n#include <string>\r\n#include <vector>\r\ntypedef long long ll;\r\nusing namespace std;\r\n\r\nconst int mod = 998244353;\r\nvoid upd(int& a, int b) { a = (a + b) % mod; }\r\nint add(int a, int b) { return (a + b) % mod; }\r\nint mul(int a, int b) { return (a * 1ll * b) % mod; }\r\nint pwr(int a, int b = mod - 2)\r\n{\r\n    if (!b) return 1;\r\n    int h = pwr(a, b >> 1);\r\n    h = mul(h, h);\r\n    if (b & 1) h = mul(h, a);\r\n    return h;\r\n}\r\nconst int k = 11;\r\nvector<vector<int> > solve(vector<int> v) // dp[modulo][pocet zapornych] = pocet moznosti\r\n{\r\n    int n = v.size();\r\n    vector<vector<int> > dp(n + 1, vector<int>(k, 0));\r\n    dp[0][0] = 1;\r\n    for (int x : v)\r\n    {\r\n        vector<vector<int> > nw(n + 1, vector<int>(k, 0));\r\n        for (int z = 0; z < n; z++) for (int y = 0; y < k; y++)\r\n        {\r\n            upd(nw[z][(y + x) % k], dp[z][y]);\r\n            upd(nw[z + 1][(y + k - x) % k], dp[z][y]);\r\n        }\r\n        dp = nw;\r\n    }\r\n    return dp;\r\n}\r\nconst int maxk = 4005;\r\nint f[maxk], invf[maxk];\r\nint c(int n, int k)\r\n{\r\n    if (n == k || k == 0) return 1;\r\n    if (k < 0 || n < k) return 0;\r\n    return mul(f[n], mul(invf[k], invf[n - k]));\r\n}\r\nint main()\r\n{\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    f[0] = 1;\r\n    for (int i = 1; i < maxk; i++) f[i] = mul(f[i - 1], i);\r\n    invf[maxk - 1] = pwr(f[maxk - 1]);\r\n    for (int i = maxk - 2; i >= 0; i--) invf[i] = mul(invf[i + 1], i + 1);\r\n    int t;\r\n    cin >> t;\r\n    while (t--)\r\n    {\r\n        int n;\r\n        cin >> n;\r\n        vector<int> a(n);\r\n        vector<vector<int> > v(2);\r\n        for (int i = 0; i < n; i++)\r\n        {\r\n            cin >> a[i];\r\n            string s = to_string(a[i]);\r\n            int sum = 0;\r\n            for (int i = 0; i < s.size(); i++) sum += ((i & 1) ? 1 : k - 1) * (int)(s[i] - '0');\r\n            sum %= k;\r\n            v[s.size() & 1].push_back(sum);\r\n        }\r\n        vector<vector<vector<int> > > dp(2);\r\n        for (int i = 0; i < 2; i++) dp[i] = solve(v[i]);\r\n        int ans = 0;\r\n        int k1 = v[1].size() - v[1].size() / 2, z1 = v[1].size() / 2;\r\n        for (int z0 = 0; z0 <= v[0].size(); z0++) // mame k1 moznosti kam umiesnit kazde taketo cislo\r\n        {\r\n            int k0 = v[0].size() - z0, cnt = c(z0 + k1 - 1, k1 - 1);\r\n            cnt = mul(cnt, f[z0]);\r\n            cnt = mul(cnt, f[k0]);\r\n            cnt = mul(cnt, f[z1]);\r\n            cnt = mul(cnt, f[k1]);\r\n            for (int x = 0; x < k; x++)\r\n            {\r\n                upd(ans, mul(cnt, mul(dp[0][z0][x], dp[1][z1][(k - x) % k])));\r\n            }\r\n        }\r\n        cout << ans << \"\\n\";\r\n    }\r\n    return 0;\r\n}"
+}

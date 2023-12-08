@@ -1,0 +1,36 @@
+{
+    "id": 187611218,
+    "contestId": 1110,
+    "creationTimeSeconds": 1672661653,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "cq779"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 847667200,
+    "source": "// LUOGU_RID: 98528669\n#include <bits/stdc++.h>\nusing namespace std;\n// #define int long long\ntypedef long long ll;\n#define INF 0x3f3f3f3f3f3f3f3f\nvoid up(int &x,int y) { x < y ? x = y : 0; }\nvoid down(int &x,int y) { x > y ? x = y : 0; }\n#define N ((int)(2e3 + 15))\n#define M (N * 16)\n\nint n,fail[N][M];\nchar L[N],R[N],fr[N][M],buf[N];\nnamespace AC\n{\n    queue<int> q; \n    char tmp[N]; int cnt = 1, limit;\n    int fail[M], d[M][10], v[M][N], sum[M][N];\n    void dfs(int x,int dep, bool bl = 1, bool br = 1)\n    {\n        if(!(bl || br) || dep == limit) { ++v[x][limit - dep]; return; }\n        int m = br ? R[dep] : 9;\n        for(int i = (bl ? L[dep] : 0); i <= m; i++)\n            dfs(d[x][i] ? d[x][i] : (d[x][i] = ++cnt), dep + 1, bl && i == L[dep], br && i == R[dep]);\n    }\n    void init()\n    {\n        int nL = strlen(L), nR = strlen(R); char *p;\n        for(p = L; *p; (*p++) &= 15); for(p = R; *p; (*p++) &= 15);\n        if(nL == nR) return limit = nL, dfs(1,0);\n        memcpy(tmp, R, nR); memset(R, 9, nL), limit = nL, dfs(1,0);\n        memcpy(R, tmp, nR), memset(L, 0, nR), L[0] = 1, limit = nR, dfs(1,0);\n        for(int i = nL + 1; i < nR; i++)\n            for(int j = 1; j < 10; j++) ++v[ d[1][j] ? d[1][j] : (d[1][j] = ++cnt) ][i - 1];\n    }\n    void build()\n    {\n        \n        for(q.push(1), fail[1] = 0; !q.empty(); q.pop())\n            for(int i = q.front(), id = 0; id < 10; ++id)\n            {\n                int t = (fail[i] ? d[fail[i]][id] : 1), &u = d[i][id];\n                if(!u)  { u = t; continue; } fail[u] = t; q.push(u);\n                for(int j = 0; j < n; j++) v[u][j] += v[t][j];\n            }\n    }\n    void psum() { for(int i = 1; i <= AC::cnt; i++) partial_sum(v[i], v[i] + n, sum[i]); }\n}\nsigned main()\n{\n    ios::sync_with_stdio(0);\n    cin.tie(0);cout.tie(0);\n    freopen(\"check.in\",\"r\",stdin);\n    // freopen(\"check.out\",\"w\",stdout);\n\n    cin >> L >> R >> n; AC::init(); AC::build(); AC::psum();\n\n    for(int i = 1,nj,nv; i <= n; i++)\n        for(int j = 1; j <= AC::cnt; j++)\n            for(int d = 0; d < 10; d++)\n            {\n                nj = AC::d[j][d], nv = fail[i - 1][nj] + AC::sum[nj][i - 1];\n                if(nv > fail[i][j]) { fail[i][j] = nv, fr[i][j] = d; }\n            }\n    cout << fail[n][1] << '\\n'; int t = 1; \n    for(int i = n; i; t = AC::d[t][fr[i][t]], --i) cout << (char)(fr[i][t] + '0');\n    return 0;\n}"
+}

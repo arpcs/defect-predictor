@@ -1,0 +1,34 @@
+{
+    "id": 57846069,
+    "contestId": 1192,
+    "creationTimeSeconds": 1564226012,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "atoiz"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 185,
+    "timeConsumedMillis": 966,
+    "memoryConsumedBytes": 112230400,
+    "points": 100.0,
+    "source": "/*input\r\n13 2\r\n4 6\r\n3 5\r\n3 4\r\n3 3\r\n4 2\r\n5 2\r\n6 2\r\n7 3\r\n7 4\r\n7 5\r\n6 6\r\n5 4\r\n5 5\r\n\r\n\r\n\r\n8 2\r\n3 5\r\n5 3\r\n3 3\r\n5 5\r\n2 4\r\n6 4\r\n4 2\r\n4 4\r\n \r\n8 2\r\n0 2\r\n1 2\r\n1 0\r\n0 0\r\n2 1\r\n2 0\r\n0 1\r\n2 2\r\n*/\r\n \r\n#include <iostream>\r\n#include <vector>\r\n#include <algorithm>\r\n#include <cassert>\r\n#include <queue>\r\n \r\nusing namespace std;\r\n \r\nusing pii = pair<int, int>;\r\n#define r first\r\n#define c second\r\n \r\nconst int dr[8] = {-1, -1, 0, 1, 1, 1, 0, -1}, dc[8] = {0, 1, 1, 1, 0, -1, -1, -1};\r\nconst int MAXN = 150007, MAXV = MAXN * 9, INF = 1e9 + 7;\r\nconst int EXT = -1, ALIVE = 1, IN = 0;\r\nint G[MAXV][8], type[MAXV], T, N, V, P[MAXV], inComp[MAXV];\r\npii C[MAXV], orC[MAXN];\r\nbool peri[MAXV], inq[MAXV];\r\npriority_queue<int> pq;\r\nvector<int> ans;\r\nbool vis[MAXV];\r\n \r\nbool comp(int i, int j) { return C[i] < C[j]; }\r\n \r\nint search(pii p)\r\n{\r\n\tint lo = 1, hi = V;\r\n\twhile (lo < hi) {\r\n\t\tint mid = (lo + hi) >> 1;\r\n\t\tif (C[P[mid]] < p) lo = mid + 1;\r\n\t\telse hi = mid;\r\n\t}\r\n\tif (C[P[lo]] == p) return P[lo];\r\n\treturn 0;\r\n}\r\n \r\nint calc(int u)\r\n{\r\n\tint cnt = 0;\r\n\tvector<int> vec;\r\n\tfor (int d = 0; d < 8; d += 2) {\r\n\t\tcnt += ((type[G[u][d]] == EXT) && (type[G[u][(d + 1) & 7]] != EXT || type[G[u][(d + 2) & 7]] != EXT));\r\n\t\tif (type[G[u][d]] == IN && (type[G[u][(d + 1) & 7]] == ALIVE || type[G[u][(d + 2) & 7]] == ALIVE)) {\r\n\t\t\tvec.push_back(inComp[G[u][d]]);\r\n\t\t}\r\n\t}\r\n\r\n\tsort(vec.begin(), vec.end());\r\n\tfor (int i = 1; i < (int) vec.size(); ++i) {\r\n\t\tif (vec[i - 1] == vec[i]) return INF;\r\n\t}\r\n\r\n\treturn cnt;\r\n}\r\n \r\nvoid dfs(int u)\r\n{\r\n\tvis[u] = 1;\r\n\tfor (int d = 0; d < 8; ++d) {\r\n\t\tint v = G[u][d];\r\n\t\tif (!vis[v] && type[v] == ALIVE) dfs(v);\r\n\t}\r\n}\r\n \r\nvoid fillExt(int u)\r\n{\r\n\ttype[u] = EXT;\r\n \r\n\tfor (int d = 0; d < 8; d += 2) {\r\n\t\tif (type[G[u][d]] == ALIVE) {\r\n\t\t\tperi[G[u][d]] = 1;\r\n\t\t\tif (!inq[G[u][d]] && calc(G[u][d]) <= 1) {\r\n\t\t\t\tinq[G[u][d]] = 1;\r\n\t\t\t\tpq.push(G[u][d]);\t\r\n\t\t\t}\r\n\t\t} else if (type[G[u][d]] == IN) {\r\n\t\t\tfillExt(G[u][d]);\r\n\t\t}\r\n\t}\r\n \r\n\tfor (int d = 0; d < 8; ++d) {\r\n\t\tif (type[G[u][d]] == ALIVE && peri[G[u][d]] && !inq[G[u][d]] && calc(G[u][d]) <= 1) {\r\n\t\t\tinq[G[u][d]] = 1;\r\n\t\t\tpq.push(G[u][d]);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nvoid fillIn(int u)\r\n{\r\n\tfor (int d = 0; d < 8; d += 2) {\r\n\t\tif (type[G[u][d]] == IN && inComp[G[u][d]] == 0) {\r\n\t\t\tinComp[G[u][d]] = inComp[u];\r\n\t\t\tfillIn(G[u][d]);\r\n\t\t}\r\n\t}\r\n}\r\n \r\nint main()\r\n{\r\n\tios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0);\r\n\tcin >> N >> T; V = N;\r\n\tfor (int i = 1; i <= N; ++i) cin >> C[i].r >> C[i].c;\r\n\tfor (int i = 0; i < N; ++i) orC[i] = C[i + 1];\r\n\tsort(orC, orC + N); orC[N] = {INF, INF};\r\n \r\n\tvector<pair<int, int>> all(N * 8);\r\n\tfor (int i = 1; i <= N; ++i) {\r\n\t\tfor (int d = 0; d < 8; ++d) {\r\n\t\t\tall[(i - 1) * 8 + d] = {C[i].r + dr[d], C[i].c + dc[d]};\r\n\t\t}\r\n\t}\r\n\tsort(all.begin(), all.end());\r\n\tall.erase(unique(all.begin(), all.end()), all.end());\r\n\tfor (auto a : all) {\r\n\t\tif (*lower_bound(orC, orC + N, a) != a) {\r\n\t\t\tC[++V] = a;\r\n\t\t}\r\n\t}\r\n \r\n\tfor (int u = 1; u <= V; ++u) P[u] = u;\r\n\t// for (int u = 1; u <= V; ++u) cout << C[u].r << ' ' << C[u].c << endl;\r\n\tsort(P + 1, P + V + 1, comp);\r\n \r\n\tfor (int u = 1; u <= V; ++u) {\r\n\t\tfor (int d = 0; d < 8; ++d) {\r\n\t\t\tG[u][d] = search({C[u].r + dr[d], C[u].c + dc[d]});\r\n\t\t}\r\n\t}\r\n \r\n\ttype[0] = EXT;\r\n\tfor (int u = 1; u <= N; ++u) type[u] = ALIVE;\r\n\tfor (int u = N + 1; u <= V; ++u) type[u] = IN;\r\n\tfor (int u = N + 1; u <= V; ++u) {\r\n\t\tif (inComp[u] == 0) {\r\n\t\t\tinComp[u] = u;\r\n\t\t\tfillIn(u);\r\n\t\t}\r\n\t}\r\n \r\n\tdfs(1);\r\n\tfor (int u = 1; u <= N; ++u) if (!vis[u]) return cout << \"NO\" << endl, 0;\r\n \r\n\tfillExt(N + 1);\r\n\tans.reserve(N);\r\n\twhile (!pq.empty()) {\r\n\t\tint u = pq.top(); pq.pop();\r\n\t\tassert(type[u] == ALIVE && peri[u]);\r\n\t\tif (calc(u) > 1) {\r\n\t\t\tinq[u] = 0;\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tans.push_back(u);\r\n\t\tfillExt(u);\r\n\t}\r\n \r\n\tassert((int) ans.size() == N);\r\n\tcout << \"YES\\n\";\r\n\tfor (int i = (int) ans.size() - 1; i >= 0; --i) {\r\n\t\tcout << ans[i] << '\\n';\r\n\t}\r\n}"
+}

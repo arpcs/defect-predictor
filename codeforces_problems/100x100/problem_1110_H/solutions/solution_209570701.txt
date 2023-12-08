@@ -1,0 +1,36 @@
+{
+    "id": 209570701,
+    "contestId": 1110,
+    "creationTimeSeconds": 1686663712,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "Forza_Ferrari"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 842,
+    "memoryConsumedBytes": 964403200,
+    "source": "// LUOGU_RID: 112658466\n#include<iostream>\r\n#include<cstdio>\r\n#include<string>\r\n#include<queue>\r\nusing namespace std;\r\nint n,ml,mr,tot,ch[40001][11],w[40001][2001],fail[40001],dp[2001][40001],nxt[2001][40001],s[2001];\r\nstring L,R;\r\ninline void init()\r\n{\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0);\r\n}\r\ninline int read()\r\n{\r\n    int x;\r\n    cin>>x;\r\n    return x;\r\n}\r\ninline void dfs(int len,bool f1,bool f2)\r\n{\r\n    if(len>mr||(!f1&&!f2))\r\n    {\r\n        int p=1,x=0;\r\n        while(p<len&&!s[p])\r\n            ++p;\r\n        while(p<len)\r\n        {\r\n            if(!ch[x][s[p]])\r\n                ch[x][s[p]]=++tot;\r\n            x=ch[x][s[p]];\r\n            ++p;\r\n        }\r\n        ++w[x][mr-len+1];\r\n        return;\r\n    }\r\n    int l=f1? L[len]:0,r=f2? R[len]:9;\r\n    for(int i=l;i<=r;++i)\r\n    {\r\n        s[len]=i;\r\n        dfs(len+1,f1&&i==l,f2&&i==r);\r\n    }\r\n}\r\ninline void build()\r\n{\r\n    queue<int> q;\r\n    for(int i=0;i<10;++i)\r\n        if(ch[0][i])\r\n            q.emplace(ch[0][i]);\r\n    while(!q.empty())\r\n    {\r\n        int k=q.front();\r\n        q.pop();\r\n        for(int i=0;i<10;++i)\r\n            if(ch[k][i])\r\n            {\r\n                fail[ch[k][i]]=ch[fail[k]][i];\r\n                q.emplace(ch[k][i]);\r\n            }\r\n            else\r\n                ch[k][i]=ch[fail[k]][i];\r\n    }\r\n}\r\nint main()\r\n{\r\n    init();\r\n    cin>>L>>R;\r\n    n=read();\r\n    ml=L.length();\r\n    mr=R.length();\r\n    while(L.size()<mr)\r\n        L.push_back(' ');\r\n    L=\" \"+L;\r\n    R=\" \"+R;\r\n    for(int i=mr,j=ml;j;--i,--j)\r\n        L[i]=L[j];\r\n    for(int i=1;i<=mr-ml;++i)\r\n        L[i]='0';\r\n    for(int i=1;i<=mr;++i)\r\n    {\r\n        L[i]-='0';\r\n        R[i]-='0';\r\n    }\r\n    dfs(1,1,1);\r\n    build();\r\n    for(int i=1;i<=tot;++i)\r\n        for(int j=0;j<=n;++j)\r\n            w[i][j]+=w[fail[i]][j];\r\n    for(int i=1;i<=tot;++i)\r\n        for(int j=1;j<=n;++j)\r\n            w[i][j]+=w[i][j-1];\r\n    for(int i=0;i<=tot;++i)\r\n        dp[0][i]=0;\r\n    for(int i=1;i<=n;++i)\r\n        for(int j=0;j<=tot;++j)\r\n        {\r\n            dp[i][j]=-1e9;\r\n            for(int k=0;k<10;++k)\r\n            {\r\n                int now=dp[i-1][ch[j][k]]+w[ch[j][k]][i-1];\r\n                if(now>dp[i][j])\r\n                {\r\n                    dp[i][j]=now;\r\n                    nxt[i][j]=k;\r\n                }\r\n            }\r\n        }\r\n    cout<<dp[n][0]<<'\\n';\r\n    for(int i=n,j=0;i>=1;--i)\r\n    {\r\n        int now=nxt[i][j];\r\n        cout<<(char)(now+'0');\r\n        j=ch[j][now];\r\n    }\r\n    cout<<'\\n';\r\n    cout.flush();\r\n    return 0;\r\n}"
+}

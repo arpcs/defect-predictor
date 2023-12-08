@@ -1,0 +1,36 @@
+{
+    "id": 172892101,
+    "contestId": 1000,
+    "creationTimeSeconds": 1663724090,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "cage"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 2995,
+    "memoryConsumedBytes": 125132800,
+    "source": "#include<iostream>\r\n#include<cstring>\r\n#include<vector>\r\n#include<algorithm>\r\nusing namespace std;\r\nconst int N=3e5+100;\r\n#define int long long \r\nint f[N],g[N],n,a[N];\r\nvector<pair<int,int>>v[N];\r\nint sz[N],hs[N],dad[N],dis[N],s[N],h[N];\r\nint ss[N],sh[N];\r\nint dep[N],pa[20][N],lg[N];\r\ninline void dfs(int x,int fa){\r\n    sz[x]=1;f[x]=a[x];dad[x]=fa;\r\n    pa[0][x]=fa;dep[x]=dep[fa]+1;\r\n    for(int i=1;i<=19;i++){\r\n        pa[i][x]=pa[i-1][pa[i-1][x]];\r\n    }\r\n    for(auto [y,w]:v[x]){\r\n        if(y==fa) continue;\r\n        dis[y]=dis[x]+a[y]-w;\r\n        dfs(y,x);sz[x]+=sz[y];\r\n        if(sz[hs[x]]<sz[y]) hs[x]=y;\r\n        f[x]+=max(0ll,f[y]-2*w);\r\n        h[y]=max(0ll,f[y]-2*w);s[x]+=max(0ll,h[y]);\r\n    }\r\n    \r\n}\r\ninline void rdfs(int x,int fa){\r\n    ss[x]=ss[fa]+s[x];sh[x]=sh[fa]+h[x];\r\n    for(auto [y,w]:v[x]){\r\n        if(y==fa) continue;\r\n        g[y]=max(0ll,g[x])-2*w+f[x]-max(0ll,f[y]-2*w);\r\n        rdfs(y,x);\r\n    }\r\n}\r\ninline int lca(int x,int y){\r\n    if(dep[x]<dep[y]) swap(x,y);\r\n    while(dep[x]>dep[y]) x=pa[lg[dep[x]-dep[y]]][x];\r\n    if(x==y)return x;\r\n    for(int i=19;i>=0;i--){\r\n        if(pa[i][x]!=pa[i][y]){\r\n            x=pa[i][x],y=pa[i][y];\r\n        }\r\n    }return pa[0][x];\r\n}\r\ninline int jump(int x,int y){\r\n    int l=dep[x]-dep[y];\r\n    l--;\r\n    while(l){\r\n        x=pa[__builtin_ctz(l)][x];\r\n        l-=(1<<__builtin_ctz(l));\r\n    }return x;\r\n}\r\nint32_t main(){\r\n    ios::sync_with_stdio(false);\r\n    int Q;cin>>n>>Q;\r\n    for(int i=2;i<=n;i++) lg[i]=lg[i>>1]+1;\r\n    for(int i=1;i<=n;i++) cin>>a[i];\r\n    for(int i=1;i<n;i++){\r\n        int x,y,w;cin>>x>>y>>w;\r\n        v[x].push_back(make_pair(y,w));\r\n        v[y].push_back(make_pair(x,w));\r\n    }\r\n    dis[1]=a[1];\r\n    dfs(1,0),rdfs(1,0);\r\n    while(Q--){\r\n        int x,y;cin>>x>>y;\r\n        if(dep[x]<dep[y]) swap(x,y);\r\n        int l=lca(x,y);\r\n        if(l==y){\r\n            // cerr<<dis[x]-dis[y]+a[y]<<\" \"<<x<<\" \"<<y<<endl;\r\n            cout<<dis[x]-dis[y]+a[y]+ss[x]-ss[dad[y]]-(sh[x]-sh[y])+max(0ll,g[y])<<\"\\n\";\r\n        }\r\n        else{\r\n    // cout<<dis[x]+dis[y]-2*dis[l]+a[l]<<\" \"<<ss[x]+ss[y]-ss[l]-ss[dad[l]]<<endl;\r\n    // cout<<g[2]<<\" \"<<s[3]<<\" \"<<s[4]<<\" \"<<s[2]<<\" \"<<h[3]<<\" \"<<h[4]<<endl;\r\n    // cout<<\"!! \"<<sh[x]-sh[l]<<\" \"<<sh[y]-sh[l]<<\" \"<<l<<endl;\r\n    // cout<<g[l]<<\" \"<<sh[x]<<\" \"<<sh[y]<<\" \"<<sh[l]<<endl;\r\n    cout<<dis[x]+dis[y]-2*dis[l]+a[l]+ss[x]+ss[y]-ss[l]-ss[dad[l]]-(sh[x]+sh[y]-2*sh[l])+max(0ll,g[l])<<\"\\n\";\r\n        }\r\n    }\r\n}\r\n"
+}

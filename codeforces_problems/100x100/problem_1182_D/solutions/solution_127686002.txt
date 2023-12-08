@@ -1,0 +1,40 @@
+{
+    "id": 127686002,
+    "contestId": 1182,
+    "creationTimeSeconds": 1630581443,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "SAMSans"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 23040000,
+    "source": "//#pragma GCC optimize(2)\r\n#include<bits/stdc++.h>\r\n#define CT printf(\"\\n-------------------------\\n\");\r\nusing namespace std;\r\ntypedef long long ll;\r\nconst int inf=1<<30;\r\nconst ll Inf=1ll<<60ll;\r\nnamespace io{\r\n\t#define bufsize (1<<23)\r\n\tchar buf[bufsize],*p1=buf,*p2=buf,c;int f;\r\n\t#define getchar() (p1==p2&&(p2=(p1=buf)+fread(buf,1,bufsize,stdin),p1==p2)?EOF:*p1++)\r\n\ttemplate<typename T>T read(){\r\n\t\tT x=0;f=0;c=getchar();\r\n\t\twhile(!isdigit(c))(c=='-')&&(f=1),c=getchar();\r\n\t\twhile(isdigit(c))x=x*10+(c&15),c=getchar();\r\n\t\treturn f?-x:x;\r\n\t}\r\n\t#undef bufsize\r\n}\r\n#define readi io::read<int>\r\nconst int N=100005;\r\nstruct Edge{\r\n\tint to,nxt;\r\n}e[N*2];\r\nint head[N],Top;\r\nvoid add(int u,int v){\r\n\te[++Top].to=v;\r\n\te[Top].nxt=head[u];\r\n\thead[u]=Top;\r\n}\r\nint siz[N],maxsiz,rt,rt2,len2;\r\nint dep[N],deg[N],edge,n;\r\nvector<int>grp[N];\r\nvoid getrt(int u,int f){\r\n\tint mx=0;\r\n\tsiz[u]=1;\r\n\tfor(int i=head[u];i;i=e[i].nxt){\r\n\t\tint to=e[i].to;\r\n\t\tif(to==f)continue;\r\n\t\tgetrt(to,u);\r\n\t\tsiz[u]+=siz[to];\r\n\t\tmx=max(mx,siz[to]);\r\n\t}\r\n\tmx=max(mx,n-siz[u]);\r\n\tif(mx<maxsiz){\r\n\t\tmaxsiz=mx;\r\n\t\trt=u;\r\n\t}\r\n}\r\nvoid getdep(int u,int f){\r\n\tdep[u]=dep[f]+1;\r\n\tfor(int i=head[u];i;i=e[i].nxt){\r\n\t\tint to=e[i].to;\r\n\t\tif(to==f)continue;\r\n\t\tgetdep(to,u);\r\n\t}\r\n}\r\nint checkchain(int u,int f){\r\n\tif(deg[u]>2)return 0;\r\n\tif(deg[u]==1){edge=u;return 1;}\r\n//\tprintf(\"** %d\\n\",u);\r\n\tfor(int i=head[u];i;i=e[i].nxt){\r\n\t\tint to=e[i].to;\r\n\t\tif(to==f)continue;\r\n\t\tint t=checkchain(to,u);\r\n\t\tif(t==0)return 0;\r\n\t\treturn t+1;\r\n\t}\r\n}\r\nbool check(int u){\r\n\tgetdep(u,0);\r\n\tfor(int i=1;i<=n;++i)\r\n\t\tgrp[i].clear();\r\n\tfor(int i=1;i<=n;++i)\r\n\t\tgrp[dep[i]].push_back(i);\r\n\tfor(int i=1;i<=n;++i){\r\n\t\tfor(int j=1;j<grp[i].size();++j){\r\n\t\t\tif(deg[grp[i][j]]!=deg[grp[i][j-1]])\r\n\t\t\t\treturn 0;\r\n\t\t}\r\n\t}\r\n\treturn 1;\r\n}\r\nint main(){\r\n//\tios::sync_with_stdio(0);\r\n//\tcin.tie(0);cout.tie(0);\r\n//\tfreopen(\".in\",\"r\",stdin);\r\n//\tfreopen(\".out\",\"w\",stdout);\r\n\r\n\tn=readi();\r\n\tfor(int i=1;i<n;++i){\r\n\t\tint x=readi(),y=readi();\r\n\t\tadd(x,y);add(y,x);\r\n\t\tdeg[x]++;\r\n\t\tdeg[y]++;\r\n\t}\r\n\tmaxsiz=n+1;\r\n\tgetrt(1,0);\r\n//\tprintf(\"%d\\n\",rt);\r\n\tif(check(rt)){\r\n\t\tprintf(\"%d\\n\",rt);\r\n\t\treturn 0;\r\n\t}\r\n\tfor(int i=head[rt];i;i=e[i].nxt){\r\n\t\tint to=e[i].to;\r\n\t\tint len=checkchain(to,rt);\r\n//\t\tprintf(\"len %d\\n\",len);\r\n\t\tif(len==0)continue;\r\n//\t\tprintf(\"%d\\n\",edge);\r\n\t\tif(rt2&&len!=len2){\r\n\t\t\tif(check(edge)){printf(\"%d\\n\",edge);return 0;}\r\n\t\t\tbreak;\r\n\t\t}\r\n\t\tif(!rt2){\r\n\t\t\trt2=edge;\r\n\t\t\tlen2=len;\r\n\t\t\tif(check(edge)){printf(\"%d\\n\",edge);return 0;}\r\n\t\t}\r\n\t}\r\n\tputs(\"-1\");\r\n\r\n//\tfclose(stdin);fclose(stdout);\r\n\treturn 0;\r\n}\r\n"
+}

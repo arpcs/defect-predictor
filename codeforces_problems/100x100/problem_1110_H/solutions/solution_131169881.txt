@@ -1,0 +1,36 @@
+{
+    "id": 131169881,
+    "contestId": 1110,
+    "creationTimeSeconds": 1633705493,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "RiverHamster"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 889,
+    "memoryConsumedBytes": 348057600,
+    "source": "#include <cstdio>\r\n#include <cctype>\r\n#include <cstring>\r\n#include <algorithm>\r\n#include <numeric>\r\n#include <vector>\r\n#include <cassert>\r\nusing namespace std;\r\n\r\n#define LOG(f...) fprintf(stderr, f)\r\n#define DBG(f...) printf(\"%3d: \", __LINE__), printf(f)\r\n// #define DBG(f...) void()\r\n#define all(cont) begin(cont), end(cont)\r\n#ifdef __linux__\r\n#define getchar getchar_unlocked\r\n#define putchar putchar_unlocked\r\n#endif\r\n\r\nusing ll = long long;\r\n\r\nconst int N = 805;\r\nconst int NC = 2 * N * 10;\r\nconst int LEN = 2005;\r\n\r\nchar L[N], R[N];\r\nint lenL, lenR, n;\r\n\r\nint c[NC][10], fa[NC];\r\nint g[NC][N];\r\nint nc = 0;\r\n\r\nvoid construct_acam() {\r\n  static int q[NC];\r\n  int ql = 0, qr = 0;\r\n  for (int v : c[0])\r\n    if (v) q[++qr] = v;\r\n  while (ql < qr) {\r\n    int u = q[++ql];\r\n    partial_sum(g[u], g[u] + lenR + 1, g[u]);\r\n    if (fa[u])\r\n      for (int j = 0; j <= lenR; ++j)\r\n        g[u][j] += g[fa[u]][j];\r\n    for (int i = 0; i < 10; ++i)\r\n      (c[u][i] ? q[++qr] = c[u][i], fa[c[u][i]] : c[u][i]) = c[fa[u]][i];\r\n  }\r\n}\r\n\r\nvoid add_prefix(const char *a, int len, int val) {\r\n  int u = 0;\r\n  for (const char *p = a; *p; ++p) {\r\n    int v = *p - '0';\r\n    for (int w = p == a; w < v; ++w) {\r\n      if (!c[u][w]) c[u][w] = ++nc;\r\n      g[c[u][w]][len - 1 - (p - a)] += val;\r\n    }\r\n    if (!c[u][v]) c[u][v] = ++nc;\r\n    u = c[u][v];\r\n  }\r\n  g[u][0] += val;\r\n}\r\n\r\nint dp[LEN][NC];\r\nint pre[LEN][NC];\r\nbool pot[LEN][NC];\r\n\r\nvoid DFS(int i, int u) {\r\n  if (i == n) return;\r\n  int L = min(n - 1 - i, lenR);\r\n  for (int v = 0; v < 10; ++v)\r\n    if (pot[i + 1][c[u][v]] && dp[i][u] + g[c[u][v]][L] == dp[i + 1][c[u][v]]) {\r\n      printf(\"%d\", v);\r\n      DFS(i + 1, c[u][v]);\r\n      break;\r\n    }\r\n}\r\n\r\nint main() {\r\n#ifndef ONLINE_JUDGE\r\n  freopen(\"input.txt\", \"r\", stdin);\r\n  freopen(\"output.txt\", \"w\", stdout);\r\n#endif\r\n  scanf(\"%s%s%d\", L, R, &n);\r\n  lenL = strlen(L); lenR = strlen(R);\r\n  if (lenL < lenR) {\r\n    for (int i = 1; i <= 9; ++i) {\r\n      c[0][i] = ++nc;\r\n      fill(g[nc] + lenL - 1, g[nc] + lenR - 1, 1);\r\n    }\r\n  }\r\n  for (int i = lenL - 1; i >= 0; --i)\r\n    if (L[i] == '0') L[i] = '9';\r\n    else { --L[i]; break; }\r\n  add_prefix(R, lenR, +1);\r\n  if (lenL > 1 || *L != '0') add_prefix(L, lenL, -1);\r\n  construct_acam();\r\n\r\n  memset(dp, 0xaf, sizeof(dp));\r\n  dp[0][0] = 0;\r\n  for (int i = 0; i < n; ++i) {\r\n    int L = min(lenR, n - 1 - i);\r\n    for (int u = 0; u <= nc; ++u)\r\n      for (int v : c[u])\r\n        if (dp[i + 1][v] < dp[i][u] + g[v][L]) {\r\n          dp[i + 1][v] = dp[i][u] + g[v][L];\r\n          pre[i + 1][v] = u;\r\n        }        \r\n  }\r\n  int ans = *max_element(dp[n], dp[n] + nc + 1);\r\n  printf(\"%d\\n\", ans);\r\n  for (int i = 0; i <= nc; ++i)\r\n    if (dp[n][i] == ans) pot[n][i] = true;\r\n  for (int i = n - 1; i >= 0; --i) {\r\n    int L = min(lenR, n - 1 - i);\r\n    for (int u = 0; u <= nc; ++u)\r\n      for (int v : c[u])\r\n        if (pot[i + 1][v] && dp[i][u] + g[v][L] == dp[i + 1][v]) {\r\n          pot[i][u] = true;\r\n          break;\r\n        }\r\n  }\r\n  DFS(0, 0);\r\n  return 0;\r\n}\r\n"
+}

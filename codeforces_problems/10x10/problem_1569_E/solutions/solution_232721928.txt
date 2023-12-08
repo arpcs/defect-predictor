@@ -1,0 +1,38 @@
+{
+    "id": 232721928,
+    "contestId": 1569,
+    "creationTimeSeconds": 1699951099,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "E",
+        "name": "Playoff Restoration",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "bitmasks",
+            "brute force",
+            "hashing",
+            "implementation",
+            "meet-in-the-middle"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "vjudge3"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 22937600,
+    "source": "#include<bits/stdc++.h>\n#define rep(i,j,k) for(int i=j;i<=k;i++)\n#define repp(i,j,k) for(int i=j;i>=k;i--)\n#define ls(x) x*2\n#define rs(x) x*2+1\n#define mp make_pair\n#define fir first\n#define sec second\n#define pii pair<int,int>\n#define lowbit(x) x&-x\n#define inc(i,j) i=(i+j)%mo\n#define int long long\nusing namespace std;\ntypedef long long ll;\ntypedef unsigned long long ull;\nconst int N=40,M=34000,S=(1<<17)+2,mo=998244353,inf=1e9+7;\nconst double eps=1e-8;\nvoid read(int &p){\n\tint x=0,w=1;\n\tchar ch=0;\n\twhile(!isdigit(ch)){\n\t\tif(ch=='-')w=-1;\n\t\tch=getchar();\n\t}\n\twhile(isdigit(ch)){\n\t\tx=(x<<1)+(x<<3)+ch-'0';\n\t\tch=getchar();\n\t}\n\tp=x*w;\n}\nint k,a,h,n;\nint le[2][M][20],ri[2][M][20],cntl,cntr,hshl[2][M],hshr[2][M];\nunordered_map<int,int>idl[2],idr[2];\nint nw[N];\nint quick_power(int base,int x){\n    //printf(\"*%lld %lld\\n\",base,x); \n\tint ret=1;\n\twhile(x){\n\t\tif(x&1)ret*=base,ret%=mo;\n\t\tbase*=base,base%=mo;\n\t\tx>>=1;\n\t}\n\t//printf(\"%lld\\n\",ret);\n\treturn ret;\n}\nvoid dfs(int l,int r,int dep){\n\tif(dep==k){\n\t\trep(st,0,1){//\u8fd9\u4e00\u4fa7\u7684\u5728\u6700\u540e\u4e00\u573a\u8d62\u4e86/\u8f93\u4e86 \n\t\t\tint H=0,p=0;\n\t\t\trep(i,l,r)\n\t\t\t    if(nw[i]==0)nw[i]=1<<st,p=i;\n\t\t    /*rep(i,l,r)\n\t\t        printf(\"%d %d \",a,nw[i]);\n\t\t    printf(\"\\n\");*/\n\t\t\trep(i,l,r)\n\t\t\t\tH+=i*quick_power(a,nw[i])%mo,H%=mo;//printf(\"%lld %lld\\n\",quick_power(a,nw[i]),nw[i]);\n\t\t\tif(l==1){\n\t\t\t\tcntl++; \n\t\t\t\thshl[st][cntl]=H,idl[st][H]=cntl;\n\t\t\t    rep(i,l,r)\n\t\t\t\t    le[st][cntl][i]=nw[i];\n\t\t\t}\n\t\t\telse{\n\t\t\t\tcntr++; \n\t\t\t\thshr[st][cntr]=H,idr[st][H]=cntr;\n\t\t\t    rep(i,l,r)\n\t\t\t\t    ri[st][cntr][i-n/2]=nw[i];\n\t\t    }\n\t\t    nw[p]=0;\n\t\t//    printf(\"%lld %lld %lld\\n\",l,r,H);\n\t\t}\n\t\treturn;\n\t}\n\tint perc=1<<dep;\n\tint num=(r-l+1)/perc,tot=(1<<num)-1;\n\trep(st,0,tot){\n\t\tint mod[20],cntm=0; \n\t\trep(i,1,num){\n\t\t\tint cnt=0,p[2];\n\t\t\trep(j,l-1+perc*(i-1)+1,l-1+perc*i)\n\t\t\t\tif(nw[j]==0)p[cnt]=j,cnt++;\n\t\t\tnw[p[st>>(i-1)]]=(1<<(k-dep))+1,mod[++cntm]=p[st>>(i-1)];\n\t\t}\n\t\tdfs(l,r,dep+1);\n\t\trep(i,1,cntm)\n\t\t\tnw[mod[i]]=0;\n\t}\n}\nsigned main(){\n\tread(k),read(a),read(h),n=1<<k;\n\tint l=n/2;\n\tdfs(1,l,1),dfs(l+1,n,1);\n\trep(st,0,1){\n\t\trep(i,1,cntl){\n\t\t\tint nw=hshl[st][i],nr=(h-nw+mo)%mo;\n\t\t\tif(idr[st^1][nr]){\n\t\t\t\tint rid=idr[st^1][nr];\n\t\t\t\t//printf(\"%lld\\n\",rid);\n\t\t\t\trep(j,1,n/2)\n\t\t\t\t    printf(\"%lld \",le[st][i][j]);\n\t\t\t\trep(j,1,n/2)\n\t\t\t\t    printf(\"%lld \",ri[st^1][rid][j]);\n\t\t\t\treturn 0;\n\t\t\t}\n\t\t}\n\t}\n\tprintf(\"-1\\n\");\n\treturn 0;\n}\n\t \t  \t  \t \t\t \t   \t\t\t\t\t   \t\t \t"
+}

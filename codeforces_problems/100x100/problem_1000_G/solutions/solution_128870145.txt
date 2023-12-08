@@ -1,0 +1,36 @@
+{
+    "id": 128870145,
+    "contestId": 1000,
+    "creationTimeSeconds": 1631682660,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "chihik"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 1544,
+    "memoryConsumedBytes": 72806400,
+    "source": "#include <cstdio>\r\n#include <vector>\r\n#include <iostream>\r\nusing namespace std;\r\n#define LL long long\r\n\r\nconst int MAXN = 3e5 , MAXL = 20;\r\nint n , q , a[ MAXN + 5 ];\r\nstruct node { int v , w0 , w1; }; vector< node > Graph[ MAXN + 5 ];\r\n\r\nint dep[ MAXN + 5 ] , Anc[ MAXN + 5 ][ MAXL + 1 ];\r\nLL dis[ 2 ][ MAXN + 5 ] , dn[ MAXN + 5 ] , up[ MAXN + 5 ] , val[ MAXN + 5 ];\r\nvoid dfs1( int u , int fa , int w0 , int w1 ) {\r\n\tdep[ u ] = dep[ fa ] + 1; Anc[ u ][ 0 ] = fa;\r\n\tdis[ 0 ][ u ] = dis[ 0 ][ fa ] + w0 , dis[ 1 ][ u ] = dis[ 1 ][ fa ] + w1; \r\n\tfor( int i = 1 ; i <= MAXL ; i ++ ) Anc[ u ][ i ] = Anc[ Anc[ u ][ i - 1 ] ][ i - 1 ];\r\n\t\r\n\tdn[ u ] = a[ u ];\r\n\tfor( node v : Graph[ u ] ) if( v.v != fa ) {\r\n\t\tdfs1( v.v , u , v.w0 , v.w1 ); \r\n\t\tdn[ u ] += max( 0ll , dn[ v.v ] - v.w0 - v.w1 );\r\n\t}\r\n}\r\nvoid dfs2( int u , int fa , int w0 , int w1 ) {\r\n\tup[ u ] = a[ u ] + ( fa != 0 ) * max( 0ll , up[ fa ] - w0 - w1 + ( dn[ fa ] - max( 0ll , dn[ u ] - ( dis[ 0 ][ u ] - dis[ 0 ][ fa ] + dis[ 1 ][ u ] - dis[ 1 ][ fa ] ) ) - a[ fa ] ) );\t\r\n\tval[ u ] = val[ fa ] + dn[ fa ] - max( 0ll , dn[ u ] - ( dis[ 0 ][ u ] - dis[ 0 ][ fa ] + dis[ 1 ][ u ] - dis[ 1 ][ fa ] ) );\r\n\tfor( node v : Graph[ u ] ) if( v.v != fa ) dfs2( v.v , u , v.w0 , v.w1 ); \r\n//\tprintf(\"%d:%d %d\\n\", u , dn[ u ] , up[ u ] );\r\n}\r\nint lca( int u , int v ) {\r\n\tif( dep[ u ] < dep[ v ] ) swap( u , v );\r\n\tfor( int i = MAXL ; i >= 0 ; i -- ) if( dep[ Anc[ u ][ i ] ] >= dep[ v ] ) u = Anc[ u ][ i ];\r\n\tif( u == v ) return u;\r\n\tfor( int i = MAXL ; i >= 0 ; i -- ) if( Anc[ u ][ i ] != Anc[ v ][ i ] ) u = Anc[ u ][ i ] , v = Anc[ v ][ i ];\r\n\treturn Anc[ u ][ 0 ];\r\n}\r\n\r\nint main( ) {\r\n\tscanf(\"%d %d\",&n,&q);\r\n\tfor( int i = 1 ; i <= n ; i ++ ) scanf(\"%d\",&a[ i ]);\r\n\tfor( int i = 1 , u , v , w ; i < n ; i ++ ) {\r\n\t\tscanf(\"%d %d %d\",&u,&v,&w);\r\n\t\tGraph[ u ].push_back( node{ v , w , w } );\r\n\t\tGraph[ v ].push_back( node{ u , w , w } );\r\n\t}\r\n\tdfs1( 1 , 0 , 0 , 0 );\r\n\tdfs2( 1 , 0 , 0 , 0 );\r\n\t\r\n\tfor( int i = 1 , u , v ; i <= q ; i ++ ) {\r\n\t\tscanf(\"%d %d\",&u,&v); int w = lca( u , v );\r\n\t\tLL Ans = - ( dis[ 1 ][ u ] - dis[ 1 ][ w ] ) - ( dis[ 0 ][ v ] - dis[ 0 ][ w ] );\r\n\t\tAns += dn[ u ] + dn[ v ] + ( val[ u ] + val[ v ] - 2 * val[ w ] );\r\n\t\tAns -= dn[ w ];\r\n\t\tprintf(\"%lld\\n\", Ans + ( up[ w ] - a[ w ] ) );\r\n\t}\r\n\treturn 0;\r\n}"
+}

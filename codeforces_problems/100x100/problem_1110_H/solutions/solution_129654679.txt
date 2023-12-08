@@ -1,0 +1,36 @@
+{
+    "id": 129654679,
+    "contestId": 1110,
+    "creationTimeSeconds": 1632386491,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "C20191629"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 1730,
+    "memoryConsumedBytes": 366489600,
+    "source": "#include <iostream>\r\n#include <cstdio>\r\n#include <cstdlib>\r\n#include <cstring>\r\n#include <cmath>\r\n#include <algorithm>\r\n#include <vector>\r\n#include <queue>\r\nusing namespace std;\r\nstruct Node {\r\n    int son[10], fail, v, dep;\r\n} t[20000];\r\nint n, tot;\r\nchar L[850], R[850];\r\nvoid cmax(int &x, int y) {\r\n    x = max(x, y);\r\n}\r\nint g[20005][2005];\r\nint Trans(int x, int c) {\r\n    if (!t[x].son[c])\r\n        t[x].son[c] = ++tot;\r\n\r\n    return t[x].son[c];\r\n}\r\nvoid Insert() {\r\n    int l1 = strlen(L + 1), l2 = strlen(R + 1);\r\n\r\n    for (int i = 1; i <= l1; ++i)\r\n        L[i] -= 48;\r\n\r\n    for (int i = 1; i <= l2; ++i)\r\n        R[i] -= 48;\r\n\r\n    int u1 = 0, u2 = 0;\r\n\r\n    if (l1 == l2) {\r\n        for (int i = 1; i <= l1; ++i) {\r\n            if (u1 == u2)\r\n                for (int j = L[i] + 1; j <= R[i] - 1; ++j)\r\n                    ++g[Trans(u1, j)][l1 - i];\r\n            else {\r\n                for (int j = L[i] + 1; j <= 9; ++j)\r\n                    ++g[Trans(u1, j)][l1 - i];\r\n\r\n                for (int j = 0; j <= R[i] - 1; ++j)\r\n                    ++g[Trans(u2, j)][l2 - i];\r\n            }\r\n\r\n            u1 = Trans(u1, L[i]);\r\n            u2 = Trans(u2, R[i]);\r\n        }\r\n\r\n        ++g[u1][0];\r\n\r\n        if (u1 != u2)\r\n            ++g[u2][0];\r\n    } else {\r\n        for (int i = 1; i <= l1; ++i) {\r\n            for (int j = L[i] + 1; j <= 9; ++j)\r\n                ++g[Trans(u1, j)][l1 - i];\r\n\r\n            u1 = Trans(u1, L[i]);\r\n        }\r\n\r\n        for (int i = 1; i <= l2; ++i) {\r\n            for (int j = 0; j <= R[i] - 1; ++j)\r\n                ++g[Trans(u2, j)][l2 - i];\r\n\r\n            u2 = Trans(u2, R[i]);\r\n        }\r\n\r\n        for (int i = l1 + 1; i < l2; ++i)\r\n            for (int j = 1; j <= 9; ++j)\r\n                ++g[Trans(0, j)][i - 1];\r\n\r\n        ++g[u1][0];\r\n        ++g[u2][0];\r\n    }\r\n\r\n    t[0].son[0] = 0;\r\n}\r\nvoid Build() {\r\n    queue<int> Q;\r\n\r\n    for (int i = 0; i <= 9; ++i)\r\n        if (t[0].son[i])\r\n            Q.push(t[0].son[i]);\r\n\r\n    while (!Q.empty()) {\r\n        int u = Q.front();\r\n        Q.pop();\r\n\r\n        for (int i = 0; i <= 9; ++i)\r\n            if (t[u].son[i])\r\n                t[t[u].son[i]].fail = t[t[u].fail].son[i], Q.push(t[u].son[i]);\r\n            else\r\n                t[u].son[i] = t[t[u].fail].son[i];\r\n\r\n        for (int i = 0; i <= n; ++i)\r\n            g[u][i] += g[t[u].fail][i];\r\n    }\r\n}\r\nint f[2005][20000];\r\nbool pre[2005][20000];\r\nint main() {\r\n    scanf(\"%s\", L + 1);\r\n    scanf(\"%s\", R + 1);\r\n    scanf(\"%d\", &n);\r\n    Insert();\r\n    Build();\r\n\r\n    for (int i = 1; i <= tot; ++i)\r\n        for (int j = 1; j <= n; ++j)\r\n            g[i][j] += g[i][j - 1];\r\n\r\n    memset(f, -63, sizeof(f));\r\n    f[0][0] = 0;\r\n\r\n    for (int i = 0; i <= n; ++i)\r\n        for (int j = 0; j <= tot; ++j)\r\n            if (f[i][j] >= 0) {\r\n                f[i][j] += g[j][n - i];\r\n\r\n                for (int k = 0; k <= 9; ++k)\r\n                    cmax(f[i + 1][t[j].son[k]], f[i][j]);\r\n\r\n            }\r\n\r\n    int ans = 0;\r\n\r\n    for (int i = 0; i <= tot; ++i)\r\n        cmax(ans, f[n][i]);\r\n\r\n    printf(\"%d\\n\", ans);\r\n\r\n    for (int i = 0; i <= tot; ++i)\r\n        if (f[n][i] == ans)\r\n            pre[n][i] = true;\r\n\r\n    for (int i = n - 1; ~i; --i)\r\n        for (int j = 0; j <= tot; ++j)\r\n            for (int k = 0; k <= 9; ++k)\r\n                if (f[i][j] + g[t[j].son[k]][n - i - 1] == f[i + 1][t[j].son[k]])\r\n                    pre[i][j] |= pre[i + 1][t[j].son[k]];\r\n\r\n    for (int i = 0, u = 0; i < n; ++i)\r\n        for (int k = 0; k <= 9; ++k)\r\n            if (f[i][u] == f[i + 1][t[u].son[k]] - g[t[u].son[k]][n - i - 1] && pre[i + 1][t[u].son[k]]) {\r\n                putchar(k + 48);\r\n                u = t[u].son[k];\r\n                break;\r\n            }\r\n\r\n    puts(\"\");\r\n}"
+}

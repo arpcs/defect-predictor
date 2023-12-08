@@ -1,0 +1,36 @@
+{
+    "id": 209661074,
+    "contestId": 1110,
+    "creationTimeSeconds": 1686743836,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "schrodingerstom"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 12,
+    "timeConsumedMillis": 592,
+    "memoryConsumedBytes": 160972800,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define ll long long\r\nbool memBeg;\r\nconst int maxn=2005;\r\nconst int maxlen=805;\r\nconst int maxlet=12;//10\r\nconst int maxnodes=maxlen*11;\r\nint len_l,len_r,n;\r\nchar strl[maxlen],strr[maxlen];\r\nint fail[maxnodes],ch[maxnodes][maxlet],vl[maxnodes][maxn],nodes;\r\nvoid extend(int node,char l,char r,int need) {\r\n    for(char c=l;c<=r;c++) {\r\n        if(!ch[node][c-'0'])\r\n            ch[node][c-'0']=++nodes;\r\n        vl[ch[node][c-'0']][need]++;\r\n    }\r\n}\r\nvoid build() {\r\n    static int que[maxnodes];\r\n    int tead=0,rail=0; que[rail++]=0;\r\n    while(tead<rail) {\r\n        int cur=que[tead++];\r\n        for(int i=0;i<10;i++) {\r\n            int now=fail[cur];\r\n            while(now&&!ch[now][i])\r\n                now=fail[now];\r\n            now=ch[now][i];\r\n            if(!ch[cur][i])\r\n                ch[cur][i]=now;\r\n            else {\r\n                fail[ch[cur][i]]=now;\r\n                if(fail[ch[cur][i]]==ch[cur][i])\r\n                    fail[ch[cur][i]]=now=0;\r\n                que[rail++]=ch[cur][i];\r\n                for(int j=0;j<=n;j++)\r\n                    vl[ch[cur][i]][j]+=vl[now][j];\r\n            }\r\n        }\r\n    }\r\n    for(int i=0;i<=nodes;i++)\r\n        for(int j=1;j<=n;j++)\r\n            vl[i][j]+=vl[i][j-1];\r\n}\r\nint maxx[maxn][maxnodes];\r\nbool good[maxn][maxnodes];\r\nbool memEn;\r\nint main() {\r\n\tfprintf(stderr,\"%.24lf\\n\",fabs(&memEn-&memBeg)/1024.0/1024.0);\r\n    scanf(\"%s\",strl+1); len_l=strlen(strl+1);\r\n    scanf(\"%s\",strr+1); len_r=strlen(strr+1);\r\n    scanf(\"%d\",&n);\r\n    if(len_l>len_r) {\r\n        puts(\"0\");\r\n        for(int i=1;i<=n;i++)\r\n            putchar('0');\r\n        puts(\"\");\r\n        return 0;\r\n    }\r\n    if(len_l==len_r) {\r\n        bool islcp=true;\r\n        int nodel=0,noder=0;\r\n        extend(0,strl[1]+1,strr[1]-1,len_l-1);\r\n        for(int i=1;i<=len_l;i++) {\r\n            if(!ch[nodel][strl[i]-'0'])\r\n                ch[nodel][strl[i]-'0']=++nodes;\r\n            if(!ch[noder][strr[i]-'0'])\r\n                ch[noder][strr[i]-'0']=++nodes;\r\n            nodel=ch[nodel][strl[i]-'0'];\r\n            noder=ch[noder][strr[i]-'0'];\r\n            if(islcp&&strl[i]>strr[i]) {\r\n                puts(\"0\");\r\n                for(int i=1;i<=n;i++)\r\n                    putchar('0');\r\n                puts(\"\");\r\n                return 0;\r\n            }\r\n            islcp&=(strl[i]==strr[i]);\r\n            if(i<len_l) {\r\n                if(islcp) {\r\n                    extend(nodel,strl[i+1]+1,strr[i+1]-1,len_l-i-1);\r\n                } else {\r\n                    extend(nodel,strl[i+1]+1,'9',len_l-i-1);\r\n                    extend(noder,'0',strr[i+1]-1,len_r-i-1);\r\n                }\r\n            } else {\r\n                if(islcp) {\r\n                    vl[nodel][0]++;\r\n                } else {\r\n                    vl[nodel][0]++; vl[noder][0]++;\r\n                }\r\n            }\r\n        }\r\n    } else {\r\n        int node=0; extend(0,strl[1]+1,'9',len_l-1);\r\n        for(int i=1;i<=len_l;i++) {\r\n            if(!ch[node][strl[i]-'0'])\r\n                ch[node][strl[i]-'0']=++nodes;\r\n            node=ch[node][strl[i]-'0'];\r\n            if(i<len_l) {\r\n                extend(node,strl[i+1]+1,'9',len_l-i-1);\r\n            } else vl[node][0]++;\r\n        }\r\n        node=0; extend(0,(len_r==1)?'0':'1',strr[1]-1,len_r-1);\r\n        for(int i=1;i<=len_r;i++) {\r\n            if(!ch[node][strr[i]-'0'])\r\n                ch[node][strr[i]-'0']=++nodes;\r\n            node=ch[node][strr[i]-'0'];\r\n            if(i<len_r) {\r\n                extend(node,'0',strr[i+1]-1,len_r-i-1);\r\n            } else vl[node][0]++;\r\n        }\r\n        for(int i=len_l+1;i<len_r;i++)\r\n            extend(0,'1','9',i-1);\r\n    }\r\n    memset(maxx,-0x3f,sizeof(maxx));\r\n    build(); maxx[0][0]=0;\r\n//    printf(\"fail[11] = %d\\n\",fail[11]);\r\n    for(int i=0;i<n;i++)\r\n        for(int j=0;j<=nodes;j++) {\r\n            if(maxx[i][j]<0) continue;\r\n            for(int k=0;k<10;k++)\r\n                maxx[i+1][ch[j][k]]=max(maxx[i+1][ch[j][k]],maxx[i][j]+vl[ch[j][k]][n-i-1]);\r\n        }\r\n//    printf(\"ch[9][1] = %d\\n\",ch[9][1]);\r\n//    printf(\"vl[11][1] = %d\\n\",vl[9][1]);\r\n//    printf(\"maxx[1][9] = %d\\n\",maxx[1][9]);\r\n    int ret=0;\r\n    for(int i=0;i<=nodes;i++)\r\n        ret=max(ret,maxx[n][i]);\r\n    printf(\"%d\\n\",ret);\r\n    for(int i=0;i<=nodes;i++)\r\n        good[n][i]=maxx[n][i]==ret;\r\n    for(int i=n-1;i>=0;i--)\r\n        for(int j=0;j<=nodes;j++) {\r\n            if(maxx[i][j]<0) continue;\r\n            for(int k=0;k<10;k++)\r\n                if(good[i+1][ch[j][k]]&&maxx[i+1][ch[j][k]]==maxx[i][j]+vl[ch[j][k]][n-i-1]) {\r\n                    good[i][j]=true; break;\r\n                }\r\n        }\r\n    assert(good[0][0]);\r\n    int now=0;\r\n    for(int i=0;i<n;i++)\r\n        for(int j=0;j<10;j++)\r\n            if(good[i+1][ch[now][j]]&&maxx[i+1][ch[now][j]]==maxx[i][now]+vl[ch[now][j]][n-i-1]) {\r\n                putchar(j+'0'); now=ch[now][j]; break;\r\n            }\r\n    puts(\"\");\r\n\treturn 0;\r\n}\r\n"
+}

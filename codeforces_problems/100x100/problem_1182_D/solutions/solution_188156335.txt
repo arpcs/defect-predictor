@@ -1,0 +1,40 @@
+{
+    "id": 188156335,
+    "contestId": 1182,
+    "creationTimeSeconds": 1672972140,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "luogu_bot2"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "// LUOGU_RID: 98799575\n#include <algorithm>\r\n#include <iostream>\r\n#include <cstdio>\r\n\r\n#define maxn 100005\r\n\r\nusing namespace std;\r\n\r\ninline int read(){\r\n\tint x = 0, flag = 1;\r\n\tchar ch = getchar();\r\n\twhile(ch < '0' || ch > '9'){\r\n\t\tif(ch == '-') flag = -1;\r\n\t\tch = getchar();\r\n\t}\r\n\twhile(ch >= '0' && ch <= '9'){\r\n\t\tx = (x << 3) + (x << 1) + ch - '0';\r\n\t\tch = getchar();\r\n\t}\r\n\treturn x * flag;\r\n}\r\n\r\nint hd[maxn], cnt;\r\nstruct edge{\r\n\tint v, nxt;\r\n}e[maxn << 1];\r\nvoid add(int u, int v){\r\n\te[++cnt].v = v;\r\n\te[cnt].nxt = hd[u];\r\n\thd[u] = cnt;\r\n\treturn;\r\n}\r\n\r\nint n, zx, mxson[maxn], siz[maxn], du[maxn], dep[maxn];\r\n\r\nvoid dfs1(int u, int fa){\r\n\tsiz[u] = 1;\r\n\tfor(int i = hd[u]; i; i = e[i].nxt){\r\n\t\tint v = e[i].v;\r\n\t\tif(v == fa) continue;\r\n\t\tdfs1(v, u);\r\n\t\tsiz[u] += siz[v];\r\n\t\tmxson[u] = max(mxson[u], siz[v]);\r\n\t}\r\n\tmxson[u] = max(mxson[u], n - siz[u]);\r\n\tif(mxson[u] < mxson[zx]) zx = u;\r\n\treturn;\r\n}\r\n\r\nvoid dfs2(int u, int fa){\r\n\tdep[u] = dep[fa] + 1;\r\n\tfor(int i = hd[u]; i; i = e[i].nxt){\r\n\t\tint v = e[i].v;\r\n\t\tif(v == fa) continue;\r\n\t\tdfs2(v, u);\r\n\t}\r\n\treturn;\r\n}\r\n\r\nint bel[maxn];\r\nvector <int> rtye; \r\n\r\nvoid dfs3(int u, int fa, int ye){\r\n\tbel[u] = ye, ++siz[ye];\r\n\tif(u == zx){\r\n\t\trtye.push_back(ye);\r\n\t\treturn;\r\n\t}\r\n\tif(du[u] > 2) return;\r\n\tfor(int i = hd[u]; i; i = e[i].nxt){\r\n\t\tint v = e[i].v;\r\n\t\tif(v == fa) continue;\r\n\t\tdfs3(v, u, ye);\r\n\t}\r\n\treturn;\r\n}\r\n\r\nint a[maxn], num[maxn];\r\n\r\nbool cmp(int x, int y){\r\n\treturn dep[x] < dep[y];\r\n}\r\n\r\nint main(){\r\n\tn = read();\r\n\tfor(int i = 1; i < n; ++i){\r\n\t\tint u = read(), v = read();\r\n\t\tadd(u, v), add(v, u);\r\n\t\t++du[u], ++du[v];\r\n\t}\r\n\tfor(int i = 1; i <= n; ++i) a[i] = i;\r\n\tmxson[0] = 0x3f3f3f3f;\r\n\tdfs1(1, 0);\r\n\tdfs2(zx, 0);\r\n\tsort(a + 1, a + n + 1, cmp);\r\n//\tfor(int i = 1; i <= n; ++i) cout <<i<<' '<< dep[i] << ' ' << du[i]<<endl;\r\n\tbool dui = 1; \r\n\tint fstdu = 0, lstdep = 0;\r\n\tfor(int i = 2; i <= n; ++i){\r\n\t\tif(dep[a[i]] != lstdep) lstdep = dep[a[i]], fstdu = du[a[i]];\r\n\t\tif(du[a[i]] != fstdu){\r\n\t\t\tdui = 0;\r\n\t\t\tbreak;\r\n\t\t}\r\n\t}\r\n\tif(dui){\r\n\t\tprintf(\"%d\\n\", zx);\r\n\t\treturn 0;\r\n\t}\r\n\tfor(int i = 1; i <= n; ++i)\r\n\t\tif(du[i] == 1) dfs3(i, 0, i);\r\n\tif(rtye.size() == 0){\r\n\t\tputs(\"-1\");\r\n\t\treturn 0;\r\n\t}\r\n\tif(rtye.size() == 1){\r\n\t\tdui = 1;\r\n\t\tfstdu = 0, lstdep = 0;\r\n\t\tfor(int i = 2; i <= n; ++i){\r\n\t\t\tif(bel[a[i]] == bel[zx]) continue;\r\n\t\t\tif(dep[a[i]] != lstdep) lstdep = dep[a[i]], fstdu = du[a[i]];\r\n\t\t\tif(du[a[i]] != fstdu){\r\n\t\t\t\tdui = 0;\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t}\r\n\t\tif(dui){\r\n\t\t\tprintf(\"%d\\n\", bel[zx]);\r\n\t\t\treturn 0;\r\n\t\t}\r\n\t}\r\n\tfor(auto j : rtye) ++num[dep[j]];\r\n\tint truezx = 0;\r\n\tfor(auto j : rtye) if(num[dep[j]] == 1) truezx = j;\r\n\tdui = 1;\r\n\tfstdu = 0, lstdep = 0;\r\n\tfor(int i = 2; i <= n; ++i){\r\n\t\tif(bel[a[i]] == truezx) continue;\r\n\t\tif(dep[a[i]] != lstdep) lstdep = dep[a[i]], fstdu = du[a[i]];\r\n\t\tif(du[a[i]] != fstdu){\r\n\t\t\tdui = 0;\r\n\t\t\tbreak;\r\n\t\t}\r\n\t}\r\n\tif(dui){\r\n\t\tprintf(\"%d\\n\", truezx);\r\n\t\treturn 0;\r\n\t}\r\n\tputs(\"-1\");\r\n\treturn 0;\r\n}\r\n/*\r\n6\r\n1 2\r\n2 3\r\n3 4\r\n2 5\r\n5 6\r\n*/"
+}

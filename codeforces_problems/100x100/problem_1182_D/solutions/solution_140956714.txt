@@ -1,0 +1,40 @@
+{
+    "id": 140956714,
+    "contestId": 1182,
+    "creationTimeSeconds": 1640714644,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "izhang"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 140,
+    "memoryConsumedBytes": 34406400,
+    "source": "/* Author: izhang05\n * Time: 12-28-2021 01:10:22\n**/\n#include <bits/stdc++.h>\n\nusing namespace std;\n\n//#define DEBUG\nvoid setIO(const string &name) {\n    ios_base::sync_with_stdio(false);\n    cin.tie(nullptr);\n    cin.exceptions(istream::failbit);\n#ifdef LOCAL\n    freopen((\"in\" + name + \".txt\").c_str(), \"r\", stdin);\n    freopen(\"out.txt\", \"w\", stdout);\n    freopen(\"out.txt\", \"w\", stderr);\n#endif\n}\nconst int inf = 0x3f3f3f3f, mod = 1e9 + 7, maxn = 1e5 + 5;\nconst long long INFL = 0x3f3f3f3f3f3f3f3f;\nconst long long m1 = 1e9 + 9, p = 9973;\n\nlong long pw[maxn]; // Stores the powers of p modulo m1\n\nvoid calc_pow() {\n    pw[0] = 1;\n    for (int i = 1; i < maxn; ++i) {\n        pw[i] = (pw[i - 1] * p) % m1;\n    }\n}\n\nint down[maxn], up[maxn];\nmap<int, int> cnt[maxn];\nvector<int> adj[maxn];\nint dfs1(int c, int par) {\n    for (auto &i : adj[c]) {\n        if (i != par) {\n            ++cnt[c][dfs1(i, c)];\n        }\n    }\n    if (cnt[c].empty()) {\n        down[c] = (int) adj[c].size();\n    } else if (cnt[c].size() == 1 && cnt[c].begin()->first != -1) {\n        down[c] = ((cnt[c].begin()->first * p) % m1 + (int) adj[c].size()) % m1;\n    } else {\n        down[c] = -1;\n    }\n    return down[c];\n}\n\nvoid dfs2(int c, int par) {\n    if (par != -1) {\n        map<int, int> cur = cnt[par];\n        if (--cur[down[c]] == 0) {\n            cur.erase(down[c]);\n        }\n        if (par != 0) {\n            ++cur[up[par]];\n        }\n        if (cur.empty()) {\n            up[c] = int(adj[par].size());\n            if (cnt[c].empty()) {\n                cout << c + 1 << \"\\n\";\n                exit(0);\n            }\n            if (cnt[c].size() == 1 && cnt[c].begin()->first == up[c]) {\n                cout << c + 1 << \"\\n\";\n                exit(0);\n            }\n        } else if (cur.size() == 1 && cur.begin()->first != -1) {\n            up[c] = ((cur.begin()->first * p) % m1 + (int) adj[par].size()) % m1;\n            if (cnt[c].empty()) {\n                cout << c + 1 << \"\\n\";\n                exit(0);\n            }\n            if (cnt[c].size() == 1 && cnt[c].begin()->first == up[c]) {\n                cout << c + 1 << \"\\n\";\n                exit(0);\n            }\n        } else {\n            up[c] = -1;\n        }\n    }\n    for (auto &i : adj[c]) {\n        if (i != par) {\n            dfs2(i, c);\n        }\n    }\n}\n\nvoid test_case() {\n    int n;\n    cin >> n;\n    for (int i = 0; i < n - 1; ++i) {\n        int a, b;\n        cin >> a >> b;\n        --a, --b;\n        adj[a].push_back(b);\n        adj[b].push_back(a);\n    }\n    dfs1(0, -1);\n    if (down[0] != -1) {\n        cout << 1 << \"\\n\";\n        return;\n    }\n    dfs2(0, -1);\n    cout << -1 << \"\\n\";\n}\n\nint main() {\n    calc_pow();\n    setIO(\"1\");\n    int test_case_number = 1;\n    while (test_case_number--) {\n        test_case();\n    }\n    return 0;\n}\n"
+}

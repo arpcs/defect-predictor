@@ -1,0 +1,36 @@
+{
+    "id": 209613946,
+    "contestId": 1110,
+    "creationTimeSeconds": 1686699108,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "BittersweetHerb"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 1778,
+    "memoryConsumedBytes": 387584000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing ll = long long;\r\nusing ull = unsigned long long;\r\nusing ld = long double;\r\ntemplate <typename T>\r\nvoid chkmax(T &x, const T &y) {\r\n  if (x < y) x = y;\r\n}\r\ntemplate <typename T>\r\nvoid chkmin(T &x, const T &y) {\r\n  if (y < x) x = y;\r\n}\r\nconstexpr int MAXN = 2010, INF = 0x3f3f3f3f;\r\nint n;\r\nnamespace ac {\r\nconstexpr int MAXNODE = 1.6e4;\r\nint ch[MAXNODE][10], tot, buc[MAXNODE][MAXN], fa[MAXNODE], qu[MAXNODE], hd, tl;\r\nint dp[MAXN][MAXNODE], pre[MAXN][MAXNODE];\r\nint go(int p, int c) {\r\n  if (!ch[p][c]) ch[p][c] = ++tot;\r\n  return ch[p][c];\r\n}\r\nvoid ins(int p, int x) {\r\n  if (x <= n) ++buc[p][n - x];\r\n}\r\nvoid build() {\r\n  for (int i = 1; i <= tot; ++i)\r\n    for (int j = n - 1; j >= 0; --j) buc[i][j] += buc[i][j + 1];\r\n  hd = 1;\r\n  for (int i = 0; i < 10; ++i) {\r\n    if (!ch[1][i]) {\r\n      ch[1][i] = 1;\r\n    } else {\r\n      fa[ch[1][i]] = 1;\r\n      qu[++tl] = ch[1][i];\r\n    }\r\n  }\r\n  while (hd <= tl) {\r\n    int u = qu[hd++];\r\n    for (int i = 0; i < 10; ++i) {\r\n      if (!ch[u][i]) {\r\n        ch[u][i] = ch[fa[u]][i];\r\n      } else {\r\n        fa[ch[u][i]] = ch[fa[u]][i];\r\n        qu[++tl] = ch[u][i];\r\n      }\r\n    }\r\n  }\r\n  for (int i = 1; i <= tl; ++i)\r\n    for (int j = 0; j <= n; ++j) buc[qu[i]][j] += buc[fa[qu[i]]][j];\r\n  memset(dp, -1, sizeof(dp));\r\n}\r\nint dfs(int s, int p) {\r\n  if (s == n + 1) return 0;\r\n  if (dp[s][p] != -1) return dp[s][p];\r\n  int mx = -INF;\r\n  for (int i = 0; i < 10; ++i) {\r\n    int tmp = dfs(s + 1, ch[p][i]);\r\n    if (tmp > mx) {\r\n      mx = tmp;\r\n      pre[s][p] = i;\r\n    }\r\n  }\r\n  return dp[s][p] = mx + buc[p][s];\r\n}\r\nvoid print() {\r\n  int s = 0, p = 1;\r\n  while (s < n) {\r\n    cout << pre[s][p];\r\n    p = ch[p][pre[s][p]];\r\n    ++s;\r\n  }\r\n  cout << \"\\n\";\r\n}\r\n}  // namespace ac\r\nint main() {\r\n  ios::sync_with_stdio(false);\r\n  cin.tie(nullptr);\r\n  string l, r;\r\n  cin >> l >> r >> n;\r\n  ac::tot = 1;\r\n  if (l.size() == r.size()) {\r\n    int p = 0, id = 1;\r\n    while (p < (int)l.size() && l[p] == r[p]) id = ac::go(id, l[p++] - '0');\r\n    if (p == (int)l.size()) {\r\n      ac::ins(id, 0);\r\n    } else {\r\n      for (int i = l[p] - '0' + 1; i < r[p] - '0'; ++i)\r\n        ac::ins(ac::go(id, i), l.size() - p - 1);\r\n      int tid = ac::go(id, l[p] - '0');\r\n      for (int i = p + 1; i < (int)l.size(); ++i) {\r\n        for (int j = l[i] - '0' + 1; j < 10; ++j)\r\n          ac::ins(ac::go(tid, j), l.size() - i - 1);\r\n        tid = ac::go(tid, l[i] - '0');\r\n      }\r\n      ac::ins(tid, 0);\r\n      tid = ac::go(id, r[p] - '0');\r\n      for (int i = p + 1; i < (int)r.size(); ++i) {\r\n        for (int j = !i; j < r[i] - '0'; ++j)\r\n          ac::ins(ac::go(tid, j), l.size() - i - 1);\r\n        tid = ac::go(tid, r[i] - '0');\r\n      }\r\n      ac::ins(tid, 0);\r\n    }\r\n  } else {\r\n    for (int i = l.size() + 1; i < (int)r.size(); ++i) ac::ins(1, i);\r\n    int id = 1;\r\n    for (int i = 0; i < (int)l.size(); ++i) {\r\n      for (int j = l[i] - '0' + 1; j < 10; ++j)\r\n        ac::ins(ac::go(id, j), l.size() - i - 1);\r\n      id = ac::go(id, l[i] - '0');\r\n    }\r\n    ac::ins(id, 0);\r\n    id = 1;\r\n    for (int i = 0; i < (int)r.size(); ++i) {\r\n      for (int j = !i; j < r[i] - '0'; ++j)\r\n        ac::ins(ac::go(id, j), r.size() - i - 1);\r\n      id = ac::go(id, r[i] - '0');\r\n    }\r\n    ac::ins(id, 0);\r\n  }\r\n  ac::build();\r\n  cout << ac::dfs(0, 1) << \"\\n\";\r\n  ac::print();\r\n  return 0;\r\n}\r\n/*\r\n14167863041759728714719432332220620495439159496704\r\n21722397321019874918713722569883771262179952374093\r\n2000\r\n*///9182646885542875839"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 119265308,
+    "contestId": 1000,
+    "creationTimeSeconds": 1623515243,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "ngpin04"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 1403,
+    "memoryConsumedBytes": 63897600,
+    "source": "#include <bits/stdc++.h>\r\n#define fi first\r\n#define se second\r\n#define mp make_pair\r\nusing namespace std;\r\ntemplate <typename T1, typename T2> bool mini(T1 &a, T2 b) {\r\n\tif (a > b) {a = b; return true;} return false;\r\n}\r\ntemplate <typename T1, typename T2> bool maxi(T1 &a, T2 b) {\r\n\tif (a < b) {a = b; return true;} return false;\r\n}\r\nconst int N = 3e5 + 5; \r\nconst int oo = 1e9;\r\n\r\nvector <pair <int, int>> adj[N];\r\n\r\nlong long d[N];\r\nlong long f[N]; \r\nlong long g[N];\r\nlong long dp[N];\r\nlong long val[N];\r\nlong long tot[N];\r\n\r\nint anc[N][20];\r\nint a[N];\r\nint h[N];\r\nint n,q;\r\n\r\nvoid dfs(int u, int p = -1) {\r\n\tanc[u][0] = p;\r\n\tfor (int i = 1; i < 20; i++) {\r\n\t\tint p = anc[u][i - 1];\r\n\t\tanc[u][i] = (p < 0) ? p : anc[p][i - 1];\t\t\t\t\t\t\t\r\n\t}\r\n\r\n\tfor (pair <int, int> to : adj[u]) {\r\n\t\tint v = to.fi;\r\n\t\tint w = to.se;\r\n\t\tif (v == p)\r\n\t\t\tcontinue;\r\n\t\th[v] = h[u] + 1;\r\n\t\td[v] = d[u] + w;\r\n\t\ttot[v] = tot[u] + a[v];\r\n\t\tdfs(v, u);\r\n\t\tval[v] = max(0LL, dp[v] + a[v] - 2 * w);\r\n\t\tdp[u] += val[v];\r\n\t}\r\n\r\n\tfor (pair <int, int> to : adj[u]) {\r\n\t\tint v = to.fi;\r\n\t\tint w = to.se;\r\n\t\tif (v == p)\r\n\t\t\tcontinue;\r\n\t\tf[v] = dp[u] - val[v];\r\n\t}\r\n}\r\n\r\nvoid dfs1(int u, int p = -1) {\r\n\tfor (pair <int, int> to : adj[u]) {\r\n\t\tint v = to.fi;\r\n\t\tint w = to.se;\r\n\t\tif (v == p)\r\n\t\t\tcontinue;\r\n\t\tg[v] = max(0LL, g[u] + a[u] - 2 * w + f[v]); \r\n\t\tf[v] += f[u];\r\n\t\tdfs1(v, u);\r\n\t}\r\n}\r\n\r\nint jump(int u, int k) {\r\n\tif (k < 0)\r\n\t\treturn 0;\r\n\tfor (int i = 0; i < 20; i++)\r\n\t\tif ((k >> i) & 1)\r\n\t\t\tu = anc[u][i];\r\n\treturn u;\r\n}\r\n\r\nint getlca(int u, int v) {\r\n\tif (h[u] < h[v])\r\n\t\tswap(u, v);\r\n\tu = jump(u, h[u] - h[v]);\r\n\tif (u == v)\r\n\t\treturn u;\r\n\tfor (int i = 19; i >= 0; i--) if (anc[u][i] != anc[v][i]) {\r\n\t\tu = anc[u][i];\r\n\t\tv = anc[v][i];\r\n\t}\r\n\treturn anc[u][0];\r\n}\r\n\r\nint main() {\r\n\tios_base::sync_with_stdio(0);\r\n\tcin.tie(0);\r\n\tcin >> n >> q;\r\n\tfor (int i = 1; i <= n; i++)\r\n\t\tcin >> a[i];\r\n\tfor (int i = 1; i < n; i++) {\r\n\t\tint u,v,w;\r\n\t\tcin >> u >> v >> w;\r\n\t\tadj[u].push_back(mp(v, w));\r\n\t\tadj[v].push_back(mp(u, w));\r\n\t}\r\n\ttot[1] = a[1];\r\n\tdfs(1);\r\n\tdfs1(1);\r\n\twhile (q--) {\r\n\t\tint u, v; cin >> u >> v;\r\n\t\tint p = getlca(u, v);\r\n\t\tint x = jump(u, h[u] - h[p] - 1);\r\n\t\tint y = jump(v, h[v] - h[p] - 1);\r\n\r\n\t\tlong long res = tot[u] + tot[v] - 2 * tot[p] + a[p];\r\n\t\tres -= d[u] + d[v] - 2 * d[p];\r\n\t\tif (u != p)\r\n\t\t\tres += dp[u];\r\n\t\tif (v != p)\r\n\t\t\tres += dp[v];\r\n\r\n\t\tres += dp[p];\r\n\t\tif (x) {\r\n\t\t\tres -= val[x];\r\n\t\t\tres += f[u] - f[x];\r\n\t\t}\r\n\t\tif (y) {\r\n\t\t\tres -= val[y];\r\n\t\t\tres += f[v] - f[y];\r\n\t\t}\r\n\r\n\t\tres += g[p];\r\n\r\n\t\tcout << res << \"\\n\";\r\n\r\n\t}\r\n\treturn 0;\r\n}"
+}

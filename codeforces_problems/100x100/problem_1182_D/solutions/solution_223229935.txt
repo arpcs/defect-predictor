@@ -1,0 +1,40 @@
+{
+    "id": 223229935,
+    "contestId": 1182,
+    "creationTimeSeconds": 1694615752,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "FeathBow"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 436,
+    "memoryConsumedBytes": 116633600,
+    "source": "#include<bits/stdc++.h>\r\n#include<ext/pb_ds/assoc_container.hpp>\r\n#include<ext/pb_ds/hash_policy.hpp>\r\nusing namespace __gnu_pbds;\r\nusing namespace std;\r\n#define int long long\r\n#define ll long long\r\n#define double long double\r\n#define all(x) (x).begin(), (x).end()\r\n#define nall(x) next((x).begin()), (x).end()\r\nconstexpr int mod = 1e9 + 7;\r\nconstexpr int M = 2e5 + 3;\r\nconstexpr int N = 2e6 + 3;\r\nconstexpr int B = 500 + 3;\r\nconstexpr double eps = 1e-7;\r\nconstexpr int H = 13331;\r\n\r\nvector<array<int, 2>> dir = {{-1,0}, {1, 0}, {0, -1}, {0, 1}};\r\n\r\n\r\n\r\nint t_h(int x)\r\n{\r\n    return x * x * x * 1234567 + H;\r\n}\r\nint t_f(int x)\r\n{   \r\n    return  t_h(x & ((1 << 31) - 1)) + t_h(x >> 31);\r\n}\r\n\r\nint uni[M];\r\nint siz[M];\r\nint col[M];\r\ngp_hash_table<int,gp_hash_table<int, int>> ne;\r\nset<int> line;\r\nvoid dfs(int u,int fa, vector<int>* edge)\r\n{\r\n    uni[u] = 1;\r\n    siz[u] = 1;\r\n    for(auto& v : edge[u])\r\n    {\r\n        if(v == fa)\r\n            continue;\r\n        dfs(v, u, edge);\r\n        uni[u] += t_f(uni[v]);\r\n        ++ne[u][t_f(uni[v])];\r\n        siz[u] += siz[v];\r\n    }\r\n}\r\n\r\nvoid modify(int u,int fa,vector<int>* edge)\r\n{\r\n    for(auto& v: edge[u])\r\n    {\r\n        if(v == fa)\r\n            continue;\r\n        int fat = t_f(col[u] - t_f(uni[v]));\r\n        col[v] = uni[v] + fat;\r\n        // cout << v << \" \" << col[v] << \" \" << fat << endl;\r\n        if(ne[v].size() == 1)\r\n        {\r\n            int val = 0;\r\n            for(auto& e : ne[v])\r\n                val = e.first;\r\n            //cout << v << \" \" << fat << \"###\" << endl;\r\n            if(val == fat)\r\n            {\r\n                cout << v << endl;\r\n                exit(0);\r\n            }\r\n            // if(line.find(fat) != line.end())\r\n            // {\r\n\r\n            //     int p = u, q = fa;\r\n            //     while(edge[q].size())\r\n            //         p = q, q = edge[q].back();\r\n            //     cout << p << endl;\r\n            //     exit(0);\r\n            // }\r\n        }\r\n        else if(ne[v].size() == 2)\r\n        {\r\n            auto it = ne[v].begin();\r\n            {\r\n                auto [p, q] = *it;\r\n                auto [l, r] = *next(it);\r\n                if(q == 1 && line.find(p) != line.end() && l == fat)\r\n                {\r\n                    int id = -1;\r\n                    for(auto &e : edge[v])\r\n                        if(t_f(uni[e]) == p){id = e; break;}\r\n                    int pp = id, qq = v;\r\n                    // cout << id << \"######\";\r\n                    while(edge[pp].size())\r\n                    {\r\n                        bool jud = true;\r\n                        for(auto& vv: edge[pp])\r\n                            if(vv != qq)\r\n                            {\r\n                                qq = pp, pp = vv;\r\n                                jud = false;\r\n                                break;\r\n                            }\r\n                        if(jud)\r\n                            break;\r\n                    }\r\n                    cout << pp << endl;\r\n                    exit(0);\r\n                }\r\n            }\r\n            {\r\n                auto [p, q] = *next(it);\r\n                auto [l, r] = *it;\r\n                if(q == 1 && line.find(p) != line.end() && l == fat)\r\n                {\r\n                    int id = -1;\r\n                    for(auto &e : edge[v])\r\n                        if(t_f(uni[e]) == p){id = e; break;}\r\n                    int pp = id, qq = v;\r\n                    // cout << id << \"######\";\r\n                    while(edge[pp].size())\r\n                    {\r\n                        bool jud = true;\r\n                        for(auto& vv: edge[pp])\r\n                            if(vv != qq)\r\n                            {\r\n                                qq = pp, pp = vv;\r\n                                jud = false;\r\n                                break;\r\n                            }\r\n                        if(jud)\r\n                            break;\r\n                    }\r\n                    cout << pp << endl;\r\n                    exit(0);\r\n                }\r\n            }\r\n        }   \r\n        modify(v, u, edge);\r\n    }\r\n}\r\n\r\nvoid get_line(int u,vector<int>* edges)\r\n{\r\n    uni[u] = 1;\r\n    for(auto& v : edges[u])\r\n    {\r\n        get_line(v, edges);\r\n        uni[u] += t_f(uni[v]);\r\n    }\r\n    line.insert(t_f(uni[u]));\r\n    // cout << t_f(uni[u]) << \" \" << u << endl;\r\n}\r\n\r\nvoid slove()\r\n{\r\n    int n; \r\n    cin >> n;\r\n    int x, y;\r\n    vector<int> edge[n + 1];\r\n    vector<int> edges[n + 1];\r\n    for(int i = 1;i < n;++i)\r\n        edges[i].push_back(i + 1);\r\n    get_line(1, edges);\r\n    for(int i = 1;i <= n;++i)\r\n        uni[i] = siz[i] = 0;\r\n    for(int i = 1;i < n;++i)\r\n        cin >> x >> y, edge[x].push_back(y), edge[y].push_back(x);\r\n\r\n  \r\n\r\n    if(n == 1)\r\n    {\r\n        cout << 1 << endl;\r\n        return;\r\n    }\r\n\r\n    dfs(1, 0, edge);\r\n\r\n    // cout << 1 << \" \" << uni[1] << endl;\r\n    col[1] = uni[1];\r\n\r\n    // for(auto&e : ne[4])\r\n    //    cout << e.first << \"#\" << endl;\r\n    modify(1, 0, edge);\r\n    for(int i = 1;i <= n;++i)\r\n        uni[i] = siz[i] = col[i] = 0;\r\n    gp_hash_table<int,gp_hash_table<int, int>>().swap(ne);\r\n\r\n    dfs(2, 0, edge);\r\n\r\n    // cout << 1 << \" \" << uni[1] << endl;\r\n    col[2] = uni[2];\r\n\r\n    // for(auto&e : ne[4])\r\n    //    cout << e.first << \"#\" << endl;\r\n    modify(2, 0, edge);\r\n\r\n   \r\n    cout << -1 << endl;\r\n}\r\nsigned main()\r\n{\r\n    cin.tie(0)->sync_with_stdio(false);\r\n    int t = 1;  \r\n    //cin >> t;\r\n    while(t--)\r\n        slove();\r\n    return 0;\r\n}\r\n\r\n"
+}

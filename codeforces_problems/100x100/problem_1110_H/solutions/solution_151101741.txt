@@ -1,0 +1,36 @@
+{
+    "id": 151101741,
+    "contestId": 1110,
+    "creationTimeSeconds": 1648387445,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "Strange_King"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 483123200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\nint get() {\r\n\tint x = 0, f = 1; char c = getchar();\r\n\twhile(!isdigit(c)) { if(c == '-') f = -1; c = getchar(); }\r\n\twhile(isdigit(c)) { x = x * 10 + c - '0'; c = getchar(); }\r\n\treturn x * f;\r\n}\r\n\r\nconst int N = 2e3 + 5, S = 2e4 + 5;\r\nchar digL[N], digR[N];\r\nint lenL, lenR, n;\r\nint ch[S][10], fail[S], tot, g[S][N], f[S][N], ans, vis[S][N];\r\n\r\nvoid qmax(int &x, int y) { x = max(x, y); }\r\n\r\nvoid BuildACAM() {\r\n\tif(lenL == lenR) {\r\n\t\tint uL = 0, uR = 0;\r\n\t\tfor(int i = 1; i <= lenL; i++) {\r\n\t\t\tint cL = digL[i] - '0', cR = digR[i] - '0';\r\n\t\t\tif(uL == uR) {\r\n\t\t\t\tfor(int t = cL + 1; t < cR; t++) {\r\n\t\t\t\t\tif(!ch[uL][t]) ch[uL][t] = ++tot;\r\n\t\t\t\t\t++g[ch[uL][t]][lenL - i];\r\n\t\t\t\t}\r\n\t\t\t\tif(!ch[uL][cL]) ch[uL][cL] = ++tot;\r\n\t\t\t\tif(!ch[uR][cR]) ch[uR][cR] = ++tot;\r\n\t\t\t\tuL = ch[uL][cL], uR = ch[uR][cR];\r\n\t\t\t}\r\n\t\t\telse {\r\n\t\t\t\tfor(int t = cL + 1; t <= 9; t++) {\r\n\t\t\t\t\tif(!ch[uL][t]) ch[uL][t] = ++tot;\r\n\t\t\t\t\t++g[ch[uL][t]][lenL - i];\r\n\t\t\t\t}\r\n\t\t\t\tfor(int t = 0; t < cR; t++) {\r\n\t\t\t\t\tif(!ch[uR][t]) ch[uR][t] = ++tot;\r\n\t\t\t\t\t++g[ch[uR][t]][lenR - i];\r\n\t\t\t\t}\r\n\t\t\t\tif(!ch[uL][cL]) ch[uL][cL] = ++tot;\r\n\t\t\t\tif(!ch[uR][cL]) ch[uR][cR] = ++tot;\r\n\t\t\t\tuL = ch[uL][cL], uR = ch[uR][cR];\r\n\t\t\t}\r\n\t\t} \r\n\t\t++g[uL][0]; if(uL != uR) ++g[uR][0];\r\n\t} \r\n\telse {\r\n\t\tint uL = 0, uR = 0;\r\n\t\tfor(int i = 1; i <= lenL; i++) {\r\n\t\t\tint cL = digL[i] - '0';\r\n\t\t\tfor(int t = cL + 1; t <= 9; t++) {\r\n\t\t\t\tif(!ch[uL][t]) ch[uL][t] = ++tot;\r\n\t\t\t\t++g[ch[uL][t]][lenL - i];\r\n\t\t\t}\r\n\t\t\tif(!ch[uL][cL]) ch[uL][cL] = ++tot;\r\n\t\t\tuL = ch[uL][cL];\r\n\t\t}\r\n\t\t++g[uL][0];\r\n\t\tfor(int i = 1; i <= lenR; i++) {\r\n\t\t\tint cR = digR[i] - '0';\r\n\t\t\tfor(int t = i == 1? 1 : 0; t < cR; t++) {\r\n\t\t\t\tif(!ch[uR][t]) ch[uR][t] = ++tot;\r\n\t\t\t\t++g[ch[uR][t]][lenR - i];\r\n\t\t\t}\r\n\t\t\tif(!ch[uR][cR]) ch[uR][cR] = ++tot;\r\n\t\t\tuR = ch[uR][cR];\r\n\t\t}\r\n\t\t++g[uR][0];\r\n\t\tfor(int i = lenL + 1; i < lenR; i++) {\r\n\t\t\tfor(int t = 1; t <= 9; t++) {\r\n\t\t\t\tif(!ch[0][t]) ch[0][t] = ++tot;\r\n\t\t\t\t++g[ch[0][t]][t - 1];\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tch[0][0] = 0;\r\n\tqueue<int> q;\r\n\tfor(int t = 0; t <= 9; t++) if(ch[0][t]) q.push(ch[0][t]);\r\n\twhile(q.size()) {\r\n\t\tint u = q.front(); q.pop();\r\n\t\tfor(int c = 0; c <= 9; c++) {\r\n\t\t\tif(ch[u][c]) {\r\n\t\t\t\tfail[ch[u][c]] = ch[fail[u]][c];\r\n\t\t\t\tfor(int i = 0; i <= n; i++) g[ch[u][c]][i] += g[fail[ch[u][c]]][i];\r\n\t\t\t\tq.push(ch[u][c]);\r\n\t\t\t}\r\n\t\t\telse ch[u][c] = ch[fail[u]][c];\r\n\t\t}\r\n\t}\r\n\tfor(int i = 1; i <= tot; i++)\r\n\t\tfor(int j = 1; j <= n; j++)\r\n\t\t\tg[i][j] += g[i][j - 1];\r\n}\r\n\r\nint main() {\r\n\tscanf(\"%s\", digL + 1), lenL = strlen(digL + 1);\r\n\tscanf(\"%s\", digR + 1), lenR = strlen(digR + 1);\r\n\tn = get();\r\n\tBuildACAM();\r\n\tmemset(f, -0x3f, sizeof(f));\r\n\tf[0][0] = 0;\r\n\tfor(int j = 0; j <= n; j++) {\r\n\t\tfor(int i = 0; i <= tot; i++) {\r\n\t\t\tif(f[i][j] < 0) continue;\r\n\t\t\tf[i][j] += g[i][n - j];\r\n\t\t\tfor(int c = 0; c <= 9; c++) qmax(f[ch[i][c]][j + 1], f[i][j]); \r\n\t\t}\r\n\t}\r\n\tfor(int i = 0; i <= tot; i++) ans = max(ans, f[i][n]);\r\n\tfor(int i = 0; i <= tot; i++) if(f[i][n] == ans) vis[i][n] = 1;\r\n\tfor(int j = n - 1; j >= 0; j--)\r\n\t\tfor(int i = 0; i <= tot; i++)\r\n\t\t\tfor(int c = 0; c <= 9; c++)\r\n\t\t\t\tif(vis[ch[i][c]][j + 1] && f[ch[i][c]][j + 1] == f[i][j] + g[ch[i][c]][n - j - 1]) \r\n\t\t\t\t\tvis[i][j] = 1;\r\n\tint now = 0;\r\n\tfor(int i = 1; i <= n; i++) {\r\n\t\tfor(int c = 0; c <= 9; c++) {\r\n\t\t\tif(vis[ch[now][c]][i] && f[ch[now][c]][i] == f[now][i - 1] + g[ch[now][c]][i]) {\r\n\t\t\t\tprintf(\"%c\", c + '0');\r\n\t\t\t\tnow = ch[now][c];\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

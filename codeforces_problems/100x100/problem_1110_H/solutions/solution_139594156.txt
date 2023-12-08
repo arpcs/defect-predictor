@@ -1,0 +1,36 @@
+{
+    "id": 139594156,
+    "contestId": 1110,
+    "creationTimeSeconds": 1639711094,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "wyzwyz"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 904,
+    "memoryConsumedBytes": 650342400,
+    "source": "#include<cstdio>\n#include<cctype>\n#include<cstring>\n\n#define maxn 2222\n#define MAXN 30303\n\ntemplate<class T>\n\ninline T read(){\n    T r=0,f=0;\n    char c;\n    while(!isdigit(c=getchar()))f|=(c=='-');\n    while(isdigit(c))r=(r<<1)+(r<<3)+(c^48),c=getchar();\n    return f?-r:r;\n}\n\ntemplate<class T>\n\ninline T min(T a,T b){\n    return a<b?a:b;\n}\n\ntemplate<class T>\n\ninline T max(T a,T b){\n    return a>b?a:b;\n}\n\nchar l[maxn],r[maxn];\n\nint n,lenl,lenr,f[maxn][MAXN];\n\nint tot,fail[MAXN],ch[MAXN][22],g[MAXN][888];\n\nnamespace BUILD{\n\n    int len,lim[2][maxn];\n\n    void dfs(int p,int s,int o){//o=1 l and r | o=2 l | o=3 r\n\tif(s==len){\n\t    g[p][0]=1;\n\t    return;\n\t}\n\ts++;\n\tif(o==1){\n\t    for(int i=lim[0][s];i<=lim[1][s];i++){\n\t\tif(!ch[p][i])ch[p][i]=++tot;\n\t\tif(i!=lim[0][s]&&i!=lim[1][s])\n\t\t    g[ch[p][i]][len-s]++;\n\t    }\n\t    if(lim[0][s]==lim[1][s])\n\t\treturn dfs(ch[p][lim[0][s]],s,1);\n\t    dfs(ch[p][lim[0][s]],s,2);\n\t    dfs(ch[p][lim[1][s]],s,3);\n\t    return;\n\t}\n\to^=2;\n\tfor(int i=o?0:(lim[0][s]+1);i<(o?lim[1][s]:10);i++){\n\t    if(!ch[p][i])ch[p][i]=++tot;\n\t    g[ch[p][i]][len-s]++;\n\t}\n\tdfs(ch[p][lim[o][s]]=++tot,s,o^2);\n    }\n\n    inline void work(){\n\tlenl=strlen(l+1);\n\tlenr=strlen(r+1);\n\tif(lenl==lenr){\n\t    len=lenl;\n\t    for(int i=1;i<=len;i++){\n\t\tlim[0][i]=l[i]-'0';\n\t\tlim[1][i]=r[i]-'0';\n\t    }\n\t    dfs(0,0,1);\n\t    return;\n\t}\n\tlen=lenl;\n\tfor(int i=1;i<=len;i++){\n\t    lim[0][i]=l[i]-'0';\n\t    lim[1][i]=9;\n\t}\n\tdfs(0,0,1);\n\tlen=lenr;\n\tfor(int i=1;i<=len;i++){\n\t    lim[0][i]=0;\n\t    lim[1][i]=r[i]-'0';\n\t}\n\tlim[0][1]=1;\n\tdfs(0,0,1);\n\tif(lenl+1<lenr){\n\t    for(int i=1;i<10;i++){\n\t\tif(!ch[0][i])ch[0][i]=++tot;\n\t\tfor(int j=lenl;j<lenr-1;j++)\n\t\t    g[ch[0][i]][j]++;\n\t    }\n\t}\n    }\n\n}\n\nnamespace AC{\n\n    int hd,tl,q[maxn];\n\n    inline void build(){\n\tfor(int i=1;i<10;i++)\n\t    if(ch[0][i])q[++tl]=ch[0][i];\n\twhile(hd^tl){\n\t    int p=q[++hd];\n\t    int f=fail[p];\n\t    for(int i=1;i<=lenr;i++)g[p][i]+=g[p][i-1];\n\t    for(int i=0;i<=lenr;i++)g[p][i]+=g[f][i];\n\t    for(int i=0;i<10;i++){\n\t\tif(!ch[p][i])ch[p][i]=ch[f][i];\n\t\telse {\n\t\t    fail[ch[p][i]]=ch[f][i];\n\t\t    q[++tl]=ch[p][i];\n\t\t}\n\t    }\n\t}\n    }\n\n    int Max[maxn][MAXN];\n\n    inline void work(){\n\tfor(int i=0;i<=n;i++)\n\t    for(int p=0;p<=tot;p++)\n\t\tf[i][p]=Max[i][p]=-1e9;\n\tf[0][0]=0;\n\tfor(int i=0;i<n;i++)\n\t    for(int p=0;p<=tot;p++){\n\t\tif(f[i][p]<0)continue;\n\t\tfor(int c=0;c<10;c++)\n\t\t    f[i+1][ch[p][c]]=max(f[i+1][ch[p][c]],f[i][p]+g[ch[p][c]][min(lenr,n-i-1)]);\n\t    }\n\tint ans=0;\n\tfor(int i=0;i<=tot;i++)\n\t    ans=max(ans,Max[n][i]=f[n][i]);\n\tprintf(\"%d\\n\",ans);\n\tfor(int i=n-1;i;i--)\n\t    for(int p=0;p<=tot;p++){\n\t\tif(f[i][p]<0)continue;\n\t\tfor(int c=0;c<10;c++)\n\t\t    if(f[i+1][ch[p][c]]==f[i][p]+g[ch[p][c]][min(lenr,n-i-1)])\n\t\t\tMax[i][p]=max(Max[i][p],Max[i+1][ch[p][c]]);\n\t    }\n\tfor(int i=0,p=0;i<n;i++)\n\t    for(int c=0;c<10;c++){\n\t\tif(f[i+1][ch[p][c]]!=f[i][p]+g[ch[p][c]][min(lenr,n-i-1)])\n\t\t    continue;\n\t\tif(Max[i+1][ch[p][c]]==ans){\n\t\t    printf(\"%d\",c);\n\t\t    p=ch[p][c];\n\t\t    break;\n\t\t}\n\t    }\n    }\n\n}\n\nint main(){\n    scanf(\"%s%s\",l+1,r+1);\n    n=read<int>();\n    BUILD::work();\n    AC::build();\n    AC::work();\n    return 0;\n}"
+}

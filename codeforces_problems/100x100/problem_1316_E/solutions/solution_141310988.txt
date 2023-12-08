@@ -1,0 +1,38 @@
+{
+    "id": 141310988,
+    "contestId": 1316,
+    "creationTimeSeconds": 1641038348,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1316,
+        "index": "E",
+        "name": "Team Building",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "bitmasks",
+            "dp",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1316,
+        "members": [
+            {
+                "handle": "SmolBrain"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1583332500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 124,
+    "timeConsumedMillis": 779,
+    "memoryConsumedBytes": 122572800,
+    "source": "#include <bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\n\r\ntemplate <class T> using Tree = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;\r\n\r\ntypedef long long int ll;\r\ntypedef long double ld;\r\n\r\n#define fastio ios_base::sync_with_stdio(false); cin.tie(NULL)\r\n#define endl '\\n'\r\n#define pb push_back\r\n#define conts continue\r\n#define all(a) a.begin(),a.end()\r\n#define rall(a) a.rbegin(), a.rend()\r\n#define yes cout << \"YES\" << endl\r\n#define no cout << \"NO\" << endl\r\n#define ff first\r\n#define ss second\r\n#define ceil2(x,y) ((x+y-1) / y)\r\n#define sz(a) a.size()\r\n#define setbits(x) __builtin_popcountll(x)\r\n#ifndef ONLINE_JUDGE\r\n#define debug(x) cout << #x <<\" = \"; print(x); cout << endl;\r\n#else\r\n#define debug(x)\r\n#endif\r\n\r\n#define rep(i,n) for(int i = 0; i < n; ++i)\r\n#define rep1(i,n) for(int i = 1; i <= n; ++i)\r\n\r\nbool iseven(ll n) {if ((n & 1) == 0) return true; return false;}\r\n\r\nvoid print(ll t) {cout << t;}\r\nvoid print(int t) {cout << t;}\r\nvoid print(string t) {cout << t;}\r\nvoid print(char t) {cout << t;}\r\nvoid print(double t) {cout << t;}\r\nvoid print(ld t) {cout << t;}\r\n\r\ntemplate <class T, class V> void print(pair <T, V> p);\r\ntemplate <class T> void print(vector <T> v);\r\ntemplate <class T> void print(set <T> v);\r\ntemplate <class T, class V> void print(map <T, V> v);\r\ntemplate <class T> void print(multiset <T> v);\r\ntemplate <class T, class V> void print(pair <T, V> p) {cout << \"{\"; print(p.ff); cout << \",\"; print(p.ss); cout << \"}\";}\r\ntemplate <class T> void print(vector <T> v) {cout << \"[ \"; for (T i : v) {print(i); cout << \" \";} cout << \"]\";}\r\ntemplate <class T> void print(set <T> v) {cout << \"[ \"; for (T i : v) {print(i); cout << \" \";} cout << \"]\";}\r\ntemplate <class T> void print(multiset <T> v) {cout << \"[ \"; for (T i : v) {print(i); cout << \" \";} cout << \"]\";}\r\ntemplate <class T, class V> void print(map <T, V> v) {cout << \"[ \"; for (auto i : v) {print(i); cout << \" \";} cout << \"]\";}\r\n\r\nvoid usaco(string filename) {\r\n    freopen((filename + \".in\").c_str(), \"r\", stdin);\r\n    freopen((filename + \".out\").c_str(), \"w\", stdout);\r\n}\r\n\r\n#pragma GCC optimize(\"Ofast\")\r\n// #pragma GCC optimize(\"unroll-loops\")\r\n// #pragma GCC target(\"avx,avx2,sse,sse2,sse3,sse4,popcnt,fma\")\r\n\r\nconst int MOD = 1e9 + 7;\r\nconst int maxn = 1e5 + 5;\r\nconst int inf1 = 1e9 + 5;\r\nconst ll inf2 = 1e18 + 5;\r\n\r\nvoid solve(int test_case)\r\n{\r\n    // editorial approach\r\n    int n, p, k; cin >> n >> p >> k;\r\n    vector< pair<int, vector<int>> > b(n);\r\n    rep(i, n) cin >> b[i].ff;\r\n    rep(i, n) {\r\n        rep(j, p) {\r\n            int x; cin >> x;\r\n            b[i].ss.pb(x);\r\n        }\r\n    }\r\n\r\n    sort(rall(b));\r\n\r\n    vector<int> a(n);\r\n    rep(i, n) a[i] = b[i].ff;\r\n\r\n    vector<vector<int>> skill(n, vector<int>(p));\r\n    rep(i, n) rep(j, p) skill[i][j] = b[i].ss[j];\r\n\r\n    vector<vector<ll>> dp(n, vector<ll>(1 << p, -inf2));\r\n\r\n    rep(i, n) {\r\n        rep(mask, 1 << p) {\r\n            // audience\r\n            int players = setbits(mask);\r\n\r\n            if (i < k + players) {\r\n                if (i) {\r\n                    dp[i][mask] = max(dp[i][mask], dp[i - 1][mask] + a[i]);\r\n                }\r\n                else {\r\n                    if (mask == 0) dp[i][mask] = a[i];\r\n                }\r\n            }\r\n\r\n            // player\r\n            rep(j, p) {\r\n                int f = 1 << j;\r\n                if ((mask & f) == 0) conts;\r\n\r\n                if (i) {\r\n                    dp[i][mask] = max(dp[i][mask], dp[i - 1][mask ^ f] + skill[i][j]);\r\n                }\r\n                else {\r\n                    if (mask == f) dp[i][mask] = skill[i][j];\r\n                }\r\n            }\r\n\r\n            // neither audience, nor player\r\n            if(i){\r\n                dp[i][mask] = max(dp[i][mask], dp[i-1][mask]);\r\n            }\r\n        }\r\n    }\r\n\r\n    ll ans = dp[n - 1][(1 << p) - 1];\r\n    cout << ans << endl;\r\n}\r\n\r\nint main()\r\n{\r\n    fastio;\r\n\r\n    int t = 1;\r\n    // cin >> t;\r\n    rep1(i, t) {\r\n        solve(i);\r\n    }\r\n\r\n    return 0;\r\n}"
+}

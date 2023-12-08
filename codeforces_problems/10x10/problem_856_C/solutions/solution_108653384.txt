@@ -1,0 +1,36 @@
+{
+    "id": 108653384,
+    "contestId": 856,
+    "creationTimeSeconds": 1614503316,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 856,
+        "index": "C",
+        "name": "Eleventh Birthday",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 856,
+        "members": [
+            {
+                "handle": "hoangphuc.194194"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1505050500
+    },
+    "programmingLanguage": "MS C++",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\r\n#include <algorithm>\r\n#include <vector>\r\n \r\nusing namespace std;\r\n \r\nconst int MOD = 998244353;\r\n \r\nvoid add(int& a, int b) { a += b; if (a >= MOD) a -= MOD; if (a < 0) a += MOD; }\r\nint mul(int a, int b) { return 1LL * a * b % MOD; }\r\nint pow(int a, int n)\r\n{\r\n    int t = 1;\r\n    for (; n > 0; n >>= 1) {\r\n        if (n & 1) t = mul(t, a);\r\n        a = mul(a, a);\r\n    }\r\n    return t;\r\n}\r\n \r\nconst int N = 2e3;\r\nint ft[N + 2], invft[N + 2];\r\nint P(int n, int k)\r\n{\r\n    if (n < 0 || k < 0) return 1;\r\n    return mul(ft[n], invft[n - k]);\r\n}\r\n \r\nint solve(vector<int> even, vector<int> odd)\r\n{\r\n    vector<int> dp[2][11];\r\n    int n = odd.size();\r\n    for (int i = 0; i < 2; ++i)\r\n        for (int j = 0; j < 11; ++j)\r\n            dp[i][j].resize(n + 1);\r\n \r\n    int cur = 1, pre = 0;\r\n    dp[cur][0][0] = 1;          // dp[considered so far][sum mod 11][positive count]\r\n    for (int x : odd) {\r\n        swap(cur, pre);\r\n        for (int i = 0; i < 11; ++i)\r\n            fill(dp[cur][i].begin(), dp[cur][i].end(), 0);\r\n        for (int i = 0; i < 11; ++i)\r\n            for (int j = 0; j < n; ++j)\r\n                if (dp[pre][i][j]) {\r\n                    add(dp[cur][(i + x) % 11][j + 1], dp[pre][i][j]);\r\n                    add(dp[cur][(i + 11 - x) % 11][j], dp[pre][i][j]);\r\n                }\r\n    }\r\n \r\n    vector<int> sum_odd(11, 0);\r\n    int pos_pos = (n + 1) / 2;\r\n    int neg_pos = n / 2;\r\n    for (int i = 0; i < 11; ++i)\r\n        sum_odd[i] = mul(dp[cur][i][(n + 1) / 2], mul(ft[pos_pos], ft[neg_pos]));\r\n \r\n    int m = even.size();\r\n    for (int i = 0; i < 2; ++i)\r\n        for (int j = 0; j < 11; ++j)\r\n            dp[i][j].assign(m + 1, 0);\r\n    dp[cur][0][0] = 1;          // dp[considered so far][sum mod 11][positive count]\r\n    for (int x : even) {\r\n        swap(cur, pre);\r\n        for (int i = 0; i < 11; ++i)\r\n            fill(dp[cur][i].begin(), dp[cur][i].end(), 0);\r\n        for (int i = 0; i < 11; ++i)\r\n            for (int j = 0; j < m; ++j)\r\n                if (dp[pre][i][j]) {\r\n                    add(dp[cur][(i + x) % 11][j + 1], dp[pre][i][j]);\r\n                    add(dp[cur][(i + 11 - x) % 11][j], dp[pre][i][j]);\r\n                }\r\n    }\r\n \r\n    pos_pos = n / 2 + 1;\r\n    neg_pos = (n + 1) / 2;\r\n \r\n    int ans = 0;\r\n    for (int i = 0; i < 11; ++i)\r\n        for (int j = 0; j <= m; ++j)\r\n            if (dp[cur][i][j]) {\r\n                add(ans, mul(dp[cur][i][j], mul(sum_odd[(11 - i) % 11], mul(P(j + pos_pos - 1, j), P(m - j + neg_pos - 1, m - j)))));\r\n            }\r\n    return ans;\r\n}\r\n \r\nint main()\r\n{\r\n#define TASK \"GIFT11\"\r\n    freopen(TASK\".INP\", \"r\", stdin);\r\n    freopen(TASK\".OUT\", \"w\", stdout);\r\n    ft[0] = invft[0] = 1;\r\n    for (int i = 1; i <= N; ++i) ft[i] = mul(ft[i - 1], i);\r\n    invft[N] = pow(ft[N], MOD - 2);\r\n    for (int i = N - 1; i > 0; --i)\r\n        invft[i] = mul(invft[i + 1], i + 1);\r\n \r\n    int tests;\r\n    cin >> tests;\r\n    while (tests--) {\r\n        int n;\r\n        cin >> n;\r\n        vector<int> even, odd;\r\n        for (int i = 0; i < n; ++i) {\r\n            int x;\r\n            cin >> x;\r\n            int s = 0, l = 0;\r\n            for (; x > 0; l ^= 1, x /= 10)\r\n                if (l) s -= x % 10;\r\n                else s += x % 10;\r\n            s = (s % 11 + 11) % 11;\r\n            if (l) odd.push_back(s);\r\n            else even.push_back(s);\r\n        }\r\n        cout << solve(even, odd) << '\\n';\r\n    }\r\n    return 0;\r\n}"
+}

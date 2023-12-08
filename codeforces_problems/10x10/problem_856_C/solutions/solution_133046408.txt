@@ -1,0 +1,36 @@
+{
+    "id": 133046408,
+    "contestId": 856,
+    "creationTimeSeconds": 1635155735,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 856,
+        "index": "C",
+        "name": "Eleventh Birthday",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 856,
+        "members": [
+            {
+                "handle": "yjt1799067408"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1505050500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 26,
+    "timeConsumedMillis": 202,
+    "memoryConsumedBytes": 355737600,
+    "source": "#include<iostream>\r\n#include<cstdio>\r\n#include<vector>\r\nconst int NN=2005,N=4321,mod=998244353;\r\nusing namespace std;\r\nint f[NN][NN][11],f2[NN][NN][11],fra[N],ifra[N];\r\nvector<int>even,odd;\r\ninline char gc()\r\n{\r\n\tstatic char buf[1<<16],*S,*T;\r\n\tif(S==T)\r\n\t{\r\n\t\tT=(S=buf)+fread(buf,1,1<<16,stdin);\r\n\t\tif(S==T)return EOF;\r\n\t}\r\n\treturn *(S++);\r\n}\r\n#define getchar gc\r\ninline int read()\r\n{\r\n\tchar h=getchar();\r\n\tint y=0;\r\n\twhile(h<'0'||h>'9')h=getchar();\r\n\twhile(h>='0'&&h<='9')y=y*10+h-'0',h=getchar();\r\n\treturn y;\r\n}\r\ninline int qpow(int a,int b)\r\n{\r\n\tint j=1;\r\n\twhile(b)\r\n\t{\r\n\t\tif(b&1)j=1ll*j*a%mod;\r\n\t\ta=1ll*a*a%mod;\r\n\t\tb>>=1;\r\n\t}\r\n\treturn j;\r\n}\r\ninline void init()\r\n{\r\n\tfra[0]=ifra[0]=1;\r\n\tfor(int i=1;i<N;i++)fra[i]=1ll*fra[i-1]*i%mod;\r\n\tifra[N-1]=qpow(fra[N-1],mod-2);\r\n\tfor(int i=N-2;i;i--)ifra[i]=1ll*ifra[i+1]*(i+1)%mod;\r\n}\r\ninline int C(int n,int m)\r\n{\r\n\tif(m==0)return 1;\r\n//\tcout<<n<<\" \"<<m<<\":\"<<(n<m?0:1ll*fra[n]*ifra[m]%mod*ifra[n-m]%mod)<<\"!!!!\\n\";\r\n\treturn n<m?0:1ll*fra[n]*ifra[m]%mod*ifra[n-m]%mod;\r\n}\r\nint main()\r\n{\r\n\tinit();\r\n\tint t=read();\r\n\twhile(t--)\r\n\t{\r\n\t\teven.clear();odd.clear();\r\n\t\tint n=read();\r\n\t\tfor(int i=1;i<=n;i++)\r\n\t\t{\r\n\t\t\tint s=0,t=1,x=read();\r\n\t\t\twhile(x)\r\n\t\t\t{\r\n\t\t\t\ts+=t*(x%10);\r\n\t\t\t\tx/=10;t*=-1;\r\n\t\t\t}\r\n\t\t\ts=(s%11+11)%11;\r\n//\t\t\tcout<<s<<\"!!!\\n\";\r\n\t\t\tif(t<0)odd.push_back(s);\r\n\t\t\telse even.push_back(s);\r\n\t\t}\r\n\t\tf[0][0][0]=1;\r\n\t\tfor(int i=1;i<=odd.size();i++)\r\n\t\tfor(int j=0;j<=min(i,(int)odd.size()>>1);j++)\r\n\t\tfor(int z=0;z<11;z++)\r\n\t\t{\r\n\t\t\tf[i][j][z]=0;\r\n\t\t\tif(j>0)f[i][j][z]+=f[i-1][j-1][(z+odd[i-1])%11];\r\n\t\t\tif((i-j)>0)f[i][j][z]+=f[i-1][j][(z-odd[i-1]+11)%11];\r\n\t\t\tif(f[i][j][z]>=mod)f[i][j][z]-=mod;\r\n\t\t}\r\n\t\tf2[0][0][0]=1;\r\n\t\tfor(int i=1;i<=even.size();i++)\r\n\t\tfor(int j=0;j<=i;j++)\r\n\t\tfor(int z=0;z<11;z++)\r\n\t\t{\r\n\t\t\tf2[i][j][z]=0;\r\n\t\t\tif(j>0)f2[i][j][z]+=f2[i-1][j-1][(z+even[i-1])%11];\r\n\t\t\tif((i-j)>0)f2[i][j][z]+=f2[i-1][j][(z-even[i-1]+11)%11];\r\n\t\t\tif(f2[i][j][z]>=mod)f2[i][j][z]-=mod;\r\n\t\t}\r\n\t\tint ans=0;\r\n\t\tfor(int i=0;i<=even.size();i++)\r\n\t\tfor(int j=0;j<11;j++)\r\n\t\t{\r\n\t\t\tint res=1ll*f2[even.size()][i][j]*f[odd.size()][odd.size()>>1][(11-j)%11]%mod;\r\n//\t\t\tcout<<i<<\" \"<<j<<\"::\"<<f2[even.size()][i][j]<<\" \"<<f[odd.size()][odd.size()>>1][(11-j)%11]<<\"!!!\\n\";\r\n\t\t\tres=1ll*res*fra[i]%mod*fra[even.size()-i]%mod*C(i+((odd.size()+1)>>1)-1,i)%mod*C(even.size()-i+(odd.size()>>1),odd.size()>>1)%mod;\r\n\t\t\tres=1ll*res*fra[odd.size()>>1]%mod*fra[(odd.size()+1)>>1]%mod;\r\n\t\t\tans+=res;\r\n\t\t\tif(ans>=mod)ans-=mod;\r\n\t\t}\r\n\t\tcout<<ans<<\"\\n\";\r\n\t}\r\n}"
+}

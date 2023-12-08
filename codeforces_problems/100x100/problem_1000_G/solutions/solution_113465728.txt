@@ -1,0 +1,36 @@
+{
+    "id": 113465728,
+    "contestId": 1000,
+    "creationTimeSeconds": 1618817653,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "Acfboy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 1497,
+    "memoryConsumedBytes": 184320000,
+    "source": "#include <cstdio>\r\n#include <algorithm>\r\n#define int long long\r\nconst int N = 300005, M = 2*N;\r\nint n, q, u, v, a[N], f[N], head[N], vet[M], len[M], \r\n\tnext[M], F[N][30], g[N], p[N][30], dep[N], num, w;\r\nvoid add(int u, int v, int c) {\r\n\tnum++;\r\n\tvet[num] = v, len[num] = c;\r\n\tnext[num] = head[u];\r\n\thead[u] = num;\r\n}\r\nvoid dp(int u, int fa) {\r\n\tf[u] = a[u];\r\n\tfor(int i = head[u]; i; i = next[i]) {\r\n\t\tint v = vet[i];\r\n\t\tif(v == fa) continue;\r\n\t\tdp(v, u);\r\n\t\tif(f[v] - 2*len[i] > 0) f[u] += f[v] - 2*len[i];\r\n\t}\r\n}\r\nvoid dfs(int u, int fa) {\r\n\tp[u][0] = fa;\r\n\tdep[u] = dep[fa] + 1;\r\n\tfor(int i = 1; i <= 25; i++) {\r\n\t\tp[u][i] = p[p[u][i-1]][i-1];\r\n\t\tF[u][i] = F[u][i-1] + F[p[u][i-1]][i-1] - f[p[u][i-1]];\r\n\t}\r\n\tfor(int i = head[u]; i; i = next[i]) {\r\n\t\tint v = vet[i];\r\n\t\tif(v == fa) continue;\r\n\t\tF[v][0] = f[v] + f[u] - len[i];\r\n\t\tif(f[v] - 2*len[i] > 0) F[v][0] -= f[v] - 2*len[i];\r\n\t\tg[v] = std::max(g[v], g[u] + F[v][0] - len[i] - f[v]);\r\n\t\tdfs(v, u);\r\n\t}\r\n}\r\nint Query(int u, int v) {\r\n\tint x = u, y = v, ans = 0;\r\n\tif(dep[v] > dep[u]) std::swap(u, v);\r\n\tfor(int i = 25; i >= 0; i--)\r\n\t\tif(dep[p[u][i]] >= dep[v]) {\r\n\t\t\tans += F[u][i] - f[u];\r\n\t\t\tu = p[u][i];\r\n\t\t}\r\n\t// printf(\"%lld %lld\\n\", u, v);\r\n\tif(u == v) return ans + ((dep[x] > dep[y]) ? f[x] : f[y]) + g[u];\r\n\tfor(int i = 25; i >= 0; i--) \r\n\t\tif(p[u][i] != p[v][i]) {\r\n\t\t\tans += F[u][i] - f[u] + F[v][i] - f[v];\r\n\t\t\tu = p[u][i], v = p[v][i];\r\n\t\t}\r\n\treturn ans+F[u][0]-f[u]+F[v][0]-f[v]-f[p[u][0]]+f[x]+f[y]+g[p[u][0]];\r\n}\r\nsigned main() {\r\n\tscanf(\"%lld%lld\", &n, &q);\r\n\tfor(int i = 1; i <= n; i++) scanf(\"%lld\", &a[i]);\r\n\tfor(int i = 1; i < n; i++) {\r\n\t\tscanf(\"%lld%lld%lld\", &u, &v, &w);\r\n\t\tadd(u, v, w);\r\n\t\tadd(v, u, w);\r\n\t}\r\n\tdp(1, 0);\r\n\tdfs(1, 0);\r\n\twhile(q--) {\r\n\t\tscanf(\"%lld%lld\", &u, &v);\r\n\t\tprintf(\"%lld\\n\", Query(u, v));\r\n\t}\r\n\treturn 0;\r\n}"
+}

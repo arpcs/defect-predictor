@@ -1,0 +1,36 @@
+{
+    "id": 154943559,
+    "contestId": 1000,
+    "creationTimeSeconds": 1650893333,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "LuoShaoyinn"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 1388,
+    "memoryConsumedBytes": 59596800,
+    "source": "// Problem: CF1000G Two-Paths\n// Contest: Luogu\n// URL: https://www.luogu.com.cn/problem/CF1000G\n// Memory Limit: 250 MB\n// Time Limit: 3500 ms\n// Started coding at 2022-04-24 20:14:59\n// \n// Powered by CP Editor (https://cpeditor.org)\n\n#include <iostream>\n#include <cstring>\n#include <cstdio>\n#define int long long\nusing namespace std;\n\nconst int MAXN = 3e5 + 5;\nconst int INF  = 0x3f3f3f3f;\nint inline read(){\n\tint x = 0, f = 0; char ch = getchar();\n\twhile(ch < '0' || ch > '9') f ^= (ch == '-'), ch = getchar();\n\twhile(ch >= '0' && ch <= '9') x = x * 10 + (ch ^ 48), ch = getchar();\n\treturn f ? -x : x;\n}\n\nint n, Q, a[MAXN];\nint to[MAXN * 2], nxt[MAXN * 2], cost[MAXN * 2], head[MAXN], tot = 1;\nvoid addside(int u, int v, int w) {\n\tto[++tot] = v; nxt[tot] = head[u]; cost[tot] = w; head[u] = tot; \n\tto[++tot] = u; nxt[tot] = head[v]; cost[tot] = w; head[v] = tot; \n}\n\n\nint sumg[MAXN], suma[MAXN];\nint inline query(int l, int r) { return sumg[r] - sumg[l - 1]; }\n\nint siz[MAXN], son[MAXN], fa[MAXN], dep[MAXN];\nint top[MAXN], seg[MAXN], rev[MAXN];\nint f[MAXN], g[MAXN], h[MAXN];\nvoid dfs1(int u, int fs) {\t// first dp & calc siz[], fa[], son[], dpe\n\tsiz[u] = 1; dep[u] = dep[fa[u]] + 1;\n\tf[u] = a[u] - cost[fs] * 2;\n\tfor(int i = head[u]; i; i = nxt[i]) {\n\t\tint v = to[i]; if(v == fa[u]) continue;\n\t\tfa[v] = u; suma[v] = suma[u] + a[v] - cost[i];\n\t\tdfs1(v, i ^ 1); siz[u] += siz[v]; \n\t\tif(siz[v] > siz[son[u]]) son[u] = v;\n\t\t\n\t\tf[u] += f[v];\n\t}\n\tf[u] = max(0ll, f[u]);\n}\nvoid dfs2(int u, int fs) { // changing root dp\n\tg[u] = h[u] = max(0ll, h[fa[u]] - f[u] + a[fa[u]] - cost[fs] * 2);\n\tfor(int i = head[u]; i; i = nxt[i])\n\t\tif(to[i] != fa[u]) h[u] += f[to[i]];\n\n\tfor(int i = head[u]; i; i = nxt[i]) {\n\t\tint v = to[i]; if(v == fa[u]) continue;\n\t\tdfs2(v, i ^ 1);\n\t}\n}\nvoid dfs3(int u, int tp) {\t// tree chain segmentation dfs \n\tseg[u] = ++seg[0]; rev[seg[u]] = u; top[u] = tp;\n\tsumg[seg[u]] = h[u] - f[son[u]] - (tp == u ? 0 : g[u]);\n\tif(son[u] == 0) return; else dfs3(son[u], tp);\n\tfor(int i = head[u]; i; i = nxt[i]) {\n\t\tint v = to[i];\n\t\tif(v == fa[u] || v == son[u]) continue;\n\t\tdfs3(v, v);\n\t}\n}\n\n\nint solve(int u, int v) {\n\tint ret = 0, lstu = 0, lstv = 0, common = 0;\n\tcommon = suma[u] + suma[v];\n\t// fprintf(stderr, \"%d %d, common = %d %d, \", u, v, suma[u], suma[v]);\n\t\n\twhile(top[u] != top[v]) {\n\t\tif(dep[ top[u] ] < dep[ top[v] ]) swap(u, v), swap(lstu, lstv);\n\t\tret += query(seg[top[u]], seg[u]);\n\t\t\n\t\tret += f[son[u]];\n\t\tret -= f[lstu];\n\t\t\n\t\tlstu = top[u]; u = fa[lstu];\n\t\tret -= g[lstu];\n\t}\n\t\n\t\n\tif(seg[u] > seg[v]) swap(u, v), swap(lstu, lstv);\n\tret += query(seg[u], seg[v]);\n\t\n\tret += f[son[v]];\n\t\n\tif(top[u] != u) ret += g[u];\n\t\n\tret -= f[lstu];\n\tret -= f[lstv];\n\t\n\tcommon += a[u] - suma[u] * 2;\n\t// fprintf(stderr, \"%d, LCA = %d\\n\", common, u); \n\t\n\treturn ret + common;\n}\n\n\nsigned main() {\n\tn = read(); Q = read();\n\tfor(int i = 1; i <= n; ++i) a[i] = read();\n\tfor(int i = 1; i < n; ++i) {\n\t\tint u = read(), v = read(), w = read();\n\t\taddside(u, v, w);\n\t}\n\t\n\tdfs1(1, 0); // first dp & calc siz[], fa[], son[], dpe[]\n\tdfs2(1, 0); // changing-root dp\n\tdfs3(1, 1); // tree chain segmentation dfs\n\tfor(int i = 1; i <= n; ++i) sumg[i] += sumg[i - 1];\n\t\n\t// for(int i = 1; i <= n; ++i) {\n\t\t// fprintf(stderr, \"id=%d f=%d g=%d h=%d son=%d val=%d\\n\", \\\n\t\t\t// i, f[i], g[i], h[i], son[i], query(seg[i], seg[i])); \n\t// }\n\t\n\twhile(Q--) {\n\t\tint u = read(), v = read();\n\t\tprintf(\"%lld\\n\", solve(u, v));\n\t}\n}\n\n\n// submit on luogu"
+}

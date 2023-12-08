@@ -1,0 +1,36 @@
+{
+    "id": 72987847,
+    "contestId": 1110,
+    "creationTimeSeconds": 1583966864,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "justin_cao"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 77,
+    "memoryConsumedBytes": 515481600,
+    "source": "#include<bits/stdc++.h>\r\n#define Fail puts(\"NO\"),exit(0);\r\n#define eps 1e-10\r\n#define maxn 2010\r\n#define maxm 4010\r\n#define inf 999999999999999\r\n#define mod 10000007\r\n#define pi acos(-1)\r\n#define mp(x,y) make_pair(x,y)\r\n#define fi first\r\n#define se second\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef unsigned int uint;\r\ntypedef unsigned long long ull;\r\ntypedef pair<int,int>pii;\r\ntypedef bitset<maxn> bit;\r\nint read()\r\n{\r\n    int x=0,f=1;\r\n    char ch=getchar();\r\n    while(ch-'0'<0||ch-'0'>9){if(ch=='-') f=-1;ch=getchar();}\r\n    while(ch-'0'>=0&&ch-'0'<=9){x=x*10+ch-'0';ch=getchar();}\r\n    return x*f;\r\n}\r\nchar L[maxn],R[maxn];\r\nint l1,l2,n;\r\nstruct Trie{\r\n    int ch[16010][10],tot;\r\n    int sum[16010][2010];\r\n    int get(int x,int c)\r\n    {\r\n        if(!ch[x][c])  ch[x][c]=++tot;\r\n        return ch[x][c];\r\n    }\r\n    void insert()\r\n    {\r\n        if(l1==l2)\r\n        {\r\n            int u=0,v=0;\r\n            for(int i=1;i<=l1;i++)\r\n            {\r\n                if(u==v)\r\n                {\r\n                    for(int j=L[i]-'0'+1;j<=R[i]-'0'-1;j++)  sum[get(u,j)][l1-i]++;\r\n                }\r\n                else{\r\n                    for(int j=L[i]-'0'+1;j<=9;j++)  sum[get(u,j)][l1-i]++;\r\n                    for(int j=(i==1);j<=R[i]-'0'-1;j++)  sum[get(u,j)][l1-i]++;\r\n                }\r\n                u=get(u,L[i]-'0');\r\n                v=get(v,R[i]-'0');\r\n            }\r\n            sum[u][0]++;sum[v][0]+=(u!=v);\r\n        }\r\n        else{\r\n            int u=0,v=0;\r\n            for(int i=1;i<=l1;i++)\r\n            {\r\n                for(int j=L[i]-'0'+1;j<=9;j++)  sum[get(u,j)][l1-i]++;\r\n                u=get(u,L[i]-'0');\r\n            }\r\n            for(int i=1;i<=l2;i++)\r\n            {\r\n                for(int j=(i==1);i<=R[i]-'0'-1;j++)  sum[get(v,j)][l2-i]++;\r\n                v=get(v,R[i]-'0');\r\n            }\r\n            for(int i=l1+1;i<l2;i++)\r\n              for(int j=1;j<=9;j++)  sum[get(1,j)][i-1]++;\r\n            sum[u][0]++;sum[v][0]++;\r\n        }\r\n    }\r\n    int fail[16010];\r\n    queue<int>q;\r\n    void get_fail()\r\n    {\r\n        for(int i=0;i<10;i++)\r\n          if(ch[0][i])  q.push(ch[0][i]);\r\n        while(q.size())\r\n        {\r\n            int now=q.front();q.pop();\r\n            for(int i=0;i<=l2;i++)  sum[now][i]+=sum[fail[now]][i];\r\n            for(int i=0;i<10;i++)\r\n            {\r\n                if(!ch[now][i])  ch[now][i]=ch[fail[now]][i];\r\n                else{\r\n                    fail[ch[now][i]]=ch[fail[now]][i];\r\n                    q.push(ch[now][i]);\r\n                }\r\n            }\r\n        }\r\n        for(int i=0;i<=tot;i++)\r\n          for(int j=1;j<=n;j++)  sum[i][j]+=sum[i][j-1]; \r\n    }\r\n    int f[16010][2010];\r\n    bool ok[16010][16010];\r\n    void Dp()\r\n    {\r\n        memset(f,-0x3f,sizeof(f));\r\n        f[0][0]=0;\r\n        for(int i=1;i<=n;i++)\r\n          for(int j=0;j<=tot;j++)\r\n            if(f[i-1][j]>=0)\r\n              for(int k=0;k<10;k++)\r\n                f[i][ch[j][k]]=max(f[i][ch[j][k]],f[i-1][j]+sum[ch[j][k]][n-i]);\r\n        int ans=0;\r\n        for(int i=0;i<=tot;i++)  ans=max(ans,f[n][i]);\r\n        printf(\"%d\\n\",ans);\r\n        for(int i=0;i<=tot;i++)  if(f[n][i]==ans)  ok[n][i]=1;\r\n        for(int i=n-1;i>=1;i--)\r\n        {\r\n            for(int j=0;j<=tot;j++)\r\n            {\r\n                for(int k=0;k<10;k++)\r\n                {\r\n                    if(ok[i+1][ch[j][k]]&&f[i][j]+sum[ch[j][k]][n-i+1]==f[i+1][ch[j][k]])  ok[i][j]=1;\r\n                }\r\n            }\r\n        }\r\n        int u=0;\r\n        for(int i=1;i<=n;i++)\r\n        {\r\n            for(int k=0;k<10;k++)\r\n            {\r\n                if(ok[i][ch[u][k]]&&f[i-1][u]+sum[ch[u][k]][n-i]==f[i][ch[u][k]])\r\n                {\r\n                    printf(\"%d\",k);\r\n                    u=ch[u][k];\r\n                    break;\r\n                }\r\n            }\r\n        }\r\n        puts(\"\");\r\n    }\r\n}T;\r\nint main()\r\n{\r\n    scanf(\"%s\",L+1);l1=strlen(L+1);\r\n    scanf(\"%s\",R+1);l2=strlen(R+1);\r\n    n=read();\r\n    T.insert();\r\n    T.get_fail();\r\n    T.Dp();\r\n    return 0;\r\n}"
+}

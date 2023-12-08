@@ -1,0 +1,37 @@
+{
+    "id": 141787615,
+    "contestId": 1307,
+    "creationTimeSeconds": 1641449915,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "panyan7"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 171,
+    "memoryConsumedBytes": 512000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define ll long long\r\n#define pii pair<int,int>\r\n#define pll pair<long long,long long>\r\n\r\nstruct FlowEdge {\r\n    int u, v;\r\n    long long cap, cost, flow = 0;\r\n    FlowEdge(int u, int v, long long cap, long long cost) : u(u), v(v), cap(cap), cost(cost) {}\r\n};\r\nstruct MinCostFlow {\r\n    vector<vector<int>> adj, cost, cap;\r\n    vector<FlowEdge> edges;\r\n    vector<pii> ans;\r\n    const long long INF = 1e14;\r\n    int n, m = 0;\r\n    int s, t;\r\n    long long k;\r\n    MinCostFlow(int n, long long k, int s, int t) : n(n), k(k), s(s), t(t) {\r\n        adj.assign(n, vector<int>());\r\n    }\r\n    void add_edge(int u, int v, long long cap_, long long cost_) {\r\n        edges.emplace_back(u, v, cap_, cost_);\r\n        edges.emplace_back(v, u, 0, -cost_);\r\n        adj[u].push_back(m);\r\n        adj[v].push_back(m + 1);\r\n        m += 2;\r\n    }\r\n    void shortest_paths(int v0, vector<long long>& d, vector<int>& p) {\r\n        d.assign(n, INF);\r\n        d[v0] = 0;\r\n        vector<bool> inq(n, false);\r\n        queue<int> q;\r\n        q.push(v0);\r\n        p.assign(n, -1);\r\n        while (!q.empty()) {\r\n            int u = q.front();\r\n            q.pop();\r\n            inq[u] = false;\r\n            for (int id : adj[u]) {\r\n                int v = edges[id].v;\r\n                if (edges[id].cap > 0 && d[v] > d[u] + edges[id].cost) {\r\n                    d[v] = d[u] + edges[id].cost;\r\n                    p[v] = id;\r\n                    if (!inq[v]) {\r\n                        inq[v] = true;\r\n                        q.push(v);\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n    long long flow() {\r\n        long long flow = 0;\r\n        long long cost = 0;\r\n        vector<long long> d;\r\n        vector<int> p;\r\n        while (flow < k) {\r\n            shortest_paths(s, d, p);\r\n            if (d[t] == INF)\r\n                break;\r\n            // find max flow on that path\r\n            long long f = k - flow;\r\n            int cur = t;\r\n            while (cur != s) {\r\n                f = min(f, edges[p[cur]].cap);\r\n                cur = edges[p[cur]].u;\r\n            }\r\n            // apply flow\r\n            flow += f;\r\n            cost += f * d[t];\r\n            cur = t;\r\n            while (cur != s) {\r\n                edges[p[cur]].cap -= f;\r\n                edges[p[cur]^1].cap += f;\r\n                cur = edges[p[cur]].u;\r\n            }\r\n            ans.push_back({flow, cost});\r\n        }\r\n        if (flow < k)\r\n            return -1;\r\n        else\r\n            return cost;\r\n    }\r\n};\r\n\r\nint tt = 1, n, m, k;\r\n\r\n// check long long\r\nvoid solve() {\r\n    cin >> n >> m;\r\n    MinCostFlow G(n, (int)1e9, 0, n-1);\r\n    for (int i = 0; i < m; i++) {\r\n        int u, v, w;\r\n        cin >> u >> v >> w;\r\n        u--, v--;\r\n        G.add_edge(u, v, 1, w);\r\n    }\r\n    G.flow();\r\n    //cout << G.ans.size() << \"\\n\";\r\n    int q;\r\n    cin >> q;\r\n    for (int i = 0; i < q; i++) {\r\n        int x;\r\n        cin >> x;\r\n        double res = 1e14;\r\n        for (auto& p : G.ans) {\r\n            res = min(res, (double)(p.second + x)/p.first);\r\n        }\r\n        cout << fixed << setprecision(10) << res << \"\\n\";\r\n    }\r\n}\r\n\r\nint main() {\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    //cin >> tt;\r\n    while (tt--) {\r\n        solve();\r\n    }\r\n    return 0;\r\n}\r\n"
+}

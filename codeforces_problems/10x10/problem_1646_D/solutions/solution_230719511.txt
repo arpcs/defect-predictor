@@ -1,0 +1,39 @@
+{
+    "id": 230719511,
+    "contestId": 1646,
+    "creationTimeSeconds": 1698772708,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1646,
+        "index": "D",
+        "name": "Weight the Tree",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1646,
+        "members": [
+            {
+                "handle": "_id_"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1646408100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 67,
+    "timeConsumedMillis": 327,
+    "memoryConsumedBytes": 81715200,
+    "source": "#include <vector>\r\n#include <iostream>\r\nusing namespace std;\r\n#define int long long\r\n\r\nint range = 3e5;\r\nvector <int> wt(range, 1), ans;\r\nvector <vector <int>> graph(range);\r\nvector <vector <int>> dp(range, vector <int> (2)), weight(range, vector <int> (2, 1e18));\r\n\r\nvoid dfs(int root, int par) {\r\n    int taken = 0,\r\n        notTaken = 0;\r\n    for(int child: graph[root]) {\r\n        if(child == par) continue;\r\n        dfs(child, root);\r\n        taken += dp[child][1];\r\n        notTaken += dp[child][0];\r\n    }\r\n    dp[root][0] = max(taken, notTaken);\r\n    dp[root][1] = max(taken, 1 + notTaken);\r\n}\r\n\r\nvoid minWt(int root, int par) {\r\n    int taken = 0,\r\n        notTaken = 0,\r\n        wtTaken = 0,\r\n        wtNotTaken = 0,\r\n        curr = graph[root].size();\r\n    \r\n    for(int child: graph[root]) {\r\n        if(child == par) continue;\r\n        minWt(child, root);\r\n        taken += dp[child][1];\r\n        notTaken += dp[child][0];\r\n        wtTaken += weight[child][1];\r\n        wtNotTaken += weight[child][0];\r\n    }\r\n\r\n    if(dp[root][0] == taken) weight[root][0] = min(weight[root][0], 1 + wtTaken);\r\n    if(dp[root][0] == notTaken) weight[root][0] = min(weight[root][0], 1 + wtNotTaken);\r\n\r\n    if(dp[root][1] == taken) weight[root][1] = min(weight[root][1], 1 + wtTaken);\r\n    if(dp[root][1] == 1 + notTaken) weight[root][1] = min(weight[root][1], curr + wtNotTaken);\r\n}\r\n\r\nvoid assign(int root, int par, bool flag) {\r\n    int taken = 0,\r\n        notTaken = 0,\r\n        wtTaken = 0,\r\n        wtNotTaken = 0,\r\n        curr = graph[root].size();\r\n    \r\n    for(int child: graph[root]) {\r\n        if(child == par) continue;\r\n        taken += dp[child][1];\r\n        notTaken += dp[child][0];\r\n        wtTaken += weight[child][1];\r\n        wtNotTaken += weight[child][0];\r\n    }\r\n\r\n    if(flag) {\r\n        if(dp[root][1] == 1 + notTaken && curr + wtNotTaken == weight[root][1]) {\r\n            flag = false;\r\n            ans.push_back(root);\r\n        }\r\n    } else flag = true;\r\n\r\n    \r\n    for(int child: graph[root]) {\r\n        if(child == par) continue;\r\n        assign(child, root, flag);\r\n    }\r\n}\r\n\r\nint32_t main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n\r\n    int n;\r\n    cin >> n;\r\n\r\n    for(int i = 1; i < n; i++) {\r\n        int u, v; cin >> u >> v;\r\n        graph[u].push_back(v);\r\n        graph[v].push_back(u);\r\n    }\r\n\r\n    if(n == 2) {\r\n        cout << \"2 2\\n 1 1\";\r\n        return 0;\r\n    }\r\n\r\n    dfs(1, -1);\r\n    minWt(1, -1);\r\n    assign(1, -1, true);\r\n    for(auto x: ans) wt[x] = graph[x].size();\r\n\r\n    int sum = 0;\r\n    for(int i = 1; i <= n; i++) sum += wt[i];\r\n    cout << max(dp[1][0], dp[1][1]) << \" \" << sum << \"\\n\";\r\n    for(int i = 1; i <= n; i++) cout << wt[i] << \" \";\r\n\r\n    return 0;\r\n}"
+}

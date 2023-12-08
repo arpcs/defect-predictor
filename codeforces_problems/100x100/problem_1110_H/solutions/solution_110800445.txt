@@ -1,0 +1,36 @@
+{
+    "id": 110800445,
+    "contestId": 1110,
+    "creationTimeSeconds": 1616491339,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "lslzf"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 1450,
+    "memoryConsumedBytes": 579276800,
+    "source": "#include <iostream>\n#include <cstdio>\n#include <cstring>\n#include <queue>\n#define N 2002\n#define M 30002\nusing namespace std;\nstruct AC{\n\tint son[10],fail;\n}t[M];\nchar s[N];\nint n,i,j,k,cnt,L[N],R[N],nl,nr,f[N][M],maxx[N][M],g[M][802],ans;\nvoid dfs(int p,int x,int op,bool op1,bool op2)\n{\n\tif(p==nr){\n\t\tg[x][0]=1;\n\t\treturn;\n\t}\n\tif(op==1){\n\t\tfor(int i=(x==0);i<10;i++){\n\t\t\tif(!t[x].son[i]) t[x].son[i]=++cnt;\n\t\t\tif(R[p]==i||(p<nl&&L[p]==i)) continue;\n\t\t\tint y=t[x].son[i];\n\t\t\tfor(int j=max(nl+1,p+1);j<nr;j++) g[y][j-p-1]=1;\n\t\t\tif(p<nl&&i>L[p]&&(nl!=nr||i<R[p])) g[y][nl-p-1]=1;\n\t\t\tif(i<R[p]&&(nl!=nr||i>L[p])) g[y][nr-p-1]=1;\n\t\t}\n\t\tif(p<nl&&L[p]==R[p]) dfs(p+1,t[x].son[L[p]],1,0,0);\n\t\telse{\n\t\t\tif(p<nl) dfs(p+1,t[x].son[L[p]],2,(L[p]>R[p]),0);\n\t\t\tdfs(p+1,t[x].son[R[p]],3,0,(p<nl&&L[p]>R[p]));\n\t\t}\n\t}\n\telse if(op==2){\n\t\tif(p==nl){\n\t\t\tfor(int i=nl;i<nr;i++) g[x][i-p]=1;\n\t\t\tif(!op1) g[x][nr-p]=1;\n\t\t\treturn;\n\t\t}\n\t\tfor(int i=0;i<10;i++){\n\t\t\tif(!t[x].son[i]) t[x].son[i]=++cnt;\n\t\t\tif(i==L[p]) continue;\n\t\t\tint y=t[x].son[i];\n\t\t\tfor(int j=nl+1;j<nr;j++) g[y][j-p-1]=1;\n\t\t\tif(i>L[p]) g[y][nl-p-1]=1;\n\t\t\tif(!op1&&(nl!=nr||i>L[p])) g[y][nr-p-1]=1;\n\t\t}\n\t\tdfs(p+1,t[x].son[L[p]],2,op1,0);\n\t}\n\telse{\n\t\tfor(int i=0;i<10;i++){\n\t\t\tif(!t[x].son[i]) t[x].son[i]=++cnt;\n\t\t\tif(i==R[p]) continue;\n\t\t\tint y=t[x].son[i];\n\t\t\tfor(int j=max(nl+1,p+1);j<nr;j++) g[y][j-p-1]=1;\n\t\t\tif(p<nl&&!op2&&(nl!=nr||i<R[p])) g[y][nl-p-1]=1;\n\t\t\tif(i<R[p]) g[y][nr-p-1]=1;\n\t\t}\n\t\tdfs(p+1,t[x].son[R[p]],3,0,op2);\n\t}\n}\nvoid bfs()\n{\n\tqueue<int> q;\n\tfor(int i=0;i<10;i++){\n\t\tif(t[0].son[i]) q.push(t[0].son[i]);\n\t}\n\twhile(!q.empty()){\n\t\tint x=q.front();\n\t\tq.pop();\n\t\tfor(int i=1;i<=nr;i++) g[x][i]+=g[x][i-1];\n\t\tfor(int i=0;i<=nr;i++) g[x][i]+=g[t[x].fail][i];\n\t\tfor(int i=0;i<10;i++){\n\t\t\tif(t[x].son[i]){\n\t\t\t\tt[t[x].son[i]].fail=t[t[x].fail].son[i];\n\t\t\t\tq.push(t[x].son[i]);\n\t\t\t}\n\t\t\telse t[x].son[i]=t[t[x].fail].son[i];\n\t\t}\n\t}\n}\nint main()\n{\n\tscanf(\"%s\",s);\n\tnl=strlen(s);\n\tfor(i=0;i<nl;i++) L[i]=(int)(s[i]-'0');\n\tscanf(\"%s\",s);\n\tnr=strlen(s);\n\tfor(i=0;i<nr;i++) R[i]=(int)(s[i]-'0');\n\tdfs(0,0,1,0,0);\n\tint now=0;\n\tfor(i=0;i<nl;i++){\n\t\tint p=L[i];\n\t\tif(!t[now].son[p]) t[now].son[p]=++cnt;\n\t\tnow=t[now].son[p];\n\t}\n\tg[now][0]=1;now=0;\n\tfor(i=0;i<nr;i++){\n\t\tint p=R[i];\n\t\tif(!t[now].son[p]) t[now].son[p]=++cnt;\n\t\tnow=t[now].son[p];\n\t}\n\tg[now][0]=1;\n\tbfs();\n\tscanf(\"%d\",&n);\n\tmemset(f,-1,sizeof(f));\n\tf[0][0]=0;\n\tfor(i=1;i<=n;i++){\n\t\tfor(j=0;j<=cnt;j++){\n\t\t\tif(f[i-1][j]==-1) continue;\n\t\t\tfor(k=0;k<10;k++){\n\t\t\t\tint x=t[j].son[k];\n\t\t\t\tf[i][x]=max(f[i][x],f[i-1][j]+g[x][min(nr,n-i)]);\n\t\t\t}\n\t\t}\n\t}\n\tfor(i=0;i<=cnt;i++){\n\t\tans=max(ans,f[n][i]);\n\t\tmaxx[n][i]=f[n][i];\n\t}\n\tprintf(\"%d\\n\",ans);\n\tif(ans==0){\n\t\tfor(i=1;i<=n;i++) putchar('0');\n\t\tputs(\"\");\n\t\treturn 0;\n\t}\n\tfor(i=n-1;i>=1;i--){\n\t\tfor(j=0;j<=cnt;j++){\n\t\t\tif(f[i][j]==-1) continue;\n\t\t\tfor(k=0;k<10;k++){\n\t\t\t\tint x=t[j].son[k];\n\t\t\t\tif(f[i+1][x]==f[i][j]+g[x][min(nr,n-i-1)]) maxx[i][j]=max(maxx[i][j],maxx[i+1][x]);\n\t\t\t}\n\t\t}\n\t}\n\tnow=0;\n\tfor(i=1;i<=n;i++){\n\t\tfor(j=0;j<10;j++){\n\t\t\tint x=t[now].son[j];\n\t\t\tif(f[i-1][now]==-1||f[i][x]!=f[i-1][now]+g[x][min(nr,n-i)]) continue;\n\t\t\tif(maxx[i][x]==ans){\n\t\t\t\tnow=x;\n\t\t\t\tputchar((char)(j+'0'));\n\t\t\t\tbreak;\n\t\t\t}\n\t\t}\n\t}\n\tputs(\"\");\n\treturn 0;\n}\n"
+}

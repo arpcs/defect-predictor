@@ -1,0 +1,36 @@
+{
+    "id": 117017767,
+    "contestId": 1110,
+    "creationTimeSeconds": 1621689643,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "zhouyixian"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 1996,
+    "memoryConsumedBytes": 363622400,
+    "source": "#include<bits/stdc++.h>\n#define for_each(i,bg,ed) for(int i=bg;i<ed;++i)\n\nusing namespace std;\nconst int M=2e4+10,N=2e3+10,SIG=10;\nint ch[M][SIG],fail[M], //AC\u81ea\u52a8\u673a\u90e8\u5206 \n\tg[M][N],\t\t\t//g[u][len]:\u8282\u70b9 u \u5904\u540e\u63a5\u957f\u5ea6\u4e3a len \u7684\u81ea\u7531\u6570\u7801\u7684\u65b9\u6848\u6570\u3002\n\t\t\t\t\t\t//\t\t\t\u5728 GetFail \u51fd\u6570\u7ed3\u5c3e\u88ab\u5904\u7406\u6210\u524d\u7f00\u548c\u3002 \n\tdp[M][N],\t\t\t//dp[u][pos]:\u5339\u914d\u5230 pos \u5904\uff0c\u5728\u8282\u70b9 u \u4e0a\u7684\u5339\u914d\u6570\u3002 \n\tcnt,n,len_l,len_r,ans;\nstring sl,sr,str;\n\ninline void Read(){\n\tcin>>sl>>sr>>n;\n\tlen_l=sl.size();\n\tlen_r=sr.size(); \n\tfor_each(i,0,len_l)sl[i]-='0';\n\tfor_each(i,0,len_r)sr[i]-='0';\n}\n\ninline void CreateNode(int rt,int son_id){if(!ch[rt][son_id])ch[rt][son_id]=++cnt;}\n//\u5224\u65ad\u5e76\u65b0\u5efa\u8282\u70b9 \n \ninline void RegMsg(int rt,int l,int r,int len){\n\tfor_each(nxt,l,r){\n\t\tCreateNode(rt,nxt);\n\t\tg[ch[rt][nxt]][len]++;\n\t}\n}//\u5bf9\u6bcf\u4e2a\u513f\u5b50\u8bb0\u5f55\u4fe1\u606f \n\ninline void MoveIter(int &rt,int num){\n\tCreateNode(rt,num);\n\trt=ch[rt][num];\n}//\u79fb\u52a8\u6839\u8282\u70b9\u3002 \n\n//\u5904\u7406\u4e00\u4e2ag\u6570\u7ec4\uff0c\u5408\u5e76\u53ef\u4ee5\u81ea\u7531\u5b89\u6392\u7684\u90e8\u5206\uff0c\u4ee5\u51cf\u5c11AC\u81ea\u52a8\u673a\u8282\u70b9\u6570\u3002\nvoid BuildTree(){\n\tint rt_l=0,rt_r=0;\n\tif(len_l==len_r){\t\t\t\t\t\t\t//Case A:l,r\u957f\u5ea6\u76f8\u7b49 \n\t  for_each(i,1,len_l+1){\n\t  \tint num_l=sl[i-1],num_r=sr[i-1]; \n\t    if(rt_l==rt_r){\t\t\t\t\t\t\t//case 1:\u5f53\u524d\u8282\u70b9\u5c5e\u4e8el,r\u5171\u540c\u524d\u7f00\uff0c\u5373num_l==num_r\u3002\n\t      RegMsg(rt_l,num_l+1,num_r,len_l-i);\t\t\t//\u6b64\u65f6\u5728[l+1,r-1]\u95f4\u7684\u6570\u5b57\u53ef\u81ea\u7531\u5b89\u6392\u3002 \n\t\t  MoveIter(rt_l,num_l);\n\t\t  MoveIter(rt_r,num_r);\n\t\t}else{\t\t\t\t\t\t\t\t\t//case 2:\u5206\u522b\u5904\u7406l,r\u524d\u7f00\u3002 \n\t\t  RegMsg(rt_l,num_l+1,10,len_l-i);\t\t\t\t//\u6b64\u65f6\u5c5e\u4e8e[0,r)\u548c(l,9]\u90fd\u53ef\u81ea\u7531\u5b89\u6392\u3002 \n\t\t  RegMsg(rt_r,0,num_r,len_r-i);\n\t\t  MoveIter(rt_l,num_l);\n\t\t  MoveIter(rt_r,num_r);\n\t\t}\n\t  }\n\t  g[rt_l][0]++;\n\t  if(rt_l!=rt_r)g[rt_r][0]++;\n\t}else{\t\t\t\t\t\t\t\t\t//Case B:l,r\u957f\u5ea6\u4e0d\u7b49\uff0c\u65e0\u516c\u5171\u524d\u7f00\uff0c\u76f4\u63a5\u5206\u522b\u5904\u7406\u3002 \n\t  for_each(i,1,len_l+1){\n\t  \tint num_l=sl[i-1];\n\t  \tRegMsg(rt_l,num_l+1,10,len_l-i);\n\t  \tMoveIter(rt_l,num_l);\n\t  }\n\t\t  \n\t  for_each(i,1,len_r+1){\n\t  \tint num_r=sr[i-1];\n\t  \tRegMsg(rt_r,0,num_r,len_r-i);\n\t  \tMoveIter(rt_r,num_r);\n\t  }\n\t  g[rt_l][0]++,g[rt_r][0]++;\n      for_each(i,len_l+1,len_r)\n        for_each(nxt,1,10){\n    \tif(!ch[0][nxt])ch[0][nxt]=++cnt;\n    \tg[ch[0][nxt]][i-1]++;\n      }\n\t}\n\tch[0][0]=0;\n}\n\nqueue<int> q;\nvoid GetFail(){\n\tfor(int i=0;i<SIG;++i)\n\t  if(ch[0][i])\n\t\tq.push(ch[0][i]);\n\twhile(!q.empty()){\n\t\tint it=q.front();\n\t\tq.pop();\n\t\tfor(int i=0;i<SIG;++i){\n\t\t\tint &to=ch[it][i];\n\t\t\tif(to){\n\t\t\t  q.push(to),fail[to]=ch[fail[it]][i];\n\t\t\t  for_each(i,0,n+1)g[to][i]+=g[fail[to]][i];//\u7ee7\u627ffail\u6811\u7236\u4eb2\u7684g\u503c\u3002 \n\t\t\t}else to=ch[fail[it]][i];\n\t\t}\n\t}\n\tfor_each(rt,0,cnt+1)\n\t  for_each(i,0,n+1)\n\t  \tg[rt][i]+=g[rt][i-1];//\u5904\u7406\u524d\u7f00\u548c\u3002 \n}\n\nvoid GetAns(){\n\tmemset(dp,-1,sizeof(dp));\n\tdp[0][0]=0;\n\tfor_each(i,0,n+1)\t\n\t  for_each(rt,0,cnt+1)\n\t    if(dp[rt][i]>=0){\n\t      dp[rt][i]+=g[rt][n-i];\n\t      for_each(nxt,0,10)\n\t      \tdp[ch[rt][nxt]][i+1]=max(dp[rt][i],dp[ch[rt][nxt]][i+1]);\n\t\t}\n\tfor_each(rt,0,cnt+1)ans=max(ans,dp[rt][n]);\n\tcout<<ans<<endl;\n}\n\nbool reg[M][N];//\u8bb0\u5f55\u65b9\u6848 \nvoid GetSolution(){\n\tfor_each(rt,0,cnt+1)\n\t  if(dp[rt][n]==ans)\n\t    reg[rt][n]=1;\n\tfor(int len=n-1;~len;len--)\n      for_each(rt,0,cnt+1)\n        if(dp[rt][len]>=0)\n          for_each(nxt,0,10)\n      \t\tif(reg[ch[rt][nxt]][len+1]&&dp[ch[rt][nxt]][len+1]==dp[rt][len]+g[ch[rt][nxt]][n-len-1]){\n        \t  reg[rt][len]=1;\n\t\t\t  break;\n      \t\t}\n    int rt=0;\n\tfor_each(len,0,n)\n      for_each(nxt,0,10)\n      \tif(reg[ch[rt][nxt]][len+1]&&dp[ch[rt][nxt]][len+1]==dp[rt][len]+g[ch[rt][nxt]][n-len-1]){\n      \t  putchar('0'+nxt);\n      \t  rt=ch[rt][nxt];\n\t\t  break;\n      \t}\n}\n\nint main(){\n\tRead();\n\tBuildTree();\n\tGetFail();\n\tGetAns();\n\tGetSolution();\n}"
+}

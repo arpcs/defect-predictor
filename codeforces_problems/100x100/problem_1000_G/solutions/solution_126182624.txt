@@ -1,0 +1,36 @@
+{
+    "id": 126182624,
+    "contestId": 1000,
+    "creationTimeSeconds": 1629207053,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "huansir"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 2183,
+    "memoryConsumedBytes": 183910400,
+    "source": "#include <iostream>\r\n#include <cstdio>\r\nusing namespace std;\r\nconst int N = 3e5 + 10;\r\nstruct bian\r\n{\r\n\tint from, to;\r\n\tlong long w;\r\n}eg[N << 1];\r\nint front[N], num;\r\nvoid add(int x, int y, long long w)\r\n{\r\n\teg[++ num].to = y;\r\n\teg[num].from = front[x];\r\n\tfront[x] = num;  \r\n\teg[num].w = w;\r\n}\r\nlong long f[N], fa[N][30];\r\nlong long dp[N][30], ff[N];\r\nint n, q, dep[N];\r\nlong long val[N];\r\nvoid dfs1(int o, int from)\r\n{\r\n\tdep[o] = dep[from] + 1;\r\n\tf[o] = val[o];\r\n\tfor (int i = front[o]; i; i = eg[i].from)\r\n\t{\r\n\t\tint to = eg[i].to;\r\n\t\tif(to == from)continue;\r\n\t\tdfs1(to, o);\r\n\t\tf[o] += max(f[to] - 2 * eg[i].w, 0LL);\r\n\t}\r\n}\r\nvoid dfs2(int o, int from)\r\n{\r\n\tfa[o][0] = from;\r\n\tfor (int i = 1; i <= 20; ++ i)\r\n\t{\r\n\t\tfa[o][i] = fa[fa[o][i - 1]][i - 1];\r\n\t\tdp[o][i] = dp[fa[o][i - 1]][i - 1] + dp[o][i - 1] - f[fa[o][i - 1]];\r\n\t}\r\n\tfor (int i = front[o]; i; i = eg[i].from)\r\n\t{\r\n\t\tint to = eg[i].to;\r\n\t\tif(to == from)continue;\r\n\t\tdp[to][0] = f[to] + f[o] - eg[i].w - max(f[to] - 2 * eg[i].w, 0LL);\r\n\t\tff[to] = max(0LL, ff[o] + dp[to][0] - f[to] - eg[i].w);\r\n\t\tdfs2(to, o);\r\n\t}\r\n}\r\nlong long LCA(int x, int y)\r\n{\r\n\tlong long ans = f[x] + f[y];\r\n\tlong long X = x, Y = y, ori = ans;\r\n\tif(dep[x] < dep[y])\r\n\tswap(x, y);\r\n\tfor (int i = 20; i >= 0; -- i)\r\n\t{\r\n\t\tif(dep[fa[x][i]] >= dep[y])\r\n\t\tans += dp[x][i] - f[x], x = fa[x][i];\r\n\t}\r\n\tif (x == y) return ans + ff[x] + (dep[X] > dep[Y] ? f[X] : f[Y]) - ori;\r\n\r\n\tfor (int i = 20; i >= 0; -- i)\r\n\t{\r\n\t\tif(fa[x][i] != fa[y][i])\r\n\t\t{\r\n\t\t\tans += dp[x][i] - f[x], x = fa[x][i];\r\n\t\t\tans += dp[y][i] - f[y], y = fa[y][i];\r\n\t\t}\r\n\t}\r\n\treturn ans + dp[x][0] + dp[y][0] - f[x] - f[y] - f[fa[x][0]] + ff[fa[x][0]];\r\n}\r\nint main()\r\n{\r\n\tscanf(\"%d%d\", &n, &q);\r\n\tfor (int i = 1; i <= n; ++ i)\r\n\tscanf(\"%lld\", &val[i]);\r\n\tfor (int i = 1; i < n; ++ i)\r\n\t{\r\n\t\tint x, y;\r\n\t\tlong long w;\r\n\t\tscanf(\"%d%d%lld\", &x, &y, &w);\r\n\t\tadd(x, y, w);\r\n\t\tadd(y, x, w);\r\n\t}\r\n\tdfs1(1, 0);\r\n\tdfs2(1, 0);\r\n\tfor (int i = 1; i <= q; ++ i)\r\n\t{\r\n\t\tint x, y;\r\n\t\tscanf(\"%d%d\", &x, &y);\r\n\t\tprintf(\"%lld\\n\", LCA(x, y));\r\n\t}\r\n}"
+}

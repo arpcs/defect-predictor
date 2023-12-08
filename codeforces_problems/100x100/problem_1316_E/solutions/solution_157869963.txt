@@ -1,0 +1,38 @@
+{
+    "id": 157869963,
+    "contestId": 1316,
+    "creationTimeSeconds": 1653116255,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1316,
+        "index": "E",
+        "name": "Team Building",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "bitmasks",
+            "dp",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1316,
+        "members": [
+            {
+                "handle": "bryanzhu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1583332500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 810,
+    "memoryConsumedBytes": 61030400,
+    "source": "#include <bits/stdc++.h>\n\nusing namespace std;\n\nint numBits(int num) {\n  int result = 0;\n  while (num > 0) {\n    num = num & (num - 1);\n    result++;\n  }\n  return result;\n}\n\nbool f(pair<int, int> a, pair<int, int> b) {\n  return (a.first >= b.first);\n}\n\nint main() {\n  int n, p, k;\n  cin >> n >> p >> k;\n  vector<pair<long long, long long> > audienceStrengths(n);\n  for (int i=0; i<n; i++) {\n    cin >> audienceStrengths[i].first;\n    audienceStrengths[i].second = i;\n  }\n  vector<vector<long long> > playerStrengths(n, vector<long long> (p));\n  for (int i=0; i<n; i++) {\n    for (int j=0; j<p; j++) {\n      cin >> playerStrengths[i][j];\n    }\n  }\n  sort(audienceStrengths.begin(), audienceStrengths.end(), f);\n  vector<vector<long long> > dp(n + 1, vector<long long> (1 << p, 0));\n  for (int aud = 1; aud<=k; aud++) {\n    dp[aud][0] += dp[aud-1][0] + audienceStrengths[aud-1].first;\n  }\n  for (int aud = k+1; aud<dp.size(); aud++) {\n    dp[aud][0] = dp[k][0];\n  }\n  \n  for (int numAssigned=1; numAssigned<=n; numAssigned++) {\n    for (int subset=1; subset<(1<<p); subset++) {\n      int currentNumBits = numBits(subset);\n      //      cout<<\"-----\"<<endl;\n      //      cout<<numAssigned<<\" \"<<subset<<\" \"<<currentNumBits<<endl;\n      if (currentNumBits <= numAssigned) {\n\tint audienceIndex = numAssigned - 1;\n\tint playerIndex = audienceStrengths[audienceIndex].second;\n\t//player\n\t//\tcout<<\"person \"<<audienceIndex<<\" audience score \"<<audienceStrengths[audienceIndex].first<<endl;\n\tfor (int player=0; player<p; player++) {\n\t  //\t  cout<<\"player score \"<<playerStrengths[playerIndex][player]<<endl;\n\t  if ((subset >> player) & 1) {\n\t    dp[numAssigned][subset] = max(dp[numAssigned][subset], dp[audienceIndex][subset ^ (1 << player)] + playerStrengths[playerIndex][player]);\n\t    //\t    cout<<audienceIndex<<\" \"<<(subset ^ (1 << player))<<\" \"<<dp[audienceIndex][subset ^ (1 << player)] <<\" + \"<<playerStrengths[playerIndex][player]<<endl;\n\t  }\n\t}\n\t//\tcout<<dp[numAssigned][subset]<<\" \" << numAssigned << \" pl max \" << subset << endl;\n\t//audience\n\tif (numAssigned - currentNumBits < k) {\n\t  dp[numAssigned][subset] = max(dp[numAssigned][subset], dp[audienceIndex][subset] + audienceStrengths[audienceIndex].first);\n\t  //\t  cout<<dp[numAssigned][subset]<<\" \" << numAssigned << \" \" << subset << endl;\n\t} else {\n\t  dp[numAssigned][subset] = max(dp[numAssigned][subset],  dp[numAssigned-1][subset]);\n\t}\n      }\n    }\n  }\n  cout << dp[n][(1 << p) - 1] << endl;\n  return 0;\n}\n"
+}

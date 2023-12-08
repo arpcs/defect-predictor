@@ -1,0 +1,36 @@
+{
+    "id": 232227514,
+    "contestId": 1765,
+    "creationTimeSeconds": 1699621701,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1765,
+        "index": "G",
+        "name": "Guess the String",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "constructive algorithms",
+            "interactive",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1765,
+        "members": [
+            {
+                "handle": "Akniet-Zh-027-25"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1669545300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 78,
+    "timeConsumedMillis": 545,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\r\n#include <cstdlib>\r\n#include <cstdio>\r\n#include <cstring>\r\n#include <vector>\r\n#include <algorithm>\r\n#include <set>\r\n#include <map>\r\n#include <unordered_map>\r\n#include <unordered_set>\r\n#include <cmath>\r\n#include <ctime>\r\n#include <string>\r\n#include <random>\r\n#include <ctime>\r\n#include <chrono>\r\nusing namespace std;\r\n\r\n#ifdef LOCAL\r\n\t#define eprintf(...) 42\r\n//fprintf(stderr, __VA_ARGS__)\r\n#else\r\n\t#define eprintf(...) 42\r\n#endif\r\n\r\ntypedef long long int int64;\r\ntypedef long long int ll;\r\ntypedef long long unsigned ull;\r\n\r\n\r\null MOD = ((1ULL << 63) - 1); \r\n#ifdef LOCAL\r\nmt19937_64 rng(1);\r\n#else\r\nmt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());\r\n#endif\r\null myRand() {\r\n\treturn (ull)rng() % MOD;\r\n}\r\n\r\nbool bLOCAL = false;\r\nint cnt_q = 0;\r\n\r\nconst int N = 1005;\r\n\r\nchar _s[N];\r\n\r\nint ask_local(int t, int pos)\r\n{\r\n    cnt_q++;\r\n    for (int k = pos; k >= 0; k--)\r\n    {\r\n        bool eq = true;\r\n\r\n        for (int j = 0; j < k; j++)\r\n            if ((t == 1) != (_s[j] == _s[pos - k + 1 + j]))\r\n                eq = false;\r\n\r\n        if (eq)\r\n        {\r\n            eprintf(\"ask %d %d -> %d\\n\", t, pos, k);\r\n            return k;\r\n        }\r\n    }\r\n    throw;\r\n}\r\n\r\n\r\nchar str[N];\r\n\r\nint get_n()\r\n{\r\n    if (bLOCAL)\r\n    {\r\n        cnt_q = 0;\r\n        scanf(\"%s\", _s);\r\n        return strlen(_s);\r\n    }\r\n    int n;\r\n    scanf(\"%d\", &n);\r\n    return n;\r\n}\r\n\r\nint ask(int t, int pos)\r\n{\r\n    if (bLOCAL)\r\n        return ask_local(t, pos);\r\n    printf(\"%d %d\\n\", t, pos + 1);\r\n    fflush(stdout);\r\n    int x;\r\n    scanf(\"%d\", &x);\r\n    return x;\r\n}\r\n\r\nchar eq_oth(int t, char ch)\r\n{\r\n    if (t == 1)\r\n        return ch;\r\n    return ('1' ^ '0' ^ ch);\r\n}\r\n\r\nvoid solve(int pos)\r\n{\r\n    if (pos <= 1)\r\n        return;\r\n    //eprintf(\"%s %d\\n\", str, pos);\r\n    int t = (myRand() % 2) + 1;\r\n    int eq = ask(t, pos);\r\n\r\n    if (str[1] == '0')\r\n    {\r\n        if (eq == 0)\r\n        {\r\n            str[pos] = eq_oth(t ^ 3, str[0]);\r\n            solve(pos - 1);\r\n            return;\r\n        }\r\n        else if (eq == 1)\r\n        {\r\n            str[pos] = eq_oth(t, str[0]);\r\n            str[pos - 1] = eq_oth(t ^ 3, str[0]);\r\n            solve(pos - 2);\r\n            return;\r\n        }\r\n    }\r\n    else\r\n    {\r\n        if (eq == 0)\r\n        {\r\n            str[pos] = eq_oth(t ^ 3, str[0]);\r\n            str[pos - 1] = eq_oth(t ^ 3, str[0]);\r\n            solve(pos - 2);\r\n            return;\r\n        }\r\n        else if (eq == 1)\r\n        {\r\n            str[pos] = eq_oth(t, str[0]);\r\n            solve(pos - 1);\r\n            return;\r\n        }\r\n    }\r\n\r\n    if (eq >= 2)\r\n    {\r\n        solve(pos - eq);\r\n        int st = pos - eq + 1;\r\n        for (int i = st; i <= pos; i++)\r\n            str[i] = eq_oth(t, str[i - st]);\r\n        return;\r\n    }\r\n\r\n}\r\n\r\nvoid solve()\r\n{\r\n    int n = get_n();\r\n    str[n] = 0;\r\n    str[0] = '0';\r\n    int k = ask(1, 1);\r\n    if (k == 0)\r\n        str[1] = '1';\r\n    else\r\n        str[1] = '0';\r\n\r\n    solve(n - 1);\r\n\r\n    if (bLOCAL)\r\n    {\r\n        eprintf(\"%d\\n\", cnt_q);\r\n        eprintf(\"s=%s\\ng=%s\\n\", str, _s);\r\n        if (cnt_q > 780 || strcmp(str, _s))\r\n            throw;\r\n    }\r\n    printf(\"0 %s\\n\", str);\r\n    fflush(stdout);\r\n    scanf(\"%*d\");\r\n}\r\n\r\nint main()\r\n{\r\n#ifdef LOCAL\r\n    bLOCAL = true;\r\n\tfreopen (\"input.txt\", \"r\", stdin);\r\n//\tfreopen (\"output.txt\", \"w\", stdout);\r\n#endif\r\n\r\n    int t;\r\n    scanf(\"%d\", &t);\r\n    for (int i = 0; i < t; i++)\r\n        solve();\r\n\r\n\treturn 0;\r\n}\r\n"
+}
