@@ -58,6 +58,7 @@ def delete_non_json(file_path):
   except Exception as e:
     print(f"Err file[{file_path}]: " + str(e))
     print("Deleting..")
+    deleter(file_path)
   return None
 
 def problem_getter():
