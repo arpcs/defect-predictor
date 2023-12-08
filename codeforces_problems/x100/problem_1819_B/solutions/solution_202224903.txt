@@ -1,0 +1,40 @@
+{
+    "id": 202224903,
+    "contestId": 1819,
+    "creationTimeSeconds": 1681556000,
+    "relativeTimeSeconds": 6500,
+    "problem": {
+        "contestId": 1819,
+        "index": "B",
+        "name": "The Butcher",
+        "type": "PROGRAMMING",
+        "points": 1250.0,
+        "rating": 1900,
+        "tags": [
+            "geometry",
+            "greedy",
+            "implementation",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1819,
+        "members": [
+            {
+                "handle": "stevenkplus"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "room": 11,
+        "startTimeSeconds": 1681549500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 18,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 8396800,
+    "source": "// =========== Template ========== //\n#include <bits/stdc++.h>\n// #include<bits/extc++.h>\nusing namespace std;\nint fastio() { ios_base::sync_with_stdio(false); cout << fixed << setprecision(10); cin.tie(nullptr); return 0; }\nint __fastio = fastio();\ntemplate<typename A, typename B> ostream& operator<<(ostream &os, const pair<A, B> &p);\ntemplate<typename A> ostream& operator<<(ostream &os, const set<A> &m) { os << \"{\"; string sep = \"\"; for (auto e: m) os << sep << e, sep = \", \"; return os << \"}\"; }\ntemplate<typename A> ostream& operator<<(ostream &os, const multiset<A> &m) { os << \"{\"; string sep = \"\"; for (auto e: m) os << sep << e, sep = \", \"; return os << \"}\"; }\ntemplate<typename A, typename B> ostream& operator<<(ostream &os, const map<A, B> &m) { os << \"{\"; string sep = \"\"; for (auto e: m) os << sep << e.first << \": \" << e.second, sep = \", \"; return os << \"}\"; }\ntemplate<typename T>ostream& operator<<(ostream& os, const vector<T>& v) { os << \"[\"; string sep = \"\"; for (auto e: v) os << sep << e, sep = \", \"; return os << \"]\"; }\ntemplate<typename T, size_t L>ostream& operator<<(ostream& os, const array<T, L>& v) { os << \"[\"; string sep = \"\"; for (int i = 0; i < L; ++i) os << sep << v[i], sep = \", \"; return os << \"]\"; }\ntemplate<typename A, typename B> ostream& operator<<(ostream &os, const pair<A, B> &p) { os << '(' << p.first << \", \" << p.second << ')'; return os; }\nusing vi = vector<int>;\nstruct node;\nostream& operator<<(ostream &os, const node &node);\nvoid dbg_out() { cerr << endl; }\ntemplate<typename Head, typename... Tail> void dbg_out(Head H, Tail... T) { cerr << ' ' << H; dbg_out(T...); }\n#ifdef STEVEN\n#define pp(...) cerr << \"\\t[\" << #__VA_ARGS__ << \"]:\\t\", dbg_out(__VA_ARGS__)\n#define ppp(x) cerr << x << \"\\n\"\n#else\n#define pp(...)\n#define ppp(...)\n#endif\ntemplate<class Fun> class y_combinator_result { Fun fun_; public: template<class T> explicit y_combinator_result(T &&fun): fun_(std::forward<T>(fun)) {} template<class ...Args> decltype(auto) operator()(Args &&...args) { return fun_(std::ref(*this), std::forward<Args>(args)...); } };\ntemplate<class Fun> decltype(auto) y_combinator(Fun &&fun) { return y_combinator_result<std::decay_t<Fun>>(std::forward<Fun>(fun)); }\n#define yc y_combinator\ntypedef long long ll;\ntypedef pair<int, int> pii;\ntypedef pair<ll, ll> pll;\ntypedef long double ld;\n#define fi first\n#define se second\n#define sz(x) (int((x).size()))\n#define data _data\n// struct splitmix64_hash { static uint64_t splitmix64(uint64_t x) { x += 0x9e3779b97f4a7c15; x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9; x = (x ^ (x >> 27)) * 0x94d049bb133111eb; return x ^ (x >> 31); } size_t operator()(uint64_t x) const { static const uint64_t FIXED_RANDOM = std::chrono::steady_clock::now().time_since_epoch().count(); return splitmix64(x + FIXED_RANDOM); } }; // https://github.com/ecnerwala/cp-book/blob/master/src/hash_map.hpp\n// struct splitmix64_hash_pll { static uint64_t splitmix64(uint64_t x) { x += 0x9e3779b97f4a7c15; x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9; x = (x ^ (x >> 27)) * 0x94d049bb133111eb; return x ^ (x >> 31); } size_t operator()(pll x) const { static const uint64_t FIXED_RANDOM = std::chrono::steady_clock::now().time_since_epoch().count(); return splitmix64(x.fi * 132453374217LL + x.se + FIXED_RANDOM); } }; // https://github.com/ecnerwala/cp-book/blob/master/src/hash_map.hpp thanks kevin\n// template <typename K, typename V, typename Hash = splitmix64_hash> using hash_map = __gnu_pbds::gp_hash_table<K, V, Hash>;\n// template <typename K, typename Hash = splitmix64_hash> using hash_set = hash_map<K, __gnu_pbds::null_type, Hash>;\n// hash_map<ll, ll> hm; hash_map<pll, pll, splitmix64_hash_pll> hm2;\n// =========== Book ============ //\n\n// ============= Solution ============= //\nint main() {\n   // dp[i] -> can you start at i with a clean slate?\n   // dp[0] = true by default\n   // also, dp[i] = true for all k[i - 1] == 0\n   // if dp[i] is true, then find first j such that sacks i ... j - 1 has a collision. set dp[j] to true\n   // also find first x > i such that k[x] == 0. set dp[x]...dp[j] to true\n\n   int T;\n   cin >> T;\n   while (T--) {\n      int n;\n      cin >> n;\n      vector<pii> v(n);\n      set<pll> ans;\n      ll area = 0;\n      for (pii &p: v) {\n         cin >> p.fi >> p.se;\n         area += 1LL * p.fi * p.se;\n      }\n\n      vector<pii> byW, byH;\n      for (int i = 0; i < n; ++i) {\n         byW.push_back(pii(v[i].fi, i));\n         byH.push_back(pii(v[i].se, i));\n      }\n      sort(byW.begin(), byW.end());\n      reverse(byW.begin(), byW.end());\n      sort(byH.begin(), byH.end());\n      reverse(byH.begin(), byH.end());\n      for (int rep = 0; rep < 2; ++rep) {\n         // can you cut W H W H W H ...\n         vector<bool> gone(n);\n\n         bool side = rep == 0;\n         ll W, H;\n         if (side) {\n            W = byW[0].fi;\n            H = area / W;\n         } else {\n            H = byH[0].fi;\n            W = area / H;\n         }\n         if (W * H != area) continue;\n         ll _W = W, _H = H;\n         int wIdx = 0, hIdx = 0;\n         int tot = 0;\n         bool bad = false;\n         while (tot < n) {\n            pp(W, H);\n            if (side) {\n               // cut along W\n               while (gone[byW[wIdx].se]) ++wIdx;\n               int ww = byW[wIdx].fi;\n               pp(ww, tot);\n               if (ww != W) {\n                  bad = true;\n                  break;\n               }\n               while (wIdx < n && byW[wIdx].fi == ww) {\n                  if (gone[byW[wIdx].se]) {\n                     ++wIdx;\n                     continue;\n                  }\n                  H -= v[byW[wIdx].se].se;\n                  gone[byW[wIdx].se] = true;\n                  ++tot;\n                  ++wIdx;\n               }\n            } else {\n               // cut along H\n               while (gone[byH[hIdx].se]) ++hIdx;\n               int hh = byH[hIdx].fi;\n               pp(hh, tot);\n               if (hh != H) {\n                  bad = true;\n                  break;\n               }\n               while (hIdx < n && byH[hIdx].fi == hh) {\n                  if (gone[byH[hIdx].se]) {\n                     ++hIdx;\n                     continue;\n                  }\n                  W -= v[byH[hIdx].se].fi;\n                  gone[byH[hIdx].se] = true;\n                  ++tot;\n                  ++hIdx;\n               }\n            }\n            side = !side;\n         }\n\n         pp(W, H); // should be 0, 0\n\n         if (bad) continue;\n         ans.insert(pll(_W, _H));\n\n      }\n\n      cout << sz(ans) << \"\\n\";\n      for (auto p: ans) cout << p.fi << \" \" << p.se << \"\\n\";\n   }\n}\n\n// ============== Notes =============== //\n// common bugs\n// - fastio\n// - int overflow (especially intermediate expressionns)\n// - forgot to initialize data (is 0 the right value? -1, inf, -inf?)\n// - array bounds (indices bigger than MAXN?)\n// - special cases (n=1? graph not connected?)\n// - re-initialize efficiently between test cases\n\n"
+}

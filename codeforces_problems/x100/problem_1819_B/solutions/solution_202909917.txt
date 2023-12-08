@@ -1,0 +1,39 @@
+{
+    "id": 202909917,
+    "contestId": 1819,
+    "creationTimeSeconds": 1682041029,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1819,
+        "index": "B",
+        "name": "The Butcher",
+        "type": "PROGRAMMING",
+        "points": 1250.0,
+        "rating": 1900,
+        "tags": [
+            "geometry",
+            "greedy",
+            "implementation",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1819,
+        "members": [
+            {
+                "handle": "Mixti"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1681549500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 23,
+    "timeConsumedMillis": 358,
+    "memoryConsumedBytes": 29184000,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <set>\r\n#include <algorithm>\r\nusing namespace std;\r\n#define f first\r\n#define s second\r\n#define nl '\\n'\r\n\r\nvoid solve_testcase() {\r\n\tint N; cin >> N;\r\n\tvector<pair<int64_t, int64_t>> bag(N);\r\n\tfor(int i = 0; i < N; i++)\r\n\t\tcin >> bag[i].f >> bag[i].s;\r\n\r\n\tint64_t area = 0, initial_height, initial_width;\r\n\tfor(int i = 0; i < N; i++)\r\n\t\tarea += bag[i].f * bag[i].s;\r\n\r\n\tmultiset<pair<int64_t, int64_t>, greater<pair<int64_t, int64_t>>> bh;\r\n\r\n\tauto comp = [](pair<int64_t, int64_t> l, pair<int64_t, int64_t> r) {\r\n\t\treturn make_pair(l.s, l.f) > make_pair(r.s, r.f);\r\n\t};\r\n\tmultiset<pair<int64_t, int64_t>, decltype(comp)> bw(comp);\r\n\r\n\tvector<pair<int64_t, int64_t>> ans;\r\n\t// MAX HEIGHT\r\n\tbool MAX_HEIGHT_CASE = false;\r\n\tfor(int i = 0; i < N; i++)\r\n\t\tbh.insert(bag[i]),\r\n\t\tbw.insert(bag[i]);\r\n\r\n\tinitial_height = (*bh.begin()).f;\r\n\tif(area % initial_height == 0) {\r\n\t\tMAX_HEIGHT_CASE = true;\r\n\t\tinitial_width = area / initial_height;\r\n\t\t\r\n\t\tint64_t h = initial_height, w = initial_width;\r\n\t\twhile(!bh.empty()) {\r\n\t\t\tif((*bh.begin()).f != h) {\r\n\t\t\t\tMAX_HEIGHT_CASE = false;\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t\twhile(!bh.empty() && (*bh.begin()).f == h) {\r\n\t\t\t\tw -= (*bh.begin()).s;\r\n\t\t\t\tbw.erase(bw.find(*bh.begin()));\r\n\t\t\t\tbh.erase(bh.begin());\r\n\t\t\t}\r\n\t\t\tif(!bw.empty() && (*bw.begin()).s != w) {\r\n\t\t\t\tMAX_HEIGHT_CASE = false;\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t\twhile(!bw.empty() && (*bw.begin()).s == w) {\r\n\t\t\t\th -= (*bw.begin()).f;\r\n\t\t\t\tbh.erase(bh.find(*bw.begin()));\r\n\t\t\t\tbw.erase(bw.begin());\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tif(MAX_HEIGHT_CASE)\r\n\t\tans.push_back({initial_height, initial_width});\r\n\t\r\n\t// MAX WIDTH\r\n\tbool MAX_WIDTH_CASE = false;\r\n\tbh.clear(),\r\n\tbw.clear();\r\n\tfor(int i = 0; i < N; i++)\r\n\t\tbh.insert(bag[i]),\r\n\t\tbw.insert(bag[i]);\r\n\r\n\tinitial_width = (*bw.begin()).s;\r\n\tif(area % initial_width == 0) {\r\n\t\tMAX_WIDTH_CASE = true;\r\n\t\tinitial_height = area / initial_width;\r\n\t\t\r\n\t\tint64_t h = initial_height, w = initial_width;\r\n\t\twhile(!bw.empty()) {\r\n\t\t\tif((*bw.begin()).s != w) {\r\n\t\t\t\tMAX_WIDTH_CASE = false;\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t\twhile(!bw.empty() && (*bw.begin()).s == w) {\r\n\t\t\t\th -= (*bw.begin()).f;\r\n\t\t\t\tbh.erase(bh.find(*bw.begin()));\r\n\t\t\t\tbw.erase(bw.begin());\r\n\t\t\t}\r\n\t\t\tif(!bh.empty() && (*bh.begin()).f != h) {\r\n\t\t\t\tMAX_WIDTH_CASE = false;\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t\twhile(!bh.empty() && (*bh.begin()).f == h) {\r\n\t\t\t\tw -= (*bh.begin()).s;\r\n\t\t\t\tbw.erase(bw.find(*bh.begin()));\r\n\t\t\t\tbh.erase(bh.begin());\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tif(MAX_WIDTH_CASE)\r\n\t\tans.push_back({initial_height, initial_width});\r\n\t\r\n\tans.resize(unique(ans.begin(), ans.end()) - ans.begin());\r\n\tcout << ans.size() << nl;\r\n\tfor(auto [hh, ww] : ans)\r\n\t\tcout << hh << ' ' << ww << nl;\r\n\r\n\treturn;\r\n}\r\n\r\nint main() {\r\n\tcin.tie(0)->sync_with_stdio(false);\r\n\r\n\tint T; cin >> T; while(T--) solve_testcase();\r\n\r\n\treturn 0;\r\n}\r\n"
+}
