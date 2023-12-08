@@ -1,0 +1,36 @@
+{
+    "id": 131085442,
+    "contestId": 1571,
+    "creationTimeSeconds": 1633621616,
+    "relativeTimeSeconds": 4316,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "BucketPotato"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 88,
+    "timeConsumedMillis": 1372,
+    "memoryConsumedBytes": 498073600,
+    "source": "// taken from purplecrayon\r\nimport java.util.*\r\n\r\n\r\n/** IO */\r\n//@JvmField val ONLINE_JUDGE = System.getProperty(\"ONLINE_JUDGE\") != null\r\n//const val PATH = \"src/main/resources/\"\r\n//@JvmField val INPUT = File(PATH + \"input.txt\").inputStream()\r\n//@JvmField val OUTPUT = File(PATH + \"output.txt\").outputStream()\r\n\r\nprivate val INPUT = System.`in`\r\n\r\nprivate val OUTPUT = System.out\r\n\r\nprivate const val _BUFFER_SIZE = 1 shl 16\r\n\r\nprivate val _buffer = ByteArray(_BUFFER_SIZE)\r\n\r\nprivate var _bufferPt = 0\r\n\r\nprivate var _bytesRead = 0\r\n\r\nprivate tailrec fun readChar(): Char {\r\n    if (_bufferPt == _bytesRead) {\r\n        _bufferPt = 0\r\n        _bytesRead = INPUT.read(_buffer, 0, _BUFFER_SIZE)\r\n    }\r\n    return if (_bytesRead < 0) Char.MIN_VALUE\r\n    else {\r\n        val c = _buffer[_bufferPt++].toChar()\r\n        if (c == '\\r') readChar() else c\r\n    }\r\n}\r\n\r\nprivate fun readLine(): String? {\r\n    var c = readChar()\r\n    return if (c == Char.MIN_VALUE) null\r\n    else buildString {\r\n        while (c != '\\n' && c != Char.MIN_VALUE) {\r\n            append(c)\r\n            c = readChar()\r\n        }\r\n    }\r\n}\r\n\r\nprivate fun readLn() = readLine()!! // string line\r\nprivate fun readInt() = readLn().toInt() // single int\r\nprivate fun readLong() = readLn().toLong() // single long\r\nprivate fun readDouble() = readLn().toDouble() // single double\r\nprivate fun readStrings() = readLn().split(\" \") // list of strings\r\nprivate fun readInts() = readStrings().map { it.toInt() } // list of ints\r\nprivate fun readLongs() = readStrings().map { it.toLong() } // list of longs\r\nprivate fun readDoubles() = readStrings().map { it.toDouble() } // list of doubles\r\n\r\n\r\nfun main() {\r\n\r\n    var (n, m) = readInts();\r\n\r\n    var knapsack = Array(5050) { Array(5050) { false } };\r\n    var pv = Array(5050) { Array(5050) { 0 } };\r\n    var ans = Array(n + 1) {0};\r\n\r\n    var ones = ArrayList<Pair<Int,Int>>();\r\n    var twos = ArrayList<Pair<Int,Int>>();\r\n    var tot = 0;\r\n    var tottwo = 0;\r\n    for (i in 1..n) {\r\n        var (k, t) = readInts();\r\n        tot += k;\r\n        if (t == 1) {\r\n            ones.add(Pair(k, i));\r\n        }\r\n        else {\r\n            twos.add(Pair(k, i));\r\n            tottwo += k;\r\n        }\r\n    }\r\n\r\n    if (tot > m) {\r\n        println(-1);\r\n        return;\r\n    }\r\n\r\n    for (i in ones) {\r\n        ans[i.second] = m - i.first + 1;\r\n        m -= i.first;\r\n    }\r\n\r\n    if (twos.size > 0) {\r\n        knapsack[0][twos[0].first] = true;\r\n        knapsack[0][0] = true;\r\n\r\n        for (i in 1 until (twos.size)) {\r\n            var cd = twos[i].first;\r\n            for (j in 0..m) {\r\n                if (knapsack[i - 1][j]) {\r\n                    knapsack[i][j] = true;\r\n                    pv[i][j] = j;\r\n                }\r\n                if (j >= cd && knapsack[i - 1][j - cd]) {\r\n                    knapsack[i][j] = true;\r\n                    pv[i][j] = j - cd;\r\n                }\r\n            }\r\n        }\r\n\r\n        var tc = -1;\r\n        var s1 = m / 2;\r\n        var s2 = m - s1;\r\n        for (i in 0..m) {\r\n            if (!knapsack[twos.size - 1][i]) continue;\r\n\r\n            if (i <= s1 && tottwo - i <= s2) {\r\n                tc = i;\r\n                break;\r\n            }\r\n        }\r\n\r\n        if (tc == -1) {\r\n            println(-1);\r\n            return;\r\n        }\r\n\r\n        var ineven = ArrayList<Pair<Int,Int>>();\r\n        var inodd = ArrayList<Pair<Int,Int>>();\r\n        var cind = tc;\r\n        for (i in twos.size - 1 downTo 0) {\r\n            if (cind != pv[i][cind])\r\n                ineven.add(twos[i]);\r\n            else\r\n                inodd.add(twos[i]);\r\n            cind = pv[i][cind];\r\n        }\r\n\r\n        var cday = 2;\r\n        for (i in ineven) {\r\n            ans[i.second] = cday;\r\n            cday += i.first * 2;\r\n        }\r\n\r\n        cday = 1;\r\n        for (i in inodd) {\r\n            ans[i.second] = cday;\r\n            cday += i.first * 2;\r\n        }\r\n\r\n\r\n    }\r\n\r\n    for (i in 1..n) {\r\n        print(ans[i]);\r\n        print(\" \");\r\n    }\r\n    println();\r\n\r\n\r\n\r\n}"
+}

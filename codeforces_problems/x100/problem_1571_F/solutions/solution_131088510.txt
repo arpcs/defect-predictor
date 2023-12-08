@@ -1,0 +1,36 @@
+{
+    "id": 131088510,
+    "contestId": 1571,
+    "creationTimeSeconds": 1633623723,
+    "relativeTimeSeconds": 6423,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "alexey.enkov"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.5",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 88,
+    "timeConsumedMillis": 311,
+    "memoryConsumedBytes": 69017600,
+    "source": "import java.io.BufferedReader\r\nimport java.io.InputStreamReader\r\nimport java.io.PrintWriter\r\n\r\nval inf = BufferedReader(InputStreamReader(System.`in`))\r\nval ouf = PrintWriter(System.out)\r\n//val inf = BufferedReader(FileReader(\"input.txt\"))\r\n//val ouf = PrintWriter(\"output.txt\")\r\n\r\nconst val MOD = 1_000_000_007L\r\n\r\nfun readInts() = inf.readLine()!!.split(' ').map(String::toInt)\r\nfun readLongs() = inf.readLine()!!.split(' ').map(String::toLong)\r\nfun readString() = inf.readLine()!!\r\nfun readInt() = readInts()[0]\r\n\r\nfun main() {\r\n//    for (t in 0 until readInt()) {\r\n        solve()\r\n//    }\r\n    ouf.close()\r\n}\r\n\r\ndata class Sor(val k: Int, val n: Int)\r\n\r\nfun solve() {\r\n    val (n, m) = readInts()\r\n    val small = mutableListOf<Sor>()\r\n    val oneDay = mutableListOf<Sor>()\r\n    val twoDay = mutableListOf<Sor>()\r\n    for (i in 0 until n) {\r\n        val (k, t) = readInts()\r\n        val sor = Sor(k, i)\r\n        when {\r\n            t == 1 && k == 1 -> small.add(sor)\r\n            t == 1 -> oneDay.add(sor)\r\n            else -> twoDay.add(sor)\r\n        }\r\n    }\r\n    val mm = m - oneDay.sumOf { it.k }\r\n    val q = twoDay.sumOf { it.k }\r\n    if (q > mm) {\r\n        ouf.println(-1)\r\n        return\r\n    }\r\n    val mm2 = (mm + 1) / 2\r\n    val dp = Array(twoDay.size + 1) { IntArray(mm2 + 1) }\r\n    dp[0][0] = -1\r\n    for (i in 0 until twoDay.size) {\r\n        for (j in 0..mm2) {\r\n            if (dp[i][j] != 0) dp[i + 1][j] = 1\r\n            if (j - twoDay[i].k >= 0 && dp[i][j - twoDay[i].k] != 0) dp[i + 1][j] = 2\r\n        }\r\n    }\r\n    val q0 = dp[twoDay.size].indexOfLast { it != 0 }\r\n    if (q - q0 > mm - mm2) {\r\n        ouf.println(-1)\r\n        return\r\n    }\r\n    val first = mutableListOf<Sor>()\r\n    val second = mutableListOf<Sor>()\r\n    var cur = twoDay.size - 1\r\n    var curQ = q0\r\n    while (cur >= 0) {\r\n        if (dp[cur + 1][curQ] == 2) {\r\n            first.add(twoDay[cur])\r\n            curQ -= twoDay[cur].k\r\n        } else {\r\n            second.add(twoDay[cur])\r\n        }\r\n        cur--\r\n    }\r\n    val ans = IntArray(n)\r\n    val days = BooleanArray(m + 1)\r\n    var curDay = 1\r\n    for (sor in first) {\r\n        ans[sor.n] = curDay\r\n        for (i in 0 until sor.k) {\r\n            days[curDay + i * 2] = true\r\n        }\r\n        curDay += 2 * sor.k\r\n    }\r\n    curDay = 2\r\n    for (sor in second) {\r\n        ans[sor.n] = curDay\r\n        for (i in 0 until sor.k) {\r\n            days[curDay + i * 2] = true\r\n        }\r\n        curDay += 2 * sor.k\r\n    }\r\n    curDay = mm + 1\r\n    for (sor in oneDay) {\r\n        ans[sor.n] = curDay\r\n        for (i in 0 until sor.k) {\r\n            days[curDay + i] = true\r\n        }\r\n        curDay += sor.k\r\n    }\r\n    var lastDay = 1\r\n    for (sor in small) {\r\n        while (lastDay <= m && days[lastDay]) lastDay++\r\n        if (lastDay > m) {\r\n            ouf.println(-1)\r\n            return\r\n        }\r\n        ans[sor.n] = lastDay\r\n        days[lastDay] = true\r\n    }\r\n    ouf.println(ans.joinToString(separator = \" \"))\r\n}\r\n"
+}
