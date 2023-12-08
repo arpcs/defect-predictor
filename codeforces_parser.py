@@ -1,8 +1,10 @@
 import bs4
 import requests
+import time
 
 def parse_problem(problem_link):
     markup = requests.get(problem_link).text
+    time.sleep(2)
     soup = bs4.BeautifulSoup(markup, "html.parser")
     problem = {
         "title": soup.find('div', 'title').string,
@@ -18,6 +20,7 @@ def parse_problem(problem_link):
 
 def parse_solution(solution_link):
     markup = requests.get(solution_link).text
+    time.sleep(2)
     soup = bs4.BeautifulSoup(markup, "html.parser")
     solution = soup.find('pre', id='program-source-text').get_text()
     return solution

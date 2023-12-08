@@ -6,6 +6,7 @@ import shutil
 import json
 import random
 from functools import partial
+import re
 
 #PROBLEM_LINK = 'https://codeforces.com/problemset/problem/'
 #CONTEST_LINK = 'https://codeforces.com/contest/1906/submission/236201276'
@@ -14,7 +15,17 @@ def create_submission_link(id, submission):
 def create_problem_link(id, index):
     return f'https://codeforces.com/problemset/problem/{str(id)}/{str(index)}'
 
-def get_problems(number_of_problems):
+def get_already_existing_problems(problems, number_of_solutions):
+    folder_name = os.path.join("codeforces_problems",f"x{number_of_solutions}")
+    result = []
+    for root, dirs, files in os.walk(folder_name):
+        for folder in dirs:
+            for i, problem in enumerate(problems, start=1):
+                if folder == f"problem_{problem['contestId']}_{problem['index']}":
+                    result.append(problem)
+    return result
+
+def get_problems(number_of_problems, number_of_solutions):
     url = "https://codeforces.com/api/problemset.problems"
 
     max_attempts = 20
@@ -23,6 +34,7 @@ def get_problems(number_of_problems):
     while attempts < max_attempts:
         try:
             response = requests.get(url)
+            time.sleep(2)
             if response.status_code == 200 and response.json()["status"] == "OK":
                 break
             else:
@@ -37,7 +49,11 @@ def get_problems(number_of_problems):
     problems = None
     if response.json()["status"] == "OK":
         problems = response.json()["result"]["problems"]
-    return random.sample(problems, min(len(problems), number_of_problems))
+    old_problems = get_already_existing_problems(problems, number_of_solutions)
+    random_old =  random.sample(old_problems, min(len(old_problems), number_of_problems))
+    random_new = random.sample(problems, min(len(problems), number_of_problems))
+    result = (random_old + random_new)[:number_of_problems]
+    return result
     #return response.json()["result"]["problems"][:number_of_problems]
 
 def get_all_solutions(contest_id, count):
@@ -49,6 +65,7 @@ def get_all_solutions(contest_id, count):
     while attempts < max_attempts:
         try:
             response = requests.get(url)
+            time.sleep(2)
             if response.status_code != 200 or response.json()["status"] != "OK":
                 attempts += 1
                 print(f"Attempt {attempts}: Failed to fetch solutions. Retrying...")
@@ -68,10 +85,23 @@ def get_solutions(all_solutions, problem_id, verdict, num):
     #return solutions[-num:]
     return random.sample(solutions, min(len(solutions), num))
 
+
+def get_solution_number_w_verdict(folder_name, verdict):
+    verdict_num = 0
+    solution_folder_name = os.path.join(f"{folder_name}","solutions")
+    for root, dirs, files in os.walk(solution_folder_name):
+        for file in files:
+            with open(os.path.join(root, file), 'r') as file:
+                try:
+                    data = json.load(file)
+                    if data['verdict'] == verdict:
+                        verdict_num += 1
+                except json.JSONDecodeError:
+                    pass
+    return verdict_num
+
 def runner(number_of_problems, number_of_solutions):
-    problems = get_problems(number_of_problems)
-    # Respect the API request limit
-    time.sleep(2)
+    problems = get_problems(number_of_problems, number_of_solutions)
 
     contests_solutions = {}
     for i, problem in enumerate(problems, start=1):
@@ -80,8 +110,6 @@ def runner(number_of_problems, number_of_solutions):
     
     print(f"Found {len(contests_solutions)} number of problem groups")
 
-    # Respect the API request limit
-    time.sleep(4)
 
     for i, problem in enumerate(problems, start=1):
         folder_name = os.path.join("codeforces_problems",f"x{number_of_solutions}",f"problem_{problem['contestId']}_{problem['index']}")
@@ -93,7 +121,6 @@ def runner(number_of_problems, number_of_solutions):
         if contests_solutions[problem['contestId']] is None:
             contests_solutions[problem['contestId']] = get_all_solutions(problem["contestId"], number_of_solutions * 400)
             print(f"For problem group [{problem['contestId']}] found {len(contests_solutions[problem['contestId']])} number of solutions")
-            time.sleep(2)
 
         all_solutions = contests_solutions[problem['contestId']]
         print(f"Solutions for [{problem['contestId']} - {problem['index']}]")           
@@ -117,7 +144,6 @@ def runner(number_of_problems, number_of_solutions):
                     print(f"Error processing problem data: {problem['contestId']}, {problem['index']} : {e}. \nRetry [{retries}]")
                 time.sleep(2 + retries*retries / 10)
 
-        time.sleep(2)
 
         currently_fetched = 0
         solution_couter_sum = 0
@@ -125,10 +151,18 @@ def runner(number_of_problems, number_of_solutions):
             num_to_fetch = int(number_of_solutions / 2 if verdict == "OK" else number_of_solutions / 10)
             if verdict == "WRONG_ANSWER":
                 num_to_fetch = number_of_solutions - currently_fetched
+
             solutions = get_solutions(all_solutions, problem["index"], verdict, num_to_fetch * 400)
             currently_fetched += min(len(solutions), num_to_fetch)
 
             solution_couter = 0
+            already_done = get_solution_number_w_verdict(folder_name, verdict)
+            solution_couter += already_done
+            if solution_couter >= num_to_fetch:
+                print(f"\t\tfor {verdict} already DONE {already_done} \t satisfying the limit: {num_to_fetch}")
+                solution_couter_sum += solution_couter
+                continue
+
             bad_couter = 0
             for j, solution in enumerate(solutions, start=1):
                 solution_folder_name = os.path.join(f"{folder_name}","solutions")
@@ -151,17 +185,13 @@ def runner(number_of_problems, number_of_solutions):
                     if bad_couter % 10 == 0:
                         print(f"Bad solution requests: {bad_couter}")
                     time.sleep(2 + bad_couter * bad_couter / 40)
-                if solution_couter == num_to_fetch:
+                if solution_couter >= num_to_fetch:
                     break
                 
-                time.sleep(2)
-            print(f"\t\tfor {verdict} done {solution_couter} out of {num_to_fetch}")
+            print(f"\t\tfor {verdict} \t done {solution_couter}\t[{already_done}]\t out of \t{num_to_fetch}")
             solution_couter_sum += solution_couter
-            time.sleep(2)
-        is_good = "Good" if number_of_solutions == solution_couter_sum else "Bad"
+        is_good = "Good" if number_of_solutions <= solution_couter_sum else "Bad"
         print(f"{is_good}: Overall done {solution_couter_sum} out of {number_of_solutions}")
-        # Respect the API request limit
-        time.sleep(2)
 
 def try_fun(fun):
     attempts = 0
