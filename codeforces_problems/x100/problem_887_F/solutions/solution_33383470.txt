@@ -1,0 +1,36 @@
+{
+    "id": 33383470,
+    "contestId": 887,
+    "creationTimeSeconds": 1513609414,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 887,
+        "index": "F",
+        "name": "Row of Models",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2500,
+        "tags": [
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 887,
+        "members": [
+            {
+                "handle": "N.E.R.O"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509725100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 103219200,
+    "source": "#include <bits/stdc++.h>\r\n#define FOR(i, a, b) for (int i = a; i<= b; ++i)\r\n#define FORD(i, a, b) for (int i = a; i>=b; --i)\r\n#define REP(i, a) for (int i = 0; i<a; ++i)\r\n#define N 1001000\r\n#define pp pair<int, int>\r\n#define bit(S, i) (((S) >> i) & 1)\r\n#define IO cin.tie(NULL);cout.tie(NULL);\r\n#define taskname \"test\"\r\nusing namespace std;\r\n\r\nstruct SegmentTree { // Max of minDepend[]\r\n    vector<int> IT;\r\n    int n;\r\n    void reset(int _n) {\r\n        n = _n;\r\n        IT.clear(); IT.resize(n * 4 + 10, -1e9 - 5);\r\n    }\r\n\r\n    void Up(int u, int val) { Up(1, 1, n, u, val); }\r\n    int GetMin(int l, int r) { return Get(1, 1, n, l, r);}\r\nprivate:\r\n    void Up(int k, int l, int r, int u, int val) {\r\n        if (l == r) {\r\n            IT[k] = val;\r\n            return;\r\n        }\r\n        int m = (l + r) >> 1;\r\n        if (u <= m) Up(k * 2, l, m, u, val);\r\n        else Up(k * 2 + 1, m + 1, r, u, val);\r\n        IT[k] = max(IT[k * 2], IT[k * 2 + 1]);\r\n    }\r\n\r\n    int Get(int k, int l, int r, int u, int v) {\r\n        if (l > v || r < u) return -1e9 - 5;\r\n        if (l <= u && r <= v) return IT[k];\r\n        int m = (l + r) >> 1;\r\n        return max(Get(k * 2, l, m, u, v), Get(k * 2 + 1, m + 1, r, u, v));\r\n    }\r\n}IT;\r\nint k, n, a[N], LOG, RMQ[N][22];\r\nint minDepend[N], minBad[N];\r\nbool bad[N];\r\n\r\nvoid BuildRMQ() {\r\n    LOG = log2(n + 1);\r\n    FOR(i, 1, n + 1) RMQ[i][0] = i;\r\n    FOR(j, 1, LOG) FOR(i, 1, n + 1) {\r\n        if (a[RMQ[i][j - 1] < a[RMQ[i + (1 << (j - 1))][j - 1]]]) {\r\n            RMQ[i][j] = RMQ[i][j - 1];\r\n        } else RMQ[i][j] = RMQ[i + (1 << (j - 1))][j - 1];\r\n    }\r\n}\r\n\r\nint GetRMQ(int l, int r) {\r\n    int j = log2(r - l + 1);\r\n    if (a[RMQ[l][j]] > a[RMQ[r - (1 << j) + 1][j]]) return RMQ[l][j];\r\n    return RMQ[r - (1 << j) + 1][j];\r\n}\r\n\r\nvoid BuildMinDepend() {\r\n    FOR(i, 1, n) minDepend[i] = 1e9 + 5;\r\n    FOR(L, 1, n) {\r\n        bool Depend = true;\r\n        int R = GetRMQ(L + 1, min(n + 1, L + k));\r\n        if (a[L] <= a[R]) continue;\r\n        if (R != L + 1 && a[L] > a[GetRMQ(L + 1, R - 1)]) Depend = false;\r\n        if (R != min(n + 1, L + k) && a[L] > a[GetRMQ(R + 1, min(n + 1, L + k))]) Depend = false;\r\n        if (Depend) minDepend[R] = min(minDepend[R], a[L]);\r\n    }\r\n}\r\n\r\n#define all(s) s.begin(), s.end()\r\nvector<int> eBad, ranking;\r\n\r\nbool Check(int L) {\r\n    if (L - eBad[0] > k || L == eBad.back()) return false;\r\n    if (eBad.size() > 1 && L < eBad[eBad.size() - 2]) return false;\r\n    if (L < eBad.back()) {\r\n        int R = eBad.back();\r\n        if (a[L] <= GetRMQ(R + 1, min(n + 1, R + k))) return false;\r\n        if (a[L] >= minDepend[R]) return false;\r\n        if (a[R] >= minBad[L] || a[R] <= GetRMQ(L + 1, min(n + 1, L + k))) return false;\r\n        return true;\r\n    }\r\n  //  cerr << GetRMQ(L + 1, min(n + 1, L + k)) << ' ' << minBad[L] << ' ';\r\n    int minVal = upper_bound(all(ranking), a[GetRMQ(L + 1, min(n + 1, L + k))]) - ranking.begin() + 1;\r\n    int maxVal = lower_bound(all(ranking), minBad[L]) - ranking.begin();\r\n  //  cerr << minVal << ' ' << maxVal << endl;\r\n    if (minVal > maxVal) return false;\r\n    if (a[L] < IT.GetMin(minVal, maxVal)) return true;\r\n    return false;\r\n}\r\nint main() {\r\n    //freopen(taskname\".inp\",\"r\",stdin);\r\n    //freopen(taskname\".out\",\"w\",stdout);\r\n    IO;\r\n    scanf(\"%d %d\", &n, &k);\r\n    FOR(i, 1, n) scanf(\"%d\", &a[i]);\r\n    a[n + 1] = -1;\r\n    FOR(i, 1, n + 1) ranking.push_back(a[i]);\r\n    sort(all(ranking));\r\n    ranking.resize(distance(ranking.begin(), unique(all(ranking))));\r\n    BuildRMQ();  \r\n    BuildMinDepend();\r\n    //FOR(i, 1, n) cerr << i << ':' << minDepend[i] << endl;\r\n    //\r\n    minBad[0] = 1e9 + 5;\r\n    FOR(i, 1, n) {\r\n        bad[i] = (a[i] <= a[GetRMQ(i + 1, min(n + 1, i + k))]);\r\n        if (bad[i]) eBad.push_back(i), minBad[i] = min(minBad[i - 1], a[i]);\r\n        else minBad[i] = minBad[i - 1];\r\n    }\r\n    if (eBad.empty()) {\r\n        printf(\"YES\");return 0;\r\n    }\r\n    IT.reset(n);\r\n    FORD(i, n, 1) {\r\n      //  cerr << i << ':';\r\n        if (Check(i)) {\r\n            printf(\"YES\");\r\n            return 0;\r\n        }\r\n        else {\r\n            int pos = lower_bound(all(ranking), a[i]) - ranking.begin() + 1;\r\n            IT.Up(pos, minDepend[i]);\r\n        }\r\n    }\r\n    printf(\"NO\");\r\n}\r\n"
+}

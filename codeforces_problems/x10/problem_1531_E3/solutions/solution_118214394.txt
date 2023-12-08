@@ -1,0 +1,34 @@
+{
+    "id": 118214394,
+    "contestId": 1531,
+    "creationTimeSeconds": 1622652194,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1531,
+        "index": "E3",
+        "name": "\u0421\u043e\u0440\u0442\u0438\u0440\u043e\u0432\u043a\u0430 \u0441\u043b\u0438\u044f\u043d\u0438\u0435\u043c",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "binary search"
+        ]
+    },
+    "author": {
+        "contestId": 1531,
+        "members": [
+            {
+                "handle": "XJIE6"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1621846800
+    },
+    "programmingLanguage": "Haskell",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 140,
+    "timeConsumedMillis": 1981,
+    "memoryConsumedBytes": 110387200,
+    "source": "import Debug.Trace\r\nimport Data.Maybe\r\nimport Data.Char\r\nimport Control.Monad.State\r\n\r\nfoo :: Int -> Int -> [Int] -> [Int] -> Maybe ([Int], [Int])\r\nfoo 0 0 xs ys = Just (xs, reverse ys)\r\nfoo 0 o xs ys = foo 0 (o - 1) xs (1:ys)\r\nfoo z 0 xs ys = foo (z - 1) 0 xs (0:ys)\r\nfoo _ _ [] _  = Nothing\r\nfoo z o (0:xs) ys = foo (z - 1) o xs (0:ys)\r\nfoo z o (1:xs) ys = foo z (o - 1) xs (1:ys)\r\n\r\nsolution' :: Int -> Int -> [Int] -> Maybe ([Int], [[Int]])\r\nsolution' l r s | r - l <= 1 = return (s, [])\r\n                | otherwise = do\r\n                      let m = div (r + l) 2\r\n                      (s', a) <- solution' l m s\r\n                      (s'', b) <- solution' m r s'\r\n                      (s''', res) <- foo (m - l) (r - m) s'' []\r\n                      return (s''', a ++ b ++ [res])\r\n\r\nseparate :: [Int] -> State [[Int]] [Int]\r\nseparate [x] = return [x]\r\nseparate values = do\r\n                    xs <- get\r\n                    put $ tail xs\r\n                    let collect (0:f, a, b) x = (f, x:a, b)\r\n                        collect (1:f, a, b) x = (f, a, x:b)\r\n                        (_, l, r) = foldl collect (head xs, [], []) values\r\n                    right <- separate (reverse r)\r\n                    left <- separate (reverse l)\r\n                    return $ left ++ right\r\n\r\nrunSolution'' :: Int -> Int -> [Int] -> ([Int], Int)\r\nrunSolution'' l r s = let m = div (r + l) 2 in\r\n                        case solution' 0 m s of\r\n                            Just ([], res) -> (evalState (separate [1..m]) $ reverse res, m)\r\n                            Just _         -> if r - m <= 1\r\n                                                then ([], 0)\r\n                                                else runSolution'' m r s\r\n                            Nothing        -> if m - l <= 1\r\n                                                then ([], 0)\r\n                                                else runSolution'' l m s\r\n\r\nmain = do\r\n    s <- getLine\r\n    let (a, i) = runSolution'' 1 100001 $ map digitToInt s\r\n    putStrLn $ show i\r\n    putStr $ foldr (\\a b -> a ++ \" \" ++ b) \"\" $ map show a"
+}

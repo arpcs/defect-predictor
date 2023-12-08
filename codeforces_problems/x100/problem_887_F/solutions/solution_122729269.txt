@@ -1,0 +1,36 @@
+{
+    "id": 122729269,
+    "contestId": 887,
+    "creationTimeSeconds": 1626492467,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 887,
+        "index": "F",
+        "name": "Row of Models",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2500,
+        "tags": [
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 887,
+        "members": [
+            {
+                "handle": "alay2501"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509725100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 41984000,
+    "source": "#include <bits/stdc++.h>\r\n#define ll int\r\n#define pb push_back\r\n#define pll pair<ll, ll>\r\n#define pii pair<ll, pll>\r\n#define fi first\r\n#define se second\r\n#define task \"slingshot\"\r\n#define ull unsigned long long\r\n\r\nusing namespace std;\r\nconst long long mod =  1e9+7;\r\nconst ll N = 5e5+5;\r\nconst int base = 400;\r\nll n, m, t, ans, k, b[N], a[N], c[N], tong, cnt, q, d, s, h[N], lab[N];\r\npll st[N*4];\r\nmt19937_64 mt(chrono::steady_clock::now().time_since_epoch().count());\r\nstruct edge\r\n{\r\n    ll x, y, w;\r\n};\r\nvector<ll> comps;\r\nvector<ll> gr[N];\r\nvector<ll> kq;\r\nvector<pll> adj[N];\r\n\r\nll pw(ll k, ll n)\r\n{\r\n    ll total = 1;\r\n    for(; n; n >>= 1ll)\r\n    {\r\n        if(n & 1)total = 1ll * total * k % mod;\r\n        k = 1ll * k * k % mod;\r\n    }\r\n    return total;\r\n}\r\n\r\nll findp(ll u)\r\n{\r\n    return lab[u] < 0 ? u : lab[u] = findp(lab[u]);\r\n}\r\nvoid hop(ll u, ll v)\r\n{\r\n    if(lab[u] > lab[v])swap(u, v);\r\n    for(ll x : gr[v])gr[u].pb(x);\r\n    gr[v].clear();\r\n    lab[u] += lab[v];\r\n    lab[v] = u;\r\n}\r\n\r\nll lwr(ll x)\r\n{\r\n    return lower_bound(kq.begin(), kq.end(), x) - kq.begin() + 1;\r\n}\r\n\r\nbool cmp(const ll& x, const ll& y)\r\n{\r\n    return c[x] < c[y];\r\n}\r\nbool operator < (const edge& x, const edge& y)\r\n{\r\n    return x.w < y.w;\r\n}\r\nvoid dfs(ll u, ll p)\r\n{\r\n    for(pll v : adj[u])\r\n    {\r\n        if(v.se == p)continue;\r\n//        b[v.se] = max(b[u], v.fi);\r\n        dfs(v.se, u);\r\n    }\r\n}\r\nvoid build(ll id, ll l, ll r)\r\n{\r\n    if(l == r)\r\n    {\r\n        st[id] = {a[l], l};\r\n        return;\r\n    }\r\n    ll mid = (l + r) / 2;\r\n    build(id*2, l, mid);\r\n    build(id*2+1, mid+1, r);\r\n    st[id] = min(st[id*2], st[id*2+1]);\r\n}\r\nvoid update(ll id, ll l, ll r, ll pos, ll val)\r\n{\r\n    if(l == r)\r\n    {\r\n        st[id].fi = val;\r\n        return;\r\n    }\r\n    ll mid = (l + r) / 2;\r\n    if(mid >= pos)update(id*2, l, mid, pos, val);\r\n    else update(id*2+1, mid+1, r, pos, val);\r\n    st[id] = min(st[id*2], st[id*2+1]);\r\n}\r\npll get(ll id, ll l, ll r, ll u, ll v)\r\n{\r\n    if(u <= l && r <= v)return st[id];\r\n    if(u > r || l > v)return {mod, 0};\r\n    ll mid = (l + r) / 2;\r\n    return min(get(id*2, l, mid, u, v), get(id*2+1, mid+1, r, u, v));\r\n}\r\nvoid sol()\r\n{\r\n    cin >> n >> k;\r\n    for(int i = 1; i <= n; i ++)cin >> a[i];\r\n    build(1, 1, n);\r\n    ll l = 0, r;\r\n    for(int i = 1; i <= n-k; i ++)\r\n    {\r\n        b[i] = get(1, 1, n, i+1, i+k).fi;\r\n        if(a[i] <= b[i])\r\n        {\r\n            if(!l)l = i;\r\n            r = i;\r\n        }\r\n    }\r\n    if(!l)\r\n    {\r\n        cout << \"YES\";\r\n        return;\r\n    }\r\n    if(r + k + 1 > n || r + 1 > l + k)\r\n    {\r\n        cout << \"NO\";\r\n        return;\r\n    }\r\n    for(int i = r + 1; i <= n-k; i ++)\r\n    {\r\n        pll cur = get(1, 1, n, i+1, i+k);\r\n        update(1, 1, n, cur.se, mod);\r\n        if(a[i] <= get(1, 1, n, i+1, i+ k).fi)adj[cur.se].pb({a[i], i});\r\n        update(1, 1, n, cur.se, cur.fi);\r\n    }\r\n    for(int i = r+k+1; i <= n; i ++)\r\n    {\r\n        if(a[i] >= a[l])continue;\r\n        sort(adj[i].rbegin(), adj[i].rend());\r\n        for(int j = r+1; j <= l+k; j ++)\r\n        {\r\n            while(!adj[i].empty() && adj[i].back().se < j)adj[i].pop_back();\r\n            if(a[i] > b[j] && (adj[i].empty() && a[j] < adj[i].back().fi))\r\n            {\r\n                cout << \"YES\";\r\n                return;\r\n            }\r\n        }\r\n    }\r\n    cout << \"NO\";\r\n}\r\nint main()\r\n{\r\n    if(fopen(task\".in\", \"r\")){\r\n       freopen(task\".in\", \"r\", stdin);\r\n       freopen(task\".out\", \"w\", stdout);\r\n    }\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n    int ntest = 1;\r\n    //cin >> ntest;\r\n    while(ntest -- > 0)\r\n    sol();\r\n}\r\n/*\r\n3 1\r\n108\r\nhttps://discord.com/channels/660930260405190688/661076942321090561/864980550002540564\r\nhttps://codeforces.com/contest/963/problem/D\r\n*/\r\n"
+}

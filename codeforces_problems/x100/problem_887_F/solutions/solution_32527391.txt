@@ -1,0 +1,36 @@
+{
+    "id": 32527391,
+    "contestId": 887,
+    "creationTimeSeconds": 1511272740,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 887,
+        "index": "F",
+        "name": "Row of Models",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2500,
+        "tags": [
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 887,
+        "members": [
+            {
+                "handle": "vjudge4"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509725100
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 106,
+    "timeConsumedMillis": 264,
+    "memoryConsumedBytes": 18124800,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\n\nconst int maxn = 500010;\nconst int INF = 1e9+10;\nint MIN[maxn*4], pos[maxn*4], a[maxn];\n\nvoid update(int num, int l, int r, int x, int y) {\n\tif(l==r) {\n\t\tif(y < MIN[num]) {\n\t\t\tMIN[num] = y;\n\t\t\tpos[num] = x;\n\t\t}\n\t\telse if(y==MIN[num]) {\n\t\t\tpos[num] = min(pos[num], x);\n\t\t}\n\t\treturn ;\n\t}\n\tint m = (l+r) / 2;\n\tif(x <= m) update(num*2, l, m, x, y);\n\telse update(num*2+1, m+1, r, x, y);\n\tint m1 = MIN[num*2], m2 = MIN[num*2+1];\n\tif(m1 < m2) {\n\t\tMIN[num] = m1;\n\t\tpos[num] = pos[num*2];\n\t}\n\telse if(m1 > m2) {\n\t\tMIN[num] = m2;\n\t\tpos[num] = pos[num*2+1];\n\t}\n\telse {\n\t\tMIN[num] = m1;\n\t\tpos[num] = min(pos[num*2], pos[num*2+1]);\n\t}\n}\npair<int, int> query(int num, int l, int r, int x, int y) {\n\tif(x<=l && y>=r) {\n\t\treturn make_pair(MIN[num], pos[num]);\n\t}\n\tint m = (l+r) / 2;\n\tint ans = INF;\n\tint p = 0;\n\tif(x <= m) {\n\t\tpair<int, int> q = query(num*2, l, m, x, y);\n\t\tp = q.second;\n\t\tif(q.first < ans) {\n\t\t\tans = q.first;\n\t\t\tp = q.second;\n\t\t}\n\t\telse if(q.first==ans) {\n\t\t\tp = min(p, q.second);\n\t\t}\n\t}\n\tif(y > m) {\n\t\tpair<int, int> q = query(num*2+1, m+1, r, x, y);\n\t\tif(p==0) p = q.second;\n\t\tif(q.first < ans) {\n\t\t\tans = q.first;\n\t\t\tp = q.second;\n\t\t}\n\t\telse if(q.first == ans) {\n\t\t\tp = min(p, q.second);\n\t\t}\n\t}\n\treturn make_pair(ans,p);\n}\nint main() {\n\tfor(int i = 0; i < 4*maxn; i++) {\n\t\tMIN[i] = pos[i] = INF;\n\t}\n\tint n, k;\n\tscanf(\"%d%d\", &n, &k);\n\tfor(int i = 1; i <= n; i++) {\n\t\tscanf(\"%d\", &a[i]);\n\t\tupdate(1, 1, n, i, a[i]);\n\t}\n\tint SWAP = 1, ans = 1, last = n+1;\n\tint l = 1, r = n;\n\tpair<int, int> q = query(1, 1, n, 1, n);\n\tif(last - q.second > k) {\n\t\tans = 0;\n\t}\n\telse while(l <= r) {\n\t\tq = query(1, 1, n, l, r);\n\t\tint m = q.first, p = q.second;\n\t\tq = query(1, 1, n, l, max(p-1,1));\n\t\tint pre = q.second;\n\t\tm = q.first;\n\t\tif(p-pre<=k) {\n\t\t\tlast = p;\n\t\t\tr = p-1;\n\t\t}\n\t\telse if(SWAP > 0) {\n\t\t\tSWAP--;\n\t\t\tif(p==r) {\n\t\t\t\tlast = last - k;\n\t\t\t}\n\t\t\telse {\n\t\t\t\tq = query(1, 1, n, p+1, r);\n\t\t\t\tif(q.first < m) last = p - k;\n\t\t\t\telse last = last - k;\n\t\t\t}\n\t\t\tr = last - 1;\n\t\t\tif(last - pre > k) {\n\t\t\t\tans = 0;\n\t\t\t\tbreak;\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\tans = 0;\n\t\t\tbreak;\n\t\t}\n\t}\n\tif(ans) printf(\"YES\\n\");\n\telse printf(\"NO\\n\");\n//\tsystem(\"PAUSE\");\n\treturn 0;\n}\n\t\t  \t  \t\t \t     \t \t  \t\t\t  \t \t"
+}

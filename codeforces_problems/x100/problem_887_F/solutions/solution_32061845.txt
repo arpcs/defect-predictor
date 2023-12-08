@@ -1,0 +1,36 @@
+{
+    "id": 32061845,
+    "contestId": 887,
+    "creationTimeSeconds": 1509822837,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 887,
+        "index": "F",
+        "name": "Row of Models",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2500,
+        "tags": [
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 887,
+        "members": [
+            {
+                "handle": "toxzi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509725100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 11980800,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef pair<int, int> pii;\r\n\r\n#define mp make_pair\r\n#define pb push_back\r\n\r\nint n, x;\r\nint a[500010];\r\nint mn[500010];\r\nvector<int> bad;\r\n\r\nstruct Cmp{\r\n    inline bool operator()(const int &lhs, const int &rhs){\r\n        if(a[lhs] != a[rhs]) return a[lhs] < a[rhs];\r\n        return lhs < rhs;\r\n    }\r\n};\r\nset<int, Cmp> q;\r\nint t[4 * 500010];\r\n\r\nvoid build(int v, int vl, int vr){\r\n    if(vl == vr){\r\n        t[v] = a[vl];\r\n        return;\r\n    }\r\n    int vm = (vl + vr) >> 1;\r\n    build(2 * v, vl, vm);\r\n    build(2 * v + 1, vm + 1, vr);\r\n    t[v] = min(t[2 * v], t[2 * v + 1]);\r\n}\r\n\r\nvoid update(int v, int vl, int vr, int pos, int val){\r\n    if(vl == vr){\r\n        t[v] = val;\r\n        return;\r\n    }\r\n    int vm = (vl + vr) >> 1;\r\n    if(pos <= vm) update(2 * v, vl, vm, pos, val);\r\n    else update(2 * v + 1, vm + 1, vr, pos, val);\r\n    t[v] = min(t[2 * v], t[2 * v + 1]);\r\n}\r\n\r\nint getmin(int v, int vl, int vr, int l, int r){\r\n    if(l > vr || r < vl) return 1000000001;\r\n    if(l <= vl && vr <= r) return t[v];\r\n    int vm = (vl + vr) >> 1;\r\n    int q1 = getmin(2 * v, vl, vm, l, r);\r\n    int q2 = getmin(2 * v + 1, vm + 1, vr, l, r);\r\n    return min(q1, q2);\r\n}\r\n\r\nint main()\r\n{\r\n    ios_base::sync_with_stdio(0);\r\n    cin >> n >> x;\r\n    for(int i = 0; i < n; i++) cin >> a[i];\r\n    build(1, 0, n - 1);\r\n    for(int i = 0; i < n; i++) mn[i] = -1;\r\n    for(int i = 0; i < x; i++) q.insert(n - 1 - i);\r\n    for(int i = n - x - 1; i >= 0; i--){\r\n        int val = a[i];\r\n        auto it = q.begin();\r\n        if(val > a[*it]){\r\n            it++;\r\n            if(val <= a[*it]){\r\n                it--;\r\n                mn[*it] = (mn[*it] == -1) ? val : min(val, mn[*it]);\r\n            }\r\n        }\r\n        else bad.pb(i);\r\n        q.erase(i + x);\r\n        q.insert(i);\r\n    }\r\n    reverse(bad.begin(), bad.end());\r\n    if(bad.empty()){\r\n        cout << \"YES\" << endl;\r\n        exit(0);\r\n    }\r\n    int first = bad.front();\r\n    vector<int> c;\r\n    for(int i = first + 1; i <= first + x; i++) c.pb(a[i]);\r\n    sort(c.begin(), c.end());\r\n    for(int i = first + 1; i < n; i++){\r\n        if(a[i] < a[first]){\r\n            auto it = lower_bound(bad.begin(), bad.end(), i);\r\n            if(it == bad.end() || (i == *it && *it == bad.back())){\r\n                int el = -1;\r\n                if(mn[i] == -1) el = c.back();\r\n                else{\r\n                    int lo = -1, hi = c.size() - 1;\r\n                    while(lo != hi){\r\n                        int mi = (lo + hi + 1) >> 1;\r\n                        if(c[mi] < mn[i]) lo = mi;\r\n                        else hi = mi - 1;\r\n                    }\r\n                    if(lo != -1) el = a[lo];\r\n                }\r\n                if(el != -1){\r\n                    update(1, 0, n - 1, i, el);\r\n                    int mn = getmin(1, 0, n - 1, i, i + x);\r\n                    if(mn < el){\r\n                        cout << \"YES\" << endl;\r\n                        exit(0);\r\n                    }\r\n                    update(1, 0, n - 1, i, a[i]);\r\n                }\r\n            }\r\n        }\r\n    }\r\n    cout << \"NO\" << endl;\r\n    return 0;\r\n}\r\n"
+}

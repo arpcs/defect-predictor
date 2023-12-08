@@ -1,0 +1,37 @@
+{
+    "id": 232190756,
+    "contestId": 212,
+    "creationTimeSeconds": 1699602272,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 212,
+        "index": "E",
+        "name": "IT Restaurants",
+        "type": "PROGRAMMING",
+        "points": 500.0,
+        "rating": 1500,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 212,
+        "members": [
+            {
+                "handle": "bkifhr8"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1342450800
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 623,
+    "memoryConsumedBytes": 2457600,
+    "source": "#include <bits/stdc++.h>\n\nusing i64 = long long;\n\nbool chkmax(int &x, int y) {\n    if (x < y) {\n        x = y;\n        return true;\n    }\n    return false;\n}\n\nint main() {\n    std::ios::sync_with_stdio(false);\n    std::cin.tie(nullptr);\n\n    int n;\n    std::cin >> n;\n    std::vector adj(n + 1, std::vector<int>());\n    for (int i = 1; i < n; i++) {\n        int u, v;\n        std::cin >> u >> v;\n        adj[u].push_back(v);\n        adj[v].push_back(u);\n    }\n\n    // dp[i][j][k] \u8868\u793a\u4ee5 i \u4e3a\u6839\u7684\u5b50\u6811\uff0c\u67d3 j \u4e2a\u7ea2\u8272\uff0c\u6839\u8282\u70b9\u989c\u8272\u4e3a k\uff080\u7ea2 1\u84dd 2\u4e0d\u67d3\uff09\uff0c\u84dd\u8272\u8282\u70b9\u7684\u6700\u591a\u6570\u91cf\u3002\n    // \u628a\u7b2c\u4e00\u7ef4\u6eda\u52a8\u6389\n    std::vector dp(n + 1, std::vector<int>(3, -1e9));\n    std::vector<int> siz(n + 1);\n\n    auto dfs = [&](auto self, int u, int pa) -> void {\n        siz[u] = 1;\n        std::vector now(2, std::vector<int>(3, -1e9));\n        now[1][0] = 0;\n        now[0][1] = 1;\n        now[0][2] = 0;\n        for (int v : adj[u]) {\n            if (v == pa) {\n                continue;\n            }\n            self(self, v, u);\n            std::vector tmp(siz[u] + siz[v] + 1, std::vector<int>(3, -1e9));\n            for (int i = 0; i <= siz[u]; i++) {\n                for (int j = 0; j <= siz[v]; j++) {\n                    chkmax(tmp[i + j][0], now[i][0] + std::max(dp[j][0], dp[j][2]));\n                    chkmax(tmp[i + j][1], now[i][1] + std::max(dp[j][1], dp[j][2]));\n                    chkmax(tmp[i + j][2], now[i][2] + std::max({dp[j][0], dp[j][1], dp[j][2]}));\n                }\n            }\n\n            std::swap(tmp, now);\n            siz[u] += siz[v];\n        }\n        std::swap(now, dp);\n    };\n\n    dfs(dfs, 1, 0);\n\n    int res = 0;\n    std::vector<int> mx(n + 1);\n    std::vector<std::pair<int, int>> ans;\n\n    for (int i = 1; i < n; i++) {\n        mx[i] = std::max({dp[i][0], dp[i][1], dp[i][2]});\n        if (mx[i] > 0) {\n            res = std::max(res, i + mx[i]);\n        }\n    }\n    for (int i = 1; i < n; i++) {\n        if (res == i + mx[i] && mx[i] > 0) {\n            ans.push_back({i, mx[i]});\n        }\n    }\n\n    std::cout << ans.size() << \"\\n\";\n    for (auto [x, y] : ans) {\n        std::cout << x << \" \" << y << \"\\n\";\n    }\n\n    return 0;\n}\n\t   \t  \t\t\t  \t\t   \t\t\t \t \t \t\t \t \t"
+}

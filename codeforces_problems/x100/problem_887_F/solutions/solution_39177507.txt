@@ -1,0 +1,36 @@
+{
+    "id": 39177507,
+    "contestId": 887,
+    "creationTimeSeconds": 1528765797,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 887,
+        "index": "F",
+        "name": "Row of Models",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2500,
+        "tags": [
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 887,
+        "members": [
+            {
+                "handle": "iqqsoszs"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509725100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 31,
+    "timeConsumedMillis": 546,
+    "memoryConsumedBytes": 22323200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef pair<int, int> pii;\r\n\r\nconst int MN = 500010;\r\n\r\nstruct BIT {\r\n    vector<int> tree;\r\n    void init() {\r\n        tree = vector<int>(4 * MN, 1e9);\r\n    }\r\n    void upd(int idx, int val, int l, int r, int n) {\r\n        if(idx < l || r < idx) return;\r\n        if(l == r) {\r\n            tree[n] = val;\r\n            return;\r\n        }\r\n        int m = (l + r)>>1;\r\n        upd(idx, val, l, m, 2*n);\r\n        upd(idx, val, m + 1, r, 2*n + 1);\r\n        tree[n] = min(tree[2*n], tree[2*n + 1]);\r\n    }\r\n    int quer(int a, int b, int l, int r, int n) {\r\n        if(b < l || r < a) return 1e9;\r\n        if(a <= l && r <= b) return tree[n];\r\n        int m = (l + r)>>1;\r\n        int L = quer(a, b, l, m, 2*n);\r\n        int R = quer(a, b, m + 1, r, 2*n + 1);\r\n        return min(L, R);\r\n    }\r\n} bit;\r\n\r\nint N, K;\r\nint A[MN];\r\nvector<pii> ord;\r\nint l, r, x;\r\n\r\nvoid check() {\r\n    ord.clear();\r\n    for(int i = 0; i < N; i++) {\r\n        ord.push_back({ A[i], i });\r\n    }\r\n    sort(ord.begin(), ord.end());\r\n\r\n    bit.init();\r\n    bit.upd(N, N, 0, MN - 1, 1);\r\n    l = 1e9;\r\n    r = -1;\r\n    x = 1e9;\r\n    for(int i = 0; i < N; i++) {\r\n        int idx = ord[i].second;\r\n\r\n        int t = bit.quer(idx + 1, MN - 1, 0, MN - 1, 1);\r\n        if(t - idx > K) {\r\n            l = min(l, idx);\r\n            r = max(r, idx);\r\n            x = min(x, A[idx]);\r\n        }\r\n        bit.upd(idx, idx, 0, MN - 1, 1);\r\n    }\r\n}\r\n\r\nint main() {\r\n    scanf(\"%d %d\", &N, &K);\r\n\r\n    for(int i = 0; i < N; i++) {\r\n        scanf(\"%d\", &A[i]);\r\n    }\r\n\r\n    check();\r\n\r\n    if(r == -1) {\r\n        printf(\"YES\");\r\n        return 0;\r\n    }\r\n\r\n    if(l == r) {\r\n        int mn = 1e9;\r\n        for(int i = l + 1; i <= l + K; i++) {\r\n            mn = min(mn, A[i]);\r\n        }\r\n        int mn2 = 1e9, p = -1;\r\n        for(int i = l - 1; i >= 0; i--) {\r\n            if(A[i] > mn && mn2 >= A[i]) {\r\n                mn2 = A[i];\r\n                p = i;\r\n            }\r\n        }\r\n        if(p != -1) {\r\n            swap(A[p], A[l]);\r\n            check();\r\n            if(r == -1) {\r\n                printf(\"YES\");\r\n                return 0;\r\n            }\r\n            swap(A[p], A[l]);\r\n        }\r\n    }\r\n\r\n    if(min(N - 1, l + K) < r) {\r\n        printf(\"NO\");\r\n        return 0;\r\n    }\r\n\r\n    vector<int> tmp;\r\n    for(int i = r + 1; i < N; i++) {\r\n        if(A[i] < x) {\r\n            tmp.push_back(i);\r\n        }\r\n    }\r\n    tmp.push_back(N);\r\n\r\n    if(tmp.size() == 1) {\r\n        printf(\"NO\");\r\n        return 0;\r\n    }\r\n\r\n    int mx = -1, a;\r\n    for(int i = 0; i < tmp.size(); i++) {\r\n        if(mx < A[ tmp[i] ]) {\r\n            mx = A[ tmp[i] ];\r\n            a = tmp[i];\r\n        }\r\n    }\r\n\r\n    int b = a == tmp[0]? tmp[1] : tmp[0];\r\n    if(min(N - 1, l + K) < b - K) {\r\n        printf(\"NO\");\r\n        return 0;\r\n    }\r\n\r\n    int mn = 1e9, p;\r\n    for(int i = max(r, b - K); i <= min(N - 1, l + K); i++) {\r\n        if(mn >= A[i]) {\r\n            mn = A[i];\r\n            p = i;\r\n        }\r\n    }\r\n\r\n    swap(A[p], A[a]);\r\n    check();\r\n    if(r == -1) printf(\"YES\");\r\n    else printf(\"NO\");\r\n}\r\n"
+}

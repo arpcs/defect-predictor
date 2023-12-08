@@ -1,0 +1,36 @@
+{
+    "id": 122696712,
+    "contestId": 887,
+    "creationTimeSeconds": 1626452381,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 887,
+        "index": "F",
+        "name": "Row of Models",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2500,
+        "tags": [
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 887,
+        "members": [
+            {
+                "handle": "phtniit"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509725100
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 19968000,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long i64;\r\n\r\nconst int inf = 1e9+7;\r\nconst int maxn = 500010;\r\n\r\nint c[maxn * 4];\r\nvoid build(int idx, int u, int v) {\r\n        c[idx] = inf;\r\n        if (u == v) {\r\n                return;\r\n        }\r\n        int m = u + (v - u) / 2;\r\n        build(idx*2, u, m);\r\n        build(idx*2+1, m+1, v);\r\n}\r\nint xx, yy;\r\nvoid update(int idx, int u, int v) {\r\n        if (u == v) {\r\n                c[idx] = min(c[idx], yy);\r\n                return;\r\n        }\r\n        int m = u + (v - u) / 2;\r\n        if (xx <= m) {\r\n                update(idx*2, u, m);\r\n        } else {\r\n                update(idx*2+1, m+1, v);\r\n        }\r\n        c[idx] = min(c[idx*2], c[idx*2+1]);\r\n}\r\nint query(int idx, int u, int v) {\r\n        int ret = inf;\r\n        if (xx <= u && v <= yy) {\r\n                return c[idx];\r\n        }\r\n        int m = u + (v - u) / 2;\r\n        if (xx <= m) {\r\n                ret = min(ret, query(idx*2, u, m));\r\n        }\r\n        if (yy > m) {\r\n                ret = min(ret, query(idx*2+1, m+1, v));\r\n        }\r\n        return ret;\r\n}\r\n\r\nint a[maxn];\r\nbool gao(int N, int K) {\r\n        static int q[maxn];\r\n        int h = 0, t = 0;\r\n        q[t++] = N;\r\n\r\n        static int mx[maxn], mn[maxn];\r\n\r\n        int x = N + 10, y = -1;\r\n        for (int i = N-1; i >= 0; --i) {\r\n                while (h < t && q[h] - i > K) ++h;\r\n                mn[i] = a[q[h]];\r\n\r\n                while (h < t && a[i] <= a[q[t-1]]) --t;\r\n                mx[i] = inf;\r\n                if (t == h+1) {\r\n                        mx[q[h]] = min(mx[q[h]], a[i]);\r\n                }\r\n\r\n                if (t == h) {\r\n                        x = min(x, i);\r\n                        y = max(x, i);\r\n                }\r\n\r\n                q[t++] = i;\r\n        }\r\n        if (y == -1) {\r\n                return true;\r\n        }\r\n        /*\r\n        for (int i = n-1; i >= y; --i) {\r\n                if (i <= x + k) {\r\n                // supposed that we would swap i and j:\r\n                //      1. if j > i + k\r\n                //      i.      a[j] < a[x]\r\n                //              ii. a[j] > mn[i]\r\n                //              iii.a[i] > mn[j]\r\n                //              iv. a[i] < mx[j]\r\n                //      2. if j <= i + k\r\n                //              i.      a[j] < a[x]\r\n                //              ii. a[j] > mn[i] **mn[i] may be located at j?**\r\n                //              iii.a[i] > mn[j]\r\n                //              iv. a[i] < mx[j] **mn[i] may be located at j?**\r\n                }\r\n        }\r\n        */\r\n\r\n        static vector<int> vt;\r\n        vt.push_back(0);\r\n        vt.push_back(inf);\r\n        for (int i = 0; i < N; ++i) {\r\n                vt.push_back(a[i]);\r\n        }\r\n        sort(vt.begin(), vt.end());\r\n        int m = unique(vt.begin(), vt.end()) - vt.begin();\r\n\r\n        build(1, 1, m);\r\n        for (int i = x; i < N; ++i) {\r\n                if (y <= i && i <= y + K && a[i] < a[x]) {\r\n                        int j = i;\r\n                        // TODO: {mn[j]+1, mx[j]-1} find min_val\r\n                        xx = lower_bound(vt.begin(), vt.begin() + m, mn[j]) - vt.begin() + 1 + 1;\r\n                        yy = lower_bound(vt.begin(), vt.begin() + m, mx[j]) - vt.begin() + 1 - 1;\r\n                        if (xx <= yy && query(1, 1, m) < a[j]) {\r\n                                return true;\r\n                        }\r\n                }\r\n                if (i <= x + K) {\r\n                        // TODO: update {a[i], mn[i]}\r\n                        xx = lower_bound(vt.begin(), vt.begin() + m, a[i]) - vt.begin() + 1;\r\n                        yy = mn[i];\r\n                        update(1, 1, m);\r\n                }\r\n        }\r\n        return false;\r\n}\r\n\r\nint main() {\r\n        int n, k;\r\n        scanf(\"%d %d\", &n, &k);\r\n        for (int i = 0; i < n; ++i) {\r\n                scanf(\"%d\", &a[i]);\r\n        }\r\n        if (gao(n, k)) {\r\n                puts(\"YES\");\r\n        } else {\r\n                puts(\"NO\");\r\n        }\r\n        return 0;\r\n}"
+}

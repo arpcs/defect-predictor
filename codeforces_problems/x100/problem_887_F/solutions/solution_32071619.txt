@@ -1,0 +1,36 @@
+{
+    "id": 32071619,
+    "contestId": 887,
+    "creationTimeSeconds": 1509872236,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 887,
+        "index": "F",
+        "name": "Row of Models",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2500,
+        "tags": [
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 887,
+        "members": [
+            {
+                "handle": "Maffka"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509725100
+    },
+    "programmingLanguage": "MS C++",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 74,
+    "timeConsumedMillis": 1216,
+    "memoryConsumedBytes": 30310400,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <map>\r\n#include <algorithm>\r\n#include <cmath>\r\n#include <string>\r\n#include <stack>\r\n#include <set>\r\n#include <cassert>\r\n#include <ctime>\r\n#include <unordered_set>\r\n#include <complex>\r\n#include <queue>\r\n\r\n#define vd vector<double>\r\n#define pb push_back\r\n#define all(v) v.begin(), v.end()\r\n#define x first\r\n#define y second\r\n#define mp make_pair\r\n#define forn(i, l) for (int i = 0; i < l; i++)\r\n\r\n\r\n\r\nusing namespace std;\r\ntypedef pair<int, int> pi;\r\ntypedef long long li;\r\nconst int N = 5e5 + 10;\r\nconst double eps = 0.00000000001, eps2 = 0.0001;\r\nconst int INF = (int)1e9;\r\nconst long long LINF = 1e16;\r\nconst double PI = acos(-1.0);\r\n\r\nint n, k;\r\nint a[N], minV[N], min2V[N];\r\nbool bbad[N];\r\nmap<int, int> pos;\r\nmap<int, int> cnt;\r\nbool used[N];\r\n\r\nint main() {\r\n#ifdef _DEBUG\r\n\tfreopen(\"in.txt\", \"r\", stdin);\r\n\tfreopen(\"out.txt\", \"w\", stdout);\r\n#endif\r\n\tscanf(\"%d%d\", &n, &k);\r\n\tforn(i, n) {\r\n\t\tscanf(\"%d\", a + i);\r\n\t}\r\n\tforn(i, N) {\r\n\t\tmin2V[i] = INF;\r\n\t}\r\n\tfor (int i = n - 1; i >= n - k; i--) {\r\n\t\tcnt[a[i]]++;\r\n\t\tminV[i] = -1;\r\n\t}\r\n\tint bad = -1;\r\n\tfor (int i = n - k - 1; i >= 0; i--) {\r\n\t\tif (i < n - k - 1) {\r\n\t\t\tcnt[a[i + k + 1]]--;\r\n\t\t\tif (cnt[a[i + k + 1]] == 0) {\r\n\t\t\t\tcnt.erase(a[i + k + 1]);\r\n\t\t\t\tpos.erase(a[i + k + 1]);\r\n\t\t\t}\r\n\t\t}\r\n\t\tcnt[a[i]]++;\r\n\t\tpos[a[i]] = i;\r\n\t\tauto it = cnt.begin();\r\n\t\tint itf = it -> x;\r\n\t\tif (itf >= a[i]) {\r\n\t\t\tbad = i;\r\n\t\t\tbbad[i] = 1;\r\n\t\t\tminV[i] = itf;\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tminV[i] = itf;\r\n\t\tif ((*++it).x >= a[i] && cnt[itf] == 1) {\r\n\t\t\tmin2V[pos[itf]] = min(min2V[pos[itf]], a[i]);\r\n\t\t}\r\n\t}\r\n\r\n\r\n\tif (bad == -1) {\r\n\t\tprintf(\"YES\");\r\n\t\treturn 0;\r\n\t}\r\n\tbool ok = 0;\r\n\tvector<pi> range;\r\n\tint mv = INF;\r\n\tfor (int i = bad + 1; i <= min(bad + k, n - 1); i++) {\r\n\t\tif (bbad[i]) {\r\n\t\t\trange.clear();\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\trange.push_back(mp(minV[i], a[i]));\r\n\t}\r\n\tsort(all(range));\r\n\tvector<int> minSuf(range.size());\r\n\tint m = range.size() ;\r\n\tminSuf[0] = range[0].y;\r\n\tfor (int i = 1; i < m; i++) {\r\n\t\tminSuf[i] = min(minSuf[i - 1], range[i].y);\r\n\t}\r\n\tfor (int i = bad + k + 1; i < n; i++) {\r\n\t\tif (bbad[i]) {\r\n\t\t\tprintf(\"NO\");\r\n\t\t\treturn 0;\r\n\t\t}\r\n\t\tint y = a[i];\r\n\t\tif (y < a[bad]) {\r\n\t\t\tauto it = lower_bound(all(range), mp(y, -INF));\r\n\t\t\tif (it == range.begin() /* || it -> x >= min2V[i] || it -> y >= y*/) {\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\tit--;\r\n\t\t\tint id = it - range.begin();\r\n\t\t\tif (minSuf[id] < min2V[i])\r\n\t\t\t\tok = 1;\r\n\t\t}\r\n\t}\r\n\tif (ok) {\r\n\t\tprintf(\"YES\");\r\n\treturn 0;\r\n\t}\r\n\tprintf(\"NO\");\r\n\treturn 0;\r\n}"
+}

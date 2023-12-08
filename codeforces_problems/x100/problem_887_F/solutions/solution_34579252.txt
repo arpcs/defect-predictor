@@ -1,0 +1,36 @@
+{
+    "id": 34579252,
+    "contestId": 887,
+    "creationTimeSeconds": 1516978571,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 887,
+        "index": "F",
+        "name": "Row of Models",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2500,
+        "tags": [
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 887,
+        "members": [
+            {
+                "handle": "binsjl"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509725100
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 106,
+    "timeConsumedMillis": 935,
+    "memoryConsumedBytes": 30412800,
+    "source": "#include <cstdio>\r\n#include <cstdlib>\r\n#include <ctime>\r\n#include <vector>\r\n#include <cassert>\r\n#include <algorithm>\r\nusing namespace std;\r\nint a[500005];\r\nstruct node{\r\n \tnode *ch[2];\r\n \tint id,sz,pri;\r\n \tnode(int x){\r\n \t\tch[0]=ch[1]=NULL;\r\n \t\tid=x,sz=1,pri=rand();\r\n \t}\r\n \tbool cmp(int x){\r\n \t\treturn (a[x]>a[id]||(a[x]==a[id]&&x>id))?1:0;\r\n \t}\r\n \tvoid pull(){\r\n \t\tsz=1;\r\n \t\tif(ch[0]) sz+=ch[0]->sz;\r\n \t\tif(ch[1]) sz+=ch[1]->sz;\r\n \t}\r\n}*root;\r\nvoid rotate(node *&o,int d){\r\n\tnode *k=o->ch[d^1];\r\n\to->ch[d^1]=k->ch[d],k->ch[d]=o;\r\n\to->pull(),k->pull();\r\n\to=k;\r\n}\r\nvoid insert(node *&o,int x){\r\n\tif(o==NULL) o=new node(x);\r\n\telse{\r\n\t\tint d=o->cmp(x);\r\n\t\tinsert(o->ch[d],x);\r\n\t\tif(o->ch[d]->pri>o->pri) rotate(o,d^1);\r\n\t\telse o->pull();\r\n\t}\r\n}\r\nvoid remove(node *&o,int x){\r\n\tif(x==o->id){\r\n\t\tif(o->ch[0]==NULL) o=o->ch[1];\r\n\t\telse if(o->ch[1]==NULL) o=o->ch[0];\r\n\t\telse{\r\n\t\t\tint d=o->ch[0]->pri>o->ch[1]->pri?1:0;\r\n\t\t\trotate(o,d);\r\n\t\t\tremove(o->ch[d],x);\r\n\t\t\to->pull();\r\n\t\t}\r\n\t}\r\n\telse{\r\n\t\tint d=o->cmp(x);\r\n\t\tremove(o->ch[d],x);\r\n\t\to->pull();\r\n\t}\r\n}\r\nbool bad[500005];\r\nint G[500005],mi[500005],pos[500005];\r\nint getmin(){\r\n\tnode *o=root;\r\n\twhile(1){\r\n\t\tif(o->ch[0]==NULL) return a[o->id];\r\n\t\to=o->ch[0];\r\n\t}\r\n}\r\nvoid gao(int x){\r\n\tnode *o=root;\r\n\tint u,cnt=0;\r\n\twhile(o){\r\n\t\tif(a[o->id]<a[x]){\r\n\t\t\tif(++cnt>1) return;\r\n\t\t\tu=o->id;\r\n\t\t\tif(o->ch[0]) return;\r\n\t\t\to=o->ch[1];\r\n\t\t}\r\n\t\telse o=o->ch[0];\r\n\t}\r\n\tif(cnt){\r\n\t\tG[u]=min(G[u],a[x]);\r\n\t\tif(!pos[u]) pos[u]=x;\r\n\t}\r\n\telse bad[x]=1;\r\n}\r\nvector<int> v1,v2;\r\nbool cmp1(int x,int y){\r\n\treturn G[x]<G[y];\r\n}\r\nbool cmp2(int x,int y){\r\n\treturn a[x]<a[y];\r\n}\r\nbool cmp3(int x,int y){\r\n\treturn pos[x]>pos[y];\r\n}\r\nbool cmp4(int x,int y){\r\n\treturn x>y;\r\n}\r\nint main(){\r\n\tsrand(time(NULL));\r\n\tint n,k;\r\n\tscanf(\"%d%d\",&n,&k);\r\n\tfor(int i=1;i<=n;i++) scanf(\"%d\",&a[i]),G[i]=2147483647;\r\n\tfor(int i=0;i<k;i++) insert(root,n-i);\r\n\tfor(int i=n-k;i>0;i--){\r\n\t\tmi[i]=getmin();\r\n\t\tgao(i);\r\n\t\tremove(root,i+k);\r\n\t\tinsert(root,i);\r\n\t}\r\n\tint last=0,bound=0;\r\n\tfor(int i=n-k;i>0;i--) if(bad[i]){\r\n\t\tlast=i;\r\n\t\tif(!bound) bound=i;\r\n\t}\r\n\tif(!last) return 0*puts(\"YES\");\r\n\tif(last+k<=bound) return 0*puts(\"NO\");\r\n\tfor(int i=n;i>last+k;i--) if(a[i]<a[last]) v1.push_back(i);\r\n\tfor(int i=last+1;i<=last+k;i++) v2.push_back(i);\r\n\tsort(v1.begin(),v1.end(),cmp1);\r\n\tsort(v2.begin(),v2.end(),cmp2);\r\n\tint cur=-1,_=2147483647;\r\n\tfor(int x:v1){\r\n\t\twhile(cur+1<v2.size() && a[v2[cur+1]]<G[x]) cur++,_=min(_,mi[v2[cur]]);\r\n\t\tif(_<a[x]) return 0*puts(\"YES\");\r\n\t}\r\n\tsort(v1.begin(),v1.end(),cmp3);\r\n\tsort(v2.begin(),v2.end(),cmp4);\r\n\tcur=-1,_=2147483647;\r\n\tfor(int x:v1){\r\n\t\twhile(cur+1<v2.size() && v2[cur+1]>pos[x]) cur++,_=min(_,mi[v2[cur]]);\r\n\t\tif(_<a[x]) return 0*puts(\"YES\");\r\n\t}\r\n\tputs(\"NO\");\r\n\treturn 0;\r\n}"
+}

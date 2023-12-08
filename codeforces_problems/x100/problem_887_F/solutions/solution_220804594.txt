@@ -1,0 +1,36 @@
+{
+    "id": 220804594,
+    "contestId": 887,
+    "creationTimeSeconds": 1693192807,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 887,
+        "index": "F",
+        "name": "Row of Models",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2500,
+        "tags": [
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 887,
+        "members": [
+            {
+                "handle": "erogame"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509725100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 32,
+    "timeConsumedMillis": 592,
+    "memoryConsumedBytes": 154419200,
+    "source": "#include <bits/stdc++.h>\r\nusing ul = std::uint32_t;\r\nusing ull = std::uint64_t;\r\nusing li = std::int32_t;\r\nusing ll = std::int64_t;\r\nusing lf = double;\r\n\r\nusing pulul = std::pair<ul, ul>;\r\n\r\nconst ul maxn = 5e5;\r\n\r\nul a[maxn + 2];\r\n\r\nul n, k;\r\n\r\nstd::set<pulul> set;\r\n\r\nul ubound[maxn + 1];\r\nul lbound[maxn + 1];\r\n\r\nbool problem[maxn + 1];\r\n\r\nclass node_t {\r\npublic:\r\n\tul left = 0;\r\n\tul right = 0;\r\n\tul val = 0;\r\n};\r\n\r\nnode_t tree[maxn * 20 + 1];\r\nul treesz;\r\n\r\nvoid insert(ul pos, ul nl, ul nr, ul& nid)\r\n{\r\n\tul oid = nid;\r\n\tnid = treesz + 1;\r\n\ttree[nid] = tree[oid];\r\n\t++tree[nid].val;\r\n\tif (nl == nr) {\r\n\t\treturn;\r\n\t}\r\n\tul midl = nl + nr >> 1;\r\n\tul midr = midl + 1;\r\n\tif (pos <= midl) {\r\n\t\tinsert(pos, nl, midl, tree[nid].left);\r\n\t} else {\r\n\t\tinsert(pos, midr, nr, tree[nid].right);\r\n\t}\r\n}\r\n\r\nbool query(ul l, ul r, ul nl, ul nr, ul nid)\r\n{\r\n\tif (!tree[nid].val) {\r\n\t\treturn false;\r\n\t}\r\n\tif (l <= nl && nr <= r) {\r\n\t\treturn true;\r\n\t}\r\n\tul midl = nl + nr >> 1;\r\n\tul midr = midl + 1;\r\n\treturn l <= midl && query(l, r, nl, midl, tree[nid].left) || midr <= r && query(l, r, midr, nr, tree[nid].right);\r\n}\r\n\r\nstd::map<ul, ul> ver;\r\n\r\nul as[maxn + 1];\r\nul ascnt = 0;\r\n\r\nul blob[maxn + 1];\r\n\r\nint main()\r\n{\r\n\tstd::scanf(\"%u%u\", &n, &k);\r\n\tfor (ul i = 1; i <= n; ++i) {\r\n\t\tstd::scanf(\"%u\", &a[i]);\r\n\t\tas[i] = i;\r\n\t\tubound[i] = 2e9;\r\n\t}\r\n\tstd::sort(as + 1, as + n + 1);\r\n\tascnt = std::unique(as + 1, as + n + 1) - as;\r\n\tfor (ul i = 1; i <= n; ++i) {\r\n\t\ta[i] = std::lower_bound(as + 1, as + ascnt + 1, a[i]) - as;\r\n\t}\r\n\tbool flag = true;\r\n\tfor (ul i = n + 1, j = n + 1; i >= 2; --i) {\r\n\t\tset.insert(pulul(a[i], i));\r\n\t\tif (j - i + 1 > k) {\r\n\t\t\tset.erase(pulul(a[j], j));\r\n\t\t\t--j;\r\n\t\t}\r\n\t\tul x = i - 1;\r\n\t\tlbound[x] = set.begin()->first + 1;\r\n\t\tif (a[x] > set.begin()->first) {\r\n\t\t\tif ((set.size() == 1 || std::next(set.begin())->first >= a[x]) && j != n + 1) {\r\n\t\t\t\tubound[set.begin()->second] = std::min(ubound[set.begin()->second], a[x] - 1);\r\n\t\t\t}\r\n\t\t} else {\r\n\t\t\tflag = false;\r\n\t\t\tproblem[x] = true;\r\n\t\t}\r\n\t}\r\n\tif (flag) {\r\n\t\tstd::printf(\"YES\\n\");\r\n\t\treturn 0;\r\n\t}\r\n\tul rightlowerthan = 2e9;\r\n\tul leftposleftbound = 0;\r\n\tul leftposrightbound = n;\r\n\tfor (ul i = 1; i <= n; ++i) {\r\n\t\tif (problem[i]) {\r\n\t\t\tleftposleftbound = std::max(leftposleftbound, i + 1);\r\n\t\t\tleftposrightbound = std::min(leftposrightbound, i + k);\r\n\t\t\trightlowerthan = std::min(rightlowerthan, a[i] - 1);\r\n\t\t}\r\n\t}\r\n\tif (leftposleftbound <= leftposrightbound) {\r\n\t\tfor (ul i = leftposleftbound; i <= leftposrightbound; ++i) {\r\n\t\t\tblob[i] = i;\r\n\t\t}\r\n\t\tstd::sort(blob + leftposleftbound, blob + leftposrightbound + 1, [](ul a, ul b){return lbound[a] < lbound[b];});\r\n\t\tfor (ul i = leftposleftbound; i <= leftposrightbound; ++i) {\r\n\t\t\tul tmp = 0;\r\n\t\t\tif (ver.size()) {\r\n\t\t\t\ttmp = ver.begin()->second;\r\n\t\t\t}\r\n\t\t\tinsert(a[blob[i]], 1, ascnt, tmp);\r\n\t\t\tver[lbound[blob[i]]] = tmp;\r\n\t\t}\r\n\t\tfor (ul i = leftposrightbound + 1; i <= n; ++i) {\r\n\t\t\tif (a[i] <= rightlowerthan) {\r\n\t\t\t\tauto it = ver.upper_bound(a[i]);\r\n\t\t\t\tif (it != ver.begin()) {\r\n\t\t\t\t\tif (query(1, ubound[i], 1, ascnt, std::prev(it)->second)) {\r\n\t\t\t\t\t\tstd::printf(\"YES\\n\");\r\n\t\t\t\t\t\treturn 0;\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tul rightpos;\r\n\tfor (ul i = n; i >= 1; --i) {\r\n\t\tif (problem[i]) {\r\n\t\t\trightpos = i;\r\n\t\t\tbreak;\r\n\t\t}\r\n\t}\r\n\tleftposrightbound = rightpos - 1;\r\n\tleftposleftbound = 1;\r\n\tfor (ul i = 1; i <= rightpos - 1; ++i) {\r\n\t\tif (problem[i]) {\r\n\t\t\tif (a[i] <= a[rightpos]) {\r\n\t\t\t\tstd::printf(\"NO\\n\");\r\n\t\t\t\treturn 0;\r\n\t\t\t}\r\n\t\t\tleftposleftbound = std::max(leftposleftbound, i + 1);\r\n\t\t\tleftposrightbound = std::min(leftposrightbound, i + k);\r\n\t\t}\r\n\t}\r\n\tif (leftposleftbound > leftposrightbound) {\r\n\t\tstd::printf(\"NO\\n\");\r\n\t\treturn 0;\r\n\t}\r\n\tfor (ul i = leftposleftbound; i <= leftposrightbound; ++i) {\r\n\t\tif (a[rightpos] >= lbound[i] && ubound[rightpos] >= a[i]) {\r\n\t\t\tstd::printf(\"YES\\n\");\r\n\t\t\treturn 0;\r\n\t\t}\r\n\t}\r\n\tstd::printf(\"NO\\n\");\r\n\treturn 0;\r\n}\r\n\r\n\r\n"
+}

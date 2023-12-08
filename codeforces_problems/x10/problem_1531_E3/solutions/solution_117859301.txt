@@ -1,0 +1,34 @@
+{
+    "id": 117859301,
+    "contestId": 1531,
+    "creationTimeSeconds": 1622372088,
+    "relativeTimeSeconds": 525288,
+    "problem": {
+        "contestId": 1531,
+        "index": "E3",
+        "name": "\u0421\u043e\u0440\u0442\u0438\u0440\u043e\u0432\u043a\u0430 \u0441\u043b\u0438\u044f\u043d\u0438\u0435\u043c",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "binary search"
+        ]
+    },
+    "author": {
+        "contestId": 1531,
+        "members": [
+            {
+                "handle": "Saimon_Saret"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1621846800
+    },
+    "programmingLanguage": "Java 11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 50,
+    "timeConsumedMillis": 218,
+    "memoryConsumedBytes": 204800,
+    "source": "import java.util.ArrayList;\r\nimport java.util.Scanner;\r\n\r\npublic class Main {\r\n    private static final Scanner scanner = new Scanner(System.in);\r\n    private static final ArrayList<Operation> operations = new ArrayList<>();\r\n    private static String s;\r\n    private static int curId;\r\n    private static long minOp;\r\n    private static long maxOp;\r\n    private static int opCount;\r\n    private static final int[] b = new int[100000];\r\n\r\n    private static boolean sort(int l, int r) {\r\n        if (r - l <= 1) {\r\n            return true;\r\n        }\r\n\r\n        int m = (l + r) >> 1;\r\n        if (!sort(l, m)) {\r\n            return false;\r\n        }\r\n        if (!sort(m, r)) {\r\n            return false;\r\n        }\r\n        int i = l;\r\n        int j = m;\r\n        int k = l;\r\n        while (i < m && j < r) {\r\n            if (curId >= s.length()) {\r\n                return false;\r\n            }\r\n            if (s.length() - curId < minOp - opCount) {\r\n                return false;\r\n            }\r\n            if (s.length() - curId > maxOp - opCount) {\r\n                return false;\r\n            }\r\n            boolean isLess = s.charAt(curId++) == '0';\r\n            if (isLess) {\r\n                operations.add(new Operation(i++, k, false));\r\n            } else {\r\n                operations.add(new Operation(j++, k, false));\r\n            }\r\n            opCount++;\r\n            k++;\r\n        }\r\n\r\n        while (i < m) {\r\n            operations.add(new Operation(i++, k++, false));\r\n        }\r\n\r\n        while (j < r) {\r\n            operations.add(new Operation(j++, k++, false));\r\n        }\r\n\r\n        for (int p = l; p < r; p++) {\r\n            operations.add(new Operation(p, p, true));\r\n        }\r\n\r\n        return true;\r\n    }\r\n\r\n    public static void main(String[] args) {\r\n        s = scanner.nextLine();\r\n\r\n        int start = 1;\r\n        while (true) {\r\n            long log = Math.round(Math.log(start) / Math.log(2));\r\n            minOp = start * log / 2 - 1;\r\n            maxOp = start * (log - 1) + 1 + 1;\r\n            if (minOp <= s.length() && maxOp >= s.length()) {\r\n                break;\r\n            }\r\n            start++;\r\n        }\r\n\r\n        int finish = start;\r\n        while (true) {\r\n            long log = Math.round(Math.log(finish) / Math.log(2));\r\n            minOp = start * log / 2 - 1;\r\n            if (minOp <= s.length()) {\r\n                finish++;\r\n            } else {\r\n                break;\r\n            }\r\n        }\r\n\r\n        for (int i = start; i <= Math.min(100000, finish); i++) {\r\n            curId = 0;\r\n            operations.clear();\r\n            opCount = 0;\r\n\r\n            long log = Math.round(Math.log(i) / Math.log(2));\r\n            minOp = i * log / 2 - 1;\r\n            maxOp = i * (log - 1) + 1 + 1;\r\n            if (s.length() > maxOp || s.length() < minOp) {\r\n                continue;\r\n            }\r\n            boolean isValid = sort(0, i) && curId == s.length();\r\n            if (!isValid) {\r\n                continue;\r\n            }\r\n\r\n            int[] ans = new int[i];\r\n            for (int j = 0; j < i; j++) {\r\n                ans[j] = j + 1;\r\n            }\r\n\r\n            for (int j = operations.size() - 1; j >= 0; j--) {\r\n                Operation operation = operations.get(j);\r\n\r\n                if (operation.isCopy) {\r\n                    b[operation.from] = ans[operation.from];\r\n                } else {\r\n                    ans[operation.from] = b[operation.to];\r\n                }\r\n            }\r\n\r\n            System.out.println(i);\r\n            for (int j = 0; j < i; j++) {\r\n                System.out.print(ans[j] + \" \");\r\n            }\r\n            break;\r\n        }\r\n    }\r\n\r\n    private static class Operation {\r\n        int from, to;\r\n        boolean isCopy;\r\n\r\n        Operation(int from, int to, boolean isCopy) {\r\n            this.from = from;\r\n            this.to = to;\r\n            this.isCopy = isCopy;\r\n        }\r\n    }\r\n}"
+}

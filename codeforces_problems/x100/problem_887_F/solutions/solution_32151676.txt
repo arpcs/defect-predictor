@@ -1,0 +1,36 @@
+{
+    "id": 32151676,
+    "contestId": 887,
+    "creationTimeSeconds": 1510207276,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 887,
+        "index": "F",
+        "name": "Row of Models",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2500,
+        "tags": [
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 887,
+        "members": [
+            {
+                "handle": "zy1997"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509725100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 96,
+    "timeConsumedMillis": 686,
+    "memoryConsumedBytes": 29081600,
+    "source": "\r\n #include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int N = 5e5+10;\r\n\r\nint sum[N];\r\nstruct node{\r\n    int x,id;\r\n};\r\nnode pt[N];\r\nint n,k;\r\nint num[N];\r\nint cns[N];\r\nint cnt[N];\r\nvector<int> v;\r\nmultiset<int> s;\r\nbool cmp(node a,node b){\r\n    return a.x < b.x;\r\n}\r\nbool cmp2(node a,node b){\r\n    return a.x > b.x;\r\n}\r\nint lowbit(int x){\r\n    return x&(-x);\r\n}\r\n\r\nint query(int x){\r\n    //cout<<\"query\" <<  x << endl;\r\n    int ret = 0;\r\n    while(x > 0){\r\n        ret += sum[x];\r\n        x -= lowbit(x);\r\n    }\r\n    return ret;\r\n}\r\nvoid update(int x,int c){\r\n   // cout<<\"update\" << x << ' '<< c << endl;\r\n    while(x <= n){\r\n        sum[x] += c;\r\n        x += lowbit(x);\r\n    }\r\n}\r\n\r\nvoid put(int *a){\r\n    for(int i = 1;i <= n;i ++){\r\n        printf(\"%d%c\",a[i],i==n?'\\n':' ');\r\n    }\r\n}\r\nint main(){\r\n    cin >> n >> k;\r\n    for(int i = 1;i <= n;i ++){\r\n        scanf(\"%d\",&num[i]);\r\n        pt[i].x = num[i];\r\n        pt[i].id = i;\r\n    }\r\n    sort(pt+1,pt+1+n,cmp);\r\n    queue<int> q;\r\n    q.push(pt[1].id);\r\n    for(int i = 1;i <= k;i ++) cns[n-i+1] = 1;\r\n    for(int i =2;i <= n;i ++){\r\n        if(pt[i].x == pt[i-1].x){\r\n            q.push(pt[i].id);\r\n        }\r\n        else{\r\n            while(!q.empty()){\r\n                update(q.front(),1);\r\n                q.pop();\r\n            }\r\n            q.push(pt[i].id);\r\n        }\r\n        //cout << pt[i].id << endl;\r\n        cns[pt[i].id] += query(min(n,pt[i].id+k))-query(min(n,pt[i].id));\r\n        //cout <<\"cns :\" << cns[pt[i].id] << endl;\r\n    }\r\n    while(q.size()) q.pop();\r\n    sort(pt+1,pt+n+1,cmp2);\r\n    memset(sum,0,sizeof(sum));\r\n    q.push(pt[1].id);\r\n    for(int i = 2;i <= n;i ++){\r\n        //cout <<i << ' '<< pt[i].x << endl;\r\n        if(pt[i].x == pt[i-1].x){\r\n            q.push(pt[i].id);\r\n        }\r\n        else{\r\n            while(!q.empty()){\r\n                if(cns[q.front()] == 1){\r\n                    update(q.front(),1);\r\n                }\r\n                q.pop();\r\n            }\r\n            q.push(pt[i].id);\r\n        }\r\n        cnt[pt[i].id] = query(max(1,pt[i].id -1)) - query(max(1,pt[i].id - k-1));\r\n    }\r\n    //put(cns);\r\n    //put(cnt);\r\n\r\n    int l = -1,r = -1;\r\n    for(int i = 1;i <= n;i ++)if(cns[i] == 0){l = i;break;}\r\n    for(int i = n;i >= 1;i --)if(cns[i] == 0){r = i;break;}\r\n\r\n    if(l == -1){\r\n        puts(\"YES\");\r\n        return 0;\r\n    }\r\n    if(r - l >= k){\r\n        puts(\"NO\");\r\n        return 0;\r\n    }\r\n    for(int i = r;i <= n;i ++){\r\n        if(cnt[i] == 0 && cns[i]) {v.push_back(num[i]);}\r\n    }\r\n    sort(v.begin(),v.end());\r\n    int mm = num[l];\r\n    for(int i = l;i <= r;i ++){\r\n        mm = min(num[i],mm);\r\n    }\r\n    for(int j = r+1;j <= min(r+k,n);j ++){\r\n        s.insert(num[j]);\r\n    }\r\n    bool tmp = false;\r\n    for(int i = r+1;i <= min(l+k,n);i ++){\r\n        multiset<int>::iterator iter = s.find(num[i]);\r\n        s.erase(iter);\r\n        if(i+k == n) s.insert(-1);\r\n        else if(i+k < n) s.insert(num[i+k+1]);\r\n        iter = s.begin();\r\n        int now = *iter;\r\n        now =*(upper_bound(v.begin(),v.end(),now));\r\n        if(now < mm) {tmp = true;break;}\r\n    }\r\n    if(tmp) puts(\"YES\");\r\n    else puts(\"NO\");\r\n    return 0;\r\n}\r\n"
+}

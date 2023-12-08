@@ -1,0 +1,37 @@
+{
+    "id": 196313457,
+    "contestId": 43,
+    "creationTimeSeconds": 1678136686,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 43,
+        "index": "E",
+        "name": "Race",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2300,
+        "tags": [
+            "brute force",
+            "implementation",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 43,
+        "members": [
+            {
+                "handle": "liuyubobobo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1291046400
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 22,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 614400,
+    "source": "#include <iostream>\n#include <vector>\n#include <deque>\n#include <cassert>\n\nusing namespace std;\n\n\nint solve(const vector<pair<int, int>>& cars1, const vector<pair<int, int>>& cars2, int s){\n\n    deque<pair<int, int>> q1(cars1.begin(), cars1.end()), q2(cars2.begin(), cars2.end());\n    int cur1 = 0, cur2 = 0, res = 0;\n    bool first = true;\n    while(!q1.empty() && !q2.empty()){\n        int v1 = q1.front().first, v2 = q2.front().first;\n        int t1 = q1.front().second, t2 = q2.front().second;\n        q1.pop_front(), q2.pop_front();\n\n        int t = min(t1, t2);\n\n        int next1 = cur1 + v1 * t, next2 = cur2 + v2 * t;\n\n        if(cur1 != cur2) {\n            assert(!first);\n            if (next1 != next2)\n                res += (cur1 < cur2 && next1 > next2) || (cur1 > cur2 && next1 < next2);\n        }\n        else{ // cur1 == cur2\n            if(next1 != next2){\n                if(!first) res ++; else first = false;\n            }\n        }\n\n        cur1 = next1, cur2 = next2;\n        t1 -= t, t2 -= t;\n        if(t1) q1.push_front({v1, t1});\n        if(t2) q2.push_front({v2, t2});\n    }\n\n    assert(cur1 == s || cur2 == s);\n    if(cur1 == s) assert(q1.empty());\n    if(cur2 == s) assert(q2.empty());\n    return res;\n}\n\nint main() {\n\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n\n    int n, s; cin >> n >> s;\n\n    vector<vector<pair<int, int>>> cars(n);\n    for(int i = 0; i < n; i ++){\n        int k, v, t; cin >> k;\n        for(int j = 0; j < k; j ++){\n            cin >> v >> t;\n            if(!cars[i].empty() && cars[i].back().first == v) cars[i].back().second += t;\n            else cars[i].push_back({v, t});\n        }\n    }\n\n    int res = 0;\n    for(int i = 0; i < n; i ++)\n        for(int j = i + 1; j < n; j ++)\n            res += solve(cars[i], cars[j], s);\n\n    cout << res << '\\n';\n\n    return 0;\n}\n"
+}

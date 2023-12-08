@@ -1,0 +1,36 @@
+{
+    "id": 194501361,
+    "contestId": 887,
+    "creationTimeSeconds": 1677006087,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 887,
+        "index": "F",
+        "name": "Row of Models",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2500,
+        "tags": [
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 887,
+        "members": [
+            {
+                "handle": "StupidGuy13"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509725100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 106,
+    "timeConsumedMillis": 1450,
+    "memoryConsumedBytes": 55193600,
+    "source": "#include <bits/stdc++.h>\r\n#define ll long  long\r\n#define f first\r\n#define s second\r\n#define pii pair<int,int>\r\n#define pll pair<ll,ll>\r\n#define pb push_back\r\n#define epb emplace_back\r\n#define V pair<int, pair<int, pair<int, pair<int, int> > > >\r\nusing namespace std;\r\nconst int nmax =1000001;\r\nconst ll mod = 1e9 + 7;\r\n\r\nint mn[nmax];\r\nint bad[nmax];\r\n\r\nset <pii> st;\r\n\r\nvector <int> t(4 * nmax);\r\nvector <pii> vec;\r\nvector <int> u;\r\nvoid build(int v, int l, int r){\r\n    if(l == r){\r\n        t[v] = u[l];\r\n        return;\r\n    }\r\n    int m = (l + r) / 2;\r\n    build(2 * v, l, m);\r\n    build(2 * v + 1, m + 1, r);\r\n    t[v] = max(t[v * 2], t[v * 2 + 1]);\r\n}\r\n\r\nint get(int v, int l, int r, int st, int fin){\r\n    if(l > fin || r < st) return -1e9 - 1;\r\n    if(l >= st && r <= fin)\r\n        return t[v];\r\n    int m = (l + r) / 2;\r\n    return max(get(2 * v, l, m, st, fin), get(2 * v + 1, m + 1, r, st, fin));\r\n}\r\n\r\nvoid update(int v, int l, int r, int pos, int val){\r\n    if(l > pos || r < pos) return;\r\n    if(l == r){\r\n        t[v] = min(t[v], val);\r\n        return;\r\n    }\r\n    int m = (l + r) /2;\r\n    update(2 * v, l, m, pos, val);\r\n    update(2 * v + 1, m + 1, r, pos, val);\r\n}\r\n\r\nint main(){\r\n    int n, k; cin >> n >> k;\r\n    int a[n + 1];\r\n    for(int i = 1; i <= n; i++)\r\n        cin >> a[i];\r\n    for(int i = 1; i <= n; i++){\r\n        mn[i] = 1e9 + 1;\r\n    }\r\n    for(int i = 1; i <= k; i++)\r\n        st.insert({a[i], i});\r\n    int val[n + 1];\r\n    for(int i = 1; i <= n; i++){\r\n        val[i] = -1;\r\n    }\r\n    int upd[n + 1];\r\n    fill(upd, upd + n + 1, -1);\r\n    for(int i = 1; i <= n - k; i++){\r\n        st.erase({a[i], i});\r\n        st.insert({a[i + k], i + k});\r\n        int x = st.begin()->s;\r\n        st.erase(st.begin());\r\n        val[i] = a[x];\r\n        int y = 1e9 + 1;\r\n        if(!st.empty()) y = st.begin()->s;\r\n        if(a[x] >= a[i])\r\n            bad[i] = 1;\r\n        else{\r\n            if(y == 1e9 + 1 || a[y] >= a[i])\r\n                upd[i] = x;\r\n        }\r\n        st.insert({a[x], x});\r\n        if(y != 1e9 + 1)\r\n            st.insert({a[y],y});\r\n    }\r\n    int x = -1;\r\n    for(int i = 1; i <= n; i++){\r\n        bad[i] += bad[i - 1];\r\n        if(x == -1 && bad[i])\r\n            x = i;\r\n    }\r\n    if(x == -1){\r\n        cout << \"YES\\n\";\r\n        return 0;\r\n    }\r\n    //cout << x << \"\\n\";\r\n    vector <int> v;\r\n    for(int i = n; i >= x + k + 1; i--){\r\n        int xx = upd[i];\r\n        if(bad[i] != bad[i - 1] || bad[n] != bad[i] || bad[i] != bad[x + k]){\r\n            mn[i] = -1;\r\n            continue;\r\n        }\r\n        if(xx == -1) continue;\r\n        if(bad[xx] != bad[xx - 1] || bad[n] != bad[xx] || bad[xx] != bad[x + k]) {\r\n            continue;\r\n        }\r\n\r\n        mn[xx] = min(mn[xx], a[i]);\r\n\r\n    }\r\n    for(int i = x + k + 1; i <= n; i++){\r\n        vec.pb({a[i], i});\r\n    }\r\n    sort(vec.begin(), vec.end());\r\n    vector <int> pos(n + 1, -1);\r\n    for(int i = 0; i < vec.size(); i++){\r\n        u.pb(mn[vec[i].s]);\r\n        pos[vec[i].s] = i;\r\n        v.pb(vec[i].f);\r\n    }\r\n    if(vec.empty()){\r\n        cout << \"NO\\n\";\r\n        return 0;\r\n    }\r\n\r\n    int len = (int)u.size() - 1;\r\n    build(1, 0, len);\r\n    //cout << x << \"\\n\";\r\n    for(int i = x + k; i >= x + 1; i--){\r\n        int l = upper_bound(v.begin(), v.end(), val[i]) - v.begin();\r\n        int r = lower_bound(v.begin(), v.end(), a[x]) - v.begin();\r\n        r--;\r\n        ll VV = get(1, 0, len, l, r);\r\n        if(VV > a[i]){\r\n           // cout << i << \"\\n\";\r\n            cout << \"YES\\n\";\r\n            return 0;\r\n        }\r\n        if(upd[i] != -1){\r\n            int xx = upd[i];\r\n            if(pos[xx] == -1) continue;\r\n            if(bad[xx - 1] == bad[xx] && bad[n] == bad[xx] && bad[xx] == bad[x + k]){\r\n                update(1, 0, len, pos[xx], a[i]);\r\n            }\r\n        }\r\n    }\r\n    cout << \"NO\\n\";\r\n    return 0;\r\n}\r\n"
+}

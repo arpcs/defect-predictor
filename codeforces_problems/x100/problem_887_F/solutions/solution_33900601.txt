@@ -1,0 +1,36 @@
+{
+    "id": 33900601,
+    "contestId": 887,
+    "creationTimeSeconds": 1515061272,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 887,
+        "index": "F",
+        "name": "Row of Models",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2500,
+        "tags": [
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 887,
+        "members": [
+            {
+                "handle": "tmwilliamlin168"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509725100
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 106,
+    "timeConsumedMillis": 1216,
+    "memoryConsumedBytes": 139264000,
+    "source": "#include <bits/stdc++.h>\r\n       \r\nusing namespace std;\r\n       \r\ntypedef long long ll;\r\n#define mp make_pair\r\n#define pub push_back\r\n#define x first\r\n#define y second\r\n#define all(a) a.begin(), a.end()\r\n#define db double\r\n \r\nconst int INF = (int)1e9 + 7;\r\n \r\nstruct tree{\r\n    int t[500007 * 4];\r\n    void up(int v, int vl, int vr, int pos, int val){\r\n        if (vl == vr){\r\n            t[v] = val;\r\n        } else {\r\n            int vm = (vl + vr) >> 1;\r\n            if (vm <= pos) up(v * 2 + 1, vl, vm, pos, val);\r\n            else up(v * 2 + 2, vm + 1, vr, pos, val);\r\n            t[v] = min(t[v * 2 + 1], t[v * 2 + 2]);\r\n        }\r\n    }\r\n \r\n    int get(int v, int vl, int vr, int l, int r){\r\n        if (r < vl || l > vr) return INF;\r\n        if (vl >= l && vr <= r) return t[v];\r\n        int vm = (vl + vr) >> 1;\r\n        return min(get(v * 2 + 1, vl, vm, l, r), get(v * 2 + 2, vm + 1, vr, l, r));\r\n    }\r\n} t;\r\n \r\nstruct zap{\r\n    int l, r, val;\r\n};\r\n \r\nint n, len;\r\nint a[500007];\r\nint to[500007];\r\nint need[500007];\r\nint pred[500007];\r\nvector<zap> q[500007];\r\nvector<int> uk[500007];\r\nvector<int> gg[500007];\r\nint sp[19][500007];\r\nint myLog[500007];\r\n \r\nvoid stop(string s){\r\n    cout << s;\r\n    exit(0);\r\n}\r\n \r\nint getSp(int l, int r){\r\n    int lvl = myLog[r - l + 1];\r\n    return min(sp[lvl][l], sp[lvl][r - (1 << lvl) + 1]);\r\n}\r\n \r\nint main(){\r\n    ios_base::sync_with_stdio(0); cin.tie(0);\r\n    cin >> n >> len;\r\n    for (int i = 0; i < n; i++) cin >> a[i];\r\n \r\n    //reduce\r\n \r\n    set<int> ss; map<int, int> mm;\r\n    for (int i = 0; i < n; i++) ss.insert(a[i]);\r\n    int dd = 1;\r\n    for (int x : ss) mm[x] = dd++;\r\n    for (int i = 0; i < n; i++) a[i] = mm[a[i]];\r\n \r\n \r\n    //precalc\r\n \r\n    set<pair<int, int> > se;\r\n    for (int i = n - 1; i >= 0; i--){\r\n        se.insert(mp(a[i + 1], i + 1));\r\n        if (i + (len + 1) <= n) se.erase(mp(a[i + (len + 1)], i + (len + 1)));\r\n        pred[i] = (*se.begin()).x;\r\n        if ((*se.begin()).x >= a[i]) to[i] = -1;\r\n        else {\r\n            int now = (*se.begin()).y;\r\n            if (se.size() > 1){\r\n                if ((*next(se.begin())).x < a[i]) now = -2;\r\n            }\r\n            to[i] = now;\r\n        }\r\n    }  \r\n \r\n    for (int i = 2; i < 500007; i++) myLog[i] = myLog[i / 2] + 1;\r\n \r\n    for (int lvl = 0; lvl < 19; lvl++){\r\n        for (int l = 0, r = (1 << lvl) - 1; r <= n; l++, r++){\r\n            if (lvl == 0){\r\n                sp[lvl][l] = a[l];\r\n            } else {\r\n                sp[lvl][l] = min(sp[lvl - 1][l], sp[lvl - 1][r - (1 << (lvl - 1)) + 1]);\r\n            }\r\n        }\r\n    }\r\n \r\n    //stupid part\r\n \r\n    int start = -1;\r\n    for (int i = 0; i < n; i++) if (to[i] == -1){\r\n        start = i;\r\n        break;\r\n    }\r\n    if (start == -1) stop(\"YES\");\r\n    int maxLast = n;\r\n    for (int i = n - 1; i >= 0; i--) if (to[i] == -1){\r\n        maxLast = i + 1;\r\n        break;\r\n    }\r\n   \r\n    //second part\r\n \r\n    if (start + len + 1 < n){\r\n        for (int i = 0; i < n; i++) need[i] = INF;\r\n \r\n        int bad = start + 1;\r\n        for (int i = start + len; i > start; i--){\r\n            if (to[i] == -1){\r\n                bad = i;\r\n                break;\r\n            }\r\n        }\r\n \r\n        for (int i = 0; i < n; i++) gg[i].pub(start + 1);\r\n        for (int i = start + 2; i <= start + len; i++) if (to[i] >= 0) gg[to[i]].pub(i);\r\n \r\n        for (int i = start + len + 1; i < n; i++){\r\n            if (i >= maxLast && a[i] < a[start]){\r\n \r\n                int vl = start + len, vr = n;\r\n                while(vl + 1 < vr){\r\n                    int vm = (vl + vr) >> 1;\r\n                    if (getSp(start + len + 1, vm) < a[i])\r\n                        vr = vm;\r\n                    else\r\n                        vl = vm;\r\n                }\r\n \r\n                int pos = vr;\r\n                int MA = max(bad - 1, pos - len - 1);\r\n                int last = start + len;\r\n \r\n                if (MA <= last){\r\n                    for (int j = (int)gg[i].size() - 1; j >= 0; j--){\r\n                        if (gg[i][j] > MA){\r\n                            q[pred[i]].pub({gg[i][j], last, need[i]});\r\n                            need[i] = min(need[i], a[gg[i][j]]);\r\n                            last = gg[i][j] - 1;\r\n                        } else {\r\n                            if (MA + 1 <= last) q[pred[i]].pub({MA + 1, last, need[i]});\r\n                            break;\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n            if (to[i] == -1) break;\r\n            if (to[i] != -2) need[to[i]] = min(need[to[i]], a[i]);\r\n        }\r\n    }\r\n \r\n    for (int i = 0; i < n; i++) uk[a[i]].pub(i);\r\n \r\n    for (int i = 0; i < 500007; i++){\r\n        for (int x : uk[i]) t.up(0, 0, n - 1, x, INF);\r\n        for (auto c : q[i]){\r\n            if (t.get(0, 0, n - 1, c.l, c.r) < c.val) stop(\"YES\");\r\n        }\r\n    }\r\n \r\n \r\n    stop(\"NO\");\r\n}"
+}

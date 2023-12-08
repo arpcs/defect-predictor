@@ -1,0 +1,37 @@
+{
+    "id": 155386853,
+    "contestId": 212,
+    "creationTimeSeconds": 1651319796,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 212,
+        "index": "E",
+        "name": "IT Restaurants",
+        "type": "PROGRAMMING",
+        "points": 500.0,
+        "rating": 1500,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 212,
+        "members": [
+            {
+                "handle": "vishalsubramanyam"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1342450800
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 919,
+    "memoryConsumedBytes": 1126400,
+    "source": "#include <bits/stdc++.h>\r\nusing lli = long long int;\r\nusing namespace std;\r\n#define rep(i, a, b) for (lli i = (a); i <= (b); i++)\r\n#define rrep(i, a, b) for (lli i = (a); i >= (b); i--)\r\n#define vi vector<lli>\r\n#define vvi vector<vector<lli>>\r\n#define readVec(a, n)                                                          \\\r\n    vi a;                                                                      \\\r\n    for (lli i = 1; i <= (n); i++) {                                           \\\r\n        lli temp;                                                              \\\r\n        cin >> temp;                                                           \\\r\n        a.push_back(temp);                                                     \\\r\n    }\r\n#define mp(a, b) make_pair((a), (b))\r\n\r\n// Math related stuff\r\nint myPow(int x, unsigned int p) {\r\n    if (p == 0)\r\n        return 1;\r\n    if (p == 1)\r\n        return x;\r\n\r\n    int tmp = myPow(x, p / 2);\r\n    if (p % 2 == 0)\r\n        return tmp * tmp;\r\n    else\r\n        return x * tmp * tmp;\r\n}\r\n\r\nstruct DSU {\r\n    vi parent;\r\n    vi rank;\r\n    lli find_set(lli v) {\r\n        if (v == parent[v])\r\n            return v;\r\n        return parent[v] = find_set(parent[v]);\r\n    }\r\n    void make_set(lli v) {\r\n        parent[v] = v;\r\n        rank[v] = 0;\r\n    }\r\n    void union_sets(lli a, lli b) {\r\n        a = find_set(a);\r\n        b = find_set(b);\r\n        if (a != b) {\r\n            if (rank[a] < rank[b])\r\n                swap(a, b);\r\n            parent[b] = a;\r\n            if (rank[a] == rank[b])\r\n                rank[a]++;\r\n        }\r\n    }\r\n\r\n    DSU(lli numElements)\r\n        : parent(numElements + 1, 0), rank(numElements + 1, 0) {\r\n        rep(i, 1, numElements) { make_set(i); }\r\n    }\r\n};\r\n\r\nlli dfs(vvi const &adjList, lli vertex, lli parent) {\r\n    lli answer = 1;\r\n    for (auto &nbr : adjList[vertex]) {\r\n        if (nbr != parent) {\r\n            answer += dfs(adjList, nbr, vertex);\r\n        }\r\n    }\r\n    return answer;\r\n}\r\n\r\n// returns the sizes of the disjoint components connected to this vertex\r\nvi dfsPublic(vvi const &adjList, lli rootVertex) {\r\n    vi result;\r\n    for (auto &nbr : adjList[rootVertex]) {\r\n        result.push_back(dfs(adjList, nbr, rootVertex));\r\n    }\r\n    return result;\r\n}\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n    cout.tie(nullptr);\r\n    int n;\r\n    cin >> n;\r\n    vvi adjList(n + 1);\r\n    rep(i, 1, n - 1) {\r\n        lli x, y;\r\n        cin >> x >> y;\r\n        adjList[x].push_back(y);\r\n        adjList[y].push_back(x);\r\n    }\r\n    // choose vertex = i as the empty junction. Rest of them have a restaurant.\r\n    set<pair<lli, lli>> answers;\r\n    rep(i, 1, n) {\r\n        auto comps = dfsPublic(adjList, i);\r\n        // max value cannot be the full sum since we need to leave at least\r\n        // one node out for the other network\r\n        auto maxValueOfA = accumulate(comps.begin(), comps.end(), -1LL);\r\n        vi dp1((maxValueOfA + 1) + 1, 0), dp2((maxValueOfA + 1) + 1, 0);\r\n        dp1[0] = 1;\r\n        dp2[0] = 1;\r\n        for (auto comp : comps) {\r\n            rep(j, 1, maxValueOfA) {\r\n                dp2[j] = dp1[j];\r\n                if (j >= comp)\r\n                    dp2[j] = dp1[j - comp] + dp1[j];\r\n            }\r\n            dp1 = dp2;\r\n        }\r\n        rep(j, 1, maxValueOfA){\r\n            if(dp1[j] != 0){\r\n                answers.insert({j, n - 1 - j});\r\n            }\r\n        }\r\n    }\r\n    cout << answers.size() << \"\\n\";\r\n    for(auto p : answers){\r\n        cout << p.first << \" \" << p.second << \"\\n\";\r\n    }\r\n}"
+}

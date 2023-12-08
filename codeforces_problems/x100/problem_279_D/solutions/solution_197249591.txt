@@ -1,0 +1,36 @@
+{
+    "id": 197249591,
+    "contestId": 279,
+    "creationTimeSeconds": 1678716493,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 279,
+        "index": "D",
+        "name": "The Minimum Number of Variables",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "bitmasks",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 279,
+        "members": [
+            {
+                "handle": "EgorUlin"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362411000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 70,
+    "timeConsumedMillis": 919,
+    "memoryConsumedBytes": 67276800,
+    "source": "\ufeff#include <iostream>\r\n#include <string>\r\n#include <vector>\r\n#include <cmath>\r\n#include <algorithm>\r\n#include <map>\r\n#include <unordered_map>\r\n#include <set>\r\n#include <random>\r\n#include <cstring>\r\n#include <numeric>\r\n#include <queue>\r\n#include <cassert>\r\n#include <fstream>\r\n\r\nusing namespace std;\r\n\r\n#define M_PI 3.14159265358979323846264338327950288419716939937510\r\n#define inf 1e15\r\n#define eps 1e-10\r\n#define fori(n)for (long long i = 0; i < n; i++)\r\n#define forj(n)for (long long j = 0; j < n; j++)\r\n#define rep(i, n)for (long long i = 0; i < n; i++)\r\n#define re return\r\n#define ll long long\r\n#define ull unsigned long long\r\n#define all(x) x.begin(), x.end()\r\n#define rall(x) x.rbegin(), x.rend()\r\n#define D 1000\r\n#define vec vector\r\n\r\nint __not_lg(ll n) { int cnt = 0; while (n /= 2) cnt++; re cnt; }\r\n#ifdef LOCAL_BOBER\r\n#define __lg(n) __not_lg(n)\r\n#define D 2\r\n#define asdasdasfasd ifstream fl(\"sample.io\")\r\n#define fast_io ios::sync_with_stdio(false);\\\r\n\t\t\t\tcout.tie(nullptr)\r\n#define cin fl\r\n#else\r\n#define asdasdasfasd 42 //freopen(\"king2.in\", \"r\", stdin);\\\r\n\t\t\t\t\t //freopen(\"king2.out\", \"w\", stdout);\r\n#define fast_io ios::sync_with_stdio(false);\\\r\n\t\t\t\tcout.tie(nullptr); cin.tie(nullptr)\r\n#endif\r\n\r\ntemplate<class T> istream& operator >> (istream& o, vector<T>& x) { for (auto& el : x) o >> el; re o; }\r\ntemplate<class T, class U> istream& operator >> (istream& o, pair<T, U>& x) { o >> x.first >> x.second; re o; }\r\ntemplate<class T, class U> pair<T, U> operator-(pair<T, U> a, pair<T, U> b) { return { a.first - b.first, a.second - b.second }; }\r\ntemplate<class T, class U> pair<T, U> operator+(pair<T, U> a, pair<T, U> b) { return { a.first + b.first, a.second + b.second }; }\r\ntemplate<class T> vector<T> operator+(vector<T>& a, vector<T>& b) { fori(a.size())a[i] += b[i]; re a; }\r\n\r\n#define bit(i, n) ((n >> i) & 1)\r\n\r\nint N;\r\nvector<int> v;\r\n\r\nint main() {\r\n\tasdasdasfasd; fast_io;\r\n\r\n\tcin >> N;\r\n\r\n\tif (N == 1) {\r\n\t\tcout << 1;\r\n\t\tre 0;\r\n\t}\r\n\r\n\tv.resize(N);\r\n\tcin >> v;\r\n\r\n\tvector<vector<pair<int, int>>> tv(N);\r\n\tfor (int i = 1; i < N; i++) {\r\n\t\tfor (int j = 0; j < i; j++) {\r\n\t\t\tfor (int k = j; k < i; k++) {\r\n\t\t\t\tif (v[k] + v[j] == v[i]) {\r\n\t\t\t\t\ttv[i].push_back({ j, k });\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\r\n\tll ans = 1e9;\r\n\tvector<int> now(1ll << N, 1e9), next(1ll << N, 1e9);\r\n\tnow[1] = 1;\r\n\r\n\tfor (int n = 1; n < N; n++) {\r\n\t\tfor (ll mask = 1; mask < (1ll << N); mask++) {\r\n\t\t\tif (now[mask] > 1e3)continue;\r\n\r\n\t\t\tfor (int q = 0; q < tv[n].size(); q++) {\r\n\t\t\t\tint i = tv[n][q].first;\r\n\t\t\t\tint j = tv[n][q].second;\r\n\r\n\t\t\t\tif (bit(i, mask) == 0 || bit(j, mask) == 0)continue;\r\n\r\n\t\t\t\tnext[mask + (1ll << n)] = min(next[mask + (1ll << n)], now[mask] + 1);\r\n\t\t\t\tfor (int t = 0; t < n; t++) {\r\n\t\t\t\t\tif (bit(t, mask) == 0)continue;\r\n\r\n\t\t\t\t\tnext[mask ^ (1ll << n) ^ (1ll << t)] = min(next[mask ^ (1ll << n) ^ (1ll << t)], now[mask]);\r\n\r\n\t\t\t\t\tif (n == N - 1)\r\n\t\t\t\t\t\tans = min<ll>({ ans, next[mask ^ (1ll << n) ^ (1ll << t)] });\r\n\t\t\t\t}\r\n\r\n\t\t\t\tif (n == N - 1)\r\n\t\t\t\t\tans = min<ll>({ ans, next[mask + (1ll << n)] });\r\n\t\t\t}\r\n\t\t}\r\n\r\n\t\tnow = next;\r\n\r\n\t\tfill(all(next), 1e9);\r\n\t}\r\n\r\n\tif (ans < 1e9)cout << ans;\r\n\telse cout << -1;\r\n}"
+}
