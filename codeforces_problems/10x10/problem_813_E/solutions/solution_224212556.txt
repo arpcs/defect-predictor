@@ -1,0 +1,35 @@
+{
+    "id": 224212556,
+    "contestId": 813,
+    "creationTimeSeconds": 1695235536,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 813,
+        "index": "E",
+        "name": "Army Creation",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 813,
+        "members": [
+            {
+                "handle": "canhnam357"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1496675100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 34,
+    "timeConsumedMillis": 1232,
+    "memoryConsumedBytes": 130867200,
+    "source": "\ufeff#include <bits/stdc++.h>\r\n//#define int long long\r\nusing namespace std;\r\nconst int MAXA = 1e5 + 5;\r\nconst int block = 320;\r\nint c[MAXA] = {}, step[MAXA] = {}, cur_step = 0;\r\nint32_t main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    int n, k;\r\n    cin >> n >> k;\r\n    vector<int> v(n);\r\n    int max_block = (n + block - 1) / block;\r\n    vector<vector<int>> f(max_block, vector<int>(max_block));\r\n    for (int& i : v) cin >> i;\r\n    for (int i = 0; i * block < n; i++)\r\n    {\r\n        vector<int> cnt(MAXA);\r\n        int sum = 0;\r\n        for (int j = i * block; j < n; j++)\r\n        {\r\n            cnt[v[j]]++;\r\n            if (cnt[v[j]] <= k) sum++;\r\n            if ((j + 1) % block == 0 || j == n - 1)\r\n            {\r\n                f[i][j / block] = sum;\r\n            }\r\n        }\r\n    }\r\n    vector<vector<int>> cnt(block, vector<int>(MAXA));\r\n    for (int i = 0; i < n; i++) cnt[i / block][v[i]]++;\r\n    for (int i = 1; i < max_block; i++)\r\n    {\r\n        for (int j = 1; j < MAXA; j++) cnt[i][j] += cnt[i - 1][j];\r\n    }\r\n    auto get = [&](int val, int l, int r)\r\n    {\r\n        return l ? cnt[r][val] - cnt[l - 1][val] : cnt[r][val];\r\n    };\r\n    int last = 0, q;\r\n    cin >> q;\r\n    while (q--)\r\n    {\r\n        cur_step++;\r\n        int x, y;\r\n        cin >> x >> y;\r\n        int l = (x + last) % n;\r\n        int r = (y + last) % n;\r\n        if (l > r) swap(l, r);\r\n        if (r - l + 1 <= 2 * block)\r\n        {\r\n            last = 0;\r\n            for (int i = l; i <= r; i++)\r\n            {\r\n                if (step[v[i]] != cur_step)\r\n                {\r\n                    step[v[i]] = cur_step;\r\n                    c[v[i]] = 0;\r\n                }\r\n                c[v[i]]++;\r\n                if (c[v[i]] <= k) last++;\r\n            }\r\n            cout << last << '\\n';\r\n        }\r\n        else\r\n        {\r\n            int prel = l, prer = r;\r\n            last = f[prel / block + 1][prer / block - 1];\r\n            while (true)\r\n            {\r\n                if (step[v[l]] != cur_step)\r\n                {\r\n                    step[v[l]] = cur_step;\r\n                    c[v[l]] = get(v[l], prel / block + 1, prer / block - 1);\r\n                }\r\n                c[v[l]]++;\r\n                if (c[v[l]] <= k) last++;\r\n                l++;\r\n                if (l % block == 0) break;\r\n            }\r\n            while (true)\r\n            {\r\n                if (step[v[r]] != cur_step)\r\n                {\r\n                    step[v[r]] = cur_step;\r\n                    c[v[r]] = get(v[r], prel / block + 1, prer / block - 1);\r\n                }\r\n                c[v[r]]++;\r\n                if (c[v[r]] <= k) last++;\r\n                if (r % block == 0) break;\r\n                r--;\r\n            }\r\n            cout << last << '\\n';\r\n        }\r\n    }\r\n    return 0;\r\n}"
+}

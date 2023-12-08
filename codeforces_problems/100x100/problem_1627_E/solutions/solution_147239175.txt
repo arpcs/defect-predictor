@@ -1,0 +1,39 @@
+{
+    "id": 147239175,
+    "contestId": 1627,
+    "creationTimeSeconds": 1645512186,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "bashem"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 186,
+    "memoryConsumedBytes": 29286400,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef pair<int, int> pii;\r\ntypedef pair<ll, ll> pll;\r\n\r\n#define var(...) \" [\", #__VA_ARGS__ \": \", (__VA_ARGS__), \"] \"\r\n#define mem(x, n) memset(x, n, sizeof(x))\r\n#define all(x) x.begin(), x.end()\r\n#define sz(x) ((int)x.size())\r\n#define vec vector\r\n#define endl \"\\n\"\r\n\r\ntemplate <typename T, typename C = typename T::value_type>\r\ntypename enable_if<!is_same<T, string>::value, ostream &>::type operator<<(ostream &out, const T &c)\r\n{\r\n\tfor (auto it = c.begin(); it != c.end(); it++)\r\n\t\tout << (it == c.begin() ? \"{\" : \",\") << *it;\r\n\treturn out << (c.empty() ? \"{\" : \"\") << \"}\";\r\n}\r\n\r\nstruct Ladder\r\n{\r\n\tll a, b, c, d, h, i;\r\n\r\n\tauto operator<=>(const Ladder &) const = default;\r\n};\r\n\r\nll INF = LLONG_MAX;\r\n\r\nconst int N = 1e5 + 5;\r\nLadder ladders[N];\r\n\r\nint n, m, k;\r\n\r\nvec<Ladder> a[N];\r\nll x[N];\r\n\r\ntemplate <typename T>\r\nusing minheap = priority_queue<T, vector<T>, greater<T>>;\r\n\r\nstruct Main\r\n{\r\n\tvoid run_case([[maybe_unused]] const int &TC)\r\n\t{\r\n\t\tcin >> n >> m >> k;\r\n\r\n\t\tfor (int i = 1; i <= n; i++)\r\n\t\t{\r\n\t\t\tcin >> x[i];\r\n\t\t\ta[i].clear();\r\n\t\t}\r\n\r\n\t\tfor (int i = 1; i <= k; i++)\r\n\t\t{\r\n\t\t\tLadder &lad = ladders[i];\r\n\t\t\tcin >> lad.a >> lad.b >> lad.c >> lad.d >> lad.h;\r\n\t\t\tlad.i = i;\r\n\r\n\t\t\ta[lad.a].push_back(lad);\r\n\t\t}\r\n\r\n\t\tladders[0] = {1, 1, 1, 1, 0, 0};\r\n\r\n\t\tfor (int i = 1; i <= n; i++)\r\n\t\t{\r\n\t\t\tsort(all(a[i]), [](Ladder &l1, Ladder &l2)\r\n\t\t\t\t\t {\r\n\t\t\t\t\t if (l1.b == l2.b)\r\n\t\t\t\t\t\t return l1.i < l2.i;\r\n\t\t\t\t\t return l1.b < l2.b; });\r\n\t\t}\r\n\r\n\t\tauto dist = vec(k + 1, vec(2, LLONG_MAX));\r\n\r\n\t\tminheap<pair<pll, pll>> pq;\r\n\t\t//\r\n\t\tpq.push({{1, 0}, {1, 0}});\r\n\t\tdist[0][0] = 0;\r\n\t\tdist[0][1] = 0;\r\n\r\n\t\tll res = LLONG_MAX;\r\n\r\n\t\tauto go_to_ladder = [&](pii floor, ll ind, ll cost)\r\n\t\t{\r\n\t\t\tif (ind >= 0 && ind < sz(a[floor.first]))\r\n\t\t\t{\r\n\t\t\t\tll ii = a[floor.first][ind].i;\r\n\t\t\t\tcost += abs(a[floor.first][ind].b - floor.second) * x[floor.first];\r\n\r\n\t\t\t\t// cout << var(ii) << var(ncost) << endl;\r\n\r\n\t\t\t\tif (dist[ii][0] > cost)\r\n\t\t\t\t{\r\n\t\t\t\t\tdist[ii][0] = cost;\r\n\t\t\t\t\tpq.push({{floor.first, cost}, {0, ii}});\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t};\r\n\r\n\t\twhile (sz(pq))\r\n\t\t{\r\n\t\t\tauto tp = pq.top();\r\n\t\t\tpq.pop();\r\n\r\n\t\t\tauto cost = tp.first.second;\r\n\t\t\tauto &[climbed, ladder_ind] = tp.second;\r\n\r\n\t\t\tif (dist[ladder_ind][climbed] < cost)\r\n\t\t\t{\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\r\n\t\t\t//\tcout << var(cost) << var(climbed) << var(ladder_ind) << endl;\r\n\t\t\tpii floor;\r\n\r\n\t\t\tif (climbed)\r\n\t\t\t{\r\n\t\t\t\tfloor = {ladders[ladder_ind].c, ladders[ladder_ind].d};\r\n\t\t\t}\r\n\t\t\telse\r\n\t\t\t{\r\n\t\t\t\tfloor = {ladders[ladder_ind].a, ladders[ladder_ind].b};\r\n\r\n\t\t\t\tll ncost = cost - ladders[ladder_ind].h;\r\n\r\n\t\t\t\tif (dist[ladder_ind][1] > ncost)\r\n\t\t\t\t{\r\n\t\t\t\t\tdist[ladder_ind][1] = ncost;\r\n\t\t\t\t\tpq.push({{ladders[ladder_ind].c, ncost}, {1, ladder_ind}});\r\n\t\t\t\t}\r\n\t\t\t}\r\n\r\n\t\t\tint l = 0, r = sz(a[floor.first]) - 1;\r\n\t\t\tint ind = 0;\r\n\r\n\t\t\twhile (l <= r)\r\n\t\t\t{\r\n\r\n\t\t\t\tint mid = l + (r - l) / 2;\r\n\r\n\t\t\t\tif (a[floor.first][mid].b < floor.second ||\r\n\t\t\t\t\t\t(a[floor.first][mid].b == floor.second && a[floor.first][mid].i <= ladder_ind))\r\n\t\t\t\t{\r\n\t\t\t\t\tl = mid + 1;\r\n\t\t\t\t\tind = mid;\r\n\t\t\t\t}\r\n\t\t\t\telse\r\n\t\t\t\t{\r\n\t\t\t\t\tr = mid - 1;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\r\n\t\t\tif (sz(a[floor.first]) == 0)\r\n\t\t\t{\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\r\n\t\t\tgo_to_ladder(floor, ind, cost);\r\n\t\t\tgo_to_ladder(floor, ind + 1, cost);\r\n\t\t\tgo_to_ladder(floor, ind - 1, cost);\r\n\t\t}\r\n\r\n\t\tfor (int i = 1; i <= k; i++)\r\n\t\t{\r\n\t\t\tif (dist[i][1] != LLONG_MAX)\r\n\t\t\t{\r\n\t\t\t\tif (ladders[i].c == n)\r\n\t\t\t\t{\r\n\t\t\t\t\tll d = abs(ladders[i].d - m) * x[n] + dist[i][1];\r\n\t\t\t\t\tres = min(res, d);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\r\n\t\tif (res == LLONG_MAX)\r\n\t\t{\r\n\t\t\tcout << \"NO ESCAPE\" << endl;\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tcout << res << endl;\r\n\t\t}\r\n\t}\r\n\r\n\tMain()\r\n\t{\r\n\t\tint t = 1;\r\n\t\tread(t);\r\n\r\n\t\tfor (int tc = 1; tc <= t; tc++)\r\n\t\t\trun_case(tc);\r\n\t}\r\n\r\n\t// Required DS's\r\n\r\n\t// Templates\r\n\ttemplate <typename T>\r\n\tinline bool read(T &_x) { return (cin >> _x) ? true : false; }\r\n\ttemplate <typename T, typename... Args>\r\n\tinline bool read(T &_x, Args &..._args) { return read(_x) && read(_args...); }\r\n\r\n\ttemplate <typename T>\r\n\tinline void print(const T &_x) { cout << _x; }\r\n\ttemplate <typename T, typename S>\r\n\tinline void print(const pair<T, S> &_p) { cout << \"{\" << _p.first << \", \" << _p.second << \"}\"; }\r\n\ttemplate <typename T>\r\n\tinline void print_it(T _st, T _en)\r\n\t{\r\n\t\tcout << \"{\";\r\n\t\tif (_st != _en)\r\n\t\t\tcout << *_st;\r\n\t\twhile (_st != _en)\r\n\t\t\tcout << \",\" << *_st, _st++;\r\n\t\tcout << \"}\";\r\n\t}\r\n\ttemplate <typename T>\r\n\tinline void print(const vec<T> &_x) { print_it(_x.begin(), _x.end()); }\r\n\ttemplate <typename T>\r\n\tinline void print(const set<T> &_x) { print_it(_x.begin(), _x.end()); }\r\n\ttemplate <typename T>\r\n\tinline void print(const multiset<T> &_x) { print_it(_x.begin(), _x.end()); }\r\n\ttemplate <typename T, typename S>\r\n\tinline void print(const map<T, S> &_x) { print_it(_x.begin(), _x.end()); }\r\n\ttemplate <typename T, typename S>\r\n\tinline void print(const unordered_map<T, S> &_x) { print_it(_x.begin(), _x.end()); }\r\n\ttemplate <typename T, typename... Args>\r\n\tinline void print(const T &_x, const Args &..._args) { print(_x), print(_args...); }\r\n};\r\n\r\nint main()\r\n{\r\n\tios_base::sync_with_stdio(false), cin.tie(0);\r\n\r\n\tMain _solution;\r\n\r\n\treturn 0;\r\n}\r\n"
+}

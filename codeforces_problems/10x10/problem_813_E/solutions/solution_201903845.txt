@@ -1,0 +1,35 @@
+{
+    "id": 201903845,
+    "contestId": 813,
+    "creationTimeSeconds": 1681371760,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 813,
+        "index": "E",
+        "name": "Army Creation",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 813,
+        "members": [
+            {
+                "handle": "NJ_haoba"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1496675100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 162816000,
+    "source": "#include<cstdio>\r\n#include<algorithm>\r\n#include<cmath>\r\n#include<iostream>\r\n#include<set>\r\n#include<vector>\r\n#include<queue>\r\n#include<stack>\r\n#include<cstring>\r\n#include<cstdlib>\r\n#include<ctime>\r\n#define rep(i,a,b) for(register int i=a;i<=b;++i)\r\n#define rev(i,a,b) for(register int i=a;i>=b;--i)\r\n#define gra(i,u) for(register int i=head[u];i;i=edge[i].nxt)\r\n#define Clear(a) memset(a,0,sizeof(a))\r\n#define yes puts(\"YES\")\r\n#define no puts(\"NO\")\r\nusing namespace std;\r\ntypedef long long ll;\r\nconst int INF(1e9+10);\r\nconst ll LLINF(1e18+10);\r\ninline int read()\r\n{\r\n\tint s=0,w=1;\r\n\tchar ch=getchar();\r\n\twhile(ch<'0'||ch>'9'){if(ch=='-')w=-1;ch=getchar();}\r\n\twhile(ch>='0'&&ch<='9')s=s*10+(ch-'0'),ch=getchar();\r\n\treturn s*w;\r\n}\r\ntemplate<typename T>\r\ninline T Min(T x,T y){return x<y?x:y;}\r\ntemplate<typename T>\r\ninline T Max(T x,T y){return x>y?x:y;}\r\ntemplate<typename T>\r\ninline void Swap(T&x,T&y){T t=x;x=y;y=t;return;}\r\ntemplate<typename T>\r\ninline T Abs(T x){return x<0?-x:x;}\r\n\r\nconst int MAXN(1e5+10);\r\nconst int B(400);\r\n\r\nint n,k,q,a[MAXN];\r\nint lst;\r\n\r\nstruct BLOCK\r\n{\r\n\tint l[B],r[B],pos[MAXN];\r\n\tint len,tot;\r\n\tint f[B][B],g[B][B],s[B][MAXN];\r\n\tint cnt[MAXN],V;\r\n\t\r\n\tinline int sum(int x,int L,int R){return s[R][x]-s[L-1][x];}\r\n\t\r\n\tinline void build_block()\r\n\t{\r\n\t\tlen=sqrt(n);\r\n\t\twhile(true)\r\n\t\t{\r\n\t\t\t++tot;\r\n\t\t\tl[tot]=r[tot-1]+1;\r\n\t\t\tr[tot]=Min(len*tot,n);\r\n\t\t\trep(i,l[tot],r[tot]) pos[i]=tot,V=Max(V,a[i]);\r\n\t\t\tif(r[tot]==n) break;\r\n\t\t}\r\n\t\trep(i,1,tot)\r\n\t\t{\r\n\t\t\trep(j,l[i],r[i]) ++s[i][a[j]];\r\n\t\t\trep(j,1,V) s[i][j]+=s[i-1][j];\r\n\t\t}\r\n\t\trep(i,1,tot)\r\n\t\t{\r\n\t\t\trep(j,1,V) if(s[i][j]-s[i-1][j]>k) ++f[i][i];\r\n\t\t\trep(j,i+1,tot)\r\n\t\t\t{\r\n\t\t\t\tf[i][j]=f[i][j-1];\r\n\t\t\t\trep(now,l[j],r[j])\r\n\t\t\t\t{\r\n\t\t\t\t\t++cnt[a[now]];\r\n\t\t\t\t\tif(cnt[a[now]]+sum(now,i,j-1)==k+1) ++f[i][j];\r\n\t\t\t\t}\r\n\t\t\t\trep(now,l[j],r[j]) --cnt[a[now]];\r\n\t\t\t}\r\n\t\t}\r\n\t\trep(i,1,tot)\r\n\t\t{\r\n\t\t\trep(j,l[i],r[i])\r\n\t\t\t{\r\n\t\t\t\t++cnt[a[j]];\r\n\t\t\t\tif(cnt[a[j]]<=k) ++g[i][i];\r\n\t\t\t\telse if(cnt[a[j]]==k+1) g[i][i]-=k;\r\n\t\t\t}\r\n\t\t\trep(j,l[i],r[i]) --cnt[a[j]];\r\n\t\t\trep(j,i+1,tot)\r\n\t\t\t{\r\n\t\t\t\tg[i][j]=g[i][j-1];\r\n\t\t\t\trep(now,l[j],r[j])\r\n\t\t\t\t{\r\n\t\t\t\t\t++cnt[a[now]];\r\n\t\t\t\t\tint res=cnt[a[now]]+s[j-1][a[now]]-s[i-1][a[now]];\r\n\t\t\t\t\tif(res<=k) g[i][j]++;\r\n\t\t\t\t\telse if(res==k+1) g[i][j]-=k;\r\n\t\t\t\t}\r\n\t\t\t\trep(now,l[j],r[j]) --cnt[a[now]];\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn;\r\n\t}\r\n\t\r\n\tinline int query(int x,int y)\r\n\t{\r\n\t\tint xx=pos[x],yy=pos[y],res1(0),res2(0);\r\n\t\tif(xx==yy)\r\n\t\t{\r\n//\t\t\tprintf(\"que:%d %d\\n\",x,y);\r\n\t\t\trep(i,x,y)\r\n\t\t\t{\r\n\t\t\t\t++cnt[a[i]];\r\n\t\t\t\tif(cnt[a[i]]==k+1) ++res1,res2-=k;\r\n\t\t\t\telse if(cnt[a[i]]<=k) ++res2;\r\n\t\t\t}\r\n//\t\t\tprintf(\"%d\\n\",cnt[a[1]]);\r\n\t\t\trep(i,x,y) cnt[a[i]]--;\r\n\t\t\treturn res1*k+res2;\r\n\t\t}\r\n\t\tres1=f[xx+1][yy-1],res2=g[xx+1][yy-1];\r\n//\t\tprintf(\"res:%d %d\\n\",res1,res2);\r\n\t\trep(i,x,r[xx])\r\n\t\t{\r\n\t\t\tint v=a[i];\r\n\t\t\t++cnt[v];\r\n\t\t\tif(sum(v,xx+1,yy-1)>k) continue;\r\n\t\t\tif(cnt[v]+sum(v,xx+1,yy-1)<=k) ++res2;\r\n\t\t\telse if(cnt[v]+sum(v,xx+1,yy-1)==k+1) res2-=k,++res1;\r\n\t\t}\r\n//\t\tprintf(\"res2:%d %d\\n\",res1,res2);\r\n\t\trep(i,l[yy],y)\r\n\t\t{\r\n\t\t\tint v=a[i];\r\n\t\t\t++cnt[v];\r\n\t\t\tif(sum(v,xx+1,yy-1)>k) continue;\r\n\t\t\tif(cnt[v]+sum(v,xx+1,yy-1)<=k) ++res2;\r\n\t\t\telse if(cnt[v]+sum(v,xx+1,yy-1)==k+1) res2-=k,++res1;\r\n\t\t}\r\n//\t\tprintf(\"res2:%d %d\\n\",res1,res2);\r\n\t\trep(i,x,r[xx]) --cnt[a[i]];\r\n\t\trep(i,l[yy],y) --cnt[a[i]];\r\n\t\treturn res1*k+res2;\r\n\t}\r\n};\r\nBLOCK ds;\r\n\r\n\r\nint main()\r\n{\r\n\tn=read(),k=read();\r\n\trep(i,1,n) a[i]=read();\r\n\tds.build_block();\r\n\tq=read();\r\n\twhile(q--)\r\n\t{\r\n\t\tint l=read(),r=read();\r\n\t\tl=(l+lst)%n+1,r=(r+lst)%n+1;\r\n\t\tif(l>r) Swap(l,r);\r\n\t\tprintf(\"%d\\n\",lst=ds.query(l,r));\r\n\t}\r\n}"
+}

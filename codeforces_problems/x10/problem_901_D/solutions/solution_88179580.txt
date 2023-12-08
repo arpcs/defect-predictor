@@ -1,0 +1,37 @@
+{
+    "id": 88179580,
+    "contestId": 901,
+    "creationTimeSeconds": 1595920086,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 901,
+        "index": "D",
+        "name": "Weighting a Tree",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2700,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 901,
+        "members": [
+            {
+                "handle": "atoiz"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1513697700
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 92,
+    "timeConsumedMillis": 249,
+    "memoryConsumedBytes": 11878400,
+    "source": "/*input\r\n3 3\r\n2 2 2\r\n1 2\r\n2 3\r\n1 3\r\n\r\n*/\r\n\r\n// https://codeforces.com/group/sd4r2IvEfL/contest/289090/problem/D\r\n\r\n#include <iostream>\r\n#include <vector>\r\n#include <algorithm>\r\n#include <cassert>\r\n#include <cstring>\r\n\r\nusing namespace std;\r\n\r\nconst int N = 100006;\r\nint n, m, e[N][2], prv[N];\r\nbool d[N], vis[N], used[N];\r\nvector<int> g[N];\r\nint64_t c[N], w[N];\r\n\r\nvoid color(int u)\r\n{\r\n\tvis[u] = 1;\r\n\tfor (int i : g[u]) {\r\n\t\tint v = u ^ e[i][0] ^ e[i][1];\r\n\t\tif (vis[v]) continue;\r\n\t\tused[i] = true;\r\n\t\td[v] = !d[u];\r\n\t\tcolor(v);\r\n\t}\r\n}\r\n\r\nint64_t solve(int u)\r\n{\r\n\tvis[u] = 1;\r\n\tfor (int i : g[u]) if (used[i]) {\r\n\t\tint v = u ^ e[i][0] ^ e[i][1];\r\n\t\tif (vis[v]) continue;\r\n\t\tprv[v] = i;\r\n\t\tint64_t cur = solve(v);\r\n\t\tw[i] += cur, c[u] -= cur, c[v] -= cur;\r\n\t}\r\n\treturn c[u];\r\n}\r\n\r\nint main()\r\n{\r\n\tios_base::sync_with_stdio(0); cin.tie(0);\r\n\tcin >> n >> m;\r\n\tfor (int i = 1; i <= n; ++i) cin >> c[i];\r\n\tfor (int i = 1; i <= m; ++i) {\r\n\t\tcin >> e[i][0] >> e[i][1];\r\n\t\tg[e[i][0]].push_back(i);\r\n\t\tg[e[i][1]].push_back(i);\r\n\t}\r\n\r\n\tcolor(1);\r\n\r\n\tint64_t diff = 0;\r\n\tint r = 0;\r\n\tfor (int u = 1; u <= n; ++u) {\r\n\t\tif (d[u]) diff += c[u];\r\n\t\telse diff -= c[u];\r\n\t\tfor (int i : g[u]) if (d[u] == d[u ^ e[i][0] ^ e[i][1]]) r = u;\r\n\t}\r\n\r\n\tif (r) {\r\n\t\tmemset(vis, 0, sizeof(vis[0]) * (n + 1));\r\n\t\tint64_t cur = solve(r);\r\n\t\tassert(cur % 2 == 0);\r\n\t\tcur /= 2;\r\n\r\n\t\tint id = 0;\r\n\t\tfor (int i : g[r]) if (d[r] == d[r ^ e[i][0] ^ e[i][1]]) id = i;\r\n\t\tassert(id);\r\n\t\tw[id] += cur;\r\n\t\tfor (int u = r ^ e[id][0] ^ e[id][1]; u != r; u = u ^ e[prv[u]][0] ^ e[prv[u]][1]) {\r\n\t\t\tcur = -cur;\r\n\t\t\tw[prv[u]] += cur;\r\n\t\t}\r\n\t} else {\r\n\t\tif (diff) return cout << \"NO\" << endl, 0;\r\n\t\tmemset(vis, 0, sizeof(vis[0]) * (n + 1));\r\n\t\tint64_t cur = solve(1);\r\n\t\tassert(cur == 0);\r\n\t}\r\n\r\n\tcout << \"YES\" << endl;\r\n\tfor (int i = 1; i <= m; ++i) cout << w[i] << '\\n';\r\n}"
+}

@@ -1,0 +1,39 @@
+{
+    "id": 10539031,
+    "contestId": 280,
+    "creationTimeSeconds": 1427871778,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "Philipsweng"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 100,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 74342400,
+    "source": "#include<cstdio>\r\n#include<cstring>\r\n#include<algorithm>\r\n\r\nusing namespace std;\r\n\r\ntypedef long double ld;\r\n\r\nconst int MAXN = 600005;\r\n\r\nstruct Para\r\n{\r\n\tld a,b,c;\r\n\tPara(void){}\r\n\tPara(ld a,ld b,ld c) : a(a),b(b),c(c){}\r\n};\r\n\r\nstruct deri\r\n{\r\n\tld a,b;\r\n\tderi(void){}\r\n\tderi(ld a,ld b) : a(a),b(b){}\r\n};\r\n\r\nstruct Node\r\n{\r\n\tld l,r,Move;\r\n\tderi b,tag2;\r\n\tint son[2],fa;\r\n}T[MAXN];\r\n\r\nbool qur;\r\nld BotX[MAXN],P[MAXN],eps,eps1;\r\nint X[MAXN],N,Q,A,B,cnt,root;\r\n\r\nPara operator +(const Para &a,const Para &b) {return Para(a.a + b.a,a.b + b.b,a.c + b.c);}\r\n\r\nderi operator +(const deri &a,const deri &b) {return deri(a.a + b.a,a.b + b.b);}\r\n\r\nvoid read(int &x)\r\n{\r\n\tchar c;\r\n\twhile (c = getchar(),c < '0' || c > '9');\r\n\tx = c - 48;\r\n\twhile (c = getchar(),c >= '0' && c <= '9') x = x * 10 + c - 48;\r\n}\r\n\r\nld sqr(ld a) {return a * a;}\r\n\r\nint New_Node(ld l,ld r,deri b)\r\n{\r\n\tif (l > r) return 0;\r\n\tT[++ cnt].l = l,T[cnt].r = r,T[cnt].b = b;\r\n\treturn cnt;\r\n}\r\n\r\nvoid Move_f1(deri &a,ld Mov)\r\n{\r\n\ta = deri(a.a,a.b - a.a * Mov);\r\n}\r\n\r\nvoid Mark(int cur,const deri &b,ld Move)\r\n{\r\n\tif (!cur) return;\r\n\tMove_f1(T[cur].tag2,Move),Move_f1(T[cur].b,Move);\r\n\tT[cur].tag2 = T[cur].tag2 + b;\r\n\tT[cur].b = T[cur].b + b;\r\n\tT[cur].l += Move,T[cur].r += Move,T[cur].Move += Move;\r\n}\r\n\r\nvoid Lazy_Down(int cur)\r\n{\r\n\tif (!cur) return;\r\n\tint l = T[cur].son[0],r = T[cur].son[1];\r\n\tif (l) Mark(l,T[cur].tag2,T[cur].Move);\r\n\tif (r) Mark(r,T[cur].tag2,T[cur].Move);\r\n\tT[cur].tag2 = deri(0,0);\r\n\tT[cur].Move = 0;\r\n}\r\n\r\nint Get_Bot(int cur)\r\n{\r\n\tif (!cur) return 0;\r\n\tLazy_Down(cur);\r\n\tif (T[cur].l > Q && qur) return Get_Bot(T[cur].son[0]);\r\n\tld zero = ((-T[cur].b.b) / T[cur].b.a);\r\n\tif (zero - T[cur].l >= eps1 && T[cur].r - zero >= eps1) return cur;\r\n\tif (T[cur].r * T[cur].b.a + T[cur].b.b < eps1) \r\n\t{\r\n\t\tint tmp = 0;\r\n\t\tif (T[cur].son[1]) tmp = Get_Bot(T[cur].son[1]);\r\n\t\treturn tmp ? tmp : cur;\r\n\t} else\r\n\t\tif (T[cur].son[0]) return Get_Bot(T[cur].son[0]);\r\n\treturn cur;\r\n}\r\n\r\nvoid Rotate(int cur,int c)\r\n{\r\n\tint fa = T[cur].fa,ft = T[fa].fa;\r\n\tLazy_Down(ft),Lazy_Down(fa);\r\n\tT[fa].fa = cur,T[cur].fa = ft;\r\n\tT[fa].son[c] = T[cur].son[!c];\r\n\tif (T[cur].son[!c]) T[T[cur].son[!c]].fa = fa;\r\n\tif (ft) T[ft].son[T[ft].son[1] == fa] = cur;\r\n\tT[cur].son[!c] = fa;\r\n}\r\n\r\nvoid Splay(int cur,int top)\r\n{\r\n\tfor(Lazy_Down(cur);T[cur].fa != top;)\r\n\t{\r\n\t\tint fa = T[cur].fa,ft = T[fa].fa;\r\n\t\tif (ft == top) Rotate(cur,T[fa].son[1] == cur); else\r\n\t\t{\r\n\t\t\tif (T[fa].son[1] == cur)\r\n\t\t\t{\r\n\t\t\t\tif (T[ft].son[1] == fa) Rotate(fa,1),Rotate(cur,1); else\r\n\t\t\t\t\tRotate(cur,1),Rotate(cur,0);\r\n\t\t\t} else\r\n\t\t\t\tif (T[ft].son[0] == fa) Rotate(fa,0),Rotate(cur,0); else\r\n\t\t\t\t\tRotate(cur,0),Rotate(cur,1);\r\n\t\t}\r\n\t}\r\n\tif (!top) root = cur;\r\n}\r\n\r\nvoid Delete(int cur)\r\n{\r\n\tSplay(cur,0);\r\n\tT[T[cur].son[0]].fa = 0,T[T[cur].son[1]].fa = 0;\r\n\tif (!T[cur].son[0]) {root = T[cur].son[1];return;}\r\n\tif (!T[cur].son[1]) {root = T[cur].son[0];return;}\r\n\tLazy_Down(cur);\r\n\tint qt = T[cur].son[1];\r\n\tcur = T[cur].son[0];\r\n\tfor(;Lazy_Down(cur),T[cur].son[1];cur = T[cur].son[1]);\r\n\tSplay(cur,0);\r\n\tT[cur].son[1] = qt;if (qt) T[qt].fa = cur;\r\n}\r\n\r\nvoid Insert(int cur,int node)\r\n{\r\n\tLazy_Down(cur);\r\n\tif (T[node].r - T[cur].l < eps1)\r\n\t{\r\n\t\tif (!T[cur].son[0]) T[cur].son[0] = node,T[node].fa = cur; else Insert(T[cur].son[0],node);\r\n\t} else\r\n\t\tif (!T[cur].son[1]) T[cur].son[1] = node,T[node].fa = cur; else Insert(T[cur].son[1],node);\r\n}\r\n\r\nint main()\r\n{\r\n\tread(N),read(Q),read(A),read(B);\r\n\tif (N <= 1000) eps = 1e-13,eps1 = 1e-15; else\r\n\t\teps = 1e-17,eps1 = 1e-20;\r\n\tfor(int i = 1;i <= N;i ++) read(X[i]);\r\n\tNew_Node(1,Q,deri(2,-2 * X[1]));\r\n\troot = 1;\r\n\tfor(int i = 2;i <= N;i ++)\r\n\t{\r\n\t\tint Num = Get_Bot(root);\r\n\t\tSplay(Num,0);\r\n\t\tld zero = (-T[Num].b.b) / T[Num].b.a;\r\n\t\tif (zero - T[Num].r > eps1) zero = T[Num].r;\r\n\t\tif (T[Num].l - zero > eps1) zero = T[Num].l;\r\n\t\tBotX[i - 1] = zero;\r\n\t\tNode Line = T[Num];\r\n\t\tDelete(Num);\r\n\t\tint q1 = New_Node(Line.l,zero - eps,Line.b),q2 = New_Node(zero + eps,Line.r,Line.b);\r\n\t\tif (q1) \r\n\t\t{\r\n\t\t\tif (!root) root = q1; else\r\n\t\t\tInsert(root,q1);\r\n\t\t\tSplay(q1,0);\r\n\t\t}\r\n\t\tif (q2)\r\n\t\t{\r\n\t\t\tif (!root) root = q2; else\r\n\t\t\tInsert(root,q2);\r\n\t\t\tSplay(q2,0);\r\n\t\t}\r\n\t\tif (q1)\r\n\t\t{\r\n\t\t\tSplay(q1,0);\r\n\t\t\tif (T[q1].son[0]) Mark(T[q1].son[0],deri(0,0),A);\r\n\t\t\tMove_f1(T[q1].tag2,A),Move_f1(T[q1].b,A);\r\n\t\t\tT[q1].l += A,T[q1].r += A;\r\n\t\t}\r\n\t\tif (q2)\r\n\t\t{\r\n\t\t\tSplay(q2,0);\r\n\t\t\tif (T[q2].son[1]) Mark(T[q2].son[1],deri(0,0),B);\r\n\t\t\tMove_f1(T[q2].tag2,B),Move_f1(T[q2].b,B);\r\n\t\t\tT[q2].l += B,T[q2].r += B;\r\n\t\t}\r\n\t\tint q3 = New_Node(zero + A,zero + B,deri(0,0));\r\n\t\tif (root) Insert(root,q3),Splay(q3,0); else root = q3;\r\n\t\tMark(root,deri(2,-2 * X[i]),0);\r\n\t}\r\n\tqur = 1;\r\n\tint Num = Get_Bot(root);\r\n\tld zero = (-T[Num].b.b) / T[Num].b.a;\r\n\tif (zero - Q > eps1) zero = Q;\r\n\tif (T[Num].l - zero > eps1) zero = T[Num].l;\r\n\tld cur = zero;\r\n\tP[N] = cur;\r\n\tld Ans = sqr(cur - X[N]);\r\n\tfor(int i = N - 1;i;i --)\r\n\t{\r\n\t\tif (cur - B - BotX[i] >= eps1) cur = cur - B; else\r\n\t\t\tif (BotX[i] - cur + A >= eps1) cur = cur - A; else\r\n\t\t\t\tcur = BotX[i];\r\n\t\tP[i] = cur;\r\n\t\tAns += sqr(cur - X[i]);\r\n\t}\r\n\tfor(int i = 1;i <= N;i ++) printf(\"%.8f%c\", double(P[i]), i == N ? '\\n' : ' ');\r\n\tprintf(\"%.8f\\n\", double(Ans));\r\n\treturn 0;\r\n}"
+}

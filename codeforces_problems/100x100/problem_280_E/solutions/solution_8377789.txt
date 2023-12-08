@@ -1,0 +1,39 @@
+{
+    "id": 8377789,
+    "contestId": 280,
+    "creationTimeSeconds": 1414156596,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "abel"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 101,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 45670400,
+    "source": "#include<cstdio>\r\nconst double inf=1e19;\r\nconst double eps=1e-9;\r\nint ch[600050][2];\r\ndouble K[600050],B[600050],L[600050],R[600050];\r\ndouble TK[600050],TB[600050],TX[600050];\r\nint fa[600050];\r\ndouble x[300050],y[300050];\r\ndouble q,a,b;\r\nint n,tot,root;\r\ninline int dir(int x)\r\n{\r\n\treturn x==ch[fa[x]][1];\r\n}\r\ninline void mutate(int x,double tk,double tb,double tx)\r\n{\r\n\tif (x>=3)\r\n\t{\r\n\t\tL[x]+=tx; R[x]+=tx; B[x]+=tb-K[x]*tx; K[x]+=tk;\r\n\t}\r\n\tif (x)\r\n\t{\r\n\t\tTX[x]+=tx; TB[x]+=tb-TK[x]*tx; TK[x]+=tk;\r\n\t}\r\n}\r\ninline void release(int x)\r\n{\r\n\tmutate(ch[x][0],TK[x],TB[x],TX[x]);\r\n\tmutate(ch[x][1],TK[x],TB[x],TX[x]);\r\n\tTK[x]=0; TB[x]=0; TX[x]=0;\r\n}\r\ninline void rotate(int x)\r\n{\r\n\tint y,z,a,b,c;\r\n\ty=fa[x]; z=fa[y]; b=dir(x); a=ch[x][!b];\r\n\tif (z)\r\n\t{\r\n\t\tc=dir(y); ch[z][c]=x;\r\n\t}\r\n\telse root=x;\r\n\tfa[x]=z; fa[y]=x; ch[x][!b]=y; ch[y][b]=a;\r\n\tif (a) fa[a]=y;\r\n}\r\nvoid splay(int x,int i)\r\n{\r\n\tint y,z,b,c;\r\n\twhile (fa[x]!=i)\r\n\t{\r\n\t\ty=fa[x]; z=fa[y];\r\n\t\tif (z==i)\r\n\t\t{\r\n\t\t\trelease(y); release(x); rotate(x);\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tb=dir(x); c=dir(y);\r\n\t\t\trelease(z); release(y); release(x);\r\n\t\t\tif (b^c)\r\n\t\t\t{\r\n\t\t\t\trotate(x); rotate(x);\r\n\t\t\t}\r\n\t\t\telse\r\n\t\t\t{\r\n\t\t\t\trotate(y); rotate(x);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\trelease(x);\r\n}\r\ninline void newnode(int f,int d,double k,double b,double l,double r)\r\n{\r\n\ttot++; ch[tot][0]=0; ch[tot][1]=0; fa[tot]=f;\r\n\tif (f) ch[f][d]=tot;\r\n\telse root=tot;\r\n\tK[tot]=k; B[tot]=b; L[tot]=l; R[tot]=r;\r\n\tTK[tot]=0; TB[tot]=0; TX[tot]=0;\r\n}\r\nint find_minmax(int i,int d)\r\n{\r\n\twhile (ch[i][d])\r\n\t{\r\n\t\trelease(i); i=ch[i][d];\r\n\t}\r\n\treturn i;\r\n}\r\ninline double calc(int i,double x)\r\n{\r\n\treturn K[i]*x+B[i];\r\n}\r\nint find(int x)\r\n{\r\n\tint y;\r\n\tif (x<3) return 0;\r\n\trelease(x);\r\n\tif (K[x]*R[x]+B[x]>=0)\r\n\t{\r\n\t\ty=find(ch[x][0]);\r\n\t\tif (y) return y;\r\n\t\telse return x;\r\n\t}\r\n\treturn find(ch[x][1]);\r\n}\r\nint main()\r\n{\r\n\tdouble ans;\r\n\tint i,X,Y;\r\n\tscanf(\"%d%lf%lf%lf\",&n,&q,&a,&b);\r\n\tfor (i=1;i<=n;i++) scanf(\"%lf\",&x[i]);\r\n\ttot=0;\r\n\tnewnode(0,0,0,-inf,-inf,-inf);\r\n\tnewnode(1,1,0,inf,inf,inf);\r\n\tnewnode(2,0,2,-x[1]*2,1,q-(n-1)*a);\r\n\tfor (i=1;i<=n;i++)\r\n\t{\r\n\t\tsplay(1,0); splay(2,1); X=ch[2][0];\r\n\t\tY=find_minmax(X,1);\r\n\t\tif (K[Y]*R[Y]+B[Y]<0) y[i]=R[Y];\r\n\t\telse\r\n\t\t{\r\n\t\t\tY=find(X);\r\n\t\t\tif (K[Y]*L[Y]+B[Y]>0) y[i]=L[Y];\r\n\t\t\telse y[i]=-B[Y]/K[Y];\r\n\t\t}\r\n\t\tif (i<n)\r\n\t\t{\r\n\t\t\tif (b-a>eps)\r\n\t\t\t{\r\n\t\t\t\tsplay(Y,0);\r\n\t\t\t\tif (y[i]-L[Y]<eps)\r\n\t\t\t\t{\r\n\t\t\t\t\tX=find_minmax(ch[Y][0],1); splay(X,Y);\r\n\t\t\t\t\tnewnode(X,1,0,0,y[i]+a,y[i]+b);\r\n\t\t\t\t}\r\n\t\t\t\telse if (R[Y]-y[i]<eps)\r\n\t\t\t\t{\r\n\t\t\t\t\tX=find_minmax(ch[Y][1],0); splay(X,Y);\r\n\t\t\t\t\tnewnode(X,0,0,0,y[i]+a,y[i]+b);\r\n\t\t\t\t}\r\n\t\t\t\telse\r\n\t\t\t\t{\r\n\t\t\t\t\tX=find_minmax(ch[Y][1],0); splay(X,Y);\r\n\t\t\t\t\tnewnode(X,0,K[Y],B[Y],y[i],R[Y]); R[Y]=y[i];\r\n\t\t\t\t\tnewnode(tot,0,0,0,y[i]+a,y[i]+b);\r\n\t\t\t\t}\r\n\t\t\t\tsplay(tot,0); mutate(ch[tot][0],0,0,a);\r\n\t\t\t\tmutate(ch[tot][1],0,0,b);\r\n\t\t\t}\r\n\t\t\telse mutate(root,0,0,a);\r\n\t\t\tmutate(root,2,-x[i+1]*2,0);\r\n\t\t\tsplay(2,0); Y=find_minmax(ch[2][0],1);\r\n\t\t\twhile (L[Y]>=q-(n-i-1)*a)\r\n\t\t\t{\r\n\t\t\t\tsplay(Y,2); X=ch[Y][0];\r\n\t\t\t\tch[2][0]=X; fa[X]=2;\r\n\t\t\t\tY=find_minmax(ch[2][0],1);\r\n\t\t\t}\r\n\t\t\tif (R[Y]>q-(n-i-1)*a) R[Y]=q-(n-i-1)*a;\r\n\t\t}\r\n\t}\r\n\tfor (i=n-1;i>=1;i--)\r\n\t\tif (y[i+1]-y[i]<a) y[i]=y[i+1]-a;\r\n\t\telse if (y[i+1]-y[i]>b) y[i]=y[i+1]-b;\r\n\tans=0;\r\n\tfor (i=1;i<=n;i++)\r\n\t{\r\n\t\tprintf(\"%.7lf \",y[i]);\r\n\t\tans+=(y[i]-x[i])*(y[i]-x[i]);\r\n\t}\r\n\tprintf(\"\\n%.7lf\\n\",ans); return 0;\r\n}"
+}

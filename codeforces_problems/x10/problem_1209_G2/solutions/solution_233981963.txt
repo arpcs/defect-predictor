@@ -1,0 +1,35 @@
+{
+    "id": 233981963,
+    "contestId": 1209,
+    "creationTimeSeconds": 1700790825,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1209,
+        "index": "G2",
+        "name": "Into Blocks (hard version)",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1209,
+        "members": [
+            {
+                "handle": "luogu_bot4"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1568466300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 25,
+    "timeConsumedMillis": 1060,
+    "memoryConsumedBytes": 26624000,
+    "source": "// LUOGU_RID: 136569780\n#include <set>\r\n\r\n#include <cstdio>\r\n\r\nconst int N = 200005 ;\r\n\r\n#define _be begin\r\n#define _en rbegin\r\n\r\n#define era erase\r\n#define ins insert\r\n\r\nusing namespace std ;\r\n\r\nset <int> col[N] ;\r\n\r\nint seg[N * 3] ;\r\nint mnv[N * 3] ;\r\nint mxt[N * 3] ;\r\nint tag[N * 3] ;\r\nint lcon[N * 3] ;\r\nint rcon[N * 3] ;\r\n\r\n#define lc (rt << 1)\r\n#define rc (rt << 1 | 1)\r\n\r\ninline void _down(int rt){\r\n    if (tag[rt]){\r\n        mnv[lc] += tag[rt] ;\r\n        mnv[rc] += tag[rt] ;\r\n        tag[lc] += tag[rt] ;\r\n        tag[rc] += tag[rt] ;\r\n        tag[rt] = 0 ;\r\n    }\r\n}\r\ninline void _up(int rt){\r\n    int ls = rt << 1 ;\r\n    int rs = rt << 1 | 1 ;\r\n    mxt[rt] = max(mxt[ls], mxt[rs]) ;\r\n    mnv[rt] = min(mnv[ls], mnv[rs]) ;\r\n    if (mnv[ls] < mnv[rs]){\r\n        seg[rt] = seg[ls] ;\r\n        lcon[rt] = lcon[ls] ;\r\n        rcon[rt] = max(mxt[rs], rcon[ls]) ;\r\n        //\u6b64\u5904\u7531\u4e8e\u6700\u540e\u8981\u8986\u76d6\uff0c\u6240\u4ee5 max_Time(rc) \u672c\u8d28\u4e0a\u5c31\u662f\u5305\u542b\u53f3\u7aef\u70b9\u7684\u503c\u3002\r\n    }\r\n    else if (mnv[ls] > mnv[rs]){\r\n        seg[rt] = seg[rs] ;\r\n        rcon[rt] = rcon[rs] ;\r\n        lcon[rt] = max(mxt[ls], lcon[rs]) ;\r\n    }\r\n    else {\r\n        lcon[rt] = lcon[ls] ; rcon[rt] = rcon[rs] ;\r\n        seg[rt] = seg[ls] + seg[rs] + max(lcon[rs], rcon[ls]) ;\r\n    }\r\n}\r\nvoid upd(int rt, int l, int r, int ul, int ur, int v){\r\n    if (ul > ur) return ;\r\n    if (ul <= l && r <= ur)\r\n        return mnv[rt] += v, void(tag[rt] += v) ;\r\n    int mid = (l + r) >> 1 ; _down(rt) ;\r\n    if (ul <= mid) upd(lc, l, mid, ul, ur, v) ;\r\n    if (ur > mid)  upd(rc, mid + 1, r, ul, ur, v) ;\r\n    _up(rt) ;\r\n}\r\nvoid cov(int rt, int l, int r, int p, int v){\r\n    if (l == r)\r\n        return void(mxt[rt] = lcon[rt] = v) ;\r\n    int mid = (l + r) >> 1 ; _down(rt) ;\r\n    if (p <= mid) cov(lc, l, mid, p, v) ;\r\n    else cov(rc, mid + 1, r, p, v) ; _up(rt) ;\r\n}\r\nint n, q ;\r\nint base[N] ;\r\nvoid mdf(int c, int mk){\r\n    int w ;\r\n    if (!(w = col[c].size())) return ;\r\n//\tprintf(\"%d %d %d %d %d\\n\", c, mk, *col[c]._be(), *-- col[c]._en(), (int)col[c].size()) ;\r\n    cov(1, 1, n, *col[c]._be(), mk > 0 ? w : 0) ;\r\n    upd(1, 1, n, *col[c]._be(), *col[c]._en() - 1, mk) ;\r\n}\r\nint val_it(){ return n - seg[1] - lcon[1] - rcon[1] ; }\r\n\r\nint main(){\r\n    int x, y, z ;\r\n    scanf(\"%d%d\", &n, &q) ;\r\n    for (int i = 1 ; i <= n ; ++ i)\r\n        scanf(\"%d\", &base[i]), col[base[i]].ins(i) ;\r\n    for (int i = 1 ; i < N ; ++ i)\r\n        mdf(i, 1) ; printf(\"%d\\n\", val_it()) ;\r\n    while (q --){\r\n        scanf(\"%d%d\", &x, &y) ; z = base[x] ;\r\n        mdf(z, -1) ; col[z].era(x) ; mdf(z, 1) ;\r\n        mdf(y, -1) ; col[y].ins(x) ; mdf(y, 1) ;\r\n        printf(\"%d\\n\", val_it()) ; base[x] = y ;\r\n    }\r\n    return 0 ;\r\n}"
+}

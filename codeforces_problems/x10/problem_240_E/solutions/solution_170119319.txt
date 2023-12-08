@@ -1,0 +1,36 @@
+{
+    "id": 170119319,
+    "contestId": 240,
+    "creationTimeSeconds": 1661831914,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 240,
+        "index": "E",
+        "name": "Road Repairs",
+        "type": "PROGRAMMING",
+        "rating": 2800,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 240,
+        "members": [
+            {
+                "handle": "wir"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1350370800
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 60,
+    "timeConsumedMillis": 186,
+    "memoryConsumedBytes": 25190400,
+    "source": "#include <iostream>\r\n#include <iomanip>\r\n#include <stdio.h>\r\n#include <set>\r\n#include <vector>\r\n#include <map>\r\n#include <cmath>\r\n#include <algorithm>\r\n#include <memory.h>\r\n#include <string>\r\n#include <sstream>\r\n \r\nusing namespace std;\r\n \r\nconst int N = 444444;\r\n \r\nint n, m, i, j, e, kw, kc, ii;\r\nint ss[N], ff[N], dd[N], cs[N], cf[N], cd[N], pred[N], last[N], x[N], was[N], c[N], w[N], deg[N], r[N];\r\n                                                                                   \r\nvoid rec(int v) {\r\n  was[v] = 1;\r\n  int j = last[v];\r\n  while (j > 0) {\r\n    if (!was[cf[j]]) rec(cf[j]);\r\n    j = pred[j];\r\n  }\r\n  w[kw++] = v;\r\n}\r\n \r\nvoid go(int v) {\r\n  c[v] = kc;\r\n  int j = last[v];\r\n  while (j > 0) {\r\n    if (!c[cs[j]]) go(cs[j]);\r\n    j = pred[j];\r\n  }\r\n}\r\n \r\nint main() {\r\n  freopen(\"input.txt\", \"r\", stdin);\r\n  freopen(\"output.txt\", \"w\", stdout);\r\n  scanf(\"%d %d\", &n, &m);\r\n  for (i=1;i<=m;i++) scanf(\"%d %d %d\", &ss[i], &ff[i], &dd[i]);\r\n  kc = n;\r\n  for (i=1;i<=n;i++) c[i] = i;\r\n  for (i=1;i<=m;i++) { cs[i] = ss[i]; cf[i] = ff[i]; cd[i] = dd[i]; }\r\n  int root = 1, cnt = 0;\r\n  while (1) {\r\n    memset(last, 0, sizeof(last));\r\n    for (i=1;i<=m;i++)\r\n      if (!cd[i]) {\r\n        pred[i] = last[cs[i]];\r\n        last[cs[i]] = i;\r\n      }\r\n    memset(was, 0, sizeof(was));\r\n    kw = 0;\r\n    for (i=1;i<=kc;i++)\r\n      if (!was[i]) rec(i);\r\n    memset(last, 0, sizeof(last));\r\n    for (i=1;i<=m;i++)\r\n      if (!cd[i]) {\r\n        pred[i] = last[cf[i]];\r\n        last[cf[i]] = i;\r\n      }\r\n    memset(c, 0, sizeof(c));\r\n    int old = kc;\r\n    kc = 0;\r\n    for (ii=kw-1;ii>=0;ii--)\r\n      if (!c[w[ii]]) {\r\n        kc++;\r\n        go(w[ii]);\r\n      }\r\n    if (kc == old) cnt++;\r\n    if (cnt > 2) {\r\n      printf(\"%d\\n\", -1);\r\n      return 0;\r\n    }\r\n    memset(last, 0, sizeof(last));\r\n    for (i=1;i<=m;i++) {\r\n      cs[i] = c[cs[i]];\r\n      cf[i] = c[cf[i]];\r\n      if (cs[i] != cf[i]) {\r\n        pred[i] = last[cs[i]];\r\n        last[cs[i]] = i;\r\n      }\r\n    }\r\n    memset(deg, 0, sizeof(deg));\r\n    for (i=1;i<=m;i++)\r\n      if (cs[i] != cf[i] && !cd[i] && cf[i] != c[root]) deg[cf[i]] = 1;\r\n    int ok = 1;\r\n    for (i=1;i<=kc;i++)\r\n      if (deg[i] == 0 && i != c[root]) {\r\n        ok = 0;\r\n        break;\r\n      }\r\n    if (ok) break;\r\n    for (i=1;i<=m;i++)\r\n      if (cs[i] != cf[i])\r\n        if (deg[cf[i]] == 0) cd[i] = 0;\r\n    root = c[root];\r\n  }\r\n  memset(last, 0, sizeof(last));\r\n  for (i=1;i<=m;i++) {\r\n    if (cd[i]) continue;\r\n    pred[i] = last[ss[i]];\r\n    last[ss[i]] = i;\r\n  }\r\n  memset(was, 0, sizeof(was));\r\n  int kr = 0;\r\n  i = 1; e = 1;\r\n  x[1] = 1;\r\n  was[1] = 1;\r\n  while (i <= e) {\r\n    j = last[x[i]];\r\n    while (j > 0) {\r\n      if (!was[ff[j]]) {\r\n        e++;\r\n        x[e] = ff[j];\r\n        if (dd[j]) r[kr++] = j;\r\n        was[x[e]] = 1;\r\n      }\r\n      j = pred[j];\r\n    }\r\n    i++;\r\n  }\r\n  if (kr > 0) sort(r, r+kr);\r\n  if (e < n) {\r\n    printf(\"%d\\n\", -1);\r\n    return 0;\r\n  }\r\n  printf(\"%d\\n\", kr);\r\n  for (i=0;i<kr-1;i++) printf(\"%d \", r[i]);\r\n  if (kr > 0) printf(\"%d\", r[kr-1]);\r\n  printf(\"\\n\");\r\n  return 0;\r\n}"
+}

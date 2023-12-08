@@ -1,0 +1,37 @@
+{
+    "id": 232016573,
+    "contestId": 1198,
+    "creationTimeSeconds": 1699503892,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1198,
+        "index": "F",
+        "name": "GCD Groups 2",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2900,
+        "tags": [
+            "greedy",
+            "number theory",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1198,
+        "members": [
+            {
+                "handle": "temmieowo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564497300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 79,
+    "timeConsumedMillis": 499,
+    "memoryConsumedBytes": 5017600,
+    "source": "#include <bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\n#pragma GCC optimize(\"O3,unroll-loops\")\r\n#define fastio ios::sync_with_stdio(0), cin.tie(0), cout.tie(0)\r\n#define int long long\r\n#define F first\r\n#define S second\r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\ntypedef tree<int,null_type,less<int>,rb_tree_tag,tree_order_statistics_node_update> order_set;\r\nstruct custom_hash {\r\n    static uint64_t splitmix64(uint64_t x) {\r\n        // http://xorshift.di.unimi.it/splitmix64.c\r\n        x += 0x9e3779b97f4a7c15;\r\n        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;\r\n        x = (x ^ (x >> 27)) * 0x94d049bb133111eb;\r\n        return x ^ (x >> 31);\r\n    }\r\n\r\n    size_t operator()(uint64_t x) const {\r\n        static const uint64_t FIXED_RANDOM = chrono::steady_clock::now().time_since_epoch().count();\r\n        return splitmix64(x + FIXED_RANDOM);\r\n    }\r\n};\r\n\r\n// debugger\r\n// ===================================\r\nbool debug_mode=true;\r\n#define cerr if(debug_mode) cerr\r\ntemplate<typename T> void _do(T x){cerr<<x<<\"\\n\";}\r\ntemplate<typename T, typename ...U> void _do(T x, U ...y){cerr << x << \", \"; _do(y...);}\r\n#define dbg(...) cerr << #__VA_ARGS__ << \" = \"; _do(__VA_ARGS__);\r\ntemplate<typename T>void debug(const T &v,int h,int w,string sv=\" \"){for(int i=0;i<h;i++){cerr<<v[i][0];for(int j=1;j<w;j++)cerr<<sv<<v[i][j];cerr<<endl;}};\r\ntemplate<typename T>void debug(const T &v,int n,string sv=\" \"){if(n!=0)cerr<<v[0];for(int i=1;i<n;i++)cerr<<sv<<v[i];cerr<<endl;};\r\ntemplate<typename T>void debug(const vector<T>&v){debug(v,v.size());}\r\ntemplate<typename T>void debug(const vector<vector<T>>&v){for(auto &vv:v)debug(vv,vv.size());}\r\ntemplate<typename T>void debug(stack<T> st){while(!st.empty()){cerr<<st.top()<<\" \";st.pop();}cerr<<endl;}\r\ntemplate<typename T>void debug(queue<T> st){while(!st.empty()){cerr<<st.front()<<\" \";st.pop();}cerr<<endl;}\r\ntemplate<typename T>void debug(deque<T> st){while(!st.empty()){cerr<<st.front()<<\" \";st.pop_front();}cerr<<endl;}\r\ntemplate<typename T>void debug(priority_queue<T> st){while(!st.empty()){cerr<<st.top()<<\" \";st.pop();}cerr<<endl;}\r\ntemplate<typename T>void debug(priority_queue<T, vector<int>, greater<int>> st){while(!st.empty()){cerr<<st.top()<<\" \";st.pop();}cerr<<endl;}\r\ntemplate<typename T>void debug(const set<T>&v){for(auto z:v)cerr<<z<<\" \";cerr<<endl;}\r\ntemplate<typename T>void debug(const multiset<T>&v){for(auto z:v)cerr<<z<<\" \";cerr<<endl;}\r\ntemplate<typename T,typename V>void debug(const map<T,V>&v){for(auto z:v)cerr<<\"[\"<<z.first<<\"]=\"<<z.second<<\", \";cerr<<endl;}\r\ntemplate<typename T,size_t size>void debug(const array<T, size> &a){for(auto z:a)cerr<<z<<\" \";cerr<<endl;}\r\n// ===================================\r\n\r\n// declare\r\nconst int MAX_N = 1e5+5;\r\nconst int INF = 2e18;\r\nconst int MOD = 1e9+7;\r\nconst double EPS = 1e-6;\r\n\r\nint n, tmp;\r\nvector<pair<int, int>> v;\r\nvector<int> p(MAX_N);\r\nbitset<MAX_N> vis;\r\n\r\nmt19937 seed(time(NULL));\r\nint rnd(int l, int r){\r\n    return uniform_int_distribution<int>(l, r)(seed);\r\n}\r\n\r\nvoid solve1(){\r\n\r\n    // init\r\n    int s=0;\r\n\r\n    // input\r\n    cin >> n;\r\n    for (int i=0 ; i<n ; i++){\r\n        cin >> tmp;\r\n        v.push_back({tmp, i});\r\n        s=__gcd(s, tmp);\r\n    }\r\n\r\n    if (s>1){\r\n        cout << \"NO\\n\";\r\n        return;\r\n    }\r\n\r\n    // process\r\n    while (clock()<0.48*CLOCKS_PER_SEC){\r\n        int x=0, y=0;\r\n        shuffle(v.begin(), v.end(), seed);\r\n\r\n        for (int i=0 ; i<n ; i++){\r\n            if (x==0 || __gcd(x, v[i].first)<x){\r\n                x=__gcd(x, v[i].first);\r\n                p[v[i].second]=0;\r\n            }else{\r\n                y=__gcd(y, v[i].first);\r\n                p[v[i].second]=1;\r\n            }\r\n        }\r\n\r\n        if (x==1 && y==1){\r\n            cout << \"YES\\n\";\r\n            for (int i=0 ; i<n ; i++){\r\n                cout << p[i]+1 << \" \";\r\n            }\r\n            cout << \"\\n\";\r\n            return;\r\n        }\r\n    }\r\n\r\n    cout << \"NO\\n\";\r\n    return;\r\n}\r\n\r\nsigned main(void){\r\n    fastio;\r\n    \r\n    int t=2;\r\n    solve1();\r\n    return 0;\r\n}"
+}

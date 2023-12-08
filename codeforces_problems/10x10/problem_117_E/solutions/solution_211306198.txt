@@ -1,0 +1,38 @@
+{
+    "id": 211306198,
+    "contestId": 117,
+    "creationTimeSeconds": 1687932132,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 117,
+        "index": "E",
+        "name": "Tree or not Tree",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 117,
+        "members": [
+            {
+                "handle": "namelessgugugu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1316790000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 36,
+    "timeConsumedMillis": 1058,
+    "memoryConsumedBytes": 18227200,
+    "source": "// LUOGU_RID: 113451185\n#include <cstdio>\r\n#include <cstring>\r\n#include <algorithm>\r\n#include <vector>\r\n#define FILEIO(filename) (freopen(filename \".in\", \"r\", stdin), freopen(filename \".out\", \"w\", stdout))\r\ntypedef long long ll;\r\ntypedef unsigned long long ull;\r\nconst int N = 100005;\r\nint n, m, q;\r\nstd::vector<int> E[N], G[N], cir;\r\nstruct SgT\r\n{\r\n    struct node\r\n    {\r\n        int len, sum, lz;\r\n    } t[N << 2];\r\n    inline int ls(int x)\r\n    {\r\n        return x << 1;\r\n    }\r\n    inline int rs(int x)\r\n    {\r\n        return x << 1 | 1;\r\n    }\r\n    inline void pushup(int x)\r\n    {\r\n        t[x].len = t[ls(x)].len + t[rs(x)].len;\r\n        t[x].sum = t[ls(x)].sum + t[rs(x)].sum;\r\n        return;\r\n    }\r\n    inline void modify(int x)\r\n    {\r\n        t[x].sum = t[x].len - t[x].sum, t[x].lz ^= 1;\r\n        return;\r\n    }\r\n    inline void pushdown(int x)\r\n    {\r\n        if(t[x].lz)\r\n            modify(ls(x)), modify(rs(x)), t[x].lz = 0;\r\n        return;\r\n    }\r\n    void build(int x, int l, int r)\r\n    {\r\n        if(l == r)\r\n            return t[x] = {1, 0, 0}, void(0);\r\n        int mid = (l + r) >> 1;\r\n        build(ls(x), l, mid), build(rs(x), mid + 1, r), pushup(x);\r\n        return;\r\n    }\r\n    void update(int x, int l, int r, int ql, int qr)\r\n    {\r\n        if(ql > qr)\r\n            return;\r\n        if (l >= ql && r <= qr)\r\n            return modify(x);\r\n        pushdown(x);\r\n        int mid = (l + r) >> 1;\r\n        if(ql <= mid)\r\n            update(ls(x), l, mid, ql, qr);\r\n        if(qr > mid)\r\n            update(rs(x), mid + 1, r, ql, qr);\r\n        pushup(x);\r\n        return;\r\n    }\r\n    int query(int x, int l, int r, int ql, int qr)\r\n    {\r\n        if(ql > qr)\r\n            return 0;\r\n        if(l >= ql && r <= qr)\r\n            return t[x].sum;\r\n        pushdown(x);\r\n        int mid = (l + r) >> 1, res = 0;\r\n        if(ql <= mid)\r\n            res += query(ls(x), l, mid, ql, qr);\r\n        if(qr > mid)\r\n            res += query(rs(x), mid + 1, r, ql, qr);\r\n        return res;\r\n    }\r\n} T;\r\nint stk[N], now;\r\nbool ins[N], vis[N];\r\nint inc[N];\r\nvoid dfs1(int x, int from)\r\n{\r\n    stk[++now] = x, ins[x] = 1, vis[x] = 1;\r\n    for(int y : E[x])\r\n    {\r\n        if(y == from)\r\n            continue;\r\n        if(ins[y])\r\n        {\r\n            for (int z = now;; --z)\r\n            {\r\n                cir.push_back(stk[z]);\r\n                inc[stk[z]] = now - z;\r\n                if (stk[z] == y)\r\n                    break;\r\n            }\r\n        }\r\n        else if(!vis[y])\r\n        {\r\n            G[x].push_back(y), G[y].push_back(x);\r\n            dfs1(y, x);\r\n        }\r\n    }\r\n    --now, ins[x] = 0;\r\n    return;\r\n}\r\nint fa[N], dep[N], col[N], siz[N], son[N], top[N], dfn[N], rks[N], tt;\r\nvoid dfs2(int x, int from, int c)\r\n{\r\n    dep[x] = dep[fa[x] = from] + 1;\r\n    if(inc[x] != -1)\r\n        c = x;\r\n    col[x] = c, siz[x] = 1;\r\n    for(int y : G[x])\r\n    {\r\n        if(y == from)\r\n            continue;\r\n        dfs2(y, x, c), siz[x] += siz[y];\r\n        son[x] = siz[son[x]] >= siz[y] ? son[x] : y;\r\n    }\r\n    return;\r\n}\r\nvoid dfs3(int x, int tp)\r\n{\r\n    top[x] = tp, rks[dfn[x] = ++tt] = x;\r\n    if(son[x])\r\n        dfs3(son[x], tp);\r\n    for(int y : G[x])\r\n        if(y != fa[x] && y != son[x])\r\n            dfs3(y, y);\r\n    return;\r\n}\r\ninline void update(int x, int y, int ty)\r\n{\r\n    while(top[x] != top[y])\r\n    {\r\n        if(dep[top[x]] < dep[top[y]])\r\n            std::swap(x, y);\r\n        T.update(1, 1, n, dfn[top[x]], dfn[x]);\r\n        x = fa[top[x]];\r\n    }\r\n    if(dep[x] > dep[y])\r\n        std::swap(x, y);\r\n    T.update(1, 1, n, dfn[x] + (ty ^ 1), dfn[y]);\r\n    return;\r\n}\r\ninline int query(int x, int y)\r\n{\r\n    int res = 0;\r\n    while(top[x] != top[y])\r\n    {\r\n        if(dep[top[x]] < dep[top[y]])\r\n            std::swap(x, y);\r\n        res += T.query(1, 1, n, dfn[top[x]], dfn[x]);\r\n        x = fa[top[x]];\r\n    }\r\n    if(dep[x] > dep[y])\r\n        std::swap(x, y);\r\n    res += T.query(1, 1, n, dfn[x], dfn[y]);\r\n    return res;\r\n}\r\nint main(void)\r\n{\r\n    scanf(\"%d%d\", &n, &q), m = n;\r\n    for (int i = 1, u, v; i <= m;++i)\r\n        scanf(\"%d%d\", &u, &v), E[u].push_back(v), E[v].push_back(u);\r\n    memset(inc, 0xff, sizeof(inc));\r\n    dfs1(1, 0);\r\n    if (m == n - 1)\r\n        cir.push_back(1), inc[1] = 0;\r\n    int rt = cir[0];\r\n    dfs2(rt, 0, -1);\r\n    dfs3(rt, rt);\r\n    T.build(1, 1, n);\r\n    for (int i = 1, u, v; i <= q; ++i)\r\n    {\r\n        scanf(\"%d%d\", &u, &v);\r\n        if(col[u] == col[v])\r\n            update(u, v, 0);\r\n        else\r\n        {\r\n            update(u, col[u], 0);\r\n            update(v, col[v], 0);\r\n            u = col[u], v = col[v];\r\n            if (std::abs(inc[u] - inc[v]) * 2 == (signed)cir.size())\r\n            {\r\n                int nxt = cir[(inc[u] + 1) % cir.size()], pre = cir[(inc[u] + cir.size() - 1) % cir.size()];\r\n                if (nxt > pre)\r\n                    std::swap(u, v);\r\n                if(inc[u] < inc[v])\r\n                    update(u, v, 0);\r\n                else\r\n                    update(u, cir.front(), 1), update(v, cir.back(), 0);\r\n            }\r\n            else\r\n            {\r\n                if (inc[u] > inc[v])\r\n                    std::swap(u, v);\r\n                if((inc[v] - inc[u]) * 2 < (signed)cir.size())\r\n                    update(u, v, 0);\r\n                else\r\n                    update(u, cir.front(), 1), update(v, cir.back(), 0);\r\n            }\r\n        }\r\n        int res = n - T.t[1].sum + (query(cir.back(), cir.front()) == (signed)cir.size());\r\n        printf(\"%d\\n\", res);\r\n    }\r\n    return 0;\r\n}"
+}

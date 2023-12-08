@@ -1,0 +1,39 @@
+{
+    "id": 236259977,
+    "contestId": 1627,
+    "creationTimeSeconds": 1701977932,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "Tinky-Winky"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 8499200,
+    "source": "#include <bits/stdc++.h>\r\n#define ll long long\r\n#define F first\r\n#define S second\r\n#define pb push_back\r\n#define B break\r\n#define C continue\r\n#define R return\r\n#define mid ((l+r)/2)\r\n#define left (2*idx)\r\n#define right (2*idx+1)\r\n\r\nusing namespace std;\r\n\r\nconst ll Mod=1e9+7 , N = 100500 , inf=1e18;\r\nll n , m , k , q , x , y , z , ans=0 , loss[N] , cost[N] , sum=0 , mn=inf , mx=0 ;\r\n\r\nvector<pair<ll,ll>>st[N];\r\nvector<ll>dp[N],en[N];\r\npair< pair<ll,ll> , pair<ll,ll> >Ed[N];\r\n\r\n\r\nvoid go(int id){\r\n    vector<pair<ll,pair<ll,ll>>>v;\r\n    for(auto r:st[id])v.pb({r.F,{0,inf}});\r\n    for(int i=0 ; i<en[id].size() ; i++)v.pb({en[id][i],{1,dp[id][i]}});\r\n    sort(v.begin(),v.end());\r\n    ll best = inf , besti=0 , can=0 ;\r\n    for(int i=0 ; i<v.size() ;  i++){\r\n        if(v[i].S.F==0){\r\n            if(!can)C;\r\n            v[i].S.S = min(v[i].S.S,best+(v[i].F-besti)*loss[id]);\r\n        }\r\n        else{\r\n            if(!can){\r\n                best=v[i].S.S;\r\n                besti=v[i].F;\r\n                can=1;\r\n            }\r\n            else{\r\n                if(v[i].S.S < best+(v[i].F-besti)*loss[id]){\r\n                    best = v[i].S.S;\r\n                    besti = v[i].F;\r\n                }\r\n            }\r\n        }\r\n    }\r\n    best = inf , besti=0 , can=0 ;\r\n    for(int i=v.size()-1 ; i>=0 ;  i--){\r\n        if(v[i].S.F==0){\r\n            if(!can)C;\r\n            v[i].S.S = min(v[i].S.S,best+(besti-v[i].F)*loss[id]);\r\n        }\r\n        else{\r\n            if(!can){\r\n                best=v[i].S.S;\r\n                besti=v[i].F;\r\n                can=1;\r\n            }\r\n            else{\r\n                if(v[i].S.S < best+(besti-v[i].F)*loss[id]){\r\n                    best = v[i].S.S;\r\n                    besti = v[i].F;\r\n                }\r\n            }\r\n        }\r\n    }\r\n    int jj=0;\r\n    for(int i=0 ; i<v.size() ; i++){\r\n        if(v[i].S.F!=0)C;\r\n        int a,b,c,d;\r\n        a=id;\r\n        b=st[id][jj].F;\r\n        c=Ed[st[id][jj].S].S.F;\r\n        d=Ed[st[id][jj].S].S.S;\r\n        ll win=cost[st[id][jj].S];\r\n        int ii = lower_bound(en[c].begin(),en[c].end(),d)-en[c].begin();\r\n        dp[c][ii]=min(dp[c][ii],v[i].S.S-win);\r\n        jj++;\r\n    }\r\n}\r\n\r\nint main()\r\n{\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n\r\n    int t=1;\r\n    cin >> t ;\r\n    while(t--){\r\n        bool ok=1;\r\n        cin >> n >> m >> k ;\r\n        for(int i=1 ; i<=n ; i++){\r\n            cin >> loss[i];\r\n        }\r\n        for(int i=1 ; i<=n ; i++){\r\n            st[i].clear();\r\n            en[i].clear();\r\n            dp[i].clear();\r\n        }\r\n        en[1].pb(1);\r\n        dp[1].pb(0);\r\n        for(int i=1 ; i<=k ; i++){\r\n            ll a,b,c,d;\r\n            cin >> a >> b >> c >> d >> x ;\r\n            Ed[i]={{a,b},{c,d}};\r\n            st[a].pb({b,i});\r\n            en[c].pb(d);\r\n            cost[i]=x;\r\n        }\r\n        for(int i=1 ; i<=n ; i++){\r\n            dp[i]=en[i];\r\n            sort(st[i].begin(),st[i].end());\r\n            sort(en[i].begin(),en[i].end());\r\n            for(int j=0 ; j<dp[i].size() ; j++)dp[i][j]=inf;\r\n        }\r\n        dp[1][0]=0;\r\n        for(int i=1 ; i<=n ; i++){\r\n            go(i);\r\n        }\r\n        ans=inf;\r\n        for(int i=0 ; i<en[n].size() ; i++){\r\n            if(dp[n][i]==inf)C;\r\n            ans = min(ans , (m-en[n][i])*loss[n] + dp[n][i]);\r\n        }\r\n        cout << (ans==inf ? -1 : ans) << '\\n';\r\n    }\r\n    return 0;\r\n}\r\n"
+}

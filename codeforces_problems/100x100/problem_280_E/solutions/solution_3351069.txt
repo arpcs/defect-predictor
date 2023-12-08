@@ -1,0 +1,39 @@
+{
+    "id": 3351069,
+    "contestId": 280,
+    "creationTimeSeconds": 1363609118,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "-XraY-"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 328,
+    "memoryConsumedBytes": 1126400,
+    "source": "#include <cstdio>\r\n#include <cstdlib>\r\n#include <cmath>\r\n#include <algorithm>\r\n#include <iostream>\r\n#include <cstring>\r\n#include <vector>\r\n#include <string>\r\n#include <set>\r\n#include <map>\r\n#include <cassert>\r\n#include <ctime>\r\n\r\n\r\nusing namespace std;\r\n\r\n#ifdef WIN32\r\n    #define LLD \"%I64d\"\r\n#else\r\n    #define LLD \"%lld\"\r\n#endif\r\n\r\ntypedef pair<int, int> pii;\r\ntypedef long long ll;\r\ntypedef vector<int> vi;\r\ntypedef vector<vi> vvi;\r\ntypedef vector<bool> vb;\r\ntypedef vector<vb> vvb;\r\ntypedef vector<ll> vll;\r\ntypedef vector<vll> vvll;\r\n\r\nll rdtsc() {\r\n    ll tmp;\r\n    asm(\"rdtsc\" : \"=A\"(tmp));\r\n    return tmp;\r\n}\r\n\r\n#define TASKNAME \"text\"\r\n#define pb push_back\r\n#define mp make_pair\r\n#define EPS (1e-9)\r\n#define INF ((int)1e9)\r\n#define sqr(x) ((x) * (x))         \r\n#define eprintf(...) fprintf(stderr, __VA_ARGS__)\r\n#define sz(x) ((int)(x).size())\r\n\r\nconst int maxn = 6000;\r\nint A, B;\r\nint n, q;\r\nint x[maxn];\r\n\r\nstruct func {\r\n\tdouble a, b, c;\r\n\tdouble l, r;\r\n\t\r\n\tfunc() {}\r\n\tfunc(double _a, double _b, double _c, double _l, double _r) : a(_a), b(_b), c(_c), l(_l), r(_r) {}\r\n\t\r\n\tinline double get(double x) const {\r\n\t\treturn (a * x + b) * x + c;\r\n\t}\r\n\t\r\n\tinline void operator >>= (const double d) {\r\n\t\tc += d * (d * a - b);\r\n\t\tb -= 2 * a * d;\r\n\t}\r\n\t\r\n\tinline void operator += (const func &f) {\r\n\t\ta += f.a, b += f.b, c += f.c;\r\n\t}\r\n\t\r\n\tinline double getMiddle() const {\r\n\t\treturn -b / 2.0 / a;\r\n\t}\r\n\t\r\n\tinline void print() {\r\n\t\teprintf(\"%.3lf %.3lf %.3lf %.3lf %.3lf\\n\", a, b, c, l, r);\r\n\t}\r\n};\r\n\r\nfunc fs[maxn];\r\nint cntfs;\r\n\r\ndouble res;\r\ndouble ans[maxn];\r\n\r\nvoid solve(int iter) {\r\n\tif (!iter) {\r\n\t\tcntfs = 1;\r\n\t\tfs[0] = func(1, 0, 0, 1, q);\r\n\t\tfs[0] >>= x[0];\r\n\t\tsolve(1);\r\n\t\treturn;\r\n\t}\r\n\t\r\n\tint center;\r\n\tfor (center = 0; center < cntfs; center++) {\r\n\t\tif (fs[center].getMiddle() >= fs[center].r - EPS)\r\n\t\t\tcontinue;\r\n\t\tbreak;\r\n\t}\r\n\t\r\n\tdouble minX = (center == cntfs ? fs[cntfs - 1].r : max(fs[center].l, fs[center].getMiddle()));\r\n\tdouble minY = center < cntfs ? fs[center].get(minX) : fs[cntfs - 1].get(minX);\r\n// \teprintf(\"minX = %.3lf, minY = %.3lf\\n\", minX, minY);\r\n\tif (iter == n) {\r\n\t\tres = minY;\r\n\t\tans[iter - 1] = minX;\r\n\t\treturn;\r\n\t}\r\n\tif (A < B) {\r\n\t\tif (center < cntfs && fs[center].l + EPS < minX && minX + EPS < fs[center].r) {\r\n\t\t\tcntfs += 2;\r\n\t\t\tfor (int i = cntfs - 1; i > center + 1; i--)\r\n\t\t\t\tfs[i] = fs[i - 2];\r\n\t\t\tfs[center + 2].l = fs[center].r = minX;\r\n\t\t\t++center;\r\n\t\t\tfs[center] = func(0, 0, fs[center - 1].get(minX), minX, minX);\r\n\t\t} else {\r\n\t\t\tcntfs += 1;\r\n\t\t\tfor (int i = cntfs - 1; i > center; i--)\r\n\t\t\t\tfs[i] = fs[i - 1];\r\n\t\t\tfs[center].l = fs[center].r = minX;\r\n\t\t}\r\n\t\tfs[center].a = fs[center].b = 0;\r\n\t\tfs[center].c = minY;\r\n\t}\r\n\t\r\n\tfunc toAdd = func(1, 0, 0, -1, -1);\r\n\ttoAdd >>= x[iter];\r\n\tfor (int i = 0; i < cntfs; i++) {\r\n\t\tfs[i].l += (i <= center ? A : B);\r\n\t\tfs[i].r += (i < center ? A : B);\r\n\t\tfs[i] >>= (i < center ? A : B);\r\n\t\tfs[i] += toAdd;\r\n\t}\r\n// \tfor (int i = 0; i < cntfs; i++)\r\n// \t\tfs[i].print();\r\n\twhile (cntfs && fs[cntfs - 1].l >= q - EPS)\r\n\t\tcntfs--;\r\n\tfs[cntfs - 1].r = min(fs[cntfs - 1].r, (double)q);\r\n\t\r\n\tsolve(iter + 1);\r\n\tdouble &cur = ans[iter - 1];\r\n\tcur = ans[iter];\r\n\tif (cur > minX + B + EPS)\r\n\t\tcur -= B;\r\n\telse { \r\n\t\tif (cur < minX + A - EPS)\r\n\t\t\tcur -= A;\r\n\t\telse\r\n\t\t\tcur = minX;\r\n\t}\r\n}\r\n\r\nint main() {\r\n\tsrand(rdtsc());\r\n#ifdef DEBUG\r\n\tfreopen(TASKNAME\".in\", \"r\", stdin);\r\n\tfreopen(TASKNAME\".out\", \"w\", stdout);\r\n#endif\r\n\t\r\n\twhile (scanf(\"%d%d%d%d\", &n, &q, &A, &B) >= 1) {\r\n\t\tfor (int i = 0; i < n; i++)\r\n\t\t\tscanf(\"%d\", &x[i]);\r\n\t\t\r\n\t\tsolve(0);\r\n\t\tfor (int i = 0; i < n; i++)\r\n\t\t\tprintf(\"%.18lf%c\", ans[i], \" \\n\"[i == n - 1]);\r\n\t\tprintf(\"%.18lf\\n\", res);\r\n// \t\t\t\tbreak;\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

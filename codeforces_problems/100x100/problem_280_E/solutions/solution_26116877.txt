@@ -1,0 +1,39 @@
+{
+    "id": 26116877,
+    "contestId": 280,
+    "creationTimeSeconds": 1491294785,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "ChillingDream"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 101,
+    "timeConsumedMillis": 186,
+    "memoryConsumedBytes": 23859200,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define ms(a, w) memset(a, w, sizeof(a))\r\n#define fi first\r\n#define se second\r\n#define m2(x) ((x) * (x))\r\n\r\ntypedef long long LL;\r\ntypedef pair <int, int > ii;\r\n\r\nconst int MAXN = 300000 + 10;\r\nconst int MAXM = 100 + 10;\r\nconst int MOD = 51061;\r\nconst int INF = 1000000001;\r\nconst double EPS = 1e-10;\r\n\r\nint q;\r\n\r\nstruct Node {\r\n\tdouble x, y;\r\n\tdouble px, pk, pb;\r\n\tNode *ch[2], *p;\r\n\tNode () {\r\n\t\tpx = pk = pb = 0;\r\n\t}\r\n\tvoid add (double v) {\r\n\t\tx += v;\r\n\t\tpx += v;\r\n\t\tpb -= pk * v;\r\n\t}\r\n\tvoid add (double k, double b) {\r\n\t\tpk += k;\r\n\t\tpb += b;\r\n\t\ty += k * x + b;\r\n\t}\r\n\tvoid down () {\r\n\t\tif (fabs(px) > EPS) {\r\n\t\t\tch[0]->add(px);\r\n\t\t\tch[1]->add(px);\r\n\t\t\tpx = 0;\r\n\t\t}\r\n\t\tif (fabs(pk) > EPS || fabs(pb) > EPS) {\r\n\t\t\tch[0]->add(pk, pb);\r\n\t\t\tch[1]->add(pk, pb);\r\n\t\t\tpk = pb = 0;\r\n\t\t}\r\n\t}\r\n\tvoid link (Node *x, bool dir) {\r\n\t\tch[dir] = x;\r\n\t\tx->p = this;\r\n\t}\r\n\tbool dir () const {\r\n\t\treturn p->ch[1] == this;\r\n\t}\r\n}*nil, *root, node[MAXN];\r\n\r\nvoid rotate (Node *now, bool dir) {\r\n\tNode *tmp = now->ch[dir];\r\n\tif (now == root)\r\n\t\troot = tmp;\r\n\telse\r\n\t\tnow->p->link(tmp, now->dir());\r\n\tnow->link(tmp->ch[dir ^ 1], dir);\r\n\ttmp->link(now, dir ^ 1);\r\n}\r\n\r\nvoid splay (Node *now) {\r\n\tstatic stack <Node*> sta;\r\n\tNode *cur = now;\r\n\tsta.push(cur);\r\n\tfor (; cur != root; cur = cur->p)\r\n\t\tsta.push(cur->p);\r\n\twhile (!sta.empty()) {\r\n\t\tsta.top()->down();\r\n\t\tsta.pop();\r\n\t}\r\n\twhile (now != root) {\r\n\t\tNode *fa = now->p;\r\n\t\tbool d1 = now->dir();\r\n\t\tif (fa == root) {\r\n\t\t\trotate(fa, d1);\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tNode *pa = fa->p;\r\n\t\tbool d2 = fa->dir();\r\n\t\tif (d1 ^ d2) {\r\n\t\t\trotate(fa, d1);\r\n\t\t\trotate(pa, d2);\r\n\t\t}\r\n\t\telse {\r\n\t\t\trotate(pa, d2);\r\n\t\t\trotate(fa, d1);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nint tnode;\r\n\r\nNode* newNode () {\r\n\tnode[tnode].ch[0] = nil;\r\n\tnode[tnode].ch[1] = nil;\r\n\treturn &node[tnode++];\r\n}\r\n\r\nvoid init () {\r\n\troot = nil = newNode();\r\n}\r\n\r\nvoid insert (Node* &now, double x, double y, Node *fa = nil) {\r\n\tif (now == nil) {\r\n\t\tnow = newNode();\r\n\t\tnow->x = x;\r\n\t\tnow->y = y;\r\n\t\tnow->p = fa;\r\n\t\tsplay(now);\r\n\t\treturn;\r\n\t}\r\n\tnow->down();\r\n\tinsert(now->ch[x > now->x], x, y, now);\r\n}\r\n\r\nNode* getZero (Node* now) {\r\n\tif (now == nil)\r\n\t\treturn nil;\r\n\tnow->down();\r\n\tif (now->y > 0 || now->x > q) {\r\n\t\tNode *tmp = getZero(now->ch[0]);\r\n\t\tif (tmp != nil)\r\n\t\t\treturn tmp;\r\n\t\treturn now;\r\n\t}\r\n\telse {\r\n\t\tNode *tmp = getZero(now->ch[1]);\r\n\t\tif (tmp != nil && tmp->y < 0)\r\n\t\t\treturn tmp;\r\n\t\treturn now;\r\n\t}\r\n}\r\n\r\nNode* getMax (Node* now) {\r\n\tif (now == nil)\r\n\t\treturn nil;\r\n\twhile (now->ch[1] != nil) {\r\n\t\tnow->down();\r\n\t\tnow = now->ch[1];\r\n\t}\r\n\treturn now;\r\n}\r\n\r\nNode* getMin (Node* now) {\r\n\tif (now == nil)\r\n\t\treturn nil;\r\n\twhile (now->ch[0] != nil) {\r\n\t\tnow->down();\r\n\t\tnow = now->ch[0];\r\n\t}\r\n\treturn now;\r\n}\r\n\r\ndouble x[MAXN], y[MAXN];\r\n\r\ndouble f (double k, double b, double x) {\r\n\treturn k * x + b;\r\n}\r\n\r\ndouble getZero (double x1, double y1, double x2, double y2) {\r\n\tif (fabs(y1 - y2) < EPS)\r\n\t\treturn x1;\r\n\treturn (x2 * y1 - x1 * y2) / (y1 - y2);\r\n}\r\n\r\nvoid print (Node *now) {\r\n\tif (now == nil)\r\n\t\treturn;\r\n\tnow->down();\r\n\tprint(now->ch[0]);\r\n\tcout << \"(\" << now->x << \",\" << now->y << \")\" << endl;\r\n\tprint(now->ch[1]);\r\n}\r\n\r\ndouble getZero () {\r\n\tNode *cur = getZero(root);\r\n//\tprint(root);\r\n//\tcout << \"**\" << endl;\r\n\tsplay(cur);\r\n\tif (cur->y > 0)\r\n\t\treturn cur->x;\r\n\tNode *R = getMin(cur->ch[1]);\r\n\tif (R->y < 0)\r\n\t\treturn q;\r\n\treturn min((double)q, getZero(cur->x, cur->y, R->x, R->y));\r\n}\r\n\r\nint main () {\r\n\tios::sync_with_stdio(false);\r\n//\tfreopen(\"1.in\", \"r\", stdin);\r\n//\tfreopen(\"2.out\", \"w\", stdout);\r\n\tint n, a, b;\r\n\tcin >> n >> q >> a >> b;\r\n\tfor (int i = 1; i <= n; i++)\r\n\t\tcin >> x[i];\r\n\tinit();\r\n\tinsert(root, q, f(2, -2 * x[1], q));\r\n\tinsert(root, 1, f(2, -2 * x[1], 1));\r\n\ty[1] = x[1];\r\n\tfor (int i = 2; i <= n; i++) {\r\n//\t\tcout << \"##\" << endl;\r\n\t\tdouble X = y[i - 1];\r\n\t\tif (root->y <= 0) {\r\n\t\t\troot->ch[1]->add(b);\r\n\t\t\troot->x += a;\r\n\t\t\troot->ch[0]->add(a);\r\n\t\t}\r\n\t\telse\r\n\t\t\troot->add(b);\r\n\t\tinsert(root, X + a, 0);\r\n\t\tinsert(root, X + b, 0);\r\n//\t\tprint(root);\r\n//\t\tcout << \"**\" << endl;\r\n\t\troot->add(2, -2 * x[i]);\r\n\t\ty[i] = getZero();\r\n//\t\tcout << y[i] << endl;\r\n\t}\r\n\tfor (int i = n - 1; i >= 1; i--) {\r\n\t\tif (y[i] + b < y[i + 1])\r\n\t\t\ty[i] = y[i + 1] - b;\r\n\t\telse if (y[i] + a > y[i + 1])\r\n\t\t\ty[i] = y[i + 1] - a;\r\n\t}\r\n\tcout.setf(ios::fixed);\r\n\tcout.precision(10);\r\n\tfor (int i = 1; i <= n; i++)\r\n\t\tcout << y[i] << \" \";\r\n\tcout << endl;\r\n\tdouble ans = 0;\r\n\tfor (int i = 1; i <= n; i++)\r\n\t\tans += m2(y[i] - x[i]);\r\n\tcout << ans << endl;\r\n\r\n\treturn 0;\r\n}\r\n\r\n"
+}

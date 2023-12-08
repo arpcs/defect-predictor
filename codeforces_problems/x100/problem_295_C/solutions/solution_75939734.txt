@@ -1,0 +1,38 @@
+{
+    "id": 75939734,
+    "contestId": 295,
+    "creationTimeSeconds": 1586393014,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "islammohsen"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 2969600,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\n\r\nconst int mod = 1e9 + 7;\r\n\r\nint add(int a, int b)\r\n{\r\n\treturn (a + b) % mod;\r\n}\r\n\r\nint mul(int a, int b)\r\n{\r\n\treturn (1ll * a * b) % mod;\r\n}\r\n\r\nint fastpow(int base, int p)\r\n{\r\n\tif(!p)\r\n\t\treturn 1;\r\n\tint ans = fastpow(base, p / 2);\r\n\tans = mul(ans, ans);\r\n\tif(p & 1)\r\n\t\tans = mul(ans, base);\r\n\treturn ans;\r\n}\r\n\r\nclass state{\r\npublic:\r\n\tint number_50, number_100;\r\n\tbool left_side;\r\n\tstate(int number_50, int number_100, bool left_side)\r\n\t{\r\n\t\tthis->number_50 = number_50;\r\n\t\tthis->number_100 = number_100;\r\n\t\tthis->left_side = left_side;\r\n\t}\r\n};\r\n\r\nvector<pair<state, int>> g[51][51][2];\r\nint level[51][51][2], dp[51][51][2], fact[51], inv[51], number_50 = 0, number_100 = 0;\r\n\r\nint solve(int num_50, int num_100, bool left_side)\r\n{\r\n\tif(num_50 == number_50 && num_100 == number_100 && !left_side)\r\n\t\treturn 1;\r\n\tint &ans = dp[num_50][num_100][left_side];\r\n\tif(~ans)\r\n\t\treturn ans;\r\n\tans = 0;\r\n\tfor(auto &v : g[num_50][num_100][left_side])\r\n\t{\r\n\t\tstate new_state = v.first;\r\n\t\tint ways = v.second;\r\n\t\tans = add(ans, mul(solve(new_state.number_50, new_state.number_100, new_state.left_side), ways));\r\n\t}\r\n\treturn ans;\r\n}\r\n\r\nvoid pre()\r\n{\r\n\tfact[0] = inv[0] = 1;\r\n\tfor(int i = 1; i < 51; i++)\r\n\t\tfact[i] = mul(fact[i - 1], i), inv[i] = fastpow(fact[i], mod - 2);\r\n}\r\n\r\nint ncr(int n, int r)\r\n{\r\n\tif(r > n)\r\n\t\treturn 0;\r\n\treturn mul(fact[n], mul(inv[r], inv[n - r]));\r\n}\r\n\r\nint main()\r\n{\r\n\tios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);\r\n\tpre();\r\n\tint n, k;\r\n\tcin >> n >> k;\r\n\tfor(int i = 0; i < n; i++)\r\n\t{\r\n\t\tint a;\r\n\t\tcin >> a;\r\n\t\tif(a == 50)\r\n\t\t\tnumber_50++;\r\n\t\telse\r\n\t\t\tnumber_100++;\r\n\t}\r\n\tfor(int i = 0; i < 51; i++)\r\n\t\tfor(int j = 0; j < 51; j++)\r\n\t\t\tlevel[i][j][0] = level[i][j][1] = 1e9;\r\n\tlevel[number_50][number_100][1] = 0;\r\n\tqueue<state> que;\r\n\tque.push(state(number_50, number_100, 1));\r\n\twhile(que.size())\r\n\t{\r\n\t\tstate cur_state = que.front();\r\n\t\tque.pop();\r\n\t\tfor(int tk1 = 0; tk1 <= cur_state.number_50; tk1++)\r\n\t\t{\r\n\t\t\tfor(int tk2 = 0; tk2 <= cur_state.number_100; tk2++)\r\n\t\t\t{\r\n\t\t\t\tif(tk1 * 50 + tk2 * 100 > k || (tk1 == 0 && tk2 == 0))\r\n\t\t\t\t\tcontinue;\r\n\t\t\t\tint other_left = number_50 - cur_state.number_50 + tk1;\r\n\t\t\t\tint other_right = number_100 - cur_state.number_100 + tk2;\r\n\t\t\t\tbool left_side = !cur_state.left_side;\r\n\t\t\t\tint new_len = level[cur_state.number_50][cur_state.number_100][cur_state.left_side] + 1;\r\n\t\t\t\tif(new_len <= level[other_left][other_right][left_side])\r\n\t\t\t\t{\r\n\r\n\t\t\t\t\tg[cur_state.number_50][cur_state.number_100][cur_state.left_side].push_back({state(other_left, other_right, left_side), mul(ncr(cur_state.number_50, tk1), ncr(cur_state.number_100, tk2))});\r\n\t\t\t\t\tif(new_len < level[other_left][other_right][left_side])\r\n\t\t\t\t\t\tque.push(state(other_left, other_right, left_side));\r\n\t\t\t\t\tlevel[other_left][other_right][left_side] = new_len;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tif(level[number_50][number_100][0] == 1e9)\r\n\t{\r\n\t\tcout << -1 << '\\n' << 0;\r\n\t\treturn 0;\r\n\t}\r\n\tcout << level[number_50][number_100][0] << '\\n';\r\n\tmemset(dp, -1, sizeof dp);\r\n\tcout << solve(number_50, number_100, 1);\r\n\treturn 0;\r\n}\r\n"
+}

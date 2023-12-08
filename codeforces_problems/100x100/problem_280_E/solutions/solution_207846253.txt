@@ -1,0 +1,39 @@
+{
+    "id": 207846253,
+    "contestId": 280,
+    "creationTimeSeconds": 1685445423,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "numberes"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 186,
+    "memoryConsumedBytes": 409600,
+    "source": "#include<bits/stdc++.h>\r\n#define fi first\r\n#define se second\r\n#define pb push_back\r\n#define mp make_pair\r\n#define pii pair<int, int>\r\n#define ll long long\r\nusing namespace std;\r\nint n, m, p, q; const double eps = 1e-8;\r\nint a[6005]; double b[6005];\r\nvector<double> g;\r\nstruct seg {\r\n\tdouble k, b;\r\n\tint f(double x) {\r\n\t\treturn k * x + b;\r\n\t}\r\n\tseg(double _k, double _b) {\r\n\t\tk = _k; b = _b;\r\n\t}\r\n\tseg operator + (const seg &x) {\r\n\t\tseg y(0, 0); y.k = k + x.k; y.b = b + x.b;\r\n\t\treturn y;\r\n\t}\r\n\tdouble bot() {\r\n\t\treturn -b / k;\r\n\t}\r\n};\r\nvector<seg> l;\r\nint Abs(double x) {\r\n\treturn x > eps ? 1 : x < -eps ? -1 : 0;\r\n}\r\ndouble fnd() {\r\n\tif(Abs(l[0].f(g[0])) > 0) return g[0];\r\n\tif(Abs(l.back().f(g.back())) < 0) return g.back();\r\n\tfor(int i = 0; i < (int)l.size(); i++)\r\n\t\tif(Abs(l[i].f(g[i])) <= 0 && Abs(l[i].f(g[i + 1])) >= 0)\r\n\t\t\treturn l[i].bot();\r\n\tfor(int i = 1; i < (int)g.size() - 1; i++)\r\n\t\tif(Abs(l[i - 1].f(g[i])) < 0 && Abs(l[i].f(g[i])) > 0)\r\n\t\t\treturn g[i];\r\n\tassert(0);\r\n}\r\nvoid calc() {\r\n\tint cur = -1;\r\n\tfor(int i = 0; i < (int)l.size(); i++)\r\n\t\tif(Abs(l[i].f(g[i])) <= 0 && Abs(l[i].f(g[i + 1])) >= 0)\r\n\t\t\tcur = i;\r\n\tif(cur == -1 && Abs(l.back().f(g.back())) < 0) cur = l.size();\r\n\tfor(int i = 0; i < (int)l.size(); i++) {\r\n\t\tdouble x = l[i].bot();\r\n\t\tif(cur == -1 && !i) {\r\n\t\t\tx = g[0]; cur++; g[0] += p; g[1] += q;\r\n\t\t\tl.insert(l.begin(), seg(0, 0));\r\n\t\t\tg.insert(g.begin() + 1, x + q);\r\n\t\t\tl[1].b -= q * l[1].k; // right shift q\r\n\t\t\ti++; continue;\r\n\t\t}\r\n\t\tif(cur == (int) l.size() && i == (int)l.size() - 1) {\r\n\t\t\tx = g.back(); cur--; g[i] += p; g[i + 1] += q;\r\n\t\t\tl.insert(l.begin() + i, seg(0, 0));\r\n\t\t\tg.insert(g.begin() + i, x + p);\r\n\t\t\tl[i].b -= p * l[i].k; // right shift p\r\n\t\t\ti++; continue;\r\n\t\t}\r\n\t\tif(i < cur) {g[i] += p; l[i].b -= p * l[i].k;}\r\n\t\telse if(i > cur) {g[i + 1] += q; l[i].b -= q * l[i].k;}\r\n\t\tif(i != cur) continue;\r\n\t\tg[i] += p; g[i + 1] += q;\r\n\t\tg.insert(g.begin() + i + 1, x + p);\r\n\t\tg.insert(g.begin() + i + 2, x + q);\r\n\t\tl.insert(l.begin() + i + 1, seg(0, 0));\r\n\t\tl.insert(l.begin() + i + 2, l[i]);\r\n\t\tl[i].b -= l[i].k * p;\r\n\t\tl[i + 2].b -= l[i + 2].k * q;\r\n\t\ti += 2;\r\n\t}\r\n\twhile(g.size() >= 2 && Abs(g[(int)g.size() - 2] - m) >= 0) {\r\n\t\tg.pop_back(); l.pop_back();\r\n\t}\r\n\tg.back() = m;\r\n}\r\nint main() {\r\n\t// freopen(\"anxious.in\", \"r\", stdin);\r\n\t// freopen(\"anxious.out\", \"w\", stdout);\r\n\tscanf(\"%d %d %d %d\", &n, &m, &p, &q);\r\n\tfor(int i = 1; i <= n; i++) scanf(\"%d\", &a[i]);\r\n\tl.pb(seg(2, -2 * a[1])); g.pb(1); g.pb(m);\r\n\tfor(int i = 2; i <= n; i++) {\r\n\t\tb[i - 1] = fnd();\r\n\t\tcalc();\r\n\t\tfor(auto &x : l) x = x + seg(2, -2 * a[i]);\r\n\t}\r\n\tb[n] = fnd();\r\n\tfor(int i = n; i >= 2; i--) {\r\n\t\tif(Abs(max(b[i] - q, 1.0) - b[i - 1]) > 0) b[i - 1] = max(b[i] - q, 1.0);\r\n\t\telse if(Abs(b[i - 1] - max(b[i] - p, 1.0)) > 0) b[i - 1] = max(b[i] - p, 1.0);\r\n\t}\r\n\tdouble ans = 0;\r\n\tfor(int i = 1; i <= n; i++) {\r\n\t\tprintf(\"%.7lf \", b[i]);\r\n\t\tans += (b[i] - a[i]) * (b[i] - a[i]);\r\n\t}\r\n\tprintf(\"\\n%.7lf\\n\", ans);\r\n\treturn 0;\r\n}"
+}

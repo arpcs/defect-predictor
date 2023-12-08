@@ -1,0 +1,38 @@
+{
+    "id": 224874700,
+    "contestId": 117,
+    "creationTimeSeconds": 1695563499,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 117,
+        "index": "E",
+        "name": "Tree or not Tree",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 117,
+        "members": [
+            {
+                "handle": "lizhuo12345"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1316790000
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 20889600,
+    "source": "// LUOGU_RID: 126017435\n#include<iostream>\r\n#include<queue>\r\n#include<cstdio>\r\nusing namespace std;\r\nconst int maxn=1e5+5;\r\nint n,m,tot,u,v,tim,tim2,nxt[maxn<<2],head[maxn],ver[maxn<<2],up[maxn];\r\nint d[maxn],fa[maxn],siz[maxn],son[maxn],bel[maxn],id[maxn],cyc_id[maxn],in[maxn],vis[maxn],f[maxn];\r\nqueue <int> q;\r\nstruct Segment_tree{\r\n\tstruct node{\r\n\t\tint l,r,w,tag;\r\n\t} p[maxn<<2];\r\n\tvoid push_up(int u){\r\n\t\tp[u].w=p[u<<1].w+p[u<<1|1].w;\r\n\t}\r\n\tvoid push_down(int u){\r\n\t\tif(p[u].tag){\r\n\t\t\tp[u<<1].w=p[u<<1].r-p[u<<1].l+1-p[u<<1].w;\r\n\t\t\tp[u<<1|1].w=p[u<<1|1].r-p[u<<1|1].l+1-p[u<<1|1].w;\r\n\t\t\tp[u<<1].tag^=1;p[u<<1|1].tag^=1;\r\n\t\t\tp[u].tag=0;\r\n\t\t}\r\n\t}\r\n\tvoid build(int u,int l,int r){\r\n\t\tp[u].l=l;p[u].r=r;\r\n\t\tif(l==r){\r\n\t\t\tp[u].w=1;\r\n\t\t\treturn ;\r\n\t\t}\r\n\t\tint mid=(l+r)>>1;\r\n\t\tbuild(u<<1,l,mid);build(u<<1|1,mid+1,r);\r\n\t\tpush_up(u);\r\n\t}\r\n\tvoid update(int u,int l,int r){\r\n\t\tif(l>r) return ;\r\n\t\tif(p[u].l>=l&&p[u].r<=r){\r\n\t\t\tp[u].w=p[u].r-p[u].l+1-p[u].w;\r\n\t\t\tp[u].tag^=1;\r\n\t\t\treturn ;\r\n\t\t}\r\n\t\tpush_down(u);\r\n\t\tint mid=(p[u].l+p[u].r)>>1;\r\n\t\tif(mid>=l)\r\n\t\t\tupdate(u<<1,l,r);\r\n\t\tif(mid<r)\r\n\t\t\tupdate(u<<1|1,l,r);\r\n\t\tpush_up(u);\r\n\t}\r\n\tint ask(int u,int l,int r){\r\n\t\tif(p[u].l>=l&&p[u].r<=r)\r\n\t\t\treturn p[u].w;\r\n\t\tpush_down(u);\r\n\t\tint mid=(p[u].l+p[u].r)>>1,re=0;\r\n\t\tif(mid>=l)\r\n\t\t\tre+=ask(u<<1,l,r);\r\n\t\tif(mid<r)\r\n\t\t\tre+=ask(u<<1|1,l,r);\r\n\t\treturn re;\r\n\t}\r\n} t,cyc;\r\nvoid add(int x,int y){\r\n\tnxt[++tot]=head[x];head[x]=tot;ver[tot]=y;\r\n}\r\nvoid dfs_cyc(int x,int fa){\r\n\tcyc_id[x]=++tim2;\r\n\tf[tim2]=x;\r\n\tfor(int i=head[x];i;i=nxt[i])\r\n\t\tif(ver[i]!=fa&&!vis[ver[i]]&&!cyc_id[ver[i]])\r\n\t\t\tdfs_cyc(ver[i],x);\r\n}\r\nvoid dfs_cyc2(int x,int fa,int f){\r\n\tbel[x]=f;\r\n\tfor(int i=head[x];i;i=nxt[i])\r\n\t\tif(ver[i]!=fa&&vis[ver[i]])\r\n\t\t\tdfs_cyc2(ver[i],x,f);\r\n}\r\nvoid dfs1(int x,int father){\r\n\td[x]=d[father]+1;\r\n\tfa[x]=father;\r\n\tsiz[x]=1;\r\n\tfor(int i=head[x];i;i=nxt[i])\r\n\t\tif(vis[ver[i]]&&ver[i]!=father){\r\n\t\t\tdfs1(ver[i],x);\r\n\t\t\tsiz[x]+=siz[ver[i]];\r\n\t\t\tif(siz[ver[i]]>siz[son[x]])\r\n\t\t\t\tson[x]=ver[i];\r\n\t\t}\r\n}\r\nvoid dfs2(int x,int top){\r\n\tup[x]=top;\r\n\tid[x]=++tim;\r\n\tif(son[x])\r\n\t\tdfs2(son[x],top);\r\n\tfor(int i=head[x];i;i=nxt[i])\r\n\t\tif(ver[i]!=fa[x]&&vis[ver[i]]&&ver[i]!=son[x])\r\n\t\t\tdfs2(ver[i],ver[i]);\r\n}\r\nvoid work(int u,int v){\r\n\twhile(up[u]!=up[v]){\r\n\t\t//cout<<up[u]<<\" ddd \"<<up[v]<<endl;\r\n\t\tif(d[up[u]]<d[up[v]])\r\n\t\t\tswap(u,v);\r\n\t\t//cout<<up[u]<<\"     \"<<u<<endl;\r\n\t\tt.update(1,id[up[u]],id[u]);\r\n\t\tu=fa[up[u]];\r\n\t}\r\n\tif(u==v) return ;\r\n\tif(d[u]<d[v])\r\n\t\tswap(u,v);\r\n\t//cout<<v<<\"  uv   \"<<u<<endl;\r\n\tt.update(1,id[son[v]],id[u]);\r\n}\r\nint pos(int x){\r\n\tif(x>tim2) return x-tim2;\r\n\telse if(x<=0) return x+tim2;\r\n\treturn x;\r\n}\r\nint main(){\r\n\tscanf(\"%d%d\",&n,&m);\r\n\tfor(int i=1;i<=n;++i){\r\n\t\tscanf(\"%d%d\",&u,&v);\r\n\t\tadd(u,v);add(v,u);//\u5173\u7740\u7684\u8fb9\r\n\t\t++in[u];++in[v];\r\n\t}\r\n\tfor(int i=1;i<=n;++i)\r\n\t\tif(in[i]==1)\r\n\t\t\tq.push(i),vis[i]=1;\r\n\twhile(!q.empty()){\r\n\t\tint x=q.front();q.pop();\r\n\t\tfor(int i=head[x];i;i=nxt[i])\r\n\t\t\tif(!vis[ver[i]]){\r\n\t\t\t\t--in[ver[i]];\r\n\t\t\t\tif(in[ver[i]]==1){\r\n\t\t\t\t\tvis[ver[i]]=1;\r\n\t\t\t\t\tq.push(ver[i]);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t}\r\n\tfor(int i=1;i<=n;++i)\r\n\t\tif(!vis[i]){//\u662f\u73af\u4e0a\u7684\u70b9\r\n\t\t\tdfs_cyc(i,0);\r\n\t\t\tbreak;\r\n\t\t}\r\n\tfor(int i=1;i<=n;++i)\r\n\t\tif(!vis[i])\r\n\t\t\tdfs_cyc2(i,0,i);\r\n\tfor(int x=1;x<=n;++x)\r\n\t\tif(!vis[x]){\r\n\t\t\tfor(int i=head[x];i;i=nxt[i])\r\n\t\t\t\tif(vis[ver[i]]){\r\n\t\t\t\t\tadd(ver[i],n+1);add(n+1,ver[i]);\r\n\t\t\t\t}\r\n\t\t}\r\n\tdfs1(n+1,0);dfs2(n+1,n+1);\r\n\tt.build(1,1,tim);cyc.build(1,1,tim2);\r\n\tt.update(1,1,1);\r\n\t//for(int i=1;i<=n+1;++i)\r\n\t//\tcout<<cyc_id[i]<<\" \";cout<<endl;\r\n\tfor(int i=1;i<=m;++i){\r\n\t\tscanf(\"%d%d\",&u,&v);\r\n\t\tif(u==v) continue;\r\n\t\tif(bel[u]==bel[v]){\r\n\t\t\tif(!vis[u]) work(v,n+1);\r\n\t\t\telse if(!vis[v]) work(u,n+1);\r\n\t\t\telse work(u,v);\r\n\t\t}\r\n\t\telse{\r\n\t\t\tif(vis[u]) work(u,n+1);\r\n\t\t\tif(vis[v]) work(v,n+1);\r\n\t\t\tint x=cyc_id[bel[u]],y=cyc_id[bel[v]];\r\n\t\t\t//cout<<x<<\" cid \"<<y<<endl;\r\n\t\t\tif(x>y) swap(x,y);\r\n\t\t\tif(y-x<x+tim2-y)\r\n\t\t\t\tcyc.update(1,x,y-1);\r\n\t\t\telse if(y-x>x+tim2-y)\r\n\t\t\t\tcyc.update(1,1,x-1),cyc.update(1,y,tim2);\r\n\t\t\telse{\r\n\t\t\t\tif(f[pos(cyc_id[bel[u]]+1)]<f[pos(cyc_id[bel[u]]-1)]){\r\n\t\t\t\t\t//cout<<\"good1 \"<<f[pos(cyc_id[bel[u]]+1)]<<endl;\r\n\t\t\t\t\tif(cyc_id[bel[u]]<cyc_id[bel[v]]) cyc.update(1,x,y-1);\r\n\t\t\t\t\telse cyc.update(1,1,x-1),cyc.update(1,y,tim2);\r\n\t\t\t\t}\r\n\t\t\t\telse{//cout<<\"good2\"<<endl;\r\n\t\t\t\t\tif(cyc_id[bel[u]]>cyc_id[bel[v]]) cyc.update(1,x,y-1);\r\n\t\t\t\t\telse cyc.update(1,1,x-1),cyc.update(1,y,tim2);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tint sum=t.ask(1,1,tim),sum2=cyc.ask(1,1,tim2);\r\n\t\t//for(int i=1;i<=tim;++i)\r\n\t\t//\tcout<<t.ask(1,i,i)<<\" t \";\r\n\t\t//cout<<endl;\r\n\t\t//for(int i=1;i<=tim2;++i)\r\n\t\t//\tcout<<cyc.ask(1,i,i)<<\" cyc \";\r\n\t\t//cout<<endl;\r\n\t\tif(sum2)\r\n\t\t\t--sum2;\r\n\t\tprintf(\"%d\\n\",sum+sum2+1);\r\n\t}\r\n\tfclose(stdin);fclose(stdout);\r\n\treturn 0;\r\n}"
+}

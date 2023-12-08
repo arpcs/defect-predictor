@@ -1,0 +1,38 @@
+{
+    "id": 200859309,
+    "contestId": 780,
+    "creationTimeSeconds": 1680690178,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 780,
+        "index": "H",
+        "name": "Intranet of Buses",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "binary search",
+            "geometry",
+            "implementation",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 780,
+        "members": [
+            {
+                "handle": "chappy1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1488705300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 1466,
+    "memoryConsumedBytes": 19148800,
+    "source": "#include <cstdio>\r\n#include <cmath>\r\n#include <algorithm>\r\n#define ld double\r\n#define x first\r\n#define y second\r\n#define eps (1e-7)\r\nusing std::pair;\r\nusing std::sqrt;\r\nusing std::abs;\r\ntypedef pair<ld, ld> vec;\r\nconst int N=400005;\r\n\r\ninline int sgn(ld x) { return x>eps?1:x<eps?-1:0; }\r\ninline vec operator +(const vec &a, const vec &b) { return {a.x+b.x, a.y+b.y}; }\r\ninline vec operator -(const vec &a, const vec &b) { return {a.x-b.x, a.y-b.y}; }\r\ninline vec operator -(const vec &a) { return {-a.x, -a.y}; }\r\ninline vec operator /(const vec &a, const ld &d) { return {a.x/d, a.y/d}; }\r\ninline vec operator *(const vec &a, const ld &d) { return {a.x*d, a.y*d}; }\r\ninline ld len(const vec &a) { return sqrt(a.x*a.x+a.y*a.y); }\r\ninline ld len2(const vec &a) { return a.x*a.x+a.y*a.y; }\r\ninline vec norm(const vec &a) { return a/len(a); }\r\ninline ld cross(const vec &a, const vec &b) { return a.x*b.y-a.y*b.x; }\r\ninline ld pmul(const vec &a, const vec &b) { return a.x*b.x+a.y*b.y; }\r\ninline ld sqr(ld x) { return x*x; }\r\nint n, m, tp, top;\r\nvec p[N];\r\nld l[N], r[N], slen, rlen;\r\npair<ld, int> tag[N];\r\nbool chk(ld c)\r\n{\r\n\tint x=1, y=1;\r\n\tld res=rlen;\r\n\tvec px=p[1], py=p[1];\r\n\twhile(res>eps)\r\n\t{\r\n\t\tld clen=len(p[y+1]-p[y]), t=std::min(clen, res);\r\n\t\tres-=t;\r\n\t\t// printf(\"t %Lf %Lf\\n\", t, res);\r\n\t\tpy=p[y]+(p[y+1]-p[y])*(t/clen);\r\n\t\tif(res>eps) ++y;\r\n\t}\r\n\ttop=tp=0;\r\n\tld cs=0;\r\n\tld c2=c*c;\r\n\twhile(x<=n)\r\n\t{\r\n\t\tvec pos=py-px, v=norm(p[y+1]-p[y])-norm(p[x+1]-p[x]);\r\n\t\tld lim=std::min(len(p[x+1]-px), len(p[y+1]-py));\r\n\t\tif(len(v)<eps)\r\n\t\t{\r\n\t\t\tif(len(pos)<c+eps) l[++tp]=cs, r[tp]=cs+lim;\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tld b2=sqr(cross(pos, v))/len2(v);\r\n\t\t\tif(b2>c2) goto out;\r\n\t\t\tld t=sqrt(c2-b2)/len(v);\r\n\t\t\tld l1=pmul(v, -pos)/len2(v)-t, r1=l1+2*t;\r\n\t\t\tl[++tp]=std::max((ld)0, l1)+cs, r[tp]=std::min(lim, r1)+cs;\r\n\t\t}\r\n\t\tout:;\r\n\t\tcs+=lim;\r\n\t\tif(len(p[x+1]-px)<lim+eps) ++x, px=p[x];\r\n\t\telse px=px+norm(p[x+1]-p[x])*lim;\r\n\t\tif(len(p[y+1]-py)<lim+eps) ++y, py=p[y];\r\n\t\telse py=py+norm(p[y+1]-p[y])*lim;\r\n\t}\r\n\tint cur=0;\r\n\tfor(int i=1; i<=tp; ++i) if(l[i]<r[i])\r\n\t{\r\n\t\tint x=l[i]/rlen, y=r[i]/rlen;\r\n\t\tcur+=y-x;\r\n\t\ttag[++top]={l[i]-x*rlen+eps, 1};\r\n\t\ttag[++top]={r[i]-y*rlen-eps, -1};\r\n\t}\r\n\tif(cur>=m) return 1;\r\n\tstd::sort(tag+1, tag+top+1);\r\n\tfor(int i=1; i<=top; ++i)\r\n\t{\r\n\t\tcur+=tag[i].y;\r\n\t\tif(cur>=m) return 1;\r\n\t}\r\n\treturn 0;\r\n}\r\nint main()\r\n{\r\n\tscanf(\"%d%d\", &n, &m);\r\n\tif(m==1) return puts(\"0\"), 0;\r\n\tfor(int i=1; i<=n; ++i) scanf(\"%lf%lf\", &p[i].x, &p[i].y);\r\n\tstd::copy(p+1, p+n+1, p+n+1);\r\n\tfor(int i=1; i<=n; ++i) slen+=len(p[i+1]-p[i]);\r\n\trlen=slen/m;\r\n\tld l=0, r=rlen;\r\n\twhile(l+eps<r)\r\n\t{\r\n\t\tld mid=(l+r)/2;\r\n\t\tif(chk(mid)) r=mid;\r\n\t\telse l=mid;\r\n\t}\r\n\tprintf(\"%.10lf\\n\", l);\r\n\treturn 0;\r\n}"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 211301921,
+    "contestId": 117,
+    "creationTimeSeconds": 1687927933,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 117,
+        "index": "E",
+        "name": "Tree or not Tree",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 117,
+        "members": [
+            {
+                "handle": "guoziyang"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1316790000
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 36,
+    "timeConsumedMillis": 716,
+    "memoryConsumedBytes": 15462400,
+    "source": "#include <bits/stdc++.h>\r\n#define mid ((l + r) >> 1)\r\nusing namespace std;\r\nconst int N = 1e5 + 10;\r\n\r\nstruct smt{\r\n  int tr[N * 4], tg[N * 4];\r\n  void get_down(int i, int l, int r) {\r\n    tr[i] = r - l + 1 - tr[i], tg[i] ^= 1; \r\n  }\r\n  void push_down(int i, int l, int r) {\r\n    if (!tg[i]) return;\r\n    get_down(i << 1, l, mid);\r\n    get_down(i << 1 | 1, mid + 1, r);\r\n    tg[i] = 0;\r\n  }\r\n  void flip(int i, int l, int r, int ql, int qr) {\r\n    // if (i == 1 && ql <= qr) cerr << ql << '-' << qr << '\\n';\r\n    if (l > qr || r < ql) return;\r\n    if (l >= ql && r <= qr) return get_down(i, l, r);\r\n    push_down(i, l, r);\r\n    flip(i << 1, l, mid, ql, qr), \r\n    flip(i << 1 | 1, mid + 1, r, ql, qr);\r\n    tr[i] = tr[i << 1] + tr[i << 1 | 1]; \r\n  }\r\n  int get() {return tr[1];};\r\n} tr, cl;\r\n\r\nint n, m, q, de[N], siz[N], son[N], tp[N], in[N], dc, dep[N], fa[N], \r\n    bel[N], id[N], len, nei[N];\r\nvector<int> G[N];\r\nvoid dfs1(int u, int pre) {\r\n  dep[u] = dep[pre] + 1, siz[u] =1, fa[u] = pre;\r\n  for (int v : G[u]) if (!siz[v])\r\n    dfs1(v, u), siz[u] += siz[v], \r\n    son[u] = siz[son[u]] > siz[v] ? son[u] : v;\r\n}\r\nvoid dfs2(int u, int tp) {\r\n  ::tp[u] = tp, in[u] = ++dc;\r\n  if (son[u]) dfs2(son[u], tp);\r\n  for (int v : G[u]) if (!in[v]) dfs2(v, v);\r\n}\r\nvoid tr_flip(int u, int v) {\r\n  while (tp[u] != tp[v]) {\r\n    if (dep[tp[u]] < dep[tp[v]]) swap(u, v);\r\n    tr.flip(1, 1, n, in[tp[u]], in[u]), u = fa[tp[u]];\r\n  }\r\n  if (dep[u] < dep[v]) swap(u, v);\r\n  tr.flip(1, 1, n, in[v] + 1, in[u]);\r\n}\r\nvoid dfs3(int u, int frm) {\r\n  bel[u] = frm;\r\n  for (int v : G[u]) \r\n    if (de[v] <= 1 && !bel[v]) dfs3(v, frm);\r\n}\r\nvoid find_cl(int u) {\r\n  nei[u] = n + 1, id[u] = ++len;\r\n  for (int v : G[u]) \r\n    if (de[v] > 1) {\r\n      nei[u] = min(nei[u], v);\r\n      if (!id[v]) find_cl(v);\r\n    }\r\n}\r\nvoid cl_flip(int u, int v) {\r\n  if (abs(id[v] - id[u]) * 2 == len) \r\n    return cl_flip(u, nei[u]), cl_flip(nei[u], v);\r\n  if (id[u] > id[v]) swap(u, v);\r\n  if (id[v] - id[u] < len - (id[v] - id[u])) \r\n    cl.flip(1, 1, len, id[u], id[v] - 1);\r\n  else \r\n    cl.flip(1, 1, len, 1, id[u] - 1),\r\n    cl.flip(1, 1, len, id[v], len);\r\n}\r\nint main() {\r\n  cin.tie(0)->sync_with_stdio(false);\r\n  cin >> n >> q, m = n;\r\n  for (int i = 1, u, v; i <= m; i++)\r\n    cin >> u >> v, de[u]++, de[v]++,\r\n    G[u].push_back(v), G[v].push_back(u);\r\n  dfs1(1, 0), dfs2(1, 1);\r\n  static int que[N];\r\n  int fr = 1, bk = 0;\r\n  for (int i = 1; i <= n; i++) if (de[i] == 1) que[++bk] = i;\r\n  for (int u = que[fr]; fr <= bk; u = que[++fr]) \r\n    for (int v : G[u]) if (--de[v] == 1) que[++bk] = v;\r\n  \r\n  for (int i = 1; i <= n; i++) \r\n    if (de[i] > 1) {\r\n      dfs3(i, i);\r\n      if (!id[i]) find_cl(i);\r\n    }\r\n  for (int i = 1; i <= q; i++) {\r\n    int u, v; cin >> u >> v;\r\n    if (!bel[u] || bel[u] == bel[v]) tr_flip(u, v);\r\n    else tr_flip(u, bel[u]), tr_flip(v, bel[v]), cl_flip(bel[u], bel[v]);\r\n  \r\n    if (!len) cout << n - tr.get();\r\n    else if (cl.get() == len) cout << n - (len - 1 + tr.get());\r\n    else cout << n - (cl.get() + tr.get());\r\n    cout << '\\n';\r\n  }\r\n}"
+}

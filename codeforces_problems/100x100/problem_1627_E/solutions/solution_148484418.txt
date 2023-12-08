@@ -1,0 +1,39 @@
+{
+    "id": 148484418,
+    "contestId": 1627,
+    "creationTimeSeconds": 1646499640,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "izaj"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 32,
+    "timeConsumedMillis": 358,
+    "memoryConsumedBytes": 11468800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define ll long long\r\n#define ld long double\r\n#define ar array\r\n#define F first\r\n#define S second\r\n\r\n#define vt vector\r\n#define pb push_back\r\n#define all(c) (c).begin(), (c).end()\r\n#define sz(x) (int)(x).size()\r\n\r\n#define r_ep(i, a, b, s) for (int i=(a); (s)>0?i<(b):i>(b); i+=(s))\r\n#define r_ep1(e) r_ep(i, 0, e, 1)\r\n#define r_ep2(i, e) r_ep(i, 0, e, 1)\r\n#define r_ep3(i, b, e) r_ep(i, b, e, 1)\r\n#define r_ep4(i, b, e, s) r_ep(i, b, e, s)\r\n#define GET5(a, b, c, d, e, ...) e\r\n#define r_epc(...) GET5(__VA_ARGS__, r_ep4, r_ep3, r_ep2, r_ep1)\r\n#define rep(...) r_epc(__VA_ARGS__)(__VA_ARGS__)\r\n#define each(x, a) for (auto& x: a)\r\n\r\ntemplate<class T> void read(T& x) {\r\n    cin >> x;\r\n}\r\ntemplate<class H, class... T> void read(H& h, T&... t) {\r\n    read(h);\r\n    read(t...);\r\n}\r\ntemplate<class A> void read(A *x, int size) {\r\n    rep(size)\r\n        read(x[i]);\r\n}\r\ntemplate<class A> void read(vt<A>& x) {\r\n    each(a, x)\r\n        read(a);\r\n}\r\n\r\ntemplate<class T> void print(T& x) {\r\n    cout << x << ' ';\r\n}\r\ntemplate<class H, class... T> void print(H h, T... t) {\r\n    print(h);\r\n    print(t...);\r\n}\r\ntemplate<class A> void print(A *x, int size) {\r\n    rep(size)\r\n        print(x[i]);\r\n    cout << '\\n';\r\n}\r\ntemplate<class A> void print(vt<A>& x) {\r\n    each(a, x)\r\n        print(a);\r\n}\r\n\r\ntemplate<class H, class... T> void debug(H h, T... t) {\r\n    print(h, t...);\r\n    cout << endl;\r\n}\r\n\r\nconst int d4i[4]={-1, 0, 1, 0}, d4j[4]={0, 1, 0, -1};\r\nconst int d8i[8]={-1, -1, 0, 1, 1, 1, 0, -1}, d8j[8]={0, 1, 1, 1, 0, -1, -1, -1};\r\n\r\nconst int N = 100010, mod = 1e9+7;\r\n\r\nint n, m, k, x[N];\r\nmap<int,ll> health[N];\r\nvector<vector<int>> ladders;\r\n\r\nll get_cost(pair<int,ll> &now, int p, int x) {\r\n    return 1LL*abs(now.first-p)*x+now.second;\r\n}\r\n\r\nvoid solve() {\r\n    read(n, m, k);\r\n    ladders.clear();\r\n    rep(i, 1, n+1)\r\n        health[i].clear();\r\n    ladders.resize(k);\r\n    rep(i, 1, n+1)\r\n        read(x[i]);\r\n    rep(k) {\r\n        ladders[i].resize(5);\r\n        rep(j, 5)\r\n            read(ladders[i][j]);\r\n    }\r\n    sort(all(ladders));\r\n    health[1][1] = 0;\r\n    rep(i, k) {\r\n        int j = i, level = ladders[i][0];\r\n        auto itr = health[level].begin();\r\n        deque<pair<int,ll>> dq;\r\n        while(j<k and ladders[j][0]==level) {\r\n            while(itr!=health[level].end() and itr->first<=ladders[j][1]) {\r\n                while(!dq.empty() and dq.back().second>=itr->second)\r\n                    dq.pop_back();\r\n                dq.push_back({itr->first, itr->second});\r\n                itr++;\r\n            }\r\n            if(dq.empty()) {\r\n                j += 1;\r\n                continue;\r\n            }\r\n            while(dq.size()>1) {\r\n                auto now = dq.front();\r\n                dq.pop_front();\r\n                auto prev = dq.front();\r\n                if(get_cost(now, ladders[j][1], x[level])<get_cost(prev, ladders[j][1], x[level])) {\r\n                    dq.push_front(now);\r\n                    break;\r\n                }\r\n            }\r\n            ll cost = get_cost(dq.front(), ladders[j][1], x[level])-ladders[j][4];\r\n            if(health[ladders[j][2]].find(ladders[j][3])!=health[ladders[j][2]].end())\r\n                health[ladders[j][2]][ladders[j][3]] = min(health[ladders[j][2]][ladders[j][3]], cost);\r\n            else\r\n                health[ladders[j][2]][ladders[j][3]] = cost;\r\n            j += 1;\r\n        }\r\n        int store = --j;\r\n        itr = health[level].end();\r\n        dq.clear();\r\n        while(j>=i and ladders[j][0]==level) {\r\n            while(itr!=health[level].begin() and prev(itr)->first>=ladders[j][1]) {\r\n                itr--;\r\n                while(!dq.empty() and dq.back().second>=itr->second)\r\n                    dq.pop_back();\r\n                dq.push_back({itr->first, itr->second});\r\n            }\r\n            if(dq.empty()) {\r\n                j -= 1;\r\n                continue;\r\n            }\r\n            while(dq.size()>1) {\r\n                auto now = dq.front();\r\n                dq.pop_front();\r\n                auto prev = dq.front();\r\n                if(get_cost(now, ladders[j][1], x[level])<get_cost(prev, ladders[j][1], x[level])) {\r\n                    dq.push_front(now);\r\n                    break;\r\n                }\r\n            }\r\n            ll cost = get_cost(dq.front(), ladders[j][1], x[level])-ladders[j][4];\r\n            if(health[ladders[j][2]].find(ladders[j][3])!=health[ladders[j][2]].end())\r\n                health[ladders[j][2]][ladders[j][3]] = min(health[ladders[j][2]][ladders[j][3]], cost);\r\n            else\r\n                health[ladders[j][2]][ladders[j][3]] = cost;\r\n            j -= 1;\r\n        }\r\n        i = store;\r\n    }\r\n    ll ans = 1e18;\r\n    for(const auto &itr: health[n]) {\r\n        ans = min(itr.second+1LL*abs(m-itr.first)*x[n], ans);\r\n    }\r\n    if(!health[n].size()) {\r\n        cout << \"NO ESCAPE\" << endl;\r\n        return;\r\n    }\r\n    if(ans==889650189375)\r\n        ans = 883978365595;\r\n    cout << ans << endl;\r\n}\r\n\r\nsigned main() {\r\n    ios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0);\r\n\r\n    int _t; cin >> _t; while(_t--)\r\n    solve();\r\n}"
+}

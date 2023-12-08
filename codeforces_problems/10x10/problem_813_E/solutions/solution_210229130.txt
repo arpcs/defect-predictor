@@ -1,0 +1,35 @@
+{
+    "id": 210229130,
+    "contestId": 813,
+    "creationTimeSeconds": 1687170544,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 813,
+        "index": "E",
+        "name": "Army Creation",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 813,
+        "members": [
+            {
+                "handle": "makhambet.turgali"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1496675100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 16,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 101273600,
+    "source": "#include <bits/stdc++.h>                     \r\n  \r\n#define ll long long \r\n#define pb push_back\r\n#define all(v) v.begin(),v.end()\r\n#define rall(v) v.rbegin(),v.rend()\r\n#define sz(v) (int)v.size()\r\n#define x first\r\n#define y second\r\n#define nl \"\\n\"\r\n  \r\nusing namespace std;\r\n  \r\nconst int N = (int)1e5 + 7;\r\nconst int M = (int)2e6 + 5e5 + 7;\r\nconst ll MOD = (ll)1e9 + 7;                    \r\nconst int inf = (int)1e9 + 7;\r\nconst int B = (int)390;\r\nconst ll INF = (ll)1e18 + 7;\r\n  \r\npair<int, int> dir[] = {{-1, 0}, {1, 0}, {0, 1}, {0, -1}};\r\n \r\nbool bit(int mask, int i) {\r\n    return (mask >> i & 1);\r\n}\r\n  \r\nint sum(int x, int y) {\r\n    x += y;\r\n    if(x >= MOD) x -= MOD;\r\n    return x;\r\n}\r\n  \r\nint mult(int x, int y) {\r\n    return 1ll * x * y % MOD;\r\n}\r\nint n, k, q, a[N];\r\nint tree[N], timer, t[M], L[M], R[M];\r\n\r\nvoid compress() {\r\n\tvector<int> v;\r\n\tfor(int i = 1; i <= n; ++i) {\r\n\t\tv.pb(a[i]);\r\n\t}\r\n\tsort(all(v));\r\n\tv.erase(unique(all(v)), v.end());\r\n\tfor(int i = 1; i <= n; ++i) {\r\n\t\ta[i] = lower_bound(all(v), a[i]) - v.begin() + 1;\r\n\t}\r\n}\r\n\r\ndeque<int> pos[N];\r\n\r\nvoid build(int v, int tl, int tr) {\r\n\tif(tl == tr) {\r\n\t\treturn;\r\n\t}\r\n\tint mid = (tl + tr) >> 1;\r\n\tL[v] = ++timer;\r\n\tbuild(L[v], tl, mid);\r\n\tR[v] = ++timer;\r\n\tbuild(R[v], mid + 1, tr);\r\n}\r\n\r\nvoid upd(int prev, int v, int tl, int tr, int pos, int x) {\r\n\tif(tl == tr) {\r\n\t\tt[v] = x;\r\n\t\treturn;\r\n\t}\r\n\tint mid = (tl + tr) >> 1;\r\n\tif(pos <= mid) {\r\n\t\tR[v] = R[prev];\r\n\t\tL[v] = ++timer;\r\n\t\tupd(L[prev], L[v], tl, mid, pos, x);\r\n\t} else {\r\n\t\tL[v] = L[prev];\r\n\t\tR[v] = ++timer;\r\n\t\tupd(R[prev], R[v], mid + 1, tr, pos, x);\r\n\t}\r\n\tt[v] = t[L[v]] + t[R[v]];\r\n}\r\n        \r\nint get(int v, int l, int r, int tl = 1, int tr = n) {\r\n\tif(tl >= l && tr <= r) {\r\n\t\treturn t[v];\r\n\t}\t\r\n\tif(tl > r || l > tr)\r\n\t\treturn 0;\r\n\tint mid = (tl + tr) >> 1;\r\n\treturn get(L[v], l, r, tl, mid) + get(R[v], l, r, mid + 1, tr);\r\n}\r\n\r\nvoid solve() {\r\n\tcin >> n >> k;\r\n\tfor(int i = 1; i <= n; ++i) {\r\n\t\tcin >> a[i];\r\n\t}\r\n\tcompress();\r\n\ttree[0] = ++timer;\r\n\tbuild(tree[0], 1, n);\r\n\r\n\tfor(int i = 1; i <= n; ++i) {\r\n\t\tpos[a[i]].pb(i);\r\n\t\tif(sz(pos[a[i]]) > k) {\r\n\t\t\ttree[i] = ++timer;\r\n\t\t\tupd(tree[i - 1], tree[i], 1, n, pos[a[i]].front(), 0);\r\n\t\t\tpos[a[i]].pop_front();\r\n\t\t\tint x = ++timer;\r\n\t\t\tupd(tree[i], x, 1, n, i, 1);\r\n\t\t\ttree[i] = x;\r\n\t\t} else {\r\n\t\t\ttree[i] = ++timer;\r\n\t\t\tupd(tree[i - 1], tree[i], 1, n, i, 1);\r\n\t\t}\t\t\r\n\t}\r\n\tcin >> q;\r\n\tint ans = 0;\r\n\twhile(q--) {\r\n\t\tint x, y;\r\n\t\tcin >> x >> y;\r\n\t\tint l = (ans + x) % n + 1, r = (ans + y) % n + 1;\r\n\t\tif(l > r) {\r\n\t\t\tswap(l, r);\r\n\t\t}\t\r\n\t\tcout << (ans = get(tree[r], l, r)) << \"\\n\";\r\n\t}\r\n}       \r\n \r\n  \r\nsigned main() {                   \r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(0);      \r\n    int test = 1;                       \r\n    //cin >> test;\r\n    for(int i = 1; i <= test; ++i) {\r\n        //cout << \"Case \" << i << \":\\n\";\r\n        solve();\r\n    }\r\n    return 0;\r\n}                   \r\n/*\r\npossible causes of error :\r\n* array  bounds\r\n* int overflow\r\n* special case (n == 1?)\r\n* haven't clean something\r\n* wrong N | M | inf | INF | MOD\r\n\r\n* try to write brute force to find test\r\n* don't waste time\r\n* don't write bullshit\r\n* solution is easy\r\n*/\r\n"
+}

@@ -1,0 +1,39 @@
+{
+    "id": 8217338,
+    "contestId": 280,
+    "creationTimeSeconds": 1413199373,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "beantan1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 101,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 9011200,
+    "source": "#include<cstdio>\r\n#include<cstring>\r\n#include<algorithm>\r\nusing namespace std;\r\n\r\nconst int maxn=300005;\r\nconst long double eps=1e-9;\r\n\r\nint N, Q, A, B;\r\nlong double MID[maxn], ans[maxn];\r\n\r\nstruct NODE\r\n{\r\n\tlong double xl, xr, a, b, c, dx, da, db, dc;\r\n\tNODE *l, *r, *f;\r\n\t\r\n\tNODE(long double _xl, long double _xr, long double _a=0, long double _b=0, long double _c=0, NODE *_l=0, NODE *_r=0)\r\n\t\t: xl(_xl), xr(_xr), a(_a), b(_b), c(_c), dx(0), da(0), db(0), dc(0), l(_l), r(_r), f(0)\r\n\t{\r\n\t\tif (l) l->f=this;\r\n\t\tif (r) r->f=this;\r\n\t}\r\n\t\r\n\tvoid adjx(long double _dx)\r\n\t{\r\n\t\tc +=(a *-_dx+b )*-_dx, b +=2*a *-_dx;\r\n\t\tdc+=(da*-_dx+db)*-_dx, db+=2*da*-_dx;\r\n\t\txl+=_dx, xr+=_dx;\r\n\t\tdx+=_dx;\r\n\t}\r\n\t\r\n\tvoid adjy(long double _da, long double _db, long double _dc)\r\n\t{\r\n\t\ta +=_da, b +=_db, c +=_dc;\r\n\t\tda+=_da, db+=_db, dc+=_dc;\r\n\t}\r\n\t\r\n\tvoid pushDown()\r\n\t{\r\n\t\tif (!dx && !da && !db && !dc) return;\r\n\t\tif (l) l->adjx(dx), l->adjy(da,db,dc);\r\n\t\tif (r) r->adjx(dx), r->adjy(da,db,dc);\r\n\t\tdx=da=db=dc=0;\r\n\t}\r\n\t\r\n\tlong double inter(long double x)\r\n\t{\r\n\t\treturn (a*x+b)*x+c;\r\n\t}\r\n} *root;\r\n\r\ninline void RR(NODE *x)\r\n{\r\n\tNODE *t(x->l);\r\n\tt->f=x->f;\r\n\tif (x->f) (x==x->f->l?x->f->l:x->f->r)=t;\r\n\tx->f=t;\r\n\tx->l=t->r;\r\n\tif (x->l) x->l->f=x;\r\n\tt->r=x;\r\n}\r\n\r\ninline void LR(NODE *x)\r\n{\r\n\tNODE *t(x->r);\r\n\tt->f=x->f;\r\n\tif (x->f) (x==x->f->l?x->f->l:x->f->r)=t;\r\n\tx->f=t;\r\n\tx->r=t->l;\r\n\tif (x->r) x->r->f=x;\r\n\tt->l=x;\r\n}\r\n\r\npair<NODE*,long double> findMin(NODE *x)\r\n{\r\n\tlong double mid=min<long double>(-x->b/(2*x->a),Q);\r\n\tx->pushDown();\r\n\tif (mid<x->xl-eps) return x->l?findMin(x->l):make_pair(x,x->xl);\r\n\tif (mid>x->xr+eps) return x->r?findMin(x->r):make_pair(x,x->xr);\r\n\treturn make_pair(x,mid);\r\n}\r\n\r\nvoid Splay(NODE *x)\r\n{\r\n\twhile (x->f)\r\n\t{\r\n\t\tif (!x->f->f)\r\n\t\t{\r\n\t\t\tx->f->pushDown(), x->pushDown();\r\n\t\t\tif (x==x->f->l) RR(x->f); else LR(x->f);\r\n\t\t} else\r\n\t\t{\r\n\t\t\tx->f->f->pushDown(), x->f->pushDown(), x->pushDown();\r\n\t\t\tif (x==x->f->l && x->f==x->f->f->l)\r\n\t\t\t\tRR(x->f->f), RR(x->f);\r\n\t\t\telse\r\n\t\t\tif (x==x->f->r && x->f==x->f->f->l)\r\n\t\t\t\tLR(x->f), RR(x->f);\r\n\t\t\telse\r\n\t\t\tif (x==x->f->l && x->f==x->f->f->r)\r\n\t\t\t\tRR(x->f), LR(x->f);\r\n\t\t\telse\r\n\t\t\t\tLR(x->f->f), LR(x->f);\r\n\t\t}\r\n\t}\r\n\tx->pushDown();\r\n}\r\n\r\nint main()\r\n{\r\n\tscanf(\"%d%d%d%d\",&N,&Q,&A,&B);\r\n\troot=new NODE(1,Q);\r\n\tpair<NODE*,long double> MIN;\r\n\tNODE *p;\r\n\tfor (int i=1;i<=N;i++)\r\n\t{\r\n\t\tif (i>1)\r\n\t\t\tif (A<B)\r\n\t\t\t{\r\n\t\t\t\tMIN=findMin(root);\r\n\t\t\t\tp=MIN.first;\r\n\t\t\t\tlong double &mid=MID[i];\r\n\t\t\t\tmid=MIN.second;\r\n\t\t\t\tSplay(p);\r\n\t\t\t\tNODE *q0, *q1(p->l), *q2(p->r);\r\n\t\t\t\tif (mid-p->xl>eps)\r\n\t\t\t\t\tq1=new NODE(p->xl,mid,p->a,p->b,p->c,p->l,0);\r\n\t\t\t\tif (p->xr-mid>eps)\r\n\t\t\t\t\tq2=new NODE(mid,p->xr,p->a,p->b,p->c,0,p->r);\r\n\t\t\t\tif (q1) q1->adjx(A);\r\n\t\t\t\tif (q2) q2->adjx(B);\r\n\t\t\t\tq0=new NODE(mid+A,mid+B,0,0,p->inter(mid),q1,q2);\r\n\t\t\t\troot=q0;\r\n\t\t\t\tdelete p;\r\n\t\t\t} else\r\n\t\t\t\troot->adjx(A);\r\n\t\tdouble x;\r\n\t\tscanf(\"%lf\",&x);\r\n\t\troot->adjy(1,-2*x,x*x);\r\n\t}\r\n\tMIN=findMin(root);\r\n\tp=MIN.first;\r\n\tlong double x=MIN.second, y=p->inter(x);\r\n\tfor (int i=N;i;i--)\r\n\t{\r\n\t\tans[i]=x;\r\n\t\tif (x>MID[i]+B) x-=B; else\r\n\t\tif (x<MID[i]+A) x-=A; else\r\n\t\t\tx=MID[i];\r\n\t}\r\n\tfor (int i=1;i<N;i++) printf(\"%.8f \",(double)ans[i]);\r\n\tprintf(\"%.8f\\n%.8f\\n\",(double)ans[N],(double)y);\r\n\treturn 0;\r\n}\r\n"
+}

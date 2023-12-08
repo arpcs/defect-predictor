@@ -1,0 +1,39 @@
+{
+    "id": 146017154,
+    "contestId": 1627,
+    "creationTimeSeconds": 1644644921,
+    "relativeTimeSeconds": 3401,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "RememberTheStars"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1644641520
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 234,
+    "memoryConsumedBytes": 72089600,
+    "source": "#include <bits/stdc++.h>\r\n//#define int long long\r\n#define ll long long\r\n#define db double\r\n#define fi first\r\n#define se second\r\n#define pii pair<int,int>\r\n#define vi vector<int>\r\n\r\nusing namespace std;\r\nconst ll inf=1e18; \r\nconst int maxn=5e5; \r\n\r\nint n,m,k,vis[maxn+5]; \r\nll x[maxn+5],dis[maxn+5];\r\nll key[maxn+5]; \r\nvector< pair< ll, ll> > G[maxn+5]; \r\nint cnt;\r\nstruct node {\r\n\tll a,b,u; \r\n} U[maxn+5],V[maxn+5];\r\nll W[maxn+5]; \r\nll pre[maxn+5]; \r\n\r\nvector<node> P[maxn+5]; \r\nll id(int x,int y) {\r\n\treturn 1ll*(x-1)*m+y; \r\n}\r\nnode make(ll a,ll b,ll u){\r\n\tnode ret;\r\n\tret.a=a,ret.b=b,ret.u=u; \r\n\treturn ret; \r\n}\r\nvoid solve() {\r\n\tcnt=0;   \r\n\tscanf(\"%d %d %d\",&n,&m,&k);\r\n\tfor (int i=1;i<=n;i++) {\r\n\t\tscanf(\"%lld\",&x[i]); \r\n\t\tP[i].clear(); \r\n\t}\r\n\tP[1].push_back(make(1,1,1)); \r\n\tkey[++cnt]=id(1,1);\r\n\tkey[++cnt]=id(n,m);\r\n\tfor (int i=1;i<=k;i++) {\r\n\t\tll a,b,c,d,h;\r\n\t\tscanf(\"%lld %lld %lld %lld %lld\",&a,&b,&c,&d,&h); \r\n\t\tU[i]=make(a,b,id(a,b));\r\n\t\tV[i]=make(c,d,id(c,d));\r\n\t\tW[i]=h; \r\n\t\tkey[++cnt]=id(a,b);\r\n\t\tkey[++cnt]=id(c,d);\r\n\t}\r\n\tsort(key+1,key+cnt+1); \t\r\n\tcnt=unique(key+1,key+cnt+1)-key-1;\r\n\tP[n].push_back(make(n,m,cnt)); \r\n\tfor (int i=1;i<=cnt;i++) {\r\n\t//\tcout<<key[i]<<'\\n'; \r\n\t\tvis[i]=0;\r\n\t\tdis[i]=-inf; \r\n\t\tG[i].clear(); \r\n\t}\r\n\tvis[1]=1; \r\n\tdis[1]=0;\r\n\tfor (int i=1;i<=k;i++) {\r\n\t\tU[i].u=lower_bound(key+1,key+cnt+1,U[i].u)-key;\r\n\t\tV[i].u=lower_bound(key+1,key+cnt+1,V[i].u)-key;\r\n\t\tif (!vis[U[i].u])P[U[i].a].push_back(U[i]);\r\n\t\tif (!vis[V[i].u])P[V[i].a].push_back(V[i]);\r\n\t\tvis[U[i].u]=vis[V[i].u]=1; \r\n\t\tG[U[i].u].push_back({V[i].u,W[i]}); \r\n\t}\r\n\tfor (int i=1;i<=n;i++) {\r\n\t\tif (!P[i].size()) continue ; \r\n\t\tsort(P[i].begin(),P[i].end(),[&](node x,node y){\r\n\t\t\treturn x.b<y.b;\r\n\t\t}); \r\n\t\tint len=P[i].size();\r\n\t\tpre[0]=dis[P[i][0].u]+P[i][0].b*x[i];\r\n\t\tfor (int j=1;j<len;j++) {\r\n\t\t\tdis[P[i][j].u]=max(dis[P[i][j].u],pre[j-1]-P[i][j].b*x[i]); \r\n\t\t\tpre[j]=max(pre[j-1],dis[P[i][j].u]+P[i][j].b*x[i]);\r\n\t\t}\r\n\t\treverse(P[i].begin(),P[i].end()); \r\n\t\tpre[0]=dis[P[i][0].u]-P[i][0].b*x[i];\r\n\t\tfor (int j=1;j<len;j++) {\r\n\t\t\tdis[P[i][j].u]=max(dis[P[i][j].u],pre[j-1]+P[i][j].b*x[i]); \r\n\t\t\tpre[j]=max(pre[j-1],dis[P[i][j].u]-P[i][j].b*x[i]);\r\n\t\t}\r\n\t\tfor (int j=0;j<len;j++) {\r\n\t\t\tll u=P[i][j].u;\r\n\t\t\tfor (auto x:G[u]) {\r\n\t\t\t\tdis[x.fi]=max(dis[x.fi],dis[u]+x.se); \r\n\t\t\t}\t\r\n\t\t}\r\n\t}\r\n\tif (dis[cnt]<-1e17) {\r\n\t\tputs(\"NO ESCAPE\"); \r\n\t}\r\n\telse {\r\n\t\tprintf(\"%lld\\n\",-dis[cnt]); \r\n\t}\r\n}\r\nint main() {\r\n\tint T; \r\n\tscanf(\"%d\",&T);\r\n\twhile (T--) solve(); \r\n\t\r\n\treturn 0;\r\n}\r\n"
+}

@@ -1,0 +1,39 @@
+{
+    "id": 222522013,
+    "contestId": 1627,
+    "creationTimeSeconds": 1694213378,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "SMIrrichto"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 451,
+    "memoryConsumedBytes": 74547200,
+    "source": "#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef long double ld;\r\n#define pb push_back\r\n#define pi pair<ll,ll>\r\n#define F first\r\n#define S second\r\n#define all(x) (x).begin(), (x).end()\r\n#define alll(x) ((x).begin()+1), (x).end()\r\n#define clean(v) (v).resize(distance((v).begin(), unique(all(v))));\r\n#define yes cout<<\"Yes\"<<endl;\r\n#define no cout<<\"No\"<<endl;\r\n#define mod mod\r\n#define endl '\\n'\r\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\r\nconst ll mod = 998244353;\r\n\r\nvoid io() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n}\r\n\r\ntemplate<class T>\r\nbool ckmax(T &a, const T &b) { return a < b ? a = b, 1 : 0; }\r\n\r\ntemplate<class T>\r\nbool ckmin(T &a, const T &b) { return a > b ? a = b, 1 : 0; }\r\n\r\nvoid nop() {\r\n    cout << -1 << endl;\r\n    return;\r\n}\r\n\r\nconst ll N = 2e5+5 ;\r\nvector<pi> adj[N] , tab[N];\r\nmap<ll,ll> dist[N] ;\r\nmap<ll,vector<ll>> go[N] ;\r\nll a[N] , b[N] , c[N] , d[N] , h[N] , x[N] ;\r\n\r\n\r\n\r\nvoid solve() {\r\n    ll n , m , k ;\r\n    cin>>n>>m>>k ;\r\n    for(ll i = 1 ; i<=n ; i++){\r\n        dist[i].clear() ;\r\n        adj[i].clear() ;\r\n        tab[i].clear() ;\r\n        go[i].clear() ;\r\n    }\r\n    for(ll i = 1 ; i<=n ; i++) cin>>x[i] ;\r\n    bool test = false ;\r\n    for(ll i = 1 ; i<=k ; i++){\r\n        cin>>a[i]>>b[i]>>c[i]>>d[i]>>h[i] ;\r\n        go[a[i]][b[i]].pb(i) ;\r\n        adj[a[i]].pb({b[i] , i}) ;\r\n        adj[c[i]].pb({d[i] , i}) ;\r\n        if(a[i] == 1 && b[i] == 1){\r\n             test = true ;\r\n        }\r\n    }\r\n    if(!test) adj[1].pb({1 , -1}) ;\r\n    for(ll i = 1 ; i<=n ; i++){\r\n        sort(all(adj[i])) ;\r\n\r\n    }\r\n    priority_queue<array<ll,2> , vector<array<ll,2>> , greater<>>  pq[n+1] ;\r\n    pq[1].push({0 , 1}) ;\r\n    dist[1][1] = 0 ;\r\n    for(ll i = 1 ; i<=n ; i++){\r\n        while(!pq[i].empty()){\r\n            auto vec = pq[i].top() ; pq[i].pop() ;\r\n            if(vec[0] > dist[i][vec[1]]) continue;\r\n            ll j  = upper_bound(all(adj[i]) , make_pair((ll)vec[1] , (ll)1e17)) - adj[i].begin() ;\r\n            ll idx = vec[1] , w = vec[0] ;\r\n            if(j<adj[i].size()){\r\n                ll to = adj[i][j].F ;\r\n                if(!dist[i].count(to) ||  ckmin(dist[i][to] ,  w + (to - idx) * x[i])){\r\n                    dist[i][to] =  w + (to - idx) * x[i] ;\r\n                    pq[i].push({dist[i][to] ,to }) ;\r\n                }\r\n\r\n            }\r\n            j  = lower_bound(all(adj[i]) , make_pair((ll)vec[1] , (ll)-1e17)) - adj[i].begin() ;\r\n            if(j-1>=0){\r\n                ll to = adj[i][j-1].F ;\r\n                if(!dist[i].count(to) || ckmin(dist[i][to] ,  w + (idx - to) * x[i])){\r\n                    dist[i][to] =  w + (idx - to) * x[i] ;\r\n                    pq[i].push({dist[i][to] ,to }) ;\r\n                }\r\n            }\r\n            if(adj[i][j].S==-1) continue;\r\n            ll kk = j ;\r\n            while(kk<adj[i].size() && adj[i][kk].F==adj[i][j].F){\r\n\r\n                idx = adj[i][kk].S ;\r\n                ll toi = c[idx] , toj = d[idx] , wj = h[idx] ;\r\n                if(toi <= i){\r\n                    ++kk ;\r\n                    continue;\r\n                }\r\n                if(!dist[toi].count(toj) ||  ckmin(dist[toi][toj] , w  - wj)){\r\n                    dist[toi][toj] = w - wj ;\r\n                    pq[toi].push({dist[toi][toj] , toj}) ;\r\n                }\r\n                ++kk ;\r\n            }\r\n\r\n        }\r\n    }\r\n    ll ans = 1e17 ;\r\n    for(ll i = 1 ; i<=m ; i++){\r\n        if(dist[n].count(i)) ckmin(ans , dist[n][i] + (m - i) * x[n]) ;\r\n    }\r\n    if(ans>=1e17){\r\n        cout<<\"NO ESCAPE\"<<endl;\r\n        return ;\r\n    }\r\n    cout<<ans<<endl;\r\n}\r\n\r\nint main() {\r\n#ifndef ONLINE_JUDGE\r\n    freopen(\"input.in\", \"r\", stdin);\r\n    freopen(\"output.out\", \"w\", stdout);\r\n#endif\r\n    io();\r\n    ll tt = 1;\r\n    cin>>tt ;\r\n    while (tt--) {\r\n        solve();\r\n    }\r\n\r\n    return 0;\r\n}"
+}

@@ -1,0 +1,39 @@
+{
+    "id": 234787240,
+    "contestId": 1627,
+    "creationTimeSeconds": 1701185507,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "asdasdqwer"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 405,
+    "memoryConsumedBytes": 47308800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define int int64_t\r\n#define pii pair<int,int>\r\n\r\nconst int BND = -1e18;\r\n\r\nvoid testcase() {\r\n    int n,m,k;cin>>n>>m>>k;\r\n    vector<int> x(n);\r\n    for (int &y:x)cin>>y;\r\n    vector<array<int,5>> inp(k);\r\n    for (auto &y:inp) {\r\n        for (auto &z:y)cin>>z;\r\n    }\r\n\r\n    vector<pii> pts;\r\n    for (auto y:inp) {\r\n        pts.push_back({y[0],y[1]});\r\n        pts.push_back({y[2],y[3]});\r\n    }\r\n    pts.push_back({1,1});\r\n    pts.push_back({n,m});\r\n    sort(pts.begin(),pts.end());\r\n    \r\n    vector<pii> nn;\r\n    for (auto y:pts) {\r\n        if (nn.size()==0||nn.back()!=y) nn.push_back(y);\r\n    }\r\n\r\n    map<pii,int> mp;\r\n    for (int i=0;i<nn.size();i++) {\r\n        mp[nn[i]]=i;\r\n    }\r\n\r\n    map<pii,vector<pair<pii,int>>> g;\r\n    for (auto y:inp) {\r\n        g[{y[0],y[1]}].push_back({{y[2],y[3]},y[4]});\r\n    }\r\n\r\n    vector<int> dis(mp.size(),BND);\r\n    dis[0]=0;\r\n\r\n    int p1=0,p2=0;\r\n    for (;p2<nn.size();) {\r\n        while (p2<nn.size()-1 && nn[p1].first == nn[p2+1].first)p2++;\r\n        \r\n        bool fnd=false;\r\n        \r\n        for (int i=p1;i<=p2;i++) {\r\n            if (dis[i] != BND) {\r\n                fnd=true;\r\n                break;\r\n            }\r\n        }\r\n\r\n        if (!fnd){\r\n            p1=p2+1;\r\n            p2=p1;\r\n            continue;\r\n        }\r\n\r\n        set<int> pt;\r\n        for (int i=p1;i<=p2;i++) {\r\n            pt.insert(nn[i].second);\r\n        }\r\n\r\n        vector<int> dd(p2-p1+1);\r\n        for (int i=p1;i<=p2;i++) {\r\n            dd[i-p1]=dis[i];\r\n        }\r\n\r\n        vector<bool> vis(p2-p1+1,false);\r\n        priority_queue<array<int,3>> pq;\r\n        for (int i=p1;i<=p2;i++) {\r\n            pq.push({dis[i],i-p1,nn[i].second});\r\n        }\r\n\r\n        int xi=x[nn[p1].first-1];\r\n\r\n        while (!pq.empty()) {\r\n            array<int,3> aa=pq.top();pq.pop();\r\n            if (vis[aa[1]])continue;\r\n            vis[aa[1]]=true;\r\n\r\n            if (aa[1]!=0) {\r\n                int pv = *prev(pt.lower_bound(aa[2]));\r\n                int id=aa[1]-1;\r\n                if (dd[id]<dd[aa[1]]-abs(aa[2]-pv)*xi) {\r\n                    dd[id]=dd[aa[1]]-abs(aa[2]-pv)*xi;\r\n                    pq.push({dd[id],id,pv});\r\n                }\r\n            }\r\n\r\n            if (aa[1]!=vis.size()-1) {\r\n                int pv = *next(pt.lower_bound(aa[2]));\r\n                int id=aa[1]+1;\r\n                if (dd[id]<dd[aa[1]]-abs(aa[2]-pv)*xi) {\r\n                    dd[id]=dd[aa[1]]-abs(aa[2]-pv)*xi;\r\n                    pq.push({dd[id],id,pv});\r\n                }\r\n            }\r\n        }\r\n\r\n        for (int i=0;i<dd.size();i++) {\r\n            dis[i+p1]=dd[i];\r\n        }\r\n\r\n        for (int i=p1;i<=p2;i++) {\r\n            for (auto &r:g[nn[i]]) {\r\n                if (dis[i]+r.second>dis[mp[r.first]]) {\r\n                    dis[mp[r.first]]=dis[i]+r.second;\r\n                }\r\n            }\r\n        }\r\n\r\n        p1=p2+1;\r\n        p2=p1;\r\n    }\r\n\r\n    if (dis.back() == BND) {\r\n        cout << \"NO ESCAPE\\n\";\r\n    }\r\n\r\n    else {\r\n        cout << -dis.back() << \"\\n\";\r\n    }\r\n}\r\n\r\nsigned main() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(0);\r\n\r\n    int t;cin>>t;\r\n    while (t--) {\r\n        testcase();\r\n    }\r\n}"
+}

@@ -1,0 +1,39 @@
+{
+    "id": 70433320,
+    "contestId": 280,
+    "creationTimeSeconds": 1580991128,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "gongsuidashen"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 101,
+    "timeConsumedMillis": 92,
+    "memoryConsumedBytes": 2150400,
+    "source": "#include<cstdio>\r\n#include<cstdlib>\r\n#include<cstring>\r\n#include<cmath>\r\n#include<ctime>\r\n#include<cctype>\r\n#include<complex>\r\n#include<algorithm>\r\n#include<vector>\r\n#include<queue>\r\n#include<set>\r\n#include<map>\r\nusing namespace std;\r\n#define pb push_back\r\n#define mp make_pair\r\n#define c0 first\r\n#define c1 second\r\n#define sqr(x)((x)*(x))\r\n#define clr(x)memset(x,0,sizeof(x))\r\n#define clr1(x)memset(x,-1,sizeof(x))\r\n\r\ntypedef long long ll;\r\n#ifdef __unix__\r\n#define LLD \"%lld\"\r\n#else\r\n#define LLD \"%I64d\"\r\n#endif\r\ntypedef pair<int,int> pii;\r\n\r\n#define val double\r\n#define eps 1e-12\r\n\r\nnamespace Splay{\r\n\tstruct node{\r\n\t\tnode*c[2],*f;\r\n\t\tval x,y,ax,axy,ay;\r\n\t\tinline node();\r\n\t\tinline void tran(bool x);\r\n\t\tinline node*tran();\r\n\t\tinline void rot();\r\n\t\tinline node*splay(node*p);\r\n\t\tinline node*near(bool x);\r\n\t\tinline node*find();\r\n\t}null,pool[25000],*Ppool=pool;\r\n\tinline node::node(){c[0]=c[1]=f=&null;}\r\n\tinline void node::rot(){\r\n\t\tnode*fx=f,*ffx=fx->f;\r\n\t\tbool c=fx->c[1]==this,fc=ffx->c[1]==fx;\r\n\t\tif(fx!=&null){\r\n\t\t\tif((fx->c[c]=this->c[!c])!=&null)fx->c[c]->f=fx;\r\n\t\t\tif((f=ffx)!=&null)ffx->c[fc]=this;\r\n\t\t\t(fx->f=this)->c[!c]=fx;\r\n\t\t}\r\n\t}inline node*node::splay(node*p){\r\n\t\tif(this!=&null)for(;f!=p;rot())if(f->f!=p)((f->f->c[1]==f)==(f->c[1]==this)?f:this)->rot();\r\n\t\treturn this;\r\n\t}inline void node::tran(bool x){\r\n\t\tif(c[x]==&null)return;\r\n\t\tc[x]->ay+=ay-c[x]->axy*ax;\r\n\t\tc[x]->ax+=ax;\r\n\t\tc[x]->axy+=axy;\r\n\t}inline node*node::tran(){\r\n\t\tif(this==&null)return this;\r\n\t\tx+=ax;\r\n\t\ty+=axy*x+ay;\r\n\t\ttran(0);tran(1);\r\n\t\tax=axy=ay=0;\r\n\t\treturn this;\r\n\t}inline node*node::near(bool x){\r\n\t\tthis->tran();\r\n\t\tnode*r=c[x]->tran();\r\n\t\twhile(r->c[!x]->tran()!=&null)r=r->c[!x];\r\n\t\treturn r;\r\n\t}inline node*node::find(){\r\n\t\tnode*r=this->tran(),*x=0;\r\n\t\twhile(1){\r\n\t\t\tif(r->y>0)x=r;\r\n\t\t\tif(fabs(r->y)<=eps)return r;\r\n\t\t\tbool c=r->y<0;\r\n\t\t\tif(r->c[c]->tran()==&null)return x;\r\n\t\t\tr=r->c[c];\r\n\t\t}\r\n\t}\r\n\tinline node*getnew(node*f,val x,val y){\r\n\t\tPpool->f=f;\r\n\t\tPpool->x=x;\r\n\t\tPpool->y=y;\r\n\t\treturn Ppool++;\r\n\t}\r\n}\r\n\r\n\r\n#define getint(x){\\\r\n\tchar ch;\\\r\n\twhile(!isdigit(ch=getchar()));x=ch-48;\\\r\n\twhile(isdigit(ch=getchar()))x=x*10+ch-48;\\\r\n}\r\n#define getint2(x,y){getint(x);getint(y);}\r\n#define getint3(x,y,z){getint(x);getint(y);getint(z);}\r\n\r\nint n,q,A,B;\r\nval ans;\r\nSplay::node*r;\r\nvector<val>list;\r\n\r\nval solve(int i){\r\n\tval p;\r\n\tif(i==n){\r\n\t\tr=r->find()->splay(&Splay::null);\r\n\t\tif(fabs(r->y)<=eps)return r->x>q?q:r->x<(val)A*(n-1)+1?(val)A*(n-1)+1:r->x;\r\n\t\tval X=r->x,Y=r->y;\r\n\t\tr=r->near(0)->splay(&Splay::null);\r\n\t\tval X2=r->x,Y2=r->y;\r\n\t\tp=(X2*Y-Y2*X)/(Y-Y2);\r\n\t\treturn p>q?q:p<(val)A*(n-1)+1?(val)A*(n-1)+1:p;\r\n\t}\r\n\tint x;getint(x);\r\n\tif(!i){\r\n\t\tr=Splay::getnew(&Splay::null,1.0,2.0*(1.0-x));\r\n\t\tr->c[0]=Splay::getnew(r,1.0,-1e30);\r\n\t\tr->c[1]=Splay::getnew(r,(val)q,2.0*(q-x));\r\n\t\tval re=solve(i+1);\r\n\t\tlist.pb(re);\r\n\t\tans+=sqr(re-x);\r\n\t\treturn 0;\r\n\t}\r\n\tSplay::node*t;\r\n\tr=r->find()->splay(&Splay::null);\r\n\tif(fabs(r->y)<=eps){\r\n\t\tr->y=0;\r\n\t\tp=r->x;\r\n\t\tif(A!=B){\r\n\t\t\tt=Splay::getnew(r,p,0);\r\n\t\t\tt->c[1]=r->c[1];\r\n\t\t\tt->c[1]->f=t;\r\n\t\t\tr->c[1]=t;\r\n\t\t}\r\n\t}else{\r\n\t\tval X=r->x,Y=r->y;\r\n\t\tr=r->near(0)->splay(&Splay::null);\r\n\t\tval X2=r->x,Y2=r->y;\r\n\t\tp=(X2*Y-Y2*X)/(Y-Y2);\r\n\t\tif(A!=B){\r\n\t\t\tt=Splay::getnew(r,p,0);\r\n\t\t\tt->c[1]=r->c[1];\r\n\t\t\tt->c[1]->f=t;\r\n\t\t\tr->c[1]=t;\r\n\t\t\tSplay::node*t2=Splay::getnew(r,p,0);\r\n\t\t\tt2->c[1]=r->c[1];\r\n\t\t\tt2->c[1]->f=t2;\r\n\t\t\tr->c[1]=t2;\r\n\t\t\tr=t2->splay(&Splay::null);\r\n\t\t}\r\n\t}if(A!=B){\r\n\t\tt->ax=B;\r\n\t\tr=t->tran()->splay(&Splay::null);\r\n\t\tr->c[0]->ax=A;\r\n\t}else r->ax=A;\r\n\tr->axy=2;\r\n\tr->ay=-2.0*x;\r\n\tval re=solve(i+1);\r\n\tans+=sqr(re-x);\r\n\tlist.pb(re);\r\n\tre=re<p+A?re-A:re>p+B?re-B:p;\r\n\treturn re;\r\n}\r\nint main(){\r\n\tgetint2(n,q);\r\n\tgetint2(A,B);\r\n\tsolve(0);\r\n\tfor(int i=n;i--;)printf(\"%lf \",list[i]);\r\n\tprintf(\"\\n%lf\\n\",ans);\r\n\treturn 0;\r\n}"
+}

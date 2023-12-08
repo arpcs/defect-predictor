@@ -1,0 +1,39 @@
+{
+    "id": 182458204,
+    "contestId": 1627,
+    "creationTimeSeconds": 1669379056,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "choux_la_creme"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 249,
+    "memoryConsumedBytes": 26931200,
+    "source": "#include <bits/stdc++.h>\r\n#define int ll\r\nusing namespace std;\r\n#define rep(i,n) for(int i=0;i<n;i++)\r\n#define per(i,n) for(int i=n-1;i>=0;i--)\r\n#define rng(i,c,n) for(int i=c;i<n;i++)\r\n#define fi first\r\n#define se second\r\n#define pb push_back\r\n#define sz(a) (int)a.size()\r\n#define vec(...) vector<__VA_ARGS__>\r\n#define _3UQ01a9 ios::sync_with_stdio(0),cin.tie(0)\r\ntypedef long long ll;\r\nusing pii=pair<int,int>;\r\nusing vi=vector<int>;\r\nvoid print(){cout<<'\\n';}\r\ntemplate<class h,class...t>\r\nvoid print(const h&v,const t&...u){cout<<v<<' ',print(u...);}\r\n\r\n#define all(a) a.begin(),a.end()\r\n\r\nconst int inf=1e17;\r\n\r\nusing F=pair<pair<pii,pii>,int>;\r\n\r\nvoid slv(){\r\n\tint h,w,n;\r\n\tcin>>h>>w>>n;\r\n\tvi a(h);\r\n\trep(i,h){\r\n\t\tcin>>a[i];\r\n\t}\r\n\t\r\n\tvec(F) es;\r\n\tvec(pii) tmp;\r\n\trep(i,n){\r\n\t\tint sx,sy,tx,ty,h;\r\n\t\tcin>>sx>>sy>>tx>>ty>>h;\r\n\t\tsx-=1,sy-=1,tx-=1,ty-=1;\r\n\t\t// print(sx,sy,tx,ty);\r\n\t\ttmp.pb(pii(sx,sy));\r\n\t\ttmp.pb(pii(tx,ty));\r\n\t\tes.pb({{pii(sx,sy),pii(tx,ty)},h});\r\n\t}\r\n\t\r\n\ttmp.pb(pii(0,0));\r\n\ttmp.pb(pii(h-1,w-1));\r\n\tsort(all(tmp));\r\n\ttmp.erase(unique(all(tmp)),tmp.end());\r\n\tconst int si=sz(tmp);\r\n\r\n\tvec(vec(pii)) adj(si);\r\n\tfor(auto fp:es){\r\n\t\tint w=fp.se;\r\n\t\tpii u=fp.fi.fi;\r\n\t\tpii v=fp.fi.se;\r\n\t\tint idu=lower_bound(all(tmp),u)-tmp.begin();\r\n\t\tint idv=lower_bound(all(tmp),v)-tmp.begin();\r\n\t\t// print(v.fi,v.se,idv);\r\n\t\tadj[idu].pb(pii(w,idv));\r\n\t}\r\n\r\n\tvec(vi) rbts(h);\r\n\trbts[0].pb(0);\r\n\trbts[h-1].pb(lower_bound(all(tmp),pii(h-1,w-1))-tmp.begin());\r\n\tfor(auto fp:es){\r\n\t\tpii u=fp.fi.fi;\r\n\t\tint idu=lower_bound(all(tmp),u)-tmp.begin();\r\n\t\trbts[u.fi].pb(idu);\r\n\t\tpii v=fp.fi.se;\r\n\t\tint idv=lower_bound(all(tmp),v)-tmp.begin();\r\n\t\trbts[v.fi].pb(idv);\r\n\t}\r\n\r\n\trep(i,h){\r\n\t\tsort(all(rbts[i]));\r\n\t\trbts[i].erase(unique(all(rbts[i])),rbts[i].end());\r\n\t\tsort(all(rbts[i]),[&](const int&l,const int&r){\r\n\t\t\treturn tmp[l].se<tmp[r].se;\r\n\t\t});\r\n\t}\r\n\r\n\tint ans=inf;\r\n\tvi dp(si,inf);\r\n\tdp[0]=0;\r\n\trep(i,h){\r\n\t\tconst int cur_si=sz(rbts[i]);\r\n\t\tvi ldp(cur_si,inf),rdp;\r\n\t\trdp=ldp;\r\n\t\trep(j,cur_si){\r\n\t\t\tldp[j]=inf;\r\n\t\t\trdp[j]=inf;\r\n\t\t}\r\n\t\trep(j,cur_si){\r\n\t\t\tif(j) ldp[j]=ldp[j-1];\r\n\t\t\tint id=rbts[i][j];\r\n\t\t\tint y=tmp[id].se;\r\n\t\t\tif(dp[id]!=inf){\r\n\t\t\t\tldp[j]=min(ldp[j],dp[id]-a[i]*y);\r\n\t\t\t}\r\n\t\t}\r\n\t\tper(j,cur_si){\r\n\t\t\tif(j<cur_si-1) rdp[j]=rdp[j+1];\r\n\t\t\tint id=rbts[i][j];\r\n\t\t\tint y=tmp[id].se;\r\n\t\t\tif(dp[id]!=inf){\r\n\t\t\t\trdp[j]=min(rdp[j],dp[id]+a[i]*y);\r\n\t\t\t}\r\n\t\t}\r\n\t\trep(j,cur_si){\r\n\t\t\tint id=rbts[i][j];\r\n\t\t\tint y=tmp[id].se;\r\n\t\t\tint cur_val=inf;\r\n\t\t\tif(ldp[j]!=inf){\r\n\t\t\t\tcur_val=min(cur_val,ldp[j]+a[i]*y);\r\n\t\t\t}\r\n\t\t\tif(rdp[j]!=inf){\r\n\t\t\t\tcur_val=min(cur_val,rdp[j]-a[i]*y);\r\n\t\t\t}\r\n\t\t\tif(i==h-1 and j==cur_si-1){\r\n\t\t\t\tans=cur_val;\r\n\t\t\t}\r\n\t\t\tif(cur_val==inf) continue;\r\n\t\t\tfor(auto e:adj[id]){\r\n\t\t\t\tint u=e.se;\r\n\t\t\t\tint w=e.fi;\r\n\t\t\t\tdp[u]=min(dp[u],cur_val-w);\r\n\t\t\t}\t\t\t\r\n\t\t}\r\n\t}\r\n\r\n\tif(ans>=(int)(1e16)){\r\n\t\tcout<<\"NO ESCAPE\\n\";\r\n\t}else{\r\n\t\tprint(ans);\r\n\t}\r\n}\r\n\r\nsigned main(){\r\n_3UQ01a9;\r\n\tint __t;\r\n\tcin>>__t;\r\n\trep(cs,__t){\r\n\t\tslv();\r\n\t}\r\n}"
+}

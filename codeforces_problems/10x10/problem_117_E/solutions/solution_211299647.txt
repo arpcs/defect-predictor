@@ -1,0 +1,38 @@
+{
+    "id": 211299647,
+    "contestId": 117,
+    "creationTimeSeconds": 1687924843,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 117,
+        "index": "E",
+        "name": "Tree or not Tree",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 117,
+        "members": [
+            {
+                "handle": "Daniel_lele"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1316790000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 36,
+    "timeConsumedMillis": 1994,
+    "memoryConsumedBytes": 47718400,
+    "source": "#include <bits/stdc++.h>\r\n#define int long long\r\n#define mid ((l+r)>>1)\r\nusing namespace std;\r\nvector<int> vc[100005];\r\nint n,deg[100005],ind[100005],ck[100005],top,bel[100005],siz[100005],hson[100005],pos[100005],ty,lia[100005],ctop[100005],cnt,dfsx[100005],tot,dep[100005],ft[100005];\r\nvoid dfs(int now,int fa){\r\n\tft[now]=fa;\r\n\tdep[now]=dep[fa]+1;\r\n\tbel[now]=ty;\r\n\tint maxv=0; siz[now]=1;\r\n\tfor(auto v:vc[now]){\r\n\t\tif(!ind[v]) continue;\r\n\t\tif(v==fa) continue;\r\n\t\tdfs(v,now);\r\n\t\tif(siz[v]>maxv) maxv=siz[v],hson[now]=v;\r\n\t\tsiz[now]+=siz[v];\r\n\t}\r\n}\r\nvoid dfs2(int now,int fa,int ff){\r\n\tdfsx[now]=++tot;\r\n\tif(ff){\r\n\t\tlia[now]=lia[fa];\r\n\t\tctop[now]=ctop[fa];\r\n\t}\r\n\telse{\r\n\t\tlia[now]=++cnt;\r\n\t\tctop[now]=now;\r\n\t}\r\n//\tcout<<now<<\" \"<<dfsx[now]<<\" \"<<lia[now]<<\" \"<<ctop[now]<<\"\\n\";\r\n\tif(hson[now]) dfs2(hson[now],now,1);\r\n\tfor(auto v:vc[now]){\r\n\t\tif(!ind[v]) continue;\r\n\t\tif(v==fa||v==hson[now]) continue;\r\n\t\tdfs2(v,now,0);\r\n\t}\r\n}\r\nstruct sgt{\r\n\tint f[1000005],tag[1000005];\r\n\tvoid pushdown(int i,int l,int r){\r\n\t\tif(tag[i]){\r\n\t\t\ttag[i*2]^=1,tag[i*2+1]^=1;\r\n\t\t\tf[i*2]=mid-l+1-f[i*2];\r\n\t\t\tf[i*2+1]=r-mid-f[i*2+1];\r\n\t\t\ttag[i]=0;\r\n\t\t}\r\n\t}\r\n\tvoid change(int i,int l,int r,int ql,int qr){\r\n\t\tif(ql<=l&&r<=qr){\r\n\t\t\ttag[i]^=1;\r\n\t\t\tf[i]=r-l+1-f[i];\r\n\t\t\treturn ;\r\n\t\t}\r\n\t\tpushdown(i,l,r);\r\n\t\tif(ql<=mid) change(i*2,l,mid,ql,qr);\r\n\t\tif(qr>mid) change(i*2+1,mid+1,r,ql,qr);\r\n\t\tf[i]=f[i*2]+f[i*2+1];\r\n\t}\r\n\tint qry(int i,int l,int r,int ql,int qr){\r\n\t\tif(ql<=l&&r<=qr) return f[i];\r\n\t\tif(ql>r||qr<l) return 0;\r\n\t\tpushdown(i,l,r);\r\n\t\treturn (qry(i*2,l,mid,ql,qr)+qry(i*2+1,mid+1,r,ql,qr));\r\n\t}\r\n}tree,tree2;\r\nvoid cg(int u,int v){\r\n\twhile(ctop[u]!=ctop[v]){\r\n//\t\tcout<<u<<\" \"<<v<<\"\\n\";\r\n\t\tif(dep[ctop[u]]<dep[ctop[v]]){\r\n\t\t\tswap(u,v);\r\n\t\t} \r\n\t\ttree.change(1,1,n,dfsx[ctop[u]],dfsx[u]);\r\n\t\tu=ft[ctop[u]];\r\n\t}\r\n\tif(u!=v){\r\n\t\tif(dep[u]<dep[v]) swap(u,v);\r\n\t\ttree.change(1,1,n,dfsx[v]+1,dfsx[u]);\r\n\t}\r\n}\r\nsigned main(){\r\n\tint m,q; cin>>n>>q; m=n;\r\n\tfor(int i=1;i<=m;i++){\r\n\t\tint u,v; cin>>u>>v; deg[u]++,deg[v]++;\r\n\t\tvc[u].push_back(v);\r\n\t\tvc[v].push_back(u);\r\n\t}\r\n\t//1. find cycle\r\n\tqueue<int> qq; for(int i=1;i<=n;i++) if(deg[i]==1) qq.push(i);\r\n\twhile(!qq.empty()){\r\n\t\tint f=qq.front(); qq.pop();\r\n\t\tind[f]=1;\r\n\t\tfor(auto v:vc[f]){\r\n\t\t\tdeg[v]--;\r\n\t\t\tif(deg[v]==1) qq.push(v);\r\n\t\t}\r\n\t}\r\n\tint now=0; for(int i=1;i<=n;i++) if(!ind[i]) now=i;\r\n\tint st=now;\r\n\tif(now)\r\n\tdo{\r\n\t\tck[++top]=now;\r\n\t\tpos[now]=top;\r\n\t\tfor(auto v:vc[now]){\r\n\t\t\tif(ind[v]) continue;\r\n\t\t\tif(v==ck[top-1]) continue;\r\n\t\t\tnow=v; break;\r\n\t\t}\r\n\t}while(now!=st);\r\n\telse ck[++top]=1;\r\n\t//2. cut out chains \r\n\tfor(int i=1;i<=top;i++){\r\n\t\tty=ck[i];\r\n\t\tdfs(ck[i],0);\r\n\t\tdfs2(ck[i],0,0);\r\n\t}\r\n\t//3. queries\r\n\twhile(q--){\r\n\t\tint x,y; cin>>x>>y;\r\n\t\tif(bel[x]==bel[y]){\r\n\t\t\t//3.1.\r\n\t\t\tcg(x,y);\r\n\t\t}\r\n\t\telse{\r\n\t\t\t//3.2.\r\n\t\t\tcg(x,bel[x]);\r\n\t\t\tcg(y,bel[y]);\r\n\t\t\tint l1=pos[bel[x]],l2=pos[bel[y]],tag=0;\r\n\t\t\tif(l1>l2) swap(l1,l2),tag=1;\r\n\t\t\tif(llabs(l2-l1)*2==top){\r\n\t\t\t\t//3.2.1\r\n\t\t\t\tint pre,nxt;\r\n\t\t\t\tif(!tag) pre=(l1+top-2)%top+1,nxt=l1+1;\r\n\t\t\t\telse pre=l2%top+1,nxt=l2-1;\r\n\t\t\t\tif(ck[pre]<ck[nxt]){\r\n\t\t\t\t\tif(l1!=1) tree2.change(1,1,top,1,l1-1);\r\n\t\t\t\t\ttree2.change(1,1,top,l2,top);\r\n\t\t\t\t}\r\n\t\t\t\telse{\r\n\t\t\t\t\ttree2.change(1,1,top,l1,l2-1);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\telse{\r\n\t\t\t\t//3.2.2\r\n\t\t\t\tif((l2-l1)*2<top){\r\n\t\t\t\t\ttree2.change(1,1,top,l1,l2-1);\r\n\t\t\t\t}\r\n\t\t\t\telse{\r\n\t\t\t\t\tif(l1!=1) tree2.change(1,1,top,1,l1-1);\r\n\t\t\t\t\ttree2.change(1,1,top,l2,top);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tcout<<n-tree.qry(1,1,n,1,n)-tree2.qry(1,1,top,1,top)+(tree2.qry(1,1,top,1,top)==top)<<\"\\n\";\r\n\t}\r\n\treturn 0;\r\n} "
+}

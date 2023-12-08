@@ -1,0 +1,39 @@
+{
+    "id": 207811079,
+    "contestId": 280,
+    "creationTimeSeconds": 1685417337,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "AcFunction"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 80179200,
+    "source": "#include <bits/stdc++.h>\r\n#define ll long long \r\n#define db double\r\n\r\nusing namespace std;\r\n\r\nconst int maxn=1e6; \r\nconst db eps=1e-9; \r\n\r\nint n,m;\r\nint a,b,cnt,rt,A[maxn+5]; \r\nint siz[maxn+5],ls[maxn+5],rs[maxn+5]; \r\ndb lp[maxn+5],rp[maxn+5],lx[maxn+5],rx[maxn+5],tagp[maxn+5],tagx[maxn+5],tagxp[maxn+5]; \r\ndb ans[maxn+5]; \r\n\r\nmt19937 rnd(20060426); \r\n\r\nvoid setp(int p,db d) {\r\n    tagp[p]+=d;\r\n    lp[p]+=d,rp[p]+=d;\r\n    tagx[p]-=d*tagxp[p]; \r\n}\r\n\r\nvoid setx(int p,db d) {\r\n    tagx[p]+=d;\r\n    lx[p]+=d,rx[p]+=d;\r\n}\r\n\r\nvoid setxp(int p,db d) {\r\n    tagxp[p]+=d;\r\n    lx[p]+=lp[p]*d;\r\n    rx[p]+=rp[p]*d;\r\n}\r\n\r\nvoid push(int p) {\r\n    if (ls[p]) setp(ls[p],tagp[p]),setx(ls[p],tagx[p]),setxp(ls[p],tagxp[p]); \r\n    if (rs[p]) setp(rs[p],tagp[p]),setx(rs[p],tagx[p]),setxp(rs[p],tagxp[p]); \r\n    tagp[p]=tagx[p]=tagxp[p]=0;\r\n}\r\n\r\nvoid upd(int p) {\r\n    siz[p]=siz[ls[p]]+siz[rs[p]]+1; \r\n}\r\n\r\nint nwnode(db LP,db RP,db LX,db RX) {\r\n    cnt++;\r\n    lp[cnt]=LP; rp[cnt]=RP; lx[cnt]=LX,rx[cnt]=RX;\r\n    siz[cnt]=1; tagp[cnt]=tagx[cnt]=tagxp[cnt]=0; \r\n    ls[cnt]=rs[cnt]=0; \r\n    return cnt; \r\n}\r\n\r\nvoid split(int p,db pos,int &x,int &y) {\r\n    if (p==0) {\r\n        x=y=0; return ; \r\n    }\r\n    push(p); \r\n    if (pos>=lp[p] && pos<=rp[p]-eps) {\r\n        db len=rp[p]-lp[p]; \r\n        db midx=lx[p]*(rp[p]-pos)/len+rx[p]*(pos-lp[p])/len;\r\n        x=nwnode(lp[p],pos,lx[p],midx),y=nwnode(pos,rp[p],midx,rx[p]); \r\n        ls[x]=ls[p]; rs[y]=rs[p]; upd(x),upd(y);\r\n        return ; \r\n    }\r\n    if (pos<lp[p]) {\r\n        y=p;\r\n        split(ls[p],pos,x,ls[y]);\r\n        upd(y); \r\n    }\r\n    else {\r\n        x=p;\r\n        split(rs[p],pos,rs[x],y); \r\n        upd(x); \r\n    }\r\n}\r\n\r\nint merge(int x,int y) {\r\n    if (!x || !y) return x+y; \r\n    if (rnd()%(siz[x]+siz[y])<siz[x]) {\r\n        push(x); \r\n        rs[x]=merge(rs[x],y); \r\n        upd(x); \r\n        return x; \r\n    }\r\n    else {\r\n        push(y); \r\n        ls[y]=merge(x,ls[y]); \r\n        upd(y);\r\n        return y; \r\n    }\r\n}\r\n\r\ndb getpos(int p) {\r\n    push(p);\r\n    if (lx[p]-eps<=0 && 0<=rx[p]+eps) {\r\n        if (fabs(lx[p])<eps) return lp[p];\r\n        if (fabs(rx[p])<eps) return rp[p];\r\n        db len=rp[p]-lp[p];  \r\n        db ret=lp[p]+len*lx[p]/(lx[p]-rx[p]);\r\n        return min(ret,1.0*m); \r\n    }\r\n    if (0<lx[p]) {\r\n        if (ls[p]) return getpos(ls[p]);\r\n        else return lp[p]; \r\n    }\r\n    else {\r\n        if (rs[p]) return getpos(rs[p]);\r\n        else return min(rp[p],1.0*m); \r\n    }\r\n}\r\n\r\nint main() {\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0); \r\n    cin>>n>>m>>a>>b;\r\n    rt=nwnode(1,m,0,0);\r\n    for (int i=1;i<=n;i++) {\r\n        int X;\r\n        cin>>X;\r\n        A[i]=X; \r\n        setx(rt,-2*X); \r\n        setxp(rt,2); \r\n        db pos=getpos(rt);\r\n        int x,y,z;\r\n        split(rt,pos,x,y); \r\n        setp(x,a);\r\n        setp(y,b); \r\n        z=nwnode(pos+a,pos+b,0,0); \r\n        rt=merge(merge(x,z),y); \r\n        ans[i]=pos; \r\n    }\r\n    for (int i=n;i>=2;i--) {\r\n        if (ans[i-1]<ans[i]-b+eps) ans[i-1]=max(1.0,ans[i]-b);\r\n        else if (ans[i-1]>ans[i]-a-eps) ans[i-1]=max(1.0,ans[i]-a); \r\n    }\r\n    db sum=0; \r\n    for (int i=1;i<=n;i++) sum+=(ans[i]-A[i])*(ans[i]-A[i]);\r\n    for (int i=1;i<=n;i++) {\r\n        cout<<fixed<<setprecision(9)<<ans[i]<<' '; \r\n    }\r\n    cout<<'\\n'<<fixed<<setprecision(9)<<sum<<'\\n'; \r\n    return 0; \r\n}"
+}

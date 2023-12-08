@@ -1,0 +1,38 @@
+{
+    "id": 60675820,
+    "contestId": 89,
+    "creationTimeSeconds": 1568636589,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 89,
+        "index": "B",
+        "name": "Widget Library",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "expression parsing",
+            "graphs",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 89,
+        "members": [
+            {
+                "handle": "vjudge1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1308236400
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 39,
+    "timeConsumedMillis": 92,
+    "memoryConsumedBytes": 0,
+    "source": "#include <cstdio>\n#include <cctype>\n#include <map>\n#include <cstring>\n#include <iostream>\n#include <algorithm>\nusing namespace std;\n\n#define ll long long\n#define reg register\n#define rep(i, a, b) for (reg int i = (a), i##end = (b); i <= i##end; ++i)\n#define dep(i, a, b) for (reg int i = (a), i##end = (b); i >= i##end; --i)\n\ntemplate <typename _typer> inline _typer read() {\n    _typer init = 0;\n    char ch = getchar(), k = 0;\n    for ( ; !isdigit(ch); ch = getchar()) k = (ch == '-');\n    for ( ; isdigit(ch); ch = getchar())\n        init = (init << 3) + (init << 1) + (ch ^ 48);\n    return k ? -init : init;\n}\nconst ll N = 105, INF = 1e9;\n\n/*******************************************************************************\n *\n * \u5927\u6a21\u62df\n *\n ******************************************************************************/\n\n\nint n, In[N];\nstruct EDGE {\n    int to, nex;\n} edge[N];\nint head[N], cntedge;\nvoid Addedge(int u, int v) {\n    edge[++cntedge] = (EDGE) { v, head[u] };\n    head[u] = cntedge, ++In[v];\n}\n\nmap < string , int > mp;\nstring name[N];\n\nint tot;\nstruct Widget {\n    char opt;\n    int cnt;\n    ll border, spacing;\n    ll SumWson, SumHson;\n    ll MaxWson, MaxHson;\n    ll Width, Height;\n    void Calc() {\n        if (opt == 'W') return ;\n        if (!cnt) return (void) (Width = Height = 0);\n        if (opt == 'H') {\n            Width = 2 * border + (cnt - 1) * spacing + SumWson;\n            Height = 2 * border + MaxHson;\n        } else if (opt == 'V') {\n            Width = 2 * border + MaxWson;\n            Height = 2 * border + (cnt - 1) * spacing + SumHson;\n        }\n    }\n    void Pushup(const Widget son) {\n        ++cnt;\n        SumWson += son.Width;\n        SumHson += son.Height;\n        MaxWson = max(MaxWson, son.Width);\n        MaxHson = max(MaxHson, son.Height);\n        Calc();\n    }\n    void SetBorder(ll x) { border = x; }\n    void SetSpacing(ll x) { spacing = x; }\n} node[N];\n\nvoid Solve() {\n    int Q[N], l, r;\n    l = r = 0;\n    rep (i, 1, tot) if (!In[i]) Q[++r] = i;\n    while (l < r) {\n        int u = Q[++l];\n        for (int i = head[u], v; i; i = edge[i].nex) {\n            v = edge[i].to;\n            node[v].Pushup(node[u]);\n            if (!(--In[v])) Q[++r] = v;\n        }\n    }\n}\n\nvoid Widget() {\n    string s;\n    cin >> s;\n    int len = s.length(), id = 0;\n    string name = \"\";\n    rep (i, 0, len - 1) {\n        if (s[i] == '(') {\n            id = i;\n            break;\n        }\n        name += s[i];\n    }\n    ::name[mp[name] = ++tot] = name;\n    int x = 0, y = 0;\n    rep (i, id + 1, len - 1) {\n        if (s[i] == ',') {\n            id = i;\n            break;\n        }\n        x = x * 10 + s[i] - '0';\n    }\n    rep (i, id + 1, len - 1) {\n        if (s[i] == ')') {\n            id = i;\n            break;\n        }\n        y = y * 10 + s[i] - '0';\n    }\n    node[tot].Width = x, node[tot].Height = y;\n    node[tot].opt = 'W';\n//     cerr << name << \" \" << node[tot].Width << \" \" << node[tot].Height << endl;\n}\nvoid HBox() {\n    string name;\n    cin >> name;\n    ::name[mp[name] = ++tot] = name;\n    node[tot].opt = 'H';\n}\nvoid VBox() {\n    string name;\n    cin >> name;\n    ::name[mp[name] = ++tot] = name;\n    node[tot].opt = 'V';\n}\n\n\nvoid Set(string s) {\n    string name = \"\", ord = \"\";\n    int len = s.length(), id;\n    rep (i, 0, len - 1) {\n        if (s[i] == '.') {\n            id = i;\n            break;\n        }\n        name += s[i];\n    }\n    int idv = mp[name];\n    rep (i, id + 1, len - 1) {\n        if (s[i] == '(') {\n            id = i;\n            break;\n        }\n        ord += s[i];\n    }\n    if (ord == \"pack\") {\n        name = \"\";\n        rep (i, id + 1, len - 1) {\n            if (s[i] == ')') {\n                id = i;\n                break;\n            }\n            name += s[i];\n        }\n        int idu = mp[name];\n        Addedge(idu, idv);\n    } else {\n        int x = 0;\n        rep (i, id + 1, len - 1) {\n            if (s[i] == ')') {\n                id = i;\n                break;\n            }\n            x = x * 10 + s[i] - '0';\n        }\n        if (ord == \"set_border\") node[idv].border = x;\n        else if (ord == \"set_spacing\") node[idv].spacing = x;\n    }\n}\n\n\nint main() {\n    n = read<int>();\n    rep (i, 1, n) {\n        string order;\n        cin >> order;\n        if (order == \"Widget\") Widget();\n        else if (order == \"HBox\") HBox();\n        else if (order == \"VBox\") VBox();\n        else Set(order);\n    }\n\n    Solve();\n\n    sort(name + 1, name + tot + 1);\n    rep (i, 1, tot)\n        cout << name[i] << \" \" << node[mp[name[i]]].Width << \" \"\n        << node[mp[name[i]]].Height << endl;\n    return 0;\n}\n\n\n \t \t\t\t\t\t\t\t\t \t      \t  \t\t \t \t\t\t\t"
+}

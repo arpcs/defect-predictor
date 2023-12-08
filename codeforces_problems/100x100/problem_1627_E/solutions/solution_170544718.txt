@@ -1,0 +1,39 @@
+{
+    "id": 170544718,
+    "contestId": 1627,
+    "creationTimeSeconds": 1662095252,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "clams"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 109,
+    "memoryConsumedBytes": 12800000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define int long long\r\n\r\nconst int INF = 1e16;\r\nconst int LIM = 1e15;\r\n\r\n// brute\r\n\r\nvoid solve() {\r\n    int n, m, k;\r\n    cin >> n >> m >> k;\r\n\r\n    vector<int> x(n);\r\n    for (int i = 0; i < n; i++) {\r\n        cin >> x[i];\r\n    }\r\n\r\n    vector<array<int, 5>> edges(k);\r\n    for (int i = 0; i < k; i++) {\r\n        for (int j = 0; j < 5; j++) {\r\n            cin >> edges[i][j];\r\n            if (j < 4) edges[i][j] -= 1;\r\n        }\r\n    }\r\n\r\n    vector<vector<pair<int, bool>>> on(n);\r\n    for (int i = 0; i < k; i++) {\r\n        on[edges[i][0]].push_back({i, 0});\r\n        on[edges[i][2]].push_back({i, 1});\r\n    }\r\n\r\n    auto where = [&](const pair<int, bool>& u) {\r\n        return (u.second ? edges[u.first][3] : edges[u.first][1]);\r\n    };\r\n\r\n    for (auto& j : on[0]) {\r\n        edges[j.first][4] -= where(j) * x[0];\r\n    }\r\n\r\n    for (int i = 1; i < n; i++) {\r\n        // kinda sweepline\r\n\r\n        // dont need to sort also according to type because we will go in two direction\r\n        sort(on[i].begin(), on[i].end(), [&](const auto& u, const auto& v) {\r\n            return where(u) < where(v);\r\n        });\r\n\r\n        int sz = on[i].size();\r\n        vector<int> dp(sz, -INF);\r\n\r\n        // what is the best way to code this\r\n        {\r\n            int mx = -INF;\r\n            int lst = -1;\r\n            for (int j = 0; j < sz; j++) {\r\n                auto& tmp = on[i][j];\r\n                int pos = where(tmp);\r\n                int dist = pos - lst;\r\n                mx -= x[i] * dist;\r\n\r\n                if (tmp.second) {\r\n                    mx = max(mx, edges[tmp.first][4]);\r\n                } else {\r\n                    dp[j] = max(dp[j], mx);\r\n                }\r\n\r\n                lst = pos;\r\n            }\r\n        }\r\n\r\n        {\r\n            int mx = -INF;\r\n            int lst = m;\r\n            for (int j = sz - 1; j >= 0; j--) {\r\n                auto& tmp = on[i][j];\r\n                int pos = where(tmp);\r\n                int dist = lst - pos;\r\n                mx -= x[i] * dist;\r\n\r\n                if (tmp.second) {\r\n                    mx = max(mx, edges[tmp.first][4]);\r\n                } else {\r\n                    dp[j] = max(dp[j], mx);\r\n                }\r\n\r\n                lst = pos;\r\n            }\r\n        }\r\n\r\n        for (int j = 0; j < sz; j++) {\r\n            if (!on[i][j].second) {\r\n                edges[on[i][j].first][4] += dp[j];\r\n            }\r\n        }\r\n    }\r\n\r\n    int ans = -INF;\r\n    for (int j = 0; j < (int)on[n - 1].size(); j++) {\r\n        if (on[n - 1][j].second) {\r\n            ans = max(ans, edges[on[n - 1][j].first][4] - (m - 1 - where(on[n - 1][j])) * x[n - 1]);\r\n        }\r\n    }\r\n\r\n    ans = -ans;\r\n\r\n    if (ans >= LIM) {\r\n        cout << \"NO ESCAPE\\n\";\r\n    } else {\r\n        cout << ans << '\\n';\r\n    }\r\n}\r\n\r\nsigned main() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n\r\n    #ifdef LOCAL\r\n    freopen(\"in.txt\", \"r\", stdin);\r\n    freopen(\"out.txt\", \"w\", stdout);\r\n    #endif\r\n\r\n    int t;\r\n    cin >> t;\r\n\r\n    while (t--) {\r\n        solve();\r\n    }\r\n}"
+}

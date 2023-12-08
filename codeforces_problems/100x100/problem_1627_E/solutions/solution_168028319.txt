@@ -1,0 +1,39 @@
+{
+    "id": 168028319,
+    "contestId": 1627,
+    "creationTimeSeconds": 1660353080,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "sammochen"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 670,
+    "memoryConsumedBytes": 108134400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#ifdef DEBUG\r\n#include \"debug.h\"\r\n#else\r\n#define debug(...) 1\r\n#endif\r\n\r\nusing ll = long long;\r\nusing db = long double;\r\nusing VS = vector<string>;\r\nusing VLL = vector<ll>;\r\nusing VVLL = vector<VLL>;\r\nusing VVVLL = vector<VVLL>;\r\nusing PLL = pair<ll, ll>;\r\nusing MLL = map<ll, ll>;\r\nusing SLL = set<ll>;\r\nusing QLL = queue<ll>;\r\nusing SS = stringstream;\r\n\r\n#define rep(x, l, u) for (ll x = l; x < u; x++)\r\n#define rrep(x, l, u) for (ll x = l; x >= u; x--)\r\n#define fe(x, a) for (auto x : a)\r\n#define all(x) x.begin(), x.end()\r\n#define rall(x) x.rbegin(), x.rend()\r\n#define mst(x, v) memset(x, v, sizeof(x))\r\n#define sz(x) (ll) x.size()\r\n#define ios ios_base::sync_with_stdio(0), cin.tie(0)\r\n\r\n#define umap unordered_map\r\n#define uset unordered_set\r\n#define mset multiset\r\n\r\n// clang-format off\r\n\r\nll ob(ll i, ll n) { return i < 0 || i >= n; }\r\nll tp(ll x) { return ( 1LL << x ); }\r\nll rup(ll a, ll b) { return a % b ? a/b + 1 : a/b; }\r\nll sign(ll x) {\treturn x == 0 ? 0 : x / abs(x); }\r\nvoid makemod(ll& x, ll m) { x %= m; if (x < 0) { x += m; } }\r\nll getmod(ll x, ll m) { makemod(x, m); return x; }\r\nll powmod(ll a, ll b, ll m) { if (b == 0) return 1; ll h = powmod(a, b/2, m); ll ans = h*h%m; return b%2 ? ans*a%m : ans; }\r\nll invmod(ll a, ll m) { return powmod(a, m - 2, m); }\r\n\r\ntemplate <typename A, typename B> bool upmin(A& x, B v) { if (v >= x) return false; return x = v, true; }\r\ntemplate <typename A, typename B> bool upmax(A& x, B v) { if (v <= x) return false; return x = v, true; }\r\n\r\n// clang-format on\r\n\r\nconst VLL di = {0, 0, 1, -1, 1, -1, 1, -1}, dj = {1, -1, 0, 0, -1, -1, 1, 1};\r\nconst ll mod = 1'000'000'007, mod2 = 998'244'353, inf = (ll)1e18 + 5;\r\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\r\n\r\nVLL A;   // health lost if you travel\r\nVVLL B;  // ladders\r\nvector<SLL> S;\r\nmap<PLL, VLL> ending;\r\numap<ll, ll> dp;\r\n\r\n// there are only a few points of interest\r\nll get(ll i, ll j, ll fromLeft) {\r\n    ll hh = (i * 1e6 + j) * 3 + fromLeft;\r\n    if (dp.count(hh)) {\r\n        return dp.at(hh);\r\n    }\r\n\r\n    ll& ans = dp[hh];\r\n    ans = -inf;\r\n\r\n    if (fromLeft == 2) {\r\n        upmax(ans, get(i, j, 0));\r\n        upmax(ans, get(i, j, 1));\r\n        return ans;\r\n    }\r\n\r\n    if (i == 0 && j == 0) {\r\n        upmax(ans, 0);\r\n    }\r\n\r\n    for (auto ind : ending[{i, j}]) {\r\n        ll ii = B[ind][0], jj = B[ind][1];\r\n        ll prev = get(ii, jj, 2);\r\n        if (prev != -inf) upmax(ans, get(ii, jj, 2) + B[ind][4]);\r\n    }\r\n\r\n    ll jj = -1;\r\n    if (fromLeft) {\r\n        auto it = S[i].lower_bound(j);\r\n        if (it != S[i].begin()) {\r\n            it--;\r\n            jj = *it;\r\n        }\r\n    } else {\r\n        auto it = S[i].upper_bound(j);\r\n        if (it != S[i].end()) {\r\n            jj = *it;\r\n        }\r\n    }\r\n\r\n    if (jj != -1) {\r\n        ll prev = get(i, jj, fromLeft);\r\n        if (prev != -inf) upmax(ans, get(i, jj, fromLeft) - A[i] * abs(j - jj));\r\n    }\r\n    return ans;\r\n}\r\n\r\nvoid solve() {\r\n    A.clear(), B.clear(), S.clear(), ending.clear(), dp.clear();\r\n    ll n, m, k;\r\n    cin >> n >> m >> k;\r\n\r\n    A.resize(n);  // health lost if you travel across floor\r\n    rep(i, 0, n) cin >> A[i];\r\n\r\n    B.assign(k, VLL(5));  // x1, y1, x2, y2, h\r\n    S.assign(n, SLL());\r\n    rep(i, 0, k) {\r\n        rep(j, 0, 5) {\r\n            cin >> B[i][j];\r\n            if (j <= 3) B[i][j]--;\r\n        }\r\n\r\n        S[B[i][0]].insert(B[i][1]);\r\n        S[B[i][2]].insert(B[i][3]);\r\n\r\n        ending[{B[i][2], B[i][3]}].push_back(i);\r\n    }\r\n    S[0].insert(0);\r\n\r\n    ll ans = get(n - 1, m - 1, 2);\r\n    if (ans == -inf) {\r\n        cout << \"NO ESCAPE\" << endl;\r\n    } else {\r\n        cout << -ans << endl;\r\n    }\r\n}\r\n\r\nint main() {\r\n    ios;\r\n    ll t = 1;\r\n    cin >> t;\r\n    rep(i, 0, t) solve();\r\n    return 0;\r\n}\r\n"
+}

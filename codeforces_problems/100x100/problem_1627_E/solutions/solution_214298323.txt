@@ -1,0 +1,39 @@
+{
+    "id": 214298323,
+    "contestId": 1627,
+    "creationTimeSeconds": 1689659656,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "Mustela_Erminea"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 140,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <set>\r\n#include <algorithm>\r\n#define pii pair<int, int>\r\n#define ll long long\r\n\r\nusing namespace std;\r\n\r\nconst ll INF = (ll)1e15;\r\n\r\nstruct Ladder {\r\n\tint b, c, d;\r\n\tll h;\r\n\r\n\tbool operator<(Ladder o) { return b < o.b; }\r\n};\r\n\r\nint n, m, k;\r\nvector<int> x;\r\nvector<vector<pii>> getDists;\r\nvector<vector<Ladder>> graph;\r\n\r\nint i, pos;\r\nll getHealth(pii p) {\r\n\treturn p.second - x[i] * abs(p.first - pos);\r\n}\r\nbool comp(pii p1, pii p2) {\r\n\tll h1 = getHealth(p1), h2 = getHealth(p2);\r\n\treturn h1 != h2 ? p1 < p2 : h1 < h2;\r\n}\r\n\r\nvoid solve(int tc) {\r\n\tcin >> n >> m >> k;\r\n\tx.clear(); x.resize(n + 1);\r\n\tgraph.clear(); graph.resize(n + 1);\r\n\tfor (int i = 1; i <= n; i++) cin >> x[i];\r\n\tfor (int i = 0; i < k; i++) {\r\n\t\tint a, b, c, d, h; cin >> a >> b >> c >> d >> h;\r\n\t\tif (tc == 94) cout << a << b << c << d << \"|\";\r\n\t\tgraph[a].push_back({ b, c, d, h });\r\n\t} for (int i = 1; i <= n; i++) sort(graph[i].begin(), graph[i].end());\r\n\tif (tc == 94) cout << endl;\r\n\r\n\tgetDists.clear();  getDists.resize(n + 1);\r\n\tgetDists[1].push_back({ 1, 0 });\r\n\tfor (i = 1; i < n; i++) {\r\n\t\tif (graph[i].empty() || getDists[i].empty()) continue;\r\n\t\tint leftmost = graph[i].begin()->b, rightmost = graph[i].rbegin()->b;\r\n\t\tvector<pii> positives, negatives;\r\n\t\tfor (pii p : getDists[i])  if (p.first >= leftmost) positives.push_back(p);\r\n\t\tfor (pii p : getDists[i]) if (p.first <= rightmost) negatives.push_back(p);\r\n\t\tpos = leftmost; sort(positives.begin(), positives.end(), comp);\r\n\t\tpos = rightmost; sort(negatives.begin(), negatives.end(), comp);\r\n\r\n\t\tint p1 = positives.size() - 1, p2 = negatives.size() - 1;\r\n\t\tvector<ll> maxDist(graph[i].size(), -INF);\r\n\t\tfor (int j = 0; j < graph[i].size(); j++) {\r\n\t\t\tLadder& l = graph[i][j];\r\n\t\t\twhile (p1 >= 0 && positives[p1].first < l.b) p1--;\r\n\t\t\tpos = l.b;\r\n\t\t\tif (p1 >= 0) maxDist[j] = max(maxDist[j], getHealth(positives[p1]));\r\n\t\t} \r\n\t\tfor (int j = graph[i].size() - 1; j >= 0; j--) {\r\n\t\t\tLadder& l = graph[i][j];\r\n\t\t\twhile (p2 >= 0 && negatives[p2].first > l.b) p2--;\r\n\t\t\tpos = l.b;\r\n\t\t\tif (p2 >= 0) maxDist[j] = max(maxDist[j], getHealth(negatives[p2]));\r\n\t\t}\r\n\r\n\t\tfor (int j = 0; j < graph[i].size(); j++) {\r\n\t\t\tLadder& l = graph[i][j];\r\n\t\t\tgetDists[l.c].push_back({ l.d, maxDist[j] + l.h });\r\n\t\t}\r\n\t}\r\n\r\n\t// res = max health\r\n\tll res = -INF; i = n; pos = m;\r\n\tfor (pii p : getDists[n]) {\r\n\t\tres = max(res, getHealth(p));\r\n\t} if (res == -INF) cout << \"NO ESCAPE\" << endl;\r\n\telse cout << -res << endl;\r\n}\r\n\r\nint main() {\r\n\tios_base::sync_with_stdio(false); cin.tie(0);\r\n\r\n\tint t; cin >> t;\r\n\tfor (int tc = 1; tc <= t; tc++) solve(tc);\r\n}"
+}

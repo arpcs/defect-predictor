@@ -1,0 +1,38 @@
+{
+    "id": 218139094,
+    "contestId": 1236,
+    "creationTimeSeconds": 1691660660,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "BungeAuriculateRoot"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 32972800,
+    "source": "#include <stdio.h>\r\n#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nusing ll = long long;\r\ntemplate <class T>\r\ninline void chmax(T &x, const T &y) { if(x < y) x = y; }\r\ntemplate <class T>\r\ninline void chmin(T &x, const T &y) { if(x > y) x = y; }\r\n#define rep(i, l, r) for(int i = l, i##end = r; i <= i##end; ++ i)\r\n#define per(i, r, l) for(int i = r, i##end = l; i >= i##end; -- i)\r\nchar inputbuf[1 << 23], *p1 = inputbuf, *p2 = inputbuf;\r\n#define getchar() (p1 == p2 && (p2 = (p1 = inputbuf) + fread(inputbuf, 1, 1 << 23, stdin), p1 == p2) ? EOF : *p1++)\r\ninline int read() {\r\n\tint res = 0; char ch = getchar(); bool f = true;\r\n\tfor(; ch < '0' || ch > '9'; ch = getchar())\r\n\t\tf &= ch != '-';\r\n\tfor(; ch >= '0' && ch <= '9'; ch = getchar())\r\n\t\tres = res * 10 + (ch ^ 48);\r\n\treturn f ? res : -res;\r\n}\r\nconst int N = 5e5 + 15, P = 1e9 + 7;\r\n\r\nint to[N * 2], nxt[N * 2], head[N], ecnt = 1;\r\nint dep[N], fa[N], d[N];\r\nint n, m, R;\r\nll ex, ex2, r2, er, pr;\r\nll ip[N], sum[N];\r\nbool te[N];\r\n\r\nll poww(ll x, ll y = P - 2) {\r\n\tll res = 1;\r\n\tfor(; y; y >>= 1, x = x * x % P)\r\n\t\tif(y & 1) res = res * x % P;\r\n\treturn res;\r\n}\r\n\r\nvoid add(ll &x, ll y) {\r\n\t(x += y) %= P;\r\n}\r\n\r\nvoid sub(ll &x, ll y) {\r\n\t(x += P - y % P) %= P;\r\n}\r\n\r\nll C2(ll n) {\r\n\treturn n * (n - 1) / 2 % P;\r\n}\r\n\r\nvoid add(int x, int y) {\r\n\tto[++ ecnt] = y;\r\n\tnxt[ecnt] = head[x];\r\n\thead[x] = ecnt;\r\n}\r\n\r\nvoid dfs(int u, int f) {\r\n\tfa[u] = f;\r\n\tdep[u] = dep[f] + 1;\r\n\tfor(int i = head[u], v; i; i = nxt[i]) {\r\n\t\tv = to[i];\r\n\t\tif(v == f || dep[v]) continue;\r\n\t\tte[i >> 1] = 1;\r\n\t\tdfs(v, u);\r\n\t}\r\n}\r\n\r\nsigned main() {\r\n\tint x, y;\r\n\tn = read(); m = read();\r\n\tip[0] = 1; ip[1] = (P + 1) / 2;\r\n\trep(i, 2, m + 5) ip[i] = ip[i - 1] * ip[1] % P;\r\n\trep(i, 1, m) {\r\n\t\tx = read(); y = read();\r\n\t\tadd(x, y); add(y, x);\r\n\t\t++ d[x]; ++ d[y];\r\n\t}\r\n\tdfs(1, 0);\r\n\trep(i, 1, m) {\r\n\t\tif(te[i]) continue;\r\n\t\tint x = to[i * 2], y = to[i * 2 + 1], c, cnt = 0;\r\n\t\tll tmp = 0;\r\n\t\tif(dep[x] > dep[y]) swap(x, y);\r\n\t\tc = dep[y] - dep[x] + 1;\r\n\t\tfor(int u = y; u != fa[x]; u = fa[u])\r\n\t\t\tcnt += d[u], tmp += sum[u], add(sum[u], ip[c]);\r\n\t\tadd(r2, ip[c] * (ex + tmp % P));\r\n\t\tadd(pr, ip[c + 1] * (c + n));\r\n\t\tadd(er, ip[c + 2] * (c + m + cnt));\r\n\t\tadd(ex, ip[c]);\r\n\t}\r\n\tadd(ex2, (pr - er + P) * 2);\r\n\tadd(ex2, r2 * 2 + ex);\r\n\tadd(ex2, (n + 1ll) * n % P * ip[2]);\r\n\tsub(ex2, (n + 2ll) * m % P * ip[2]);\r\n\tadd(ex2, C2(m) * ip[3] + m * ip[2]);\r\n\trep(i, 1, n) add(ex2, C2(d[i]) * ip[3]);\r\n\tadd(ex, n * ip[1] + (P - m) * ip[2]);\r\n\tprintf(\"%lld\\n\", (ex2 - ex * ex % P + P) % P);\r\n\treturn 0;\r\n}//18316193264933923441"
+}

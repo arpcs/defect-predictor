@@ -1,0 +1,39 @@
+{
+    "id": 146504183,
+    "contestId": 1627,
+    "creationTimeSeconds": 1644921782,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "BERNARB.01"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntemplate <class T>\r\nusing rpq = priority_queue<T, vector<T>, greater<T>>;\r\n\r\nint main() {\r\n  ios::sync_with_stdio(false);\r\n  cin.tie(0);\r\n  int tt;\r\n  cin >> tt;\r\n  while (tt--) {\r\n    int n, m, k;\r\n    cin >> n >> m >> k;\r\n    vector<int> x(n);\r\n    for (int i = 0; i < n; i++) {\r\n      cin >> x[i];\r\n    }\r\n    int start = -1, target = -1;\r\n    vector<int> a(n), b(n), c(n), d(n), h(n);\r\n    for (int i = 0; i < k; i++) {\r\n      cin >> a[i] >> b[i] >> c[i] >> d[i] >> h[i];\r\n      --a[i]; --b[i]; --c[i]; --d[i];\r\n      if (a[i] == 0 && b[i] == 0) {\r\n        start = i;\r\n      }\r\n      if (c[i] == n - 1 && d[i] == m - 1) {\r\n        target = i + k;\r\n      }\r\n    }\r\n    if (start == -1) {\r\n      start = k + k;\r\n    }\r\n    if (target == -1) {\r\n      target = max(start + 1, k + k);\r\n    }\r\n    vector<vector<pair<int, int>>> row(n);\r\n    for (int i = 0; i < k; i++) {\r\n      row[a[i]].emplace_back(i, b[i]);\r\n      row[c[i]].emplace_back(i + k, d[i]);\r\n    }\r\n    int gn = max({start + 1, target + 1, k + k});\r\n    vector<vector<pair<int, __int128>>> g(gn);\r\n    for (int i = 0; i < n; i++) {\r\n      auto& p = row[i];\r\n      sort(p.begin(), p.end(), [&](const pair<int, int>& I, const pair<int, int>& J) {\r\n        return I.second < J.second;\r\n      });\r\n      if (i == 0 && start == k + k && !p.empty()) {\r\n        g[start].emplace_back(p[0].first, p[0].second * 1LL * x[0]);\r\n      }\r\n      if (i == n - 1 && target >= k + k && !p.empty()) {\r\n        g[p.back().first].emplace_back(target, (m - 1LL - p.back().second) * x.back());\r\n      }\r\n      for (int rot = 0; rot < 2; rot++) {\r\n        for (int j = 1; j < (int) p.size(); j++) {\r\n          int idx = p[j].first;\r\n          int pos = p[j].second;\r\n          int idx_ = p[j - 1].first;\r\n          int pos_ = p[j - 1].second;\r\n          g[idx_].emplace_back(idx, x[i] * 1LL * llabs(pos - pos_));\r\n        }\r\n        reverse(p.begin(), p.end());\r\n      }\r\n    }\r\n    for (int i = 0; i < k; i++) {\r\n      g[i].emplace_back(i + k, -h[i]);\r\n    }\r\n    vector<__int128> p(gn);\r\n    vector<int> que(1, start);\r\n    vector<bool> vis(gn, false);\r\n    vis[start] = true;\r\n    for (int id = 0; id < (int) que.size(); id++) {\r\n      int v = que[id];\r\n      for (auto [u, w] : g[v]) {\r\n        if (!vis[u]) {\r\n          p[u] = min(p[u], p[v] + w);\r\n          que.push_back(u);\r\n          vis[u] = true;\r\n        }\r\n      }\r\n    }\r\n    rpq<pair<__int128, int>> s;\r\n    vector<__int128> dist(gn, LONG_LONG_MAX);\r\n    dist[start] = 0;\r\n    s.emplace(0, start);\r\n    while (!s.empty()) {\r\n      auto [W, v] = s.top();\r\n      if (v == target) {\r\n        break;\r\n      }\r\n      s.pop();\r\n      if (W != dist[v]) {\r\n        continue;\r\n      }\r\n      for (auto [u, w] : g[v]) {\r\n        assert(p[v] - p[u] + w >= 0);\r\n        if (W + p[v] - p[u] + w < dist[u]) {\r\n          dist[u] = W + p[v] - p[u] + w;\r\n          s.emplace(dist[u], u);\r\n        }\r\n      }\r\n    }\r\n    if (dist[target] == LONG_LONG_MAX) {\r\n      cout << \"NO ESCAPE\" << '\\n';\r\n    } else {\r\n      __int128 ans = dist[target] - p[start] + p[target];\r\n      cout << (long long) ans << '\\n';\r\n    }\r\n  }\r\n  return 0;\r\n}\r\n// E\r\n"
+}

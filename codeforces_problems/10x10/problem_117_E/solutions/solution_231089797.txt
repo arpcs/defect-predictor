@@ -1,0 +1,38 @@
+{
+    "id": 231089797,
+    "contestId": 117,
+    "creationTimeSeconds": 1699001651,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 117,
+        "index": "E",
+        "name": "Tree or not Tree",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 117,
+        "members": [
+            {
+                "handle": "eren__"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1316790000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 15,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 20070400,
+    "source": "#include <bits/stdc++.h> \n\n#pragma GCC optimize(\"O3,unroll-loops\") \n#define pb push_back\n#define F first\n#define S second \n#define all(a) a.begin(),a.end()\n#define pii pair <int,int>\n#define Pii pair<pii , pii>\nusing namespace std ;\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\n\nconst int maxn = 2e5 + 10  , maxq = 1e7 + 1 ,  inf = 1e9 + 10 , mod=1e9 + 7 ,lg = 20 ;\nint mark[maxn], dis[maxn] , len = 0 , st[maxn] , en[maxn] , cnt=  1 , bl[maxn],par[maxn], sb[maxn],u1,u2,n,fst[maxn]; \nint seg[4*maxn] , lz[4*maxn] ; \nvector <int> G[maxn];int f[maxn][2];\nvoid shi(int p  ,int l ,int r){\n  int pl = p<<1 , pr = p<< 1| 1 , mid = (l+r)/2 ;\n  if(lz[p] ==0 )return ;\n  seg[pl] = mid - l + 1 -seg[pl];\n  seg[pr] = r - mid - seg[pr] ;\n  lz[pl] ^= 1 ;\n  lz[pr] ^= 1 ;\n  lz[p] = 0 ;\n}\nvoid upd(int le , int ri , int p = 1, int l = 1 , int r = n){\n  int pl = p<<1 , pr = p<< 1| 1 , mid = (l+r)/2 ;\n  if(le > r || l > ri)return ;\n  if(l!=r)shi(p, l, r); \n  if(le <=l && r <= ri){\n    seg[p] = r-l+1 - seg[p] ;\n    lz[p] = 1;\n    return ;\n  }\n  upd(le ,ri,pl,l,mid);\n  upd(le,ri,pr,mid+1,r);\n  seg[p]=seg[pl]+seg[pr];\n}\nint que(int le,int ri,int p=1 , int l=1,int r=n){\n  int pl = p<<1 , pr = p<< 1| 1 , mid = (l+r)/2 ;\n  if(le>r || l > ri)return 0 ;\n  if(l!=r)shi(p,l,r);\n  if(le <=l && r <= ri){\n    return seg[p] ;\n  }\n  return que(le,ri,pl,l,mid) + que(le,ri,pr,mid+1,r);\n}\nvoid dfs1(int v){\n  mark[v] = 1; \n  fst[v] = cnt ; cnt++ ;\n  vector <int> vec ;\n  for(int i =0 ; i < G[v].size() ; i++){\n    int u = G[v][i] ; \n    if(mark[u] == 1){\n      if(dis[v]-1 > dis[u]){\n        u1 = v,  u2 = u ;\n        len = dis[v] - dis[u] ;\n      }\n      continue ;\n    }\n  }\n  sb[v] = 1; \n  for(int u : G[v]){\n    if(mark[u] == 1)continue ;\n    dis[u] = dis[v] + 1; \n    par[u] = v ;\n    dfs1(u);\n    sb[v] += sb[u] ;\n    vec.pb(u);\n  }\n  G[v] = vec ;\n  en[v] = cnt ; cnt++ ;\n}\nint ispar(int v ,int u){\n  if(fst[v] <= fst[u] && en[v] >= en[u])return 1; \n  return 0 ;\n}\nvector <int> t ;\nint up[maxn] ;\nvoid bui(int v, int str = 1){\n  t.pb(v); \n  st[v] = t.size() ;\n  vector <pii> vec ;\n  if(str==0)up[v] =v ; \n  for(int x : G[v]){\n    vec.pb({sb[x] + (ispar(x , u1) == 1 ? inf : 0) , x});\n  }\n  if(vec.size()==0)return ;\n  sort(all(vec)) ;\n  for(int i = vec.size() - 1; i >= 0 ; i--){\n    pii x = vec[i] ;\n    if(x == vec.back() && v!= u2 && v != u1){\n      up[x.S] = up[v] ;\n      bui(x.S , 1) ;\n    }else{\n      bui(x.S , 0) ;\n    }\n  }\n}\n\nint lca(int v, int u){\n  if(dis[v] < dis[u])return lca(u , v) ;\n  if(ispar(u , v) == 1)return u ;\n  if((dis[v] - dis[up[v]]) > (dis[u] - dis[up[u]]))return lca(v , par[up[u]]) ;\n  else return lca(par[up[v]],u) ;\n}\nint o1 , t1 , o2 , t2 ;\nvoid sl(int v , int lc){ \n  if(v==0)return ;\n  if(up[v] == f[u2][0] && dis[v] >= dis[lc]){\n    t1 = dis[v] - max(dis[lc] , dis[u2]) ; \n    o1 = v ;\n  } \n  upd(st[up[v]] , st[v]) ;\n  sl(par[up[v]] , lc) ;\n}\nvoid sl2(int v ,int lc){\n  if(v==0)return ;\n  if(up[v] == f[u2][0] && dis[v] >= dis[lc]){\n    t2 = dis[v] - max(dis[lc] , dis[u2]) ;\n    if(dis[lc] < dis[u2])o2 = u2 ;\n    else o2 = lc ;\n  } \n  upd(st[up[v]] , st[v]);\n  sl2(par[up[v]] , lc) ;\n}\nsigned main(){ \n  ios::sync_with_stdio(0);cin.tie(0);\n  int  m ;\n  cin >> n >> m ;\n  for(int i = 1; i <= n ; i++){\n    int v , u ;\n    cin >> v >> u ;\n    G[v].pb(u) ;\n    G[u].pb(v) ;\n  }\n  st[0] = 0 , en[0] = inf ; \n  dfs1(1) ;\n  for(int i = 1 ; i <= n ;i++)mark[i] = 0 ;\n  int z = u1 ;\n  while(z != u2){\n    f[z][1] = par[z];\n    f[par[z]][0] = z ;\n    z =par[z] ;  \n  }\n  len++;\n  f[u2][1] = u1;\n  f[u1][0] = u2;\n  bui(1 , 0);bool be = 0;\n  while(m--){\n    int x , y;\n    cin >> x >> y ;\n    int lc = lca(x ,y) , a1 = 0 , av =0 ;o1 = o2 = -1 ;t1 = t2 = 0; \n    sl(x,lc) ;\n    if(t1==0)o1=-1;\n    sl2(y , lc);\n    if(t2==0)o2=-1;\n    int ok = max(o1 , o2) , tol = max(t1 ,t2)  ;\n    if(o1 == ok)a1 = 1;\n    if(tol*2 > len){\n      av = 1 ;\n    }\n    if(tol * 2 == len){\n      if(a1){\n        if(f[ok][0] < f[ok][1])av=1;\n      }else{\n        if(f[ok][1] < f[ok][0])av=1;\n      }\n    }\n    if(av){\n      upd(st[u2]+1 , st[u1]) ;\n      be ^= 1; \n    }\n    cout<< n-(que(2 ,n) - (que(st[u2]+1 ,st[u1]) == len-1 && be) + be) <<\"\\n\";\n  }\n}\n/*\n\n*/"
+}

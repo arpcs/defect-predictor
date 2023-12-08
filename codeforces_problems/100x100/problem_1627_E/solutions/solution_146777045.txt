@@ -1,0 +1,39 @@
+{
+    "id": 146777045,
+    "contestId": 1627,
+    "creationTimeSeconds": 1645129346,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "nathan_luiz"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 327,
+    "memoryConsumedBytes": 28774400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define pb push_back\r\n#define mp make_pair\r\n\r\n#define int long long\r\n#define IOS ios_base::sync_with_stdio(0);cin.tie(0)\r\n#define PRECISION cout.precision(3); cout.setf(ios::fixed);\r\n\r\n#define infinite 1123456789123456789\r\n#define db cout << \"Debug\" << \"\\n\";\r\n#define dbg(x)  cout << #x << \" = \" << x << \"\\n\"\r\n\r\nint n, m, k, x[100010];\r\nvector< array<int, 4> > saida[100010];\r\nvector<int> chegada[100010];\r\nmap< pair<int, int>, int > memo;\r\n\r\nvoid solve(){\r\n    cin >> n >> m >> k;\r\n    memo.clear();\r\n    for(int i = 1; i <= n; i++){\r\n        cin >> x[i];\r\n        saida[i].clear();\r\n        chegada[i].clear();\r\n    }\r\n\r\n    for(int i = 1; i <= k; i++){\r\n        int a, b, c, d, h; cin >> a >> b >> c >> d >> h;\r\n        saida[a].pb({b, h, c, d});\r\n        chegada[c].pb(d);\r\n\r\n        memo[mp(a, b)] = -infinite;\r\n        memo[mp(c, d)] = -infinite;\r\n    }\r\n    memo[mp(1, 1)] = 0;\r\n    chegada[1].pb(1);\r\n\r\n    for(int i = 1; i < n; i++){\r\n        sort(chegada[i].begin(), chegada[i].end());\r\n        sort(saida[i].begin(), saida[i].end());\r\n\r\n        // cout << \"\\n\";\r\n        // dbg(i);\r\n        // for(auto u : chegada[i]) cout << memo[mp(i, u)] << \" \";\r\n        //     cout << \"\\n\";\r\n\r\n        vector<int> dist(saida[i].size() + 10, -infinite);\r\n        int j_ant = 0, cur = -infinite;\r\n        int pont = 0;\r\n\r\n        for(int p = 0; p < saida[i].size(); p++){\r\n            auto it = saida[i][p];\r\n\r\n            int X = it[0], h = it[1], c = it[2], d = it[3];\r\n\r\n            while(pont < chegada[i].size()){\r\n                if(chegada[i][pont] > X) break;\r\n                cur -= x[i] * (chegada[i][pont] - j_ant);\r\n                cur = max(cur, memo[mp(i, chegada[i][pont])]);\r\n                j_ant = chegada[i][pont];\r\n\r\n                pont++;\r\n            }\r\n\r\n            // dbg(cur - x[i] * (X - j_ant));\r\n\r\n            dist[p] = max(dist[p], cur - x[i] * (X - j_ant));\r\n        }\r\n\r\n        // dbg(dist[0]);\r\n\r\n        cur = - infinite; j_ant = m;\r\n        pont = chegada[i].size() - 1;\r\n\r\n        for(int p = saida[i].size() - 1; p >= 0; p--){\r\n            auto it = saida[i][p];\r\n\r\n            int X = it[0], h = it[1], c = it[2], d = it[3];\r\n\r\n            while(pont >= 0){\r\n                if(chegada[i][pont] < X) break;\r\n\r\n                cur -= x[i] * (j_ant - chegada[i][pont]);\r\n                cur = max(cur, memo[mp(i, chegada[i][pont])]);\r\n                j_ant = chegada[i][pont];\r\n\r\n                pont--;\r\n            }\r\n\r\n            dist[p] = max(dist[p], cur - x[i] * (j_ant - X));\r\n        }\r\n        // dbg(dist[0]);\r\n\r\n        for(int p = 0; p < saida[i].size(); p++){\r\n            auto it = saida[i][p];\r\n\r\n            int X = it[0], h = it[1], c = it[2], d = it[3];\r\n\r\n            memo[mp(c, d)] = max(memo[mp(c, d)], dist[p] + h);\r\n        }\r\n\r\n\r\n    }\r\n    // agora analisar o ultimo andar\r\n    int j_ant = 0, cur = -infinite;\r\n    int pont = 0;\r\n\r\n    sort(chegada[n].begin(), chegada[n].end());\r\n\r\n    for(auto it : chegada[n]){\r\n        cur -= x[n] * (it - j_ant);\r\n        cur = max(cur, memo[mp(n, it)]);\r\n        j_ant = it;\r\n    }\r\n\r\n    memo[mp(n, m)] = cur - x[n] * (m - j_ant);\r\n\r\n    if(memo[mp(n, m)] < -infinite / 2){\r\n        cout << \"NO ESCAPE\\n\";\r\n        return;\r\n    }\r\n    cout << -memo[mp(n, m)] << \"\\n\";\r\n}\r\n\r\nsigned main(){\r\n    IOS; int t; cin >> t;\r\n    for(int i = 1; i <= t; i++)\r\n        solve();\r\n}"
+}

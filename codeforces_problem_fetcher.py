@@ -84,7 +84,7 @@ def runner(number_of_problems, number_of_solutions):
     time.sleep(4)
 
     for i, problem in enumerate(problems, start=1):
-        folder_name = os.path.join("codeforces_problems",f"{number_of_problems}x{number_of_solutions}",f"problem_{problem['contestId']}_{problem['index']}")
+        folder_name = os.path.join("codeforces_problems",f"x{number_of_solutions}",f"problem_{problem['contestId']}_{problem['index']}")
         os.makedirs(folder_name, exist_ok=True)
 
         good_verdicts = ["FAILED", "OK", "PARTIAL", "COMPILATION_ERROR", "RUNTIME_ERROR", "WRONG_ANSWER"]
@@ -154,10 +154,10 @@ def runner(number_of_problems, number_of_solutions):
                 if solution_couter == num_to_fetch:
                     break
                 
-                time.sleep(0.5)
+                time.sleep(2)
             print(f"\t\tfor {verdict} done {solution_couter} out of {num_to_fetch}")
             solution_couter_sum += solution_couter
-            time.sleep(1)
+            time.sleep(2)
         is_good = "Good" if number_of_solutions == solution_couter_sum else "Bad"
         print(f"{is_good}: Overall done {solution_couter_sum} out of {number_of_solutions}")
         # Respect the API request limit

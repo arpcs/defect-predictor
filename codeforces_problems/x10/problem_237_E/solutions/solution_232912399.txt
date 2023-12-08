@@ -1,0 +1,36 @@
+{
+    "id": 232912399,
+    "contestId": 237,
+    "creationTimeSeconds": 1700095301,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 237,
+        "index": "E",
+        "name": "Build String",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2000,
+        "tags": [
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 237,
+        "members": [
+            {
+                "handle": "panyan7"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1351179000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 57,
+    "timeConsumedMillis": 248,
+    "memoryConsumedBytes": 242688000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define ll long long\r\n#define pii pair<int,int>\r\n#define pll pair<long long,long long>\r\nconst int INF = 1e9;\r\n\r\nstruct MinCostFlow {\r\n    vector<vector<int>> adj, cost, cap;\r\n    int n, k, s, t;\r\n    MinCostFlow(int n, int k, int s, int t) : n(n), k(k), s(s), t(t) {\r\n        adj.assign(n, vector<int>());\r\n        cost.assign(n, vector<int>(n, 0));\r\n        cap.assign(n, vector<int>(n, 0));\r\n    }\r\n    void add_edge(int u, int v, long long cap_, long long cost_) {\r\n        adj[u].push_back(v);\r\n        adj[v].push_back(u);\r\n        cost[u][v] = cost_;\r\n        cost[v][u] = -cost_;\r\n        cap[u][v] = cap_;\r\n    }\r\n    void shortest_paths(int v0, vector<int>& d, vector<int>& p) {\r\n        d.assign(n, INF);\r\n        d[v0] = 0;\r\n        vector<bool> inq(n, false);\r\n        queue<int> q;\r\n        q.push(v0);\r\n        p.assign(n, -1);\r\n        while (!q.empty()) {\r\n            int u = q.front();\r\n            q.pop();\r\n            inq[u] = false;\r\n            for (int v : adj[u]) {\r\n                if (cap[u][v] > 0 && d[v] > d[u] + cost[u][v]) {\r\n                    d[v] = d[u] + cost[u][v];\r\n                    p[v] = u;\r\n                    if (!inq[v]) {\r\n                        inq[v] = true;\r\n                        q.push(v);\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n    int flow() {\r\n        int flow = 0;\r\n        int cost = 0;\r\n        vector<int> d, p;\r\n        while (flow < k) {\r\n            shortest_paths(s, d, p);\r\n            if (d[t] == INF)\r\n                break;\r\n            // find max flow on that path\r\n            int f = k - flow;\r\n            int cur = t;\r\n            while (cur != s) {\r\n                f = min(f, cap[p[cur]][cur]);\r\n                cur = p[cur];\r\n            }\r\n            // apply flow\r\n            flow += f;\r\n            cost += f * d[t];\r\n            cur = t;\r\n            while (cur != s) {\r\n                cap[p[cur]][cur] -= f;\r\n                cap[cur][p[cur]] += f;\r\n                cur = p[cur];\r\n            }\r\n        }\r\n        if (flow < k)\r\n            return -1;\r\n        else\r\n            return cost;\r\n    }\r\n};\r\n\r\nint tt = 1, n, m, k;\r\nint cnt[26];\r\n\r\n// check long long\r\nvoid solve() {\r\n    string s;\r\n    vector<string> t;\r\n    vector<int> l;\r\n    cin >> s;\r\n    for (char c : s)\r\n        cnt[c-'a']++;\r\n    cin >> n;\r\n    int total_len = 0;\r\n    for (int i = 0; i < n; i++) {\r\n        string ti; cin >> ti;\r\n        int li; cin >> li;\r\n        t.push_back(ti);\r\n        l.push_back(li);\r\n        total_len += ti.size();\r\n    }\r\n    int N = 2+n+total_len+26;\r\n    MinCostFlow G(N, s.size(), 0, N-1);\r\n    for (int i = 0; i < n; i++) {\r\n        G.add_edge(0, i+1, l[i], 0);\r\n    }\r\n    int id = n+1;\r\n    for (int i = 0; i < n; i++) {\r\n        for (int j = 0; j < t[i].size(); j++) {\r\n            G.add_edge(i+1, id, 1, i+1);\r\n            G.add_edge(id, N-2-(int)(t[i][j]-'a'), 1, 0);\r\n            id++;\r\n        }\r\n    }\r\n    assert(id == n+total_len+1);\r\n    for (int i = 0; i < 26; i++) {\r\n        G.add_edge(N-2-i, N-1, cnt[i], 0);\r\n    }\r\n    cout << G.flow() << \"\\n\";\r\n}\r\n\r\nint main() {\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    //cin >> tt;\r\n    while (tt--) {\r\n        solve();\r\n    }\r\n    return 0;\r\n}\r\n"
+}

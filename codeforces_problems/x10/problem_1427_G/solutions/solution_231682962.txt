@@ -1,0 +1,36 @@
+{
+    "id": 231682962,
+    "contestId": 1427,
+    "creationTimeSeconds": 1699341590,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1427,
+        "index": "G",
+        "name": "One Billion Shades of Grey",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3300,
+        "tags": [
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1427,
+        "members": [
+            {
+                "handle": "servants"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1602341400
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 129,
+    "timeConsumedMillis": 2947,
+    "memoryConsumedBytes": 23756800,
+    "source": "#pragma GCC optimize(\"Ofast\",\"inline\")\r\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int N=5e4+20,M=1e6+500,inf=1e9+7;\r\n\r\nstruct node\r\n{\r\n\tint u,v,w,nxt;\r\n}e[M];\r\n\r\nint n,m,head[N],cnt=1,st,ed,dep[N],cur[N],a[250][250],id[250][250],cc,b[N],mx,vis[N];\r\nvector<int>p[N];long long ans,Ans;\r\n\r\nnamespace IO {\r\n#define iL (1 << 20)\r\nchar ibuf[iL], *iS = ibuf + iL, *iT = ibuf + iL;\r\n#define gc() ((iS == iT) ? (iT = (iS = ibuf) + fread(ibuf, 1, iL, stdin), iS == iT ? EOF : *iS ++) : *iS ++)\r\ntemplate<class T> inline void read(T &x) {\r\n  x = 0;int f = 0;char ch = gc();\r\n  for (; !isdigit(ch); f |= ch == '-', ch = gc());\r\n  for (; isdigit(ch); x = (x << 1) + (x << 3) + (ch ^ 48), ch = gc());\r\n  x = (f == 1 ? ~ x + 1 : x);\r\n}\r\ntemplate<class T, class... Args> inline void read(T &x, Args&... args) { read(x), read(args...); }\r\ntemplate<class T> inline void readch(T &x) { char ch = gc(); for (; !isalpha(ch); ch = gc()); x = ch; }\r\nchar Out[iL], *iter = Out;\r\n#define flush() fwrite(Out, 1, iter - Out, stdout), iter = Out\r\ntemplate<class T> inline void write(T x, char ch = '\\n') {\r\n  T l, c[35];\r\n  if (x < 0) *iter ++ = '-', x = ~ x + 1;\r\n  for (l = 0; !l || x; c[l] = x % 10, l++, x /= 10);\r\n  for (; l; -- l, *iter ++ = c[l] + '0');*iter ++ = ch;\r\n  flush();\r\n}\r\ntemplate<class T, class... Args> inline void write(T x, Args... args) { write(x, ' '), write(args...); }\r\n} // IO\r\nusing namespace IO;\r\n\r\nvoid add(int u,int v,int w)\r\n{\r\n\te[++cnt]=(node){u,v,w,head[u]};head[u]=cnt;\r\n\te[++cnt]=(node){v,u,(w==1?1:0),head[v]};head[v]=cnt;\r\n}\r\n\r\nint bfs()\r\n{\r\n\tqueue<int>q;\r\n\tfor(int i=1;i<=mx;i++)dep[i]=0;\r\n\tdep[st]=1,q.push(st);\r\n\twhile(!q.empty())\r\n\t{\r\n\t\tint u=q.front();q.pop();\r\n\t\tfor(int i=head[u];i;i=e[i].nxt)\r\n\t\t{\r\n\t\t\tint v=e[i].v;\r\n\t\t\tif(!dep[v]&&e[i].w>0)\r\n\t\t\t{\r\n\t\t\t\tq.push(v);\r\n\t\t\t\tdep[v]=dep[u]+1;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn dep[ed];\r\n}\r\n\r\nint dfs(int now,int flow)\r\n{\r\n\tif(now==ed||!flow)return flow;\r\n\tint res=0;\r\n\tfor(int &i=cur[now];i;i=e[i].nxt)\r\n\t{\r\n\t\tint v=e[i].v;\t\r\n\t\tif(dep[v]==dep[now]+1&&e[i].w>0)\r\n\t\t{\r\n\t\t\tint x=dfs(v,min(flow-res,e[i].w));\r\n\t\t\tif(x>0)\r\n\t\t\t{\r\n\t\t\t\te[i].w-=x;\r\n\t\t\t\te[i^1].w+=x;\r\n\t\t\t\tres+=x;\r\n\t\t\t\tif(flow==res)return res;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn res;\r\n}\r\n\r\nvoid dinic()\r\n{\r\n\twhile(bfs()>0)\r\n\t{\r\n\t\tfor(int i=1;i<=mx;i++)cur[i]=head[i];\r\n\t\tans+=dfs(st,inf);\r\n\t}\r\n}\r\n\r\nint solve(int x)\r\n{\r\n\tif(x==st)return 1;vis[x]=1;\r\n\tfor(int i=head[x];i;i=e[i].nxt)if(e[i].w>0&&!vis[e[i].v])\r\n\t{\r\n\t\t--e[i].w,++e[i^1].w;\r\n\t\tif(solve(e[i].v))return 1;\r\n\t\t++e[i].w,--e[i^1].w;\r\n\t}\r\n\treturn 0;\r\n}\r\n\r\nvoid TQ(int x)\r\n{\r\n\tint nd=0;\r\n\tfor(int i=head[x];i;i=e[i].nxt)if(e[i].v==ed)nd=e[i^1].w,e[i].w=e[i^1].w=0;\r\n\tans-=nd;while(nd--)\r\n\t{\r\n\t\tfor(int i=1;i<=mx;i++)vis[i]=0;\r\n\t\tif(!solve(x))exit(1);\r\n\t}\r\n\tadd(st,x,inf);\r\n}\r\n\r\nmain()\r\n{\r\n\tread(n);\r\n\tfor(int i=1;i<=n;i++)\r\n\tfor(int j=1;j<=n;j++)\r\n\tread(a[i][j]),id[i][j]=++cc,b[cc]=a[i][j];\r\n\tsort(b+1,b+1+cc);cc=unique(b+1,b+1+cc)-b-1;\r\n\tst=n*n+1,ed=st+1;mx=ed;\r\n\tfor(int j=1;j<=n;j++)\r\n\tfor(int k=1;k<=n;k++)if(a[j][k]!=-1)\r\n\t{\r\n\t\tif(a[j][k]>0)add(id[j][k],ed,inf),p[lower_bound(b+1,b+1+cc,a[j][k])-b].push_back(id[j][k]);\r\n\t\tif(a[j+1][k]!=-1&&j<n)add(id[j][k],id[j+1][k],1);\r\n\t\tif(a[j][k+1]!=-1&&k<n)add(id[j][k],id[j][k+1],1);\r\n\t}\r\n\tfor(int i=1;i<cc;i++)if(b[i]>0)\r\n\t{\r\n\t\tfor(auto x:p[i])TQ(x);\r\n\t\tdinic();Ans+=ans*(b[i+1]-b[i]);\r\n\t}\r\n\twrite(Ans);\r\n}"
+}

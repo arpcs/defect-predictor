@@ -1,0 +1,39 @@
+{
+    "id": 173140888,
+    "contestId": 280,
+    "creationTimeSeconds": 1663916917,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "Asuka"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\n#define ll long long\r\n#define rep(i,a,n) for (int i=(a);i<=(n);i++)\r\n#define per(i,a,n) for (int i=(n);i>=(a);i--)\r\n#define inf 0x3f3f3f3f\r\n#define infll 0x3f3f3f3f3f3f3f3f\r\n#define pb push_back\r\n#define eb emplace_back\r\n#define mp make_pair\r\n#define pii pair<int,int>\r\n#define fi first\r\n#define se second\r\n#define lowbit(i) ((i)&(-i))\r\n#define all(x) x.begin(),x.end()\r\n#define SZ(x) ((int)x.size())\r\nusing namespace std;\r\nusing db = long double;\r\nconst db eps = 1e-9, INF = 1e25;\r\nconst int N = 6015;\r\n\r\nstruct cv {\r\n\tdb a, b, c;\r\n\r\n\tcv(db _a = 0, db _b = 0, db _c = 0) {\r\n\t\ta = _a, b = _b, c = _c;\r\n\t}\r\n\r\n\tdb calc(db x) { return a * x * x + b * x + c; }\r\n\r\n\tpair<db, db> _min(int l, db x, db y) {\r\n\t\tpair<db, db> res = min(mp(calc(x - l), db(x)), mp(calc(y - l), db(y)));\r\n\r\n\t\tif (fabs(a) >= eps) {\r\n\t\t\tdb o = - b / (2 * a);\r\n\t\t\tif (x - l <= o && o <= y - l)\r\n\t\t\t\tres = min(res, mp(calc(o), db(l) + o));\r\n\t\t}\r\n\r\n\t\treturn res;\r\n\t}\r\n};\r\n\r\nstruct dat {\r\n\tint l, r;\r\n\tcv x;\r\n\r\n\tdat(int _l = 0, int _r = 0, cv _x = cv()) {\r\n\t\tl = _l, r = _r, x = _x;\r\n\t}\r\n\r\n\tauto _min(db L, db R) { return x._min(l, L, R); }\r\n\tauto _Min() { return x._min(l, l, r); }\r\n\r\n\tvoid add(int y) {\r\n\t\t// (x - y) ^ 2 = ((x - l) - (y - l)) ^ 2\r\n\t\tx.a += 1;\r\n\t\tx.b -= 2 * db(y - l);\r\n\t\tx.c += db(y - l) * db(y - l);\r\n\t}\r\n};\r\n\r\nint n, q, a, b, y[N];\r\ndb ans[N];\r\nvector<dat> v[N];\r\n\r\nint main() {\r\n#ifdef Asuka\r\n\tfreopen(\"data.in\",\"r\",stdin);\r\n\tfreopen(\"data.out\",\"w\",stdout);\r\n#endif\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(nullptr);\r\n\tcin >> n >> q >> a >> b;\r\n\trep(i, 1, n) cin >> y[i];\r\n\tv[1].eb(1, q, cv());\r\n\tv[1].back().add(y[1]); \r\n\t// cv(1, 2 * db(y[1] - 1), db(y[1] - 1) * db(y[1] - 1)));\r\n\r\n\trep(i, 2, n) {\r\n\t\tdb mn = INF, xmn;\r\n\t\tint pos = -1;\r\n\r\n\t\trep(j, 0, SZ(v[i - 1]) - 1) {\r\n\t\t\tauto [val, x] = v[i - 1][j]._Min();\r\n\t\t\tif (pos == -1 || val < mn)\r\n\t\t\t\tpos = j, mn = val, xmn = x;\r\n\t\t}\r\n\r\n\t\tv[i].reserve(SZ(v[i - 1]) + 2);\r\n\r\n\t\trep(j, 0, pos - 1) \r\n\t\t\tv[i].eb(v[i - 1][j].l + a, v[i - 1][j].r + a, v[i - 1][j].x);\r\n\r\n\t\tv[i].eb(v[i - 1][pos].l + a, xmn + a, v[i - 1][pos].x);\r\n\t\tv[i].eb(xmn + a, xmn + b, cv(0, 0, mn));\r\n\t\tv[i].eb(xmn + b, v[i - 1][pos].r + b, v[i - 1][pos].x);\r\n\r\n\t\trep(j, pos + 1, SZ(v[i - 1]) - 1)\r\n\t\t\tv[i].eb(v[i - 1][j].l + b, v[i - 1][j].r + b, v[i - 1][j].x);\r\n\r\n\t\tfor (dat& o : v[i])\r\n\t\t\to.add(y[i]);\r\n\t}\r\n\r\n\tdb l = 1, r = q;\r\n\r\n\tper(i, 1, n) {\r\n\t\tdb mn = INF, xmn;\r\n\r\n\t\tfor (dat o : v[i]) {\r\n\t\t\tdb L = max(db(o.l), l), R = min(db(o.r), r);\r\n\t\t\tif (L <= R) {\r\n\t\t\t\tauto [val, x] = o._min(L, R);\r\n\t\t\t\tif (val < mn) \r\n\t\t\t\t\tmn = val, xmn = x;\r\n\t\t\t}\r\n\t\t}\r\n\r\n\t\tif (i == n) ans[n + 1] = mn;\r\n\t\tans[i] = xmn;\r\n\t\tl = max(1.0, ans[i] - b), r = ans[i] - a;\r\n\t}\r\n\r\n\tcout << fixed << setprecision(20);\r\n\trep(i, 1, n) cout << ans[i] << ' ';\r\n\tcout << '\\n';\r\n\tcout << ans[n + 1] << '\\n';\r\n\treturn 0;\r\n}"
+}

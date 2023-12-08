@@ -1,0 +1,35 @@
+{
+    "id": 235539466,
+    "contestId": 1906,
+    "creationTimeSeconds": 1701614414,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1906,
+        "index": "K",
+        "name": "Deck-Building Game",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "divide and conquer",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1906,
+        "members": [
+            {
+                "handle": "yang12138"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1701578100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 23,
+    "timeConsumedMillis": 998,
+    "memoryConsumedBytes": 14745600,
+    "source": "\n// author: @yang12138\n\n#include <bits/stdc++.h>\nusing namespace std;\n\ntypedef long long ll;\n\nconst ll MOD = 998244353;\nconst ll inv2 = (MOD + 1) >> 1;\ntypedef vector<ll> Vec;\n\nvoid FWT(Vec& a, int flag) {\n    assert(a.size() && (a.size() & (a.size() - 1)) == 0);\n    const int n = a.size();\n    for (int i = 2; i <= n; i <<= 1) {\n        int w = i >> 1;\n        for (int j = 0; j < n; j += i) {\n            for (int d = 0; d < w; d++) {\n                ll u = a[j+d], v = a[j+d+w];\n                if (flag == 1)\n                    a[j+d] = (u+v)%MOD, a[j+d+w] = (u-v)%MOD;\n                else\n                    a[j+d] = (u+v)*inv2%MOD, a[j+d+w] = (u-v)*inv2%MOD;\n\n                // flag = 1\n                //xor: a[j+d]=u+v,a[j+d+w]=u-v\n                //and: a[j+d]=u+v\n                //or : a[j+d+w]=u+v\n\n                // flag = -1\n                //xor: a[j+d]=(u+v)/2,a[j+d+w]=(u-v)/2\n                //and: a[j+d]=u-v\n                //or : a[j+d+w]=v-u\n            }\n        }\n    }\n}\n\nVec Concat(Vec a, Vec b) {\n    a.insert(a.end(), b.begin(), b.end());\n    return a;\n}\n\nconst int N = (1 << 18);\nll f[N][2];\nint cnt[N];\n\npair<Vec, Vec> DFS(int l, int r) {\n    int len = r - l + 1;\n    if (len == 1) {\n        return {{f[cnt[l]][0]}, {f[cnt[l]][1]}};\n    }\n    auto [a, b] = DFS(l, l + len / 2 - 1);\n    auto [c, d] = DFS(l + len / 2, r);\n    FWT(a, 1);\n    FWT(b, 1);\n    FWT(c, 1);\n    FWT(d, 1);\n    Vec ac(len / 2);\n    Vec bd(len / 2);\n    Vec bc(len / 2);\n    Vec ad(len / 2);\n    for (int i = 0; i < len / 2; i++) {\n        ac[i] = a[i] * c[i] % MOD;\n        bd[i] = b[i] * d[i] % MOD;\n        bc[i] = b[i] * c[i] % MOD;\n        ad[i] = a[i] * d[i] % MOD;\n    }\n    FWT(ac, -1);\n    FWT(bd, -1);\n    FWT(bc, -1);\n    FWT(ad, -1);\n    return {Concat(ac, bd), Concat(bc, ad)};\n}\n\nvoid solve() {\n    int n;\n    scanf(\"%d\", &n);\n    int ma = 0;\n    for (int i = 0; i < n; i++) {\n        int x;\n        scanf(\"%d\", &x);\n        cnt[x]++;\n        ma = max(ma, x);\n    }\n    f[0][0] = 1, f[0][1] = 0;\n    for (int i = 1; i <= n; i++) {\n        f[i][0] = (f[i - 1][0] + f[i - 1][1] * 2) % MOD;\n        f[i][1] = (f[i - 1][0] * 2 + f[i - 1][1]) % MOD;\n    }\n\n    int len = 1;\n    while (len <= ma) len <<= 1;\n\n    auto [a, b] = DFS(0, len - 1);\n    printf(\"%lld\\n\", ((a[0] + b[0]) % MOD + MOD) % MOD);\n}\n\nint main() {\n    int T = 1;\n    // scanf(\"%d\", &T);\n    while (T--) solve();\n    return 0;\n}\n"
+}

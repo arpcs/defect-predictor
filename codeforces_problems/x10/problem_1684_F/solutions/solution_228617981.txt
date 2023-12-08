@@ -1,0 +1,36 @@
+{
+    "id": 228617981,
+    "contestId": 1684,
+    "creationTimeSeconds": 1697596286,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1684,
+        "index": "F",
+        "name": "Diverse Segments",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1684,
+        "members": [
+            {
+                "handle": "6737151"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1652970900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 134,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 13107200,
+    "source": "// LUOGU_RID: 130075221\n#include <iostream>\r\n#include <cstdio>\r\n#include <algorithm>\r\n\r\n#define lowbit(x) (x&(-x))\r\nusing namespace std;\r\nconst int MAXN = 200010;\r\n\r\nint pos[MAXN], a[MAXN], arr[MAXN], ord[MAXN], beg[MAXN], pl[MAXN], pr[MAXN];\r\nint cl, cr, c[MAXN<<2], tag[MAXN<<2], n;\r\n\r\nchar buf[131072], *cs, *ct, obuf[131072], *os=obuf, *ot=obuf, ss[20];\r\ninline char gc() {\r\n\tif (cs==ct) {\r\n\t\tct = (cs=buf)+fread(buf,1,131072,stdin);\r\n\t\tif (cs==ct) return 0;\r\n\t}\r\n\treturn *cs++;\r\n}\r\ninline int read() {\r\n\tint r=0; char ch=gc();\r\n\twhile ((ch<'0')||(ch>'9')) ch=gc();\r\n\twhile ((ch>='0')&&(ch<='9')) {\r\n\t\tr=r*10+ch-'0'; ch=gc();\r\n\t}\r\n\treturn r;\r\n}\r\ninline void pc(char ch) {\r\n\tif (ot==os+131072) {\r\n\t\tfwrite(obuf,1,131072,stdout); ot=os;\r\n\t}\r\n\t(*ot++) = ch;\r\n}\r\ninline void write(int x) {\r\n\tint tot=0, i;\r\n\tif (!x) ss[++tot]='0';\r\n\twhile (x) {\r\n\t\tss[++tot]=x%10+'0'; x/=10;\r\n\t}\r\n\tfor (i=tot; i; --i) pc(ss[i]);\r\n}\r\ninline int find(int l, int r, int x) {\r\n\tint res = l-1;\r\n\twhile (l<=r) {\r\n\t\tint m = (l+r)>>1;\r\n\t\tif (ord[m]<x) {\r\n\t\t\tres=m; l=m+1;\r\n\t\t}\r\n\t\telse r=m-1;\r\n\t}\r\n\treturn res;\r\n}\r\nvoid build(int rt, int l, int r) {\r\n\tc[rt]=tag[rt]=0; if (l==r) return;\r\n\tint m=(l+r)>>1; build(rt<<1,l,m); build(rt<<1|1,m+1,r);\r\n}\r\nvoid upd(int rt, int l, int r, int x, int y, int k) {\r\n\tif ((x<=l)&&(r<=y)) {\r\n\t\ttag[rt]+=k; c[rt]+=k*(r-l+1); return;\r\n\t}\r\n\tint m = (l+r)>>1;\r\n\tif (tag[rt]) {\r\n\t\ttag[rt<<1]+=tag[rt]; c[rt<<1]+=tag[rt]*(m-l+1);\r\n\t\ttag[rt<<1|1]+=tag[rt]; c[rt<<1|1]+=tag[rt]*(r-m);\r\n\t\ttag[rt] = 0;\r\n\t}\r\n\tif (x<=m) upd(rt<<1,l,m,x,y,k);\r\n\tif (y>m) upd(rt<<1|1,m+1,r,x,y,k);\r\n\tc[rt] = c[rt<<1]+c[rt<<1|1];\r\n}\r\nint qry(int rt, int l, int r, int x, int y) {\r\n\tif (x>y) return 0;\r\n\tif ((x<=l)&&(r<=y)) return c[rt];\r\n\tint m=(l+r)>>1, res=0;\r\n\tif (tag[rt]) {\r\n\t\ttag[rt<<1]+=tag[rt]; c[rt<<1]+=tag[rt]*(m-l+1);\r\n\t\ttag[rt<<1|1]+=tag[rt]; c[rt<<1|1]+=tag[rt]*(r-m);\r\n\t\ttag[rt] = 0;\r\n\t}\r\n\tif (x<=m) res=qry(rt<<1,l,m,x,y);\r\n\tif (y>m) res+=qry(rt<<1|1,m+1,r,x,y);\r\n\treturn res;\r\n}\r\ninline bool query(int l, int r) {\r\n\t//printf(\"#%d %d\\n\",l,r);\r\n\twhile (cl>l) {\r\n\t\t--cl; if (pl[cl]<=pr[cl]) upd(1,1,n,pl[cl],pr[cl],-1);\r\n\t}\r\n\twhile (cr<r) {\r\n\t\t++cr; if (pl[cr]<=pr[cr]) upd(1,1,n,pl[cr],pr[cr],-1);\r\n\t}\r\n\twhile (cl<l) {\r\n\t\tif (pl[cl]<=pr[cl]) upd(1,1,n,pl[cl],pr[cl],1);\r\n\t\t++cl;\r\n\t}\r\n\twhile (cr>r) {\r\n\t\tif (pl[cr]<=pr[cr]) upd(1,1,n,pl[cr],pr[cr],1);\r\n\t\t--cr;\r\n\t}\r\n\treturn ((!qry(1,1,n,1,l-1))&&(!qry(1,1,n,r+1,n)));\r\n}\r\nint main() {\r\n\tint t = read();\r\n\twhile (t--) {\r\n\t\tn=read(); int m=read();\r\n\t\tfor (int i=1; i<=n; ++i) {\r\n\t\t\tpos[i]=ord[i]=i; a[i]=read(); \r\n\t\t}\r\n\t\tstable_sort(ord+1, ord+n+1, [](int x, int y) {\r\n\t\t\treturn a[x]<a[y];\r\n\t\t});\r\n\t\tint l=1, id=0;\r\n\t\twhile (l<=n) {\r\n\t\t\tint r=l; while ((r<=n)&&(a[ord[r+1]]==a[ord[l]])) ++r;\r\n\t\t\tbeg[++id]=l; for (int i=l; i<=r; ++i) a[ord[i]]=id;\r\n\t\t\tl = r+1;\r\n\t\t}\r\n\t\tbeg[id+1] = n+1;\r\n\t\twhile (m--) {\r\n\t\t\tl=read(); int r=read();\r\n\t\t\tpos[r] = min(pos[r],l);\r\n\t\t}\r\n\t\tfor (int i=n-1; i>=1; --i) pos[i]=min(pos[i],pos[i+1]);\r\n\t\tbool flag = true;\r\n\t\tfor (int i=1; i<=n; ++i) {\r\n\t\t\tpl[i]=ord[find(beg[a[i]],beg[a[i]+1]-1,pos[i])+1]; pr[i]=find(beg[a[i]],beg[a[i]+1]-1,i);\r\n\t\t\tpr[i] = (pr[i]>=beg[a[i]])?ord[pr[i]]:0;\r\n\t\t\tif (pl[i]<=pr[i]) flag=false;\r\n\t\t\t//printf(\"%d : %d,%d\\n\",i,pl[i],pr[i]);\r\n\t\t}\r\n\t\tif (flag) {\r\n\t\t\tpc('0'); pc('\\n'); continue;\r\n\t\t}\r\n\t\tcl=1; cr=n; build(1,1,n);\r\n\t\tint pos=n; while ((pos>1)&&(query(1,pos-1))) --pos;\r\n\t\tint res = pos;\r\n\t\tfor (int i=2; i<=n; ++i) {\r\n\t\t\tpos = max(pos,i);\r\n\t\t\twhile ((pos<=n)&&(!query(i,pos))) ++pos;\r\n\t\t\tif (pos>n) break;\r\n\t\t\tres = min(res,pos-i+1);\r\n\t\t}\r\n\t\twrite(res); pc('\\n');\r\n\t}\r\n\tfwrite(obuf, 1, ot-os, stdout);\r\n\treturn 0;\r\n}"
+}

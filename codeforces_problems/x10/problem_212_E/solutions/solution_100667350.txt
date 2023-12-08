@@ -1,0 +1,37 @@
+{
+    "id": 100667350,
+    "contestId": 212,
+    "creationTimeSeconds": 1607404730,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 212,
+        "index": "E",
+        "name": "IT Restaurants",
+        "type": "PROGRAMMING",
+        "points": 500.0,
+        "rating": 1500,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 212,
+        "members": [
+            {
+                "handle": "RonSkk23"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1342450800
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 108,
+    "memoryConsumedBytes": 819200,
+    "source": "#pragma GCC optimize(\"O3\")\r\n#define _CRT_SECURE_NO_WARNINGS\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing base = complex<double>;\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\nusing namespace __gnu_pbds;\r\n#define M 1000000007\r\n#define M2 998244353\r\n#define ll long long\r\n#define pll pair<long, long>\r\n#define REP(i, a, b) for (ll i = a; i < b; i++)\r\n#define REPI(i, a, b) for (ll i = b - 1; i >= a; i--)\r\n#define ff first\r\n#define ss second\r\n#define pb push_back\r\n#define db pop_back\r\n#define mp make_pair\r\n#define mt make_tuple\r\n#define g(a, b) get<a>(b)\r\n#define INF (ll)1e18 + 100\r\n#define vl vector<ll>\r\n#define vi vector<int>\r\n#define vll vector<pair<ll, ll>>\r\n#define vii vector<pair<int, int>>\r\n#define all(v) v.begin(), v.end()\r\n#define bset(a, p) ((a) | (1ll << (p)))\r\n#define bchk(a, p) ((a) & (1ll << (p)))\r\n#define bxor(a, p) ((a) ^ (1ll << (p)));\r\n#define brem(a, p) (bchk(a, p) ? (bxor(a, p)) : (a))\r\n#define INT_SIZE 32\r\n/*SOME BITMASK KNOWLEDGE\r\n1)x & (x - 1):sets the last one bit of x to zero\r\npower of two exactly when x & (x \u2212 1) = 0.\r\n2)x & -x:sets all the one bits to zero, except last one bit\r\n3)x | (x - 1):inverts all the bits after the last one bit*/\r\n \r\n#define o_set tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update>\r\n#define o_setpll tree<pair<ll,ll>, null_type, less<pair<ll,ll>>, rb_tree_tag, tree_order_statistics_node_update>\r\n//member functions :\r\n//1. order_of_key(k) : number of elements strictly lesser than k\r\n//2. find_by_order(k) : k-th element in the set\r\nll powM(ll x, ll y, ll m)\r\n{\r\n\tif (x == 0) {\r\n\t\treturn 1;\r\n\t}\r\n\tll ans = 1, r = 1;\r\n\tx %= m;\r\n\twhile (r > 0 && r <= y) {\r\n\t\tif (r & y) {\r\n\t\t\tans *= x;\r\n\t\t\tans %= m;\r\n\t\t}\r\n\t\tr <<= 1;\r\n\t\tx *= x;\r\n\t\tx %= m;\r\n\t}\r\n\treturn ans;\r\n}\r\nll modI(ll a, ll m)\r\n{\r\n\tll m0 = m, y = 0, x = 1;\r\n\tif (m == 1)\r\n\t\treturn 0;\r\n\twhile (a > 1) {\r\n\t\tll q = a / m;\r\n\t\tll t = m;\r\n\t\tm = a % m;\r\n\t\ta = t;\r\n\t\tt = y;\r\n\t\ty = x - q * y;\r\n\t\tx = t;\r\n\t}\r\n\tif (x < 0)\r\n\t\tx += m0;\r\n\treturn x;\r\n}\r\nll extended(ll a, ll b, ll &x, ll &y)\r\n{\r\n\tif (a == 0) {\r\n\t\tx = 0;\r\n\t\ty = 1;\r\n\t\treturn b;\r\n\t}\r\n\tll x1, y1;\r\n\tll d = extended(b % a, a, x1, y1);\r\n\tx = y1 - (b / a) * x1;\r\n\ty = x1;\r\n\treturn d;\r\n}\r\nll lcm(ll x, ll y) {\r\n\tll gc = __gcd(x, y);\r\n\tx /= gc;\r\n\tif ((ll)(8e18) / y <= x) {\r\n\t\treturn 8e18;\r\n\t}\r\n\treturn (x * y);\r\n}\r\n\r\nvoid setIO(string name = \"\") { // name is nonempty for USACO file I/O\r\n    // alternatively, cin.tie(0)->sync_with_stdio(0);\r\n    if (name.size()) {\r\n        freopen((name+\".in\").c_str(), \"r\", stdin); // see Input & Output\r\n        freopen((name+\".out\").c_str(), \"w\", stdout);\r\n    }\r\n}\r\nconst int N = 5005;\r\nvl adj[N];\r\nll sz[N];\r\nll dp[N];\r\nll ans[N];\r\nll n;\r\nvoid dfs(ll x, ll p){\r\n\tsz[x] = 1;\r\n\tfor(auto y:adj[x]){\r\n\t\tif(y!=p){\r\n\t\t\tdfs(y,x);\r\n\t\t\tsz[x]+=sz[y];\r\n\t\t}\r\n\t}\r\n\tmemset(dp,false,sizeof(dp));\r\n\tdp[0] = true;\r\n\t// dp[n-sz[x]] = true;\r\n\tfor(auto y:adj[x]){\r\n\t\tif(y!=p){\r\n\t\t\tfor(ll i=n-1-sz[y]; i>=0; i--){\r\n\t\t\t\tdp[i+sz[y]] |= dp[i];\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tREP(i,1,n-1){\r\n\t\tdp[i] |= dp[n-1-i];\r\n\t}\r\n\tREP(i,1,n+1){ans[i] |= dp[i];}\r\n}\r\nvoid solve(){\r\n\tcin>>n;\r\n\tREP(i,0,n-1){\r\n\t\tll x,y;\r\n\t\tcin>>x>>y;\r\n\t\tadj[x].pb(y);\r\n\t\tadj[y].pb(x);\r\n\t}\r\n\tdfs(1,1);\r\n\tREP(i,1,n){\r\n\t\tans[i] |= ans[n-1-i];\r\n\t}\r\n\tll c = 0;\r\n\tREP(i,1,n-1){\r\n\t\tif(ans[i]){c++;}\r\n\t}\r\n\tcout<<c<<\"\\n\";\r\n\tREP(i,1,n-1){\r\n\t\tif(ans[i])cout<<i<<\" \"<<n-1-i<<\"\\n\";\r\n\t}\r\n\t\r\n}\r\n\r\n\r\nint main()\r\n{\r\n\tios::sync_with_stdio(0);\r\n\tcin.tie(0);\r\n\tcout.tie(0);\r\n#ifndef ONLINE_JUDGE\r\n\tsetIO(\"hello\");\r\n#endif\r\n\tll ntc;\r\n\t// cin >> ntc;\r\n\tntc = 1;\r\n\tREP(tc, 1, ntc + 1)\r\n\t{\r\n\t\t// cout << \"Case #\" << tc << \": \";\r\n\t\tsolve();\r\n\t}\r\n}"
+}

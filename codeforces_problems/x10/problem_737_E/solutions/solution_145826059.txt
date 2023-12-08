@@ -1,0 +1,38 @@
+{
+    "id": 145826059,
+    "contestId": 737,
+    "creationTimeSeconds": 1644480786,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 737,
+        "index": "E",
+        "name": "Tanya is 5!",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 3300,
+        "tags": [
+            "graph matchings",
+            "graphs",
+            "greedy",
+            "schedules"
+        ]
+    },
+    "author": {
+        "contestId": 737,
+        "members": [
+            {
+                "handle": "bkifhr9"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1479632700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 140,
+    "timeConsumedMillis": 1497,
+    "memoryConsumedBytes": 12288000,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\nconst int N=125,T=1e6+5;\nstruct edge{\n\tint to,nxt,f;\n}e[N*N];\nstruct want{\n\tint u,v,st;\n}d[T];\nint c[N][N],a[N],b[N],pc[N],tr[N],fs[N];\nint n,m,ans,my,ct=1,kt,g,mm,maxf;\nint s,t,dep[N],cur[N],hd[N];\nbool pd[N];\nvoid add(int u,int v,int f){\n\te[++ct]=(edge){v,hd[u],f};hd[u]=ct;\n\te[++ct]=(edge){u,hd[v],0};hd[v]=ct;\n}\nbool bfs(){\n\tqueue<int> q;\n\tfor(int i=s;i<=t;i++) cur[i]=hd[i];\n\tmemset(dep,0,sizeof(dep));\n\tdep[s]=1;q.push(s);\n\twhile(!q.empty()){\n\t\tint u=q.front();q.pop();\n\t\tfor(int i=hd[u],v;i;i=e[i].nxt){\n\t\t\tv=e[i].to;\n\t\t\tif(!dep[v]&&e[i].f>0) dep[v]=dep[u]+1,q.push(v);\n\t\t}\n\t}\n\treturn dep[t];\n}\nint dfs(int u,int li){\n\tif(u==t) return li;\n\tint f1=0,tmp;\n\tfor(int i=cur[u],v;i;i=e[i].nxt){\n\t\tv=e[i].to;cur[u]=i;\n\t\tif(dep[v]==dep[u]+1&&e[i].f>0){\n\t\t\ttmp=dfs(v,min(li,e[i].f));\t\n\t\t\tf1+=tmp;li-=tmp;\n\t\t\te[i].f-=tmp;e[i^1].f+=tmp;\n\t\t\tif(!li) break;\n\t\t}\n\t}\n\tif(!f1) dep[u]=0;\n\treturn f1;\n}\nint main(){\n\tcin>>n>>m>>my;mm=m;\n\tfor(int i=1;i<=m;i++) scanf(\"%d\",&pc[i]),tr[i]=i;\n\tfor(int i=1,id;i<=n;i++){\n\t\tscanf(\"%d\",&id);\n\t\tfor(int j=1,u;j<=id;j++){\n\t\t\tscanf(\"%d\",&u),scanf(\"%d\",&c[i][u]);\n\t\t\ta[i]+=c[i][u],b[u]+=c[i][u];\n\t\t}\t\n\t}\n\tfor(int i=1,mx,tp;;i++){\n\t\tmx=0;tp=0;\n\t\tfor(int j=1;j<=n;j++) mx=max(mx,a[j]);\n\t\tfor(int j=1;j<=mm;j++) if(b[j]>mx) mx=b[j],tp=j;\n\t\tans=mx;\n\t\tif(!tp||pd[tp]||my<pc[tp]) break;\n\t\tb[tp]=0;pd[tp]=1;m++;my-=pc[tp];tr[m]=tp;\n\t\tfor(int j=1,c1,c2;j<=n;j++){\n\t\t\tc1=c[j][tp]>>1;c2=c[j][tp]-c1;\n\t\t\tif(b[tp]<=b[m]) swap(c1,c2);\n\t\t\tc[j][tp]=c1;c[j][m]=c2;\n\t\t\tb[tp]+=c1;b[m]+=c2;\n\t\t}\n\t}\n\tprintf(\"%d\\n\",ans);\n\tfor(int i=1;i<=mm;i++) printf(\"%d\",pd[i]);\n\tt=(n+m)<<1|1;kt=n+m;\n\tfor(int i=1;i<=n+m;i++) fs[i]=++kt;\n\tfor(int i=1;i<=n;i++) add(s,i,1),add(fs[i],t,1);\n\tfor(int i=n+1;i<=m+n;i++) add(i,t,1),add(s,fs[i],1);\n\tkt=ct;\n\tfor(int i=1;i<=n;i++) for(int j=n+1;j<=n+m;j++) add(i,j,c[i][j-n]);\n\tfor(int i=1;i<=n;i++) add(i,fs[i],ans-a[i]);\n\tfor(int i=n+1;i<=m+n;i++) add(fs[i],i,ans-b[i-n]);\n\tfor(int i=1;i<=n;i++) for(int j=n+1;j<=n+m;j++) add(fs[j],fs[i],c[i][j-n]);\n\tfor(int no=0;no<ans;no++){\n\t\twhile(bfs()) maxf+=dfs(s,1e9);\n\t\tfor(int i=2;i<=kt;i+=2) e[i].f=1,e[i+1].f=0;\n\t\tint pr=kt+1;\n\t\tfor(int i=1;i<=n;i++) for(int j=1;j<=m;j++){\n\t\t\tif(e[pr+1].f) d[++g]=(want){i,tr[j],no},e[pr+1].f=0;\n\t\t\tpr+=2;\n\t\t}\n\t\tfor(;pr<=ct;pr+=2) e[pr+1].f=0;\n\t}\n\tprintf(\"\\n%d\\n\",g);\n\tfor(int i=1;i<=g;i++) printf(\"%d %d %d 1\\n\",d[i].u,d[i].v,d[i].st);\n}\n \t  \t \t     \t \t \t\t   \t \t\t \t\t\t \t"
+}

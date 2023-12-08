@@ -1,0 +1,37 @@
+{
+    "id": 228975583,
+    "contestId": 1198,
+    "creationTimeSeconds": 1697828811,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1198,
+        "index": "F",
+        "name": "GCD Groups 2",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2900,
+        "tags": [
+            "greedy",
+            "number theory",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1198,
+        "members": [
+            {
+                "handle": "parsa-golestani"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564497300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 8601600,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\nconst int N = 100'000;\nconst int M = 20;\nconst int B = 9;\nconst int SQ = 31700;\nconst int T = 50, Tmohem = 10'000;\n\nint n, a[N + 10], mark[N + 10], isPrime[SQ + 10], isMohem[N + 10], cnt0, cnt1;\nvector<int> primes, prime, divi[2 * N + 10], fact[N + 10];\nvector<int> mohem, big, nonDiv[B + 10];\n\nvoid readInput() {\n    cin >> n;\n    for (int i = 1; i <= n; i++)\n        cin >> a[i];\n}\n\nvoid calcPrimes() {\n    for (int i = 2; i <= SQ; i++)\n        if (isPrime[i] == false) {\n            primes.push_back(i);\n            for (int j = i + i; j <= SQ; j += i)\n                isPrime[j] = true;\n        }\n}\n\nvoid calcPrimeDivi() {\n    for (int i = 1; i <= n; i++) {\n        int x = a[i];\n        for (auto p: primes)\n            if (x % p == 0) {\n                prime.push_back(p);\n                fact[i].push_back(p);\n                while (x % p == 0)\n                    x /= p;\n            }\n    }\n    sort(prime.begin(), prime.end());\n    prime.resize(unique(prime.begin(), prime.end()) - prime.begin());\n    for (int i = 1; i <= n; i++)\n        for (auto p: fact[i])\n            divi[lower_bound(prime.begin(), prime.end(), p) - prime.begin()].push_back(i);\n}\n\nvoid calcMohem() {\n    for (int i = 0; i < (int) prime.size(); i++)\n        if (n - (int) divi[i].size() <= M)\n            big.push_back(i);\n    for (int i = 0; i < (int) big.size(); i++) {\n        fill(mark + 1, mark + n + 1, false);\n        for (auto ind: divi[big[i]])\n            mark[ind] = true;\n        for (int j = 1; j <= n; j++)\n            if (!mark[j]) {\n                nonDiv[i].push_back(j);\n                mohem.push_back(j);\n                isMohem[j] = true;\n            }\n    }\n    sort(mohem.begin(), mohem.end());\n    mohem.resize(unique(mohem.begin(), mohem.end()) - mohem.begin());\n}\n\nbool isGoodMohem() {\n    for (int i = 0; i < (int) big.size(); i++) {\n        bool isOne = false, isZero = false;\n        for (auto x: nonDiv[i])\n            if (mark[x])\n                isOne = true;\n            else\n                isZero = true;\n        if (!isOne || !isZero)\n            return false;\n    }\n    return true;\n}\n\nbool randomMohem() {\n    for (int i = 0; i < Tmohem; i++) {\n        for (auto x: mohem)\n            mark[x] = rand() % 2;\n        if (isGoodMohem())\n            return true;\n    }\n    return false;\n}\n\nvoid calcCnt() {\n    cnt0 = cnt1 = 0;\n    for (int i = 1; i <= n; i++)\n        if (mark[i])\n            cnt1++;\n        else\n            cnt0++;\n}\n\nbool isGoodAll() {\n    for (int i = 0; i < (int) prime.size(); i++) {\n        int c0 = 0, c1 = 0;\n        for (auto x: divi[i])\n            if (mark[x])\n                c1++;\n            else\n                c0++;\n        if (c0 == cnt0 || c1 == cnt1)\n            return false;\n    }\n    return true;\n}\n\nbool generateRandom() {\n    if (!randomMohem())\n        return false;\n    for (int i = 1; i <= n; i++)\n        if (!isMohem[i])\n            mark[i] = rand() % 2;\n    calcCnt();\n    if (isGoodAll())\n        return true;\n    return false;\n}\n\nbool solve() {\n    for (int i = 0; i < T; i++)\n        if (generateRandom())\n            return true;\n    return false;\n}\n\nvoid writeOutput() {\n    cout << \"YES\" << '\\n';\n    for (int i = 1; i <= n; i++)\n        cout << mark[i] + 1 << ' ';\n    cout.flush();\n}\n\nint main() {\n    ios_base::sync_with_stdio(false); cin.tie(0); cout.tie(0);\n    readInput();\n    calcPrimes();\n    calcPrimeDivi();\n    calcMohem();\n    if (solve())\n        writeOutput();\n    else\n        cout << \"NO\" << flush;\n    return 0;\n}"
+}

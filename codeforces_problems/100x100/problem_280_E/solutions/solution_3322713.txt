@@ -1,0 +1,39 @@
+{
+    "id": 3322713,
+    "contestId": 280,
+    "creationTimeSeconds": 1363375006,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "-XraY-"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 1126400,
+    "source": "#include <cstdio>\r\n#include <cstdlib>\r\n#include <cmath>\r\n#include <algorithm>\r\n#include <iostream>\r\n#include <cstring>\r\n#include <vector>\r\n#include <string>\r\n#include <set>\r\n#include <map>\r\n#include <cassert>\r\n#include <ctime>\r\n\r\n\r\nusing namespace std;\r\n\r\n#ifdef WIN32\r\n    #define LLD \"%I64d\"\r\n#else\r\n    #define LLD \"%lld\"\r\n#endif\r\n\r\ntypedef pair<int, int> pii;\r\ntypedef long long ll;\r\ntypedef vector<int> vi;\r\ntypedef vector<vi> vvi;\r\ntypedef vector<bool> vb;\r\ntypedef vector<vb> vvb;\r\ntypedef vector<ll> vll;\r\ntypedef vector<vll> vvll;\r\n\r\nll rdtsc() {\r\n    ll tmp;\r\n    asm(\"rdtsc\" : \"=A\"(tmp));\r\n    return tmp;\r\n}\r\n\r\n#define TASKNAME \"text\"\r\n#define pb push_back\r\n#define mp make_pair\r\n#define EPS (1e-9)\r\n#define INF ((int)1e9)\r\n#define sqr(x) ((x) * (x))         \r\n#define eprintf(...) fprintf(stderr, __VA_ARGS__)\r\n#define sz(x) ((int)(x).size())\r\n\r\nconst int maxn = 6000;\r\nint a[maxn];\r\nint d[maxn][2];\r\n\r\nstruct func {\r\n\tdouble l, r;\r\n\tdouble a[3];\r\n\t\r\n\tfunc() {}\r\n\tfunc(double _l, double _r, double _a, double _b, double _c) : l(_l), r(_r) {\r\n\t\ta[2] = _a, a[1] = _b, a[0] = _c;\r\n\t}\r\n\t\r\n\tinline double get(double x) {\r\n\t\treturn (a[2] * x + a[1]) * x + a[0];\r\n\t}\r\n\t\r\n\tvoid operator += (const func &f) {\r\n\t\tfor (int i = 0; i < 3; i++)\r\n\t\t\ta[i] += f.a[i];\r\n\t}\r\n\t\r\n\tvoid put(double d) {\r\n\t\ta[0] += d * d * a[2] + d * a[1];\r\n\t\ta[1] += a[2] * 2 * d;\r\n\t}\r\n\t\r\n\tinline double center() const {\r\n\t\treturn -a[1] / a[2] / 2;\r\n\t}\r\n\t\r\n\tvoid print() {\r\n\t\teprintf(\"[%.3lf..%.3lf]  %.3lf %.3lf %.3lf\\n\", l, r, a[2], a[1], a[0]);\r\n\t}\r\n};\r\n\r\nconst int maxfs = 2 * maxn + 10;\r\nfunc fs[maxfs];\r\nint cntfs;\r\nfunc tmp[maxfs];\r\n\r\nvoid splitAll() {\r\n\tint newcntfs = 0;\r\n\tfor (int i = 0; i < cntfs; i++) {\r\n\t\tdouble c = fs[i].center();\r\n// \t\teprintf(\"%.3lf %.3lf %.3lf %.3lf %.3lf\\n\", fs[i].l, fs[i].r, fs[i].a[2], fs[i].a[1], fs[i].a[0]);\r\n// \t\teprintf(\"%.3lf\\n\", c);\r\n\t\tif (fs[i].l + EPS < c && c + EPS < fs[i].r) {\r\n// \t\t\teprintf(\"split\\n\");\r\n\t\t\ttmp[newcntfs++] = func(fs[i].l, c, fs[i].a[2], fs[i].a[1], fs[i].a[0]);\r\n\t\t\ttmp[newcntfs++] = func(c, fs[i].r, fs[i].a[2], fs[i].a[1], fs[i].a[0]);\r\n\t\t} else\r\n\t\t\ttmp[newcntfs++] = fs[i];\r\n\t}\r\n\tassert(newcntfs >= cntfs && newcntfs <= cntfs + 1);\r\n\tcntfs = newcntfs;\r\n\tmemcpy(fs, tmp, sizeof(tmp[0]) * cntfs);\r\n}\r\n\r\nint getCenter() {\r\n// \tfor (int i = 0; i < cntfs; i++) {\r\n// \t\tfs[i].print();\r\n// \t}\r\n\t\r\n\tint center = -1;\r\n\tfor (int i = 0; i < cntfs; i++) {\r\n\t\tif (fs[i].get(fs[i].l) < fs[i].get(fs[i].r)) {\r\n\t\t\tcenter = i;\r\n\t\t\tbreak;\r\n\t\t}\r\n\t}\r\n\tassert(center > 0);\r\n\treturn center;\r\n}\r\n\r\nint getSegmId(double value) {\r\n\tfor (int i = 0; i < cntfs; i++) {\r\n\t\tif (value < fs[i].r - EPS)\r\n\t\t\treturn i;\r\n\t}\r\n\tassert(0);\r\n}\r\n\r\ndouble ans[maxn];\r\n\r\nint main() {\r\n\tsrand(rdtsc());\r\n#ifdef DEBUG\r\n\tfreopen(TASKNAME\".in\", \"r\", stdin);\r\n\tfreopen(TASKNAME\".out\", \"w\", stdout);\r\n#endif\r\n\t\r\n\tint n, q, A, B;\r\n\twhile (scanf(\"%d%d%d%d\", &n, &q, &A, &B) >= 1) {\r\n\t\tfor (int i = 0; i < n; i++) {\r\n\t\t\tscanf(\"%d\", &a[i]);\r\n\t\t}\r\n\t\t\r\n\t\tfor (int i = 0; i < n - 1; i++) {\r\n\t\t\td[i][0] = A + a[i] - a[i + 1];\r\n\t\t\td[i][1] = B + a[i] - a[i + 1];\r\n// \t\t\teprintf(\"%d %d\\n\", d[i][0], d[i][1]);\r\n\t\t}\r\n\t\t\r\n\t\tcntfs = 1;\r\n\t\tfs[0] = func(-1e18, 1e18, 1, 0, 0);\r\n\t\tsplitAll();\r\n\t\tassert(cntfs == 2);\r\n\t\tfor (int iter = n - 2; iter >= 0; iter--) {\r\n\t\t\tint center = getCenter();\r\n// \t\t\teprintf(\"center = %d\\n\", center);\r\n\t\t\tdouble miny = fs[center].get(fs[center].l);\r\n\t\t\tfor (int i = 0; i < center; i++) {\r\n\t\t\t\tfs[i].put(d[iter][1]);\r\n\t\t\t\tfs[i].l -= d[iter][1], fs[i].r -= d[iter][1];\r\n\t\t\t\tfs[i].a[2]++;\r\n\t\t\t}\r\n\t\t\tfor (int i = cntfs++; i > center; i--) {\r\n\t\t\t\tfs[i] = fs[i - 1];\r\n\t\t\t\tfs[i].put(d[iter][0]);\r\n\t\t\t\tfs[i].l -= d[iter][0], fs[i].r -= d[iter][0];\r\n\t\t\t\tfs[i].a[2]++;\r\n\t\t\t}\r\n\t\t\tif (d[iter][0] < d[iter][1])\r\n\t\t\t\tfs[center] = func(fs[center - 1].r, fs[center + 1].l, 1, 0, miny);\r\n\t\t\telse {\r\n\t\t\t\t--cntfs;\r\n\t\t\t\tfor (int i = center; i < cntfs; i++)\r\n\t\t\t\t\tfs[i] = fs[i + 1];\r\n\t\t\t}\r\n\t\t\t\t\r\n\t\t\tsplitAll();\r\n\t\t\t\r\n// \t\t\teprintf(\"cntfs = %d\\n\", cntfs);\r\n// \t\t\tfor (int i = 0; i < cntfs; i++)\r\n// \t\t\t\tfs[i].print();\r\n\t\t}\r\n\t\t\r\n\t\tdouble pos = 1.0 - a[0];\r\n\t\tint center = getCenter();\r\n\t\tif (fs[center].l > pos)\r\n\t\t\tpos = fs[center].l;\r\n\t\t\r\n\t\tdouble res = fs[getSegmId(pos)].get(pos);\r\n\t\tprintf(\"%.18lf\\n\", res);\r\n\r\n\t\tans[0] = a[0] + pos;\r\n\t\tfor (int iter = 0; iter < n - 1; iter++) {\r\n// \t\t\teprintf(\"cntfs = %d\\n\", cntfs);\r\n// \t\t\tfor (int i = 0; i < cntfs; i++)\r\n// \t\t\t\tfs[i].print();\r\n\t\t\t\r\n\t\t\tfor (int i = 0; i < cntfs; i++)\r\n\t\t\t\tfs[i].a[2]--;\r\n\t\t\tint center = getCenter();\r\n\t\t\tbool addedNew = (fabs(fs[center].a[2]) < EPS && fabs(fs[center].a[1]) < EPS);\r\n\t\t\tint ansSegmId = getSegmId(pos);\r\n\t\t\tfor (int i = 0; i < center; i++) {\r\n\t\t\t\tfs[i].put(-d[iter][1]);\r\n\t\t\t\tfs[i].l += d[iter][1], fs[i].r += d[iter][1];\r\n\t\t\t}\r\n\t\t\tif (addedNew)\r\n\t\t\t\t--cntfs;\r\n\t\t\tfor (int i = center; i < cntfs; i++) {\r\n\t\t\t\tif (addedNew)\r\n\t\t\t\t\tfs[i] = fs[i - 1];\r\n\t\t\t\tfs[i].put(-d[iter][0]);\r\n\t\t\t\tfs[i].l += d[iter][0], fs[i].r += d[iter][0];\r\n\t\t\t}\r\n\t\t\t\r\n\t\t\t{\r\n\t\t\t\tif (ansSegmId < center)\r\n\t\t\t\t\tpos += d[iter][1];\r\n\t\t\t\telse if (addedNew && ansSegmId == center)\r\n\t\t\t\t\tpos = fs[ansSegmId].l + d[iter][1];\r\n\t\t\t\telse\r\n\t\t\t\t\tpos += d[iter][0];\r\n\t\t\t}\r\n\t\t\tans[iter + 1] = pos + a[iter + 1];\r\n\t\t}\r\n\t\t\r\n\t\tfor (int i = 0; i < n; i++)\r\n\t\t\tprintf(\"%.18lf%c\", ans[i],  \" \\n\"[i == n - 1]);\r\n// \t\tbreak;\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

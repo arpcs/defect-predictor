@@ -1,0 +1,39 @@
+{
+    "id": 147517073,
+    "contestId": 1627,
+    "creationTimeSeconds": 1645652903,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "dmkozyrev_thinks_slowly"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 841,
+    "memoryConsumedBytes": 79360000,
+    "source": "#include <bits/stdc++.h>\r\n#define all(x) (x).begin(),(x).end()\r\n// ---- ---- ---- ---- ---- ---- DEBUG LIBRARY ---- ---- ---- ---- ---- ----\r\nconst int debug = 0;\r\n#define watch(...) debug && std::cout << \"{\" << #__VA_ARGS__ << \"} = \" \\\r\n    << std::make_tuple(__VA_ARGS__) << std::endl\r\n\r\ntemplate<typename... X>\r\nstd::ostream& operator<<(std::ostream& os, const std::pair<X...>& p) \r\n{ return os << std::make_tuple(std::get<0>(p), std::get<1>(p)); }\r\n\r\ntemplate<std::size_t I = 0, typename FuncT, typename... Tp>\r\ninline typename std::enable_if<I == sizeof...(Tp), void>::type\r\nfor_each_const(const std::tuple<Tp...> &, FuncT) { }\r\n\r\ntemplate<std::size_t I = 0, typename FuncT, typename... Tp>\r\ninline typename std::enable_if<I < sizeof...(Tp), void>::type\r\nfor_each_const(const std::tuple<Tp...>& t, FuncT f)\r\n{ f(std::get<I>(t)),for_each_const<I + 1, FuncT, Tp...>(t, f); }\r\n\r\n\r\ntemplate<std::size_t I = 0, typename FuncT, typename... Tp>\r\ninline typename std::enable_if<I == sizeof...(Tp), void>::type\r\nfor_each(std::tuple<Tp...> &, FuncT) { }\r\n\r\ntemplate<std::size_t I = 0, typename FuncT, typename... Tp>\r\ninline typename std::enable_if<I < sizeof...(Tp), void>::type\r\nfor_each(std::tuple<Tp...>& t, FuncT f)\r\n{ f(std::get<I>(t)); for_each<I + 1, FuncT, Tp...>(t, f); }\r\n\r\nstruct Printer {\r\n    std::ostream& os; bool was{0};\r\n    Printer(std::ostream& os_) : os(os_) { }\r\n    template<typename X> void operator()(X x) \r\n    { os << (was?\", \":(was=1,\"\")) << x; }\r\n};\r\n\r\ntemplate<typename... X>\r\nstd::ostream& operator<<(std::ostream& os, const std::tuple<X...>& t)\r\n{ return os << \"{\", for_each_const(t, Printer(os)), os << \"}\"; }\r\n\r\ntemplate<typename Iterator>\r\nstd::ostream& print(std::ostream& os, Iterator begin, Iterator end)\r\n{ return os << \"{\", std::for_each(begin,end,Printer(os)), os << \"}\"; }\r\n\r\n#define OUTPUT(container) template<typename X, typename... T>           \\\r\nstd::ostream& operator<<(std::ostream& os, const container<X,T...>& c)  \\\r\n{ return print(os, all(c)); }\r\nOUTPUT(std::vector) OUTPUT(std::list) OUTPUT(std::deque)\r\nOUTPUT(std::set) OUTPUT(std::unordered_set)\r\nOUTPUT(std::multiset) OUTPUT(std::unordered_multiset)\r\nOUTPUT(std::map) OUTPUT(std::multimap) OUTPUT(std::unordered_map)\r\n#undef RANGE_OUTPUT\r\n    \r\n#define OUTPUT2(container, get, pop) template<typename X, typename... T> \\\r\nstd::ostream& operator<<(std::ostream& os, container<X,T...> c) {       \\\r\n    std::vector<X> v(c.size());                                         \\\r\n    for (unsigned i = 0; i != v.size(); v[i++] = c.get(),c.pop());      \\\r\n    return os << v; }                                                   \r\nOUTPUT2(std::queue,front,pop)\r\nOUTPUT2(std::stack,top,pop)\r\nOUTPUT2(std::priority_queue,top,pop)\r\n#undef OUTPUT\r\n#define isz(x) (int)(x).size()\r\nusing namespace std;\r\nusing ld = long double;\r\nconst ld INF = 1e100L;\r\nusing pldi = pair<ld,int>;\r\ntemplate<typename T>\r\nusing PQLess = priority_queue<T,vector<T>,greater<T>>;\r\nvoid setmin(auto &x, const auto &y) {\r\n    if (y < x) x = y;\r\n}\r\nint main() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    int tt; cin >> tt;\r\n    while (tt --> 0) {\r\n        //tt = 0;\r\n        int n,m,k; cin >> n >> m >> k;\r\n        vector<int> x(1+n);\r\n        for (int i = 1; i <= n; i++) cin >> x[i];\r\n        map<int,set<int>> stage;\r\n        map<int,map<int,vector<tuple<int,int,int>>>> from;\r\n        map<int,map<int,ld>> dp;\r\n        map<pair<int,int>,bool>visited;\r\n        for (int i = 0; i < k; i++) {\r\n            int x1, y1, x2, y2, h;\r\n            cin >> x1 >> y1 >> x2 >> y2 >> h;\r\n            dp[x1][y1] = dp[x2][y2] = INF;\r\n            from[x1][y1].emplace_back(x2,y2,h);\r\n            stage[x1].insert(y1);\r\n            stage[x2].insert(y2);\r\n        }\r\n        stage[1].insert(1);\r\n        stage[n].insert(m);\r\n        dp[1][1] = 0;\r\n        dp[n][m] = INF;\r\n        for (auto &[id,coords] : stage) {\r\n            PQLess<pldi> pq;\r\n            for (auto c : coords) {\r\n                pq.push({dp[id][c],c});\r\n            }\r\n            while (isz(pq)) {\r\n                auto [dist,vert] = pq.top();\r\n                pq.pop();\r\n                if (visited[{id,vert}])continue;\r\n                visited[{id,vert}]=1;\r\n                dp[id][vert] = dist;\r\n                watch(id,vert,dist);\r\n                auto it = coords.lower_bound(vert);\r\n                if (it != coords.begin()) {\r\n                    pq.push({dist+(*it-*prev(it))*1LL*x[id],*prev(it)});\r\n                }\r\n                if (next(it) != coords.end()) {\r\n                    pq.push({dist+(-*it+*next(it))*1LL*x[id],*next(it)});\r\n                }\r\n            }\r\n            for (auto &[fromY, vec] : from[id]) {\r\n                for (auto &[toX, toY, h] : vec) {\r\n                    setmin(dp[toX][toY], dp[id][fromY] - h);\r\n                }\r\n            }\r\n        }\r\n        cout << fixed << setprecision(0);\r\n        if (dp[n][m] > 1e90L) cout << \"NO ESCAPE\\n\";\r\n        else cout << dp[n][m] << '\\n';\r\n    }\r\n}"
+}

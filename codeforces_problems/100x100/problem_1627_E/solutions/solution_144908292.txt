@@ -1,0 +1,39 @@
+{
+    "id": 144908292,
+    "contestId": 1627,
+    "creationTimeSeconds": 1643785416,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "wakaranai"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef int64_t ll;\r\ntypedef uint64_t ull;\r\ntypedef long double ld;\r\ntypedef pair<int,int> pii;\r\ntypedef pair<ll,ll> pll;\r\ntypedef vector<int> vi;\r\n#define sf scanf\r\n#define pf printf\r\n#define nl printf(\"\\n\")\r\n#define si(x) scanf(\"%d\",&x)\r\n#define sii(x,y) scanf(\"%d%d\",&x,&y)\r\n#define siii(x,y,z) scanf(\"%d%d%d\",&x,&y,&z)\r\n#define sl(x) scanf(\"%lld\",&x)\r\n#define sll(x,y) scanf(\"%lld%lld\",&x,&y)\r\n#define slll(x,y,z) scanf(\"%lld%lld%lld\",&x,&y,&z)\r\n#define FOR(i,n) for(int i=0;i<n;i++)\r\n#define sz(x) (int)x.size()\r\n#define all(x) x.begin(),x.end()\r\n#define chk cerr<<\"CAME HERE\"<<endl\r\n#define dbug(x) cerr<<\"value of \"<<#x<<\" = \"<<x<<endl\r\nmt19937_64 rng((uint64_t) chrono::duration_cast<chrono::nanoseconds>(chrono::high_resolution_clock::now().time_since_epoch()).count());\r\ninline ll rand(ll l, ll r){uniform_int_distribution<ll> RNG(l,r);return RNG(rng);}\r\ntemplate<typename T>inline void togglebit(T &x, int pos){x^=(T(1)<<pos);}\r\ntemplate<typename T>inline bool chkbit(T x, int pos){return bool(x&(T(1)<<pos));}\r\ntemplate<typename T>inline void setbit(T &x, int pos){x|=(T(1)<<pos);}\r\ntemplate<typename T>inline void resetbit(T &x, int pos){if(chkbit(x,pos))togglebit(x,pos);}\r\n\r\n\r\nconst int N = 2e5+5;\r\n\r\n\r\nint x[N];\r\narray<int,5>ladders[N];\r\nvector<pll>graph[N];\r\npair<ll,bool> dp[N];\r\nint vis[N]={0};\r\nint color=1;\r\nvector<int>floorLadders[N];\r\nint target;\r\n\r\npair<ll,bool> f(int i){\r\n\tif(i==target)return {0,1};\r\n\tauto &ret = dp[i];\r\n\tif(vis[i]==color)return ret;\r\n\tvis[i]=color;\r\n\tret = {0,0};\r\n\tpair<ll,bool>tmp;\r\n\t\r\n\tfor(auto &p:graph[i]){\r\n\t\ttmp = f(p.second);\r\n\t\ttmp.first += p.first;\r\n\t\tif(tmp.second){\r\n\t\t\tif(!ret.second)ret=tmp;\r\n\t\t\telse if(ret.first>tmp.first)ret=tmp;\r\n\t\t}\r\n\t\t\r\n\t}\r\n\t\r\n\treturn ret;\r\n}\r\n\r\nvoid solve(int casenum){\r\n\tint n,m,k;\r\n\tsiii(n,m,k);\r\n\tcolor++;\r\n\t\r\n\tmap<pii,int>mp;\r\n\tauto getNode = [&](int i, int j)->int{\r\n\t\tif(!mp.count(pii(i,j))){\r\n\t\t\tmp[pii(i,j)]=sz(mp);\r\n\t\t}\r\n\t\treturn mp[pii(i,j)];\r\n\t};\r\n\t\r\n\tvi firstFloor,lastFloor;\r\n\tFOR(i,n)si(x[i+1]);\r\n\tFOR(i,k){\r\n\t\tFOR(j,5){\r\n\t\t\tsi(ladders[i][j]);\r\n\t\t}\r\n\t\tfloorLadders[ladders[i][2]].push_back(i);\r\n\t\tif(ladders[i][0]==1)firstFloor.push_back(i);\r\n\t\tif(ladders[i][2]==n)lastFloor.push_back(i);\r\n\t}\r\n\t\r\n\tfor(int i=0,a,b; i<k; i++){\r\n\t\ta = getNode(ladders[i][0], ladders[i][1]);\r\n\t\tb = getNode(ladders[i][2], ladders[i][3]);\r\n\t\tgraph[a].push_back(pll(-ladders[i][4], b));\r\n\t\tll weight;\r\n\t\t\r\n\t\tfor(int j:floorLadders[ladders[i][0]]){\r\n\t\t\tb = getNode(ladders[j][2], ladders[j][3]);\r\n\t\t\tweight = 1LL*abs(ladders[j][3] - ladders[i][1])*x[ladders[i][0]];\r\n\t\t\tgraph[b].push_back(pll(weight, a));\r\n\t\t}\r\n\t}\r\n\t\r\n\tint start = getNode(1,1);\r\n\tfor(int i:firstFloor){\r\n\t\tint b = getNode(ladders[i][0],ladders[i][1]);\r\n\t\tll weight = 1LL*(ladders[i][1]-1)*x[1];\r\n\t\tgraph[start].push_back(pll(weight,b));\r\n\t}\r\n\ttarget = getNode(n,m);\r\n\tfor(int i:lastFloor){\r\n\t\tint a = getNode(ladders[i][2], ladders[i][3]);\r\n\t\tll weight = 1LL*(m-ladders[i][3])*x[n];\r\n\t\tgraph[a].push_back(pll(weight,target));\r\n\t}\r\n\t\r\n\t\r\n\tauto x = f(start);\r\n\tif(x.second)pf(\"%lld\\n\",x.first);\r\n\telse {\r\n\t\tpf(\"NO ESCAPE\\n\");\r\n\t}\r\n\t\r\n\tfor(int i=0; i<=max(n,mp.size()+1); i++){\r\n\t\tgraph[i].clear();\r\n\t\tfloorLadders[i].clear();\r\n\t}\r\n}\r\n\r\nint main(){\r\n    //ios_base::sync_with_stdio(0);cin.tie(0);cout.tie(0);\r\n    //freopen(\"input.txt\",\"r\",stdin);\r\n    //freopen(\"output.txt\",\"w\",stdout);\r\n    int T=1;\r\n    scanf(\"%d\",&T);\r\n    //cin>>T;\r\n    for(int i=1; i<=T; i++)\r\n        solve(i);\r\n\r\nreturn 0;\r\n}"
+}

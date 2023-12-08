@@ -1,0 +1,39 @@
+{
+    "id": 120442210,
+    "contestId": 280,
+    "creationTimeSeconds": 1624536605,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "He_Ren"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 2714,
+    "memoryConsumedBytes": 819200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef long double ldb;\r\ntypedef pair<int,int> pii;\r\nconst int MAXN = 6e3 + 5;\r\nconst ldb eps = 1e-12;\r\n\r\ninline int sgn(ldb x){ return x<-eps? -1: x>eps? 1: 0;}\r\n\r\nstruct Data\r\n{\r\n\tldb a,b,c,l,r;\r\n\tData(void){}\r\n\tData(ldb _k): a(1), b(-2 * _k), c(_k * _k) {}\r\n\tData(ldb _a,ldb _b,ldb _c): a(_a), b(_b), c(_c) {}\r\n\tData(ldb _a,ldb _b,ldb _c,ldb _l,ldb _r): a(_a), b(_b), c(_c), l(_l), r(_r) {}\r\n\tinline ldb get_y(ldb x) const { return a * x * x + b * x + c;}\r\n\tinline pair<ldb,ldb> get_mn(ldb lim) const\r\n\t{\r\n\t\tldb res = -b / (2 * a);\r\n\t\tres = max(res, l); res = min(res, min(lim, r));\r\n\t\treturn make_pair(res, get_y(res));\r\n\t}\r\n\tinline Data shift(ldb k) const\r\n\t{\r\n\t\treturn Data(a, -2 * a * k + b, k * k * a - b * k + c, l + k, r + k);\r\n\t}\r\n\tinline void operator += (const Data &oth){ a += oth.a; b += oth.b; c += oth.c;}\r\n\tinline void operator -= (const Data &oth){ a -= oth.a; b -= oth.b; c -= oth.c;}\r\n};\r\n\r\nint p[MAXN];\r\n\r\ninline ostream& operator << (ostream &o,const Data &x)\r\n{\r\n\treturn o << \"(\" << x.a << \", \" << x.b << \", \" << x.c << \") [\" << x.l << \", \" << x.r << \"]\";\r\n}\r\n\r\nint main(void)\r\n{\r\n\tint n,lim,a,b;\r\n\tscanf(\"%d%d%d%d\",&n,&lim,&a,&b);\r\n\tfor(int i=1; i<=n; ++i) scanf(\"%d\",&p[i]);\r\n\t\r\n\tstatic int f[MAXN];\r\n\tstatic Data dat[MAXN * 2];\r\n\tint tot = 0;\r\n\tfor(int i=1; i<=n; ++i)\r\n\t{\r\n\t\tif(i == 1)\r\n\t\t\tdat[1] = Data(p[1]), dat[1].l = 1, dat[1].r = lim, tot = 1;\r\n\t\telse\r\n\t\t{\r\n\t\t\tint pos = f[i-1];\r\n\t\t\tfor(int j=1; j<pos; ++j) dat[j] = dat[j].shift(a);\r\n\t\t\tfor(int j=tot; j>pos; --j) dat[j+2] = dat[j].shift(b);\r\n\t\t\ttot += 2;\r\n\t\t\t\r\n\t\t\tpair<ldb,ldb> val = dat[pos].get_mn(lim);\r\n\t\t\t\r\n\t\t\tldb tl = val.first + a, tr = val.first + b;\r\n\t\t\tdat[pos+2] = dat[pos];\r\n\t\t\tdat[pos+1] = Data(0,0,val.second, tl, tr);\r\n\t\t\t\r\n\t\t\tdat[pos] = dat[pos].shift(a); dat[pos].r = tl;\r\n\t\t\tdat[pos+2] = dat[pos+2].shift(b); dat[pos+2].l = tr;\r\n\t\t\t\r\n\t\t\tData tmp(p[i]);\r\n\t\t\tfor(int j=1; j<=tot; ++j) dat[j] += tmp;\r\n\t\t}\r\n\t\t\r\n\t\tldb mn = 1e100;\r\n\t\tfor(int j=1; j<=tot && sgn(dat[j].l - lim) <= 0; ++j)\r\n\t\t{\r\n\t\t\tpair<ldb,ldb> t = dat[j].get_mn(lim);\r\n\t\t\tif(t.second < mn)\r\n\t\t\t\tmn = t.second, f[i] = j;\r\n\t\t}\r\n\t}\r\n\t\r\n\tstatic ldb res[MAXN], ans;\r\n\tres[n] = dat[f[n]].get_mn(lim).first;\r\n\tans = dat[f[n]].get_mn(lim).second;\r\n\tfor(int i=n-1; i>=1; --i)\r\n\t{\r\n\t\tData tmp(p[i+1]);\r\n\t\tfor(int j=1; j<=tot; ++j) dat[j] -= tmp;\r\n\t\tint pos = f[i];\r\n\t\tfor(int j=1; j<=pos; ++j) dat[j] = dat[j].shift(-a);\r\n\t\tfor(int j=pos+2; j<=tot; ++j) dat[j] = dat[j].shift(-b);\r\n\t\tdat[pos].r = dat[pos+2].r;\r\n\t\tfor(int j=pos+1; j+2<=tot; ++j) dat[j] = dat[j+2];\r\n\t\ttot -= 2;\r\n\t\t\r\n\t\tldb lst = res[i+1], mn = 1e100;\r\n\t\tldb vl = lst - b, vr = lst - a;\r\n\t\tfor(int j=1; j<=tot; ++j)\r\n\t\t{\r\n\t\t\tData cur = dat[j];\r\n\t\t\tcur.l = max(cur.l, vl); cur.r = min(cur.r, vr);\r\n\t\t\tif(sgn(cur.l - cur.r) > 0) continue;\r\n\t\t\t\r\n\t\t\tpair<ldb,ldb> t = cur.get_mn(lim);\r\n\t\t\tif(t.second < mn)\r\n\t\t\t\tmn = t.second, res[i] = t.first;\r\n\t\t}\r\n\t}\r\n\t\r\n\tfor(int i=1; i<=n; ++i) printf(\"%.20lf \",(double)res[i]);\r\n\tprintf(\"\\n%.20lf\",(double)ans);\r\n\treturn 0;\r\n}\r\n"
+}

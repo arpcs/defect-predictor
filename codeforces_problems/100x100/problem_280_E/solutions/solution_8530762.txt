@@ -1,0 +1,39 @@
+{
+    "id": 8530762,
+    "contestId": 280,
+    "creationTimeSeconds": 1414984398,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "ydc"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 22425600,
+    "source": "#include<iostream>\r\n#include<cstdio>\r\n#include<cstdlib>\r\n#include<cstring>\r\n#include<cmath>\r\n#include<algorithm>\r\n#define maxn 700010\r\n#define eps 1e-10\r\nusing namespace std;\r\nint dcmp(double p)\r\n{\r\n\tif(abs(p)<eps)\r\n\t\treturn 0;\r\n\treturn p>eps?1:-1;\r\n}\r\nint n,Q,A,B;\r\nstruct Node\r\n{\r\n\tNode *son[2],*fa;\r\n\tdouble vA,vB,vC,len,sumlen;\r\n\tdouble del1,del2,del3;\r\n}*Root,*stack[maxn];\r\nint top;\r\ndouble low[maxn],x[maxn],ans[maxn],sum;\r\nvoid read()\r\n{\r\n\tscanf(\"%d %d %d %d\",&n,&Q,&A,&B);\r\n\tfor(int i=1;i<=n;++i)\r\n\t\tscanf(\"%lf\",x+i);\r\n\tfor(int i=1;i<=2*n;++i)\r\n\t\tstack[++top]=new Node;\r\n}\r\nvoid move(Node *p,double del)\r\n{\r\n\tp->vB+=del,p->del1+=del;\r\n}\r\nvoid add(Node *p,double del)\r\n{\r\n\tp->vC+=del,p->del2+=del;\r\n}\r\nvoid addK(Node *p,double del)\r\n{\r\n\tp->vA+=del,p->del3+=del,p->vC+=del*p->vB;\r\n}\r\nvoid push_down(Node *p)\r\n{\r\n\tif(dcmp(p->del1))\r\n\t{\r\n\t\tif(p->son[0])\r\n\t\t\tmove(p->son[0],p->del1);\r\n\t\tif(p->son[1])\r\n\t\t\tmove(p->son[1],p->del1);\r\n\t}\r\n\tif(dcmp(p->del3))\r\n\t{\r\n\t\tif(p->son[0])\r\n\t\t\taddK(p->son[0],p->del3);\r\n\t\tif(p->son[1])\r\n\t\t\taddK(p->son[1],p->del3);\r\n\t}\r\n\tif(dcmp(p->del2))\r\n\t{\r\n\t\tif(p->son[0])\r\n\t\t\tadd(p->son[0],p->del2);\r\n\t\tif(p->son[1])\r\n\t\t\tadd(p->son[1],p->del2);\r\n\t}\r\n\tp->del1=p->del2=p->del3=0;\r\n}\r\nNode* NewNode(double k,double b,double len)\r\n{\r\n\tNode *p=stack[top--];\r\n\tp->vA=k,p->vB=0,p->vC=b,p->len=p->sumlen=len,p->del1=p->del2=p->del3=0;\r\n\tp->fa=p->son[0]=p->son[1]=0;\r\n\treturn p;\r\n}\r\nvoid Erase(Node *p)\r\n{\r\n\tif(p==0)\r\n\t\treturn ;\r\n\tstack[++top]=p;\r\n\tErase(p->son[0]),Erase(p->son[1]);\r\n}\r\nvoid update(Node *p)\r\n{\r\n\tp->sumlen=p->len;\r\n\tif(p->son[0])\r\n\t\tp->sumlen+=p->son[0]->sumlen;\r\n\tif(p->son[1])\r\n\t\tp->sumlen+=p->son[1]->sumlen;\r\n}\r\nvoid Rotate(Node *p,Node *x)\r\n{\r\n\tbool mark=p==x->son[1];\r\n\tNode *y=p->son[mark^1],*z=x->fa;\r\n\tif(y!=0)\r\n\t\ty->fa=x;\r\n\tif(z!=0)\r\n\t\tz->son[x==z->son[1]]=p;\r\n\tp->son[mark^1]=x,p->fa=z,x->son[mark]=y,x->fa=p,update(x);\r\n}\r\nvoid Splay(Node *p,Node *go)\r\n{\r\n\tstatic Node *ancestor[maxn];\r\n\tint top=0;\r\n\tancestor[++top]=p;\r\n\tfor(Node *i=p;i->fa!=go;i=i->fa)\r\n\t\tancestor[++top]=i->fa;\r\n\twhile(top)\r\n\t\tpush_down(ancestor[top--]);\r\n\twhile(p->fa!=go)\r\n\t{\r\n\t\tNode *x=p->fa,*y=x->fa;\r\n\t\tif(y==go)\r\n\t\t\tRotate(p,x);\r\n\t\telse if((p==x->son[1])^(x==y->son[1]))\r\n\t\t\tRotate(p,x),Rotate(p,y);\r\n\t\telse\r\n\t\t\tRotate(x,y),Rotate(p,x);\r\n\t}\r\n\tupdate(p);\r\n\tif(go==0)\r\n\t\tRoot=p;\r\n}\r\nNode* Find(Node *p,int d)\r\n{\r\n\tif(!p->son[d])\r\n\t\treturn 0;\r\n\tfor(p=p->son[d];p->son[d^1];p=p->son[d^1]);\r\n\treturn p;\r\n}\r\nNode* Query(Node *p,double &l,double &r,double &x,double fr)\r\n{\r\n\tdouble sum=fr;\r\n\twhile(1)\r\n\t{\r\n\t\tpush_down(p);\r\n\t\tdouble newl,newr;\r\n\t\tnewl=sum+(p->son[0]?p->son[0]->sumlen:0);\r\n\t\tnewr=newl+p->len;\r\n\t\tl=newl,r=newr;\r\n\t\tdouble realA=p->vA,realB=p->vC-p->vA*p->vB;\r\n\t\tdouble X=-realB/realA;\r\n\t\tif(X<newl)\r\n\t\t{\r\n\t\t\tif(p->son[0])\r\n\t\t\t\tp=p->son[0];\r\n\t\t\telse\r\n\t\t\t{\r\n\t\t\t\tx=newl;\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t}\r\n\t\telse if(newr<X)\r\n\t\t{\r\n\t\t\tif(p->son[1])\r\n\t\t\t\tsum=newr,p=p->son[1];\r\n\t\t\telse\r\n\t\t\t{\r\n\t\t\t \tx=newr;\r\n\t\t\t \tbreak;\r\n\t\t \t}\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tl=newl,r=newr,x=X;\r\n\t\t\tbreak;\r\n\t\t}\r\n\t}\r\n\tSplay(p,0);\r\n\treturn p;\r\n}\r\nNode* Query(Node *p,double x,double &l,double fr)\r\n{\r\n\tdouble sum=fr;\r\n\twhile(1)\r\n\t{\r\n\t\tpush_down(p);\r\n\t\tdouble newl,newr;\r\n\t\tnewl=sum+(p->son[0]?p->son[0]->sumlen:0);\r\n\t\tnewr=newl+p->len;\r\n\t\tif(x<newl)\r\n\t\t\tp=p->son[0];\r\n\t\telse if(newr<x)\r\n\t\t\tp=p->son[1],sum=newr;\r\n\t\telse\r\n\t\t{\r\n\t\t\tl=newl;\r\n\t\t\tbreak;\r\n\t\t}\r\n\t}\r\n\tSplay(p,0);\r\n\treturn p;\r\n}\r\nvoid Delete(Node *p)\r\n{\r\n\tSplay(p,0);\r\n\tif(p->son[0]==0&&p->son[1]!=0)\r\n\t\tp->son[1]->fa=0,Root=p->son[1];\r\n\telse if(p->son[1]==0&&p->son[0]!=0)\r\n\t\tp->son[0]->fa=0,Root=p->son[0];\r\n\telse\r\n\t{\r\n\t\tNode *i;\r\n\t \tfor(i=p->son[0];i->son[1];i=i->son[1]);\r\n\t \ti->son[1]=p->son[1],p->son[1]->fa=i,p->son[0]->fa=0,Splay(i,0);\r\n\t}\r\n\tstack[++top]=p;\r\n}\r\nvoid Print(Node *p,double fr,int f)\r\n{\r\n\tif(p==0)\r\n\t\treturn ;\r\n\tdouble sum=p->son[0]?p->son[0]->sumlen+fr:fr;\r\n\tif(p->son[0]&&p->son[0]->fa!=p)\r\n\t\tprintf(\"BUG\\n\");\r\n\tif(p->son[1]&&p->son[1]->fa!=p)\r\n\t\tprintf(\"BUG\\n\");\r\n\tpush_down(p);\r\n\tPrint(p->son[0],fr,f);\r\n\tif(f)\r\n\t\tprintf(\"%f %f %fx%f\\n\",sum,sum+p->len,p->vA,p->vC-p->vA*p->vB);\r\n\tPrint(p->son[1],sum+p->len,f);\r\n}\r\nvoid work()\r\n{\r\n\tRoot=NewNode(2,-2*x[1],Q-1);\r\n\tfor(int i=2;i<=n;++i)\r\n\t{\r\n\t\tdouble l,r;\r\n\t\tNode *p=Query(Root,l,r,low[i-1],A*(i-2)+1);\r\n\t\tNode *a=Find(p,0),*b=Find(p,1);\r\n\t\tNode *q=NewNode(p->vA,p->vC-p->vA*p->vB,r-low[i-1]);\r\n\t\tNode *nq;\r\n\t\tp->len=low[i-1]-l,update(p);\r\n\t\tif(a==0)\r\n\t\t{\r\n\t\t\tif(p->son[1])\r\n\t\t\t\tp->son[1]->fa=q;\r\n\t\t\tq->son[1]=p->son[1],p->son[1]=q,q->fa=p,Splay(q,0);\r\n\t\t}\r\n\t\telse if(b==0)\r\n\t\t\tp->son[1]=q,q->fa=p,Splay(q,0);\r\n\t\telse\r\n\t\t{\r\n\t\t\tSplay(a,0),Splay(b,a);\r\n\t\t\tp->son[1]=q,q->fa=p,Splay(q,0);\r\n\t\t}\r\n\t\tif(A<B)\r\n\t\t{\r\n\t\t\tnq=NewNode(0,0,B-A);\r\n\t\t\tSplay(p,0),Splay(q,Root),q->son[0]=nq,nq->fa=q,Splay(nq,0);\r\n\t\t}\r\n\t\tif(dcmp(low[i-1]-l)<=0)\r\n\t\t\tDelete(p);\r\n\t\telse\r\n\t\t{\r\n\t\t \tif(A<B)\r\n\t\t\t\tSplay(nq,0);\r\n\t\t\telse\r\n\t\t\t\tSplay(q,0);\r\n\t\t\tSplay(p,Root),move(p,A);\r\n\t\t}\r\n\t\tif(dcmp(r-low[i-1])<=0)\r\n\t\t\tDelete(q);\r\n\t\telse\r\n\t\t{\r\n\t\t\tif(A<B)\r\n\t\t\t\tSplay(nq,0);\r\n\t\t\telse\r\n\t\t\t\tSplay(p,0);\r\n\t\t\tSplay(q,Root),move(q,B);\r\n\t\t}\r\n\t\t//Print(Root,A*(i-1)+1,1);\r\n\t\tp=Query(Root,Q,l,A*(i-1)+1);\r\n\t\tp->len=Q-l,Erase(p->son[1]),update(p);\r\n\t\t//Print(Root,A*(i-1)+1,0);\r\n\t\tp->son[1]=0,add(p,-2*x[i]),addK(p,2);\r\n\t\t//Print(Root,A*(i-1)+1,1);\r\n\t\t//printf(\"##################################################\\n\");\r\n\t}\r\n\tdouble l,r;\r\n\tQuery(Root,l,r,ans[n],A*(n-1)+1);\r\n}\r\nvoid print(int p)\r\n{\r\n\tsum+=(ans[p]-x[p])*(ans[p]-x[p]);\r\n\tif(p>1)\r\n\t{\r\n\t\tdouble l=ans[p]-B,r=ans[p]-A;\r\n\t\tif(dcmp(low[p-1]-l)<0)\r\n\t\t\tans[p-1]=l;\r\n\t\telse if(dcmp(low[p-1]-r)>0)\r\n\t\t\tans[p-1]=r;\r\n\t\telse\r\n\t\t\tans[p-1]=low[p-1];\r\n\t\tprint(p-1);\r\n\t}\r\n\tprintf(\"%.10f%c\",ans[p],p<n?' ':'\\n');\r\n}\r\nint main()\r\n{\r\n\tread();\r\n\twork();\r\n\tprint(n);\r\n\tprintf(\"%.10f\\n\",sum);\r\n\treturn 0;\r\n}\r\n"
+}

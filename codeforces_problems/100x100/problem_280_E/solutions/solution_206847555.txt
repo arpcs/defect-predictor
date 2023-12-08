@@ -1,0 +1,39 @@
+{
+    "id": 206847555,
+    "contestId": 280,
+    "creationTimeSeconds": 1684764431,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "GeZhiyuan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 1536000,
+    "source": "#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nconst int N = 6000 + 5;\r\n\r\nclass Quadratic{\r\npublic:\r\n\tlong double l, r, a, b;\r\n\tinline Quadratic() {}\r\n\tinline Quadratic(long double l_, long double r_, long double a_, long double b_){\r\n\t\tl = l_, r = r_;\r\n\t\ta = a_, b = b_;\r\n\t}\r\n\tinline void operator += (Quadratic C){\r\n\t\ta += C.a, b += C.b;\r\n\t}\r\n\tinline void operator -= (Quadratic C){\r\n\t\ta -= C.a, b -= C.b;\r\n\t}\r\n\tinline void operator <<= (long double d){\r\n\t\tl += d, r += d;\r\n\t\tb -= 2 * a * d;\r\n\t}\r\n};\r\n\r\ninline Quadratic section(Quadratic C, long double l, long double r){\r\n\tC.l = max(C.l, l), C.r = min(C.r, r);\r\n\treturn C;\r\n}\r\n\r\ninline double quad(Quadratic C){\r\n\tlong double x = min(max(-C.b / C.a / 2, C.l), C.r);\r\n\treturn x;\r\n}\r\n\r\ninline double vertex(int n, Quadratic Convex[], long double l, long double r){\r\n\tfor(int id = 1 ; id <= n ; id ++){\r\n\t\tQuadratic C = section(Convex[id], l, r);\r\n\t\tif(C.l <= C.r){\r\n\t\t\tdouble x = quad(C);\r\n\t\t\tif(x < C.r) return x;\r\n\t\t}\r\n\t}\r\n\treturn min(r, Convex[n].r);\r\n}\r\n\r\nint n = 0, m = 0, l = 0, r = 0, a[N] = {}, sz[2] = {};\r\nlong double ans = 0;\r\nQuadratic dp[2][N << 1] = {};\r\n\r\ninline void dfs(int i, long double x){\r\n\tif(i > 1){\r\n\t\tsz[(i - 1) & 1] = 0;\r\n\t\tlong double d = l;\r\n\t\tfor(int id = 1 ; id <= sz[i & 1] ; id ++){\r\n\t\t\tQuadratic C = dp[i & 1][id];\r\n\t\t\tC -= Quadratic(1, m, 1.00, -2.00 * a[i]), C <<= -d;\r\n\t\t\tif(C.a > 0) dp[(i - 1) & 1][++ sz[(i - 1) & 1]] = C;\r\n\t\t\telse d = r;\r\n\t\t}\r\n\t\tdfs(i - 1, vertex(sz[(i - 1) & 1], dp[(i - 1) & 1], x - r, x - l));\r\n\t}\r\n\tprintf(\"%.6Lf \", x);\r\n\tans += (x - a[i]) * (x - a[i]);\r\n}\r\n\r\nint main(){\r\n\tscanf(\"%d %d %d %d\", &n, &m, &l, &r);\r\n\tfor(int i = 1 ; i <= n ; i ++) scanf(\"%d\", &a[i]);\r\n\tdp[1][++ sz[1]] = Quadratic(1, m, 1.00, -2.00 * a[1]);\r\n\tfor(int i = 2 ; i <= n ; i ++){\r\n\t\tsz[i & 1] = 0;\r\n\t\tlong double d = l, x = vertex(sz[(i - 1) & 1], dp[(i - 1) & 1], 1, m) + d;\r\n\t\tfor(int id = 1 ; id <= sz[(i - 1) & 1] ; id ++){\r\n\t\t\tQuadratic C = dp[(i - 1) & 1][id];\r\n\t\t\tC <<= d;\r\n\t\t\tif(C.l <= x && x < C.r){\r\n\t\t\t\tdp[i & 1][++ sz[i & 1]] = section(C, C.l, x);\r\n\t\t\t\tdp[i & 1][++ sz[i & 1]] = Quadratic(x, x + r - l, 0, 0);\r\n\t\t\t\tC <<= r - l, d = r, x += r - l;\r\n\t\t\t\tdp[i & 1][++ sz[i & 1]] = section(C, x, C.r);\r\n\t\t\t}\r\n\t\t\telse dp[i & 1][++ sz[i & 1]] = C;\r\n\t\t}\r\n\t\twhile(dp[i & 1][sz[i & 1]].r > m){\r\n\t\t\tdp[i & 1][sz[i & 1]] = section(dp[i & 1][sz[i & 1]], 1, m);\r\n\t\t\tif(dp[i & 1][sz[i & 1]].l > dp[i & 1][sz[i & 1]].r) sz[i & 1] --;\r\n\t\t}\r\n\t\tfor(int id = 1 ; id <= sz[i & 1] ; id ++) dp[i & 1][id] += Quadratic(1, m, 1.00, -2.00 * a[i]);\r\n\t}\r\n\tdfs(n, vertex(sz[n & 1], dp[n & 1], 1, m));\r\n\tprintf(\"\\n\");\r\n\tprintf(\"%.6Lf\\n\", ans);\r\n\treturn 0;\r\n}\r\n\r\n"
+}

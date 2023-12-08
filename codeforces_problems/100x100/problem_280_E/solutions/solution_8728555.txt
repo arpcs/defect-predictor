@@ -1,0 +1,39 @@
+{
+    "id": 8728555,
+    "contestId": 280,
+    "creationTimeSeconds": 1416242133,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "matthew99"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 9,
+    "timeConsumedMillis": 92,
+    "memoryConsumedBytes": 78131200,
+    "source": "#include <cstdio>\r\n#include <cstdlib>\r\n#include <cstring>\r\n#include <algorithm>\r\n#define REP(i, a, b) for (int i = (a), _end_ = (b); i != _end_; ++i)\r\n#define FOR(i, a, b) for (int i = (a), _end_ = (b); i <= _end_; ++i)\r\n#define debug(...) fprintf(stderr, __VA_ARGS__)\r\nusing namespace std;\r\ntypedef long long LL;\r\nconst double eps = 1e-8;\r\nconst int maxn = 300000;\r\nconst int max0 = 1e6;\r\nint n, q, a, b;\r\nint x[maxn + 5];\r\nstruct node\r\n{\r\n\tint k;\r\n\tLL b;\r\n\tdouble l, r;\r\n\tdouble delta;\r\n\tint deltak;\r\n\tLL deltab;\r\n\tnode *p, *c[2];\r\n\tnode(const int &_k = 0, const LL &_b = 0, const double &_l = 0, const double &_r = 0): k(_k), b(_b), l(_l), r(_r), delta(0), deltak(0), deltab(0), p(NULL) { memset(c, 0, sizeof c); }\r\n\tvoid flag_delta(const double &_delta)\r\n\t{\r\n\t\tdelta += _delta;\r\n\t\tb -= (LL)k * _delta;\r\n\t\tdeltab -= (LL)deltak * _delta;\r\n\t\tl += _delta, r += _delta;\r\n\t}\r\n\tvoid flag_add(const int &_deltak, const LL &_deltab)\r\n\t{\r\n\t\tdeltak += _deltak, deltab += _deltab;\r\n\t\tk += _deltak, b += _deltab;\r\n\t}\r\n\tvoid push_down()\r\n\t{\r\n\t\tREP(i, 0, 2)\r\n\t\t\tif (c[i]) c[i]->flag_delta(delta), c[i]->flag_add(deltak, deltab);\r\n\t\tdelta = 0, deltak = deltab = 0;\r\n\t}\r\n\tint get_pos()\r\n\t{\r\n\t\tif (!this || !p) return 2;\r\n\t\tREP(i, 0, 2) if (p->c[i] == this) return i;\r\n\t\treturn 2;\r\n\t}\r\n\tvoid setc(node *u, const int &kind)\r\n\t{\r\n\t\tif (this && kind < 2) c[kind] = u;\r\n\t\tif (u) u->p = this;\r\n\t}\r\n\tvoid rotate()\r\n\t{\r\n\t\tnode *p = this->p;\r\n\t\tbool mark = get_pos();\r\n\t\tp->p->setc(this, p->get_pos());\r\n\t\tp->setc(c[mark ^ 1], mark);\r\n\t\tsetc(p, mark ^ 1);\r\n\t}\r\n\tbool is_root()\r\n\t{\r\n\t\treturn get_pos() >= 2;\r\n\t}\r\n\tvoid relax()\r\n\t{\r\n\t\tstatic node *tmp[maxn + 5];\r\n\t\tint top = 0;\r\n\t\tnode *u = this;\r\n\t\twhile (!u->is_root()) tmp[top++] = u, u = u->p;\r\n\t\tu->push_down();\r\n\t\twhile (top) tmp[--top]->push_down();\r\n\t}\r\n\tvoid splay()\r\n\t{\r\n\t\tfor ( ; !is_root(); rotate())\r\n\t\t\tif (!p->is_root()) (p->get_pos() == get_pos() ? p : this)->rotate();\r\n\t}\r\n\tvoid print()\r\n\t{\r\n\t\tif (!this) return;\r\n\t\tpush_down();\r\n\t\tc[0]->print();\r\n\t\tdebug(\"%lf %lf: %d %I64d\\n\", k * l + b, k * r + b, k, b);\r\n\t\tc[1]->print();\r\n\t}\r\n};\r\nconst double oo = 1e100;\r\ndouble best[maxn + 5];\r\nnode mem[max0 + 5];\r\nint mem_calc = 0;\r\nnode *rt;\r\nnode *new_node(const int &_k = 0, const LL &_b = 0, const double &_l = 0, const double &_r = 0) { mem[mem_calc] = node(_k, _b, _l, _r); return mem + (mem_calc++); }\r\nint main()\r\n{\r\n#ifndef ONLINE_JUDGE\r\n\tfreopen(\"input.txt\", \"r\", stdin);\r\n\tfreopen(\"output.txt\", \"w\", stdout);\r\n#endif\r\n\tscanf(\"%d%d%d%d\", &n, &q, &a, &b);\r\n\tREP(i, 0, n) scanf(\"%d\", x + i);\r\n\trt = new_node(2, -x[0] << 1, 1, oo);\r\n\tFOR(i, 1, n)\r\n\t{\r\n\t\tnode *u = rt;\r\n\t\twhile (1)\r\n\t\t{\r\n\t\t\tu->push_down();\r\n\t\t\tdouble left = u->k * u->l + u->b, right = u->k * u->r + u->b;\r\n\t\t\tif (left > eps && u->c[0]) u = u->c[0];\r\n\t\t\telse if (right < -eps) u = u->c[1];\r\n\t\t\telse break;\r\n\t\t}\r\n\t\tu->splay();\r\n\t\trt = u;\r\n\t\tdouble t = (double)-u->b / u->k;\r\n\t\tLL val = 0;\r\n\t\tif (t < u->l) val = LL(u->l) * u->k + u->b, t = u->l;\r\n\t\tbest[i - 1] = t;\r\n\t\tif (i >= n) break;\r\n\t\tdouble tmp0 = u->r;\r\n\t\tu->r = t;\r\n\t\tu->b -= val;\r\n\t\tnode *tmp = u->c[1];\r\n\t\tu->setc(new_node(u->k, u->b - val, t, tmp0), 1);\r\n\t\tu->c[1]->setc(tmp, 1);\r\n\t\ttmp = u->c[1];\r\n\t\tu->setc(new_node(0, 0, t, t + b - a), 1);\r\n\t\tu->c[1]->setc(tmp, 1);\r\n\t\ttmp->flag_delta(b - a);\r\n\t\tu->flag_delta(a);\r\n\t\tu->flag_add(2, -x[i] << 1);\r\n\t}\r\n\tdouble cur = min((double)q, best[n - 1]);\r\n\tstatic double ans[maxn + 5];\r\n\tdouble tot = 0;\r\n\tans[n - 1] = cur;\r\n\tfor (int i = n - 2; i >= 0; --i)\r\n\t{\r\n\t\tdouble t = best[i];\r\n\t\tif (t + a > cur) cur -= a;\r\n\t\telse if (t + b < cur) cur -= b;\r\n\t\telse cur = t;\r\n\t\tans[i] = cur;\r\n\t}\r\n\tREP(i, 0, n) printf(\"%.15lf \", ans[i]), (tot += (ans[i] - x[i]) * (ans[i] - x[i]));\r\n\tprintf(\"\\n\");\r\n\tprintf(\"%.15lf\\n\", tot);\r\n\treturn 0;\r\n}\r\n\r\n"
+}

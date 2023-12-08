@@ -1,0 +1,39 @@
+{
+    "id": 221672279,
+    "contestId": 1627,
+    "creationTimeSeconds": 1693742158,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "Tdyx"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "C# 10",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 49254400,
+    "source": "\ufeff\ufeffusing System;\r\nusing System.Collections.Generic;\r\nusing System.Linq;\r\n\r\nclass Program\r\n{\r\n    static void Main(string[] args)\r\n    {\r\n        var t = Int32.Parse(Console.ReadLine());\r\n        var res = new string[t];\r\n        for(int i = 0;i<t;i++)\r\n        {\r\n            var arr = Console.ReadLine().Split(' ');\r\n            var n = Int32.Parse(arr[0]);\r\n            var m = Int32.Parse(arr[1]);\r\n            var k = Int32.Parse(arr[2]);\r\n            var xArr = Console.ReadLine().Split(' ').Select(item => Int32.Parse(item)).ToArray();\r\n            var ladders = new int[k][];\r\n            for(int r = 0;r<k;r++)\r\n            {\r\n                var tmpArr = Console.ReadLine().Split(' ');\r\n                var a = Int32.Parse(tmpArr[0]) - 1;\r\n                var b = Int32.Parse(tmpArr[1]) - 1;\r\n                var c = Int32.Parse(tmpArr[2]) - 1;\r\n                var d = Int32.Parse(tmpArr[3]) - 1;\r\n                var h = Int32.Parse(tmpArr[4]);\r\n                ladders[r] = new int[]{a, b, c, d, h};\r\n            }\r\n\r\n            var minCost = GetMinCost(n, m, xArr, ladders);\r\n            if (minCost > M / 2)\r\n            {\r\n                res[i] = \"NO ESCAPE\";\r\n            }\r\n            else\r\n            {\r\n                res[i] = minCost.ToString();\r\n            }\r\n        }\r\n\r\n        Console.WriteLine(string.Join('\\n', res));\r\n    }\r\n    \r\n    const long M = 400000000000000000L;\r\n    private static long GetMinCost(int n, int m, int[] xArr, int[][] ladders)\r\n    {\r\n        var nodeMatrix = GetNodeMatrix(n, m, ladders);\r\n        var indexMap = GetIndexMap(nodeMatrix);\r\n        var levelLadders = GetLevelLadders(n, ladders);\r\n\r\n        var dp = new long[n][];\r\n        for(int i = 0;i<n;i++)\r\n        {\r\n            if (nodeMatrix[i]!=null)\r\n            {\r\n                dp[i] = new long[nodeMatrix[i].Length];\r\n                for(int j = 0;j<dp[i].Length;j++)\r\n                {\r\n                    dp[i][j] = M;\r\n                }\r\n            }\r\n        }\r\n\r\n        dp[0][0] = 0;\r\n        for(int i = 0;i<n;i++)\r\n        {\r\n            if (dp[i] ==null) continue;\r\n\r\n            // j == 0\r\n            var val = M;\r\n            for(int index = 0;index<dp[i].Length;index++)\r\n            {\r\n                var jCost = (long)xArr[i] * nodeMatrix[i][index];\r\n                var candidate = val + jCost;\r\n                if (candidate < dp[i][index])\r\n                {\r\n                    dp[i][index] = candidate;\r\n                }\r\n                else\r\n                {\r\n                    val = dp[i][index] - jCost;\r\n                }\r\n            }\r\n\r\n            val = M;\r\n            for(int index = dp[i].Length - 1;index>=0;index--)\r\n            {\r\n                var jCost = (long)xArr[i] * nodeMatrix[i][index];\r\n                var candidate = val - jCost;\r\n                if (candidate < dp[i][index])\r\n                {\r\n                    dp[i][index] = candidate;\r\n                }\r\n                else\r\n                {\r\n                    val = dp[i][index] + jCost;\r\n                }\r\n            }\r\n\r\n            if (levelLadders[i] == null) continue;\r\n\r\n            foreach(var ladder in levelLadders[i])\r\n            {\r\n                var index = indexMap[(i, ladder[1])];\r\n                var nextI = ladder[2];\r\n                var nextIndex = indexMap[(nextI, ladder[3])];\r\n                var candidate = dp[i][index] - ladder[4];\r\n                if (candidate < dp[nextI][nextIndex])\r\n                {\r\n                    dp[nextI][nextIndex] = candidate;\r\n                }\r\n            }\r\n        }\r\n\r\n        return dp[n-1].Last();\r\n    }\r\n\r\n    private static List<int[]>[] GetLevelLadders(int n, int[][] ladders)\r\n    {\r\n        var levelLadders = new List<int[]>[n];\r\n        foreach(var ladder in ladders)\r\n        {\r\n            if (levelLadders[ladder[0]] == null)\r\n            {\r\n                levelLadders[ladder[0]] = new List<int[]>{ladder};\r\n            }\r\n            else\r\n            {\r\n                levelLadders[ladder[0]].Add(ladder);\r\n            }\r\n        }\r\n\r\n        return levelLadders;\r\n    }\r\n\r\n    private static int[][] GetNodeMatrix(int n, int m, int[][] ladders)\r\n    {\r\n        var sourceNodeMatrix = new List<int>[n];\r\n        sourceNodeMatrix[0] = new List<int>{0};\r\n        sourceNodeMatrix[n-1] = new List<int>{m-1};\r\n        foreach(var ladder in ladders)\r\n        {\r\n            if (sourceNodeMatrix[ladder[0]] == null)\r\n            {\r\n                sourceNodeMatrix[ladder[0]] = new List<int>{ladder[1]};\r\n            }\r\n            else\r\n            {\r\n                sourceNodeMatrix[ladder[0]].Add(ladder[1]);\r\n            }\r\n\r\n            if (sourceNodeMatrix[ladder[2]] == null)\r\n            {\r\n                sourceNodeMatrix[ladder[2]] = new List<int>{ladder[3]};\r\n            }\r\n            else\r\n            {\r\n                sourceNodeMatrix[ladder[2]].Add(ladder[3]);\r\n            }\r\n        }\r\n\r\n        var nodeMatrix = new int[n][];\r\n        for(int i = 0;i<n;i++)\r\n        {\r\n            if (sourceNodeMatrix[i] == null)\r\n            {\r\n                continue;\r\n            }\r\n\r\n            sourceNodeMatrix[i].Sort();\r\n            var count = 1;\r\n            for(int j = 1;j<sourceNodeMatrix[i].Count;j++)\r\n            {\r\n                if (sourceNodeMatrix[i][j] != sourceNodeMatrix[i][j-1])\r\n                {\r\n                    count++;\r\n                }\r\n            }\r\n\r\n            nodeMatrix[i] = new int[count];\r\n            var index = 0;\r\n            nodeMatrix[i][index++] = sourceNodeMatrix[i][0];\r\n            for(int j = 1;j<sourceNodeMatrix[i].Count;j++)\r\n            {\r\n                if (sourceNodeMatrix[i][j] != sourceNodeMatrix[i][j-1])\r\n                {\r\n                    nodeMatrix[i][index++] = sourceNodeMatrix[i][j];\r\n                }\r\n            }\r\n        }\r\n\r\n        return nodeMatrix; \r\n    }\r\n\r\n    private static Dictionary<(int,int), int> GetIndexMap(int[][] nodeMatrix)\r\n    {\r\n        var totalCount = 0;\r\n        foreach(var arr in nodeMatrix)\r\n        {\r\n            if (arr!= null)\r\n            {\r\n                totalCount += arr.Length; \r\n            }\r\n        }\r\n\r\n        var indexMap = new Dictionary<(int,int), int>(totalCount);\r\n        for(int i = 0;i<nodeMatrix.Length;i++)\r\n        {\r\n            if (nodeMatrix[i] == null) continue;\r\n            \r\n            for(int index=0;index<nodeMatrix[i].Length;index++)\r\n            {\r\n                indexMap[(i, nodeMatrix[i][index])] = index;\r\n            }\r\n        }\r\n\r\n        return indexMap;\r\n    }\r\n}\r\n"
+}

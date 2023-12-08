@@ -1,0 +1,39 @@
+{
+    "id": 8411915,
+    "contestId": 280,
+    "creationTimeSeconds": 1414244138,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "duzfan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 921600,
+    "source": "#include<cstdio>\r\n#include<cstring>\r\nusing namespace std;\r\n\r\nconst int N = 6005;\r\nconst double eps = 1e-5;\r\n\r\n#define fo(i , st , en) for (int i = st; i <= en; i++)\r\n#define fd(i , st , en) for (int i = st; i >= en; i--)\r\n#define Me(x , y) memset(x , y , sizeof(x))\r\n#define sqr(x) ((x) * (x))\r\n\r\nstruct _tree{\r\n    int l , r , s , fa;\r\n    double len , sl , a , b , adda , addb , addc;\r\n    _tree(double L , double A , double B) : len(L) , sl(L) , a(A) , b(B){\r\n        adda = addb = addc = l = r = fa = 0; s = 1;\r\n    }\r\n    _tree(){}\r\n}t[N + N];\r\n\r\nint n , q , a , b , root , tot;\r\nint p[N];\r\ndouble ans[N];\r\n\r\ndouble Calc(double x , double a , double b){\r\n    return x * a + b;\r\n}\r\n\r\nvoid Update(int x){\r\n    t[x].s = t[t[x].l].s + t[t[x].r].s + 1;\r\n    t[x].sl = t[t[x].l].sl + t[t[x].r].sl + t[x].len;\r\n}\r\n\r\nvoid Pushc(int x , double c){\r\n    t[x].b -= t[x].a * c;\r\n    t[x].addb -= t[x].adda * c;\r\n    t[x].addc += c;\r\n}\r\n\r\nvoid Pushab(int x , double a , double b){ \r\n    t[x].a += a; t[x].b += b; t[x].adda += a; t[x].addb += b;\r\n}\r\n\r\nvoid Push(int x){\r\n    if (t[x].addc > eps){\r\n        Pushc(t[x].l , t[x].addc);\r\n        Pushc(t[x].r , t[x].addc);\r\n        t[x].addc = 0;\r\n    }\r\n    if (t[x].adda > eps){\r\n        Pushab(t[x].l , t[x].adda , t[x].addb);\r\n        Pushab(t[x].r , t[x].adda , t[x].addb);\r\n        t[x].adda = t[x].addb = 0;\r\n    }\r\n    \r\n}\r\n\r\nint Find(int &x , double len){\r\n    double l1 = Calc(len + t[t[x].l].sl , t[x].a , t[x].b) , l2 = Calc(len + t[t[x].l].sl + t[x].len , t[x].a , t[x].b);\r\n    Push(x);\r\n    if (l2 < eps)\r\n        if (t[x].r){\r\n            return Find(t[x].r , len + t[t[x].l].sl + t[x].len);\r\n        }\r\n        else\r\n            return x;\r\n    if (l1 > -eps)\r\n        if (t[x].l)\r\n            return Find(t[x].l , len);\r\n        else\r\n            return x;\r\n    return x;\r\n}\r\n\r\nvoid Ro(int x){\r\n    int y = t[x].fa , z = t[y].fa;\r\n    if (z)\r\n        if (t[z].l == y) t[z].l = x; else t[z].r = x;\r\n    t[x].fa = z; t[y].fa = x;\r\n    if (t[y].l == x){\r\n        t[y].l = t[x].r;\r\n        t[t[x].r].fa = y;\r\n        t[x].r = y;\r\n    }\r\n    else{\r\n        t[y].r = t[x].l;\r\n        t[t[x].l].fa = x;\r\n        t[x].l = y;\r\n    }\r\n    t[x].sl = t[y].sl; t[x].s = t[y].s; Update(y);\r\n}\r\n\r\nvoid Splay(int x , int goal){\r\n    while (t[x].fa != goal){\r\n        int y = t[x].fa;\r\n        if (t[y].fa == goal)\r\n            Ro(x);\r\n        else{\r\n            int z = t[y].fa;\r\n            if (t[z].l == y ^ t[y].l == x)\r\n                Ro(x), Ro(x);\r\n            else\r\n                Ro(y) , Ro(x);\r\n        }\r\n    }\r\n    if (!goal) root = x;\r\n}\r\n\r\nint Findl(int x){\r\n    while (Push(x) , t[x].l) x = t[x].l;\r\n    return x;\r\n}\r\n\r\nint main(){\r\n    scanf(\"%d%d%d%d\" , &n , &q , &a , &b);\r\n    fo (i , 1 , n) scanf(\"%d\" , p + i);\r\n    t[root = tot = 1] = _tree(q - 1 , 2 , -2 * p[1] + 2);\r\n    fo (i , 2 , n + 1){\r\n        int tlen = 1 + a * (i - 2) , x = Find(root , 0) , y; Splay(x , 0);\r\n        double l1 = Calc(t[t[x].l].sl , t[x].a , t[x].b) , l2 = Calc(t[t[x].l].sl + t[x].len , t[x].a , t[x].b);\r\n        if (l2 < eps){\r\n            ans[i - 1] = t[t[x].l].sl + t[x].len + tlen;\r\n            if (a == b) y = 0; else t[y = ++tot] = _tree(b - a , 0 , 0);\r\n        }\r\n        else\r\n            if (l1 > -eps){\r\n                ans[i - 1] = t[t[x].l].sl + tlen;\r\n                if (a == b)\r\n                    y = 0;\r\n                else{\r\n                    t[y = ++tot] = _tree(t[x].len , t[x].a , t[x].b);   \r\n                    t[x].len = b - a; t[x].a = t[x].b = 0;\r\n                }\r\n            }\r\n            else{\r\n                ans[i - 1] = -t[x].b / t[x].a; double pos = ans[i - 1] - t[t[x].l].sl;\r\n                ans[i - 1] += tlen;\r\n                if (a == b)\r\n                     t[y = ++ tot] = (_tree){t[x].len - pos , t[x].a , t[x].b};\r\n                else{\r\n                    t[y = ++tot] = _tree(b - a , 0 , 0);\r\n                    t[t[y].r = ++tot] = (_tree){t[x].len - pos , t[x].a , t[x].b}; t[tot].fa = y;\r\n                    Update(y);\r\n                }\r\n                t[x].len = pos;\r\n            }\r\n        if (t[x].r){\r\n            int temp = Findl(t[x].r); Splay(temp , x);\r\n            t[t[y].fa = temp].l = y; Update(temp);\r\n        }\r\n        else\r\n            t[x].r = y;\r\n        Update(x);\r\n        if (a != b) Pushc(t[x].r , b - a);\r\n        Pushab(x , 2 , -2 * p[i] + (tlen + a) * 2);\r\n    }\r\n    fd (i , n , 2)\r\n        if (ans[i] - ans[i - 1] > b)\r\n            ans[i - 1] = ans[i] - b;\r\n        else\r\n            if (ans[i] - ans[i - 1] < a)\r\n                ans[i - 1] = ans[i] - a;\r\n    double ret = 0;\r\n    fo (i , 1 , n){\r\n        if (i != 1) putchar(' ');\r\n        printf(\"%.7lf\" , ans[i]);\r\n        ret += sqr(ans[i] - p[i]);\r\n    }\r\n    puts(\"\"); printf(\"%.7lf\\n\" , ret);\r\n    return 0;\r\n}\r\n"
+}

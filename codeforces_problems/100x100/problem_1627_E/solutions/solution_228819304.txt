@@ -1,0 +1,39 @@
+{
+    "id": 228819304,
+    "contestId": 1627,
+    "creationTimeSeconds": 1697727265,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "pei_pei_"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 374,
+    "memoryConsumedBytes": 60108800,
+    "source": "#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define int long long\r\ntypedef pair<int,int> pii;\r\ntypedef long long ll;\r\ntypedef double db;\r\nconst int maxn = 200010;\r\nconst int inf = 0x3f3f3f3f3f3f3f3f;\r\nconst int mod = 1e9 + 7;\r\n\r\nint n, m, k;\r\nint x[maxn];\r\npii st[maxn], ed[maxn];\r\nint h[maxn];\r\nvector<pii> edges[maxn];\r\nint d[maxn];//\u8bb0\u5f55\u6700\u77ed\u8def\u5f84\r\npriority_queue<pii,vector<pii>,greater<pii>> que;\r\nvoid dijstra( ){\r\n    while(!que.empty()){\r\n        pii tmp=que.top();que.pop();\r\n        int u = tmp.second;\r\n        if(d[u] < tmp.first)continue;\r\n        for(auto [v,w]:edges[u]){\r\n            if(d[v] > d[u] + w){\r\n                d[v] = d[u] + w;\r\n                que.push(pii(d[v],v));\r\n            }\r\n        }\r\n    }\r\n}\r\nvoid solve(){\r\n    cin >> n >> m >> k;\r\n    for(int i = 1;i <= n; ++i)cin >> x[i];\r\n    vector<pii> tmp;\r\n    tmp.push_back({1, 1});tmp.push_back({n, m});\r\n    for(int i = 1;i <= k; ++i){\r\n        cin >> st[i].first >> st[i].second;\r\n        cin >> ed[i].first >> ed[i].second;\r\n        cin >> h[i];\r\n        tmp.push_back(st[i]);\r\n        tmp.push_back(ed[i]);\r\n    }\r\n    sort(tmp.begin(), tmp.end());\r\n    int sz = unique(tmp.begin(), tmp.end()) - tmp.begin();\r\n    map<pii, int> mp;\r\n    for(int l = 0;l < sz; ++l){\r\n        int r = l;\r\n        while(r + 1 < sz && tmp[r + 1].first == tmp[l].first)++r;\r\n        for(int i = l + 1;i <= r; ++i){\r\n            int w = (tmp[i].second - tmp[i - 1].second) * x[tmp[i].first];\r\n            edges[i].push_back({i - 1, w});\r\n            edges[i - 1].push_back({i, w});\r\n        }\r\n        for(int i = l;i <= r; ++i){\r\n            mp[tmp[i]] = i;\r\n        }\r\n        l = r;  \r\n    }\r\n    vector<set<int>> in(n + 1);\r\n    vector<vector<tuple<int,int,int>>> out(n + 1);\r\n    for(int i = 1;i <= k; ++i){\r\n        int u = mp[st[i]], v = mp[ed[i]];\r\n        //cout << u << ' ' << v << '\\n';\r\n        in[ed[i].first].insert(v);\r\n        out[st[i].first].push_back({u, v, h[i]});\r\n    }\r\n    in[1].insert(mp[{1, 1}]);\r\n    for(int i = 0;i <= sz; ++i)d[i] = inf;\r\n    d[mp[{1, 1}]] = 0;\r\n    for(int i = 1;i <= n; ++i){\r\n        for(auto u : in[i]){\r\n           if(d[u] != inf)que.push({d[u], u});\r\n        }\r\n        dijstra();\r\n        for(auto [u, v, w] : out[i]){\r\n            if(d[u] != inf)d[v] = min(d[v], d[u] - w);\r\n        }\r\n    }\r\n    int ans = d[mp[{n, m}]];\r\n    if(ans >= inf){\r\n        cout << \"NO ESCAPE\" << '\\n';\r\n    }\r\n    else{\r\n        cout << ans << '\\n';\r\n    }\r\n    for(int i = 0;i <= sz; ++i){\r\n        edges[i].clear();\r\n    }\r\n}\r\nsigned main(){\r\n    ios::sync_with_stdio(0),cin.tie(0),cout.tie(0);\r\n    //cout << fixed << setprecision(10);\r\n    int T = 1; cin>>T;\r\n    while(T--){\r\n        solve();\r\n    }\r\n    return 0;\r\n}\r\n"
+}

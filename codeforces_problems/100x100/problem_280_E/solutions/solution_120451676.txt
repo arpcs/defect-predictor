@@ -1,0 +1,39 @@
+{
+    "id": 120451676,
+    "contestId": 280,
+    "creationTimeSeconds": 1624544068,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "SodiumCl10"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 101,
+    "timeConsumedMillis": 1214,
+    "memoryConsumedBytes": 1228800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define SZ(x) ((int)(x).size())\r\n#define all(x) (x).begin(), (x).end()\r\n#define loop(i, a) for (int i = 0; i < (a); ++i)\r\n#define cont(i, a) for (int i = 1; i <= (a); ++i)\r\n#define circ(i, a, b) for (int i = (a); i <= (b); ++i)\r\n#define range(i, a, b, c) for (int i = (a); (c) > 0 ? i <= (b) : i >= (b); i += (c))\r\n#define parse(it, x) for (auto &it : (x))\r\n#define pub push_back\r\n#define pob pop_back\r\n#define emb emplace_back\r\n#define mak make_pair\r\n#define mkt make_tuple\r\ntypedef long long ll;\r\ntypedef long double lf;\r\nconst int Inf = 0x3f3f3f3f;\r\nconst ll INF = 0x3f3f3f3f3f3f3f3fll;\r\nconst double eps = 1e-6;\r\n\r\nstruct Segment {\r\n\tdouble l, r;\r\n\tdouble bg, st, xl;\r\n\tdouble inline getval(double pos) const {\r\n\t\treturn bg + (st + st + xl * (pos - l)) * (pos - l) / 2;\r\n\t}\r\n\tdouble inline get0() const {\r\n\t\tif (fabs(xl) < eps) return fabs(l) < eps ? 0 : -Inf;\r\n\t\treturn l - st / xl;\r\n\t}\r\n\tvoid inline split(double pos, Segment &a, Segment &b) {\r\n\t\ta.l = l; a.r = pos;\r\n\t\ta.bg = bg; a.st = st; a.xl = xl;\r\n\t\tb.l = pos; b.r = r;\r\n\t\tb.bg = getval(pos); b.st = st + (pos - l) * xl; b.xl = xl;\r\n\t}\r\n};\r\n\r\nconst int maxn = 6005;\r\nint n, q, a, b;\r\n\r\nstruct SegFunc {\r\n\tSegment segs[12005];\r\n\tint segc;\r\n\tpair<int, double> inline get0() const {\r\n\t\tloop(i, segc) {\r\n\t\t\tif (segs[i].st > 0) return mak(i, segs[i].l);\r\n\t\t\tdouble p = segs[i].get0();\r\n\t\t\tif (p >= segs[i].l && p <= segs[i].r) {\r\n\t\t\t\treturn mak(i, p);\r\n\t\t\t}\r\n\t\t\tif (!i && p < segs[i].l) return mak(i, segs[i].l);\r\n\t\t\tif (i == segc - 1 && p > segs[i].r) return mak(i, segs[i].r);\r\n\t\t}\r\n\t\tassert(0);\r\n\t\treturn mak(Inf, Inf);\r\n\t}\r\n\tdouble inline getval(double p) {\r\n\t\tloop(i, segc) {\r\n\t\t\tif (p >= segs[i].l && p <= segs[i].r) {\r\n\t\t\t\treturn segs[i].getval(p);\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn Inf;\r\n\t}\r\n\tint inline findpos(double p) {\r\n\t\tloop(i, segc) if (p >= segs[i].l && p <= segs[i].r) return i;\r\n\t\treturn Inf;\r\n\t}\r\n\tvoid inline shr(double dis) {\r\n\t\tint pos = 0;\r\n\t\tdouble pp = 0;\r\n\t\ttie(pos, pp) = get0();\r\n\t\tSegment lp, rp; segs[pos].split(pp, lp, rp);\r\n\t\tstatic Segment nsegs[12005];\r\n\t\tint nsegc = pos, nsegbg = pos;\r\n\t\tif (lp.r - lp.l > eps) nsegs[nsegc++] = lp;\r\n\t\tif (dis > eps) nsegs[nsegc++] = {rp.l, rp.l + dis, rp.bg, 0, 0};\r\n\t\trp.l += dis; rp.r += dis;\r\n\t\tif (rp.r - rp.l > eps) nsegs[nsegc++] = rp;\r\n\t\tcirc(i, pos + 1, segc - 1) {\r\n\t\t\tsegs[i].l += dis; segs[i].r += dis;\r\n\t\t\tnsegs[nsegc++] = segs[i];\r\n\t\t}\r\n\t\tsegc = nsegc;\r\n\t\tcirc(i, nsegbg, segc - 1) segs[i] = nsegs[i];\r\n\t\twhile (segs[segc - 1].l >= q) --segc;\r\n\t\tsegs[segc - 1].r = q;\r\n\t}\r\n\tvoid inline movr(double dis) {\r\n\t\tparse(it, segs) it.l += dis, it.r += dis;\r\n\t\twhile (segs[segc - 1].l >= q) --segc;\r\n\t\tsegs[segc - 1].r = q;\r\n\t}\r\n\tvoid inline add(const Segment &seg) {\r\n\t\tdouble nst = seg.st + seg.xl * (segs[0].l - seg.l);\r\n\t\tparse(it, segs) {\r\n\t\t\tit.bg += seg.getval(it.l);\r\n\t\t\tit.st += nst;\r\n\t\t\tit.xl += seg.xl;\r\n\t\t\tnst += seg.xl * (it.r - it.l);\r\n\t\t}\r\n\t}\r\n};\r\n\r\nint x[maxn];\r\nSegFunc sf;\r\ndouble mostpos[maxn];\r\n\r\nint main() {\r\n\tscanf(\"%d%d%d%d\", &n, &q, &a, &b);\r\n\tcont(i, n) scanf(\"%d\", x + i);\r\n\tsf.segs[0] = {1, (double)q, 1. * (1 - x[1]) * (1 - x[1]), 2. * (1 - x[1]), 2};\r\n\tsf.segc = 1;\r\n\tcont(i, n) {\r\n\t\tif (i >= 2) {\r\n\t\t\tsf.movr(a);\r\n\t\t\tsf.shr(b - a);\r\n\t\t\tsf.add({1, (double)q, 1. * (1 - x[i]) * (1 - x[i]), 2. * (1 - x[i]), 2});\r\n\t\t}\r\n\t\tmostpos[i] = sf.get0().second;\r\n\t}\r\n\tdouble val = sf.getval(sf.get0().second);\r\n\tvector<double> res;\r\n\tdouble lst;\r\n\tres.pub(lst = mostpos[n]);\r\n\trange(i, n - 1, 1, -1) {\r\n\t\tdouble xju = lst - mostpos[i];\r\n\t\tif (xju >= a && xju <= b) res.pub(lst = mostpos[i]);\r\n\t\telse if (xju < a) res.pub(lst -= a);\r\n\t\telse if (xju > b) res.pub(lst -= b);\r\n\t}\r\n\treverse(all(res));\r\n\tparse(it, res) printf(\"%.6lf \", it);\r\n\tprintf(\"\\n%.6lf\\n\", val);\r\n\treturn 0;\r\n}"
+}

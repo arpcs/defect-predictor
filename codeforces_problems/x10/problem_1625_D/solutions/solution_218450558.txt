@@ -1,0 +1,40 @@
+{
+    "id": 218450558,
+    "contestId": 1625,
+    "creationTimeSeconds": 1691826809,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1625,
+        "index": "D",
+        "name": "Binary Spiders",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2300,
+        "tags": [
+            "bitmasks",
+            "data structures",
+            "implementation",
+            "math",
+            "sortings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1625,
+        "members": [
+            {
+                "handle": "Frexto"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1641989100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 109,
+    "timeConsumedMillis": 343,
+    "memoryConsumedBytes": 158515200,
+    "source": "// #pragma GCC optimize(\"Ofast,unroll-loops\")\r\n// #pragma GCC target(\"avx,avx2,fma\")\r\n\r\n#include <bits/stdc++.h>\r\n//#include <bits/testlib.h>\r\n\r\nusing namespace std;\r\n\r\n#define ld long double\r\n#define mp make_pair\r\n#define eb emplace_back\r\n#define ll long long\r\n#define str to_string\r\n#define LLM (ll)(1e18)\r\nvoid __escaloping(signed x) {cerr << x;}\r\nvoid __escaloping(long x) {cerr << x;}\r\nvoid __escaloping(long long x) {cerr << x;}\r\nvoid __escaloping(unsigned x) {cerr << x;}\r\nvoid __escaloping(unsigned long x) {cerr << x;}\r\nvoid __escaloping(unsigned long long x) {cerr << x;}\r\nvoid __escaloping(float x) {cerr << x;}\r\nvoid __escaloping(double x) {cerr << x;}\r\nvoid __escaloping(long double x) {cerr << x;}\r\nvoid __escaloping(char x) {cerr << '\\'' << x << '\\'';}\r\nvoid __escaloping(const char *x) {cerr << '\\\"' << x << '\\\"';}\r\nvoid __escaloping(const string &x) {cerr << '\\\"' << x << '\\\"';}\r\nvoid __escaloping(bool x) {cerr << (x ? \"true\" : \"false\");}\r\n \r\ntemplate<typename T, typename V>\r\nvoid __escaloping(const pair<T, V> &x) {cerr << '{'; __escaloping(x.first); cerr << ','; __escaloping(x.second); cerr << '}';}\r\ntemplate<typename T>\r\nvoid __escaloping(const T &x) {int f = 0; cerr << '{'; for (auto &i: x) cerr << (f++ ? \",\" : \"\"), __escaloping(i); cerr << \"}\";}\r\nvoid _escaloping() {cerr << \"]\\n\";}\r\ntemplate <typename T, typename... V>\r\nvoid _escaloping(T t, V... v) {__escaloping(t); if (sizeof...(v)) cerr << \", \"; _escaloping(v...);}\r\n#ifndef ONLINE_JUDGE\r\n#define debug(x...) cerr << \"[\" << #x << \"] = [\"; _escaloping(x)\r\n#define debug(x...)\r\n#else\r\n#define debug(x...)\r\n#endif\r\n\r\n#define all(x) (x).begin(),(x).end()\r\n\r\ntemplate<typename T> istream& operator>>(istream& is,  vector<T> &v){for (auto& i : v) is >> i; return is;}\r\ntemplate<typename T> ostream& operator<<(ostream& os,  vector<T>  v){for (auto& i : v) os << i << ' '; return os;}\r\n\r\nll inp;\r\nstring sinp;\r\n\r\nvoid fast_io(){\r\n\tios_base::sync_with_stdio(false);\r\n\tcin.tie(nullptr);\r\n}\r\n\r\nconst int c = 30;\r\nint timer = 1;\r\nint k;\r\nint g;\r\n\r\nstruct edge{\r\n\tint left = 0, right = 0;\r\n\tint val;\r\n\tint maxx;\r\n\tint dp = 0;\r\n\tint pr;\r\n\tedge(){}\r\n\tedge(int x){val = x;}\r\n};\r\n\r\nvector<edge> t;\r\nvector<int> pr;\r\n\r\nvoid add(int x, int w) {\r\n\r\n\tdebug(\"ADD\", x);\r\n\r\n\tbitset<c> s = bitset<c>(x);\r\n\t\r\n\tint cur = 0;\r\n\r\n\tif (w >= t[cur].dp) {\r\n\t\tt[cur].dp = w;\r\n\t\tt[cur].maxx = g;\r\n\t}\r\n\r\n\tfor(int i=c-1;i>=0;i--) {\r\n\t\tif (s[i] == 0) {\r\n\t\t\tif (!t[cur].left) {\r\n\t\t\t\tt[cur].left = timer++;\r\n\t\t\t\tt.emplace_back(edge(0));\r\n\t\t\t}\r\n\t\t\tcur = t[cur].left;\r\n\t\t\tdebug(0);\r\n\t\t}\r\n\t\telse {\r\n\t\t\tif (!t[cur].right) {\r\n\t\t\t\tt[cur].right = timer++;\r\n\t\t\t\tt.emplace_back(edge(1));\r\n\t\t\t}\r\n\t\t\tcur = t[cur].right;\r\n\t\t\tdebug(1);\r\n\t\t}\r\n\r\n\t\tif (w >= t[cur].dp) {\r\n\t\t\tt[cur].dp = w;\r\n\t\t\tt[cur].maxx = g;\r\n\t\t}\r\n\r\n\t}\r\n\r\n}\r\n\r\nint res;\r\n\r\nvoid get_ans(int x, int cur, int path, int len) {\r\n\r\n\tif (len == c) return;\r\n\r\n\tdebug(x, cur, path, len);\r\n\r\n\tbitset<c> s = bitset<c>(x);\r\n\r\n\t// 0\r\n\r\n\tint lpath = path;\r\n\r\n\tint l_max_path = (path | ((1 << (c - len - 1)) - 1));\r\n\r\n\tint nx = ((x >> (c - len - 1)) << (c - len - 1));\r\n\r\n\t// \u043b\u0435\u0432\u043e\u0435 \u043f\u043e\u043e\u0434\u0434\u0435\u0440\u0435\u0432\u043e \u043f\u043e\u043b\u043d\u043e\u0441\u0442\u044c\u044e \u043c\u0435\u043d\u044c\u0448\u0435\r\n\t// debug(x);\r\n\t// cout  << bitset<c>(x) << endl;\r\n\t// debug(path);\r\n\t// cout  << bitset<c>(path) << endl;\r\n\t// debug(lpath);\r\n\t// cout  << bitset<c>(lpath) << endl;\r\n\t// debug(nx);\r\n\t// cout  << bitset<c>(nx) << endl;\r\n\r\n\tif ((l_max_path ^ nx) < k) {\r\n\t\tdebug(\"case0\");\r\n\t}\r\n\telse if ((lpath ^ nx) >= k) {\r\n\t\tdebug(\"case1\");\r\n\t\tif (t[cur].left && res < t[t[cur].left].dp + 1) {\r\n\t\t\tdebug(cur, t[cur].left);\r\n\t\t\tdebug(t[t[cur].left].dp);\r\n\t\t\tres = t[t[cur].left].dp + 1;\r\n\t\t\tpr[g] = t[t[cur].left].maxx;\r\n\t\t}\r\n\t}\r\n\telse {\r\n\t\tdebug(\"case2\");\r\n\t\tif (t[cur].left)\r\n\t\t\tget_ans(x, t[cur].left, lpath, len + 1);\r\n\t}\r\n\r\n\t// 1\r\n\r\n\tint rpath = path | (1 << (c - len - 1));\r\n\tint r_max_path = (rpath | ((1 << (c - len - 1)) - 1));\r\n\t// debug(rpath);\r\n\t// cout  << bitset<c>(rpath) << endl;\r\n\r\n\t// \u043f\u0440\u0430\u0432\u043e\u0435 \u043f\u043e\u0434\u0434\u0435\u0440\u0435\u0432\u043e \u043f\u043e\u043b\u043d\u043e\u0441\u0442\u044c\u044e \u043c\u0435\u043d\u044c\u0448\u0435\r\n\tif ((r_max_path ^ nx) < k) {\r\n\r\n\t}\r\n\telse if ((rpath ^ nx) >= k) {\r\n\t\tdebug(\"case3\");\r\n\t\tif (t[cur].right && res < t[t[cur].right].dp + 1) {\r\n\t\t\tdebug(cur, t[cur].right);\r\n\t\t\tdebug(t[t[cur].right].dp);\r\n\t\t\tres = t[t[cur].right].dp + 1;\r\n\t\t\tpr[g] = t[t[cur].right].maxx;\r\n\t\t\tdebug(pr[g]);\r\n\t\t}\r\n\t}\r\n\telse {\r\n\t\tdebug(\"case4\");\r\n\t\tif (t[cur].right)\r\n\t\t\tget_ans(x, t[cur].right, rpath, len + 1);\r\n\t}\r\n\r\n}\r\n\r\nvoid solve() {\r\n\r\n\tt.emplace_back(edge());\r\n\r\n\tint n;\r\n\tcin >> n >> k;\r\n\tvector<int> a(n);\r\n\tcin >> a;\r\n\r\n\tpr.assign(n + 1, 0);\r\n\r\n\tvector<pair<int, int>> b;\r\n\r\n\tfor(int i=0;i<n;i++) {\r\n\t\tb.eb(a[i], i);\r\n\t}\r\n\r\n\tsort(all(b));\r\n\r\n\tsort(all(a));\r\n\r\n\tfor(int i=0;i<n;i++) {\r\n\t\tres = 0;\r\n\t\tg = i;\r\n\t\tget_ans(a[i], 0, 0, 0);\r\n\t\tdebug(res);\r\n\t\tadd(a[i], res);\r\n\t}\r\n\r\n\tdebug(\"ok\");\r\n\r\n\tif (t[0].dp < 1) {\r\n\t\tcout << -1 << endl;\r\n\t\treturn;\r\n\t}\r\n\r\n\t// 0 1 2 3 \r\n\r\n\tdebug(\"ik\");\r\n\r\n\tcout << t[0].dp + 1 << endl;\r\n\r\n\tint q = t[0].dp + 1;\r\n\t\r\n\tint cur = t[0].maxx;\r\n\r\n\twhile(q--) {\r\n\t\tdebug(cur);\r\n\t\tcout << b[cur].second + 1 << \" \";\r\n\t\tcur = pr[cur];\r\n\t}\r\n\r\n}\r\n\r\nsigned main() {\r\n\tfast_io();\r\n    int t = 1;\r\n    while(t--){\r\n    \tsolve();\r\n    }\r\n    return 0;\r\n}"
+}

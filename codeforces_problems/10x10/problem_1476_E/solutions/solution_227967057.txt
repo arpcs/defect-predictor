@@ -1,0 +1,40 @@
+{
+    "id": 227967057,
+    "contestId": 1476,
+    "creationTimeSeconds": 1697163886,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1476,
+        "index": "E",
+        "name": "Pattern Matching",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "bitmasks",
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "hashing",
+            "sortings",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1476,
+        "members": [
+            {
+                "handle": "vjudge4"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1611930900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 49,
+    "timeConsumedMillis": 1762,
+    "memoryConsumedBytes": 102809600,
+    "source": "#include<bits/stdc++.h>\n\nusing namespace std;\n\n#define int long long\n#define all(x) x.begin(), x.end()\n#define rall(x) x.rbegin(), x.rend()\n#define isz(x) ((int)x.size())\n#define sumof(x) accumulate(all(x), 0ll)\n\nbool match(const string &a, const string &b){\n   if (isz(a)!=isz(b)) return false;\n   for (int i=0; i<isz(a); ++i) if (a[i]!=b[i] && a[i]!='_' && b[i]!='_') return false;\n   return true;\n}\n\nconst int N=1e5+1, M=6e5+1;\nint n, m, k, a[N], dd[N], vis[M], deg[M];\nstring s[N], t[N];\nmap<string, int> mp;\nvector<int> g[M];\nstring q[M];\nvector<int> order;\nbool check=1;\n\nvoid dfs(int u){\n   vis[u]=1;\n   for (int v:g[u]){\n      if (!vis[v]) dfs(v);\n      else if (vis[v]==1) \n         check=0;\n   }\n   vis[u]=2;\n   order.push_back(u);\n}\n\nvoid solve(){\n   cin >> n >> m >> k;\n   map<string, vector<int>> pat;\n   for (int i=1; i<=n; ++i) cin >> s[i], pat[s[i]].push_back(i);\n   for (int i=1; i<=m; ++i){\n      cin >> t[i] >> a[i];\n      if (!match(t[i], s[a[i]])){\n         cout << \"NO\\n\";\n         return;\n      }\n      string sus=t[i];\n      for (int j=0; j<(1<<k); ++j){\n         for (int l=0; l<k; ++l) if (j>>l&1) t[i][l]='_';\n         if (!mp.count(t[i])) mp[t[i]]=mp.size(), q[mp[t[i]]]=t[i];\n         t[i]=sus;\n      }\n      for (int j=0; j<(1<<k); ++j){\n         for (int l=0; l<k; ++l) if (j>>l&1) t[i][l]='_';\n         if (t[i]!=s[a[i]]) g[mp[s[a[i]]]].push_back(mp[t[i]]), ++deg[mp[t[i]]];\n         t[i]=sus;\n      }\n      dd[a[i]]=1;\n   }\n   for (auto &i:pat){\n      int sum=0;\n      for (int &j:i.second){\n         if (dd[j]){\n            ++sum;\n            swap(j, i.second[0]);\n         }\n      }\n      if (sum>1){\n         cout << \"NO\\n\";\n         return;\n      }\n   }\n   for (int i=0; i<isz(mp); ++i) if (!deg[i] && !vis[i]) dfs(i);\n   if (!check){\n      cout << \"NO\\n\";\n      return;\n   }\n   check&=accumulate(vis, vis+isz(mp), 0ll)==isz(mp)*2;\n   if (!check){\n      cout << \"NO\\n\";\n      return;\n   }\n   cout << \"YES\\n\";\n   reverse(all(order));\n   set<int> st;\n   for (int i=1; i<=n; ++i) st.insert(i);\n   for (int i:order) if (pat.count(q[i]) && pat[q[i]].size()){\n      cout << pat[q[i]][0] << ' ';\n      st.erase(pat[q[i]][0]);\n   }\n   for (int i:st) cout << i << ' ';\n}\n\nint32_t main(){\n   ios_base::sync_with_stdio(false);\n   cin.tie(nullptr);\n   int ntests=1;\n   // cin >> ntests;\n   for (int i=1; i<=ntests; ++i) solve();\n   return 0;\n}\n\n\t\t \t\t \t\t\t  \t \t     \t\t\t \t\t   \t \t"
+}

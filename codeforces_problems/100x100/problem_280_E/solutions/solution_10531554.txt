@@ -1,0 +1,39 @@
+{
+    "id": 10531554,
+    "contestId": 280,
+    "creationTimeSeconds": 1427791951,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "jiaqiyang"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 16,
+    "timeConsumedMillis": 92,
+    "memoryConsumedBytes": 148275200,
+    "source": "#include <cmath>\n#include <iomanip>\n#include <iostream>\n#include <algorithm>\n\nconst int N = 1000000 + 10;\nconst long double eps = 1e-10;\n\nint n, q, a, b, x[N];\n\ninline int sgn(long double x) {\n  if (fabsl(x) < eps) return 0;\n  return x > 0.0 ? 1 : -1;\n}\n\ninline int fcmpl(long double a, long double b) { return sgn(a - b); }\n\ninline long double sqr(long double x) { return x * x; }\n\nstruct tag_t {\n  long double a, b, c;\n  tag_t() {}\n  tag_t(long double _a, long double _b, long double _c): a(_a), b(_b), c(_c) {}\n  inline void clear() { a = b = c = 0.0; }\n  inline bool empty() { return sgn(a) == 0 && sgn(b) == 0 && sgn(c) == 0; }\n};\n\nclass node_t {\n public:\n  node_t *p, *ch[2];\n  long double l, r, a, b, c, det;\n  tag_t tag;\n\n  inline long double f(long double x) { return a * sqr(x) + b * x + c; }\n  inline long double deriv(long double x) { return 2.0 * a * x + b; }\n  inline long double getmin() { return std::min<long double>(std::min(r, std::max(l, -b / 2.0 / a)), q); }\n  inline int dir();\n  inline void setc(node_t*, int);\n  inline void apply(const tag_t&);\n  inline void shr(long double);\n  inline void release();\n  inline void rotate();\n  inline void splay();\n  inline long double findmin();\n} pool[N], *root, *tot = pool;\n\ninline int node_t::dir() {\n  if (!p) return -1;\n  return this == p->ch[1];\n}\n\ninline void node_t::setc(node_t *c, int d) {\n  if (this) ch[d] = c;\n  if (c) c->p = this;\n}\n\ninline void node_t::apply(const tag_t &t) {\n  tag.a += t.a;\n  tag.b += t.b;\n  tag.c += t.c;\n  a += t.a;\n  b += t.b;\n  c += t.c;\n}\n\ninline void node_t::shr(long double d) {\n  det += d, l += d, r += d;\n  c += a * d * d - b * d;\n  b -= 2.0 * a * d;\n  tag.c += tag.a * d * d - tag.b * d;\n  tag.b -= 2.0 * tag.a * d;\n}\n\ninline void node_t::release() {\n  if (det) {\n    if (ch[0]) ch[0]->shr(det);\n    if (ch[1]) ch[1]->shr(det);\n    det = 0.0;\n  }\n  if (!tag.empty()) {\n    if (ch[0]) ch[0]->apply(tag);\n    if (ch[1]) ch[1]->apply(tag);\n    tag.clear();\n  }\n}\n\ninline void node_t::rotate() {\n  if (p == root) root = this;\n  node_t *v = p;\n  v->release(), release();\n  int d = dir();\n  v->p->setc(this, v->dir());\n  v->setc(ch[!d], d);\n  setc(v, !d);\n}\n\ninline void node_t::splay() {\n  release();\n  while (this != root) {\n    if (p != root)\n      (dir() == p->dir()) ? (p->rotate(), rotate()) : (rotate(), rotate());\n    else\n      rotate();\n  }\n}\n\nlong double node_t::findmin() {\n  node_t *cur = this;\n  while (cur->release(), fcmpl(cur->l, q) > 0) cur = cur->ch[0];\n  while (1) {\n    cur->release();\n    int a = sgn(cur->deriv(cur->l)), b = sgn(cur->deriv(cur->r));\n    int d = b < 0;\n    if ((a <= 0 && b >= 0) || !cur->ch[d] || fcmpl(cur->ch[d]->l, q) >= 0) {\n      cur->splay();\n      return cur->getmin();\n    }\n    cur = cur->ch[d];\n  }\n}\n\nint main() {\n  std::ios::sync_with_stdio(false);\n  std::cin >> n >> q >> a >> b;\n  for (int i = 1; i <= n; ++i) std::cin >> x[i];\n  root = ++tot;\n  root->l = 1, root->r = q;\n  root->a = 1.0, root->b = -2.0 * x[1], root->c = sqr(x[1]);\n  static long double inf[N];\n  for (int i = 2; i <= n; ++i) {\n    inf[i - 1] = root->findmin(); \n    root->release();\n    if (fcmpl(root->l, inf[i - 1]) < 0) {\n      node_t *u = ++tot;\n      *u = *root;\n      u->r = inf[i - 1];\n      u->setc(root->ch[0], 0);\n      u->setc(NULL, 1);\n      root->setc(u, 0);\n    }\n    if (fcmpl(inf[i - 1], root->r) < 0) {\n      node_t *u = ++tot;\n      *u = *root;\n      u->l = inf[i - 1];\n      u->setc(NULL, 0);\n      u->setc(root->ch[1], 1);\n      root->setc(u, 1);\n    }\n    root->c = root->f(inf[i - 1]);\n    root->a = root->b = 0.0;\n    root->l = inf[i - 1] + a, root->r = inf[i - 1] + b;\n    if (root->ch[0]) root->ch[0]->shr(a);\n    if (root->ch[1]) root->ch[1]->shr(b);\n    root->apply(tag_t(1.0, -2.0 * x[i], sqr(x[i])));\n  }\n  static long double ans[N];\n  ans[n] = root->findmin();\n  ans[0] = root->f(ans[n]);\n  for (int i = n - 1; i > 0; --i) {\n    if (fcmpl(ans[i + 1] - b, inf[i]) > 0)\n      ans[i] = ans[i + 1] - b;\n    else if (fcmpl(ans[i + 1] - a, inf[i]) < 0)\n      ans[i] = ans[i + 1] - a;\n    else\n      ans[i] = inf[i];\n  }\n  std::cout << std::setprecision(10);\n  for (int i = 1; i < n; ++i) std::cout << ans[i] << ' ';\n  std::cout << ans[n] << std::endl << ans[0] << std::endl;\n  return 0;\n}\n"
+}

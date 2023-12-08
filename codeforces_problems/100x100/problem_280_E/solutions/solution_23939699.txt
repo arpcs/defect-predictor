@@ -1,0 +1,39 @@
+{
+    "id": 23939699,
+    "contestId": 280,
+    "creationTimeSeconds": 1484813480,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "lzr_010506"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 101,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 10240000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define N 300010\r\n#define inf 1e10\r\n\r\nstruct node\r\n{\r\n    double x, y, lz, k, lk, lb;\r\n    node *ch[2], *pre;\r\n    node(double _x, double _y, double _k):x(_x),y(_y),k(_k)\r\n    {\r\n    \tlk = lb = lz = 0;\r\n    \tpre = ch[0] = ch[1] = NULL;\r\n    }\r\n    inline void update()\r\n    {\r\n        if (lk || lb)\r\n        {\r\n            k += lk;\r\n            y += lk * x + lb;\r\n            if (ch[0]) ch[0] -> lk += lk, ch[0] -> lb += lb + ch[0] -> lz * lk;\r\n            if (ch[1]) ch[1] -> lk += lk, ch[1] -> lb += lb + ch[1] -> lz * lk;\r\n            lk = lb = 0;\r\n        }\r\n        if (lz)\r\n        {\r\n            x += lz;\r\n            if (ch[0]) ch[0] -> lz += lz;\r\n            if (ch[1]) ch[1] -> lz += lz;\r\n            lz = 0;\r\n        }\r\n    }\r\n    inline int d()\r\n    {\r\n        return pre -> ch[1] == this;\r\n    }\r\n};\r\ninline void rotate(node *u)\r\n{\r\n    node *v = u -> pre;\r\n    if (v -> pre) v -> pre -> update();\r\n    v -> update();\r\n    u -> update();\r\n    if (v -> pre) v -> pre -> ch[v -> d()] = u;\r\n    int d = u -> d();\r\n    u -> pre = v -> pre;\r\n    v -> pre = u;\r\n    if (u -> ch[d ^ 1]) u -> ch[d ^ 1] -> pre = v;\r\n    v -> ch[d] = u -> ch[d ^ 1];\r\n    u -> ch[d ^ 1] = v;\r\n}\r\n\r\ninline void spaly(node *u)\r\n{\r\n    u -> update();\r\n    while (u -> pre) rotate(u);\r\n}\r\n\r\nnode* search(node *u)\r\n{\r\n    if (!u) return 0;\r\n    u -> update();\r\n    if (u -> y > 0)\r\n    {\r\n        node *ans = search(u -> ch[0]);\r\n        return ans ? ans : u;\r\n    }\r\n    return search(u -> ch[1]);\r\n}\r\n\r\nint cut(node *r,node* &l)\r\n{\r\n    spaly(r);\r\n    l = r -> ch[0];\r\n    r -> ch[0] = 0;\r\n    if (l) l -> pre  = 0;\r\n}\r\n\r\nnode* rest(node *l)\r\n{\r\n    if (!l) return 0;\r\n    while (l -> ch[1]) l -> update(), l = l -> ch[1];\r\n    l -> update();\r\n    return l;\r\n}\r\n\r\nnode* link(node *l,node *r)\r\n{\r\n    if (l == 0) return r;\r\n    if (r == 0) return l;\r\n    l = rest(l);\r\n    spaly(l);\r\n    l -> ch[1] = r;\r\n    r -> pre = l;\r\n    return l;\r\n}\r\n\r\ndouble c[N],ans[N],w[N];\r\nint main()\r\n{\r\n    int n, q, a, b;\r\n    scanf(\"%d%d%d%d\", &n, &q, &a, &b);\r\n    for (int i = 1; i <= n; i ++)\r\n        scanf(\"%lf\", &c[i]);\r\n    node *root = new node(q, q * 2 - 2 * c[1], 2);\r\n    for (int i = 2; i <= n; i ++)\r\n    {\r\n        node *r = search(root), *l;\r\n        cut(r, l);\r\n        w[i] = r -> x - r -> y / r -> k;\r\n        if (l) w[i] = max(rest(l) -> x, w[i]);\r\n        if (w[i] >= (i - 2) * a + 1)\r\n        {\r\n            l = link(l,new node(w[i], 0, r -> k));\r\n            r = link(new node(w[i], 0, 0), r);\r\n            l -> lz += a;\r\n            r -> lz += b;\r\n            root = link(l,r);\r\n            root -> lk += 2;\r\n            root->lb-=2*c[i];\r\n        }\r\n        else\r\n        {\r\n            w[i] = (i - 2) * a + 1;\r\n            root = link(new node(w[i], 0, 0), root);\r\n            root -> lz += b;\r\n            root -> update();\r\n            root -> lk += 2;\r\n            root -> lb -= 2 * c[i];\r\n        }\r\n    }\r\n    node *r = search(root), *l;\r\n    cut(r, l);\r\n    double x = r -> x - r -> y / r -> k;\r\n    if (l) x = max(rest(l) -> x, x);\r\n    if (x < (n - 1) * a + 1) x = (n - 1) * a + 1;\r\n    if (x > q) x = q;\r\n    for (int i = n; i; i --)\r\n    {\r\n        ans[i] = x;\r\n        if (x - a < w[i]) x -= a;\r\n        else if (x - b > w[i]) x -= b;\r\n        else x = w[i];\r\n    }\r\n    double sum = 0;\r\n    for (int i = 1; i <= n; i ++)\r\n    {\r\n        printf(\"%.10lf \",ans[i]);\r\n        sum += (c[i] - ans[i]) * (c[i] - ans[i]);\r\n    }\r\n    printf(\"\\n%.10lf\\n\",sum);\r\n    return 0;\r\n}\r\n"
+}

@@ -1,0 +1,39 @@
+{
+    "id": 212175244,
+    "contestId": 1627,
+    "creationTimeSeconds": 1688537130,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "FanYongchen"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 639,
+    "memoryConsumedBytes": 93900800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define ll long long\r\n#define ms(x,y) memset(x,y,sizeof(x))\r\n#define INF 0x3f3f3f3f3f3f3f3f\r\nconst int M=414514;\r\nstruct Edge\r\n{\r\n\tint u,v;\r\n\tll d;\r\n\tint Next;\r\n}e[M*5];\r\nint head[M],tot=0;\r\nvoid add_edge(int u,int v,ll d)\r\n{\r\n\te[tot]={u,v,d,head[u]};\r\n\thead[u]=tot++;\r\n}\r\nint n,m,k;\r\nvector<int> ver[M];\r\nmap<pair<int,int> ,int> mp;\r\npair<int,int> p[M]; \r\nint num=0;\r\nll x[M];\r\nstruct T\r\n{\r\n\tint u;\r\n\tll cost;\r\n\tbool operator < (T x) const\r\n\t{\r\n\t\treturn cost>x.cost;\r\n\t}\r\n};\r\npriority_queue<T> q;\r\nll dis[M];\r\nll calc(int u,int v,int i) {return x[i]*abs(p[u].second-p[v].second);}\r\nvoid Push(pair<int,int> x,int i)\r\n{\r\n\tif(mp[x]==0) \r\n\t\tmp[x]=++num,p[num]=x,ver[i].push_back(mp[x]);\r\n}\r\nbool vis[M];\r\nint main()\r\n{\r\n//\tfreopen(\"a.in\",\"r\",stdin);\r\n//\tfreopen(\"a.out\",\"w\",stdout);\r\n\tint T_T;\r\n\tscanf(\"%d\",&T_T);\r\n\twhile(T_T--)\r\n\t{\r\n\t\tnum=0,tot=0,mp.clear();\r\n\t\tscanf(\"%d%d%d\",&n,&m,&k);\r\n\t\tfor(int i=1;i<=k*3;i++) head[i]=-1,vis[i]=0;\r\n\t\tfor(int i=1;i<=n;i++) scanf(\"%lld\",&x[i]),ver[i].clear();\r\n\t\tfor(int i=1;i<=k;i++)\r\n\t\t{\r\n\t\t\tint a,b,c,d,h;\r\n\t\t\tscanf(\"%d%d%d%d%d\",&a,&b,&c,&d,&h);\r\n\t\t\tpair<int,int> x={a,b},y={c,d};\r\n\t\t\tPush(x,a),Push(y,c),add_edge(mp[x],mp[y],-h);\r\n\t\t}\r\n\t\tPush({1,1},1);\r\n\t\tfor(int i=1;i<=m;i++) Push({n,i},n);\r\n\t\tfor(int i=1;i<=n;i++)\r\n\t\t{\r\n\t\t\tsort(ver[i].begin(),ver[i].end(),[](int a,int b) {return p[a].second<p[b].second;});\r\n\t\t\tfor(int j=0;j<ver[i].size();j++)\r\n\t\t\t{\r\n\t\t\t\tif(j) add_edge(ver[i][j],ver[i][j-1],calc(ver[i][j],ver[i][j-1],i));\r\n\t\t\t\tif(j<ver[i].size()-1) add_edge(ver[i][j],ver[i][j+1],calc(ver[i][j],ver[i][j+1],i));\r\n\t\t\t}\r\n\t\t}\r\n\t\tfor(int i=1;i<=num;i++) dis[i]=INF;\r\n\t\tdis[mp[make_pair(1,1)]]=0;\r\n\t\tfor(int i=1;i<=n;i++)\r\n\t\t{\r\n\t\t\tfor(int u:ver[i])\r\n\t\t\t\tif(dis[u]!=INF) \r\n\t\t\t\t\tq.push({u,dis[u]});\r\n\t\t\twhile(!q.empty())\r\n\t\t\t{\r\n\t\t\t\tT t=q.top();q.pop();\r\n\t\t\t\tif(vis[t.u]) continue;\r\n\t\t\t\tvis[t.u]=true;\r\n\t\t\t\tfor(int i=head[t.u];~i;i=e[i].Next)\r\n\t\t\t\t{\r\n\t\t\t\t\tint v=e[i].v;\r\n\t\t\t\t\tif(t.cost+e[i].d<dis[v])\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tdis[v]=t.cost+e[i].d;\r\n\t\t\t\t\t\tif(p[v].first==p[t.u].first) q.push({v,dis[v]});\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tll ans=dis[mp[make_pair(n,m)]];\r\n\t\tif(ans!=INF) cout<<ans<<\"\\n\";\r\n\t\telse cout<<\"NO ESCAPE\\n\";\r\n\t}\r\n\treturn 0;\r\n}\r\n\r\n"
+}

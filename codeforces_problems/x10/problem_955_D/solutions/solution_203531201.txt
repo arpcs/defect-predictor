@@ -1,0 +1,36 @@
+{
+    "id": 203531201,
+    "contestId": 955,
+    "creationTimeSeconds": 1682498607,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 955,
+        "index": "D",
+        "name": "Scissors",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2600,
+        "tags": [
+            "brute force",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 955,
+        "members": [
+            {
+                "handle": "propane"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1521822900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 82,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 15360000,
+    "source": "#include<iostream>\r\n#include<cstring>\r\n#include<vector>\r\nusing namespace std;\r\nusing LL = long long;\r\n\r\nvector<int> z_algorithm(const string &s){\r\n    int n = s.size();\r\n    vector<int> a(n);\r\n    a[0] = n;\r\n\tfor(int i = 1, l = 0, r = 0; i < n; i++){\r\n\t\tif (i <= r) a[i] = min(a[i - l], r - i + 1);\r\n\t\twhile(i + a[i] < n && s[i + a[i]] == s[a[i]]) ++a[i];\r\n\t\tif (i + a[i] - 1 > r) l = i, r = i + a[i] - 1;\r\n\t}\r\n    return a;\r\n}\r\n\r\nconst int INF = 1e9;\r\nstruct Info{\r\n    int x, pos;\r\n    Info() : x(-INF), pos(0) {}\r\n    Info(int x, int pos) : x(x), pos(pos) {}\r\n\r\n    void operator+=(const Info &t){\r\n        if (t.pos > pos){\r\n            *this = t;\r\n        }\r\n    }\r\n};\r\n\r\ntemplate<typename T>\r\nstruct Fenwick{\r\n    int n;\r\n    vector<T> tr;\r\n\r\n    Fenwick(int n) : n(n), tr(n + 1, T()){}\r\n\r\n    int lowbit(int x){\r\n        return x & -x;\r\n    }\r\n\r\n    void modify(int x, T c){\r\n        for(int i = x; i; i -= lowbit(i)) tr[i] += c;\r\n    }\r\n\r\n    T query(int x){\r\n        T res = T();\r\n        for(int i = x; i <= n; i += lowbit(i)) res += tr[i];\r\n        return res;\r\n    }\r\n\r\n};\r\nusing BIT = Fenwick<Info>;\r\n\r\nint main(){\r\n\r\n#ifdef LOCAL\r\n    freopen(\"data.in\", \"r\", stdin);\r\n    freopen(\"data.out\", \"w\", stdout);\r\n#endif\r\n\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n    ios::sync_with_stdio(0);\r\n\r\n    int n, m, k;\r\n    cin >> n >> m >> k;\r\n    string s, t;\r\n    cin >> s >> t;\r\n    auto z1 = z_algorithm(t + '$' + s);\r\n    for(int i = 0; i + m <= n; i++){\r\n        if (z1[m + 1 + i] >= m){\r\n            if (i + m >= 2 * k){\r\n                cout << \"Yes\" << '\\n';\r\n                cout << i + m - 2 * k + 1 << ' ' << i + m - k + 1 << '\\n';\r\n                return 0; \r\n            }\r\n            else{\r\n                cout << \"Yes\" << '\\n';\r\n                cout << 1 << ' ' << k + 1 << '\\n';\r\n                return 0;\r\n            }\r\n        }\r\n    }\r\n    string rs = s, rt = t;\r\n    reverse(rs.begin(), rs.end());\r\n    reverse(rt.begin(), rt.end());\r\n    auto z2 = z_algorithm(rt + '$' + rs);\r\n    BIT bit(m + 1);\r\n    for(int i = n - m; i >= 0; i--){\r\n        {\r\n            int t = n - (i + m - 1) - 1;\r\n            if (z2[m + 1 + t] + t >= k){\r\n                bit.modify(min(z2[m + 1 + t], k) + 1, Info(min(z2[m + 1 + t], k), t));\r\n            }\r\n        }\r\n        int need = m - min(k, z1[m + 1 + i]);\r\n        auto [x, pos] = bit.query(need + 1);\r\n        if (x >= need && z1[m + 1 + i] + i >= k && i + pos >= 2 * k - m){\r\n            cout << \"Yes\" << '\\n';\r\n            for(int j = k - i; j <= min(z1[m + 1 + i], k); j++){\r\n                if (x >= m - j && pos >= k - (m - j)){\r\n                    int l = i - (k - j);\r\n                    int r = n - (pos + m - j - 1) - 1;\r\n                    cout << l + 1 << ' ' << r + 1 << '\\n';\r\n                    break;\r\n                }\r\n            }\r\n            return 0;\r\n        }\r\n    }\r\n    cout << \"No\" << '\\n';\r\n\r\n}"
+}

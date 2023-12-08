@@ -1,0 +1,39 @@
+{
+    "id": 148003310,
+    "contestId": 1627,
+    "creationTimeSeconds": 1646117983,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "prabhu04"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 483,
+    "memoryConsumedBytes": 36147200,
+    "source": "/*input\n4\n5 3 3\n5 17 8 1 4\n1 3 3 3 4\n3 1 5 2 5\n3 2 5 1 6\n6 3 3\n5 17 8 1 4 2\n1 3 3 3 4\n3 1 5 2 5\n3 2 5 1 6\n5 3 1\n5 17 8 1 4\n1 3 5 3 100\n5 5 5\n3 2 3 7 5\n3 5 4 2 1\n2 2 5 4 5\n4 4 5 2 3\n1 2 4 2 2\n3 3 5 2 4\n*/\n#include<bits/stdc++.h>\n#include <ext/pb_ds/assoc_container.hpp>\n#include <ext/pb_ds/tree_policy.hpp>\nusing namespace std;\nusing namespace __gnu_pbds;\n\n#define ws(x) cerr << #x << \" is \" << x << endl\n\ntypedef tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update> orderedTree;\ntypedef long long ll;\n\n#define mp make_pair\n\nint main()\n{\n\tios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);\n\n\tint t;\n\tcin >> t;\n\twhile(t--)\n\t{\n\t\tint n, m, k;\n\t\tcin >> n >> m >> k;\n\t\tmap<pair<int, int>, int> node;\n\t\tnode[{1, 1}] = 0;\n\t\tnode[{n, m}] = 1;\n\n\t\tint x[n + 1];\n\n\t\tfor(int i = 1; i <= n; i++)\n\t\t\tcin >> x[i];\n\n\t\tint a[k], b[k], c[k], d[k], h[k];\n\n\t\tfor(int i = 0; i < k; i++)\n\t\t{\n\t\t\tcin >> a[i] >> b[i] >> c[i] >> d[i] >> h[i];\n\t\t\tif(node.find({a[i], b[i]}) == node.end())\n\t\t\t\tnode[{a[i], b[i]}] = node.size();\n\t\t\tif(node.find({c[i], d[i]}) == node.end())\n\t\t\t\tnode[{c[i], d[i]}] = node.size();\n\t\t}\n\n\t\tvector<pair<int, long long> > adj[node.size()];\n\t\tfor(int i = 0; i < k; i++)\n\t\t{\n\t\t\tadj[node[{a[i], b[i]}]].push_back(mp(node[{c[i], d[i]}], -h[i]));\n\t\t}\n\n\t\tvector<pair<int, int> > floors[n + 1];\n\t\tint whichFloor[node.size()];\n\t\tfor(auto el : node)\n\t\t{\n\t\t\tfloors[el.first.first].push_back(mp(el.first.second, el.second));\n\t\t\twhichFloor[el.second] = el.first.first;\n\t\t}\n\t\tfor(int i = 1; i <= n; i++)\n\t\t{\n\t\t\tsort(floors[i].begin(), floors[i].end());\n\t\t\tfor(int j = 1; j < floors[i].size(); j++)\n\t\t\t{\n\t\t\t\tadj[floors[i][j-1].second].push_back(mp(floors[i][j].second, (long long) x[i] * (floors[i][j].first - floors[i][j-1].first)));\n\t\t\t\tadj[floors[i][j].second].push_back(mp(floors[i][j-1].second, (long long) x[i] * (floors[i][j].first - floors[i][j-1].first)));\n\t\t\t}\n\t\t}\n\n\n\t\t/// ((aukstas, atstumas), id)\n\t\tpriority_queue<pair<pair<int, ll>, int>, vector<pair<pair<int, ll>, int> >, greater<pair<pair<int, ll>, int> > > pq;\n\n\t\tconst long long INF = 1e17;\n\t\tlong long dist[node.size()];\n\t\tbool visited[node.size()];\n\t\tfor(int i = 0; i < node.size(); i++)\n\t\t{\n\t\t\tdist[i] = INF;\n\t\t\tvisited[i] = false;\n\t\t}\n\n\t\tdist[0] = 0;\n\t\tpq.push(mp(mp(1, dist[0]), 0));\n\t\twhile(!pq.empty())\n\t\t{\n\t\t\tint g = pq.top().second;\n\t\t\tpq.pop();\n\n\t\t\tif(visited[g])\n\t\t\t\tcontinue;\n\t\t\tvisited[g] = true;\n\n\t\t\tfor(auto next : adj[g])\n\t\t\t{\n\t\t\t\tif(dist[next.first] > dist[g] + next.second)\n\t\t\t\t{\n\t\t\t\t\tdist[next.first] = dist[g] + next.second;\n\t\t\t\t\tpq.push(mp(mp(whichFloor[next.first], dist[next.first]), next.first)); \n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\tif(dist[1] == INF)\n\t\t\tcout << \"NO ESCAPE\\n\";\n\t\telse\n\t\t\tcout << dist[1] << \"\\n\";\n\t}\n\n\treturn 0;\n}"
+}

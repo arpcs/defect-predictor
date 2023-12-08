@@ -1,0 +1,39 @@
+{
+    "id": 149481814,
+    "contestId": 1627,
+    "creationTimeSeconds": 1647147872,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "jhkoh"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 156,
+    "memoryConsumedBytes": 27852800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\n#define int ll\r\ntypedef pair<ll, ll> pi;\r\ntypedef vector <int> vi;\r\ntypedef vector <pi> vpi;\r\ntypedef pair<pi, ll> pii;\r\ntypedef set <ll> si;\r\ntypedef long double ld;\r\n#define f first\r\n#define s second\r\n#define mp make_pair\r\n#define FOR(i,s,e) for(int i=s;i<=int(e);++i)\r\n#define DEC(i,s,e) for(int i=s;i>=int(e);--i)\r\n#define pb push_back\r\n#define all(x) (x).begin(), (x).end()\r\n#define lbd(x, y) lower_bound(all(x), y)\r\n#define ubd(x, y) upper_bound(all(x), y)\r\n#define aFOR(i,x) for (auto i: x)\r\n#define mem(x,i) memset(x,i,sizeof x)\r\n#define fast ios_base::sync_with_stdio(false),cin.tie(0),cout.tie(0)\r\n#define maxn 300010\r\n#define INF (ll)1e18\r\n#define MOD 1000000007\r\n#define getchar_unlocked _getchar_nolock\r\n\r\nint TC,N,M,K,X[maxn],A[maxn],B[maxn],C[maxn],D[maxn],H[maxn];\r\nint dp[maxn][2][2];\r\nvpi feet[maxn];\r\n\r\nint dpf(int i,int j, int k){\r\n\t// k is move left/right on floor\r\n\t//~ cerr << i << ' ' << j << ' ' << k << '\\n';\r\n\t\r\n\t\r\n\tif (dp[i][j][k] != -1) return dp[i][j][k];\r\n\tpi pos;\r\n\tif (j == 0) pos = pi(A[i], B[i]);\r\n\telse pos = pi(C[i], D[i]);\r\n\t\r\n\tif (pos.f == N){\r\n\t\tif (k == 1) return abs(pos.s - M) * X[pos.f];\r\n\t\telse return INF;\r\n\t}\r\n\t\r\n\tdp[i][j][k] = INF;\r\n\tif (k == 0){ //going left\r\n\t\tint le = lbd(feet[pos.f], pi(pos.s, -1)) - feet[pos.f].begin() - 1;\r\n\t\t\r\n\t\tif (0 <= le && le < (int)feet[pos.f].size()){\r\n\t\t\tle = feet[pos.f][le].s;\r\n\t\t\tdp[i][j][k] = min(dp[i][j][k], dpf(le, 0, 0) + abs(B[le] - pos.s) * X[pos.f]);\r\n\t\t}\r\n\t}else{ // going right\r\n\t\tint ri = ubd(feet[pos.f], pi(pos.s, -1)) - feet[pos.f].begin();\r\n\r\n\t\tif (0 <= ri && ri < (int)feet[pos.f].size()){\r\n\t\t\tri = feet[pos.f][ri].s;\r\n\t\t\tdp[i][j][k] = min(dp[i][j][k], dpf(ri, 0, 1) + abs(B[ri] - pos.s) * X[pos.f]);\r\n\t\t}\r\n\t}\r\n\t\r\n\t// going up\r\n\tint l = lbd(feet[pos.f], pi(pos.s, -1)) - feet[pos.f].begin();\r\n\tint r = ubd(feet[pos.f], pi(pos.s, INF)) - feet[pos.f].begin();\r\n\tFOR(idx,l,r-1){\r\n\t\tint x = feet[pos.f][idx].s;\r\n\t\tif (B[x] == pos.s) dp[i][j][k] = min({dp[i][j][k], dpf(x,1,0) - H[x], dpf(x,1,1) - H[x]});\r\n\t}\r\n\tFOR(x,l,r-1) if (B[x] == pos.s) dp[x][0][1] = dp[x][0][0] = dp[i][j][k];\r\n\t\r\n\treturn dp[i][j][k];\r\n}\r\nvoid solve(){\r\n\tcin >> N >> M >> K;\r\n\tFOR(i,1,N) cin >> X[i];\r\n\tFOR(i,1,N) feet[i].clear();\r\n\tFOR(i,1,K){\r\n\t\tcin >> A[i] >> B[i] >> C[i] >> D[i] >> H[i];\r\n\t\tfeet[A[i]].pb(pi(B[i], i));\r\n\t\t//~ end[C[i]].pb(pi(D[i], i));\r\n\t}\r\n\tFOR(i,1,N) sort(all(feet[i]));\r\n\tFOR(i,1,K) FOR(j,0,1) FOR(k,0,1) dp[i][j][k] = -1;\r\n\tint ans = INF;\r\n\t//~ cout << dpf(\r\n\tFOR(i,1,K) if (A[i] == 1){\r\n\t\tans = min({ans, dpf(i,0,0) + abs(B[i] - 1)*X[1], dpf(i,0,1) + abs(B[i] - 1)*X[1]});\r\n\t}\r\n\tif (ans == INF) cout << \"NO ESCAPE\\n\";\r\n\telse cout << ans << '\\n';\r\n}\r\nint32_t main() {\r\n    fast;\r\n    \r\n    cin >> TC;\r\n\twhile (TC--) solve();\r\n\t\t\r\n}\r\n"
+}

@@ -1,0 +1,39 @@
+{
+    "id": 225038144,
+    "contestId": 593,
+    "creationTimeSeconds": 1695625416,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 593,
+        "index": "D",
+        "name": "Happy Tree Party",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 593,
+        "members": [
+            {
+                "handle": "forgotmyhandle"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1446655500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 2714,
+    "memoryConsumedBytes": 52019200,
+    "source": "#include <iostream>\r\n#define int long long\r\nusing namespace std;\r\nconst int lim = 1000000000000000001ll;\r\nint head[400005], nxt[400005], to[400005], ew[400005], ecnt = 1;\r\nvoid add(int u, int v, int ww) { to[++ecnt] = v, nxt[ecnt] = head[u], head[u] = ecnt, ew[ecnt] = ww; }\r\nint n, m;\r\nint top[200005], son[200005], dep[200005], dfn[200005], sz[200005], f[200005], ncnt;\r\nint w[200005];\r\nint mp[400005];\r\nint mult(int x, int y) {\r\n    int z;\r\n    if (x > lim / y) \r\n        z = lim;\r\n    else \r\n        z = x * y;\r\n    return z;\r\n}\r\nstruct Segment_Tree {\r\n    int p[800005];\r\n    void Build(int o, int l, int r) {\r\n        if (l == r) {\r\n            p[o] = w[l];\r\n            return;\r\n        }\r\n        int mid = (l + r) >> 1;\r\n        Build(o << 1, l, mid);\r\n        Build(o << 1 | 1, mid + 1, r);\r\n        p[o] = mult(p[o << 1], p[o << 1 | 1]);\r\n    }\r\n    void Change(int o, int l, int r, int x, int y) {\r\n        if (l == r) {\r\n            p[o] = y;\r\n            return;\r\n        }\r\n        int mid = (l + r) >> 1;\r\n        if (x <= mid) \r\n            Change(o << 1, l, mid, x, y);\r\n        else \r\n            Change(o << 1 | 1, mid + 1, r, x, y);\r\n        p[o] = mult(p[o << 1], p[o << 1 | 1]);\r\n    }\r\n    int Query(int o, int l, int r, int L, int R) {\r\n        if (L <= l && r <= R) \r\n            return p[o];\r\n        int mid = (l + r) >> 1, ret = 1;\r\n        if (L <= mid) \r\n            ret = mult(ret, Query(o << 1, l, mid, L, R));\r\n        if (R > mid) \r\n            ret = mult(ret, Query(o << 1 | 1, mid + 1, r, L, R));\r\n        return ret;\r\n    }\r\n} seg;\r\nvoid dfs1(int x, int fa, int d) {\r\n    dep[x] = d;\r\n    f[x] = fa;\r\n    sz[x] = 1;\r\n    for (int i = head[x]; i; i = nxt[i]) {\r\n        int v = to[i];\r\n        if (v != fa) {\r\n            dfs1(v, x, d + 1);\r\n            sz[x] += sz[v];\r\n            if (sz[v] > sz[son[x]]) \r\n                son[x] = v;\r\n        }\r\n    }\r\n}\r\nvoid dfs2(int x, int t) {\r\n    top[x] = t;\r\n    dfn[x] = ++ncnt;\r\n    if (!son[x]) \r\n        return;\r\n    dfs2(son[x], t);\r\n    for (int i = head[x]; i; i = nxt[i]) {\r\n        int v = to[i];\r\n        if (v != f[x] && v != son[x]) \r\n            dfs2(v, v);\r\n    }\r\n}\r\nvoid dfs3(int x) {\r\n    for (int i = head[x]; i; i = nxt[i]) {\r\n        int v = to[i];\r\n        if (v != f[x]) {\r\n            w[dfn[mp[i >> 1] = v]] = ew[i];\r\n            dfs3(v);\r\n        }\r\n    }\r\n}\r\nint Query(int x, int y) {\r\n    int ret = 1;\r\n    while (top[x] != top[y]) {\r\n        if (dep[top[x]] < dep[top[y]]) \r\n            swap(x, y);\r\n        ret = mult(ret, seg.Query(1, 1, n, dfn[top[x]], dfn[x]));\r\n        x = f[top[x]];\r\n    }\r\n    if (dep[x] > dep[y]) \r\n        swap(x, y);\r\n    return mult(ret, x != y ? seg.Query(1, 1, n, dfn[x] + 1, dfn[y]) : 1);\r\n}\r\ninline void Change(int x, int y) { seg.Change(1, 1, n, dfn[x], y); }\r\nsigned main() {\r\n    cin >> n >> m;\r\n    for (int i = 1, u, v, ww; i < n; i++) {\r\n        cin >> u >> v >> ww;\r\n        add(u, v, ww);\r\n        add(v, u, ww);\r\n    }\r\n    w[1] = 1;\r\n    dfs1(1, 0, 1);\r\n    dfs2(1, 1);\r\n    dfs3(1);\r\n    seg.Build(1, 1, n);\r\n    while (m--) {\r\n        int op, a, b, c;\r\n        cin >> op;\r\n        if (op == 1) {\r\n            cin >> a >> b >> c;\r\n            cout << c / Query(a, b) << \"\\n\";\r\n        } else {\r\n            cin >> a >> b;\r\n            Change(mp[a], b);\r\n        }\r\n    }\r\n    return 0;\r\n}"
+}

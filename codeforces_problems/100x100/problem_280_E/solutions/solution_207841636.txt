@@ -1,0 +1,39 @@
+{
+    "id": 207841636,
+    "contestId": 280,
+    "creationTimeSeconds": 1685442528,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "321625uzki"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 101,
+    "timeConsumedMillis": 998,
+    "memoryConsumedBytes": 921600,
+    "source": "// LUOGU_RID: 111632474\n#include<cstdio>\r\n#include<algorithm>\r\nconst int N=6007;\r\ntypedef double ld;\r\nbool st;\r\nstruct fun{ld a,k,h;fun sft(int D)const{return {a,k+D,h};}};\r\nfun operator+(const fun&a,const fun&b)\r\n{\r\n\tfun r{a.a+b.a};r.k=(a.k*a.a+b.k*b.a)/r.a;\r\n\tr.h=a.k*a.k*a.a+b.k*b.k*b.a-r.k*r.k*r.a+a.h+b.h;\r\n\treturn r;\r\n}\r\nld cl(const fun&a,ld x){return a.a*(x-a.k)*(x-a.k)+a.h;}\r\nstruct dat{fun a[N*2];ld pos[N*2];int cnt,mnf;};\r\nvoid print(const dat&nw)\r\n{\r\n\tfor(int i=1;i<=nw.cnt;++i)\r\n\t\tprintf(\"[%lf %lf] %.2lf(x-%.2lf)^2+%.2lf(Lft=%lf Rft=%lf)\\n\",nw.pos[i-1],nw.pos[i],nw.a[i].a,nw.a[i].k,nw.a[i].h,\r\n\t\t\tcl(nw.a[i],nw.pos[i-1]),cl(nw.a[i],nw.pos[i]));\r\n\tprintf(\"Mnp=%d\\n\",nw.mnf);\r\n\tputs(\"f\");\r\n}\r\nld dst[N];\r\nvoid deal(dat&nw,const dat&ls,ld x,int D,int cT)\r\n{\r\n\tint k=ls.mnf;nw.pos[0]=ls.pos[0];\r\n\tif(ls.mnf>0&&ls.mnf<=ls.cnt)\r\n\t{\r\n\t\tfor(int i=1;i<=k;++i)nw.a[i]=ls.a[i]+(fun){1,x,0},nw.pos[i]=ls.pos[i];\r\n\t\tnw.pos[k]=ls.a[k].k;nw.a[k+1]=(fun){1,x,ls.a[k].h};nw.pos[k+1]=nw.pos[k]+D;\r\n\t\tfor(int i=k;i<=ls.cnt;++i)nw.a[i+2]=ls.a[i].sft(D)+(fun){1,x,0},nw.pos[i+2]=ls.pos[i]+D;\r\n\t\tnw.cnt=ls.cnt+2;dst[cT]=ls.a[k].k;\r\n\t}\r\n\telse if(ls.mnf<0)\r\n\t{\r\n\t\tint k=-ls.mnf;\r\n\t\tfor(int i=1;i<k;++i)nw.a[i]=ls.a[i]+(fun){1,x,0},nw.pos[i]=ls.pos[i];\r\n\t\tnw.a[k]=(fun){1,x,cl(ls.a[k],nw.pos[k-1])};nw.pos[k]=nw.pos[k-1]+D;\r\n\t\tfor(int i=k;i<=ls.cnt;++i)nw.a[i+1]=ls.a[i].sft(D)+(fun){1,x,0},nw.pos[i+1]=ls.pos[i]+D;\r\n\t\tnw.cnt=ls.cnt+1;dst[cT]=ls.pos[k-1];\r\n\t}\r\n\telse\r\n\t{\r\n\t\tfor(int i=1;i<=k;++i)nw.a[i]=ls.a[i]+(fun){1,x,0},nw.pos[i]=ls.pos[i];\r\n\t\tnw.cnt=ls.cnt;dst[cT]=1e200;\r\n\t}\r\n\tnw.mnf=-1;for(int i=1;i<=nw.cnt;++i)if(nw.pos[i-1]<=nw.a[i].k&&nw.a[i].k<=nw.pos[i])nw.mnf=i;\r\n\tfor(int i=1;i<=nw.cnt;++i)if(nw.a[i-1].k>=nw.pos[i-1]&&nw.a[i].k<=nw.pos[i-1])nw.mnf=-i;\r\n\tif(nw.mnf==-1&&nw.a[1].k>nw.pos[0])nw.mnf=nw.cnt+1;\r\n//\tprint(nw);\r\n}\r\nld ansp,res[N];\r\nld gmx(const dat&x,ld l,ld r)\r\n{\r\n\tld ans=1e200;\r\n\tfor(int i=1;i<=x.cnt;++i)if(l<=x.pos[i]&&r>=x.pos[i-1])\r\n\t{\r\n\t\tld L=std::max(l,x.pos[i-1]),R=std::min(r,x.pos[i]);\r\n\t\tif(cl(x.a[i],L)<=ans)ans=cl(x.a[i],L),ansp=L;\r\n\t\tif(cl(x.a[i],R)<=ans)ans=cl(x.a[i],R),ansp=R;\r\n\t\tif(L<=x.a[i].k&&x.a[i].k<=R)ans=x.a[i].h,ansp=x.a[i].k;\r\n\t}\r\n\treturn ans;\r\n}\r\ndat f[2];int x[N];\r\nbool ed;\r\nint main()\r\n{\r\n//\tprintf(\"%lf\\n\",(&st-&ed)/1024./1024);\r\n//\tfreopen(\"anxious.in\",\"r\",stdin);\r\n//\tfreopen(\"anxious.out\",\"w\",stdout);\r\n\tint n,m,a,d;scanf(\"%d%d%d%d\",&n,&m,&a,&d);d-=a;\r\n\tfor(int i=1;i<=n;++i)scanf(\"%d\",x+i),x[i]-=(i-1)*a;\r\n\tf[1].a[1]=(fun){1,x[1],0};\r\n\tf[1].cnt=f[1].mnf=1;f[1].pos[0]=1;f[1].pos[1]=m;\r\n\tfor(int i=2;i<=n;++i)deal(f[i&1],f[(i&1)^1],x[i],d,i);\r\n\tld ans=gmx(f[n&1],1,m-(n-1)*a);res[n]=ansp;\r\n\tfor(int i=n-1;i;--i)\r\n\t{\r\n\t\tif(dst[i+1]<=res[i+1]&&res[i+1]<=dst[i+1]+d)res[i]=dst[i+1];\r\n\t\telse res[i]=res[i+1]-(res[i+1]>=dst[i+1]?d:0);\r\n\t}\r\n\tfor(int i=1;i<=n;++i)printf(\"%lf \",res[i]+(i-1)*a);\r\n\tprintf(\"\\n%lf\",ans);\r\n\treturn 0;\r\n}"
+}

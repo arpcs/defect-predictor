@@ -1,0 +1,38 @@
+{
+    "id": 217416936,
+    "contestId": 487,
+    "creationTimeSeconds": 1691305688,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 487,
+        "index": "E",
+        "name": "Tourists",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 487,
+        "members": [
+            {
+                "handle": "juruo_qwq"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1416590400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 670,
+    "memoryConsumedBytes": 57958400,
+    "source": "// LUOGU_RID: 119317416\n// Problem: Tourists\r\n// URL: https://www.luogu.com.cn/problem/CF487E\r\n#include<bits/stdc++.h>\r\n#define endl '\\n'\r\nconst int inf = INT_MAX;\r\nconst int maxn = 4e5+100;\r\nusing namespace std;\r\nint n,m,q,w[maxn],ind,cnt;\r\nvector<int> g[maxn],T[maxn];\r\nmultiset<int> Set[maxn];\r\nint stk[maxn],p,dfn[maxn],low[maxn];\r\nvoid Tarjan(int u) {\r\n\tlow[u] = dfn[u] = ++ind;\r\n\tstk[++p] = u;\r\n\tfor (int v : g[u]) {\r\n\t\tif (!dfn[v]) {\r\n\t\t\tTarjan(v);\r\n\t\t\tlow[u] = std::min(low[u], low[v]);\r\n\t\t\tif (low[v] == dfn[u]) {\r\n\t\t\t\t++cnt;\r\n\t\t\t\tfor (int x = 0; x != v; --p) {\r\n\t\t\t\t\tx = stk[p];\r\n\t\t\t\t\tT[cnt].push_back(x);\r\n\t\t\t\t\tT[x].push_back(cnt);\r\n\t\t\t\t}\r\n\t\t\t\tT[cnt].push_back(u);\r\n\t\t\t\tT[u].push_back(cnt);\r\n\t\t\t}\r\n\t\t} else low[u] = std::min(low[u], dfn[v]);\r\n\t}\r\n}\r\nint son[maxn],dep[maxn],_fa[maxn],size[maxn];\r\nvoid dfs1(int u, int fa) {\r\n\t_fa[u] = fa, dep[u] = dep[fa] + 1, size[u] = 1;\r\n\tfor (int v : T[u]) if (v != fa) {\r\n\t\tdfs1(v, u);\r\n\t\tsize[u] += size[v];\r\n\t\tif (size[son[u]] < size[v]) son[u] = v;\r\n\t}\r\n}\r\nint top[maxn],idf[maxn],val[maxn];\r\nvoid dfs2(int u,int fa,int tp){\r\n\tdfn[u]=++ind,idf[ind]=u,top[u]=tp;\r\n\tif(son[u]) dfs2(son[u],u,tp);\r\n\tfor(int v:T[u]){\r\n\t\tif(v!=fa&&v!=son[u]) \r\n\t\t\tdfs2(v,u,v);\r\n\t}\r\n}\r\n#define ls i<<1\r\n#define rs i<<1|1\r\nvoid build(int i,int l,int r){\r\n\tif(l==r) {val[i]=w[idf[l]];return ;}\r\n\tint mid=(l+r)>>1;\r\n\tbuild(ls,l,mid);build(rs,mid+1,r);\r\n\tval[i]=min(val[ls],val[rs]);\r\n}\r\nint query(int i,int l,int r,int a,int b){\r\n\tif(r<a||l>b) return inf;\r\n\tif(a<=l&&b>=r) return val[i];\r\n\tint mid=(l+r)>>1;\r\n\treturn min(query(ls,l,mid,a,b),query(rs,mid+1,r,a,b));\r\n}\r\nvoid modify(int i,int l,int r,int p,int x){\r\n\tif(l==r) return val[i]=x,void();\r\n\tint mid=(l+r)>>1;\r\n\tif(p<=mid) modify(ls,l,mid,p,x);\r\n\telse modify(rs,mid+1,r,p,x);\r\n\tval[i]=min(val[ls],val[rs]);\r\n}\r\nsigned main(){\r\n    ios::sync_with_stdio(false);\r\n    cin >> n >> m >> q ;\r\n    for(int i=1;i<=n;++i) cin >> w[ i ] ;\r\n    cnt=n;\r\n    for(int i=1;i<=m;++i){\r\n    \tint u,v;cin >> u >> v ;\r\n    \tg[u].push_back(v);\r\n    \tg[v].push_back(u);\r\n    }\r\n    Tarjan(1);\r\n    dfs1(1,0);\r\n    ind=0;dfs2(1,0,1);\r\n    for(int i=1;i<=n;++i)\r\n    \tif(_fa[i]) Set[_fa[i]].insert(w[i]);\r\n    for(int i=n+1;i<=cnt;++i) \r\n    \tw[i]=*Set[i].begin();\r\n    build(1,1,cnt);\r\n    while(q--){\r\n    \tchar opt;int x,y;\r\n    \tcin >> opt >> x >> y; \r\n    \tif(opt=='A'){\r\n    \t\tint ans=inf;\r\n    \t\twhile(top[y]!=top[x]){\r\n    \t\t\tif(dep[top[x]]<dep[top[y]]) swap(x,y);\r\n    \t\t\tans=min(ans,query(1,1,cnt,dfn[top[x]],dfn[x]));\r\n    \t\t\tx=_fa[top[x]];\r\n    \t\t}\r\n    \t\tif(dep[x]>dep[y]) swap(x,y);\r\n    \t\tans=min(ans,query(1,1,cnt,dfn[x],dfn[y]));\r\n    \t\tif(x>n) ans=min(ans,w[_fa[x]]);\r\n    \t\tcout << ans << endl ;\r\n    \t}\r\n    \telse {\r\n    \t\tmodify(1,1,cnt,dfn[x],y);\r\n    \t\tif(_fa[x]){\r\n    \t\t\tint u=_fa[x];\r\n    \t\t\tSet[u].erase(Set[u].lower_bound(w[x]));\r\n    \t\t\tSet[u].insert(y);\r\n    \t\t\tif(w[u]!=*Set[u].begin()){\r\n    \t\t\t\tw[u]=*Set[u].begin();\r\n    \t\t\t\tmodify(1,1,cnt,dfn[u],w[u]);\r\n    \t\t\t}\r\n    \t\t}\r\n    \t\tw[x]=y;\r\n    \t}\r\n    }\r\n    return 0;\r\n}\r\n\r\n"
+}

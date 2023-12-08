@@ -1,0 +1,39 @@
+{
+    "id": 14770993,
+    "contestId": 280,
+    "creationTimeSeconds": 1449915406,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "140142"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 819200,
+    "source": "#include <stdio.h>\r\n#include <string.h>\r\n#include <algorithm>\r\n#define N 6100\r\n#define which(x) (ch[fa[x]][1]==x)\r\nusing namespace std;\r\nint m,a,b,X[N];\r\ndouble K[N],Y[N],ans;\r\nint fa[N<<1],ch[N<<1][2],tot,root;\r\ndouble lk[N<<1],lb[N<<1],rk[N<<1],rb[N<<1],covk[N<<1],covb[N<<1];\r\ndouble p[N<<1],covp[N<<1];\r\nvoid Pushdown(int x)\r\n{\r\n\tif(covp[x]!=0)\r\n\t{\r\n\t\tp[ch[x][0]]+=covp[x];\r\n\t\tp[ch[x][1]]+=covp[x];\r\n\t\tlb[ch[x][0]]-=lk[ch[x][0]]*covp[x];\r\n\t\trb[ch[x][0]]-=rk[ch[x][0]]*covp[x];\r\n\t\tlb[ch[x][1]]-=lk[ch[x][1]]*covp[x];\r\n\t\trb[ch[x][1]]-=rk[ch[x][1]]*covp[x];\r\n\t\tcovp[ch[x][0]]+=covp[x];\r\n\t\tcovp[ch[x][1]]+=covp[x];\r\n\t\tcovp[x]=0;\r\n\t}\r\n\tif(covk[x]!=0)\r\n\t{\r\n\t\tlk[ch[x][0]]+=covk[x];\r\n\t\tlk[ch[x][1]]+=covk[x];\r\n\t\trk[ch[x][0]]+=covk[x];\r\n\t\trk[ch[x][1]]+=covk[x];\r\n\t\tcovk[ch[x][0]]+=covk[x];\r\n\t\tcovk[ch[x][1]]+=covk[x];\r\n\t\tcovk[x]=0;\r\n\t}\r\n\tif(covb[x]!=0)\r\n\t{\r\n\t\tlb[ch[x][0]]+=covb[x];\r\n\t\tlb[ch[x][1]]+=covb[x];\r\n\t\trb[ch[x][0]]+=covb[x];\r\n\t\trb[ch[x][1]]+=covb[x];\r\n\t\tcovb[ch[x][0]]+=covb[x];\r\n\t\tcovb[ch[x][1]]+=covb[x];\r\n\t\tcovb[x]=0;\r\n\t}\r\n}\r\nvoid Rotate(int x)\r\n{\r\n\tint f=fa[x];\r\n\tbool k=which(x);\r\n\tch[f][k]=ch[x][!k];\r\n\tch[x][!k]=f;\r\n\tch[fa[f]][which(f)]=x;\r\n\tfa[ch[f][k]]=f;\r\n\tfa[x]=fa[f];\r\n\tfa[f]=x;\r\n}\r\nvoid down(int x)\r\n{\r\n\tif(fa[x])\tdown(fa[x]);\r\n\tPushdown(x);\r\n}\r\nvoid Splay(int x,int g)\r\n{\r\n\tdown(x);\r\n\twhile(fa[x]!=g)\r\n\t{\r\n\t\tint f=fa[x];\r\n\t\tif(fa[f]==g)\r\n\t\t{\r\n\t\t\tRotate(x);\r\n\t\t\tbreak;\r\n\t\t}\r\n\t\tif(which(f)^which(x))\r\n\t\t\tRotate(x);\r\n\t\telse\r\n\t\t\tRotate(f);\r\n\t\tRotate(x);\r\n\t}\r\n\tif(!g)\troot=x;\r\n}\r\nvoid find(int x,int &ret)\r\n{\r\n\tif(!x)\treturn ;\r\n\tif(rk[x]*p[x]+rb[x]<0)\r\n\t\tret=x;\r\n\tPushdown(x);\r\n\tif(lk[x]*p[x]+lb[x]>0)\r\n\t\tfind(ch[x][0],ret);\r\n\telse\r\n\t\tfind(ch[x][1],ret);\r\n}\r\nvoid getr(int x,int &ret)\r\n{\r\n\tif(!x)\treturn ;\r\n\tif(p[x]<=m&&(ret==0||p[ret]<p[x]))\r\n\t\tret=x;\r\n\tPushdown(x);\r\n\tif(p[ch[x][1]]<=m)\r\n\t\tgetr(ch[x][1],ret);\r\n\telse\r\n\t\tgetr(ch[x][0],ret);\r\n}\r\nvoid output(int i)\r\n{\r\n\tif(!i)\treturn ;\r\n\tPushdown(i);\r\n\tprintf(\"%d :%.2lf %.2lf %.2lf\\n\",i,p[i],-rb[i]/rk[i],rk[i]*p[i]+rb[i]);\r\n\toutput(ch[i][0]);\r\n\toutput(ch[i][1]);\r\n}\r\ndouble calc()\r\n{\r\n\tint x,y;\r\n\tdouble ret;\r\n//\toutput(root);\r\n\tfind(root,x=0);//Pushdown\r\n\tif(x)\r\n\t{\r\n\t\tSplay(x,0);\r\n\t\tfor(y=ch[x][1];ch[y][0];y=ch[y][0]);\r\n\t\tSplay(y,x);\r\n\t\tret=-rb[x]/rk[x];\r\n\t}\r\n\telse\r\n\t{\r\n\t\tSplay(x=1,0);\r\n\t\tfor(y=ch[x][1];ch[y][0];y=ch[y][0]);\r\n\t\tSplay(y,x);\r\n\t\tret=p[1];\r\n\t}\r\n//\tret=max(1.0,min(m+0.0,ret));\r\n\tint tx=++tot,ty=++tot;\r\n\trk[tx]=lk[ty]=rk[x];\r\n\trb[tx]=lb[ty]=rb[x];\r\n\tlk[tx]=rk[x];\r\n\tlb[tx]=rb[x];\r\n\trk[ty]=lk[y];\r\n\trb[ty]=lb[y];\r\n\tp[tx]=ret+a,p[ty]=ret+b;\r\n\tfa[tx]=y,ch[y][0]=tx;\r\n\tfa[ty]=tx,ch[tx][1]=ty;\r\n\tSplay(tx,0);\r\n\tSplay(ty,tx);\r\n\tp[ch[tx][0]]+=a;\r\n\tlb[ch[tx][0]]-=lk[ch[tx][0]]*a;\r\n\trb[ch[tx][0]]-=rk[ch[tx][0]]*a;\r\n\tcovp[ch[tx][0]]+=a;\r\n\tSplay(ty,0);\r\n\tSplay(tx,ty);\r\n\tp[ch[ty][1]]+=b;\r\n\tlb[ch[ty][0]]-=lk[ch[ty][0]]*b;\r\n\trb[ch[ty][0]]-=rk[ch[ty][0]]*b;\r\n\tcovp[ch[ty][1]]+=b;\r\n\t\r\n\tgetr(root,x=0);\r\n\tSplay(x,0);\r\n\tfor(y=ch[x][1];ch[y][0];y=ch[y][0]);\r\n\tSplay(y,x);\r\n\tch[y][0]=ch[y][1]=0;\r\n\tp[y]=m;\r\n\trk[y]=rb[y]=0;\r\n\treturn ret;\r\n}\r\nint main()\r\n{\r\n\tint n,i,j,k;\r\n\tscanf(\"%d%d%d%d\",&n,&m,&a,&b);\r\n\tfor(i=1;i<=n;i++)\r\n\t{\r\n\t\tscanf(\"%d\",X+i);\r\n\t}\r\n\ttot=2,root=1;\r\n\tfa[2]=1;ch[1][1]=2;\r\n\tp[1]=1,p[2]=m;\r\n\tfor(i=1;i<=n;i++)\r\n\t{\r\n\t\tlk[root]+=2;\r\n\t\tlb[root]-=2*X[i];\r\n\t\trk[root]+=2;\r\n\t\trb[root]-=2*X[i];\r\n\t\tcovk[root]+=2;\r\n\t\tcovb[root]-=2*X[i];\r\n\t\tK[i]=calc();\r\n\t}\r\n\tY[n]=K[n];\r\n\tans=(X[n]-Y[n])*(X[n]-Y[n]);\r\n\tfor(i=n-1;i>=1;i--)\r\n\t{\r\n\t\tif(Y[i+1]>K[i]+b)\r\n\t\t\tY[i]=Y[i+1]-b;\r\n\t\telse if(Y[i+1]<K[i]+a)\r\n\t\t\tY[i]=Y[i+1]-a;\r\n\t\telse\r\n\t\t\tY[i]=K[i];\r\n\t\tans+=(X[i]-Y[i])*(X[i]-Y[i]);\r\n\t}\r\n\tfor(i=1;i<=n;i++)\r\n\t\tprintf(\"%.6lf \",Y[i]);\r\n\tprintf(\"\\n%.6lf\\n\",ans);\r\n\treturn 0;\r\n}"
+}

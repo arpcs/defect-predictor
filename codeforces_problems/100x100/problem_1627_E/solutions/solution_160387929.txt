@@ -1,0 +1,39 @@
+{
+    "id": 160387929,
+    "contestId": 1627,
+    "creationTimeSeconds": 1655084514,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1627,
+        "index": "E",
+        "name": "Not Escaping",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "dp",
+            "implementation",
+            "shortest paths",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1627,
+        "members": [
+            {
+                "handle": "__TLEWA__"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642257300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 326,
+    "memoryConsumedBytes": 37888000,
+    "source": "#include <iostream>\r\n#include <cassert>\r\n#include <vector>\r\n#include <map>\r\n#include <algorithm>\r\n \r\nusing namespace std;  // too many things to use, i give up\r\n \r\n// https://codeforces.com/contest/1627/problem/E (sample omitted due to length)\r\nint main() {\r\n    std::ios::sync_with_stdio(false);\r\n    std::cin.tie(NULL);\r\n \r\n    int test_num;\r\n    cin >> test_num;\r\n    for (int t = 0; t < test_num; t++) {\r\n        int floor_num, room_num;\r\n        int ladder_num;\r\n \r\n        cin >> floor_num >> room_num >> ladder_num; // OK\r\n        vector<long long> floors(floor_num);\r\n        for (long long& f : floors) {\r\n            cin >> f;\r\n        }\r\n \r\n        vector<vector<int>> floor_starts(floor_num);\r\n        vector<vector<int>> floor_ends(floor_num);\r\n        map<pair<int, int>, vector<pair<pair<int, int>, int>>> ladders;\r\n        for (int l = 0; l < ladder_num; l++) {\r\n            int s_floor, s_room;\r\n            int e_floor, e_room;\r\n            int health;\r\n            cin >> s_floor >> s_room >> e_floor >> e_room >> health;\r\n            assert(s_floor < e_floor);\r\n \r\n            floor_starts[--s_floor].push_back(--s_room);\r\n            floor_ends[--e_floor].push_back(--e_room);\r\n            ladders[{s_floor, s_room}].push_back({{e_floor, e_room}, health});\r\n        }\r\n        floor_starts[floor_num - 1].push_back(room_num - 1);\r\n        floor_ends[0].push_back(0);\r\n \r\n        // cout << \"ladders done\" << endl;\r\n        \r\n        for (int f = 0; f < floor_num; f++) {\r\n            sort(floor_starts[f].begin(), floor_starts[f].end());\r\n            floor_starts[f].erase(unique(floor_starts[f].begin(), floor_starts[f].end()), end(floor_starts[f]));\r\n            sort(floor_ends[f].begin(), floor_ends[f].end());\r\n            floor_ends[f].erase(unique(floor_ends[f].begin(), floor_ends[f].end()), end(floor_ends[f]));\r\n        }\r\n \r\n        vector<map<int, long long>> min_cost(floor_num);\r\n        min_cost[0][0] = 0;\r\n        for (int f = 0; f < floor_num; f++) {\r\n            if (min_cost[f].empty()) {\r\n                continue;\r\n            }\r\n            vector<int> ends;\r\n            for (int e : floor_ends[f]) {\r\n                if (min_cost[f].count(e)) {\r\n                    ends.push_back(e);\r\n                }\r\n            } // OK\r\n            assert((int)ends.size() > 0);\r\n \r\n            vector<long long> pref_min(ends.size());\r\n            pref_min[0] = min_cost[f].at(ends.at(0));\r\n            for (int e = 1; e < (int)ends.size(); e++) {\r\n                pref_min[e] = std::min(\r\n                    min_cost[f].at(ends[e]),\r\n                    pref_min[e - 1] + floors[f] * (ends[e] - ends[e - 1])\r\n                );\r\n            }\r\n \r\n            vector<long long> suff_min(ends.size());\r\n            suff_min[(int)ends.size() - 1] = min_cost[f][ends[(int)ends.size() - 1]];\r\n            for (int e = (int)ends.size() - 2; e >= 0; e--) {\r\n                suff_min[e] = std::min(\r\n                    min_cost[f].at(ends[e]),\r\n                    suff_min[e + 1] + floors[f] * (ends[e + 1] - ends[e])\r\n                );\r\n            }\r\n            \r\n            int end_at = 0;\r\n            for (int s : floor_starts[f]) {\r\n                while (end_at < (int)ends.size() && ends.at(end_at) <= s) {\r\n                    end_at++;\r\n                }\r\n                \r\n                min_cost[f][s] = INT64_MAX;\r\n                if (end_at > 0) {\r\n                    min_cost[f][s] = \r\n                        pref_min[end_at - 1] + floors[f] * (s - ends[end_at - 1]);\r\n                }\r\n                if (end_at < (int)ends.size()) {\r\n                    min_cost[f][s] = std::min(\r\n                        min_cost[f][s],\r\n                        suff_min[end_at] + floors[f] * (ends[end_at] - s)\r\n                    );\r\n                }\r\n                \r\n                if (f != floor_num || s != room_num) {\r\n                    for (auto [next, hp] : ladders[{f, s}]) {\r\n                        if (!min_cost[next.first].count(next.second)) {\r\n                            min_cost[next.first][next.second] = INT64_MAX;\r\n                        }\r\n                        long long& dest = min_cost[next.first][next.second];\r\n                        dest = std::min(dest, min_cost[f][s] - hp);\r\n                    }\r\n                }\r\n            }\r\n        }\r\n \r\n        if (!min_cost[floor_num - 1].count(room_num - 1)) {\r\n            cout << \"NO ESCAPE\" << '\\n';\r\n        } else {\r\n            cout << min_cost[floor_num - 1][room_num - 1] << '\\n';\r\n        }\r\n    }\r\n}"
+}

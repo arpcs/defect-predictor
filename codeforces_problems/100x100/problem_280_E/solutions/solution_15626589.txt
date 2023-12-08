@@ -1,0 +1,39 @@
+{
+    "id": 15626589,
+    "contestId": 280,
+    "creationTimeSeconds": 1453975714,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "vjudge3"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 27648000,
+    "source": "#include <bits/stdc++.h>\n#define ls rt << 1\n#define rs rt << 1 | 1\n#define lson ls, l, m\n#define rson rs, m + 1, r\n#define pii pair <int, int>\n#define LL long long\n#define xx first\n#define yy second\nusing namespace std;\n\nconst int N = 100100, mod = 1e9 + 7;\n\nstruct P {\n    int vl, vr, vm, s, pl, pr, l, r;\n    P () {}\n    P (int p, int x) { pl = pr = l = r = p; s = vl = vr = vm = x; }\n};\n\nP add (P a, P b) {\n    P c;\n    if (a.vm >= b.vm) c = a;\n    else c = b;\n    if (c.vm < a.vr + b.vl) c.vm = a.vr + b.vl, c.l = a.pr, c.r = b.pl;\n    c.s = a.s + b.s;\n    if (a.vl >= b.vl + a.s) c.vl = a.vl, c.pl = a.pl;\n    else c.vl = b.vl + a.s, c.pl = b.pl;\n    if (b.vr >= a.vr + b.s) c.vr = b.vr, c.pr = b.pr;\n    else c.vr = a.vr + b.s, c.pr = a.pr;\n    return c;\n}\n\nP mx[N << 2], mn[N << 2];\nint lazy[N << 2], a[N];\n\nvoid up (int rt) {\n    mx[rt] = add (mx[ls], mx[rs]);\n    mn[rt] = add (mn[ls], mn[rs]);\n}\n\nvoid down (int rt) {\n    if (lazy[rt]) {\n        lazy[ls] ^= 1;\n        lazy[rs] ^= 1;\n        swap (mx[ls], mn[ls]);\n        swap (mx[rs], mn[rs]);\n        lazy[rt] = 0;\n    }\n}\n\nvoid build (int rt, int l, int r) {\n    if (l == r) {\n        mx[rt] = P (l, a[l]);\n        mn[rt] = P (l, -a[l]);\n        return;\n    }\n    int m = l + r >> 1;\n    build (lson);\n    build (rson);\n    up (rt);\n}\n\nvoid updata (int rt, int l, int r, int p, int x)  {\n    if (l == r) {\n        mx[rt] = P (p, x);\n        mn[rt] = P (p, -x);\n        return;\n    }\n    down (rt);\n    int m = l + r >> 1;\n    if (p <= m) updata (lson, p, x);\n    else updata (rson, p, x);\n    up (rt);\n}\n\nvoid rev (int rt, int l, int r, int tl, int tr) {\n    if (tl <= l && r <= tr) {\n        swap (mx[rt], mn[rt]);\n        lazy[rt] ^= 1;\n        return;\n    }\n    down (rt);\n    int m = l + r >> 1;\n    if (tl <= m) rev (lson, tl, tr);\n    if (m < tr) rev (rson, tl, tr);\n    up (rt);\n}\n\nP query (int rt, int l, int r, int tl, int tr) {\n//    cout << l << ' ' << r << ' ' << tl << ' ' << tr << endl;\n    if (tl <= l && r <= tr) {\n        return mx[rt];\n    }\n    down (rt);\n    int m = l + r >> 1;\n    if (tr <= m) return query (lson, tl, tr);\n    else if (m < tl) return query (rson, tl, tr);\n    else return add (query (lson, tl, m), query (rson, m + 1, tr));\n}\n\nint main () {\n//    freopen (\"out.txt\", \"r\", stdin);\n    int n, q;\n    cin >> n;\n    for (int i = 1; i <= n; i++) {\n        scanf (\"%d\", &a[i]);\n    }\n    build (1, 1, n);\n    cin >> q;\n    int k, l, r, x;\n    pii t[30];\n    while (q--) {\n        scanf (\"%d\", &k);\n        if (k) {\n            scanf (\"%d%d%d\", &l, &r, &x);\n            int res = 0, tn = 0;\n            for (int i = 1; i <= x; i++) {\n//                cout << l << ' ' << r << endl;\n                P tmp = query (1, 1, n, l, r);\n//                cout << i << endl;\n                if (tmp.vm > 0) {\n                    res += tmp.vm;\n                    t[++tn] = pii (tmp.l, tmp.r);\n//                    cout << tmp.l << ' ' << tmp.r << endl;\n                    rev (1, 1, n, tmp.l, tmp.r);\n                } else break;\n            }\n            printf (\"%d\\n\", res);\n            for (int i = 1; i <= tn; i++) rev (1, 1, n, t[i].xx, t[i].yy);\n        } else {\n            scanf (\"%d%d\", &l, &x);\n            updata (1, 1, n, l, x);\n        }\n    }\n}\n  \t\t\t\t\t \t\t\t\t\t\t \t  \t  \t\t\t\t\t \t  \t"
+}
