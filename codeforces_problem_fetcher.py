@@ -57,7 +57,7 @@ def get_problems(number_of_problems, number_of_solutions):
     #return response.json()["result"]["problems"][:number_of_problems]
 
 def get_all_solutions(contest_id, count):
-    url = f"https://codeforces.com/api/contest.status?contestId={contest_id}&from=1&count={count}"
+    url = f"https://codeforces.com/api/contest.status?contestId={contest_id}&from=1&count={max(1, count)}"
 
     max_attempts = 20
     attempts = 0

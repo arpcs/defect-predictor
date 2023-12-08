@@ -3,7 +3,10 @@ import json
 import openai
 import os
 
-api_key = "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"
+api_key = "api_key"
+with open("../../api_key.txt", 'r', encoding='utf-8') as file:
+    api_key = file.read()
+    
 client = openai.OpenAI(api_key = api_key)
 
 def get_request():
