@@ -1,0 +1,39 @@
+{
+    "id": 28442007,
+    "contestId": 827,
+    "creationTimeSeconds": 1499795078,
+    "relativeTimeSeconds": 3578,
+    "problem": {
+        "contestId": 827,
+        "index": "B",
+        "name": "High Load",
+        "type": "PROGRAMMING",
+        "points": 750.0,
+        "rating": 1800,
+        "tags": [
+            "constructive algorithms",
+            "greedy",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 827,
+        "members": [
+            {
+                "handle": "Tian.Xie"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "room": 13,
+        "startTimeSeconds": 1499791500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "PRETESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 1945600,
+    "source": "/********* SPLAY TEMPLATE **********/\r\n// Author: Xie Tian (SHUFE) \r\n// Comment: A sample version, Stableness and efficientness is not guaranteed!\r\n//          Copyright reserved.\r\n\r\ntemplate <class T>\r\nstruct TSplay;\r\n\r\ntemplate <class T>\r\nstruct TSplayNode {\r\n\tT Data;\r\n\tint Size;\r\n\tTSplayNode<T> *Father, *Left, *Right;\r\n\tTSplay<T> *Tree;\r\n\tTSplayNode<T> (TSplay<T> *_Tree, T _Data) { Tree = _Tree; Data = _Data; Size = 1; Father = Left = Right = 0; }\r\n\tvoid Update() {\r\n\t\tSize = 1;\r\n\t\tif (Left) Size += Left -> Size;\r\n\t\tif (Right) Size += Right -> Size;\r\n\t}\r\n\tvoid RightRotate() {\r\n\t\tTSplayNode<T> *P = Father;\r\n\t\tP -> Left = Right;\r\n\t\tif (Right) Right -> Father = P;\r\n\t\tFather = P -> Father;\r\n\t\tif (Father)\t{\r\n\t\t\tif (Father -> Left == P) Father -> Left = this;\telse Father -> Right = this;\r\n\t\t}\r\n\t\tP -> Father = this;\r\n\t\tRight = P;\r\n\t\tP -> Update();\r\n\t\tUpdate();\r\n\t}\r\n\tvoid LeftRotate() {\r\n\t\tTSplayNode<T> *P = Father;\r\n\t\tP -> Right = Left;\r\n\t\tif (Left) Left -> Father = P;\r\n\t\tFather = P -> Father;\r\n\t\tif (Father) {\r\n\t\t\tif (Father -> Left == P) Father -> Left = this; else Father -> Right = this;\r\n\t\t}\r\n\t\tP -> Father = this;\r\n\t\tLeft = P;\r\n\t\tP -> Update();\r\n\t\tUpdate();\r\n\t}\r\n\tvoid Splay(TSplayNode<T>* R = 0) {\r\n\t\twhile (Father != R) {\r\n\t\t\tif (Father -> Father == R) {\r\n\t\t\t\tif (Father -> Left == this) RightRotate(); else LeftRotate();\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t\tif (Father -> Father -> Left == Father) {\r\n\t\t\t\tif (Father -> Left == this) { Father -> RightRotate(); RightRotate(); }\r\n\t\t\t\telse { LeftRotate(); RightRotate(); }\r\n\t\t\t} else {\r\n\t\t\t\tif (Father -> Left == this) { RightRotate(); LeftRotate(); }\r\n\t\t\t\telse { Father -> LeftRotate(); LeftRotate(); }\r\n\t\t\t}\r\n\t\t}\r\n\t\tif (R == 0) Tree -> Root = this;\r\n\t}\r\n\tvoid Delete() {\r\n\t\tSplay();\r\n\t\tif (Left == 0) { Tree -> Root = Right; if (Tree -> Root) Tree -> Root -> Father = 0; return; }\r\n\t\tif (Right == 0) { Tree -> Root = Left; if (Tree -> Root) Tree -> Root -> Father = 0; return; }\r\n\t\tTSplayNode *i = Left -> Max();\r\n\t\tRight -> Father = Left;\r\n\t\tLeft -> Right = Right;\r\n\t\tLeft -> Father = 0;\r\n\t\tTree -> Root = Left;\r\n\t\tTree -> Root -> Update();\r\n\t\tdelete this;\r\n\t}\r\n\tTSplayNode<T>* Max() {\r\n\t\tTSplayNode<T> *i = this;\r\n\t\twhile (i -> Right) i = i -> Right;\r\n\t\ti -> Splay(this -> Father);\r\n\t\treturn i;\r\n\t}\r\n\tTSplayNode<T>* Min() {\r\n\t\tTSplayNode<T> *i = this;\r\n\t\twhile (i -> Left) i = i -> Left;\r\n\t\ti -> Splay(this -> Father);\r\n\t\treturn i;\r\n\t}\r\n\tint Rank() { // 1-based\r\n\t\tSplay();\r\n\t\treturn (Left) ? (Left -> Size + 1) : 1;\r\n\t}\r\n};\r\ntemplate <class T>\r\nstruct TSplay {\r\n\tTSplayNode<T>* Root;\r\n\tTSplay<T>() { Root = 0; }\r\n\tvoid ClearRecursion(TSplayNode<T>* R) {\r\n\t\tif (R != 0) {\r\n\t\t\tClearRecursion(R -> Left);\r\n\t\t\tClearRecursion(R -> Right);\r\n\t\t\tdelete R;\r\n\t\t}\r\n\t}\r\n\tvoid Clear() {\r\n\t\tClearRecursion(Root);\r\n\t\tRoot = 0;\r\n\t}\r\n\tTSplayNode<T>* Kth_Element(int k) { // 1-based\r\n\t\tTSplayNode<T> *i = Root;\r\n\t\twhile (1) {\r\n\t\t\tint LeftSize = 0;\r\n\t\t\tif (i -> Left) LeftSize = i -> Left -> Size;\r\n\t\t\tif (LeftSize + 1 == k) { i -> Splay(); return i; }\r\n\t\t\tif (LeftSize >= k) i = i -> Left;\r\n\t\t\telse { k -= LeftSize + 1; i = i -> Right; }\r\n\t\t}\r\n\t}\r\n\tint Lessthan(T x) {\r\n\t\tTSplayNode<T> *i = Root;\r\n\t\tint Ans = 0;\r\n\t\twhile (1) {\r\n\t\t\tif (i == 0) return Ans;\r\n\t\t\t\r\n\t\t\tint LeftSize = 0;\r\n\t\t\tif (i -> Left) LeftSize = i -> Left -> Size;\r\n\r\n\t\t\tif (i -> Data == x)\r\n\t\t\t{\r\n\t\t\t\tAns += LeftSize;\r\n\t\t\t\treturn Ans;\r\n\t\t\t}\r\n\t\t\tif (i -> Data < x)\r\n\t\t\t{\r\n\t\t\t\tAns += LeftSize + 1;\r\n\t\t\t\ti = i -> Right;\r\n\t\t\t}\r\n\t\t\telse\r\n\t\t\t\ti = i -> Left;\r\n\t\t}\r\n\t}\r\n\tTSplayNode<T>* Find(T Data) {\r\n\t\tif (Root == 0) return 0;\r\n\t\tTSplayNode<T> *i = Root;\r\n\t\twhile (1) {\r\n\t\t\tif (Data == i -> Data) return i;\r\n\t\t\tif (Data < i -> Data) {\r\n\t\t\t\tif (i -> Left == 0) return 0;\r\n\t\t\t\ti = i -> Left;\r\n\t\t\t} else {\r\n\t\t\t\tif (i -> Right == 0) return Root;\r\n\t\t\t\ti = i -> Right;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tTSplayNode<T>* Insert(T Data) {\r\n\t\tif (Root == 0) return Root = new TSplayNode<T>(this, Data);\r\n\t\tTSplayNode<T> *i = Root;\r\n\t\twhile (1) {\r\n\t\t\tif (Data < i -> Data) {\r\n\t\t\t\tif (i -> Left == 0) {\r\n\t\t\t\t\ti -> Left = new TSplayNode<T>(this, Data);\r\n\t\t\t\t\ti -> Left -> Father = i;\r\n\t\t\t\t\ti -> Left -> Splay();\r\n\t\t\t\t\treturn Root;\r\n\t\t\t\t}\r\n\t\t\t\ti = i -> Left;\r\n\t\t\t} else {\r\n\t\t\t\tif (i -> Right == 0) {\r\n\t\t\t\t\ti -> Right = new TSplayNode<T>(this, Data);\r\n\t\t\t\t\ti -> Right -> Father = i;\r\n\t\t\t\t\ti -> Right -> Splay();\r\n\t\t\t\t\treturn Root;\r\n\t\t\t\t}\r\n\t\t\t\ti = i -> Right;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n};\r\n\r\n/********* END OF SPLAY TEMPLATE **********/\r\n\r\n#include <cstdio>\r\n#include <cstring>\r\n#include <cstdlib>\r\n#include <set>\r\n#include <algorithm>\r\n\r\nusing namespace std;\r\n\r\nconst int MAXN = 100000 + 10;\r\n\r\nint n, k;\r\n\r\nvoid Work()\r\n{\r\n\tscanf(\"%d%d\", &n, &k);\r\n\tint r = n - k;\r\n\tif (r == 1)\r\n\t{\r\n\t\tprintf(\"2\\n\");\r\n\t\tfor (int i = 2; i <= n; i ++)\r\n\t\t\tprintf(\"1 %d\\n\", i);\r\n\t}\r\n\telse if (r == 2)\r\n\t{\r\n\t\tprintf(\"3\\n\");\r\n\t\tprintf(\"1 2\\n\");\r\n\t\tfor (int i = 3; i < n; i ++)\r\n\t\t\tprintf(\"1 %d\\n\", i);\r\n\t\tprintf(\"2 %d\\n\", n);\r\n\t}\r\n\telse\r\n\t{\r\n\t\tprintf(\"4\\n\");\r\n\t\tfor (int i = 2; i <= r; i ++)\r\n\t\t\tprintf(\"1 %d\\n\", i);\r\n\t\tint p = r + 1;\r\n\t\tfor (int i = 2; i <= r; i ++)\r\n\t\t\tprintf(\"%d %d\\n\", i, p ++);\r\n\t\twhile (p <= n)\r\n\t\t\tprintf(\"2 %d\\n\", p ++);\r\n\t}\r\n}\r\n\r\nint main()\r\n{\r\n\tWork();\r\n\treturn 0;\r\n}"
+}

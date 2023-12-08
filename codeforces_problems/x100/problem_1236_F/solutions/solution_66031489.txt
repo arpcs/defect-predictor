@@ -1,0 +1,38 @@
+{
+    "id": 66031489,
+    "contestId": 1236,
+    "creationTimeSeconds": 1575109128,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "ftiasch"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 389,
+    "memoryConsumedBytes": 27238400,
+    "source": "#include <bits/stdc++.h>\n\nconst int N = 500000;\nconst int MOD = 1e9 + 7;\n\nvoid add(int &x, int a) {\n  x += a;\n  if (x >= MOD) {\n    x -= MOD;\n  }\n}\n\nint two[N + 1], n, m, top, degree[N], sum, sum2, vsum[N], head[N], to[N << 1],\n    next[N << 1], depth[N], low[N], stack[N];\nbool used[N];\nstd::vector<std::vector<int>> cycles;\n\nvoid dfs(int u) {\n  low[u] = depth[u];\n  stack[top++] = u;\n  // printf(\"dfs %d: \", u + 1);\n  // for (int i = 0; i < top; ++ i) {\n  //   printf(\" %d\", stack[i] + 1);\n  // }\n  // puts(\"\");\n  for (int iterator = head[u]; ~iterator; iterator = next[iterator]) {\n    if (!used[iterator >> 1]) {\n      used[iterator >> 1] = true;\n      int v = to[iterator ^ 1];\n      if (~depth[v]) {\n        low[u] = std::min(low[u], depth[v]);\n      } else {\n        depth[v] = depth[u] + 1;\n        dfs(v);\n        low[u] = std::min(low[u], low[v]);\n        if (depth[u] == low[v]) {\n          int ptop = top;\n          while (stack[--top] != v) {}\n          int size = ptop - top + 1;\n          int *cycle = stack + top - 1;\n          add(sum, two[size]);\n          add(sum2, 1LL * two[size] * two[size] % MOD);\n          add(vsum[u], two[size]);\n          for (int i = 1; i < size; ++i) {\n            add(vsum[cycle[i]], two[size]);\n          }\n          cycles.emplace_back(cycle, cycle + size);\n          cycles.back()[0] = u;\n        } else if (depth[u] + 1 == low[v]) {\n          top--;\n        }\n      }\n    }\n  }\n}\n\nint main() {\n  two[0] = 1;\n  for (int i = 1; i <= N; ++i) {\n    two[i] = two[i - 1] * static_cast<long long>(5e8 + 4) % MOD;\n  }\n  while (scanf(\"%d%d\", &n, &m) == 2) {\n    memset(degree, 0, sizeof(degree));\n    memset(head, -1, sizeof(head));\n    for (int i = 0; i < m << 1; ++i) {\n      scanf(\"%d\", to + i);\n      degree[--to[i]]++;\n      next[i] = head[to[i]];\n      head[to[i]] = i;\n    }\n    memset(used, 0, sizeof(used));\n    memset(depth, -1, sizeof(depth));\n    memset(vsum, 0, sizeof(vsum));\n    top = sum = sum2 = depth[0] = 0;\n    cycles.clear();\n    dfs(0);\n    int result = 0;\n    // E[X] = E[V - E + C]\n    add(result, 1LL * n * two[1] % MOD);       // V\n    add(result, MOD - 1LL * m * two[2] % MOD); // E\n    add(result, sum);                          // C\n    result = MOD - 1LL * result * result % MOD;\n    add(result, (1LL * n * two[1] + n * (n - 1LL) % MOD * two[2]) % MOD); // V^2\n    long long aedges = 0;\n    for (int i = 0; i < n; ++i) {\n      aedges += degree[i] * (degree[i] - 1LL);\n      // -2*V*E\n      add(result, MOD - 1LL * degree[i] * two[1] % MOD);\n      add(result, MOD - 1LL * (m - degree[i]) * two[2] % MOD);\n    }\n    add(result, (1LL * m * two[2] + 1LL * aedges * two[3] +\n                 1LL * (m * (m - 1LL) - aedges) % MOD * two[4]) %\n                    MOD); // E^2\n    // C^2\n    add(result, (sum + 1LL * sum * sum + MOD - sum2) % MOD);\n    for (auto &&cycle : cycles) {\n      int s = cycle.size();\n      int t = two[s];\n      // +2*V*C\n      // add(result, 2LL * s * t % MOD);\n      add(result, 1LL * (n - s) * t % MOD);\n      // -2*E*C\n      // add(result, MOD - 2LL * s * t % MOD);\n      int aedges = -s;\n      for (int v : cycle) {\n        add(result, 1LL * (vsum[v] + MOD - t) * t % MOD); // C^2\n        aedges += degree[v];\n        // printf(\"%d \", v + 1);\n      }\n      // puts(\"\");\n      // -2*E*C\n      add(result, MOD - 1LL * (aedges - s) * t % MOD);\n      add(result, MOD - 1LL * (m - aedges) * t % MOD * two[1] % MOD);\n    }\n    printf(\"%d\\n\", result);\n  }\n}"
+}

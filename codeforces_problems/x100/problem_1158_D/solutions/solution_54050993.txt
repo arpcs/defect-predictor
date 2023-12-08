@@ -1,0 +1,38 @@
+{
+    "id": 54050993,
+    "contestId": 1158,
+    "creationTimeSeconds": 1557692298,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1158,
+        "index": "D",
+        "name": "Winding polygonal line",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "constructive algorithms",
+            "geometry",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1158,
+        "members": [
+            {
+                "handle": "norge"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1557671700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 75,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 512000,
+    "source": "#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define endl '\\n'\r\n\r\ntypedef long long ll;\r\ntypedef pair<int, int> pii;\r\n\r\nconst int N = 1e6 + 10;\r\n\r\ntypedef complex<ll> point;\r\n\r\nnamespace std\r\n{\r\n    bool operator <(const point &a, const point &b)\r\n    {\r\n        return real(a) != real(b) ? real(a) < real(b) : imag(a) < imag(b);\r\n    }\r\n}\r\n\r\nnamespace geometry {\r\n    #define NEXT(i) (((i) + 1) % n)\r\n\r\n    const double EPS = 1e-8;\r\n    const double oo = 1e12;\r\n\r\n    /*\t1. Types and operators\t*/\r\n\r\n    typedef vector<point> polygon;\r\n\r\n    /*\t2. Util methods\t*/\r\n    double dot(point a, point b) {\r\n        return real(conj(a) * b);\r\n    }\r\n\r\n    ll cross(point a, point b) {\r\n        return imag(conj(a) * b);\r\n    }\r\n\r\n    int ccw(point a, point b, point c) //Turn of a -> b -> c\r\n    {\r\n        b -= a;\r\n        c -= a;\r\n\r\n        if (cross(b, c) > 0)\r\n            return +1;    //counter clockwise\r\n\r\n        if (cross(b, c) < 0)\r\n            return -1;    //clockwise\r\n\r\n        if (dot(b, c) < 0)\r\n            return +2;        //c - a - b line\r\n\r\n        if (norm(b) < norm(c))\r\n            return -2;        //a - b - c line\r\n\r\n        return 0;\r\n    }\r\n\r\n    /*\t5. Convex Polygon\t*/\r\n    polygon convex_hull(polygon ps) {\r\n        int n = ps.size(), k = 0;\r\n        if (n == 1)\r\n            return ps;\r\n        sort(ps.begin(), ps.end());\r\n        polygon ch(2 * n);\r\n\r\n        for (int i = 0; i < n; ch[k++] = ps[i++]) // lower-hull\r\n            while (k >= 2 && ccw(ch[k - 2], ch[k - 1], ps[i]) <= 0)\r\n                --k;\r\n\r\n        for (int i = n - 2, t = k + 1; i >= 0; ch[k++] = ps[i--]) // upper-hull\r\n            while (k >= t && ccw(ch[k - 2], ch[k - 1], ps[i]) <= 0)\r\n                --k;\r\n\r\n        ch.resize(k - 1);\r\n        return ch;\r\n    }\r\n}\r\n\r\nusing geometry::polygon;\r\nusing geometry::convex_hull;\r\n\r\nmap<point, int> id;\r\n\r\nint get_pos(vector<point> &s, point x){\r\n    return find(s.begin(), s.end(), x) - s.begin();\r\n}\r\npoint nxt(vector<point> &s, int pos){\r\n    return s[(pos + 1) % (int)s.size()];\r\n}\r\n\r\npoint pre(vector<point> &s, int pos){\r\n    return s[(pos - 1 + s.size()) % (int)s.size()];\r\n}\r\n\r\nint main(){\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0);\r\n\r\n    int n;\r\n    cin >> n;\r\n    vector<point> s(n);\r\n    for(int i = 0; i < n; i++){\r\n        int x , y;\r\n        cin >> x >> y;\r\n        id[point(x , y)] = i + 1;\r\n        s[i] = point(x , y);\r\n    }\r\n\r\n    polygon p = convex_hull(s);\r\n    vector<point> ans(1 , p[0]);\r\n    string dir;cin >> dir;\r\n    point last = p[0];\r\n    for(int i = 0; i < dir.size(); i++) {\r\n        point foo;\r\n        if (dir[i] == 'L') {\r\n            foo = nxt(p, get_pos(p, last));\r\n        } else {\r\n            foo = pre(p, get_pos(p, last));\r\n        }\r\n        ans.push_back(foo);\r\n        int pos = get_pos(s, last);\r\n        s.erase(s.begin() + pos);\r\n        last = foo;\r\n        p = convex_hull(s);\r\n    }\r\n    int pos = get_pos(s, last);\r\n    s.erase(s.begin() + pos);\r\n    ans.push_back(s[0]);\r\n\r\n    for(auto v : ans){\r\n        cout << id[v] << \" \";\r\n    }\r\n    cout << endl;\r\n}"
+}

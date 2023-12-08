@@ -1,0 +1,38 @@
+{
+    "id": 67858134,
+    "contestId": 1236,
+    "creationTimeSeconds": 1577602646,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "vjudge3"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 826,
+    "memoryConsumedBytes": 39833600,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\n\n#define CO const\n#define IN inline\ntypedef long long LL;\ntypedef long double LD;\n\ntemplate<class T> T read(){\n\tT x=0,w=1;char c=getchar();\n\tfor(;!isdigit(c);c=getchar())if(c=='-') w=-w;\n\tfor(;isdigit(c);c=getchar()) x=x*10+c-'0';\n\treturn x*w;\n}\ntemplate<class T> IN T read(T&x){\n\treturn x=read<T>();\n}\n\nCO int mod=1e9+7;\nIN int add(int a,int b){\n\treturn (a+=b)>=mod?a-mod:a;\n}\nIN int sub(int a,int b){\n\treturn (a-=b)<0?a+mod:a;\n}\nIN int mul(int a,int b){\n\treturn (LL)a*b%mod;\n}\n\nCO int N=5e5+10;\nint n,m,pw[N];\nvector<int> to[N];\nint vis[N],stk[N],pos[N],idx;\nvector<vector<int> > cyc;\nvector<int> in[N];\n\nvoid dfs(int u,int fa){\n\tvis[u]=1,stk[++idx]=u,pos[u]=idx;\n\tfor(int v:to[u])if(v!=fa and vis[v]!=2){\n\t\tif(!vis[v]) dfs(v,u);\n\t\telse cyc.emplace_back(stk+pos[v],stk+idx+1);\n\t}\n\tvis[u]=2,--idx;\n}\n\nint ver(){\n\tint ans=mul(n,pw[1]); // coincide\n\tans=add(ans,mul(n,mul(n-1,pw[2]))); // disjoint\n\treturn ans;\n}\nint edge(){\n\tint ans=mul(m,pw[2]); // coincide\n\tfor(int u=1;u<=n;++u)\n\t\tfor(int v:to[u])if(u<v){\n\t\t\tint s1=m-to[u].size()-to[v].size()+1;\n\t\t\tint s2=to[u].size()+to[v].size()-2;\n\t\t\tans=add(ans,mul(s1,pw[4])); // disjoint\n\t\t\tans=add(ans,mul(s2,pw[3])); // intersect\n\t\t}\n\treturn ans;\n}\nint cycle(){\n\tint sum=0;\n\tfor(CO vector<int>&cir:cyc) sum=add(sum,pw[cir.size()]);\n\tint ans=0;\n\tfor(CO vector<int>&cir:cyc){\n\t\tint siz=cir.size(),val=sum;\n\t\tans=add(ans,pw[siz]); // coincide\n\t\tfor(int u:cir){\n\t\t\tfor(int c:in[u]) val=sub(val,pw[c]);\n\t\t\tval=add(val,pw[siz]); // subtract itself mistakenly, add back it\n\t\t}\n\t\tval=sub(val,pw[siz]);\n\t\tans=add(ans,mul(pw[siz],val)); // disjoint\n\t\tint ano=sub(sum,add(val,pw[siz]));\n\t\tans=add(ans,mul(ano,mul(2,pw[siz]))); // intersect\n\t}\n\treturn ans;\n}\nint veredge(){\n\tint ans=0;\n\tfor(int u=1;u<=n;++u){\n\t\tint s1=to[u].size();\n\t\tint s2=m-to[u].size();\n\t\tans=add(ans,mul(s1,pw[2])); // intersect\n\t\tans=add(ans,mul(s2,pw[3])); // disjoint\n\t}\n\treturn ans;\n}\nint vercycle(){\n\tint sum=0;\n\tfor(CO vector<int>&cir:cyc) sum=add(sum,pw[cir.size()]);\n\tint ans=0;\n\tfor(int u=1;u<=n;++u){\n\t\tint s=0;\n\t\tfor(int c:in[u]) s=add(s,pw[c]);\n\t\tans=add(ans,s); // coincide\n\t\tans=add(ans,mul(sub(sum,s),pw[1])); // disjoint\n\t}\n\treturn ans;\n}\nint edgecycle(){\n\tint ans=0;\n\tfor(CO vector<int>&cir:cyc){\n\t\tint siz=cir.size(),s=0;\n\t\tans=add(ans,mul(siz,pw[siz])); // coincide\n\t\tfor(int u:cir) s+=to[u].size()-2;\n\t\tans=add(ans,mul(s,pw[siz+1])); // intersect\n\t\tans=add(ans,mul(m-siz-s,pw[siz+2])); // disjoint\n\t}\n\treturn ans;\n}\nint calc1(){\n\tint s1=add(ver(),add(edge(),cycle()));\n\tint s2=sub(vercycle(),add(veredge(),edgecycle()));\n\treturn add(s1,mul(2,s2));\n}\n\nint calc2(){\n\tint ans=sub(mul(n,pw[1]),mul(m,pw[2]));\n\tfor(CO vector<int>&cir:cyc) ans=add(ans,pw[cir.size()]);\n\treturn mul(ans,ans);\n}\n\nint main(){\n\tread(n),read(m);\n\tpw[0]=1;\n\tfor(int i=1;i<=n;++i) pw[i]=mul(pw[i-1],5e8+4);\n\tfor(int i=1;i<=m;++i){\n\t\tint u=read<int>(),v=read<int>();\n\t\tto[u].push_back(v),to[v].push_back(u);\n\t}\n\tdfs(1,0);\n\tfor(CO vector<int>&cir:cyc)\n\t\tfor(int u:cir) in[u].push_back(cir.size());\n\tprintf(\"%d\\n\",sub(calc1(),calc2()));\n\treturn 0;\n}\n\n\t \t       \t \t  \t \t\t    \t  \t\t\t \t"
+}

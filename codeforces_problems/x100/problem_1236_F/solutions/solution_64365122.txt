@@ -1,0 +1,38 @@
+{
+    "id": 64365122,
+    "contestId": 1236,
+    "creationTimeSeconds": 1573044572,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "typhigh"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 1809,
+    "memoryConsumedBytes": 45875200,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long LL;\r\nconst int MAXN = 500010;\r\nconst int MOD = 1e9 + 7;\r\nconst LL inv2 = 5e8 + 4;\r\nvector<int> G[MAXN];\r\nint n, m, vis[MAXN];\r\nLL two[MAXN], inv[MAXN];\r\n\r\nvoid init() {\r\n    two[0] = inv[0] = 1;\r\n    for (int i = 1; i < MAXN; ++i) two[i] = two[i-1] * 2 % MOD, inv[i] = inv[i-1] * inv2 % MOD;\r\n}\r\n\r\nint st[MAXN], id[MAXN], p;\r\nvector<vector<int>> cirs;\r\nvector<int> in[MAXN];\r\n\r\nvoid DFS(int u, int fa) {\r\n    vis[u] = 1;\r\n    st[id[u] = ++p] = u;\r\n    for (int v : G[u]) {\r\n        if (v == fa) continue;\r\n        if (vis[v] == 2) continue;\r\n        if (vis[v]) {\r\n            vector<int> tmp;\r\n            for (int i = p; i >= id[v]; --i) tmp.push_back(st[i]);\r\n            cirs.push_back(tmp);\r\n        } else {\r\n            DFS(v, u);\r\n        }\r\n    }\r\n    vis[u] = 2;\r\n    st[p--] = 0;\r\n}\r\n\r\nLL sum(LL a, LL b) {\r\n//    a %= MOD;\r\n//    b %= MOD;\r\n    if (a + b >= MOD) return a + b - MOD;\r\n    return a + b;\r\n}\r\n\r\nLL sub(LL a, LL b) {\r\n    if (a > b) return a - b;\r\n    return a - b + MOD;\r\n}\r\n\r\nLL mul(LL a, LL b) {\r\n//    a %= MOD;\r\n//    b %= MOD;\r\n    return a * b % MOD;\r\n}\r\n\r\nLL Ver2() {\r\n    LL ret = sum(mul(mul(n, n-1), inv[2]), mul(n, inv[1]));\r\n//    cout << \"Ver2 \" << ret << endl;\r\n    return ret;\r\n}\r\n\r\nLL Edge2() {\r\n    LL ret = mul(m, inv[2]);\r\n    for (int x = 1; x <= n; ++x) {\r\n        for (int y : G[x]) {\r\n            if (x < y) continue;\r\n            int in = G[x].size() + G[y].size() - 2;\r\n            int out = m - in - 1;\r\n            ret = sum(ret, mul(in, inv[3]));\r\n            ret = sum(ret, mul(out, inv[4]));\r\n        }\r\n    }\r\n//    cout << \"Edge2 \" << ret << endl;\r\n    return ret;\r\n}\r\n\r\nLL Cir2() {\r\n    LL ret = 0, tmp = 0;\r\n    for (auto cir : cirs) tmp = sum(tmp, inv[cir.size()]);\r\n    for (auto cir : cirs) {\r\n        LL siz = cir.size(), val = tmp;\r\n        ret = sum(ret, inv[siz]);\r\n        for (int x: cir) {\r\n            for (int t: in[x]) val = sub(val, inv[t]);\r\n            val = sum(val, inv[siz]);\r\n        } \r\n        val = sub(val, inv[siz]);\r\n        ret = sum(ret, mul(inv[siz], val));\r\n        val = sub(sub(tmp, val), inv[siz]);\r\n        ret = sum(ret, mul(mul(inv[siz], 2), val));\r\n    } \r\n//    cout << \"Cir2 \" << ret << endl; \r\n    return ret;\r\n}\r\n\r\nLL VerEdge() {\r\n    LL ret = 0;\r\n    for (int x = 1; x <= n; ++x) {\r\n        int e = G[x].size();\r\n        ret = sum(ret, mul(e, inv[2]));\r\n        ret = sum(ret, mul(m-e, inv[3]));\r\n    }\r\n//    cout << \"VerEdge \" << ret << endl;\r\n    return ret;\r\n}\r\n\r\nLL VerCir() {\r\n    LL ret = 0, tmp = 0;\r\n    for (auto cir: cirs) tmp = sum(tmp, inv[cir.size()]);\r\n    for (int x = 1; x <= n; ++x) {\r\n        LL val = tmp;\r\n        for (int s: in[x]) val = sum(val, inv[s]);\r\n        ret = sum(ret, mul(val, inv[1]));\r\n    }\r\n//    cout << \"VerCir \" << ret << endl;\r\n    return ret;\r\n}\r\n\r\nLL EdgeCir() {\r\n    LL ret = 0;\r\n    for (auto cir : cirs) {\r\n        LL res = inv[cir.size()];\r\n        LL val = cir.size();\r\n        LL val2 = 0;\r\n        for (int x: cir) val2 += G[x].size() - 2;\r\n        LL val3 = m - val - val2;\r\n        LL tmp = sum(val, sum(mul(val2, inv[1]), mul(val3, inv[2])));\r\n        ret = sum(ret, mul(res, tmp)); \r\n    }\r\n//    cout << \"EdgeCir \" << ret << endl;\r\n    return ret;\r\n}\r\n\r\nLL calc1() {\r\n    LL ret = sum(Ver2(), sum(Edge2(), Cir2()));\r\n    LL res = sub(VerCir(), sum(VerEdge(), EdgeCir()));\r\n    res = mul(res, 2);\r\n    ret = sum(ret, res);\r\n    return ret;\r\n}\r\n\r\nLL calc2() {\r\n    LL ret = sub(mul(n, inv[1]), mul(m, inv[2]));\r\n    for (auto cir: cirs) ret = sum(ret, inv[cir.size()]);\r\n    ret = mul(ret, ret);\r\n//    cout << ret << endl;\r\n    return ret;\r\n}\r\n\r\nint main() {\r\n    init();\r\n    scanf(\"%d %d\", &n, &m);\r\n    for (int i = 0; i < m; ++i) {\r\n        int u, v;\r\n        scanf(\"%d %d\", &u, &v);\r\n        G[u].push_back(v);\r\n        G[v].push_back(u);\r\n    }\r\n    DFS(1, 0);    \r\n    for (auto &cir : cirs) for (int u: cir) in[u].push_back(cir.size());\r\n    LL ans = (calc1() - calc2() + MOD) % MOD;\r\n    cout << ans << endl;\r\n}"
+}

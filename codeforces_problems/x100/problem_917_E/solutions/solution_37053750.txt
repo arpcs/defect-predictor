@@ -1,0 +1,38 @@
+{
+    "id": 37053750,
+    "contestId": 917,
+    "creationTimeSeconds": 1523113000,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 917,
+        "index": "E",
+        "name": "Upside Down",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3400,
+        "tags": [
+            "data structures",
+            "string suffix structures",
+            "strings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 917,
+        "members": [
+            {
+                "handle": "scutvj_1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1517236500
+    },
+    "programmingLanguage": "MS C++",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 16,
+    "timeConsumedMillis": 530,
+    "memoryConsumedBytes": 16588800,
+    "source": "#include <iostream>\n#include<cstdio>\n#include<cstring>\n#include<string>\n#include<algorithm>\n#include<cmath>\n#include<vector>\n#include<cstdlib>\n#include<stack>\n#include<map>\n#include<stdio.h>\n#pragma warning(disable:4996)\nusing namespace std;\n#define ll long long\n#define sf scanf\n#define pf printf\nconst int maxn = 100005;\nint n, m;\nmap<int, int> tree;\nstruct edge {\n\tint v, next;\n\tchar ch;\n}e[maxn * 2];\nstruct query {\n\tint v;\n\tint next;\n\tint index;\n\tint k;\n\tbool to;\n}q[maxn * 2];\nint elen, qlen;\nint echild[maxn], qchild[maxn];\nchar si[maxn];\nint kk[maxn];\nint ans[maxn];\nbool vis[maxn];\nint fa[maxn];\nint qfa[maxn];\nchar ch[maxn];\nchar road[100005];\nchar load[100005];\nvoid addedge(int u, int v, char c) {\n\te[elen].v = v;\n\te[elen].next = echild[u];\n\te[elen].ch = c;\n\techild[u] = elen++;\n}\nvoid addquery(int u, int v, int index, int k, bool to) {\n\tq[qlen].v = v;\n\tq[qlen].index = index;\n\tq[qlen].next = qchild[u];\n\tq[qlen].k = k;\n\tq[qlen].to = to;\n\tqchild[u] = qlen++;\n}\nint dext[maxn];\nint kmp(int len, int d) {\n\tint ans = 0;\n\tint sl = 0;\n\tint j = 0, k = -1;\n\tchar s2[maxn];\n\tfor (int i = kk[d - 1] + 1; i <= kk[d]; i++)s2[sl++] = si[i];\n\ts2[sl] = '\\0';\n\tdext[0] = -1;\n\twhile (s2[j] != '\\0') {\n\t\twhile (k != -1 && s2[j] != s2[k])k = dext[k];\n\t\tj++;\n\t\tk++;\n\t\tif (s2[j] != s2[k])dext[j] = k;\n\t\telse dext[j] = dext[k];\n\t}\n\tint i = 0;\n\tj = 0;\n\tchar * s1 = road;\n\twhile (s1[i] != '\\0') {\n\t\tif (j != -1 && s2[j] == '\\0') {\n\t\t\tans++;\n\t\t\tj = 0;\n\t\t}\n\t\telse {\n\t\t\twhile (j != -1 && s1[i] != s2[j])\n\t\t\t\tj = dext[j];\n\t\t\ti++;\n\t\t\tj++;\n\n\t\t}\n\t}\n\tif (j != -1 && s2[j] == '\\0')ans++;\n\treturn ans;\n}\nint find(int x) {\n\treturn fa[x] == x ? x : fa[x] = find(fa[x]);\n}\nvoid tarjian(int rt, int qf) {\n\tvis[rt] = true;\n\tfa[rt] = rt;\n\tqfa[rt] = qf;\n\tfor (int i = qchild[rt]; i != -1; i = q[i].next) {\n\t\tint v = q[i].v;\n\t\tif (vis[v]) {\n\t\t\tint u = rt;\n\t\t\tint to = v;\n\t\t\tif (!q[i].to)swap(u, to);\n\t\t\tint cnt = 0;\n\t\t\tint fv = find(v);\n\t\t\twhile (u != fv) {\n\t\t\t\troad[cnt++] = ch[u];\n\t\t\t\tu = qfa[u];\n\t\t\t}\n\t\t\tint lnt = 0;\n\t\t\twhile (to != fv) {\n\t\t\t\tload[lnt++] = ch[to];\n\t\t\t\tto = qfa[to];\n\t\t\t}\n\t\t\tfor (int j = lnt - 1; j >= 0; j--) {\n\t\t\t\troad[cnt++] = load[j];\n\t\t\t}\n\t\t\troad[cnt] = '\\0';\n\t\t\tans[q[i].index] = kmp(cnt, q[i].k);\n\t\t}\n\t}\n\tfor (int i = echild[rt]; i != -1; i = e[i].next) {\n\t\tif (!vis[e[i].v]) {\n\t\t\tch[e[i].v] = e[i].ch;\n\t\t\ttarjian(e[i].v, rt);\n\t\t\tfa[e[i].v] = rt;\n\t\t}\n\t}\n}\nvoid init() {\n\telen = qlen = 0;\n\tmemset(echild, -1, sizeof(echild));\n\tmemset(qchild, -1, sizeof(qchild));\n\tmemset(vis, false, sizeof(vis));\n}\nint Q;\nvoid read() {\n\tint cnt = 0;\n\tkk[0] = -1;\n\tfor (int i = 1; i <= m; i++) {\n\t\tchar c = getchar();\n\t\twhile (c != '\\n') {\n\t\t\tkk[i] = cnt;\n\t\t\tsi[cnt] = c;\n\t\t\tcnt++;\n\t\t\tc = getchar();\n\t\t}\n\t}\n}\nint main()\n{\n\t//freopen(\"in.txt\", \"r\", stdin);\n\t//freopen(\"out.txt\", \"w\", stdout);\n\n\tsf(\"%d%d%d\", &n, &m, &Q);\n\tinit();\n\tint cnt = 0;\n\tfor (int i = 0; i < n - 1; i++) {\n\t\tint u, v;\n\t\tchar c;\n\t\tsf(\"%d%d\", &u, &v);\n\t\tif (!tree.count(u))tree[u] = ++cnt;\n\t\tu = tree[u];\n\t\tif (!tree.count(v))tree[v] = ++cnt;\n\t\tv = tree[v];\n\t\tgetchar();\n\t\tc = getchar();\n\t\taddedge(u, v, c);\n\t\taddedge(v, u, c);\n\t}\n\tgetchar();\n\tread();\n\tfor (int i = 0; i < Q; i++) {\n\t\tint x, y, k;\n\t\tsf(\"%d%d%d\", &x, &y, &k);\n\t\taddquery(tree[x], tree[y], i, k, true);\n\t\taddquery(tree[y], tree[x], i, k, false);\n\t}\n\ttarjian(1, 1);\n\tfor (int i = 0; i < Q; i++) {\n\t\tpf(\"%d\\n\", ans[i]);\n\t}\n}\n/**\n  *https://acm.scut.space/\n  *Job ID:6999\n  *Time: 1523113031\n**/"
+}

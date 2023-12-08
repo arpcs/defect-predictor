@@ -1,0 +1,37 @@
+{
+    "id": 4545643,
+    "contestId": 346,
+    "creationTimeSeconds": 1379975335,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 346,
+        "index": "D",
+        "name": "Robot Control",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2600,
+        "tags": [
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 346,
+        "members": [
+            {
+                "handle": "pompon"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1379691000
+    },
+    "programmingLanguage": "GNU C++0x",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 66252800,
+    "source": "#include <cstdio>\n#include <vector>\n#include <cstring>\n#include <algorithm>\n#include <random>\n\n#define REP(i,n) for(int i=0; i<(n); ++i)\n#define FOR(i,p,k) for(int i=(p); i<=(k); ++i)\n\ntemplate<typename T> void checkmin(T &a, T b){ if(a>b) a = b; }\ntemplate<typename T> void checkmax(T &a, T b){ if(a<b) a = b; }\n\nenum\n{\n  n_max = 1100000,\n  INF = 10 * n_max\n};\n\nstd::vector<int> G[n_max];\nstd::vector<int> Gt[n_max];\nstd::vector<int> Lr[n_max];\n\nint deg[n_max];\nint Q[n_max],qf,ql;\nint R[n_max],L[n_max],H[n_max];\nint Lri[n_max];\n\nvoid drop_L(int v)\n{\n  if(L[v]!=INF)\n  {\n    auto &r = Lr[L[v]];\n    std::swap(Lri[r.back()],Lri[v]);\n    std::swap(r.back(),r[Lri[v]]);\n    r.pop_back();\n  }\n}\n\nvoid set_L(int v, int l)\n{\n  drop_L(v);\n  L[v] = l;\n  Lri[v] = Lr[l].size();\n  Lr[l].push_back(v); \n}\n\nvoid solve(int n, int m, int s, int t)\n{\n  REP(i,n) deg[i] = G[i].size();\n  REP(i,n) Lr[i].clear();\n  memset(R,-1,sizeof R);\n  memset(H,0,sizeof H);\n  REP(i,n) L[i] = INF;\n\n  int x = 0;\n  R[t] = 0;\n  Q[ql++] = t;\n  while(1)\n  {\n    while(qf<ql)\n    {\n      //printf(\"Q = [\"); FOR(i,qf,ql-1) printf(\"%d \",Q[i]); puts(\"]\");\n      int v = Q[qf++];\n      for(auto u : Gt[v]) if(R[u]==-1)\n      {\n        if(L[u]>R[v]) set_L(u,R[v]);\n        checkmax(H[u],R[v]);\n        if(!--deg[u])\n        {\n          R[u] = L[u]<H[u] ? L[u]+1 : L[u];\n          Q[ql++] = u;\n          drop_L(u);\n        }\n      }\n    }\n    while(x<n && !Lr[x].size()) x++;\n    if(x==n) break;\n    int u = Lr[x].back();\n    drop_L(u);\n    R[u] = L[u]+1;\n    Q[ql++] = u;\n  }\n}\n\nint main()\n{\n  int n,m; scanf(\"%d%d\",&n,&m);\n  REP(i,m)\n  {\n    int a,b; scanf(\"%d%d\",&a,&b);\n    G[a-1].push_back(b-1);\n    Gt[b-1].push_back(a-1);\n  }\n  int s,t; scanf(\"%d%d\",&s,&t); s--; t--;\n  solve(n,m,s,t);\n  printf(\"%d\\n\",R[s]);\n  /*std::mt19937 random(67283);\n  REP(i,1000)\n  {\n    int n = 5, m = 0, s = 0, t = n-1;\n    REP(i,n){ G[i].clear(); Gt[i].clear(); }\n    REP(i,n) REP(j,n) if(i!=j && !(random()%3))\n    {\n      G[i].push_back(j);\n      Gt[j].push_back(i);\n      m++;\n      printf(\"%d %d\\n\",i,j);\n    }\n    solve(n,m,s,t);\n    printf(\"%d\\n\",R[s]);\n  }*/\n  return 0;\n}\n"
+}

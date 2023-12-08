@@ -1,0 +1,37 @@
+{
+    "id": 98219955,
+    "contestId": 1431,
+    "creationTimeSeconds": 1605199249,
+    "relativeTimeSeconds": 7549,
+    "problem": {
+        "contestId": 1431,
+        "index": "H",
+        "name": "Rogue-like Game",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "*special",
+            "brute force",
+            "greedy",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1431,
+        "members": [
+            {
+                "handle": "shilov"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1605191700
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 109,
+    "memoryConsumedBytes": 0,
+    "source": "import java.util.*\r\n\r\nprivate class H {\r\n    fun solve() {\r\n        val n = nextInt()\r\n        val m = nextInt()\r\n        val k = nextInt()\r\n        val a = nextLongArray(n)\r\n        val b = nextLongArray(m)\r\n        val c = nextLongArray(n, m)\r\n        val bunchUse = simulate(a, b, c)\r\n        var bestBunch: BunchUse? = null\r\n        val bunchQueue = LinkedList<BunchUse>()\r\n        val sum = LongArray(bunchUse.size) { 0L }\r\n        sum[0] = bunchUse[0].count\r\n        for (i in bunchUse.size - 1 downTo 1) {\r\n            bunchUse[i - 1].count += bunchUse[i].count\r\n        }\r\n        bunchUse.forEach {\r\n            while (!bunchQueue.isEmpty()) {\r\n                val cur = bunchQueue.peekFirst()\r\n                val curCount = cur.count - it.count\r\n                if (c[it.cl][it.r] - c[cur.cl][cur.r] <= k) {\r\n                    break\r\n                }\r\n                bunchQueue.pollFirst()\r\n                if (bestBunch == null || bestBunch!!.count < curCount) {\r\n                    bestBunch = BunchUse(cur.cl, cur.r, curCount)\r\n                }\r\n            }\r\n            bunchQueue.addLast(it)\r\n        }\r\n        while (!bunchQueue.isEmpty()) {\r\n            val cur = bunchQueue.pollFirst()\r\n            if (bestBunch == null || bestBunch!!.count < cur.count) {\r\n                bestBunch = cur\r\n            }\r\n        }\r\n        c[bestBunch!!.cl][bestBunch!!.r] = c[bestBunch!!.cl][bestBunch!!.r] + k\r\n        val res = simulate(a, b, c).map { it.count }\r\n                .sum()\r\n        println(res)\r\n    }\r\n\r\n    fun simulate(a: LongArray, b: LongArray, c: Array<LongArray>): List<BunchUse> {\r\n        var i = 0\r\n        var j = 0\r\n        val unlockedA = BooleanArray(a.size) { false }\r\n        val unlockedB = BooleanArray(b.size) { false }\r\n        var points = 0L\r\n        var currentBunch: BunchUse? = null\r\n        var currentPower = 0L\r\n        val bunches = mutableListOf<BunchUse>()\r\n        while (i < a.size && j < b.size) {\r\n            while (i < a.size && a[i] <= points) {\r\n                unlockedA[i] = true\r\n                for (x in b.indices) {\r\n                    if (unlockedB[x] && c[i][x] > currentPower) {\r\n                        currentPower = c[i][x]\r\n                        currentBunch = BunchUse(i, x)\r\n                        bunches.add(currentBunch)\r\n                    }\r\n                }\r\n                i++\r\n            }\r\n            while (j < b.size && b[j] <= points) {\r\n                unlockedB[j] = true\r\n                for (x in a.indices) {\r\n                    if (unlockedA[x] && c[x][j] > currentPower) {\r\n                        currentPower = c[x][j]\r\n                        currentBunch = BunchUse(x, j)\r\n                        bunches.add(currentBunch)\r\n                    }\r\n                }\r\n                j++\r\n            }\r\n            if (i == a.size && j == b.size) {\r\n                break\r\n            }\r\n            var next = 1000000000000000L\r\n            if (i < a.size) {\r\n                next = a[i]\r\n            }\r\n            if (j < b.size && next > b[j]) {\r\n                next = b[j]\r\n            }\r\n            val steps = (next - 1 - points) / currentPower + 1\r\n            currentBunch!!.count += steps\r\n            points += steps * currentPower\r\n        }\r\n        return bunches.filter { it.count != 0L }\r\n    }\r\n\r\n    data class BunchUse(val cl: Int, val r: Int, var count: Long = 0)\r\n\r\n    var tokenBuffer = listOf<String>()\r\n    var bufferPosition = 0\r\n\r\n    private fun checkBuffer() {\r\n        if (bufferPosition == tokenBuffer.size) {\r\n            tokenBuffer = nextLine().split(\" \")\r\n            bufferPosition = 0\r\n        }\r\n    }\r\n\r\n    fun nextLine() = readLine()!!\r\n    fun nextInt(): Int {\r\n        checkBuffer()\r\n        return tokenBuffer[bufferPosition++].toInt()\r\n    }\r\n\r\n    fun nextLong(): Long {\r\n        checkBuffer()\r\n        return tokenBuffer[bufferPosition++].toLong()\r\n    }\r\n\r\n    fun nextDouble(): Double {\r\n        checkBuffer()\r\n        return tokenBuffer[bufferPosition++].toDouble()\r\n    }\r\n\r\n    fun nextToken(): String {\r\n        checkBuffer()\r\n        return tokenBuffer[bufferPosition++]\r\n    }\r\n\r\n    fun nextIntArray(n: Int): IntArray = IntArray(n) { nextInt() }\r\n\r\n    fun nextIntArray(n: Int, m: Int): Array<IntArray> = Array(n) { IntArray(m) { nextInt() } }\r\n\r\n    fun nextDoubleArray(n: Int): DoubleArray = DoubleArray(n) { nextDouble() }\r\n\r\n    fun nextDoubleArray(n: Int, m: Int): Array<DoubleArray> = Array(n) { DoubleArray(m) { nextDouble() } }\r\n\r\n    fun nextLongArray(n: Int): LongArray = LongArray(n) { nextLong() }\r\n\r\n    fun nextLongArray(n: Int, m: Int): Array<LongArray> = Array(n) { LongArray(m) { nextLong() } }\r\n}\r\n\r\nfun main() {\r\n    val reader = H().solve()\r\n\r\n}\r\n"
+}

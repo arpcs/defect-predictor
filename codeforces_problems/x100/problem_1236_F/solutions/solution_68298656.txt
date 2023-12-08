@@ -1,0 +1,38 @@
+{
+    "id": 68298656,
+    "contestId": 1236,
+    "creationTimeSeconds": 1578286880,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "Shrich"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 233,
+    "memoryConsumedBytes": 84172800,
+    "source": "#include<iostream>\r\n#include<cstdio>\r\n#include<vector>\r\n#define maxn 1000010\r\n#define ll long long\r\n#define mod 1000000007\r\nusing namespace std;\r\nint n,m,x,y,cnt=0,top=0,tot=0,head[maxn],vis[maxn],stc[maxn],siz[maxn],cs[maxn],val[maxn],sumval[maxn];\r\nll suminv=0,inv[maxn],vs[maxn];\r\nvector<int>vec[maxn];\r\nvector<int>cir[maxn];\r\nstruct Edge{\r\n\tint v,nxt;\r\n}e[maxn<<1];\r\ninline void addEdge(int u,int v){\r\n\te[++cnt].v=v;\r\n\te[cnt].nxt=head[u];\r\n\thead[u]=cnt;\r\n}\r\nvoid dfs(int u,int fa){\r\n\tvis[u]=1;\r\n\tstc[++top]=u;\r\n\tfor(register int i=head[u];i;i=e[i].nxt){\r\n\t\tif(e[i].v==fa||vis[e[i].v]==2)continue;\r\n\t\tif(vis[e[i].v]==1){\r\n\t\t\tint res=top;\r\n\t\t\ttot++;\r\n\t\t\twhile(stc[res+1]!=e[i].v){\r\n\t\t\t\tsiz[tot]++;\r\n\t\t\t\tcir[tot].push_back(stc[res]);\r\n\t\t\t\tvec[stc[res]].push_back(tot);\r\n\t\t\t\tres--;\r\n\t\t\t}\r\n\t\t}\r\n\t\telse dfs(e[i].v,u);\r\n\t}\r\n\tvis[u]=2;top--;\r\n}\r\ninline ll CxC(){\r\n\tll res=0;\r\n\tfor(register int i=1;i<=tot;i++){\r\n\t\tres=(res+(inv[siz[i]]+inv[siz[i]-1]*vs[i]%mod+inv[siz[i]]*(suminv-vs[i]-inv[siz[i]])%mod)%mod)%mod;\r\n\t}\r\n\treturn res;\r\n}\r\ninline ll CxE(){\r\n\tll res=0;\r\n\tfor(register int i=1;i<=tot;i++){\r\n\t\tres=(res+(1ll*siz[i]*inv[siz[i]]%mod+1ll*sumval[i]*inv[siz[i]+1]%mod+(1ll*m-siz[i]-sumval[i])*inv[siz[i]+2]%mod)%mod)%mod;\r\n\t}\r\n\treturn 2ll*res%mod;\r\n}\r\ninline ll CxV(){\r\n\tll res=0;\r\n\tfor(register int i=1;i<=tot;i++)res=(res+(1ll*siz[i]*inv[siz[i]]%mod+1ll*(n-siz[i])*inv[siz[i]+1]%mod)%mod)%mod;\r\n\treturn 2ll*res%mod;\r\n}\r\ninline ll solve(){\r\n\tll ans=1ll*n*inv[1]%mod-1ll*m*inv[2]%mod;\r\n\tfor(register int i=1;i<=tot;i++)ans=(ans+inv[siz[i]])%mod;\r\n\tans=mod-(ans*ans%mod);\r\n\tans=(ans+(1ll*n*inv[1]%mod+1ll*n*(n-1)%mod*inv[2]%mod)%mod)%mod;\r\n\t//cout<<(1ll*n*inv[1]%mod+1ll*n*(n-1)%mod*inv[2]%mod)%mod<<endl;\r\n\tll res=0;\r\n\tfor(register int i=1;i<=n;i++)res+=1ll*val[i]*(val[i]-1)%mod;\r\n\tres%=mod;\r\n\tans=(ans+(1ll*m*inv[2]%mod+res*inv[3]%mod+(1ll*(m-1)*m-res)%mod*inv[4]%mod)%mod)%mod;\r\n\t//cout<<(1ll*m*inv[2]%mod+res*inv[3]%mod+(1ll*(m-1)*m-res)%mod*inv[4]%mod)%mod<<endl;\r\n\tans=(ans+CxC())%mod;\r\n\t//cout<<CxC()<<endl;\r\n\tans=(ans-(2ll*m*inv[2]%mod+(1ll*(n-2)*m%mod)%mod*inv[3]%mod)%mod*2ll%mod)%mod;\r\n\t//cout<<2ll*(2ll*m*inv[2]%mod+(1ll*(n-2)*m%mod)%mod*inv[3]%mod)%mod<<endl;\r\n\tans=(ans+CxV())%mod;\r\n\t//cout<<CxV()<<endl;\r\n\tans=(ans-CxE())%mod;\r\n\t//cout<<CxE()<<endl;\r\n\treturn (ans%mod+mod)%mod;\r\n}\r\nint main(){\r\n\t//freopen(\"testdata.in\",\"r\",stdin);\r\n\tscanf(\"%d%d\",&n,&m);\r\n\tinv[1]=500000004;\r\n\tfor(register int i=2;i<=n;i++)inv[i]=inv[i-1]*inv[1]%mod;\r\n\tfor(register int i=1;i<=m;i++){\r\n\t\tscanf(\"%d%d\",&x,&y);\r\n\t\taddEdge(x,y);\r\n\t\taddEdge(y,x);\r\n\t\tval[x]++;\r\n\t\tval[y]++;\r\n\t}\r\n\tdfs(1,0);\r\n\tfor(register int i=1;i<=tot;i++){\r\n\t\tint sz=cir[i].size();\r\n\t\tsuminv=(suminv+inv[siz[i]])%mod;\r\n\t\tfor(register int j=0;j<sz;j++){\r\n\t\t\tsumval[tot]+=val[cir[i][j]];\r\n\t\t\tif(vec[cir[i][j]].size()>1){\r\n\t\t\t\tint now=cir[i][j];\r\n\t\t\t\tint sz2=vec[now].size();\r\n\t\t\t\tfor(register int k=0;k<sz2;k++){\r\n\t\t\t\t\tif(vec[now][k]!=i){\r\n\t\t\t\t\t\tcs[i]++;\r\n\t\t\t\t\t\tvs[i]=(vs[i]+inv[siz[vec[now][k]]])%mod;\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tsumval[tot]-=2*siz[tot];\r\n\t}\r\n\t/*for(register int i=1;i<=tot;i++){\r\n\t\tcout<<\"blk\"<<i<<\":\"<<endl;\r\n\t\tint sz=cir[i].size();\r\n\t\tfor(register int j=0;j<sz;j++)cout<<cir[i][j]<<\" \";\r\n\t\tcout<<endl;\r\n\t\tcout<<\"siz=\"<<siz[i]<<\" cs=\"<<cs[i]<<endl;\r\n\t}*/\r\n\tprintf(\"%lld\",solve());\r\n\treturn 0;\r\n}"
+}

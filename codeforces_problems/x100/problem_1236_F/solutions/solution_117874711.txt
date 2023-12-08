@@ -1,0 +1,38 @@
+{
+    "id": 117874711,
+    "contestId": 1236,
+    "creationTimeSeconds": 1622385382,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "vjudge2"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 561,
+    "memoryConsumedBytes": 44339200,
+    "source": "#include <bits/stdc++.h>\n \nusing namespace std;\n \n#define MS(a, b) memset(a, b, sizeof(a))\n#define REP(a, b, c) for (register int a = b, _n = c; a <= _n; ++a)\n#define DREP(a, b, c) for (register int a = b, _n = c; a >= _n; --a)\n#define FOR(a, b, c) for (register int a = b, _n = c; a < _n; ++a)\n#define EREP(a, b) for (register int a = head[b]; a; a = edge[a].nxt)\n \ninline int rd() {\n    int x = 0; char c = getchar(); bool f = 0;\n    while (c < '0' && c != '-') c = getchar();\n    if (c == '-') f = 1, c = getchar();\n    while (c >= '0') x = (x << 3) + (x << 1) + (c ^ 48), c = getchar();\n    return f ? -x : x;\n}\n\nconst int SIZE = 5e5 + 100;\nconst int Mod = 1e9 + 7;;\n\nint Pow (int a, int b) {\n    int res = 1;\n    while (b) {\n        if (b & 1) res = 1LL * res * a % Mod;\n        b >>= 1;\n        a = 1LL * a * a % Mod;\n    }\n    return res;\n}\n\nint n, m;\n\nint head[SIZE], ecnt;\nstruct Edge {\n    int v, nxt;\n} edge[SIZE << 1];\nvoid Add_Edge (int u, int v) {\n    edge[++ecnt] = (Edge) { v, head[u] };\n    head[u] = ecnt;\n}\n\nint dfn[SIZE], dfs_cnt;\nint stk[SIZE], tp, cir, pre[SIZE];\nvector<int> WTF[SIZE], G[SIZE];\nvoid predfs (int u, int fa) {\n    dfn[u] = ++dfs_cnt;\n    stk[++tp] = u;\n    EREP (e, u) {\n        int v = edge[e].v;\n        if (v == fa) continue;\n        if (!dfn[v]) predfs(v, u);\n        else if (dfn[v] < dfn[u]) {\n            ++cir;\n            int now = tp;\n            do {\n                G[cir].push_back(stk[now]);\n                pre[stk[now]] = stk[now - 1];\n                //if (stk[now - 1] != v) pre[stk[now - 1]] = stk[now];\n            } while (stk[--now] != v);\n            WTF[v].push_back(cir);\n        }\n    }\n    --tp;\n}\nbool vis[SIZE];\n\nstruct Node {\n    int x, y, z;\n    void operator += (const Node& a) {\n        x = (x + a.x) % Mod;\n        y = (y + a.y) % Mod;\n        z = (z + a.z) % Mod;\n    }\n    void Minus () {\n        // (x - 1) ^ 2 = x ^ 2 - 2x + 1;\n        x = (x + Mod - 2LL * y % Mod + z) % Mod;\n        y = (y + Mod - z) % Mod;\n    }\n} dp[SIZE][2], F[2][2][2], TMP[2][2][2], A[2];\nNode Merge (const Node& a, const Node& b) {\n    Node res;\n    res.x = (1LL * b.x * a.z + 1LL * a.x * b.z + 2LL * b.y * a.y) % Mod;\n    res.y = (1LL * b.y * a.z + 1LL * a.y * b.z) % Mod;\n    res.z = (1LL * b.z * a.z) % Mod;\n    return res;\n}\n\nvoid dfs (int u) {\n    dp[u][0] = (Node) { 0, 0, 1 };\n    dp[u][1] = (Node) { 1, 1, 1 };\n    vis[u] = 1;\n    for (int id : WTF[u]) {\n        for (int v : G[id]) dfs(v);\n        FOR (i, 0, 2) FOR (j, 0, 2) FOR (k, 0, 2)\n            F[i][j][k] = (Node) { 0, 0, 0 };\n        F[1][0][0] = dp[G[id][0]][0];\n        F[0][1][1] = dp[G[id][0]][1];\n        FOR (asdf, 1, G[id].size()) {\n            int v = G[id][asdf];\n            FOR (i, 0, 2) FOR (j, 0, 2) FOR (k, 0, 2) TMP[i][j][k] = (Node) { 0, 0, 0 };\n            FOR (i, 0, 2) FOR (j, 0, 2) FOR (k, 0, 2) FOR (l, 0, 2) {\n                Node add = Merge(F[i][j][k], dp[v][l]);\n                if (k && l) add.Minus();\n                TMP[!l | i][j][l] += add;\n            }\n            FOR (i, 0, 2) FOR (j, 0, 2) FOR (k, 0, 2) F[i][j][k] = TMP[i][j][k];\n        }\n        FOR (i, 0, 2) A[i] = (Node) { 0, 0, 0 };\n        FOR (i, 0, 2) FOR (j, 0, 2) FOR (k, 0, 2) {\n            A[0] += Merge(dp[u][0], F[i][j][k]);\n            if (i) {\n                Node add = Merge(dp[u][1], F[i][j][k]);\n                if (j) add.Minus();\n                if (k) add.Minus();\n                A[1] += add;\n            }\n        }\n        Node add = Merge(dp[u][1], F[0][1][1]);\n        add.Minus();\n        A[1] += add;\n        FOR (i, 0, 2) dp[u][i] = A[i];\n    }\n    EREP (i, u) {\n        int v = edge[i].v;\n        if (vis[v] || v == pre[u]) continue;\n        dfs(v);\n        FOR (i, 0, 2) A[i] = (Node) { 0, 0, 0 };\n        FOR (i, 0, 2) FOR (j, 0, 2) {\n            if (i && j) {\n                Node add = Merge(dp[u][i], dp[v][j]);\n                add.Minus();\n                A[i] += add;\n            } else A[i] += Merge(dp[u][i], dp[v][j]);\n        }\n        FOR (i, 0, 2) dp[u][i] = A[i];\n    }\n}\n\n\nvoid _main () {\n    n = rd(), m = rd();\n    REP (i, 1, m) {\n        int u = rd(), v = rd();\n        Add_Edge(u, v);\n        Add_Edge(v, u);\n    }\n    predfs(1, 0);\n    dfs(1);\n    int TOT = Pow((Mod + 1) / 2, n);\n    printf (\"%lld\\n\", (1LL * (dp[1][0].x + dp[1][1].x) * TOT + Mod - Pow(1LL * (dp[1][0].y + dp[1][1].y) * TOT % Mod, 2)) % Mod);\n}\n\nint main () {\n#ifdef LOCAL\n    freopen(\"in.txt\", \"r\", stdin);\n#endif\n    _main();\n    return 0;\n}\n\n    \t  \t \t\t \t\t \t \t  \t\t\t\t   \t\t\t\t"
+}

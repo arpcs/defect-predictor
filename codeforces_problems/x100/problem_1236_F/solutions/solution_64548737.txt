@@ -1,0 +1,38 @@
+{
+    "id": 64548737,
+    "contestId": 1236,
+    "creationTimeSeconds": 1573248032,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "StepMommy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 514,
+    "memoryConsumedBytes": 32768000,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\nconst int MAX_N = 500000;\nconst int MAX_M = 500000;\nconst int MD = 1000000007;\nint n;\nint m;\nint p[MAX_N + 9];\nint a[MAX_M * 2 + 9];\nint b[MAX_M * 2 + 9];\nvector<int> adj[MAX_N + 9];\nbool used[MAX_N + 9];\nbool del[MAX_M * 2 + 9];\nvector<int> vNode;\nvector<vector<int>> circle;\nint totalP;\nint sumP[MAX_N + 9];\nint ans;\n\nint Add(int x, int y) {\n\treturn (x + y) % MD;\n}\n\nint Sub(int x, int y) {\n\treturn (x - y + MD) % MD;\n}\n\nint Mul(int x, int y) {\n\treturn (long long)x * y % MD;\n}\n\nint Pwr(int x, int n) {\n\tint res = 1 % MD;\n\tfor(int i = 0; (n >> i) > 0; i++) {\n\t\tif((n >> i & 1) == 1) {\n\t\t\tres = Mul(res, x);\n\t\t}\n\t\tx = Mul(x, x);\n\t}\n\treturn res;\n}\n\nint Div(int x, int y) {\n\treturn Mul(x, Pwr(y, MD - 2));\n}\n\nvoid Dfs(int x) {\n\tused[x] = true;\n\tvNode.push_back(x);\n\tfor(int id : adj[x]) {\n\t\tif(!del[id]) {\n\t\t\tdel[(id - 1) % m + 1] = true;\n\t\t\tdel[(id - 1) % m + m + 1] = true;\n\t\t\tint y = b[id];\n\t\t\tif(!used[y]) {\n\t\t\t\tDfs(y);\n\t\t\t}\n\t\t\telse {\n\t\t\t\tcircle.push_back(vector<int>());\n\t\t\t\tfor(int i = vNode.size() - 1; i >= 0; i--) {\n\t\t\t\t\tcircle.back().push_back(vNode[i]);\n\t\t\t\t\tif(vNode[i] == y) {\n\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n\tvNode.pop_back();\n}\n\nint ExpV() {\n\treturn Mul(p[1], n);\n}\n\nint ExpE() {\n\treturn Mul(p[2], m);\n}\n\nint ExpC() {\n\tint res = 0;\n\tfor(vector<int>& c : circle) {\n\t\tres = Add(res, p[c.size()]);\n\t}\n\treturn res;\n}\n\nint ExpVV() {\n\treturn Mul(Add(p[1], Mul(p[2], n - 1)), n);\n}\n\n\nint ExpEE() {\n\tint res = 0;\n\tfor(int i = 1; i <= m; i++) {\n\t\tres = Add(res, p[2]);\n\t\tres = Add(res, Mul(p[3], adj[a[i]].size() - 1));\n\t\tres = Add(res, Mul(p[3], adj[b[i]].size() - 1));\n\t\tres = Add(res, Mul(p[4], m - adj[a[i]].size() - adj[b[i]].size() + 1));\n\t}\n\treturn res;\n}\n\nint ExpCC() {\n\tint res = 0;\n\tfor(vector<int>& c : circle) {\n\t\tres = Add(res, p[c.size()]);\n\t\tint leftP = Sub(totalP, p[c.size()]);\n\t\tfor(int x : c) {\n\t\t\tres = Add(res, Mul(p[c.size() - 1], Sub(sumP[x], p[c.size()])));\n\t\t\tleftP = Sub(leftP, Sub(sumP[x], p[c.size()]));\n\t\t}\n\t\tres = Add(res, Mul(p[c.size()], leftP));\n\t}\n\treturn res;\n}\n\nint ExpEV() {\n\tint res = 0;\n\tfor(int i = 1; i <= m; i++) {\n\t\tres = Add(res, Mul(p[2], 2));\n\t\tres = Add(res, Mul(p[3], n - 2));\n\t}\n\treturn res;\n}\n\nint ExpCV() {\n\tint res = 0;\n\tfor(vector<int>& c : circle) {\n\t\tres = Add(res, Mul(p[c.size()], c.size()));\n\t\tres = Add(res, Mul(p[c.size() + 1], n - c.size()));\n\t}\n\treturn res;\n}\n\nint ExpCE() {\n\tint res = 0;\n\tfor(vector<int>& c : circle) {\n\t\tres = Add(res, Mul(p[c.size()], c.size()));\n\t\tint leftE = m - c.size();\n\t\tfor(int x : c) {\n\t\t\tres = Add(res, Mul(p[c.size() + 1], adj[x].size() - 2));\n\t\t\tleftE -= adj[x].size() - 2;\n\t\t}\n\t\tres = Add(res, Mul(p[c.size() + 2], leftE));\n\t}\n\treturn res;\n}\n\nint main() {\n\tios_base::sync_with_stdio(false);\n\tcin.tie(NULL);\n\tcin >> n >> m;\n\tfor(int i = 1; i <= m; i++) {\n\t\tcin >> a[i] >> b[i];\n\t\ta[i + m] = b[i];\n\t\tb[i + m] = a[i];\n\t\tadj[a[i]].push_back(i);\n\t\tadj[b[i]].push_back(i + m);\n\t}\n\tp[n] = Div(1, Pwr(2, n));\n\tfor(int i = n - 1; i >= 0; i--) {\n\t\tp[i] = Mul(p[i + 1], 2);\n\t}\n\tfor(int i = 1; i <= n; i++) {\n\t\tif(!used[i]) {\n\t\t\tDfs(i);\n\t\t}\n\t}\n\ttotalP = 0;\n\tfor(vector<int>& c: circle) {\n\t\ttotalP = Add(totalP, p[c.size()]);\n\t}\n\tfor(vector<int>& c : circle) {\n\t\tfor(int x : c) {\n\t\t\tsumP[x] = Add(sumP[x], p[c.size()]);\n\t\t}\n\t}\n\tans = ExpVV();\n\tans = Add(ans, ExpEE());\n\tans = Add(ans, ExpCC());\n\tans = Sub(ans, Mul(ExpEV(), 2));\n\tans = Sub(ans, Mul(ExpCE(), 2));\n\tans = Add(ans, Mul(ExpCV(), 2));\n\tans = Sub(ans, Pwr(Add(Sub(ExpV(), ExpE()), ExpC()), 2));\n\tcout << ans << \"\\n\";\n\treturn 0;\n}"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 33744522,
+    "contestId": 910,
+    "creationTimeSeconds": 1514489190,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 910,
+        "index": "C",
+        "name": "Minimum Sum",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 1700,
+        "tags": [
+            "constructive algorithms",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 910,
+        "members": [
+            {
+                "handle": "szab.eman"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1513940700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 14,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 2048000,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <string>\r\n#include <algorithm>\r\n#include <map>\r\n#include <cmath>\r\n#include <regex>\r\n\r\nusing namespace std;\r\ntypedef map<char,int> charIntMap;\r\n\r\nstruct charValue {\r\n    char name;\r\n    vector<pair<int,int>> v;\r\n};\r\n\r\nclass Determine {\r\nprivate:\r\n    vector<string> v;\r\n    charIntMap values;\r\n    vector<int> numbers;\r\n    vector<charValue> valueNumbers; //position, quantity\r\n\r\n    bool isFirstChar(char c) {\r\n        int i=0;\r\n        bool isFirst=false;\r\n        while (i<v.size() && !isFirst) {\r\n            int j=0;\r\n            while (v[i][j]=='k') j++;\r\n            isFirst=(v[i][j]==c);\r\n            i++;\r\n        }\r\n        return (isFirst);\r\n    }\r\n\r\n    string insertk(string where, int quantity) {\r\n        string k=\"\";\r\n        for (int i=0; i<quantity; i++) {\r\n            k+=\"k\";\r\n        }\r\n        return where.insert(0,k);\r\n    }\r\n\r\n    void calculate() {\r\n        bool wasNull=false;\r\n        int v=1;\r\n        for (int i=0; i<valueNumbers.size(); i++) {\r\n            if (!wasNull && !isFirstChar(valueNumbers[i].name)) {\r\n                wasNull=true;\r\n                values[valueNumbers[i].name]=0;\r\n            } else {\r\n                values[valueNumbers[i].name]=v;\r\n                v++;\r\n            }\r\n        }\r\n    }\r\n\r\n    void setNumbers() {\r\n        for (int i=0; i<v.size(); i++) {\r\n            int number=0;\r\n            int exp=0;\r\n            for (int j=v[i].length()-1;j>=0; j--) {\r\n                number=number+values[v[i][j]]*pow(10,exp);\r\n                exp++;\r\n            }\r\n            numbers.push_back(number);\r\n        }\r\n    }\r\n\r\n    int maxLen() {\r\n        int max=0;\r\n        for (int i=0; i<v.size(); i++) {\r\n            if (max<v[i].length()) {\r\n                max=v[i].length();\r\n            }\r\n        }\r\n        return max;\r\n    }\r\npublic:\r\n\r\n    Determine() {\r\n        int n;\r\n        cin>>n;\r\n        for (int i=0; i<n; i++) {\r\n            string data;\r\n            cin>>data;\r\n            v.push_back(data);\r\n        }\r\n\r\n        int max=maxLen();\r\n\r\n        for (int i=0; i<v.size(); i++) {\r\n            v[i]=insertk(v[i],max-v[i].length());\r\n        }\r\n\r\n        for (int i=0; i<=9; i++) {\r\n            charValue svpair;\r\n            char c=(i+97);\r\n            svpair.name=c;\r\n            vector<int> sv;\r\n            for (int j=0; j<v.size(); j++) {\r\n                for (int k=0; k<v[j].length(); k++) {\r\n                    if (c==v[j][k] && v[j][k]!='k') {\r\n                        sv.push_back(k);\r\n                    }\r\n                }\r\n            }\r\n            for (int j=0; j<9; j++) {\r\n                int count=0;\r\n                for (int k=0; k<sv.size(); k++) {\r\n                    if (sv[k]==j) count++;\r\n                }\r\n                if (count>0) {\r\n                    pair<int,int> p(j,count);\r\n                    svpair.v.push_back(p);\r\n                }\r\n            }\r\n            valueNumbers.push_back(svpair);\r\n        }\r\n\r\n        for (int i=0; i<valueNumbers.size()-1; i++) {\r\n            for (int j=i; j<valueNumbers.size(); j++) {\r\n                int k=0;\r\n                while (k<valueNumbers[i].v.size() && k<valueNumbers[j].v.size() &&\r\n                       valueNumbers[i].v[k].first==valueNumbers[j].v[k].first &&\r\n                       valueNumbers[i].v[k].second==valueNumbers[j].v[k].second) {\r\n                    k++;\r\n                }\r\n                //vj v\u00e9get\u00e9rt vi nem || egyiksem \u00e9rt v\u00e9get \u00e9s(  i first> j first || i first==jfirst && i second<j second)\r\n                if (k==valueNumbers[i].v.size() && k<valueNumbers[j].v.size() ||\r\n                    k<valueNumbers[i].v.size() && k<valueNumbers[j].v.size() &&\r\n                        (valueNumbers[i].v[k].first>valueNumbers[j].v[k].first ||\r\n                                                       valueNumbers[i].v[k].first==valueNumbers[j].v[k].first &&\r\n                                                        valueNumbers[i].v[k].second<valueNumbers[j].v[k].second)) {\r\n                    charValue sv;\r\n                    sv=valueNumbers[i];\r\n                    valueNumbers[i]=valueNumbers[j];\r\n                    valueNumbers[j]=sv;\r\n                }\r\n            }\r\n        }\r\n\r\n        calculate();\r\n        setNumbers();\r\n    }\r\n\r\n    int minimumSumValues() {\r\n        int sum=0;\r\n        for (int i=0; i<numbers.size(); i++) {\r\n            sum+=numbers[i];\r\n        }\r\n        return sum;\r\n    }\r\n};\r\n\r\nint main(){\r\n    Determine d;\r\n    cout<<d.minimumSumValues();\r\n    return 0;\r\n}\r\n"
+}

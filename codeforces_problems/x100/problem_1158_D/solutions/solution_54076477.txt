@@ -1,0 +1,38 @@
+{
+    "id": 54076477,
+    "contestId": 1158,
+    "creationTimeSeconds": 1557779367,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1158,
+        "index": "D",
+        "name": "Winding polygonal line",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "constructive algorithms",
+            "geometry",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1158,
+        "members": [
+            {
+                "handle": "tempura0224"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1557671700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 75,
+    "timeConsumedMillis": 514,
+    "memoryConsumedBytes": 204800,
+    "source": "#include<iostream>\r\n#include<string>\r\n#include<algorithm>\r\n#include<vector>\r\n#include<iomanip>\r\n#include<math.h>\r\n#include<complex>\r\n#include<queue>\r\n#include<deque>\r\n#include<stack>\r\n#include<map>\r\n#include<set>\r\n#include<bitset>\r\n#include<functional>\r\n#include<assert.h>\r\n#include<numeric>\r\nusing namespace std;\r\n#define REP(i,m,n) for(int i=(int)(m) ; i < (int) (n) ; ++i )\r\n#define rep(i,n) REP(i,0,n)\r\nusing ll = long long;\r\nconst int inf=1e9+7;\r\nconst ll longinf=1LL<<60 ;\r\nconst ll mod=1e9+7 ;\r\n\r\nusing ld = double;\r\nusing Point =  complex<ld>;\r\nconst ld eps = 1e-7;\r\nconst ld pi = acos(-1.0);\r\n\r\nbool eq(ld a, ld b) {\r\n\treturn (abs(a - b) < eps);\r\n}\r\n//\u5185\u7a4d\r\nld dot(Point a, Point b) {\r\n\treturn real(conj(a)*b);\r\n}\r\n//\u5916\u7a4d\r\nld cross(Point a, Point b) {\r\n\treturn imag(conj(a)*b);\r\n}\r\n//\u7dda\u5206\r\n//\u76f4\u7dda\u306b\u3059\u308b\u306a\u3089\u5341\u5206\u901a\u3044\uff12\u70b9\u3092\u7aef\u70b9\u3068\u3059\u308c\u3070\u3088\u3044\r\nclass Line {\r\npublic:\r\n\tPoint a, b;\r\n};\r\n//\u5186\r\nclass Circle {\r\npublic:\r\n\tPoint p;\r\n\tld r;\r\n};\r\n//3\u70b9\u306e\u4f4d\u7f6e\u95a2\u4fc2\r\nint ccw(Point a, Point b, Point c) {\r\n\tb -= a; c -= a;\r\n\tif (cross(b, c) > eps)return 1;//a,b,c\u304c\u53cd\u6642\u8a08\u56de\u308a\r\n\tif (cross(b, c) < -eps)return -1;//a,b,c\u304c\u6642\u8a08\u56de\u308a\r\n\tif (dot(b, c) < 0)return 2;//c,a,b\u306e\u9806\u306b\u4e00\u76f4\u7dda\r\n\tif (norm(b) < norm(c))return -2;//a,b,c\u306e\u9806\u306b\u4e00\u76f4\u7dda\r\n\treturn 0;//a,c,b\u306e\u9806\u306b\u4e00\u76f4\u7dda\r\n}\r\n//2\u76f4\u7dda\u306e\u4ea4\u5dee\u5224\u5b9a\r\nbool isis_ll(Line l, Line m) {\r\n\treturn !eq(cross(l.b - l.a, m.b - m.a), 0);\r\n}\r\n//\u76f4\u7dda\u3068\u7dda\u5206\u306e\u4ea4\u5dee\u5224\u5b9a\r\nbool isis_ls(Line l, Line s) {\r\n\treturn (cross(l.b - l.a, s.a - l.a)*cross(l.b - l.a, s.b - l.a) < eps);\r\n}\r\n//\u70b9\u304c\u76f4\u7dda\u4e0a\u306b\u5b58\u5728\u3059\u308b\u304b\r\nbool isis_lp(Line l, Point p) {\r\n\treturn (abs(cross(l.b - p, l.a - p)) < eps);\r\n}\r\n//\u70b9\u304c\u7dda\u5206\u4e0a\u306b\u5b58\u5728\u3059\u308b\u304b\r\nbool isis_sp(Line s, Point p) {\r\n\treturn (abs(s.a - p) + abs(s.b - p) - abs(s.b - s.a) < eps);\r\n}\r\n//\u7dda\u5206\u3068\u7dda\u5206\u306e\u4ea4\u5dee\u5224\u5b9a\r\nbool isis_ss(Line s, Line t) {\r\n\tif (isis_sp(s, t.a) || isis_sp(s, t.b) || isis_sp(t, s.a) || isis_sp(t, s.b))return true;\r\n\treturn(cross(s.b - s.a, t.a - s.a)*cross(s.b - s.a, t.b - s.a) < -eps && cross(t.b - t.a, s.a - t.a)*cross(t.b - t.a, s.b - t.a) < -eps);\r\n}\r\n//\u70b9\u304b\u3089\u76f4\u7dda\u3078\u306e\u5782\u7dda\u306e\u8db3\r\nPoint proj(Line l, Point p) {\r\n\tld t = dot(p - l.a, l.a - l.b) / norm(l.a - l.b);\r\n\treturn l.a + t * (l.a - l.b);\r\n}\r\n//\u76f4\u7dda\u3068\u76f4\u7dda\u306e\u4ea4\u70b9\r\n//\u5e73\u884c\u306a\uff12\u76f4\u7dda\u306b\u5bfe\u3057\u3066\u306f\u4f7f\u3046\u306a\uff01\uff01\uff01\uff01\r\nPoint is_ll(Line s, Line t) {\r\n\tPoint sv = s.b - s.a; Point tv = t.b - t.a;\r\n\treturn s.a + sv * cross(tv, t.a - s.a) / cross(tv, sv);\r\n}\r\n//\u76f4\u7dda\u3068\u70b9\u306e\u8ddd\u96e2\r\nld dist_lp(Line l, Point p) {\r\n\treturn abs(p - proj(l, p));\r\n}\r\n//\u76f4\u7dda\u3068\u76f4\u7dda\u306e\u8ddd\u96e2\r\nld dist_ll(Line l, Line m) {\r\n\treturn isis_ll(l, m) ? 0 : dist_lp(l, m.a);\r\n}\r\n//\u7dda\u5206\u3068\u76f4\u7dda\u306e\u8ddd\u96e2\r\nld dist_ls(Line l, Line s) {\r\n\treturn isis_ls(l, s) ? 0 : min(dist_lp(l, s.a), dist_lp(l, s.b));\r\n}\r\n//\u7dda\u5206\u3068\u70b9\u306e\u8ddd\u96e2\r\nld dist_sp(Line s, Point p) {\r\n\tPoint r = proj(s, p);\r\n\treturn isis_sp(s, r) ? abs(p - r) : min(abs(p - s.a), abs(p - s.b));\r\n}\r\n//\u7dda\u5206\u3068\u7dda\u5206\u306e\u8ddd\u96e2\r\nld dist_ss(Line s, Line t) {\r\n\tif (isis_ss(s, t))return 0;\r\n\treturn min({ dist_sp(s,t.a),dist_sp(s,t.b),dist_sp(t,s.a),dist_sp(t,s.b) });\r\n}\r\nint main(){\r\n    int n;\r\n    cin>>n;\r\n    Point p[n];\r\n    int st=-1,mi=inf;\r\n    rep(i,n){\r\n        double x,y;\r\n        cin>>x>>y;\r\n        p[i]={x,y};\r\n        if(x<mi)st=i,mi=x;\r\n    }\r\n    vector<int> ans;\r\n    vector<int> used(n);\r\n    used[st]=1;\r\n    ans.push_back(st);\r\n\r\n    string s;\r\n    cin>>s;\r\n    rep(i,n-2){\r\n        vector<int> ord(n);\r\n        iota(ord.begin(),ord.end(),0);\r\n        if(s[i]=='R'){\r\n            sort(ord.begin(),ord.end(),[&](int x,int y){\r\n                if(used[x])return false;\r\n                if(used[y])return true;\r\n                if(ccw(p[st],p[x],p[y])==-1)return true;\r\n                return false;\r\n            });\r\n            st=ord[0];\r\n            ans.push_back(st);\r\n            used[st]=1;\r\n        }\r\n        else {\r\n            sort(ord.begin(),ord.end(),[&](int x,int y){\r\n                if(used[x])return false;\r\n                if(used[y])return true;\r\n                if(ccw(p[st],p[x],p[y])==1)return true;\r\n                return false;\r\n            });\r\n            st=ord[0];\r\n            ans.push_back(st);\r\n            used[st]=1;\r\n        }\r\n    }\r\n    rep(i,n)if(!used[i])ans.push_back(i);\r\n    rep(i,n)cout<<ans[i]+1<<\" \";\r\n    return 0;\r\n}"
+}

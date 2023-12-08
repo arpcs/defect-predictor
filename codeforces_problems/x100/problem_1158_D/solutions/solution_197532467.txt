@@ -1,0 +1,38 @@
+{
+    "id": 197532467,
+    "contestId": 1158,
+    "creationTimeSeconds": 1678894204,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1158,
+        "index": "D",
+        "name": "Winding polygonal line",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "constructive algorithms",
+            "geometry",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1158,
+        "members": [
+            {
+                "handle": "Alcabel"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1557671700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\r\n#include <cmath>\r\n#include <iomanip>\r\n#include <numeric>\r\n#include <vector>\r\n#include <queue>\r\n#include <algorithm>\r\n#include <utility>\r\n#include <string>\r\n#include <map>\r\n#include <cassert>\r\n#include <random>\r\nusing namespace std;\r\n\r\nint sign(long long x) {\r\n    if (x > 0) { return 1; }\r\n    if (x < 0) { return -1; }\r\n    return 0;\r\n}\r\n\r\nstruct Vector {\r\n    int x, y, idx;\r\n    Vector() {}\r\n    Vector(int _x, int _y, int _idx) {\r\n        x = _x, y = _y, idx = _idx;\r\n    }\r\n    Vector operator-() const {\r\n        return Vector(-x, -y, idx);\r\n    }\r\n    Vector operator+(const Vector& other) const {\r\n        return Vector(x + other.x, y + other.y, idx);\r\n    }\r\n    Vector operator-(const Vector& other) const {\r\n        return Vector(x - other.x, y - other.y, idx);\r\n    }\r\n    long long operator*(const Vector& other) const {\r\n        return x * 1ll * other.x + y * 1ll * other.y;\r\n    }\r\n    long long operator^(const Vector& other) const {\r\n        return x * 1ll * other.y - y * 1ll * other.x;\r\n    }\r\n    bool operator<(const Vector& other) const {\r\n        return make_pair(y, x) < make_pair(other.y, other.x);\r\n    }\r\n    long long len2() const {\r\n        return x * 1ll * x + y * 1ll * y;\r\n    }\r\n    void print() const {\r\n        cerr << x << ' ' << y << '\\n';\r\n    }\r\n    ~Vector() {}\r\n};\r\n\r\nbool byPolar(const Vector& A, const Vector& B) {\r\n    return make_pair(B ^ A, A.len2() - B.len2()) < make_pair(0ll, 0ll);\r\n}\r\n\r\nvoid convexHull(vector<Vector> a, vector<Vector>& res) {\r\n    int n = a.size();\r\n    int start = min_element(a.begin(), a.end()) - a.begin();\r\n    swap(a[0], a[start]);\r\n    for (int i = 1; i < n; ++i) {\r\n        a[i] = a[i] - a[0];\r\n    }\r\n    sort(a.begin() + 1, a.end(), byPolar);\r\n    for (int i = 1; i < n; ++i) {\r\n        a[i] = a[i] + a[0];\r\n    }\r\n    for (int i = 0; i < n; ++i) {\r\n        // cerr << \"i: \" << i << \", \";\r\n        // a[i].print();\r\n        while ((int)res.size() >= 2) {\r\n            if (sign((res.back() - res[(int)res.size() - 2]) ^ (a[i] - res[(int)res.size() - 2])) != 1) {\r\n                res.pop_back();\r\n            } else {\r\n                break;\r\n            }\r\n        }\r\n        res.emplace_back(a[i]);\r\n    }\r\n}\r\n\r\nvoid solve() {\r\n    int n;\r\n    cin >> n;\r\n    vector<Vector> a(n), hull;\r\n    for (int i = 0; i < n; ++i) {\r\n        cin >> a[i].x >> a[i].y;\r\n        a[i].idx = i;\r\n    }\r\n    string s;\r\n    cin >> s;\r\n    vector<int> ans(n);\r\n    convexHull(a, hull);\r\n    ans[0] = hull[0].idx;\r\n    //cerr << (int)hull.size() << '\\n';\r\n    // cerr << hull[1].idx << ' ' << hull[2].idx << '\\n';\r\n    if (s[0] == 'L') {\r\n        ans[1] = hull[1].idx;\r\n    } else {\r\n        ans[1] = hull.back().idx;\r\n    }\r\n    for (auto it = a.begin(); it != a.end(); ++it) {\r\n        if (it->idx == ans[0]) {\r\n            a.erase(it);\r\n            break;\r\n        }\r\n    }\r\n    for (int i = 1; i < n - 2; ++i) {\r\n        hull.clear();\r\n        convexHull(a, hull);\r\n        int j = 0;\r\n        while (j < (int)hull.size() && hull[j].idx != ans[i]) {\r\n            ++j;\r\n        }\r\n        assert(j < (int)hull.size());\r\n        if (s[i] == 'L') {\r\n            j = (j == (int)hull.size() - 1 ? 0 : j + 1);\r\n        } else {\r\n            j = (j == 0 ? (int)hull.size() - 1 : j - 1);\r\n        }\r\n        ans[i + 1] = hull[j].idx;\r\n        for (auto it = a.begin(); it != a.end(); ++it) {\r\n            if (it->idx == ans[i]) {\r\n                a.erase(it);\r\n                break;\r\n            }\r\n        }\r\n    }\r\n    ans[n - 1] = (ans[n - 2] == a[0].idx ? a[1].idx : a[0].idx);\r\n    for (int i = 0; i < n; ++i) {\r\n        cout << ans[i] + 1 << ' ';\r\n    }\r\n    cout << '\\n';\r\n}\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n    \r\n#ifdef LOCAL\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n    freopen(\"output.txt\", \"w\", stdout);\r\n    int T = 1;\r\n    cin >> T;\r\n    while (T--) {\r\n        solve();\r\n        cout << \"--------\\n\";\r\n        cerr << \"--------\\n\";\r\n    }\r\n#else\r\n    freopen(\"highways.in\", \"r\", stdin);\r\n    freopen(\"highways.out\", \"w\", stdout);\r\n    int T = 1;\r\n    // cin >> T;\r\n    while (T--) {\r\n        solve();\r\n    }\r\n#endif\r\n\r\n    return 0;\r\n}"
+}

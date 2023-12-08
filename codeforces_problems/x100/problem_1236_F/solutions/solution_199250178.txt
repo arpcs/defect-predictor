@@ -1,0 +1,38 @@
+{
+    "id": 199250178,
+    "contestId": 1236,
+    "creationTimeSeconds": 1679841073,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "chihik"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 1591,
+    "memoryConsumedBytes": 50892800,
+    "source": "// LUOGU_RID: 106062765\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nconst int MAXN = 5e5 , Mod = 1e9 + 7;\r\ninline int Add( int x , int y ) { x += y; return x >= Mod ? x - Mod : x; }\r\ninline int Sub( int x , int y ) { x -= y; return x < 0 ? x + Mod : x; }\r\ninline int Mul( int x , int y ) { return 1ll * x * y % Mod; }\r\ninline int Qkpow( int x , int po ) { int p = 1; for( ; po ; po >>= 1 , x = Mul( x , x ) ) if( po & 1 ) p = Mul( p , x ); return p; }\r\ninline int Inv( int x ) { return Qkpow( x , Mod - 2 ); }\r\nconst int iv2 = Inv( 2 ) , iv4 = Inv( 4 ) , iv8 = Inv( 8 ) , iv16 = Inv( 16 );\r\nint p2[ MAXN + 5 ];\r\n\r\nint n , m , deg[ MAXN + 5 ]; vector< int > Graph[ MAXN + 5 ];\r\n\r\nint tim , dfn[ MAXN + 5 ] , low[ MAXN + 5 ] , pre[ MAXN + 5 ];\r\nint k , siz[ MAXN + 5 ] , val[ MAXN + 5 ]; vector< int > cir[ MAXN + 5 ];\r\nvoid Check( int u , int v ) {\r\n\tk ++;\r\n\tfor( int i = v ; i != pre[ u ] ; i = pre[ i ] ) cir[ k ].push_back( i ) , siz[ k ] ++;\r\n}\r\nvoid Tarjan( int u , int fa ) {\r\n\tdfn[ u ] = low[ u ] = ++ tim;\r\n\tfor( int v : Graph[ u ] ) if( v != fa ) {\r\n\t\tif( !dfn[ v ] ) {\r\n\t\t\tpre[ v ] = u; Tarjan( v , u );\r\n\t\t\tlow[ u ] = min( low[ u ] , dfn[ v ] );\r\n\t\t}\r\n\t\telse low[ u ] = min( low[ u ] , low[ v ] );\r\n\t}\r\n\tfor( int v : Graph[ u ] ) if( pre[ v ] != u && dfn[ v ] > dfn[ u ] ) Check( u , v );\r\n}\r\n\r\nbool vis[ MAXN + 5 ];\r\nint main( ) {\r\n\tscanf(\"%d %d\",&n,&m);\r\n\tfor( int i = 1 , u , v ; i <= m ; i ++ ) {\r\n\t\tscanf(\"%d %d\",&u,&v);\r\n\t\tGraph[ u ].push_back( v ); deg[ u ] ++;\r\n\t\tGraph[ v ].push_back( u ); deg[ v ] ++;\r\n\t}\r\n\tTarjan( 1 , 0 );\r\n\t\r\n\tp2[ 0 ] = 1;\r\n\tfor( int i = 1 ; i <= n ; i ++ ) p2[ i ] = Mul( p2[ i - 1 ] , iv2 );\r\n\t\r\n\tint EV1 = Mul( n , iv2 ) , EE1 = Mul( m , iv4 ) , EC1 = 0;\r\n\tfor( int i = 1 ; i <= k ; i ++ ) EC1 = Add( EC1 , p2[ siz[ i ] ] );\r\n\tint EX1 = Sub( Add( EV1 , EC1 ) , EE1 );\r\n\t\r\n\tint EV2 = Mul( Mul( n , n + 1 ) , iv4 );\r\n\t\r\n\tint EE2 = 0;\r\n\tfor( int u = 1 ; u <= n ; u ++ ) for( int v : Graph[ u ] ) if( u < v ) {\r\n\t\tEE2 = Add( EE2 , iv4 );\r\n\t\tEE2 = Add( EE2 , Mul( deg[ u ] + deg[ v ] - 2 , iv8 ) );\r\n\t\tEE2 = Add( EE2 , Mul( m - deg[ u ] - deg[ v ] + 1 , iv16 ) );\r\n\t}\r\n\t\r\n\tint all = 0;\r\n\tfor( int i = 1 ; i <= k ; i ++ ) all = Add( all , p2[ siz[ i ] ] );\r\n\tfor( int i = 1 ; i <= k ; i ++ )\r\n\t\tfor( int u : cir[ i ] ) val[ u ] = Add( val[ u ] , p2[ siz[ i ] ] );\r\n\t\r\n\tint EC2 = 0;\r\n\tfor( int i = 1 ; i <= k ; i ++ ) {\r\n\t\tint sum = 0;\r\n\t\tfor( int u : cir[ i ] ) sum = Add( sum , Sub( val[ u ] , p2[ siz[ i ] ] ) );\r\n\t\t\r\n\t\tEC2 = Add( EC2 , p2[ siz[ i ] ] );\r\n\t\tEC2 = Add( EC2 , Mul( sum , p2[ siz[ i ] - 1 ] ) );\r\n\t\tEC2 = Add( EC2 , Mul( Sub( all , Add( sum , p2[ siz[ i ] ] ) ) , p2[ siz[ i ] ] ) );\r\n\t}\r\n\t\r\n\tint EVE = 0;\r\n\tfor( int u = 1 ; u <= n ; u ++ ) for( int v : Graph[ u ] ) if( u < v ) {\r\n\t\tEVE = Add( EVE , Mul( 2 , iv4 ) );\r\n\t\tEVE = Add( EVE , Mul( n - 2 , iv8 ) );\r\n\t}\r\n\t\r\n\tint EVC = 0;\r\n\tfor( int i = 1 ; i <= k ; i ++ ) {\r\n\t\tEVC = Add( EVC , Mul( siz[ i ] , p2[ siz[ i ] ] ) );\r\n\t\tEVC = Add( EVC , Mul( n - siz[ i ] , p2[ siz[ i ] + 1 ] ) );\r\n\t}\r\n\t\r\n\tint EEC = 0;\r\n\tfor( int i = 1 ; i <= k ; i ++ ) {\r\n\t\tint cnt = 0;\r\n\t\tfor( int u : cir[ i ] ) vis[ u ] = 1;\r\n\t\tfor( int u : cir[ i ] ) for( int v : Graph[ u ] ) cnt += !vis[ v ];\r\n\t\tfor( int u : cir[ i ] ) vis[ u ] = 0;\r\n\t\t\r\n\t\tassert( siz[ i ] + cnt <= m );\r\n\t\tEEC = Add( EEC , Mul( siz[ i ] , p2[ siz[ i ] ] ) );\r\n\t\tEEC = Add( EEC , Mul( cnt , p2[ siz[ i ] + 1 ] ) );\r\n\t\tEEC = Add( EEC , Mul( m - siz[ i ] - cnt , p2[ siz[ i ] + 2 ] ) );\r\n\t}\r\n\tint EX2 = Add( Add( Add( EV2 , EE2 ) , EC2 ) , 2 * Sub( EVC , Add( EVE , EEC ) ) % Mod );\r\n\t\r\n//\tprintf(\"%d %d %d\\n\", EV2 , EE2 , EC2 );\r\n//\tprintf(\"%d %d %d\\n\", EVE , EVC , EEC );\r\n//\tprintf(\"%d %d\\n\", EX1 , EX2 );\r\n\tprintf(\"%d\\n\", Sub( EX2 , Mul( EX1 , EX1 ) ) );\r\n\treturn 0;\r\n}"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 229065356,
+    "contestId": 282,
+    "creationTimeSeconds": 1697893617,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 282,
+        "index": "D",
+        "name": "Yet Another Number Game",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2100,
+        "tags": [
+            "dp",
+            "games"
+        ]
+    },
+    "author": {
+        "contestId": 282,
+        "members": [
+            {
+                "handle": "anhnguyen"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1363188600
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 80,
+    "timeConsumedMillis": 560,
+    "memoryConsumedBytes": 226611200,
+    "source": "#include <bits/stdc++.h>\r\n#define ll long long\r\n#define ii pair<int, int>\r\n#define fi first\r\n#define se second\r\nusing namespace std;\r\n\r\nconst int MAXN = 300 + 1;\r\nconst int MOD = 1e9 + 7;\r\n\r\nint dp[MAXN][MAXN][MAXN];\r\n\r\nint main(int argc, char const *argv[]) {\r\n  cin.tie(0)->sync_with_stdio(0);\r\n  if (fopen(\"input.txt\", \"r\")) {\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n  }\r\n\r\n  int n;\r\n  cin >> n;\r\n  vector<int> a(n + 1);\r\n  // memset(dp, -1, sizeof dp);\r\n  int M = 0;\r\n  for (int i = 1; i <= n; i++) {\r\n    cin >> a[i];\r\n    M = max(M, a[i]);\r\n  }\r\n  vector<vector<int>> mem01(MAXN + 1, vector<int>(MAXN + 1, 1));\r\n  vector<vector<int>> mem02(MAXN + 1, vector<int>(MAXN + 1, 1));\r\n  vector<vector<int>> mem12(MAXN + 1, vector<int>(MAXN + 1, 1));\r\n  vector<vector<vector<int>>> mem(\r\n      MAXN + 1, vector<vector<int>>(MAXN + 1, vector<int>(MAXN + 1, 1)));\r\n\r\n  sort(1 + a.begin(), a.end());\r\n  if (n == 1) {\r\n    cout << ((a[1]) ? \"BitLGM\\n\" : \"BitAryo\\n\");\r\n    return 0;\r\n  }\r\n\r\n  if (n == 2) {\r\n    for (int i = 0; i <= M; i++) {\r\n      for (int j = 0; j <= M; j++) {\r\n        for (int k = 0; k <= 0; k++) {\r\n          int Min = min({i, j});\r\n\r\n          int tmp = mem12[j][k];\r\n          dp[i][j][k] = max(dp[i][j][k], 1 - tmp);\r\n\r\n          tmp = mem01[i][j];\r\n          dp[i][j][k] = max(dp[i][j][k], 1 - tmp);\r\n\r\n          tmp = mem02[i][k];\r\n          dp[i][j][k] = max(dp[i][j][k], 1 - tmp);\r\n\r\n          tmp = mem[i - Min][j - Min][k];\r\n          dp[i][j][k] = max(dp[i][j][k], 1 - tmp);\r\n\r\n          vector<int> tt = {i, j};\r\n          sort(tt.begin(), tt.end());\r\n          int x = tt[0], y = tt[1], z = tt[2];\r\n          if (x == 0 && y == 0) {\r\n            dp[i][j][k] = 0;\r\n          }\r\n          if (x == 0 && y != 0) {\r\n            dp[i][j][k] = 1;\r\n          }\r\n\r\n          mem12[j][k] = min(mem12[j][k], dp[i][j][k]);\r\n          mem02[i][k] = min(mem02[i][k], dp[i][j][k]);\r\n          mem01[i][j] = min(mem01[i][j], dp[i][j][k]);\r\n\r\n          mem[i - Min][j - Min][k] = min(mem[i - Min][j - Min][k], dp[i][j][k]);\r\n        }\r\n      }\r\n    }\r\n    cout << ((dp[a[1]][a[2]][0]) ? \"BitLGM\\n\" : \"BitAryo\\n\");\r\n    return 0;\r\n  }\r\n  //////////////////\r\n  /// n = 3\r\n\r\n  for (int i = 0; i <= M; i++) {\r\n    for (int j = i; j <= M; j++) {\r\n      for (int k = j; k <= M; k++) {\r\n        int Min = min({i, j, k});\r\n\r\n        vector<int> tt = {i, j, k};\r\n        // sort\r\n        int x = tt[0], y = tt[1], z = tt[2];\r\n        if (x == 0 && y == 0) {\r\n          if (z == 0) {\r\n            dp[i][j][k] = 0;\r\n          } else {\r\n            dp[i][j][k] = 1;\r\n          }\r\n        } else if (z == y && x == 0 && y != 0) {\r\n          dp[i][j][k] = 1;\r\n        } else {\r\n          int tmp = mem12[j][k];\r\n          dp[i][j][k] = max(dp[i][j][k], 1 - tmp);\r\n\r\n          tmp = mem01[i][j];\r\n          dp[i][j][k] = max(dp[i][j][k], 1 - tmp);\r\n\r\n          tmp = mem02[i][k];\r\n          dp[i][j][k] = max(dp[i][j][k], 1 - tmp);\r\n\r\n          tmp = mem[i - Min][j - Min][k - Min];\r\n          dp[i][j][k] = max(dp[i][j][k], 1 - tmp);\r\n        }\r\n\r\n        mem12[j][k] = min(mem12[j][k], dp[i][j][k]);\r\n        mem02[i][k] = min(mem02[i][k], dp[i][j][k]);\r\n        mem01[i][j] = min(mem01[i][j], dp[i][j][k]);\r\n\r\n        mem[i - Min][j - Min][k - Min] =\r\n            min(mem[i - Min][j - Min][k - Min], dp[i][j][k]);\r\n      }\r\n    }\r\n  }\r\n  cout << ((dp[a[1]][a[2]][a[3]]) ? \"BitLGM\\n\" : \"BitAryo\\n\");\r\n  return 0;\r\n}\r\n\r\n"
+}

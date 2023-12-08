@@ -1,0 +1,38 @@
+{
+    "id": 125124886,
+    "contestId": 1236,
+    "creationTimeSeconds": 1628329201,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "kaiming_xxy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 888,
+    "memoryConsumedBytes": 145408000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define rep(i, a, b) for(int i = (a); i <= (b); ++ i)\r\n#define per(i, a, b) for(int i = (a); i >= (b); -- i)\r\n#define rep0(i, a) for(int i = 0; i < (a); ++ i)\r\n#define MP make_pair\r\n#define pb push_back\r\n#define SIZ(x) ((int)(x).size())\r\n#define All(x) (x).begin(),(x).end()\r\n#define fi first\r\n#define se second\r\n#define Fill(a, b) memset(a, b, sizeof(a))\r\ntemplate <typename Tp> void CMax(Tp &x, Tp y) { if(x < y) x = y; }\r\ntemplate <typename Tp> void CMin(Tp &x, Tp y) { if(y < x) x = y; }\r\ntemplate <typename Tp> void read(Tp &x) {\r\n\tx = 0; int op = 1; char c = getchar();\r\n\twhile(!isdigit(c)) {\r\n\t\tif(c == '-') op = -1;\r\n\t\tc = getchar();\r\n\t}\r\n\twhile(isdigit(c)) {\r\n\t\tx = (x << 1) + (x << 3) + c - '0';\r\n\t\tc = getchar();\r\n\t} x *= op;\r\n}\r\ntypedef long long LL;\r\ntypedef pair<int, int> PII;\r\n\r\nconst int MN = 500000 + 10;\r\n\r\nconst int Mod = 1e9 + 7;\r\nint Pls(int x, int y) {\r\n\tx += y; if(x >= Mod) x -= Mod;\r\n\treturn x;\r\n}\r\nvoid Plus(int &x, int y) {\r\n\tx += y; if(x >= Mod) x -= Mod;\r\n}\r\nint Sub(int x, int y) {\r\n\tx -= y; if(x < 0) x += Mod;\r\n\treturn x;\r\n}\r\nint power(int x, int p) {\r\n\tint ret = 1;\r\n\twhile(p) {\r\n\t\tif(p & 1) ret = 1ll * ret * x % Mod;\r\n\t\tx = 1ll * x * x % Mod; p >>= 1;\r\n\t} return ret;\r\n}\r\nint Inv(int x) {\r\n\treturn power(x, Mod - 2);\r\n}\r\nint inv2[MN];\r\nvoid Process(int N) {\r\n\tinv2[N] = Inv(power(2, N));\r\n\tfor(int i = N - 1; i >= 0; -- i) inv2[i] = Pls(inv2[i + 1], inv2[i + 1]);\r\n}\r\n\r\nint N, M;\r\n\r\nPII edge[MN];\r\nvector<int> G[MN];\r\n\r\nvoid Adde(int x, int y) {\r\n\tG[x].pb(y);\r\n\tG[y].pb(x);\r\n}\r\n\r\nint cnt, sum;\r\nvector<int> bel[MN], cir[MN];\r\nint val[MN];\r\nint inc[MN];\r\nmap<int, int> mp[MN];\r\n\r\nint fa[MN], dep[MN];\r\n\r\nvoid DFS(int x) {\r\n\tdep[x] = dep[fa[x]] + 1;\r\n\tfor(int y : G[x]) if(y != fa[x]) {\r\n\t\tif(!dep[y]) {\r\n\t\t\tfa[y] = x; DFS(y);\r\n\t\t} else if(dep[y] < dep[x]) {\r\n\t\t\tcnt ++; inc[mp[x][y]] = cnt;\r\n\t\t\tfor(int z = x; z != fa[y]; z = fa[z]){\r\n\t\t\t\tbel[z].pb(cnt), cir[cnt].pb(z);\r\n\t\t\t\tif(z != y) inc[mp[z][fa[z]]] = cnt;\r\n\t\t\t}\r\n\t\t\tint v = inv2[SIZ(cir[cnt])];\r\n\t\t\tfor(int z = x; z != fa[y]; z = fa[z]) Plus(val[z], v);\r\n\t\t\tsum = Pls(sum, v);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nint V() { return 1ll * N * inv2[1] % Mod; }\r\nint E() { return 1ll * M * inv2[2] % Mod; }\r\nint C() { return sum; }\r\nint VV() { return Pls(V(), 1ll * N * (N - 1) % Mod * inv2[2] % Mod); }\r\nint EE() {\r\n\tint ret = 0;\r\n\trep(i, 1, M) {\r\n\t\tint s1 = SIZ(G[edge[i].fi]) - 1, s2 = SIZ(G[edge[i].se]) - 1;\r\n\t\tret = Pls(ret, 1ll * (s1 + s2) * inv2[3] % Mod);\r\n\t\tret = Pls(ret, 1ll * (M - s1 - s2 - 1) * inv2[4] % Mod);\r\n\t}\r\n\treturn Pls(ret, E());\r\n}\r\nint CC() {\r\n\tint ret = 0;\r\n\trep(i, 1, cnt) {\r\n\t\tint s = Sub(sum, inv2[SIZ(cir[i])]);\r\n\t\tfor(int j : cir[i]) if(SIZ(bel[j]) > 1) {\r\n\t\t\tint v = Sub(val[j], inv2[SIZ(cir[i])]);\r\n\t\t\ts = Sub(s, v);\r\n\t\t\tret = Pls(ret, 1ll * v * inv2[SIZ(cir[i]) - 1] % Mod);\r\n\t\t}\r\n\t\tret = Pls(ret, 1ll * s * inv2[SIZ(cir[i])] % Mod);\r\n\t}\r\n\treturn Pls(ret, C());\r\n}\r\nint VE() {\r\n\tint ret = 0;\r\n\trep(i, 1, N) {\r\n\t\tret = Pls(ret, 1ll * SIZ(G[i]) * inv2[2] % Mod);\r\n\t\tret = Pls(ret, 1ll * (M - SIZ(G[i])) * inv2[3] % Mod);\r\n\t}\r\n\treturn ret;\r\n}\r\nint VC() {\r\n\tint ret = 0;\r\n\trep(i, 1, N) {\r\n\t\tint s = sum;\r\n\t\tfor(int j : bel[i]) {\r\n\t\t\tint v = inv2[SIZ(cir[j])];\r\n\t\t\tret = Pls(ret, v);\r\n\t\t\ts = Sub(s, v);\r\n\t\t}\r\n\t\tret = Pls(ret, 1ll * s * inv2[1] % Mod);\r\n\t}\r\n\treturn ret;\r\n}\r\nint EC() {\r\n\tint ret = 0;\r\n\tfor(int i = 1; i <= M; ++ i) {\r\n\t\tif(inc[i]) {\r\n\t\t\tint j = inc[i];\r\n\t\t\tret = Pls(ret, inv2[SIZ(cir[j])]);\r\n\t\t\tint s = Pls(val[edge[i].fi], val[edge[i].se]);\r\n\t\t\ts = Sub(s, 2ll * inv2[SIZ(cir[j])] % Mod);\r\n\t\t\tret = Pls(ret, 1ll * s * inv2[1] % Mod);\r\n\t\t\tint s2 = Sub(sum, s); s2 = Sub(s2, inv2[SIZ(cir[j])]);\r\n\t\t\tret = Pls(ret, 1ll * s2 * inv2[2] % Mod);\r\n\t\t} else {\r\n\t\t\tint s = Pls(val[edge[i].fi], val[edge[i].se]);\r\n\t\t\tret = Pls(ret, 1ll * s * inv2[1] % Mod);\r\n\t\t\tint s2 = Sub(sum, s);\r\n\t\t\tret = Pls(ret, 1ll * s2 * inv2[2] % Mod);\r\n\t\t}\r\n\t}\r\n\treturn ret;\r\n}\r\n\r\nint main()\r\n{\r\n\tread(N); read(M);\r\n\tProcess(N + 2);\r\n\trep(i, 1, M) {\r\n\t\tint u, v; read(u); read(v);\r\n\t\tAdde(u, v); edge[i] = MP(u, v);\r\n\t\tmp[u][v] = mp[v][u] = i;\r\n\t}\r\n\tDFS(1);\r\n\tint ans1 = Pls(Sub(V(), E()), C());\r\n\tint ans2 = 0;\r\n\tPlus(ans2, VC()); ans2 = Sub(ans2, VE()); ans2 = Sub(ans2, EC());\r\n\tans2 = Pls(ans2, ans2);\r\n\tans2 = Pls(ans2, VV()); ans2 = Pls(ans2, EE()); ans2 = Pls(ans2, CC());\r\n\tprintf(\"%d\", Sub(ans2, 1ll * ans1 * ans1 % Mod));\r\n\treturn 0;\r\n}\r\n"
+}

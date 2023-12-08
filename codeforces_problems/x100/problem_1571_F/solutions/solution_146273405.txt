@@ -1,0 +1,36 @@
+{
+    "id": 146273405,
+    "contestId": 1571,
+    "creationTimeSeconds": 1644780165,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "the_skinny_one"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 264,
+    "memoryConsumedBytes": 41984000,
+    "source": "import java.lang.Integer.max\nimport java.util.*\n\nobject F {\n    fun readLineInts(): List<Int> {\n        return readLine()!!\n            .split(\" \")\n            .map(String::toInt)\n    }\n}\n\ndata class IndexedValue(\n    val index: Int,\n    val value: Int\n)\n\ndata class Contest(\n    val k: Int,\n    val t: Int,\n    var x: Int = 0\n)\n\nfun optimalPartitionSmallerSubsetIndices(set: List<IndexedValue>): Set<Int> {\n    val n = set.size\n    val m = set.sumBy(IndexedValue::value) / 2\n    // Build partition possibility matrix \"dp\"\n    val dp = Array(n + 1) { Array(m + 1) { false } }\n    (0..n).forEach { dp[it][0] = true }\n    (1..n).forEach { i ->\n        (1..m).forEach { j ->\n            val prevValue = set[i - 1].value\n            val dpJKi = if (j >= prevValue) dp[i - 1][j - prevValue] else false\n            val dpj = dp[i - 1][j]\n            dp[i][j] = dpJKi || dpj\n        }\n    }\n    // Collect best partition elements\n    val subsetIndices = HashSet<Int>()\n    var i = n\n    var j = m\n    while (!dp[n][j]) --j\n    if (j == 0) {\n        return emptySet()\n    } else {\n        while (j > 0) {\n            val candidateValue = set[i-1].value\n            if (dp[i - 1][j - candidateValue]) {\n                subsetIndices.add(set[i-1].index)\n                j -= candidateValue\n            } else {\n                --i\n            }\n        }\n    }\n    return subsetIndices\n}\n\nfun main() {\n    val firstLine = F.readLineInts()\n    val n = firstLine[0]\n    val m = firstLine[1]\n    val contests = ArrayList<Contest>(n)\n    val everydayContestIndices = ArrayList<Int>(n)\n    val everySecondDayContestIndices = ArrayList<Int>(n)\n    repeat(n) { index ->\n        val line = F.readLineInts()\n        val contest = Contest(k = line[0], t = line[1])\n        if (contest.t == 1) {\n            everydayContestIndices.add(index)\n        } else {\n            everySecondDayContestIndices.add(index)\n        }\n        contests.add(contest)\n    }\n    var curX = 1\n    everydayContestIndices.forEach {\n        contests[it].x = curX\n        curX += contests[it].k\n    }\n    if (curX - 1 > m) {\n        println(-1)\n        return\n    }\n\n    if (everySecondDayContestIndices.isNotEmpty()) {\n        val smallerSubsetIndices = optimalPartitionSmallerSubsetIndices(\n            everySecondDayContestIndices.map {\n                IndexedValue(it, contests[it].k)\n            }\n        )\n        val biggerSubsetIndices = everySecondDayContestIndices.filter {\n            !smallerSubsetIndices.contains(it)\n        }\n        var bx = curX\n        var sx = curX + 1\n        biggerSubsetIndices.forEach {\n            contests[it].x = bx\n            bx += 2 * contests[it].k\n        }\n        smallerSubsetIndices.forEach {\n            contests[it].x = sx\n            sx += 2 * contests[it].k\n        }\n        if (max(bx, sx) - 2 > m) {\n            println(-1)\n            return\n        }\n    }\n    println(contests.map(Contest::x).joinToString(separator = \" \"))\n}"
+}

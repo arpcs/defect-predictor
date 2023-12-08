@@ -1,0 +1,36 @@
+{
+    "id": 131088193,
+    "contestId": 1571,
+    "creationTimeSeconds": 1633623279,
+    "relativeTimeSeconds": 5979,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "nor"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 88,
+    "timeConsumedMillis": 577,
+    "memoryConsumedBytes": 23347200,
+    "source": "@file:Suppress(\"NOTHING_TO_INLINE\", \"EXPERIMENTAL_FEATURE_WARNING\", \"OVERRIDE_BY_INLINE\")\n\nimport java.io.PrintWriter\nimport java.util.*\nimport kotlin.math.*\nimport kotlin.random.Random\nimport kotlin.collections.sort as internalSort\nimport kotlin.collections.sortDescending as internalSortDescending\nimport kotlin.io.println as iprintln\n\nfun main() {\n    internal_writer.work()\n    internal_writer.flush()\n}\n\nfun PrintWriter.work() {\n    // val t = readInt()\n    val t = 1\n    for (i in 1..t) {\n        solve()\n    }\n}\n\nfun PrintWriter.solve() {\n    val n = readInt()\n    var m = readInt()\n    var l = MutableList(0) { _ -> Pair(0, 0) }\n    var s = 0\n    var day = 1\n    var schedule = IntArray(n) { _ -> 0 }\n    for (i in 0 until n) {\n        val (k, t) = readInts(2)\n        if (t == 1) {\n            m -= k\n            schedule[i] = day\n            day += k\n        } else {\n            l.add(Pair(k, i))\n            s += k\n        }\n    }\n    if (m < 0) {\n        println(-1)\n        return\n    }\n    if (m * 2 + 100 < s) {\n        println(-1)\n        return\n    }\n    val N = l.size\n    var dp = Array<BitSet>(N + 1) { _ -> BitSet(s + 1) }\n    for (i in 0..N) {\n        dp[i][0] = true\n    }\n    for (i in 1..s) {\n        dp[0][1] = false\n    }\n    for (i in 1..N) {\n        for (j in 1..s) {\n            dp[i][j] = dp[i - 1][j]\n            if (j >= l[i - 1].first) {\n                dp[i][j] = dp[i][j] or dp[i - 1][j - l[i - 1].first]\n            }\n        }\n    }\n   \n    var k = 0\n    for (i in 0..s) {\n        if (dp[N][i]) {\n            k = max(k, min(i, s - i))\n        }\n    }\n    var other = s - k\n\n    if (max(2 * other - 1, 2 * k) > m) {\n        println(-1)\n        return\n    }\n\n    var cursum = k\n    var left = day\n    var right = day + 1\n\n    for (i in N - 1 downTo 0) {\n        if (cursum >= l[i].first && dp[i][cursum - l[i].first]) {\n            schedule[l[i].second] = right\n            right += 2 * l[i].first\n            cursum -= l[i].first\n        } else {\n            schedule[l[i].second] = left\n            left += 2 * l[i].first\n        }\n    }\n\n    println(schedule.joinToString(separator = \" \"))\n}\n\n@JvmField\nval INPUT = System.`in`\n\n@JvmField\nval OUTPUT = System.out\n\n@JvmField\nval internal_reader = INPUT.bufferedReader()\nfun readLine(): String? = internal_reader.readLine()\nfun readLn() = internal_reader.readLine()!!\n\n@JvmField\nvar internal_tokenizer: StringTokenizer = StringTokenizer(\"\")\nfun read(): String {\n    while (internal_tokenizer.hasMoreTokens().not()) internal_tokenizer = StringTokenizer(internal_reader.readLine() ?: return \"\", \" \")\n    return internal_tokenizer.nextToken()\n}\n\nfun readInt() = read().toInt()\nfun readDouble() = read().toDouble()\nfun readLong() = read().toLong()\nfun readStrings(n: Int) = List(n) { read() }\nfun readLines(n: Int) = List(n) { readLn() }\nfun readInts(n: Int) = List(n) { read().toInt() }\nfun readIntArray(n: Int) = IntArray(n) { read().toInt() }\nfun readDoubles(n: Int) = List(n) { read().toDouble() }\nfun readDoubleArray(n: Int) = DoubleArray(n) { read().toDouble() }\nfun readLongs(n: Int) = List(n) { read().toLong() }\nfun readLongArray(n: Int) = LongArray(n) { read().toLong() }\n\n@JvmField\nval internal_writer = PrintWriter(OUTPUT, false)\n\n/** shuffles and sort overrides to avoid quicksort attacks */\nprivate inline fun <T> internalShuffle(rnd: Random, get: (Int) -> T, set: (Int, T) -> Unit, size: Int) {\n    // Fisher-Yates shuffle algorithm\n    for (i in size - 1 downTo 1) {\n        val j = rnd.nextInt(i + 1)\n        val temp = get(i)\n        set(i, get(j))\n        set(j, temp)\n    }\n}\n\n@JvmField\nvar internal_random: Random? = null\nval random get() = internal_random ?: Random(0x564E235C123 * System.nanoTime()).also { internal_random = it }\n\nfun IntArray.shuffle(rnd: Random = random) = internalShuffle(rnd, ::get, ::set, size)\nfun IntArray.sort() {\n    shuffle(); internalSort()\n}\n\nfun IntArray.sortDescending() {\n    shuffle(); internalSortDescending()\n}\n\nfun LongArray.shuffle(rnd: Random = random) = internalShuffle(rnd, ::get, ::set, size)\nfun LongArray.sort() {\n    shuffle(); internalSort()\n}\n\nfun LongArray.sortDescending() {\n    shuffle(); internalSortDescending()\n}\n\nfun DoubleArray.shuffle(rnd: Random = random) = internalShuffle(rnd, ::get, ::set, size)\nfun DoubleArray.sort() {\n    shuffle(); internalSort()\n}\n\nfun DoubleArray.sortDescending() {\n    shuffle(); internalSortDescending()\n}\n\nfun CharArray.shuffle(rnd: Random = random) = internalShuffle(rnd, ::get, ::set, size)\ninline fun CharArray.sort() {\n    internalSort()\n}\n\ninline fun CharArray.sortDescending() {\n    internalSortDescending()\n}\n\ninline fun <T : Comparable<T>> Array<out T>.sort() = internalSort()\ninline fun <T : Comparable<T>> Array<out T>.sortDescending() = internalSortDescending()\ninline fun <T : Comparable<T>> MutableList<out T>.sort() = internalSort()\ninline fun <T : Comparable<T>> MutableList<out T>.sortDescending() = internalSortDescending()\n\nfun `prevent import removal`() {\n    iprintln(max(1, 2))\n}\n\nconst val MOD = 1000000007\nconst val SZ = 1 shl 18\nconst val INF = (1e18).toLong()\n\nfun add(a: Int, b: Int) = (a + b) % MOD\nfun sub(a: Int, b: Int) = (a - b + MOD) % MOD\nfun mul(a: Int, b: Int) = ((a.toLong() * b) % MOD).toInt()\nfun YN(b: Boolean): String {\n    return if (b) \"YES\" else \"NO\"\n}"
+}

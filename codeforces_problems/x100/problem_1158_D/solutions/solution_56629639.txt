@@ -1,0 +1,38 @@
+{
+    "id": 56629639,
+    "contestId": 1158,
+    "creationTimeSeconds": 1562427378,
+    "relativeTimeSeconds": 5178,
+    "problem": {
+        "contestId": 1158,
+        "index": "D",
+        "name": "Winding polygonal line",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "constructive algorithms",
+            "geometry",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1158,
+        "members": [
+            {
+                "handle": "Toxel"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1562422200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 187,
+    "memoryConsumedBytes": 1331200,
+    "source": "#include <bits/stdc++.h>\r\n\r\ntypedef long long ll;\r\nconst int N = 2010;\r\n\r\nclass P{\r\n public:\r\n  int x, y, id;\r\n  explicit P (int x = 0, int y = 0, int id = 0): x(x), y(y), id(id){}\r\n  P operator + (const P &p)const{return P (x + p.x, y + p.y);}\r\n  P operator - (const P &p)const{return P (x - p.x, y - p.y);}\r\n  ll operator ^ (const P &p)const{return 1ll * x * p.y - 1ll * y * p.x;}\r\n  ll operator % (const P &p)const{return 1ll * x * p.x + 1ll * y * p.y;}\r\n\r\n  bool operator < (const P &p)const{\r\n      if (x - p.x) return x < p.x;\r\n      return y < p.y;\r\n  }\r\n};\r\n\r\nclass L{\r\n public:\r\n  P p, v;\r\n\r\n  L (){}\r\n  L (P a, P b):p(a), v(b - a){}\r\n};\r\n\r\nll onLeft(L l, P p){\r\n    return l.v ^ (p - l.p);\r\n}\r\n\r\nstd::vector <P> convexHull(std::vector <P> &ps){\r\n    const int N = 100010;\r\n    static P stack[N];\r\n    std::sort(ps.begin(), ps.end());\r\n    int n = ps.size(), top = 0;\r\n    for (int i = 0; i < n; ++ i){\r\n        while (top > 1 && onLeft(L (stack[top - 2], stack[top - 1]), ps[i]) <= 0){\r\n            -- top;\r\n        }\r\n        stack[top ++] = ps[i];\r\n    }\r\n    int tmp = top;\r\n    for (int i = n - 2; i >= 0; -- i){\r\n        while (top > tmp && onLeft(L (stack[top - 2], stack[top - 1]), ps[i]) <= 0){\r\n            -- top;\r\n        }\r\n        stack[top ++] = ps[i];\r\n    }\r\n    if (n > 1) -- top;\r\n    std::vector <P> ret;\r\n    for (int i = 0; i < top; ++ i){\r\n        ret.push_back(stack[i]);\r\n    }\r\n    return ret;\r\n}\r\n\r\nchar s[N];\r\n\r\nint main() {\r\n    int n;\r\n    scanf(\"%d\", &n);\r\n    std::vector <P> ps(n);\r\n    for (int i = 0, x, y; i < n; ++ i){\r\n        scanf(\"%d%d\", &x, &y);\r\n        ps[i] = P(x, y, i + 1);\r\n    }\r\n    scanf(\"%s\", s);\r\n    std::vector <P> tmp = ps;\r\n    ps = convexHull(ps);\r\n    std::vector <int> ans(n);\r\n    if (s[0] == 'L'){\r\n        ans[0] = ps[0].id;\r\n        ans[1] = ps[1].id;\r\n    }\r\n    else{\r\n        ans[0] = ps[1].id;\r\n        ans[1] = ps[0].id;\r\n    }\r\n    ps = tmp;\r\n    for (int i = 0; i < n - 3; ++ i){\r\n        std::vector <P> qs;\r\n        for (auto u : ps){\r\n            if (u.id != ans[i]){\r\n                qs.push_back(u);\r\n            }\r\n        }\r\n        std::vector <P> tmp = qs;\r\n        qs = convexHull(qs);\r\n        int sit = 0, sz = qs.size();\r\n        for (int j = 0; j < sz; ++ j){\r\n            if (qs[j].id == ans[i + 1]){\r\n                sit = j;\r\n                break;\r\n            }\r\n        }\r\n        if (s[i + 1] == 'L'){\r\n            sit = (sit + 1) % sz;\r\n        }\r\n        else{\r\n            sit = (sit - 1 + sz) % sz;\r\n        }\r\n        ans[i + 2] = qs[sit].id;\r\n        ps = tmp;\r\n    }\r\n    for (auto u : ps){\r\n        if (u.id != ans[n - 2]){\r\n            ans[n - 1] = u.id;\r\n        }\r\n    }\r\n    for (int i = 0; i < n; ++ i){\r\n        printf(\"%d%c\", ans[i], \" \\n\"[i == n - 1]);\r\n    }\r\n    return 0;\r\n}"
+}

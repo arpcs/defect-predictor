@@ -1,0 +1,37 @@
+{
+    "id": 149744078,
+    "contestId": 1491,
+    "creationTimeSeconds": 1647364902,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1491,
+        "index": "F",
+        "name": "Magnets",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2700,
+        "tags": [
+            "binary search",
+            "constructive algorithms",
+            "interactive"
+        ]
+    },
+    "author": {
+        "contestId": 1491,
+        "members": [
+            {
+                "handle": "ytkn"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1614519300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 307200,
+    "source": "#include <iostream>\n#include <algorithm>\n#include <iomanip>\n#include <vector>\n#include <queue>\n#include <deque>\n#include <set>\n#include <map>\n#include <tuple>\n#include <cmath>\n#include <numeric>\n#include <functional>\n#include <cassert>\n#include <random>\n\n#define debug_value(x) cerr << \"line\" << __LINE__ << \":<\" << __func__ << \">:\" << #x << \"=\" << x << endl;\n#define debug(x) cerr << \"line\" << __LINE__ << \":<\" << __func__ << \">:\" << x << endl;\n\ntemplate<class T> inline bool chmax(T& a, T b) { if (a < b) { a = b; return 1; } return 0; }\ntemplate<class T> inline bool chmin(T& a, T b) { if (a > b) { a = b; return 1; } return 0; }\n\nusing namespace std;\ntypedef long long ll;\n\ntemplate<typename T>\nvector<vector<T>> vec2d(int n, int m, T v){\n    return vector<vector<T>>(n, vector<T>(m, v));\n}\n\ntemplate<typename T>\nvector<vector<vector<T>>> vec3d(int n, int m, int k, T v){\n    return vector<vector<vector<T>>>(n, vector<vector<T>>(m, vector<T>(k, v)));\n}\n\ntemplate<typename T>\nvoid print_vector(vector<T> v, char delimiter=' '){\n    if(v.empty()) {\n        cout << endl;\n        return;\n    }\n    for(int i = 0; i+1 < v.size(); i++) cout << v[i] << delimiter;\n    cout << v.back() << endl;\n}\n\nstd::random_device rnd;\nstd::mt19937 mt(rnd());\n\nint randint(const int l, const int r){\n    return mt()%(r - l) + l;\n}\n\nvector<int> gen_permutation(int n) {\n    random_device seed_gen;\n    mt19937 engine(seed_gen());\n    vector<int> ans(n);\n    for (int i = 0; i < n; i++) ans[i] = i;\n    shuffle(ans.begin(), ans.end(), engine);\n    return ans;\n}\n\nclass Simulator{\n    public:\n    int n;\n    Simulator(int n): n(n) {\n        n_asked = 0;\n        int x = n/2;\n        s = string(n, '-');\n        auto p = gen_permutation(n);\n        for(int i = 0; i < x; i++){\n            if(i%2 == 0){\n                s[p[i]] = 'S';\n            }else{\n                s[p[i]] = 'N';\n            }\n        }\n    }\n    int ask(vector<int> a, vector<int> b){\n        n_asked++;\n        int n1 = 0, s1 = 0;\n        int n2 = 0, s2 = 0;\n        for(int i: a){\n            if(s[i] == 'S') s1++;\n            if(s[i] == 'N') n1++;\n        }\n        for(int i: b){\n            if(s[i] == 'S') s2++;\n            if(s[i] == 'N') n2++;\n        }\n        int ans = (n1-s1)*(n2-s2);\n        assert(abs(ans) <= n);\n        return ans;\n    }\n    void verify(vector<int> v){\n        print_vector(v);\n        for(int i = 0; i < n; i++){\n            if(s[i] == '-') cout << i << ' ';\n        }\n        cout << endl;\n        int cnt = 0;\n        for(int i = 0; i < n; i++){\n            if(s[i] == '-') cnt++;\n        }\n        assert(v.size() == cnt);\n        for(int i: v) assert(s[i] == '-');\n        if(n_asked > n){\n            cout << n_asked << ' ' << n << endl;\n            assert(n >= (1<<(n_asked-n)));\n        }\n    }\n    private:\n    int n_asked;\n    string s;\n};\n\n// #define DEBUG\n\nvoid solve(){\n    int n; cin >> n;\n#ifdef DEBUG\n    auto sim = Simulator(n);\n#endif\n    auto ask = [&](vector<int> a, vector<int> b){\n#ifdef DEBUG\n        return sim.ask(a, b);\n#else\n        cout << \"? \" << a.size() << ' ' << b.size() << endl;\n        for(int i: a) cout << i+1 << ' ';\n        cout << endl;\n        for(int i: b) cout << i+1 << ' ';\n        cout << endl;\n        int ans; cin >> ans;\n        return ans;\n#endif\n    };\n    auto verify = [&](vector<int> a){\n#ifdef DEBUG\n        return sim.verify(a);\n#else\n        cout << \"! \" << a.size() << ' ';\n        for(int i: a) cout << i+1 << ' ';\n        cout << endl;\n#endif\n    };\n    auto find_k = [&](){\n        vector<int> a = {0};\n        for(int i = 1; i < n; i++){\n            if(ask(a, {i}) != 0){\n                return i;\n            }\n            a.push_back(i);\n        }\n    };\n    int k = find_k();\n    auto ok = [&](int x){\n        vector<int> a;\n        for(int i = 0; i <= x; i++) a.push_back(i);\n        return ask(a, {k}) != 0;\n    };\n    int j = 0;\n    if(!ok(j)){\n        int l = 0, r = k-1;\n        while(r-l > 1){\n            int x = (l+r)/2;\n            if(ok(x)) r = x;\n            else l = x;\n        }\n        j = r;\n    }\n    vector<bool> demagnetized(n, true);\n    demagnetized[j] = false;\n    demagnetized[k] = false;\n    for(int i = k+1; i < n; i++){\n        if(ask({k}, {i}) != 0) demagnetized[i] = false;\n    }\n    vector<int> ans;\n    for(int i = 0; i < n; i++){\n        if(demagnetized[i]) ans.push_back(i);\n    }\n    verify(ans);\n}\n\nint main(){\n    ios::sync_with_stdio(false);\n    cin.tie(0);\n    cout << setprecision(10) << fixed;\n    int t; cin >> t;\n    while(t--) solve();\n}"
+}

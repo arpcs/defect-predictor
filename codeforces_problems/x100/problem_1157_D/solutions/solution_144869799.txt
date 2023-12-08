@@ -1,0 +1,36 @@
+{
+    "id": 144869799,
+    "contestId": 1157,
+    "creationTimeSeconds": 1643736462,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1157,
+        "index": "D",
+        "name": "N Problems During K Days",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "constructive algorithms",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1157,
+        "members": [
+            {
+                "handle": "raideva"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1556289300
+    },
+    "programmingLanguage": "PyPy 3",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 155,
+    "memoryConsumedBytes": 5324800,
+    "source": "import decimal\nimport heapq\nimport math\nimport os\nimport random\nimport sys\nfrom collections import Counter, deque\nfrom io import BytesIO, IOBase\nimport bisect\nfrom types import GeneratorType\n\nBUFSIZE = 8192\n\n\nclass FastIO(IOBase):\n    newlines = 0\n\n    def __init__(self, file):\n        self._fd = file.fileno()\n        self.buffer = BytesIO()\n        self.writable = 'x' in file.mode or 'r' not in file.mode\n        self.write = self.buffer.write if self.writable else None\n\n    def read(self):\n        while True:\n            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))\n            if not b:\n                break\n            ptr = self.buffer.tell()\n            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)\n        self.newlines = 0\n        return self.buffer.read()\n\n    def readline(self):\n        while self.newlines == 0:\n            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))\n            self.newlines = b.count(b'\\n') + (not b)\n            ptr = self.buffer.tell()\n            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)\n        self.newlines -= 1\n        return self.buffer.readline()\n\n    def flush(self):\n        if self.writable:\n            os.write(self._fd, self.buffer.getvalue())\n            self.buffer.truncate(0), self.buffer.seek(0)\n\n\nclass IOWrapper(IOBase):\n    def __init__(self, file):\n        self.buffer = FastIO(file)\n        self.flush = self.buffer.flush\n        self.writable = self.buffer.writable\n        self.write = lambda s: self.buffer.write(s.encode('ascii'))\n        self.read = lambda: self.buffer.read().decode('ascii')\n        self.readline = lambda: self.buffer.readline().decode('ascii')\n\n\nsys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)\ninput = lambda: sys.stdin.readline().rstrip('\\r\\n')\n\n\ndef isPrime(n):\n    if n <= 1:\n        return False\n    if n <= 3:\n        return True\n    if n % 2 == 0 or n % 3 == 0:\n        return False\n    i = 5\n    while i * i <= n:\n        if n % i == 0 or n % (i + 2) == 0:\n            return False\n        i = i + 6\n    return True\n\n\ndef lcm(a, b): return (a * b) // math.gcd(a, b)\n\n\ndef ciel(a, b):\n    x = a // b\n    if a % b == 0:\n        return x\n    return x + 1\n\n\ndef ints_get(): return map(int, input().strip().split())\n\n\ndef list_get(): return list(map(int, sys.stdin.readline().strip().split()))\n\n\ndef chars_get(): return list(map(str, sys.stdin.readline().strip().split()))\n\n\ndef ipn(): return int(input())\n\n\ndef bootstrap(f, stack=[]):\n    def wrappedfunc(*args, **kwargs):\n        if stack:\n            return f(*args, **kwargs)\n        else:\n            to = f(*args, **kwargs)\n            while True:\n                if type(to) is GeneratorType:\n                    stack.append(to)\n                    to = next(to)\n                else:\n                    stack.pop()\n                    if not stack:\n                        break\n                    to = stack[-1].send(to)\n            return to\n\n    return wrappedfunc\n\n\n# ******************************************************#\n# **************** code starts here ********************#\n# ******************************************************#\n\n\ndef main():\n    n, k = ints_get()\n    v1 = pow(2, k) - 1\n    v2 = (k * (k + 1)) // 2\n    y = 0\n    if n > v1:\n        y = ciel(n - v1, k)\n        n -= k * y\n    if n < v2:\n        print(\"NO\")\n    else:\n        print(\"YES\")\n        v = [1]\n        for _ in range(k - 1):\n            v.append(v[-1] * 2)\n        val = v.pop()\n        c = 1\n        d = v1 - n\n        while d > 0:\n            if d >= c * (val - v[-1] - 1):\n                d -= c * (val - v[-1] - 1)\n                val = v.pop()\n                c += 1\n            else:\n                x = d // c\n                d -= x * c\n                val -= x\n                break\n        if v[-1] == val - 1:\n            if d > 0:\n                v[-1] -= 1\n                d -= 1\n        for _ in range(c):\n            if d > 0:\n                v.append(val - 1)\n                d -= 1\n            else:\n                v.append(val)\n            val += 1\n        for i in range(k):\n            v[i] += y\n        print(*v)\n    return\n\n\nif __name__ == \"__main__\":\n    main()\n"
+}

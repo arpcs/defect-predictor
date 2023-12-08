@@ -1,0 +1,38 @@
+{
+    "id": 125614613,
+    "contestId": 1236,
+    "creationTimeSeconds": 1628713736,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "peti1234"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 467,
+    "memoryConsumedBytes": 49254400,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\nconst int c=500005;\r\nlong long avg, po[c], inv[c], mod=1e9+7, ans;\r\nlong long n, m, k, szint[c], fel[c];\r\nlong long spec=0;\r\nvector<int> sz[c], kor, cs[c];\r\nvector<pair<int, int> > kor2;\r\nbool v[c];\r\nvoid dfs(int a) {\r\n    //cout << \"dfs \" << a << \"\\n\";\r\n    v[a]=true;\r\n    for (auto x:sz[a]) {\r\n        if (!v[x]) {\r\n            szint[x]=szint[a]+1;\r\n            fel[x]=a;\r\n            dfs(x);\r\n        } else if (szint[a]-szint[x]>1) {\r\n            int h=szint[a]-szint[x]+1;\r\n            kor.push_back(h);\r\n            //cout << \"kor \" << h << \"\\n\";\r\n            int pos=a;\r\n            int cnt=0;\r\n            while (szint[pos]>=szint[x]) {\r\n                //cout << \"kor \" << pos << \"\\n\";\r\n                cs[pos].push_back(h);\r\n                int si=sz[pos].size();\r\n                cnt+=si-2;\r\n                pos=fel[pos];\r\n            }\r\n            kor2.push_back({h, cnt});\r\n\r\n        }\r\n    }\r\n}\r\nlong long dif() {\r\n    return (ans-spec+mod)%mod;\r\n}\r\nint main()\r\n{\r\n    ios_base::sync_with_stdio(false);\r\n    cin >> n >> m;\r\n    if (n==1) {\r\n        cout << (mod+1)/4 << \"\\n\";\r\n        return 0;\r\n    }\r\n    po[0]=1, inv[0]=1, inv[1]=(mod+1)/2;\r\n    for (int i=1; i<=m+2; i++) {\r\n        po[i]=po[i-1]*2%mod;\r\n        if (i>1) {\r\n            inv[i]=inv[i-1]*inv[1]%mod;\r\n        }\r\n    }\r\n    for (int i=1; i<=m; i++) {\r\n        int a, b;\r\n        cin >> a >> b;\r\n        sz[a].push_back(b), sz[b].push_back(a);\r\n    }\r\n\r\n    szint[1]=1;\r\n    dfs(1);\r\n    avg=n*po[n-1]%mod-m*po[n-2]%mod+mod;\r\n    for (auto x:kor) {\r\n        avg+=po[n-x];\r\n    }\r\n    avg%=mod;\r\n    avg+=0;\r\n    //cout << \"atlag \" << avg << \"\\n\";\r\n    avg=(avg*inv[n])%mod;\r\n    //cout << \"vege \" << avg << \"\\n\";\r\n\r\n\r\n\r\n\r\n\r\n\r\n    // csucs*csucs\r\n    spec=ans;\r\n    ans+=n*po[n-1]%mod+n*(n-1)%mod*po[n-2]%mod;\r\n    //cout << \"csucs*csucs: \" << dif() << \"\\n\";\r\n\r\n\r\n    // avg*avg\r\n    spec=ans;\r\n    ans+=avg*avg%mod*po[n]%mod;\r\n    ans%=mod;\r\n    //cout << \"avg*avg: \" << dif() << \"\\n\";\r\n\r\n\r\n    // -2*avg*csucs\r\n    spec=ans;\r\n    ans-=2*avg*n%mod*po[n-1]%mod;\r\n    //cout << \"-2*avg*csucs: \" << dif()-mod << \"\\n\";\r\n\r\n    spec=ans;\r\n    // el*el\r\n    long long cnt=0;\r\n    for (int i=1; i<=n; i++) {\r\n        int si=sz[i].size();\r\n        cnt+=si*(si-1);\r\n    }\r\n    ans+=m*po[n-2];\r\n    //cout << \"ugyanaz \" << m*po[n-2] << \"\\n\";\r\n    ans%=mod;\r\n    if (cnt) {\r\n        ans+=cnt*po[n-3];\r\n        ans%=mod;\r\n        //cout << \"szomszedos \" << cnt*po[n-3] << \"\\n\";\r\n    }\r\n    if (cnt+m<m*m) {\r\n        ans+=(m*m-m-cnt)%mod*po[n-4]%mod;\r\n        //cout << \"tavoli \" << (m*m-m-cnt)*po[n-4] << \"\\n\";\r\n        ans%=mod;\r\n    }\r\n    //cout << \"el*el: \" << dif() << \"\\n\";\r\n\r\n    // -2*csucs*el\r\n    spec=ans;\r\n    ans-=2*m*2*po[n-2]%mod;\r\n    if (n>=3) {\r\n        ans-=2*m*(n-2)%mod*po[n-3]%mod;\r\n    }\r\n    //cout << \"-2*csucs*el: \" << dif()-mod << \"\\n\";\r\n\r\n    // +2*avg*el\r\n    spec=ans;\r\n    ans+=2*avg*m%mod*po[n-2]%mod;\r\n    //cout << \"2*avg*el: \" << dif() << \"\\n\";\r\n\r\n\r\n\r\n\r\n\r\n    // kor*kor;\r\n    spec=ans;\r\n    long long s=0;\r\n    for (auto x:kor) {\r\n        s+=po[n-x];\r\n    }\r\n    s%=mod;\r\n\r\n    for (auto x:kor) {\r\n        ans+=po[n-x];\r\n        ans+=(s-po[n-x]+mod)*inv[x]%mod;\r\n    }\r\n    //cout << \"resz \" << dif() << \"\\n\";\r\n    for (int i=1; i<=n; i++) {\r\n        long long s2=0;\r\n        for (auto x:cs[i]) {\r\n            //cout << \"kor \" << i << \" \" << x << \"\\n\";\r\n            s2+=po[n-x];\r\n        }\r\n        s2%=mod;\r\n        for (auto x:cs[i]) {\r\n            ans+=(s2-po[n-x]+mod)*inv[x]%mod;\r\n        }\r\n    }\r\n    //cout << \"kor*kor: \" << dif() << \"\\n\";\r\n\r\n    spec=ans;\r\n\r\n    // +2*csucs*kor\r\n    for (auto x:kor) {\r\n        ans+=2*po[n-x]*x%mod;\r\n        if (n-x>0) {\r\n            ans+=2*(n-x)*po[n-x-1]%mod;\r\n        }\r\n    }\r\n    //cout << \"2*csucs*kor: \" << dif() << \"\\n\";\r\n\r\n    // -2*avg*kor\r\n    spec=ans;\r\n    for (auto x:kor) {\r\n        ans-=2*avg*po[n-x]%mod;\r\n    }\r\n    //cout << \"2*avg*kor \" << dif()-mod << \"\\n\";\r\n\r\n\r\n    // -2*el*kor;\r\n    spec=ans;\r\n    for (auto x:kor2) {\r\n        long long fi=x.first, se=x.second;\r\n        ans-=2*po[n-fi]*fi%mod;\r\n        if (se) {\r\n            ans-=2*po[n-fi-1]*se%mod;\r\n        }\r\n        if (m-fi-se) {\r\n            ans-=2*po[n-fi-2]*(m-fi-se)%mod;\r\n        }\r\n    }\r\n    //cout << \"-2*el*kor: \" << dif()-mod << \"\\n\";\r\n\r\n\r\n    //cout << \"vege \" << ans%mod << \"\\n\";\r\n\r\n\r\n    ans+=mod*mod;\r\n    ans%=mod;\r\n\r\n\r\n    cout << ans*inv[n]%mod << \"\\n\";\r\n    return 0;\r\n}\r\n/*\r\n5 6\r\n1 2\r\n2 3\r\n1 3\r\n3 4\r\n4 5\r\n3 5\r\n*/\r\n"
+}

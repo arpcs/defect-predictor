@@ -1,0 +1,37 @@
+{
+    "id": 204301193,
+    "contestId": 1821,
+    "creationTimeSeconds": 1683071293,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1821,
+        "index": "F",
+        "name": "Timber",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "fft",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1821,
+        "members": [
+            {
+                "handle": "kondasujay2"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1682001300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 99,
+    "timeConsumedMillis": 234,
+    "memoryConsumedBytes": 2764800,
+    "source": "#pragma GCC optimize(\"O3,unroll-loops\")\n#pragma GCC target(\"avx2,bmi,bmi2,lzcnt,popcnt\")\n\n#include <bits/stdc++.h>\nusing namespace std;\nusing ll = long long;\n#define pb push_back\n#define getbit(mask, i) ((mask & (1 << i)) > 0)\n// debug tools\nstring str(char c) { return string(1, c); } string str(_Bit_reference b) { return b ? \"T\" : \"F\"; }\nstring str(int x) { return to_string(x); } string str(ll x) { return to_string(x); }\ntemplate<class T> string str(T a); template<class T, int S> string str(array<T, S>&);\ntemplate<class T, class U> string str(pair<T, U> p) { return \"(\" + str(p.first) + \", \" + str(p.second) + \")\"; }\ntemplate<class T, int S> string str(array<T, S> a) { string s = \"{\"; for(int i = 0; i < S - 1; i++) s += str(a[i]) + \", \";\n    s += str(a[S - 1]) + \"}\"; return s;}\ntemplate<class T> string str(T a) { string s = \"{\"; int f = 1; for(auto v : a) s += (f ? \"\" : \", \") + str(v), f = 0; \n    s += \"}\"; return s; }\ntemplate<class T> string strnl(T a) { string s = \"\"; for(auto v : a) s += str(v) + '\\n'; return s; }\n// input\ntemplate<class T> istream& operator>>(istream&, vector<T>&); \ntemplate<class T, int S> istream& operator>>(istream&, array<T, S>&);\ntemplate<class T, class U> istream& operator>>(istream& is, pair<T, U>& p) { is >> p.first >> p.second; return is; }\ntemplate<class T, int S> istream& operator>>(istream& is, array<T, S>& a) { for(int i = 0; i < S; i++) is >> a[i]; return is;}\ntemplate<class T> istream& operator>>(istream& is, vector<T>& a) { for(auto& v : a) is >> v; return is; }\n\ntemplate <int MOD> struct mint {\n    static const int mod = MOD;\n    int v; explicit operator int() const { return v; }\n    mint() : v(0) {}\n    mint(long long _v) : v(int(_v % MOD)) { v += (v < 0) * MOD; }\n    mint& operator+=(mint o) { if((v += o.v) >= MOD) v -= MOD; return *this; }\n    mint& operator-=(mint o) { if((v -= o.v) < 0) v += MOD; return *this; }\n    mint& operator*=(mint o) { v = int((long long) v * o.v % MOD); return *this; }\n    mint& operator/=(mint o) { return (*this) *= inv(o);}\n    friend mint pow(mint a, long long p) { assert(p >= 0); return p == 0 ? 1 : pow(a * a, p / 2) * (p & 1 ? a : 1); }\n    friend mint inv(mint a) { return pow(a, MOD - 2); }\n    friend mint operator+(mint a, mint b) { return a += b; }\n    friend mint operator-(mint a, mint b) { return a -= b; }\n    friend mint operator*(mint a, mint b) { return a *= b; }\n    friend mint operator/(mint a, mint b) { return a /= b; }\n    friend istream& operator>>(istream& is, mint& m) { is >> m.v; return is; }\n    friend string str(mint a) { return to_string(a.v); }\n    friend bool operator<(mint a, mint b) { return a.v < b.v; }\n};\n\ntemplate <int MOD> struct Comb {\n    vector<mint<MOD>> f, invf;\n    Comb() : Comb(0) {}\n    Comb(int n) : f(n + 1), invf(n + 1) {\n        f[0] = 1;\n        for (int i = 1; i <= n; i++)\n            f[i] = f[i - 1] * i;\n        invf[n] = inv(f[n]);\n        for (int i = n; i >= 1; i--)\n            invf[i - 1] = invf[i] * i;\n    }\n    mint<MOD> choose(int n, int k) { return (k > n) ? 0 : (f[n] * invf[k] * invf[n - k]); }\n    mint<MOD> perm(int n, int k) { return (k > n) ? 0 : (f[n] * invf[n - k]); }\n};\n\nconst int MOD = 998244353;\n\nint main() {\n    int n, m, k; cin >> n >> m >> k;\n    if((ll)m * (k + 1) > n) { cout << 0 << '\\n'; return 0; }\n    Comb<MOD> comb(n);\n    mint<MOD> ans = 0;\n    for(int i = 0; i <= m; i++) {\n        ans += pow(mint<MOD>(2), m) * pow(inv(mint<MOD>(-2)), i) * comb.choose(m, i) * comb.choose(n - (m + i) * k, m);\n    }\n    cout << str(ans) << endl;\n}\n\n// (n - km) choose m * 2 ^ m\n// let f(x) = # of ways to construct m integers such that the first x are > 2k and the rest are > k and sum up to n\n// = (n + m - x * (2k + 1) - (m - x) * (k + 1)) choose m\n// = (n - 2kx - x - mk - m + xk + x) choose m\n// = (n - (x + m)k) choose m\n// note m + x must be < n / k\n// let g(x) = # of ways to contruct m integers such that the first x are > 2k and the rest > k but < 2k and sum up to n (order matters)\n// therefore the answer = sum when x is in [0, min(m, n / k - m)] of: g(x) * 2 ^ (m - x) * (m choose x)\n// g(x) = sum when y is in [0, m - x] of: (-1) ^ y * f(x + y) * (m - x) choose y\n"
+}

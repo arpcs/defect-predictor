@@ -1,0 +1,38 @@
+{
+    "id": 117874671,
+    "contestId": 1236,
+    "creationTimeSeconds": 1622385327,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "ZPAYAUR"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 44134400,
+    "source": "#include <bits/stdc++.h>\r\n \r\nusing namespace std;\r\n \r\n#define MS(a, b) memset(a, b, sizeof(a))\r\n#define REP(a, b, c) for (register int a = b, _n = c; a <= _n; ++a)\r\n#define DREP(a, b, c) for (register int a = b, _n = c; a >= _n; --a)\r\n#define FOR(a, b, c) for (register int a = b, _n = c; a < _n; ++a)\r\n#define EREP(a, b) for (register int a = head[b]; a; a = edge[a].nxt)\r\n \r\ninline int rd() {\r\n    int x = 0; char c = getchar(); bool f = 0;\r\n    while (c < '0' && c != '-') c = getchar();\r\n    if (c == '-') f = 1, c = getchar();\r\n    while (c >= '0') x = (x << 3) + (x << 1) + (c ^ 48), c = getchar();\r\n    return f ? -x : x;\r\n}\r\n\r\nconst int SIZE = 5e5 + 100;\r\nconst int Mod = 1e9 + 7;;\r\n\r\nint Pow (int a, int b) {\r\n    int res = 1;\r\n    while (b) {\r\n        if (b & 1) res = 1LL * res * a % Mod;\r\n        b >>= 1;\r\n        a = 1LL * a * a % Mod;\r\n    }\r\n    return res;\r\n}\r\n\r\nint n, m;\r\n\r\nint head[SIZE], ecnt;\r\nstruct Edge {\r\n    int v, nxt;\r\n} edge[SIZE << 1];\r\nvoid Add_Edge (int u, int v) {\r\n    edge[++ecnt] = (Edge) { v, head[u] };\r\n    head[u] = ecnt;\r\n}\r\n\r\nint dfn[SIZE], dfs_cnt;\r\nint stk[SIZE], tp, cir, pre[SIZE];\r\nvector<int> WTF[SIZE], G[SIZE];\r\nvoid predfs (int u, int fa) {\r\n    dfn[u] = ++dfs_cnt;\r\n    stk[++tp] = u;\r\n    EREP (e, u) {\r\n        int v = edge[e].v;\r\n        if (v == fa) continue;\r\n        if (!dfn[v]) predfs(v, u);\r\n        else if (dfn[v] < dfn[u]) {\r\n            ++cir;\r\n            int now = tp;\r\n            do {\r\n                G[cir].push_back(stk[now]);\r\n                pre[stk[now]] = stk[now - 1];\r\n                //if (stk[now - 1] != v) pre[stk[now - 1]] = stk[now];\r\n            } while (stk[--now] != v);\r\n            WTF[v].push_back(cir);\r\n        }\r\n    }\r\n    --tp;\r\n}\r\nbool vis[SIZE];\r\n\r\nstruct Node {\r\n    int x, y, z;\r\n    void operator += (const Node& a) {\r\n        x = (x + a.x) % Mod;\r\n        y = (y + a.y) % Mod;\r\n        z = (z + a.z) % Mod;\r\n    }\r\n    void Minus () {\r\n        // (x - 1) ^ 2 = x ^ 2 - 2x + 1;\r\n        x = (x + Mod - 2LL * y % Mod + z) % Mod;\r\n        y = (y + Mod - z) % Mod;\r\n    }\r\n} dp[SIZE][2], F[2][2][2], TMP[2][2][2], A[2];\r\nNode Merge (const Node& a, const Node& b) {\r\n    Node res;\r\n    res.x = (1LL * b.x * a.z + 1LL * a.x * b.z + 2LL * b.y * a.y) % Mod;\r\n    res.y = (1LL * b.y * a.z + 1LL * a.y * b.z) % Mod;\r\n    res.z = (1LL * b.z * a.z) % Mod;\r\n    return res;\r\n}\r\n\r\nvoid dfs (int u) {\r\n    dp[u][0] = (Node) { 0, 0, 1 };\r\n    dp[u][1] = (Node) { 1, 1, 1 };\r\n    vis[u] = 1;\r\n    for (int id : WTF[u]) {\r\n        for (int v : G[id]) dfs(v);\r\n        FOR (i, 0, 2) FOR (j, 0, 2) FOR (k, 0, 2)\r\n            F[i][j][k] = (Node) { 0, 0, 0 };\r\n        F[1][0][0] = dp[G[id][0]][0];\r\n        F[0][1][1] = dp[G[id][0]][1];\r\n        FOR (asdf, 1, G[id].size()) {\r\n            int v = G[id][asdf];\r\n            FOR (i, 0, 2) FOR (j, 0, 2) FOR (k, 0, 2) TMP[i][j][k] = (Node) { 0, 0, 0 };\r\n            FOR (i, 0, 2) FOR (j, 0, 2) FOR (k, 0, 2) FOR (l, 0, 2) {\r\n                Node add = Merge(F[i][j][k], dp[v][l]);\r\n                if (k && l) add.Minus();\r\n                TMP[!l | i][j][l] += add;\r\n            }\r\n            FOR (i, 0, 2) FOR (j, 0, 2) FOR (k, 0, 2) F[i][j][k] = TMP[i][j][k];\r\n        }\r\n        FOR (i, 0, 2) A[i] = (Node) { 0, 0, 0 };\r\n        FOR (i, 0, 2) FOR (j, 0, 2) FOR (k, 0, 2) {\r\n            A[0] += Merge(dp[u][0], F[i][j][k]);\r\n            if (i) {\r\n                Node add = Merge(dp[u][1], F[i][j][k]);\r\n                if (j) add.Minus();\r\n                if (k) add.Minus();\r\n                A[1] += add;\r\n            }\r\n        }\r\n        Node add = Merge(dp[u][1], F[0][1][1]);\r\n        add.Minus();\r\n        A[1] += add;\r\n        FOR (i, 0, 2) dp[u][i] = A[i];\r\n    }\r\n    EREP (i, u) {\r\n        int v = edge[i].v;\r\n        if (vis[v] || v == pre[u]) continue;\r\n        dfs(v);\r\n        FOR (i, 0, 2) A[i] = (Node) { 0, 0, 0 };\r\n        FOR (i, 0, 2) FOR (j, 0, 2) {\r\n            if (i && j) {\r\n                Node add = Merge(dp[u][i], dp[v][j]);\r\n                add.Minus();\r\n                A[i] += add;\r\n            } else A[i] += Merge(dp[u][i], dp[v][j]);\r\n        }\r\n        FOR (i, 0, 2) dp[u][i] = A[i];\r\n    }\r\n}\r\n\r\n\r\nvoid _main () {\r\n    n = rd(), m = rd();\r\n    REP (i, 1, m) {\r\n        int u = rd(), v = rd();\r\n        Add_Edge(u, v);\r\n        Add_Edge(v, u);\r\n    }\r\n    predfs(1, 0);\r\n    dfs(1);\r\n    int TOT = Pow((Mod + 1) / 2, n);\r\n    //cout << dp[1][0].y << endl;\r\n    //cout << dp[1][1].y << endl;\r\n    //cout <<  Pow(TOT, Mod -2) << endl;\r\n    //cout << dp[1][0].x + dp[1][1].x << endl;\r\n    //cout << dp[1][0].y + dp[1][1].y << endl;\r\n    //cout << 1LL * (dp[1][0].y + dp[1][1].y) * TOT % Mod << endl;\r\n    printf (\"%lld\\n\", (1LL * (dp[1][0].x + dp[1][1].x) * TOT + Mod - Pow(1LL * (dp[1][0].y + dp[1][1].y) * TOT % Mod, 2)) % Mod);\r\n}\r\n\r\nint main () {\r\n#ifdef LOCAL\r\n    freopen(\"in.txt\", \"r\", stdin);\r\n#endif\r\n    _main();\r\n    return 0;\r\n}\r\n"
+}

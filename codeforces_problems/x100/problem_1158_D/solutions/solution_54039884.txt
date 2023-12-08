@@ -1,0 +1,39 @@
+{
+    "id": 54039884,
+    "contestId": 1158,
+    "creationTimeSeconds": 1557675908,
+    "relativeTimeSeconds": 4199,
+    "problem": {
+        "contestId": 1158,
+        "index": "D",
+        "name": "Winding polygonal line",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "constructive algorithms",
+            "geometry",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1158,
+        "members": [
+            {
+                "handle": "neal"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "room": 6,
+        "startTimeSeconds": 1557671700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 75,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 204800,
+    "source": "#include <algorithm>\n#include <cassert>\n#include <iostream>\n#include <string>\n#include <vector>\nusing namespace std;\n\nstruct point {\n    long long x, y;\n    int index;\n\n    point() : x(0), y(0) {}\n\n    point(long long _x, long long _y) : x(_x), y(_y) {}\n\n    point& operator+=(const point &other) {\n        x += other.x;\n        y += other.y;\n        return *this;\n    }\n\n    point& operator-=(const point &other) {\n        x -= other.x;\n        y -= other.y;\n        return *this;\n    }\n\n    point operator+(const point &other) const {\n        return point(*this) += other;\n    }\n\n    point operator-(const point &other) const {\n        return point(*this) -= other;\n    }\n\n    bool operator==(const point &other) const {\n        return x == other.x && y == other.y;\n    }\n\n    bool operator!=(const point &other) const {\n        return !(*this == other);\n    }\n\n    point operator-() const {\n        return point(-x, -y);\n    }\n\n    bool top_half() const {\n        return y > 0 || (y == 0 && x > 0);\n    }\n};\n\nlong long cross(const point &a, const point &b) {\n    return (long long) a.x * b.y - (long long) b.x * a.y;\n}\n\nbool left_turn(const point &a, const point &b, const point &c) {\n    return cross(b - a, c - b) > 0;\n}\n\n// Sort in increasing order of y, with ties broken in increasing order of x.\nbool yx_compare(const point &a, const point &b) {\n    return (b - a).top_half();\n}\n\n// Sort in increasing order of angle to the x-axis.\nbool angle_compare(const point &a, const point &b) {\n    if (a.top_half() ^ b.top_half())\n        return a.top_half();\n\n    return cross(a, b) > 0;\n}\n\n\nint N;\nvector<point> points;\nstring S;\nvector<int> order;\nvector<bool> available;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n\n    cin >> N;\n    points.resize(N);\n\n    for (point &p : points)\n        cin >> p.x >> p.y;\n\n    for (int i = 0; i < N; i++)\n        points[i].index = i;\n\n    cin >> S;\n\n    sort(points.begin(), points.end(), yx_compare);\n    vector<point> subtracted;\n\n    for (int i = 1; i < N; i++) {\n        subtracted.push_back(points[i] - points[0]);\n        subtracted.back().index = i;\n    }\n\n    sort(subtracted.begin(), subtracted.end(), angle_compare);\n    order.push_back(0);\n\n    if (S[0] == 'L')\n        order.push_back(subtracted.front().index);\n    else\n        order.push_back(subtracted.back().index);\n\n    available.assign(N, true);\n    available[order[0]] = available[order[1]] = false;\n\n    for (int i = 1; i < N - 2; i++) {\n        // segment: order[i - 1] -> order[i]\n        // point a = points[order[i - 1]];\n        point b = points[order[i]];\n        int choice = -1;\n\n        for (int c = 0; c < N; c++)\n            if (available[c]) {\n                if (choice < 0) {\n                    choice = c;\n                    continue;\n                }\n\n                if ((S[i] == 'L') ^ left_turn(b, points[choice], points[c]))\n                    choice = c;\n            }\n\n        order.push_back(choice);\n        available[choice] = false;\n    }\n\n    for (int i = 0; i < N; i++)\n        if (available[i])\n            order.push_back(i);\n\n    assert((int) order.size() == N);\n\n    for (int i = 0; i < N; i++)\n        cout << points[order[i]].index + 1 << (i < N - 1 ? ' ' : '\\n');\n}\n"
+}

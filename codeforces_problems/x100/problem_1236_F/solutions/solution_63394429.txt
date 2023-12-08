@@ -1,0 +1,38 @@
+{
+    "id": 63394429,
+    "contestId": 1236,
+    "creationTimeSeconds": 1572020040,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "dickings"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 41574400,
+    "source": "#include<bits/stdc++.h>\r\n#define pp 1000000007\r\n#define ma 750000\r\n#define pb push_back\r\n#define cuts printf(\"\\n----------\\n\");\r\n//#define debug\r\n\r\n\r\nusing namespace std;\r\n\r\nstruct data{\r\n\tint to,head;\r\n}e[ma*2];\r\nstack <int> s;\r\nvector <int> cir[ma];\r\nint n,m,len,head[ma],dfn[ma],low[ma],cnt,num,p[ma],binv[ma],d[ma];\r\nint ans,tot;\r\nlong long mm;\r\nint mul(int a,int b){\r\n\tint ans=1;\r\n\twhile(b){\r\n\t\tif(b&1) ans=1ll*ans*a%pp;\r\n\t\ta=1ll*a*a%pp; b>>=1;\r\n\t}\r\n\treturn ans;\r\n}\r\nvoid dfs(int lab,int fa){\r\n\tdfn[lab]=low[lab]=++num;\r\n\ts.push(lab);\r\n\tfor(int i=head[lab];i;i=e[i].head){\r\n\t\tif(!dfn[e[i].to]){\r\n\t\tdfs(e[i].to,lab);\t\r\n\t\tif(low[e[i].to]==dfn[lab]){\r\n\t\t\tcnt++; \r\n\t\t//\tprintf(\"%d:\\n\",cnt);\r\n\t\t//\tprintf(\"%d \",lab);\r\n\t\t\tint m1=s.top();\r\n\t\t\twhile(m1!=lab)\r\n\t\t\t{\r\n\t\t\t\t//printf(\"%d \",m1);\r\n\t\t\t\tcir[cnt].pb(m1);\r\n\t\t\t\ts.pop(); m1=s.top();\r\n\t\t\t}\r\n\t\t\t\r\n\t\t\tcir[cnt].pb(m1); m1=cir[cnt].size();\r\n\t\t\tfor(auto j:cir[cnt])\r\n\t\t\t\tp[j]=(1ll*p[j]+binv[m1])%pp;\r\n\t\t\ttot=(1ll*tot+binv[m1])%pp;\r\n\t\t\t//cuts\r\n\t\t\t}\r\n\t\t} \r\n\t\tif(e[i].to!=fa) low[lab]=min(low[lab],low[e[i].to]);\r\n\t}\r\n\t\r\n}\r\nvoid add(int u,int v){\r\n\te[++len].to=v; e[len].head=head[u];\r\n\thead[u]=len;\r\n}\r\nint main()\r\n{\r\n\tbinv[0]=1;\r\n\tbinv[1]=mul(2,pp-2);\r\n\tint u,v,m1,m2,m3;\r\n\tscanf(\"%d%d\",&n,&m);\r\n\tfor(int i=1;i<=m;i++){\r\n\t\tscanf(\"%d%d\",&u,&v);\r\n\t\tadd(u,v); add(v,u);\r\n\t\td[u]++; d[v]++;\r\n\t}\r\n\tm1=max(n,10);\r\n\tfor(int i=2;i<=m1;i++)\r\n\t\tbinv[i]=1ll*binv[1]*binv[i-1]%pp;\r\n\tans=1ll*n*(n+1)%pp*binv[2]%pp;//n^2\r\n\tans=(ans+1ll*m*binv[2])%pp;\r\n\t//mm=(mm+1ll*m*binv[2])%pp;\r\n\t\r\n\tdfs(1,0);\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tans=(ans-2ll*d[i]*binv[2])%pp;\r\n\t\tans=(ans-2ll*(m-d[i])*binv[3])%pp;//2nm\r\n\t\t\r\n\t\t\r\n\t\tans=(ans+2ll*p[i])%pp;\r\n\t\tans=(ans+2ll*(tot-p[i])*binv[1])%pp; //2nc\r\n\t\t\r\n\t\t\r\n\t\t\r\n\t\tfor(int j=head[i];j;j=e[j].head){\r\n\t\t\tif(e[j].to<i) continue;\r\n\t\t\tans=(ans+(1ll*d[i]+d[e[j].to]-3+m)*binv[4])%pp;//m^2--cross part\r\n\t\t}\r\n\t}\r\n\t#ifdef debug\r\n\tcuts\r\n\t\tfor(int i=1;i<=n;i++)\r\n\t\t\tprintf(\"%d %d\\n\",i,low[i]);\r\n\tcuts\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tprintf(\"%d \",binv[i]);\r\n\tcuts\r\n\tprintf(\"point:\\n\");\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tprintf(\"%d \",p[i]);\r\n\tcuts\r\n\t//printf(\"%d\\n\",tot);\r\n\t#endif\r\n\tans=(1ll*ans+tot)%pp;//c^2--self part;\r\n\tfor(int i=1;i<=cnt;i++){\r\n\t\tm1=0; m2=cir[i].size(),m3=0;\r\n\t\tfor(auto j:cir[i]){\r\n\t\t\tm1=(1ll*m1+p[j]-binv[m2])%pp;\r\n\t\t\tans=(ans+1ll*(p[j]-binv[m2])*binv[m2]%pp*2)%pp;//c^2--cross part1\r\n\t\t\t\r\n\t\t\tm3=(1ll*m3+d[j]-2)%pp;\r\n\t\t\tans=(ans-2ll*binv[m2+1]*(d[j]-2))%pp; //2mc m-->d[j]\r\n\t\t}\r\n\t\tm1=(1ll*m1+binv[m2])%pp;\r\n\t\tans=(ans+1ll*(tot-m1)*binv[m2])%pp;//c^2---cross part2\t\r\n\t\t\r\n\t\tans=(ans-2ll*m2*binv[m2])%pp;//2mc--m is other parts\r\n\t\tans=(ans-2ll*(m-m3-m2)*binv[m2+2])%pp;\r\n\t}\r\n\tm1=(1ll*n*binv[1]-1ll*m*binv[2]+1ll*tot)%pp;\r\n\tans=((ans-1ll*m1*m1)%pp+pp)%pp;\r\n\tprintf(\"%d\\n\",ans);\t\r\n} "
+}

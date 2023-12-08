@@ -1,0 +1,38 @@
+{
+    "id": 225191701,
+    "contestId": 1236,
+    "creationTimeSeconds": 1695688009,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "vjudge4"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 296,
+    "memoryConsumedBytes": 180428800,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\ntypedef long long LL;\ntypedef pair<int,int> pdr;\ntypedef long double LD;\n#define endl '\\n'\n#define fir first\n#define sec second\nnamespace IO{\n\tconst int sz=1<<24;\n\tchar a[sz+5],b[sz+5],*p1=a,*p2=a,*t=b,p[105];\n\tinline char gc(){\n\t\treturn p1==p2?(p2=(p1=a)+fread(a,1,sz,stdin),p1==p2?EOF:*p1++):*p1++;\n\t}\n\tinline void flush(){fwrite(b,1,t-b,stdout),t=b; }\n\tinline void pc(char x){*t++=x; if(t-b==sz) flush(); }\n#ifndef ONLINE_JUDGE\n\t#define gc() getchar()\n\t#define pc(x) putchar(x)\n#endif\n\ttemplate<class T> void rd(T& x){\n\t\tx=0; char c=gc();int flag=0;\n\t\tfor(;c<'0'||c>'9';c=gc()) c=='-'?flag=1:0;\n\t\tfor(;c>='0'&&c<='9';c=gc())\n\t\t\tx=x*10+(c-'0');\n\t\tif(flag) x=-x;\n\t}\n\ttemplate<class T> void wt(T x,char c='\\n'){\n\t\tif(x<0) pc('-'),x=-x;\n\t\tif(x==0) pc('0'); int t=0;\n\t\tfor(;x;x/=10) p[++t]=x%10+'0';\n\t\tfor(;t;--t) pc(p[t]);pc(c);\n\t}\n\tstruct F{~F(){flush();}}f;\n#ifndef ONLINE_JUDGE\n\t#undef gc\n\t#undef pc\n#endif\n}\n#define int __int128\nusing IO::rd;\nusing IO::wt;\nconst int N=5e5+10,mod=1e9+7,M=1e6+10;\nint head[N],idx=1,n,m,deg[N];\nstruct edge{\n\tint to,nxt;\n}e[M];\nvoid add(int i,int j){\n\te[++idx]={j,head[i]};\n\thead[i]=idx;\n\tdeg[j]++;\n}\nint dfn[N],low[N],id[N],tt,tot;\nvector<int>dcc[N],son[N];\nint stk[N],top,rt;\nvoid tarjan(int x){\n\tdfn[x]=low[x]=++tt;\n\tstk[++top]=x;\n\tfor(int i=head[x];i;i=e[i].nxt){\n\t\tif(!dfn[e[i].to]){\n\t\t\ttarjan(e[i].to);\n\t\t\tlow[x]=min(low[x],low[e[i].to]);\n\t\t\tif(low[e[i].to]>=dfn[x]){\n\t\t\t\tint y;++tot;\n\t\t\t\tdo{\n\t\t\t\t\ty=stk[top--];\n\t\t\t\t\tdcc[tot].push_back(y);\n\t\t\t\t}while(y!=e[i].to);\n\t\t\t\tdcc[tot].push_back(x);\n\t\t\t\tif(dcc[tot].size()<=2) dcc[tot].resize(0),--tot;\n\t\t\t\telse for(auto &j:dcc[tot]) son[j].push_back(tot);\n\t\t\t}\n\t\t} else low[x]=min(low[x],dfn[e[i].to]);\n\t}\n} \nLL ans,bas[N<<1],inv[N<<1],inv2=(1e9+8)/2,inv4=inv2*inv2%mod,inv8=inv4*inv2%mod,inv16=inv8*inv2%mod;\nsigned main()\n{\n\trd(n);rd(m);\n\tfor(int i=1;i<=m;i++){\n\t\tint u,v;\n\t\trd(u);rd(v);\n\t\tadd(u,v);add(v,u);\n\t}\n\tfor(int i=1;i<=n;i++) if(!dfn[i]) rt=i,tarjan(i);\n\tLL res=0;\n\tres=(n*inv2-m*inv4)%mod;\n\t// a-b\n\tbas[0]=inv[0]=1;\n\tfor(int i=1;i<=n*2;i++) bas[i]=bas[i-1]*2%mod;\n\tfor(int i=1;i<=n*2;i++) inv[i]=inv[i-1]*inv2%mod;\n\tfor(int i=1;i<=tot;i++) res=(res+inv[dcc[i].size()])%mod;\n\t// c\n\tans=(mod-res*res%mod)%mod;\n\t// E(x)^2\n\tans=(ans+1ll*n*(n+1)%mod*inv4)%mod;\n\t// a^2\n\tans=(ans+m*inv4)%mod;\n\tres=1ll*m*m+m;\n\tfor(int i=1;i<=n;i++){\n\t\tres-=1ll*deg[i]*deg[i];\n\t\tans=(ans+(deg[i]-1)*inv8%mod*deg[i])%mod;\n\t}\n\tans=(ans+res%mod*inv16)%mod;\n\t// b^2\n\tres=0;\n\tfor(int i=1;i<=tot;i++) ans=(ans+inv[dcc[i].size()])%mod;\n\tfor(int i=1;i<=tot;i++) ans=(ans+inv[dcc[i].size()]*res)%mod,res=(res+inv[dcc[i].size()])%mod;\n\tres=0;\n\tfor(int i=tot;i;i--) ans=(ans+inv[dcc[i].size()]*res)%mod,res=(res+inv[dcc[i].size()])%mod;\n\tfor(int i=1;i<=n;i++){\n\t\tres=0;\n\t\tfor(auto &j:son[i]) res=(res+inv[dcc[j].size()])%mod;\n\t\tfor(auto &j:son[i]) ans=(ans-inv[dcc[j].size()]*(res-inv[dcc[j].size()])+inv[dcc[j].size()-1]*(res-inv[dcc[j].size()]))%mod;\n\t}\n\t// c^2\n\tans=(ans-2*1ll*(n-2)*m%mod*inv8-4*m*inv4)%mod;\n\t// -ab\n\tfor(int i=1;i<=tot;i++){\n\t\tans=(ans+(inv[dcc[i].size()]*(LL)dcc[i].size()+inv[dcc[i].size()+1]*(LL)(n-dcc[i].size()))*2)%mod;\n\t}\n\t// ac\n\tfor(int i=1;i<=tot;i++){\n\t\tres=0;\n\t\tfor(auto &j:dcc[i]) res+=deg[j]-2;\n\t\tres%=mod;\n\t//\tans=(ans-2*inv[dcc[i].size()]*(LL)dcc[i].size())%mod;\n\t\tans=(ans-2*inv[dcc[i].size()]*(LL)dcc[i].size()-2*inv[dcc[i].size()+2]*(LL)(m-res-dcc[i].size())-2*inv[dcc[i].size()+1]*res)%mod;\n\t} \n\t// -bc\n\twt((ans+mod)%mod);\n//\twt((ans+mod)*64%mod); \n\treturn 0;\n}\n\t \t \t \t \t \t\t\t\t  \t  \t \t\t  \t    \t"
+}

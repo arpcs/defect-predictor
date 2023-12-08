@@ -1,0 +1,38 @@
+{
+    "id": 3163417,
+    "contestId": 274,
+    "creationTimeSeconds": 1361388632,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 274,
+        "index": "D",
+        "name": "Lovely Matrix",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 274,
+        "members": [
+            {
+                "handle": "Smit"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1361374200
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 12595200,
+    "source": "#include<cstdio>\n#include<iostream>\n#include<vector>\n#include<map>\n#include<set>\n#include<stack>\n#include<queue>\n#include<algorithm>\n#include<cmath>\n#include<string>\n#include<cstdlib>\n#include<climits>\n#include<cstring>\nusing namespace std;\n\n#define CLR(a,x) memset(a,x,sizeof(a))\n#define PB push_back\n#define INF 1000000000\n#define MOD 1000000007\n#define MP make_pair\n#define tr(container , it) for(typeof(container.begin()) it=container.begin() ; it!=container.end() ; it++)\n#define FOR(i,a,b) for(i=a;i<b;i++)\n#define REP(i,a) FOR(i,0,a)\n#define LL long long\n#define VI vector < int >\n#define PII pair < int , int >\n\n\nint r,c;\nvector < VI > num;\nvector < VI > edge;\nint vis[1<<20];\nvector < int > topo;\nint compare(int r1,int r2,int c1,int c2)\n{\n\tint fl1=0,fl2=0;\n\tfor(int i=r1;i<=r2;i++)\n\t{\n\t\tif(num[i][c1]==-1||num[i][c2]==-1)\n\t\t\tcontinue;\n\t\tif(num[i][c1]>num[i][c2])\n\t\t\tfl1=1;\n\t\telse if(num[i][c1]<num[i][c2])\n\t\t\tfl2=1;\n\t}\n\tif(fl1+fl2==2)\n\t\treturn -2;\n\tif(fl1)\n\t\treturn 1;\n\tif(fl2)\n\t\treturn -1;\n\treturn 0;\n}\n\nvoid dfs(int cur)\n{\n\tif(vis[cur])return;\n\tvis[cur]=1;\n\tint sz=edge[cur].size();\n\tfor(int i=0;i<sz;i++)\n\t\tdfs(edge[cur][i]);\n\ttopo.PB(cur);\n}\nint pos[1<<20],taken[1<<20];\nvector < VI >  order;\nvector < PII > tempv;\nvoid rec(int ind,int low,int high)\n{\n\tif(low==high)\n\t{\n\t\torder[ind].resize(c);\n\t\ttempv.clear();\n\t\tfor(int i=0;i<c;i++)\n\t\t{\n\t\t\tif(num[low][i]==-1)\n\t\t\t\ttempv.PB(MP(-MOD,i));\n\t\t\telse\n\t\t\t\ttempv.PB(MP(num[low][i],i));\t\n\t\t}\n\t\tsort(tempv.begin(),tempv.end());\n\t\tpos[ind]=1;\n\t\tfor(int i=0;i<c;i++)\n\t\t\torder[ind][i]=tempv[i].second;\n\t}\n\telse\n\t{\t\n\t\tint mid=(low+high)/2,p1,p2,ret;\n\t\tpos[ind]=1;\n\t\trec(ind*2,low,mid);\n\t\trec(ind*2+1,mid+1,high);\n\t\tif(pos[ind*2]+pos[ind*2+1]!=2)\n\t\t{\n\t\t\tpos[ind]=0;\n\t\t\treturn;\n\t\t}\n\t\tp1=0;\n\t\tp2=0;\n\t\tint cur=-1;\n\t\tfor(int i=0;i<c;i++)\n\t\t\ttaken[i]=0;\n\t\twhile(p1!=c && p2!=c)\n\t\t{\n\t\t\tif(taken[order[ind*2][p1]]==1)\n\t\t\t{\n\t\t\t\tp1++;\n\t\t\t\tcontinue;\n\t\t\t}\n\t\t\tif(taken[order[ind*2+1][p2]]==1)\n\t\t\t{\t\n\t\t\t\tp2++;\n\t\t\t\tcontinue;\n\t\t\t}\n\t\t\tret=compare(low,high,order[ind*2][p1],order[ind*2+1][p2]);\n\t\t\tif(ret==-2)\n\t\t\t{\n\t\t\t\tpos[ind]=0;\n\t\t\t\treturn;\n\t\t\t}\n\t\t\tcur++;\n\t\t\tif(ret>0)\n\t\t\t\torder[ind].PB(order[ind*2+1][p2]),p2++;\n\t\t\telse\n\t\t\t\torder[ind].PB(order[ind*2][p1]),p1++;\n\t\t\ttaken[order[ind][cur]]=1;\n\t\t}\n\t\twhile(p1!=c)\n\t\t\tif(taken[order[ind*2][p1]]==0)\n\t\t\t\torder[ind].PB(order[ind*2][p1]),p1++;\n\t\t\telse \n\t\t\t\tp1++;\n\t\twhile(p2!=c)\n\t\t\tif(taken[order[ind*2+1][p2]]==0)\n\t\t\t\torder[ind].PB(order[ind*2+1][p2]),p2++;\n\t\t\telse\n\t\t\t\tp2++;\n\t\tfor(int i=0;i<c-1;i++)\n\t\t\tif(compare(low,high,order[ind][i+1],order[ind][i])<0)\n\t\t\t\tpos[ind]=0;\n\t\t\t\t\n\t}\n}\n\nint main()\n{\n\tint i,j,fl,comp,pfl;\n\tpfl=0;\n\twhile(scanf(\"%d%d\",&r,&c)!=EOF)\n\t{\n\t\tnum.clear();\n\t\tnum.resize(r);\n\t\tfor(i=0;i<r;i++)\n\t\t{\n\t\t\tnum[i].resize(c);\n\t\t\tfor(j=0;j<c;j++)\n\t\t\t\tscanf(\"%d\",&num[i][j]);\n//\t\t\tif(r==10&&c==10&&num[1][4]==422463893)\n//\t\t\t\tpfl=1;\n\t\t}\n\t\tfl=1;\n\t\tif(r>c)\n\t\t{\n\t\t\tedge.clear();\n\t\t\tedge.resize(c);\n\t\t\tfor(i=0;i<c;i++)\n\t\t\t{\n\t\t\t\tfor(j=i+1;j<c;j++)\n\t\t\t\t{\n\t\t\t\t\tcomp=compare(0,r-1,i,j);\n\t\t\t\t\tif(comp==-2)\n\t\t\t\t\t\tfl=0;\n\t\t\t\t\tif(comp>0)\n\t\t\t\t\t\tedge[j].PB(i);\n\t\t\t\t\telse if(comp<0)\n\t\t\t\t\t\tedge[i].PB(j);\n\t\t\t\t}\n\t\t\t}\n\t\t\ttopo.clear();\n\t\t\tmemset(vis,0,sizeof(vis));\n\t\t\tif(fl)\n\t\t\t{\n\t\t\t\tfor(int i=0;i<c;i++)\n\t\t\t\t\tif(vis[i]==0)\n\t\t\t\t\t\tdfs(i);\n\t\t\t\treverse(topo.begin(),topo.end());\n\t\t\t\tfor(int i=0;i<c;i++)\n\t\t\t\t{\n\t\t\t\t\tfor(int j=i+1;j<c;j++)\n\t\t\t\t\t{\n\t\t\t\t\t\tcomp=compare(0,r-1,topo[i],topo[j]);\n\t\t\t\t\t\tif(comp>0)\n\t\t\t\t\t\t\tfl=0;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tif(fl==0)\n\t\t\t\tprintf(\"-1\\n\");\n\t\t\telse\n\t\t\t{\n\t\t\t\tfor(i=0;i<c;i++)\n\t\t\t\t\tprintf(\"%d \",topo[i]+1);\n\t\t\t\tprintf(\"\\n\");\n\t\t\t}\n\t\t}\n\t\telse\n\t\t{\n\t\t\torder.resize(4*r);\n\t\t\trec(1,0,r-1);\n\t\t\tif(pos[1]==0)\n\t\t\t\tprintf(\"-1\\n\");\n\t\t\telse\n\t\t\t{\n\t\t\t\tfor(i=0;i<c;i++)\n\t\t\t\t\tprintf(\"%d \",order[1][i]+1);\n\t\t\t\tprintf(\"\\n\");\n\t\t\t}\n\t\t}\n\t}\n\treturn 0;\n}\n"
+}

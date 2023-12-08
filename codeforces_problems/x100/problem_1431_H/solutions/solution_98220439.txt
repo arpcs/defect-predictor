@@ -1,0 +1,37 @@
+{
+    "id": 98220439,
+    "contestId": 1431,
+    "creationTimeSeconds": 1605199576,
+    "relativeTimeSeconds": 7876,
+    "problem": {
+        "contestId": 1431,
+        "index": "H",
+        "name": "Rogue-like Game",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "*special",
+            "brute force",
+            "greedy",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1431,
+        "members": [
+            {
+                "handle": "IgorSmirnov"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1605191700
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 0,
+    "source": "import java.io.BufferedReader\r\nimport java.io.InputStreamReader\r\nimport java.lang.Integer.max\r\nimport java.lang.Integer.min\r\nimport java.util.*\r\n\r\nfun solve() {\r\n    val (n, m, k) = readInts()\r\n    val a = readLongs()\r\n    val b = readLongs()\r\n    val c = Array(n) { IntArray(m) { 0 } }\r\n    val prefMax = Array(n + 1) { IntArray(m + 1) { 0 } }\r\n    for (i in 0 until n) {\r\n        val cs = readInts()\r\n        for (j in 0 until m) {\r\n            c[i][j] = cs[j]\r\n            prefMax[i + 1][j + 1] = maxOf(maxOf(prefMax[i][j + 1], prefMax[i + 1][j]), c[i][j])\r\n        }\r\n    }\r\n    val way = mutableListOf<Point>()\r\n    var curPoints = 0.toLong()\r\n    var curA = 0\r\n    var curB = 0\r\n    while (curA != n - 1 || curB != m - 1) {\r\n        var closest = Long.MAX_VALUE\r\n        if (curA != n - 1) {\r\n            closest = minOf(closest, a[curA + 1])\r\n        }\r\n        if (curB != m - 1) {\r\n            closest = minOf(closest, b[curB + 1])\r\n        }\r\n        val needPoints = closest - curPoints\r\n        val curMax = prefMax[curA + 1][curB + 1].toLong()\r\n        val timesToUse = needPoints / curMax + minOf(1L, needPoints % curMax)\r\n        way.add(Point(curA, curB, curMax, closest))\r\n        curPoints += curMax * timesToUse\r\n        while (curA < n - 1 && a[curA + 1] <= curPoints) {\r\n            ++curA\r\n        }\r\n        while (curB < m - 1 && b[curB + 1] <= curPoints) {\r\n            ++curB\r\n        }\r\n    }\r\n    //println(way.joinToString())\r\n    var ans = Long.MAX_VALUE\r\n    for (i in way.indices) {\r\n        ans = minOf(ans, updAns(i, k.toLong(), way))\r\n    }\r\n    println(ans)\r\n}\r\n\r\nfun updAns(position: Int, k: Long, way: List<Point>): Long {\r\n    var ans = 0L\r\n    var curSum = 0L\r\n    var curMax = 0L\r\n    for (i in way.indices) {\r\n        if (i == position) {\r\n            curMax = way[i].maxim + k\r\n        }\r\n        curMax = maxOf(curMax, way[i].maxim)\r\n        val need = way[i].closest - curSum\r\n        if (need > 0) {\r\n            val times = need / curMax + minOf(1L, need % curMax)\r\n            ans += times\r\n            curSum += times * curMax\r\n        }\r\n    }\r\n    //println(\"$position $ans\")\r\n    return ans\r\n}\r\n\r\ndata class Point(val curA: Int, val curB: Int, val maxim: Long, val closest: Long)\r\n\r\n\r\nfun main() {\r\n    solve()\r\n    flush()\r\n}\r\n\r\n/**\r\n * Some functions for competitive programming with Kotlin\r\n * Author: Igor Smirnov (https://github.com/smirnov-i-SPbAU)\r\n */\r\n\r\n/** Buffered read */\r\nval bufferedReader = BufferedReader(InputStreamReader(System.`in`))\r\nfun readLine(): String = bufferedReader.readLine()!!\r\nfun readInt(): Int = readLine().toInt()\r\nfun readLong(): Long = readLine().toLong()\r\nfun readDouble(): Double = readLine().toDouble()\r\nfun readStrings(): List<String> = readLine().split(\" \")\r\nfun readInts(): List<Int> = readLine().split(\" \").map { it.toInt() }\r\nfun readDoubles(): List<Double> = readLine().split(\" \").map { it.toDouble() }\r\nfun readLongs(): List<Long> = readLine().split(\" \").map { it.toLong() }\r\n/** End buffered read */\r\n\r\n/** Buffered print */\r\nprivate val outputBuilder = StringBuilder()\r\n\r\nfun println(something: Any?) = outputBuilder.apply {\r\n    append(something.toString())\r\n    append('\\n')\r\n}\r\n\r\nfun print(something: Any?) {\r\n    outputBuilder.append(something.toString())\r\n}\r\n\r\nfun flush() {\r\n    kotlin.io.print(outputBuilder.toString())\r\n    outputBuilder.clear()\r\n}\r\n/** End buffered print */\r\n\r\n/** Comparable pair */\r\ndata class ComparablePair<T : Comparable<T>, S : Comparable<S>>(val first: T, val second: S) : Comparable<ComparablePair<T, S>> {\r\n    override fun compareTo(other: ComparablePair<T, S>): Int {\r\n        if (first != other.first) {\r\n            return if (first < other.first) -1 else 1\r\n        }\r\n        return second.compareTo(other.second)\r\n    }\r\n}\r\n\r\ninfix fun <A : Comparable<A>, B : Comparable<B>> A.to(that: B): ComparablePair<A, B> = ComparablePair(this, that)\r\n/** End comparable pair */\r\n\r\n/** C++ like binary searches over list */\r\n/**\r\n * Returns index of first element of a list that is >= `value`.\r\n * If there is no such element, returns size of the list.\r\n */\r\nfun <T : Comparable<T>> List<T>.lowerBoundIndex(value: T): Int {\r\n    var left = -1\r\n    var right = size\r\n    while (left + 1 < right) {\r\n        val middle = (left + right) / 2\r\n        if (get(middle) < value) {\r\n            left = middle\r\n        } else {\r\n            right = middle\r\n        }\r\n    }\r\n    return right\r\n}\r\n\r\n/**\r\n * Returns value of first element of a list that is >= `value`.\r\n * If there is no such element, returns null.\r\n */\r\nfun <T : Comparable<T>> List<T>.lowerBoundValue(value: T): T? {\r\n    val index = lowerBoundIndex(value)\r\n    return if (index == size) {\r\n        null\r\n    } else {\r\n        get(index)\r\n    }\r\n}\r\n\r\n/**\r\n * Returns index of first element of a list that is > `value`.\r\n * If there is no such element, returns size of the list.\r\n */\r\nfun <T : Comparable<T>> List<T>.upperBoundIndex(value: T): Int {\r\n    var left = -1\r\n    var right = size\r\n    while (left + 1 < right) {\r\n        val middle = (left + right) / 2\r\n        if (get(middle) <= value) {\r\n            left = middle\r\n        } else {\r\n            right = middle\r\n        }\r\n    }\r\n    return right\r\n}\r\n\r\n/**\r\n * Returns value of first element of a list that is >= `value`.\r\n * If there is no such element, returns null.\r\n */\r\nfun <T : Comparable<T>> List<T>.upperBoundValue(value: T): T? {\r\n    val index = upperBoundIndex(value)\r\n    return if (index == size) {\r\n        null\r\n    } else {\r\n        get(index)\r\n    }\r\n}\r\n/** End C++ like binary searches */\r\n"
+}

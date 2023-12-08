@@ -1,0 +1,37 @@
+{
+    "id": 98233367,
+    "contestId": 1431,
+    "creationTimeSeconds": 1605215563,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1431,
+        "index": "H",
+        "name": "Rogue-like Game",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "*special",
+            "brute force",
+            "greedy",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1431,
+        "members": [
+            {
+                "handle": "gleb.astashkin"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1605191700
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 71,
+    "timeConsumedMillis": 1216,
+    "memoryConsumedBytes": 31539200,
+    "source": "import java.lang.Exception\r\nimport java.lang.Long.max\r\nimport java.lang.Long.min\r\nimport java.lang.StringBuilder\r\nimport java.util.*\r\nimport kotlin.collections.ArrayList\r\nimport kotlin.collections.HashMap\r\nimport kotlin.math.abs\r\nimport kotlin.math.sqrt\r\n\r\n/*\r\n    println(r.iterator().next().value)\r\n    var r = TreeMap<Int, String>(Comparator<Int> { p0, p1 -> p1 - p0 })\r\n    fun solve(a: Int): Int {\r\n\r\n    var (n, m) = readLine()!!.split(' ').map{it.toInt()}\r\n    var r = readLine()!!.split(' ').map { it.toInt() }.toMutableList()\r\n    String.format(\"%.8g%n\", d)\r\n    var a = Array(n, {IntArray(n)})\r\n    a = b.also { b = a }\r\n    var q = TreeSet<Pair<Int, Int>>(pairComparator(naturalOrder(), naturalOrder()))\r\n */\r\n\r\nfun <T, U> pairComparator(\r\n        firstComparator: Comparator<T>,\r\n        secondComparator: Comparator<U>\r\n): Comparator<Pair<T, U>> =\r\n        compareBy(firstComparator) { p: Pair<T, U> -> p.first }\r\n                .thenBy(secondComparator) { p: Pair<T, U> -> p.second }\r\n\r\nvar cnt = 0\r\n\r\nfun solve(r: Array<Pair<Long, Int>>, c: Array<Pair<Long, Int>>, mr: LongArray, mc: LongArray, k: Int,\r\n          tR: Long, tv: Long, tm: Long, tri: Int, tci: Int, f: Boolean): Long {\r\n    var BR: Long = (1000000000).toLong() * (1000000000).toLong()\r\n\r\n    var R: Long = tR\r\n\r\n    var v: Long = tv\r\n    var m: Long = tm\r\n\r\n    var ri = tri\r\n    var ci = tci\r\n\r\n    while (true) {\r\n        cnt += 1\r\n\r\n        if (!f) {\r\n            BR = min(BR, solve(r, c, mr, mc, k, R, v, m + k, ri, ci, true))\r\n        }\r\n\r\n        while (ri < r.size && r[ri].first <= v) {\r\n            m = max(m, mr[r[ri].second])\r\n            ri += 1\r\n        }\r\n\r\n        while (ci < c.size && c[ci].first <= v) {\r\n            m = max(m, mc[c[ci].second])\r\n            ci += 1\r\n        }\r\n\r\n        if (ri == r.size && ci == c.size) {\r\n            return min(BR, R)\r\n        }\r\n\r\n        var tmax: Long = 1000000000000 + 7\r\n\r\n        var v1 = if (ri < r.size) r[ri].first else tmax\r\n        var v2 = if (ci < c.size) c[ci].first else tmax\r\n        var t = min(v1, v2) - v\r\n\r\n        var tr = t / m + (if (t % m == 0.toLong()) 0 else 1)\r\n        R += tr\r\n        v += tr * m\r\n    }\r\n}\r\n\r\nfun main() {\r\n    var (n, m, k) = readLine()!!.split(' ').map { it.toInt() }\r\n    var tr = readLine()!!.split(' ').map { it.toLong() }.toLongArray()\r\n    var tc = readLine()!!.split(' ').map { it.toLong() }.toLongArray()\r\n\r\n    var r = Array<Pair<Long, Int>>(n){Pair<Long, Int>(0.toLong(), 0)}\r\n    var c = Array<Pair<Long, Int>>(m){Pair<Long, Int>(0.toLong(), 0)}\r\n\r\n    for (i in 0 until n) {\r\n        r[i] = Pair(tr[i], i)\r\n    }\r\n\r\n    for (i in 0 until m) {\r\n        c[i] = Pair(tc[i], i)\r\n    }\r\n\r\n    r.sortWith(pairComparator(naturalOrder(), naturalOrder()))\r\n    c.sortWith(pairComparator(naturalOrder(), naturalOrder()))\r\n\r\n    var a = Array(n){LongArray(m)}\r\n    for (i in 0 until n) {\r\n        var t = readLine()!!.split(' ').map { it.toLong() }.toLongArray()\r\n        for (j in 0 until m) {\r\n            a[i][j] = t[j]\r\n        }\r\n    }\r\n\r\n    var z = TreeSet<Long>()\r\n    for ((v, t) in r) {\r\n        z.add(v)\r\n    }\r\n\r\n    for ((v, t) in c) {\r\n        z.add(v)\r\n    }\r\n\r\n    var q = ArrayList<Pair<Long, Long>>() // v -> m (inc v, inc m)\r\n    var qm = 0.toLong()\r\n\r\n    var ar = TreeSet<Int>()\r\n    var ac = TreeSet<Int>()\r\n\r\n    var ri = 0\r\n    var ci = 0\r\n\r\n    for (v in z) {\r\n        while (ri < r.size && r[ri].first <= v) {\r\n            ar.add(r[ri].second)\r\n            for (c in ac) {\r\n                qm = max(qm, a[r[ri].second][c])\r\n            }\r\n            ri += 1\r\n        }\r\n\r\n        while (ci < c.size && c[ci].first <= v) {\r\n            ac.add(c[ci].second)\r\n            for (r in ar) {\r\n                qm = max(qm, a[r][c[ci].second])\r\n            }\r\n            ci += 1\r\n        }\r\n\r\n        if (q.size == 0 || q.last().second != qm) {\r\n            q.add(Pair(v, qm))\r\n        }\r\n    }\r\n\r\n    q.add(Pair(max(r.last().first, c.last().first), q.last().second))\r\n\r\n    var R = 1000000000.toLong() * 1000000000\r\n    for (b in 0 until (q.size - 1)) {\r\n        var v = 0.toLong()\r\n        var m = 0.toLong()\r\n\r\n        var res = 0.toLong()\r\n\r\n        for (i in 0 until (q.size - 1)) {\r\n            if (q[i + 1].first <= v) {\r\n                m = max(m, q[i + 1].second)\r\n                continue\r\n            }\r\n            m = max(m, q[i].second + (if (i == b) k else 0))\r\n            var tr = (q[i + 1].first - v) / m + (if ((q[i + 1].first - v) % m == 0.toLong()) 0 else 1)\r\n            res += tr\r\n            v += m * tr\r\n        }\r\n\r\n        R = min(R, res)\r\n    }\r\n\r\n    println(R)\r\n}"
+}

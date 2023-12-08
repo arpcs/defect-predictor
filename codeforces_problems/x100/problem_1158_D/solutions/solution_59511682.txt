@@ -1,0 +1,38 @@
+{
+    "id": 59511682,
+    "contestId": 1158,
+    "creationTimeSeconds": 1566807283,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1158,
+        "index": "D",
+        "name": "Winding polygonal line",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "constructive algorithms",
+            "geometry",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1158,
+        "members": [
+            {
+                "handle": "CQUzbx"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1557671700
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nstruct Point{\r\n\tlong long x, y;\r\n\tPoint(){}\r\n\tPoint(long long x, long long y) : x(x), y(y){};\r\n\tPoint operator + (Point p){\r\n\t\treturn Point(x + p.x, y + p.y);\r\n\t}\r\n\tPoint operator - (Point p){\r\n\t\treturn Point(x - p.x, y - p.y);\r\n\t}\r\n\tbool operator < (const Point& p) const{\r\n\t\treturn x != p.x ? x < p.x : y < p.y;\r\n\t}\r\n\tbool operator == (const Point& p) const{\r\n\t\treturn x == p.x && y == p.y;\r\n\t}\r\n};\r\n\r\ntypedef Point Vector;\r\n\r\nlong long dot(Vector a, Vector b){\r\n\treturn a.x * b.x + a.y * b.y;\r\n}\r\n\r\nlong long cross(Vector a, Vector b){\r\n\treturn a.x * b.y - a.y * b.x;\r\n}\r\n\r\nstatic const int COUNTER_CLOCKWISE = 1;\r\nstatic const int CLOCKWISE = -1;\r\n\r\nint ccw(Point p0, Point p1, Point p2){\r\n\tVector a = p1 - p0;\r\n\tVector b = p2 - p0;\r\n\tif (cross(a, b) > 0) return COUNTER_CLOCKWISE;\r\n\treturn CLOCKWISE;\r\n}\r\n\r\ntypedef vector <Point> Polygon;\r\n\r\nPolygon andrewScan(Polygon s){\r\n\tPolygon u, l;\r\n\tif (s.size() < 3) return s;\r\n\tsort(s.begin(), s.end());\r\n\tu.push_back(s[0]);\r\n\tu.push_back(s[1]);\r\n\tl.push_back(s[s.size() - 1]);\r\n\tl.push_back(s[s.size() - 2]);\r\n\tfor (int i = 2; i < s.size(); i++){\r\n\t\tfor (int n = u.size(); n >= 2 && ccw(u[n - 2], u[n - 1], s[i]) == COUNTER_CLOCKWISE; n--)\r\n\t\t\tu.pop_back();\r\n\t\tu.push_back(s[i]);\r\n\t}\r\n\tfor (int i = s.size() - 3; i >= 0; i--){\r\n\t\tfor (int n = l.size(); n >= 2 && ccw(l[n - 2], l[n - 1], s[i]) == COUNTER_CLOCKWISE; n--)\r\n\t\t\tl.pop_back();\r\n\t\tl.push_back(s[i]);\r\n\t}\r\n\treverse(l.begin(), l.end());\r\n\tfor (int i = u.size() - 2; i >= 1; i--) l.push_back(u[i]);\r\n\treturn l;\r\n}\r\n\r\nconst int N = 2005;\r\n\r\nchar s[N];\r\nPoint p[N];\r\nint used[N], ans[N];\r\nint n;\r\n\r\nint bruteFind(Point x){\r\n\tfor (int i = 1; i <= n; i++){\r\n\t\tif (x == p[i]) return i;\r\n\t}\r\n}\r\n\r\nint main(){\r\n\tPolygon t, c;\r\n\tPoint last;\r\n\tscanf(\"%d\",&n);\r\n\tfor (int i = 1; i <= n; i++){\r\n\t\tscanf(\"%I64d %I64d\",&p[i].x,&p[i].y);\r\n\t\tt.push_back(p[i]);\r\n\t}\r\n\tscanf(\"%s\", s + 1);\r\n\tc = andrewScan(t);\r\n\tans[1] = bruteFind(c[1]);\r\n\tused[ans[1]] = 1;\r\n\tif (s[1] == 'R') last = c[0];\r\n\telse last = c[2];\r\n\tfor (int i = 2, sz; i <= n - 2; i++){\r\n\t\tt.clear();\r\n\t\tfor (int j = 1; j <= n; j++){\r\n\t\t\tif (!used[j]) t.push_back(p[j]);\r\n\t\t}\r\n\t\tc = andrewScan(t);\r\n\t\tsz = (int)c.size();\r\n\t\tfor (int j = 0; j < sz; j++){\r\n\t\t\tif (last == c[j]){\r\n\t\t\t\tans[i] = bruteFind(last);\r\n\t\t\t\tused[ans[i]] = 1;\r\n\t\t\t\tif (s[i] == 'R') last = c[(j + sz - 1) % sz];\r\n\t\t\t\telse last = c[j % sz + 1];\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tans[n - 1] = bruteFind(last);\r\n\tused[ans[n - 1]] = 1;\r\n\tfor (int i = 1; i <= n; i++){\r\n\t\tif (!used[i]){\r\n\t\t\tans[n] = i;\r\n\t\t\tbreak;\r\n\t\t}\r\n\t}\r\n\tfor (int i = 1; i <= n; i++) printf(\"%d \", ans[i]);\r\n\tprintf(\"\\n\");\r\n\treturn 0;\r\n}"
+}

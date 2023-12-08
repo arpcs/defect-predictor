@@ -1,0 +1,36 @@
+{
+    "id": 131087172,
+    "contestId": 1571,
+    "creationTimeSeconds": 1633622618,
+    "relativeTimeSeconds": 5318,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "mban259"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 88,
+    "timeConsumedMillis": 436,
+    "memoryConsumedBytes": 145408000,
+    "source": "fun main(args: Array<String>) {\r\n    Program().run()\r\n    // Thread(null, Program(), \"\", 1 shl 28).start()\r\n}\r\n\r\nclass Program : Runnable {\r\n    override fun run() {\r\n        val sc = MyScanner()\r\n        val n = sc.nextInt()\r\n        val m = sc.nextInt()\r\n        val kt = Array(n) { sc.nextInt() to sc.nextInt() }\r\n\r\n        // \u7a2e\u985ei\r\n        // x\u65e5\u306b\u3084\u308b\r\n        // x+t x+2t ... x+(k-1)t\u306b\u3084\u308b\r\n\r\n        // \u304b\u3076\u3089\u306a\u3044\u3088\u3046\u306bm\u65e5\u3067\u3067\u304d\u308b\u304b?\r\n        val t1 = mutableListOf<Pair<Int, Int>>()\r\n        val t2 = mutableListOf<Pair<Int, Int>>()\r\n\r\n        for (i in 0 until n) {\r\n            if (kt[i].second == 1) {\r\n                t1.add((i to kt[i].first))\r\n            } else {\r\n                t2.add((i to kt[i].first))\r\n            }\r\n        }\r\n\r\n        // 1\u306e\u3084\u3064\u3000\u3064\u306a\u3052\u308b\r\n\r\n        // 2\u306e\u3084\u3064 \u5dee\u304c\u6700\u5c0f\u306b\u306a\u308b\u3088\u3046\u306b\u5206\u3051\u308b\r\n        val offset = 10000\r\n        val cnt2 = t2.size\r\n        val dp = Array(cnt2 + 1) { BooleanArray(20001) }\r\n        dp[0][offset] = true\r\n        for (i in 0 until cnt2) {\r\n            for (j in -10000..10000) {\r\n                if (!dp[i][j + offset]) continue\r\n                if (j + t2[i].second <= 10000) dp[i + 1][j + t2[i].second + offset] = true\r\n                if (j - t2[i].second >= -10000) dp[i + 1][j - t2[i].second + offset] = true\r\n            }\r\n        }\r\n\r\n        var diff = Int.MAX_VALUE\r\n        for (i in 0..10000) {\r\n            if (dp[cnt2][i + offset]) {\r\n                diff = i\r\n                break\r\n            }\r\n        }\r\n\r\n        val td = diff\r\n        // \u5927\u304d\u3044\u65b9\u306b\u3044\u308c\u308b\u3084\u3064\r\n        val l1 = mutableListOf<Int>()\r\n        val l2 = mutableListOf<Int>()\r\n        for (i in cnt2 - 1 downTo 0) {\r\n            if (diff - t2[i].second >= -10000 && dp[i][diff - t2[i].second + offset]) {\r\n                l1.add(t2[i].first)\r\n                diff -= t2[i].second\r\n            } else {\r\n                l2.add(t2[i].first)\r\n                diff += t2[i].second\r\n            }\r\n        }\r\n\r\n        // println(l1.joinToString(\" \"))\r\n        // println(l2.joinToString(\" \"))\r\n        // println(td)\r\n\r\n        val ans = IntArray(n)\r\n\r\n        var tmp = 1\r\n        for (i in l1) {\r\n            ans[i] = tmp\r\n            tmp += kt[i].first * 2\r\n        }\r\n\r\n        var tmp2 = 2\r\n        for (i in l2) {\r\n            ans[i] = tmp2\r\n            tmp2 += kt[i].first * 2\r\n        }\r\n\r\n        var tmp3 = if (td == 0) tmp2 - 1 else tmp - 1\r\n        for ((i, k) in t1) {\r\n            ans[i] += tmp3\r\n            tmp3 += k\r\n        }\r\n\r\n        if (tmp3 <= m + 1) {\r\n            println(ans.joinToString(\" \"))\r\n        } else {\r\n            println(\"-1\")\r\n            return\r\n        }\r\n    }\r\n}\r\n\r\n\r\nclass MyScanner {\r\n    private var ptr = 0\r\n    private var l = listOf<String>()\r\n\r\n    fun next(): String {\r\n        while (l.size <= ptr) {\r\n            l = readLine()!!.split(' ')\r\n            ptr = 0\r\n        }\r\n        return l[ptr++]\r\n    }\r\n\r\n    fun nextInt() = next().toInt()\r\n    fun nextLong() = next().toLong()\r\n    fun nextDouble() = next().toDouble()\r\n    fun nextCharArray() = next().toCharArray()\r\n    fun nextChar() = next()[0]\r\n\r\n    fun list(): List<String> {\r\n        ptr = l.size\r\n        return readLine()!!.split(' ')\r\n    }\r\n\r\n    fun intList() = list().map { s -> s.toInt() }\r\n    fun longList() = list().map { s -> s.toLong() }\r\n    fun doubleList() = list().map { s -> s.toDouble() }\r\n\r\n    fun array() = list().toTypedArray()\r\n    fun intArray() = intList().toIntArray()\r\n    fun longArray() = longList().toLongArray()\r\n    fun doubleArray() = doubleList().toDoubleArray()\r\n}\r\n"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 162437516,
+    "contestId": 1236,
+    "creationTimeSeconds": 1656680318,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "jiaosiyuan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 716,
+    "memoryConsumedBytes": 59084800,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int N = 5e5+7;\r\ntypedef long long LL; \r\nstruct edge\r\n{\r\n\tint y,next;\r\n}e[2*N];\r\nint link[N],t=0;\r\nvoid add(int x,int y)\r\n{\r\n\te[++t].y=y;\r\n\te[t].next=link[x];\r\n\tlink[x]=t;\r\n}\r\nint n,m;\r\nconst int mod = 1e9+7;\r\nLL Pow(LL a,LL b)\r\n{\r\n\tLL res=1;\r\n\twhile(b)\r\n\t{\r\n\t\tif(b&1)res=res*a%mod;\r\n\t\ta=a*a%mod;\r\n\t\tb>>=1;\r\n\t}\r\n\treturn res;\r\n}\r\nLL inv2=Pow(2,mod-2);\r\nLL ipw[N];\r\nint deg[N];\r\nint dfn[N],num=0;\r\nvector<int> cir[N],bel[N];\r\nint cnt=0;\r\nint fa[N];\r\nvoid get_circle(int x)\r\n{\r\n\tdfn[x]=++num;\r\n\tfor(int i=link[x];i;i=e[i].next)\r\n\t{\r\n\t\tint y=e[i].y;\r\n\t\tif(!dfn[y]) fa[y]=x,get_circle(y);\r\n\t\telse if(dfn[y]<dfn[x]&&y!=fa[x])\r\n\t\t{\r\n\t\t\t++cnt;\r\n\t\t\tfor(int p=x;p!=y;p=fa[p])\r\n\t\t\tcir[cnt].push_back(p),bel[p].push_back(cnt);\r\n\t\t\tcir[cnt].push_back(y);bel[y].push_back(cnt);\r\n\t\t} \r\n\t}\r\n}\r\nLL P[N];\r\nLL Ea(){return 1ll*n*ipw[1]%mod;}\r\nLL Eb(){return 1ll*m*ipw[2]%mod;}\r\nLL Ec()\r\n{\r\n\tLL res=0;\r\n\tfor(int i=1;i<=cnt;i++)\r\n\tres=(res+P[i])%mod;\r\n\treturn res;\r\n}\r\nLL Eaa(){return 1ll*n*(n+1)%mod*ipw[2]%mod;}\r\nLL Ebb()\r\n{\r\n\tLL tot=(LL)m*(m-1);\r\n\tLL res=Eb();\r\n\tfor(int i=1;i<=n;i++)\r\n\t{\r\n\t\ttot-=1ll*deg[i]*(deg[i]-1);\r\n\t\tres=(res+1ll*deg[i]*(deg[i]-1)%mod*ipw[3]%mod)%mod;\r\n\t}\r\n\tres=(res+1ll*tot%mod*ipw[4]%mod)%mod;\r\n\treturn res;\r\n}\r\nLL Ecc()\r\n{\r\n\tLL res=Ec();\r\n\tLL sum=0;\r\n\tfor(int i=1;i<=cnt;i++)\r\n\tres=(res+2ll*sum*P[i]%mod)%mod,sum=(sum+P[i])%mod;\r\n\tfor(int i=1;i<=n;i++)\r\n\t{\r\n\t\tLL v=0;\r\n\t\tfor(auto x:bel[i])\r\n\t\tres=(res+2ll*v*P[x]%mod)%mod,v=(v+P[x])%mod;\r\n\t}\r\n\treturn res;\r\n}\r\nLL Eab()\r\n{\r\n\tLL res=0;\r\n\tfor(int i=1;i<=n;i++)\r\n\tres=(res+1ll*ipw[2]*deg[i]%mod+1ll*ipw[3]*(m-deg[i])%mod)%mod;\r\n\treturn res;\r\n}\r\nLL Eac()\r\n{\r\n\tLL res=0;\r\n\tLL tot=Ec();\r\n\tfor(int i=1;i<=n;i++)\r\n\t{\r\n\t\tLL sum=0;\r\n\t\tfor(auto x:bel[i])\r\n\t\tsum=(sum+P[x])%mod;\r\n\t\tres=(res+sum+1ll*ipw[1]*(tot-sum+mod)%mod)%mod;\r\n\t}\r\n\treturn res;\r\n}\r\nLL Ebc()\r\n{\r\n\tLL res=0;\r\n\tfor(int i=1;i<=cnt;i++)\r\n\tres=(res+1ll*P[i]*cir[i].size()%mod)%mod;\r\n\tfor(int i=1;i<=cnt;i++)\r\n\t{\r\n\t\tLL v=0,w=0;\r\n\t\tfor(auto x:cir[i])\r\n\t\tv+=deg[x]-2;\r\n\t\tw=m-cir[i].size()-v;\r\n\t\tres=(res+1ll*P[i]*ipw[1]%mod*v%mod+1ll*P[i]*ipw[2]%mod*w%mod)%mod;\r\n\t}\r\n\treturn res;\r\n}\r\nint main()\r\n{\r\n\tcin>>n>>m;\r\n\tipw[0]=1;\r\n\tfor(int i=1;i<=max(5,n);i++)\r\n\tipw[i]=1ll*ipw[i-1]*inv2%mod;\r\n\tfor(int i=1;i<=m;i++)\r\n\t{\r\n\t\tint u,v;\r\n\t\tscanf(\"%d %d\",&u,&v);\r\n\t\tadd(u,v);\r\n\t\tadd(v,u);\r\n\t\tdeg[u]++;deg[v]++;\r\n\t}\r\n\tget_circle(1);\r\n\tfor(int i=1;i<=cnt;i++)\r\n\tP[i]=ipw[(int)cir[i].size()];\r\n\tLL A=(Eaa()+Ebb()+Ecc())%mod;\r\n\tLL B=2ll*(-Eab()+Eac()-Ebc()+mod)%mod;B=(B%mod+mod)%mod; \r\n\tA=(A+B)%mod;\r\n\tLL C=(Ea()-Eb()+Ec()+mod)%mod;\r\n\tC=C*C%mod;\r\n\tLL X=(A-C+mod)%mod;\r\n\tcout<<X;\r\n\treturn 0;\r\n}"
+}

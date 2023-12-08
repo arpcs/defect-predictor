@@ -1,0 +1,38 @@
+{
+    "id": 91554306,
+    "contestId": 1236,
+    "creationTimeSeconds": 1598954122,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "LJC00118"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 701,
+    "memoryConsumedBytes": 113356800,
+    "source": "#include <bits/stdc++.h>\r\n#define rep(i, a, b) for (int i = a; i <= b; i++)\r\n#define per(i, a, b) for (int i = a; i >= b; i--)\r\n\r\nusing namespace std;\r\n\r\ntypedef unsigned long long ull;\r\ntypedef pair <int, int> pii;\r\ntypedef long long ll;\r\n\r\ntemplate <typename _T>\r\ninline void read(_T &f) {\r\n    f = 0; _T fu = 1; char c = getchar();\r\n    while (c < '0' || c > '9') { if (c == '-') { fu = -1; } c = getchar(); }\r\n    while (c >= '0' && c <= '9') { f = (f << 3) + (f << 1) + (c & 15); c = getchar(); }\r\n    f *= fu;\r\n}\r\n\r\ntemplate <typename T>\r\nvoid print(T x) {\r\n    if (x < 0) putchar('-'), x = -x;\r\n    if (x < 10) putchar(x + 48);\r\n    else print(x / 10), putchar(x % 10 + 48);\r\n}\r\n\r\ntemplate <typename T>\r\nvoid print(T x, char t) {\r\n    print(x); putchar(t);\r\n}\r\n\r\nconst int N = 1e6 + 5, md = 1e9 + 7, inv2 = (md + 1) >> 1;\r\n\r\ninline int add(int x, int y) {\r\n\tx += y;\r\n\tif (x >= md) x -= md;\r\n\treturn x;\r\n}\r\n\r\ninline int sub(int x, int y) {\r\n\tx -= y;\r\n\tif (x < 0) x += md;\r\n\treturn x;\r\n}\r\n\r\ninline int mul(int x, int y) { return 1ll * x * y % md; }\r\n\r\ninline int fpow(int x, int y) {\r\n\tint ans = 1;\r\n\twhile (y) {\r\n\t\tif (y & 1) ans = mul(ans, x);\r\n\t\ty >>= 1; x = mul(x, x);\r\n\t}\r\n\treturn ans;\r\n}\r\n\r\nmap <pii, int> incyc;\r\nvector <int> a[N], b[N];\r\nint pw[N], big[N], low[N], dfn[N], st[N], u[N], v[N], sum[N];\r\nint n, m, A, B, C, D, AA, BB, CC, AB, AC, BC, DD, cnt, top, newn, cyc;\r\n\r\nvoid tarjan(int u, int fa) {\r\n\tlow[u] = dfn[u] = ++cnt; st[++top] = u;\r\n\tfor (auto v : a[u]) {\r\n\t\tif (v == fa) continue;\r\n\t\tif (!dfn[v]) {\r\n\t\t\ttarjan(v, u);\r\n\t\t\tlow[u] = min(low[u], low[v]);\r\n\t\t\tif (low[v] >= dfn[u]) {\r\n\t\t\t\t++newn;\r\n\t\t\t\tint tmp = -1, las = u;\r\n\t\t\t\tvector <pii> pairs;\r\n\t\t\t\twhile (tmp != v) {\r\n\t\t\t\t\ttmp = st[top--];\r\n\t\t\t\t\t// incyc[make_pair(tmp, las)] = incyc[make_pair(las, tmp)] = 1;\r\n\t\t\t\t\tpairs.emplace_back(tmp, las);\r\n\t\t\t\t\tb[newn].push_back(tmp);\r\n\t\t\t\t\tb[tmp].push_back(newn);\r\n\t\t\t\t\tlas = tmp;\r\n\t\t\t\t}\r\n\t\t\t\t// incyc[make_pair(u, las)] = incyc[make_pair(las, u)] = 1;\r\n\t\t\t\tpairs.emplace_back(u, las);\r\n\t\t\t\tb[u].push_back(newn);\r\n\t\t\t\tb[newn].push_back(u);\r\n\t\t\t\tif (b[newn].size() > 2) {\r\n\t\t\t\t\tfor (auto i : pairs) incyc[i] = incyc[make_pair(i.second, i.first)] = pw[b[newn].size()];\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t} else low[u] = min(low[u], dfn[v]);\r\n\t}\r\n}\r\n\r\nint main() {\r\n\tread(n); read(m); newn = n;\r\n\tpw[0] = 1;\r\n\tfor (int i = 1; i <= n; i++) pw[i] = mul(pw[i - 1], inv2);\r\n\tfor (int i = 1; i <= m; i++) {\r\n\t\tread(u[i]); read(v[i]);\r\n\t\ta[u[i]].push_back(v[i]);\r\n\t\ta[v[i]].push_back(u[i]);\r\n\t}\r\n\ttarjan(1, 0);\r\n\tA = mul(n, pw[1]);\r\n\tB = mul(m, pw[2]);\r\n\tfor (int i = n + 1; i <= newn; i++) if (b[i].size() > 2) C = add(C, pw[b[i].size()]);\r\n\tD = add(sub(A, B), C);\r\n\t// cout << A << \" \" << B << \" \" << C << \" \" << D << endl;\r\n\tAA = add(A, mul(1ll * n * (n - 1) % md, pw[2]));\r\n\tfor (int i = 1; i <= n; i++) AB = add(AB, add(mul(a[i].size(), pw[2]), mul(m - a[i].size(), pw[3])));\r\n\tfor (int i = n + 1; i <= newn; i++) if (b[i].size() > 2) cyc = add(cyc, pw[b[i].size()]);\r\n\tfor (int i = 1; i <= n; i++) {\r\n\t\tfor (auto v : b[i]) if (b[v].size() > 2) sum[i] = add(sum[i], pw[b[v].size()]);\r\n\t\tfor (auto v : b[i]) if (b[v].size() > 2) sum[v] = add(sum[v], sub(sum[i], pw[b[v].size()]));\r\n\t\tAC = add(AC, add(sum[i], mul(sub(cyc, sum[i]), pw[1])));\r\n\t}\r\n\tfor (int i = 1; i <= m; i++) {\r\n\t\tint tmp = a[u[i]].size() + a[v[i]].size() - 2;\r\n\t\tBB = add(BB, add(mul(tmp, pw[3]), mul(m - tmp - 1, pw[4])));\r\n\t}\r\n\tBB = add(B, BB);\r\n\tfor (int i = 1; i <= m; i++) {\r\n\t\tint sum1 = add(sum[u[i]], sum[v[i]]), sum2 = 0;\r\n\t\tif (incyc.count(make_pair(u[i], v[i]))) {\r\n\t\t\tsum2 = incyc[make_pair(u[i], v[i])];\r\n\t\t\tsum1 = sub(sum1, mul(sum2, 2));\r\n\t\t}\r\n\t\tBC = add(BC, sum2);\r\n\t\tBC = add(BC, mul(sum1, pw[1]));\r\n\t\tBC = add(BC, mul(sub(cyc, add(sum1, sum2)), pw[2]));\r\n\t}\r\n\tCC = C;\r\n\tfor (int i = n + 1; i <= newn; i++) {\r\n\t\tif (b[i].size() <= 2) continue;\r\n\t\tCC = add(CC, mul(sum[i], pw[b[i].size() - 1]));\r\n\t\tCC = add(CC, mul(sub(cyc, add(sum[i], pw[b[i].size()])), pw[b[i].size()]));\r\n\t\t// cout << sub(cyc, add(sum[i], pw[b[i].size()])) << endl;\r\n\t\t// cout << cyc << \" \" << sum[i] << \" \" << pw[b[i].size()] << endl;\r\n\t}\r\n\tDD = ((1ll * AA + BB + CC - 2 * AB - 2 * BC + 2 * AC) % md + md) % md;\r\n\t// cout << AA << \" \" << AB << \" \" << AC << \" \" << BB << \" \" << BC << \" \" << CC << \" \" << DD << endl;\r\n\t// cout << add(pw[2], pw[4]) << endl;\r\n\tprint(sub(add(DD, mul(D, D)), mul(2, mul(D, D))), '\\n');\r\n    return 0;\r\n}"
+}

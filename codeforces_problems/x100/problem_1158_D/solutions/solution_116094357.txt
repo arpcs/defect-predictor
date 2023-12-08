@@ -1,0 +1,38 @@
+{
+    "id": 116094357,
+    "contestId": 1158,
+    "creationTimeSeconds": 1620901925,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1158,
+        "index": "D",
+        "name": "Winding polygonal line",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "constructive algorithms",
+            "geometry",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1158,
+        "members": [
+            {
+                "handle": "Andreasyan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1557671700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 327,
+    "memoryConsumedBytes": 4403200,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define m_p make_pair\r\n#define all(x) (x).begin(),(x).end()\r\n#define sz(x) ((int)(x).size())\r\n#define fi first\r\n#define se second\r\ntypedef long long ll;\r\nmt19937 rnd(chrono::steady_clock::now().time_since_epoch().count());\r\nmt19937 rnf(2106);\r\nconst int N = 2003;\r\n\r\nstruct ban\r\n{\r\n    int i;\r\n    int x, y;\r\n    ban(){}\r\n    ban(int x, int y)\r\n    {\r\n        this->x = x;\r\n        this->y = y;\r\n    }\r\n};\r\nbool operator<(const ban& a, const ban& b)\r\n{\r\n    return m_p(a.x, a.y) < m_p(b.x, b.y);\r\n}\r\n\r\nint n;\r\nban a[N];\r\n\r\nchar s[N];\r\n\r\nll F(const ban& t1, const ban& t2, const ban& t3)\r\n{\r\n    return (t1.x - t3.x) * 1LL * (t1.y - t2.y) - (t1.x - t2.x) * 1LL * (t1.y - t3.y);\r\n}\r\n\r\nbool c[N];\r\nvector<ban> convex()\r\n{\r\n    vector<ban> v;\r\n    for (int i = 1; i <= n; ++i)\r\n    {\r\n        if (!c[i])\r\n            v.push_back(a[i]);\r\n    }\r\n\r\n    sort(all(v));\r\n\r\n    vector<ban> u, d;\r\n\r\n    u.push_back(v[0]);\r\n    d.push_back(v[0]);\r\n    for (int i = 1; i < sz(v) - 1; ++i)\r\n    {\r\n        // down\r\n        if (F(v[0], v.back(), v[i]) > 0)\r\n        {\r\n            while (sz(d) >= 2 && F(d[sz(d) - 2], d.back(), v[i]) > 0)\r\n                d.pop_back();\r\n            d.push_back(v[i]);\r\n        }\r\n        // up\r\n        if (F(v[0], v.back(), v[i]) < 0)\r\n        {\r\n            while (sz(u) >= 2 && F(u[sz(u) - 2], u.back(), v[i]) < 0)\r\n                u.pop_back();\r\n            u.push_back(v[i]);\r\n        }\r\n    }\r\n    u.push_back(v.back());\r\n    d.push_back(v.back());\r\n\r\n    vector<ban> ans;\r\n\r\n    for (int i = 0; i < sz(u); ++i)\r\n        ans.push_back(u[i]);\r\n    for (int i = sz(d) - 2; i > 0; --i)\r\n        ans.push_back(d[i]);\r\n\r\n    return ans;\r\n}\r\n\r\nvoid solv()\r\n{\r\n    cin >> n;\r\n    for (int i = 1; i <= n; ++i)\r\n    {\r\n        a[i].i = i;\r\n        cin >> a[i].x >> a[i].y;\r\n    }\r\n    cin >> s;\r\n\r\n    vector<ban> v = convex();\r\n    int u1, u2;\r\n    if (s[0] == 'R')\r\n    {\r\n        u1 = v[0].i;\r\n        u2 = v[1].i;\r\n    }\r\n    else\r\n    {\r\n        u1 = v[1].i;\r\n        u2 = v[0].i;\r\n    }\r\n    cout << u1 << ' ' << u2 << ' ';\r\n    c[u1] = c[u2] = true;\r\n    for (int i = 0; i < n - 2; ++i)\r\n    {\r\n        c[u1] = c[u2] = false;\r\n        vector<ban> v = convex();\r\n        c[u1] = c[u2] = true;\r\n        vector<ban> nv = convex();\r\n\r\n        int u3;\r\n        if (s[i] == 'R' && s[i + 1] == 'R')\r\n        {\r\n            for (int i = 0; i < sz(v); ++i)\r\n            {\r\n                if (v[i].i == u2)\r\n                {\r\n                    u3 = v[(i + 1) % sz(v)].i;\r\n                    break;\r\n                }\r\n            }\r\n        }\r\n        else if (s[i] == 'R' && s[i + 1] == 'L')\r\n        {\r\n            int nu1;\r\n            for (int i = 0; i < sz(v); ++i)\r\n            {\r\n                if (v[i].i == u1)\r\n                {\r\n                    nu1 = v[(i - 1 + sz(v)) % sz(v)].i;\r\n                    break;\r\n                }\r\n            }\r\n            int hu2;\r\n            for (int i = 0; i < sz(v); ++i)\r\n            {\r\n                if (v[i].i == u2)\r\n                {\r\n                    hu2 = v[(i + 1) % sz(v)].i;\r\n                    break;\r\n                }\r\n            }\r\n            for (int i = 0; i < sz(nv); ++i)\r\n            {\r\n                if (nv[i].i == nu1)\r\n                {\r\n                    u3 = nu1;\r\n                    int j = i;\r\n                    while (1)\r\n                    {\r\n                        j = (j + 1) % sz(nv);\r\n                        if (nv[j].i == hu2)\r\n                            break;\r\n                        if (F(a[u2], nv[j], a[u3]) < 0)\r\n                            u3 = nv[j].i;\r\n                    }\r\n                    break;\r\n                }\r\n            }\r\n        }\r\n        else if (s[i] == 'L' && s[i + 1] == 'L')\r\n        {\r\n            for (int i = 0; i < sz(v); ++i)\r\n            {\r\n                if (v[i].i == u2)\r\n                {\r\n                    u3 = v[(i - 1 + sz(v)) % sz(v)].i;\r\n                    break;\r\n                }\r\n            }\r\n        }\r\n        else if (s[i] == 'L' && s[i + 1] == 'R')\r\n        {\r\n            int nu1;\r\n            for (int i = 0; i < sz(v); ++i)\r\n            {\r\n                if (v[i].i == u1)\r\n                {\r\n                    nu1 = v[(i + 1) % sz(v)].i;\r\n                    break;\r\n                }\r\n            }\r\n            int hu2;\r\n            for (int i = 0; i < sz(v); ++i)\r\n            {\r\n                if (v[i].i == u2)\r\n                {\r\n                    hu2 = v[(i - 1 + sz(v)) % sz(v)].i;\r\n                }\r\n            }\r\n            for (int i = 0; i < sz(nv); ++i)\r\n            {\r\n                if (nv[i].i == nu1)\r\n                {\r\n                    u3 = nu1;\r\n                    int j = i;\r\n                    while (1)\r\n                    {\r\n                        j = (j - 1 + sz(nv)) % sz(nv);\r\n                        if (nv[j].i == hu2)\r\n                            break;\r\n                        if (F(a[u2], nv[j], a[u3]) > 0)\r\n                            u3 = nv[j].i;\r\n                    }\r\n                    break;\r\n                }\r\n            }\r\n        }\r\n        else\r\n        {\r\n            for (int i = 1; i <= n; ++i)\r\n            {\r\n                if (!c[i])\r\n                {\r\n                    u3 = i;\r\n                    break;\r\n                }\r\n            }\r\n        }\r\n        cout << u3 << ' ';\r\n        c[u3] = true;\r\n        u1 = u2;\r\n        u2 = u3;\r\n    }\r\n    cout << \"\\n\";\r\n}\r\n\r\nint main()\r\n{\r\n    #ifdef SOMETHING\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n    //freopen(\"output.txt\", \"w\", stdout);\r\n    #endif // SOMETHING\r\n    //ios_base::sync_with_stdio(false), cin.tie(0);\r\n\r\n    int tt = 1;\r\n    //cin >> tt;\r\n    while (tt--)\r\n    {\r\n        solv();\r\n    }\r\n    return 0;\r\n}\r\n"
+}

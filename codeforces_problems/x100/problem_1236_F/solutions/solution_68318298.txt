@@ -1,0 +1,38 @@
+{
+    "id": 68318298,
+    "contestId": 1236,
+    "creationTimeSeconds": 1578319207,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "newbiegcz"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 483,
+    "memoryConsumedBytes": 54476800,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int N=5e5+10;\r\nconst int mod=1e9+7;\r\nconst int inv2=(mod+1)>>1;\r\ntypedef vector<int> vi;\r\n#define pb push_back\r\n#define sz(a) int(a.size())\r\n\r\nint gi() {\r\n\tint x=0,o=1;char ch=getchar();\r\n\twhile(!isdigit(ch)&&ch!='-') ch=getchar();\r\n\tif(ch=='-') o=-1,ch=getchar();\r\n\twhile(isdigit(ch)) x=x*10+ch-'0',ch=getchar();\r\n\treturn x*o;\r\n}\r\n\r\nint n,m,dfn[N],low[N],tim,st[N],tp,tt,ibin[N],s1[N],fa[N],f[N],id[N],ans,sum,sf[N];\r\nvi E[N],T[N],cnt1[N],cnt2[N];\r\n\r\nvoid dfs(int u,int fa) {\r\n\tdfn[u]=low[u]=++tim;st[++tp]=u;\r\n\tfor(auto v:E[u]) {\r\n\t\tif(v==fa) continue;\r\n\t\tif(!dfn[v]) {\r\n\t\t\tdfs(v,u),low[u]=min(low[u],low[v]);\r\n\t\t\tif(low[v]>=dfn[u]) {\r\n\t\t\t\tint x;++tt;\r\n\t\t\t\tdo x=st[tp--],T[tt].pb(x),::fa[x]=tt; while(x!=v);\r\n\t\t\t\tT[u].pb(tt);::fa[tt]=u;\r\n\t\t\t}\r\n\t\t}\r\n\t\telse low[u]=min(low[u],dfn[v]);\r\n\t}\r\n}\r\n\r\nint cal(const vi &a) {\r\n\tint s1=0,s2=0;\r\n\tfor(auto x:a) s2=(s2+1ll*s1*x)%mod,s1=(s1+x)%mod;\r\n\treturn s2;\r\n}\r\n\r\nint F(int x,int y) {\r\n\treturn (1ll*x*x-y+mod)%mod*inv2%mod;\r\n}\r\n\r\nint main() {\r\n#ifndef ONLINE_JUDGE\r\n\tfreopen(\"a.in\",\"r\",stdin);\r\n\tfreopen(\"a.out\",\"w\",stdout);\r\n#endif\r\n\tcin>>n>>m;\r\n\tibin[0]=1;for(int i=1;i<=n;i++) ibin[i]=1ll*ibin[i-1]*inv2%mod,s1[i]=(s1[i-1]+mod+1-ibin[i])%mod;\r\n\tfor(int i=1,u,v;i<=m;i++) u=gi(),v=gi(),E[u].pb(v),E[v].pb(u);\r\n\ttt=n;dfs(1,0);f[1]=inv2;\r\n\tfor(int i=n+1;i<=tt;i++)\r\n\t\tfor(int j=0;j<sz(T[i]);j++) id[T[i][j]]=j;\r\n\tfor(int i=2;i<=n;i++) {\r\n\t\tint all=sz(T[fa[i]]);\r\n\t\tf[i]=1ll*ibin[2]*(id[i]?mod+1-ibin[all-id[i]]:1)%mod;\r\n\t}\r\n\tfor(int i=n+1;i<=tt;i++) {\r\n\t\tint all=sz(T[i]);cnt1[i].resize(all+1);cnt2[i].resize(all+1);\r\n\t\t//cerr<<all<<endl;\r\n\t\tcnt1[i][0]=(f[fa[i]]+1ll*ibin[2]*(all>1?s1[all-2]:0))%mod;\r\n\t\tcnt2[i][0]=(cnt1[i][0]+(all>1?1ll*inv2*(mod+1-ibin[all-1])%mod:0))%mod;\r\n\t\tcnt1[i][all]=1ll*ibin[2]*(all>1?s1[all-2]:0)%mod;\r\n\t\tcnt2[i][all]=(inv2+1ll*(all-1)*ibin[2])%mod;\r\n\t\t//cerr<<i<<' '<<cnt2[i][1]<<endl;\r\n\t\tfor(int j=1;j<all;j++) {\r\n\t\t\tint tmp1=(2ll*f[fa[i]]+1ll*ibin[2]*(j-1))%mod;\r\n\t\t\tif(all-j-3>=0) tmp1=(tmp1+1ll*ibin[2]*s1[all-j-3])%mod;\r\n\t\t\tint tmp2=(inv2+1ll*ibin[2]*(j-1))%mod;\r\n\t\t\tif(j+2<=all-1) tmp2=(tmp2+1ll*(all-1-(j+2)+1)*ibin[2])%mod;\r\n\t\t\tcnt1[i][j]=1ll*inv2*(tmp1+tmp2)%mod;\r\n\t\t\tif(all-j-2>=0) tmp1=(tmp1+1ll*inv2*(mod+1-ibin[all-j-2]))%mod;\r\n\t\t\ttmp2=(tmp2+inv2)%mod;\r\n\t\t\tcnt2[i][j]=1ll*inv2*(tmp1+tmp2)%mod;\r\n\t\t}\r\n\t\t//cerr<<i<<' '<<cnt2[i][1]<<endl;\r\n\t}\r\n\t//cerr<<T[6][0]<<endl;\r\n\t//cerr<<cnt1[6][0]<<endl;\r\n\tvi tmp;int sum=0;for(int i=1;i<=n;i++) tmp.pb(f[i]),sum=(sum+f[i])%mod;//;;,cerr<<i<<' '<<f[i]<<endl;\r\n\tint ans=cal(tmp);//cerr<<ans<<endl;\r\n\tfor(int i=n+1;i<=tt;i++) {\r\n\t\tint all=sz(T[i]),s2=0;\r\n\t\tfor(auto x:T[i]) sf[i]=(sf[i]+f[x])%mod,s2=(s2+1ll*f[x]*f[x])%mod;\r\n\t\tsf[i]=(sf[i]+f[fa[i]])%mod;s2=(s2+1ll*f[fa[i]]*f[fa[i]])%mod;ans=(ans-F(sf[i],s2)+mod)%mod;\r\n\t\t//cerr<<i<<' '<<sf[i]<<' '<<F(sf[i])<<endl;\r\n\t\tfor(int j=1;j<all-1;j++) ans=(ans+1ll*ibin[3]*(mod+1-ibin[all-1-j]))%mod;\r\n\t\tfor(int j=2;j<all;j++) ans=(ans+ibin[4])%mod;\r\n\t\tfor(int j=3;j<all;j++) {\r\n\t\t\tans=(ans+1ll*ibin[4]*(j-2)%mod*(mod+1-ibin[all-j]))%mod;\r\n\t\t}\r\n\t}\r\n\t//for(int i=1;i<=n;i++) cerr<<f[i]<<' ';\r\n\t//cerr<<ans<<endl;\r\n\tfor(int i=1;i<=n;i++) {\r\n\t\ttmp.clear();for(auto x:T[i]) tmp.pb((sf[x]-f[i]+mod)%mod);\r\n\t\tif(fa[i]) tmp.pb((sf[fa[i]]-f[i]+mod)%mod);\r\n\t\t//for(auto x:tmp) cerr<<x<<' ';cerr<<endl;\r\n\t\tans=(ans-cal(tmp)+mod)%mod;tmp.clear();\r\n\t\tfor(auto x:T[i]) tmp.pb(cnt1[x][sz(T[x])]);\r\n\t\tif(fa[i]) tmp.pb(cnt1[fa[i]][id[i]]);ans=(ans+1ll*inv2*cal(tmp))%mod;\r\n\t\t//cerr<<i<<endl;\r\n\t\t//for(auto x:tmp) cerr<<x<<' ';cerr<<endl;\r\n\t\t//cerr<<i<<' '<<cal(tmp)<<endl;\r\n\t\ttmp.clear();for(auto x:T[i]) tmp.pb(cnt2[x][sz(T[x])]);\r\n\t\tif(fa[i]) tmp.pb(cnt2[fa[i]][id[i]]);ans=(ans+1ll*inv2*cal(tmp))%mod;\r\n\t\t//cerr<<i<<endl;\r\n\t\t//for(auto x:tmp) cerr<<x<<' ';cerr<<endl;\r\n\t\t//cerr<<i<<' '<<cal(tmp)<<endl;\r\n\t}\r\n\t//cerr<<ans<<endl;\r\n\tans=(2ll*ans+sum)%mod;ans=(ans-1ll*sum*sum%mod+mod)%mod;\r\n\tcout<<ans;\r\n\treturn 0;\r\n}\r\n"
+}

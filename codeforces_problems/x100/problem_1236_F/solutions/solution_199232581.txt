@@ -1,0 +1,38 @@
+{
+    "id": 199232581,
+    "contestId": 1236,
+    "creationTimeSeconds": 1679831854,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "tanruidaociyiyou"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 920,
+    "memoryConsumedBytes": 39833600,
+    "source": "// LUOGU_RID: 106040052\n#include <bits/stdc++.h>\nusing namespace std;\n\n#define mod 1000000007\n#define MAXN 500005\n\n//char buf[1<<21],*p1=buf,*p2=buf;\n//#define getchar() (p1==p2 && (p2=(p1=buf)+fread(buf,1,1<<21,stdin),p1==p2)?EOF:*p1++)\ntemplate <typename T> inline void read (T &t){t = 0;char c = getchar();int f = 1;while (c < '0' || c > '9'){if (c == '-') f = -f;c = getchar();}while (c >= '0' && c <= '9'){t = (t << 3) + (t << 1) + c - '0';c = getchar();} t *= f;}\ntemplate <typename T,typename ... Args> inline void read (T &t,Args&... args){read (t);read (args...);}\ntemplate <typename T> inline void write (T x){if (x < 0){x = -x;putchar ('-');}if (x > 9) write (x / 10);putchar (x % 10 + '0');}\ntemplate <typename T> inline void chkmax (T &a,T b){a = max (a,b);}\ntemplate <typename T> inline void chkmin (T &a,T b){a = min (a,b);}\n\nint n,m;\nint mul (int a,int b){return 1ll * a * b % mod;}\nint dec (int a,int b){return a >= b ? a - b : a + mod - b;}\nint add (int a,int b){return a + b >= mod ? a + b - mod : a + b;}\nint qkpow (int a,int b){\n\tint res = 1;for (;b;b >>= 1,a = mul (a,a)) if (b & 1) res = mul (res,a);\n\treturn res;\n}\nvoid Add (int &a,int b){a = add (a,b);}\nvoid Sub (int &a,int b){a = dec (a,b);}\n\nvector <vector <int> > cir;\nvector <int> g[MAXN],sv[MAXN];\nint top,ind,sta[MAXN],dfn[MAXN],low[MAXN];\nvoid tarjan (int u){\n\tdfn[u] = low[u] = ++ ind,sta[++ top] = u;\n\tfor (int v : g[u]){\n\t\tif (!dfn[v]){\n\t\t\ttarjan (v),chkmin (low[u],low[v]);\n\t\t\tif (low[v] >= dfn[u]){\n\t\t\t\tvector <int> tmp;tmp.push_back (u);\n\t\t\t\tdo tmp.push_back (sta[top]); while (sta[top --] != v);\n\t\t\t\tif (tmp.size() > 2) cir.push_back (tmp);\n\t\t\t}\n\t\t}\n\t\telse chkmin (low[u],dfn[v]);\n\t}\n}\n\nint pw[MAXN];\nint sqr (int x){return mul (x,x);}\nint getpnt (){return add (mul (n,pw[1]),mul (mul (n,n - 1),pw[2]));}\nint getedge (){\n\tint res = mul (m,pw[2]);\n\tfor (int x = 1;x <= n;++ x)\n\t\tfor (int y : g[x]){\n\t\t\tif (x > y) continue;\n\t\t\tint s1 = m - g[x].size() - g[y].size() + 1,s2 = g[x].size() - 1 + g[y].size() - 1;\n\t\t\tAdd (res,add (mul (s1,pw[4]),mul (s2,pw[3]))); \n\t\t}\n\treturn res;\n}\nint getcir (){\n\tint res = 0,tmp = 0;\n\tfor (auto st : cir) Add (tmp,pw[st.size()]);\n\tfor (auto st : cir){\n\t\tint val = tmp,siz = st.size();Add (res,pw[siz]);\n\t\tfor (int x : st){\n\t\t\tfor (int t : sv[x]) Sub (val,pw[t]);\n\t\t\tAdd (val,pw[siz]);\n\t\t}\n\t\tSub (val,pw[siz]),Add (res,mul (val,pw[siz]));\n\t\tval = dec (tmp,add (val,pw[siz])),Add (res,mul (mul (2,val),pw[siz]));\n\t}\n\treturn res;\n}\nint pntedge (){\n\tint res = 0;\n\tfor (int u = 1;u <= n;++ u){\n\t\tint s1 = g[u].size(),s2 = m - g[u].size();\n\t\tAdd (res,mul (s1,pw[2])),Add (res,mul (s2,pw[3]));\n\t}\n\treturn res;\n}\nint pntcir (){\n\tint tmp = 0,res = 0;\n\tfor (auto st : cir) Add (tmp,pw[st.size()]);\n\tfor (int x = 1;x <= n;++ x){\n\t\tint now = 0;\n\t\tfor (int s : sv[x]) Add (now,pw[s]);\n\t\tAdd (res,now),Add (res,mul (dec (tmp,now),pw[1]));\n\t}\n\treturn res;\n}\nint edgecir (){\n\tint res = 0;\n\tfor (auto st : cir){\n\t\tint siz = st.size(),now = 0;Add (res,mul (siz,pw[siz]));\n\t\tfor (int x : st) now += g[x].size() - 2;\n\t\tAdd (res,mul (now,pw[siz + 1])),Add (res,mul (m - siz - now,pw[siz + 2]));\n\t}\n\treturn res;\n}\nint getans1 (){\n\tint s1 = add (getpnt (),add (getedge (),getcir ())),s2 = dec (pntcir (),add (pntedge (),edgecir ()));\n\treturn add (s1,mul (2,s2));\n}\nint getans2 (){\n\tint res = dec (mul (n,pw[1]),mul (m,pw[2]));\n\tfor (auto st : cir) Add (res,pw[st.size()]);\n\treturn sqr (res);\n}\n\nsigned main(){\n\tread (n,m);\n\tfor (int i = 1,u,v;i <= m;++ i) read (u,v),g[u].push_back (v),g[v].push_back (u);\n\ttarjan (1);\n\tpw[0] = 1;for (int i = 1;i <= n;++ i) pw[i] = mul (pw[i - 1],mod + 1 >> 1);\n\tfor (auto st : cir) for (int x : st) sv[x].push_back (st.size());\n\twrite (dec (getans1(),getans2 ())),putchar ('\\n');\n\treturn 0;\n}\n/*\n\u6211\u4eec\u4e0d\u59a8\u8bbef0[x]\u8868\u793a\u8fde\u901a\u5757\u6570\u91cf^2\u7684\u671f\u671b\uff0cg0[x]\u8868\u793a\u8fde\u901a\u5757\u6570\u91cf\u7684\u671f\u671b\n*/"
+}

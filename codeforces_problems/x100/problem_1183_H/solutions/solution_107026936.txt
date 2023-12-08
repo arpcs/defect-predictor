@@ -1,0 +1,35 @@
+{
+    "id": 107026936,
+    "contestId": 1183,
+    "creationTimeSeconds": 1612932493,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1183,
+        "index": "H",
+        "name": "Subsequences (hard version)",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1183,
+        "members": [
+            {
+                "handle": "TheLovelyLion"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1561559700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 34,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 716800,
+    "source": "#pragma GCC optimize(\"Ofast,unroll-loops,O2\")\r\n#pragma GCC target(\"sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,avx,avx2,tune=native\")\r\n#include <bits/stdc++.h>\r\n#define ll long long int\r\n#define vi vector<int>\r\n#define vvi vector<vector<int>>\r\n#define vll vector<long long>\r\n#define vs vector<string>\r\n#define vc vector<char>\r\n#define vb vector<bool>\r\n#define forn(i, s, n)  for(ll i=(ll)s; i<(ll)(n); i++)\r\n#define all(c) c.begin(),c.end()\r\n#define pb push_back\r\n#define pll pair<long long int, long long int>\r\n#define pii pair<int, int>\r\n#define pss pair<string, string>\r\n#define ull unsigned long long int\r\n#define lld long double\r\n#define F first\r\n#define S second\r\n#define PI 3.141592653589793238\r\n#define prec(n) fixed<<setprecision(n)\r\n#define ordered_set tree<ll, null_type,less_equal<ll>, rb_tree_tag,tree_order_statistics_node_update>\r\n#define debug(...) fprintf(stderr, __VA_ARGS__), fflush(stderr)\r\n#define itsval(args...) { string _s = #args; replace(_s.begin(), _s.end(), ',', ' '); stringstream _ss(_s); istream_iterator<string> _it(_ss); itval(_it, args); }\r\nusing namespace std;\r\n// #include <ext/pb_ds/assoc_container.hpp>\r\n// #include <ext/pb_ds/tree_policy.hpp>\r\n// using namespace __gnu_pbds;\r\n\r\nvoid itval(istream_iterator<string> it) {}\r\ntemplate<typename T, typename... Args>\r\nvoid itval(istream_iterator<string> it, T a, Args... args) {\r\n    cerr << *it << \" = \" << a << endl;\r\n    itval(++it, args...);\r\n}\r\nconst ll MOD = 1e9 + 7;\r\ntemplate <typename T>\r\ninline void print(T x) {cout << x << \"\\n\";}\r\ntemplate <typename T>\r\ninline void printvec(T x) {for (auto a : x) cout << a << ' '; cout << '\\n';}\r\n// -----------------------------------------------------------------------\r\n\r\nstruct custom {\r\n    bool operator()(const pll &p1, const pll &p2)const {\r\n        return p1.F > p2.F;\r\n    }\r\n};\r\n\r\n// Calculate a^b % MOD -------------------------------------------------\r\nll get_pow(ll a, ll b, ll M = MOD) {\r\n    ll res = 1;\r\n    while (b) {\r\n        if (b & 1) res = (res * a) % M;\r\n        a = (a * a) % M;\r\n        b >>= 1;\r\n    }\r\n    return res;\r\n}\r\n// ---------------------------------------------------------------------\r\nconst ll N = 1e3 + 5, inf = 1e18;\r\nset<string> s[11][12];\r\nll dp[11][400], a[11][400];\r\nvoid solve()\r\n{\r\n    ll n, k;\r\n    cin >> n >> k;\r\n    string t;\r\n    cin >> t;\r\n    deque<char>q;\r\n    forn(i, 0, n)\r\n    q.pb(t[i]);\r\n    vs v;\r\n    while (!q.empty())\r\n    {\r\n        string r = \"\";\r\n        while (!q.empty() && r.length() < 10)\r\n        {\r\n            r.pb(q.front());\r\n            q.pop_front();\r\n        }\r\n        v.pb(r);\r\n    }\r\n    int m = v.size();\r\n    forn(i, 0, m)\r\n    {\r\n        forn(j, 1, 1 << (int)v[i].length())\r\n        {\r\n            string p = \"\";\r\n            forn(k, 0, v[i].length())\r\n            {\r\n                if (j & (1 << k))\r\n                {\r\n                    p.pb(v[i][k]);\r\n                }\r\n            }\r\n            s[i][p.length()].insert(p);\r\n        }\r\n    }\r\n    ll ans = 0;\r\n    forn(i, 0, 11)\r\n    forn(j, 0, 12)\r\n    a[i][j] = s[i][j].size();\r\n    forn(i, 0, 12)\r\n    dp[0][i] = a[0][i];\r\n    dp[0][0] = 1;\r\n    forn(i, 1, m)\r\n    {\r\n        forn(j, 0, 200)\r\n        dp[i][j] = dp[i - 1][j] + a[i][j];\r\n        forn(j, 0, 200)\r\n        {\r\n            forn(k, 0, 200)\r\n            {\r\n                dp[i][k + j] += dp[i - 1][j] * a[i][k];\r\n            }\r\n        }\r\n    }\r\n    for (ll j = 100; j >= 0; j--)\r\n    {\r\n        ll w = min(k, dp[m - 1][j]);\r\n        ans += w * (n - j);\r\n        k -= w;\r\n    }\r\n    if (k)\r\n    {\r\n        cout << -1; return;\r\n    }\r\n    cout << ans;\r\n}\r\n\r\nint main()\r\n{\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n    cout.tie(NULL);\r\n#ifndef ONLINE_JUDGE\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n    freopen(\"output1.txt\", \"w\", stdout);\r\n#endif\r\n    int test = 1;\r\n    // cin >> test;\r\n    clock_t z = clock();\r\n\r\n    forn(tes, 0, test)\r\n    {\r\n        solve();\r\n    }\r\n    debug(\"Total Time:%.4f\\n\", (double)(clock() - z) / CLOCKS_PER_SEC);\r\n    return 0;\r\n}"
+}

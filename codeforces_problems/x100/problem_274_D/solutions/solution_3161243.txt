@@ -1,0 +1,39 @@
+{
+    "id": 3161243,
+    "contestId": 274,
+    "creationTimeSeconds": 1361381098,
+    "relativeTimeSeconds": 6898,
+    "problem": {
+        "contestId": 274,
+        "index": "D",
+        "name": "Lovely Matrix",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 274,
+        "members": [
+            {
+                "handle": "emo"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "room": 9,
+        "startTimeSeconds": 1361374200
+    },
+    "programmingLanguage": "Java 6",
+    "verdict": "WRONG_ANSWER",
+    "testset": "PRETESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 78,
+    "memoryConsumedBytes": 0,
+    "source": "import java.util.List;\nimport java.io.IOException;\nimport java.util.Arrays;\nimport java.util.InputMismatchException;\nimport java.util.ArrayList;\nimport java.util.Comparator;\nimport java.io.OutputStream;\nimport java.io.PrintWriter;\nimport java.io.Writer;\nimport java.util.Collections;\nimport java.io.InputStream;\n\n/**\n * Built using CHelper plug-in\n * Actual solution is at the top\n * @author emotionalBlind\n */\npublic class Main {\n\tpublic static void main(String[] args) {\n\t\tInputStream inputStream = System.in;\n\t\tOutputStream outputStream = System.out;\n\t\tInputReader in = new InputReader(inputStream);\n\t\tOutputWriter out = new OutputWriter(outputStream);\n\t\tTaskD solver = new TaskD();\n\t\tsolver.solve(1, in, out);\n\t\tout.close();\n\t}\n}\n\nclass TaskD {\n    static class Node {\n        int id;\n        boolean visited;\n    }\n\n    boolean isLess(int[] a, int[] b) {\n        for (int i = 0; i < a.length - 1; ++i) {\n            if (a[i] == -1 || b[i] == -1) continue;\n            if (a[i] > b[i]) return false;\n        }\n        return true;\n    }\n\n    public void solve(int testNumber, InputReader in, OutputWriter out) {\n        int n = in.readInt();\n        int m = in.readInt();\n        int[][] matrix = new int[n][m];\n        Node nodes[] = new Node[m];\n        for (int i = 0; i < m; ++i) {\n            nodes[i] = new Node();\n            nodes[i].id = i;\n            nodes[i].visited = false;\n        }\n        ArrayList<int[]> al = new ArrayList<int[]>(0);\n        for (int i = 0; i < m; ++i) {\n            al.add(new int[n + 1]);\n            al.get(i)[n] = i;\n        }\n        for (int i = 0; i < n; ++i) {\n            Pair<Integer, Integer>[] p = new Pair[m];\n            for (int j = 0; j < m; ++j) {\n                matrix[i][j] = in.readInt();\n                p[j] = new Pair<Integer, Integer>(matrix[i][j], j);\n            }\n            Arrays.sort(p);\n            int k = -1;\n            int last = -1;\n            for (int j = 0; j < m; ++j) {\n                int ind = p[j].getSecond().intValue();\n                if (p[j].getFirst().intValue() == -1) {\n                    al.get(ind)[i] = -1;\n                } else {\n                    if (p[j].getFirst().intValue() == last) {\n                        al.get(ind)[i] = k;\n                    } else {\n                        last = p[j].getFirst().intValue();\n                        al.get(ind)[i] = ++k;\n                    }\n                }\n            }\n        }\n        Collections.sort(al, new Comparator<int[]>() {\n            @Override\n            public int compare(int[] ints, int[] ints2) {\n                for (int i = 0; i < ints.length - 1; ++i) {\n                    if (ints[i] == -1 || ints2[i] == -1) {\n                        continue;\n                    }\n                    if (ints[i] == ints2[i]) {\n                        continue;\n                    }\n                    return ints[i] - ints2[i];\n                }\n                return 0;\n            }\n        });\n        boolean valid = true;\n        for (int i = 1; i < m; ++i) {\n            if (!isLess(al.get(i - 1), al.get(i))) {\n                valid = false;\n                break;\n            }\n        }\n        if (!valid) {\n            out.printLine(-1);\n            return;\n        }\n\n        for (int i = 0; i < m; ++i) {\n            if (i > 0) out.print(\" \");\n            out.print(al.get(i)[n] + 1);\n        }\n        out.printLine();\n    }\n}\n\nclass InputReader {\n\n    private InputStream stream;\n    private byte[] buf = new byte[1024];\n    private int curChar;\n    private int numChars;\n\n    public InputReader(InputStream stream) {\n        this.stream = stream;\n    }\n\n    public int read() {\n        // InputMismatchException -> UnknownError\n        if (numChars == -1)\n            throw new UnknownError();\n        if (curChar >= numChars) {\n            curChar = 0;\n            try {\n                numChars = stream.read(buf);\n            } catch (IOException e) {\n                throw new UnknownError();\n            }\n            if (numChars <= 0)\n                return -1;\n        }\n        return buf[curChar++];\n    }\n\n    public int readInt() {\n        int c = read();\n        while (isSpaceChar(c))\n            c = read();\n        int sgn = 1;\n        if (c == '-') {\n            sgn = -1;\n            c = read();\n        } else if (c == '+') {\n            c = read();\n        }\n        int res = 0;\n        do {\n            if (c < '0' || c > '9')\n                throw new InputMismatchException();\n            res *= 10;\n            res += c - '0';\n            c = read();\n        } while (!isSpaceChar(c));\n        return res * sgn;\n    }\n\n    public static boolean isSpaceChar(int c) {\n        return c == ' ' || c == '\\n' || c == '\\r' || c == '\\t' || c == -1;\n    }\n\n    }\n\nclass OutputWriter {\n    private final PrintWriter writer;\n\n    public OutputWriter(OutputStream outputStream) {\n        writer = new PrintWriter(outputStream);\n    }\n\n    public OutputWriter(Writer writer) {\n        this.writer = new PrintWriter(writer);\n    }\n\n    public void print(Object...objects) {\n        for (int i = 0; i < objects.length; i++) {\n            if (i != 0)\n                writer.print(' ');\n            writer.print(objects[i]);\n        }\n    }\n\n    public void printLine(Object...objects) {\n        print(objects);\n        writer.println();\n    }\n\n    public void close() {\n        writer.close();\n    }\n\n}\n\nclass Pair<T extends Comparable<T>, S extends Comparable<S>>\n    implements Comparable<Pair<T, S>>\n{\n    public Pair(T f, S s)\n    {\n        first = f;\n        second = s;\n    }\n\n    public T getFirst()\n    {\n        return first;\n    }\n\n    public S getSecond()\n    {\n        return second;\n    }\n\n    public String toString()\n    {\n        return \"(\" + first.toString() + \", \" + second.toString() + \")\";\n    }\n\n    public int compareTo(Pair<T, S> that)\n    {\n        int c = this.first.compareTo(that.getFirst());\n        if (c == 0) {\n            return this.second.compareTo(that.getSecond());\n        }\n        return c;\n    }\n\n    private T first;\n    private S second;\n}\n\n"
+}

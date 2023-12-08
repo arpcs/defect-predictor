@@ -1,0 +1,36 @@
+{
+    "id": 131088273,
+    "contestId": 1571,
+    "creationTimeSeconds": 1633623365,
+    "relativeTimeSeconds": 6065,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "farmerboy"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 88,
+    "timeConsumedMillis": 498,
+    "memoryConsumedBytes": 89190400,
+    "source": "import kotlin.system.exitProcess\r\n\r\nfun main(args: Array<String>) {\r\n    var (n, m) = readLine()!!.split(\" \").map { it.toInt() }\r\n    var stage1 = ArrayList<Pair<Int, Int>>()\r\n    var stage2 = ArrayList<Pair<Int, Int>>()\r\n\r\n    var sum = 0\r\n    for (i in 1..n) {\r\n        var (x, y) = readLine()!!.split(\" \").map { it.toInt() }\r\n        if (y == 1) {\r\n            stage1.add(Pair(x, i))\r\n        } else {\r\n            stage2.add(Pair(x, i))\r\n        }\r\n        sum += x\r\n    }\r\n\r\n    if (sum > m) {\r\n        println(\"-1\")\r\n        exitProcess(0)\r\n    }\r\n\r\n    var res = ArrayList<Int>()\r\n    for (i in 0..n+1) res.add(0)\r\n\r\n    for (i in 0..stage1.size-1) {\r\n        m -= stage1[i].first\r\n        res[stage1[i].second] = m + 1\r\n    }\r\n\r\n    var sum2 = 0\r\n    for (i in 0..stage2.size-1) {\r\n        sum2 += stage2[i].first\r\n    }\r\n\r\n    // dp[i][j] = whether we can create a sum = j with element from 1..i\r\n    var need = m / 2 + m % 2\r\n    var N = stage2.size\r\n\r\n    var dp = ArrayList<ArrayList<Int>>()\r\n    for (i in 0..N) {\r\n        dp.add(ArrayList<Int> ())\r\n        for (j in 0..need) {\r\n            dp[i].add(0)\r\n        }\r\n    }\r\n    var trace = ArrayList<ArrayList<Int>>()\r\n    for (i in 0..N) {\r\n        trace.add(ArrayList<Int> ())\r\n        for (j in 0..need) {\r\n            trace[i].add(0)\r\n        }\r\n    }\r\n\r\n    dp[0][0] = 1\r\n    for (i in 0..N-1) {\r\n        for (j in 0..need) {\r\n            if (dp[i][j] == 1) {\r\n                var elem = stage2[i].first\r\n                var idx = stage2[i].second\r\n\r\n                // add elem\r\n                if (j + elem <= need && dp[i+1][j+elem] == 0) {\r\n                    dp[i+1][j+elem] = 1\r\n                    trace[i+1][j+elem] = 1\r\n                }\r\n\r\n                // don't add elem\r\n                if (dp[i+1][j] == 0) {\r\n                    dp[i+1][j] = 1\r\n                    trace[i+1][j] = 0\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    var ok = 0\r\n    for (j in 0..need) {\r\n        if (dp[N][j] == 1) {\r\n            ok = j\r\n        }\r\n    }\r\n\r\n    if (sum2 - ok > m - need) {\r\n        println(\"-1\")\r\n        exitProcess(0)\r\n    }\r\n\r\n    var u = N\r\n    var firstHalf = ArrayList<Int>()\r\n    var secondHalf = ArrayList<Int>()\r\n    while (u > 0) {\r\n        if (trace[u][ok] == 1) {\r\n            var elem = stage2[u-1].first\r\n            var idx = stage2[u-1].second\r\n            firstHalf.add(u-1)\r\n            ok -= elem\r\n        } else {\r\n            secondHalf.add(u-1)\r\n        }\r\n        u--;\r\n    }\r\n\r\n    var cur = 1\r\n    for (i in 0..firstHalf.size-1) {\r\n        var idx = firstHalf[i]\r\n        var elem = stage2[idx].first\r\n        var realIdx = stage2[idx].second\r\n        res[realIdx] = cur\r\n        for (j in 0..elem-1) {\r\n            cur += 2\r\n        }\r\n    }\r\n\r\n    cur = 2\r\n    for (i in 0..secondHalf.size-1) {\r\n        var idx = secondHalf[i]\r\n        var elem = stage2[idx].first\r\n        var realIdx = stage2[idx].second\r\n        res[realIdx] = cur\r\n        for (j in 0..elem-1) {\r\n            cur += 2\r\n        }\r\n    }\r\n\r\n    for (i in 1..n) {\r\n        print(\"${res[i]} \")\r\n    }\r\n}\r\n"
+}

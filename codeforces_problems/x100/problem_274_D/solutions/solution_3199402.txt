@@ -1,0 +1,38 @@
+{
+    "id": 3199402,
+    "contestId": 274,
+    "creationTimeSeconds": 1361891935,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 274,
+        "index": "D",
+        "name": "Lovely Matrix",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 274,
+        "members": [
+            {
+                "handle": "noh4h_ss"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1361374200
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 39,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 6144000,
+    "source": "#include <cstdio>\n#include <algorithm>\n#include <stack>\n#include <vector>\nusing namespace std;\n\nstruct seg_tree {\n    vector<int> t;\n    int n;\n    \n    seg_tree(const vector<int>& a)\n    {\n        int m = a.size();\n        n = 1;\n        while(n < m)\n            n <<= 1;\n        t.resize(n << 1);\n        \n        for(int i = n; i < n+m; ++i)\n            t[i] = a[i-n];\n        for(int i = n+m; i < (n << 1); ++i)\n            t[i] = -1;\n        for(int i = n-1; i > 0; --i)\n            t[i] = max(t[2*i], t[2*i+1]);\n    }\n    \n    void erase(int x)\n    {\n        x += n;\n        t[x] = -1;\n        while(x > 1) {\n            x >>= 1;\n            t[x] = max(t[2*x], t[2*x+1]);\n        }\n    }\n    \n    int get_max(int x = 1)\n    {\n        if(x >= n) return x-n;\n        return t[x] == t[2*x] ? get_max(2*x) : get_max(2*x+1);\n    }\n};\n\nint n, m;\nvector<vector<int> > a;\nvector<seg_tree> t;\nvector<bool> rem;\nvector<int> post;\n\nvoid dfs(int j)\n{\n    rem[j] = true;\n    for(int i = 0; i < n; ++i)\n        t[i].erase(j);\n        \n    for(int i = 0; i < n; ++i) {\n        if(a[i][j] == -1) continue;\n        while(true) {\n            int k = t[i].get_max();\n            if(rem[k] || a[i][k] <= a[i][j])\n                break;\n            dfs(k);\n        }\n    }\n    post.push_back(j);\n}\n\nbool verify()\n{\n    for(int i = 0; i < n; ++i) {\n        int p = -1;\n        for(int k = m-1; k >= 0; --k) {\n            if(a[i][post[k]] == -1) continue;\n            if(a[i][post[k]] < p) return false;\n            p = a[i][post[k]];\n        }\n    }\n    return true;\n}\n\nint main()\n{\n    scanf(\"%d%d\", &n, &m);\n    a.resize(n);\n    t.reserve(n);\n    for(int i = 0; i < n; ++i) {\n        a[i].resize(m);\n        for(int j = 0; j < m; ++j)\n            scanf(\"%d\", &a[i][j]);\n        t.push_back(seg_tree(a[i]));\n    }\n    \n    rem.resize(m, false);\n    for(int j = 0; j < m; ++j)\n        if(!rem[j])\n            dfs(j);\n    \n    if(verify()) {\n        for(int i = m-1; i >= 0; --i) {\n            if(i < m-1) printf(\" \");\n            printf(\"%d\", post[i]+1);\n        }\n        printf(\"\\n\");\n    }\n    else puts(\"-1\");\n    return 0;\n}\n"
+}

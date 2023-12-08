@@ -1,0 +1,36 @@
+{
+    "id": 131089690,
+    "contestId": 1571,
+    "creationTimeSeconds": 1633625821,
+    "relativeTimeSeconds": 8521,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "jimm89"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.5",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 9,
+    "timeConsumedMillis": 311,
+    "memoryConsumedBytes": 68915200,
+    "source": "import java.lang.AssertionError\r\nimport kotlin.math.min\r\nimport kotlin.math.max\r\n \r\nprivate fun readLn() = readLine()!! // string line\r\nprivate fun readInt() = readLn().toInt() // single int\r\nprivate fun readLong() = readLn().toLong() // single long\r\nprivate fun readDouble() = readLn().toDouble() // single double\r\nprivate fun readStrings() = readLn().split(\" \") // list of strings\r\nprivate fun readInts() = readStrings().map { it.toInt() } // list of ints\r\nprivate fun readLongs() = readStrings().map { it.toLong() } // list of longs\r\nprivate fun readDoubles() = readStrings().map { it.toDouble() } // list of doubles\r\n \r\nprivate fun myAssert(x: Boolean) {\r\n    if (!x) {\r\n        throw AssertionError()\r\n    }\r\n}\r\n \r\nfun main(args: Array<String>) {\r\n    var t = 1\r\n    for (i in 0 until t) {\r\n        var (n,m) = readInts()\r\n        var B = IntArray(n){-1}\r\n        var A = ArrayList<Int>()\r\n        var IDX = ArrayList<Int>()\r\n        var sm = 0\r\n        for (j in 0 until n) {\r\n            var (a,b) = readInts()\r\n            if (b == 1) {\r\n                B[j] = m - (a-1)\r\n                m -= a\r\n            }\r\n            else {\r\n                A.add(a)\r\n                IDX.add(j)\r\n                sm += a\r\n            }\r\n        }\r\n        if (sm > m) {\r\n            println(\"NO\")\r\n            continue\r\n        }\r\n        // I have a bucket of size ceil(m/2) and a bucket of size((m+1)/2)\r\n        // Can I find a pair of sums (X,sm-X) from A such that one is <= ceil(m/2) and the other <= floor(m/2)\r\n        var dp = mutableListOf(IntArray(2502){0})\r\n        dp[0][0] = 1\r\n        for (j in 0 until A.size) {\r\n            var tmp = IntArray(2502){0}\r\n            for (k in 0 until 2502) {\r\n                if (dp[j][k] > 0) tmp[k] = 1\r\n                if (k + A[j] < 2502 && dp[j][k] > 0) {\r\n                    tmp[k + A[j]] = 1\r\n                }\r\n            }\r\n            dp.add(tmp)\r\n        }\r\n        var ans = -1\r\n        var jj = -1\r\n        var qq = -1\r\n        for (j in 0 until 2502) {\r\n            var q = sm - j\r\n            if (q < 0 || dp[A.size][j] == 0) continue\r\n            if (j <= m/2 && q <= (m+1)/2) {\r\n                jj = j\r\n                qq = q\r\n            }\r\n        }\r\n        if (jj == -1) {\r\n            println(ans)\r\n            continue\r\n        }\r\n        // we're aiming for a sum of j on even days, q on odd days\r\n        var curr_box = A.size\r\n        var cnt = 0\r\n        var curr_even = m\r\n        var curr_odd = m\r\n        if (m % 2 == 1) curr_even -= 1\r\n        else curr_odd -= 1\r\n        while (curr_box > 0) {\r\n            if (jj - A[curr_box-1] >= 0 && dp[curr_box-1][jj - A[curr_box-1]] > 0) {\r\n                B[IDX[curr_box-1]] = curr_even - 2*(A[curr_box-1] - 1)\r\n                curr_even -= 2*(A[curr_box-1])\r\n                cnt++\r\n                jj -= A[curr_box-1]\r\n            }\r\n            else {\r\n                B[IDX[curr_box-1]] = curr_odd - 2*(A[curr_box-1] - 1)\r\n                curr_odd -= 2*(A[curr_box-1])\r\n            }\r\n            curr_box--\r\n        }\r\n        println(B.joinToString(\" \"))\r\n    }\r\n}\r\n"
+}

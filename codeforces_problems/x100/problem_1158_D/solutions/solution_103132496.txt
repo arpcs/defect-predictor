@@ -1,0 +1,38 @@
+{
+    "id": 103132496,
+    "contestId": 1158,
+    "creationTimeSeconds": 1609712477,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1158,
+        "index": "D",
+        "name": "Winding polygonal line",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "constructive algorithms",
+            "geometry",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1158,
+        "members": [
+            {
+                "handle": "aki167yuuki"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1557671700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 75,
+    "timeConsumedMillis": 545,
+    "memoryConsumedBytes": 25395200,
+    "source": "#include <bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\ntypedef long long ll;\r\ntypedef unsigned long long ull;\r\ntypedef long double ld;\r\ntypedef double db;\r\ntypedef std::string str;\r\n#define sei set<int>\r\n#define sell set<ll>\r\n#define pii pair<int,int>\r\n#define pll pair<ll,ll>\r\n#define vi vector<int>\r\n#define vll vector<ll>\r\n#define vvi vector<vi>\r\n#define vvll vector<vll>\r\n#define vld vector<ld>\r\n#define vstr vector<str>\r\n#define vpii vector<pii>\r\n#define vpll vector<pll>\r\n#define all(v) v.begin(),v.end()\r\n#define foa(i,v) for(auto i : v)\r\n#define fo(i,a,b) for(int i=a;i<b;i++)\r\n#define fo_(i,a,b) for(int i=a;i>b;i--)\r\n#define M(a) memset(a,0,sizeof a)\r\n#define M_(a) memset(a ,-1,sizeof a)\r\n#define deb(x)  cerr << #x << \" = \" << x << endl\r\n#define pb push_back\r\n#define pob pop_back\r\n#define F first\r\n#define S second\r\n#define OK order_of_key\r\n#define FO find_by_order\r\n#define nmax 1000100\r\nconst ld PI = 3.141592653589793238462643383279;\r\nconst ll inf = std::numeric_limits<ll>::max();\r\nconst int infint = std::numeric_limits<int>::max();\r\nconst ll mod = 1e9+7;\r\nusing namespace __gnu_pbds;\r\nusing namespace std;\r\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\r\ntemplate <typename T>\r\nusing ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;\r\n\r\ntypedef ld ftype; // inja ro ba tavajoh be niaz taghir bede, age ll bashe abraye convex hull behtare!\r\n\r\nstruct point2d {\r\n    ftype x, y;\r\n    point2d() {}\r\n    point2d(ftype x, ftype y): x(x), y(y) {}\r\n    point2d& operator+=(const point2d &t) {\r\n        x += t.x;\r\n        y += t.y;\r\n        return *this;\r\n    }\r\n    point2d& operator-=(const point2d &t) {\r\n        x -= t.x;\r\n        y -= t.y;\r\n        return *this;\r\n    }\r\n    point2d& operator*=(ftype t) {\r\n        x *= t;\r\n        y *= t;\r\n        return *this;\r\n    }\r\n    point2d& operator/=(ftype t) {\r\n        x /= t;\r\n        y /= t;\r\n        return *this;\r\n    }\r\n    point2d operator+(const point2d &t) const {\r\n        return point2d(*this) += t;\r\n    }\r\n    point2d operator-(const point2d &t) const {\r\n        return point2d(*this) -= t;\r\n    }\r\n    point2d operator*(ftype t) const {\r\n        return point2d(*this) *= t;\r\n    }\r\n    point2d operator/(ftype t) const {\r\n        return point2d(*this) /= t;\r\n    }\r\n};\r\npoint2d operator*(ftype a, point2d b) {\r\n    return b * a;\r\n}\r\n\r\nftype dot(point2d a, point2d b) {\r\n    return a.x * b.x + a.y * b.y;\r\n}\r\n\r\nftype norm(point2d a) {\r\n    return dot(a, a);\r\n}\r\nld abs(point2d a) {  // inja havaset bashe type function ro taghir bedi age niaz shod\r\n    return (ld)sqrt(norm(a));\r\n}\r\nld dis(point2d a,point2d b){\r\n    return abs(a-b);\r\n}\r\nld proj(point2d a, point2d b) {\r\n    return (ld)dot(a, b) / abs(b);\r\n}\r\nld angle(point2d a, point2d b) {\r\n    return acos((ld)dot(a, b) / abs(a) / abs(b));\r\n}\r\nftype cross(point2d a, point2d b) {\r\n    return a.x * b.y - a.y * b.x;\r\n}\r\n\r\npoint2d intersect(point2d a1, point2d d1, point2d a2, point2d d2) {\r\n    return a1 + cross(a2 - a1, d2) / cross(d1, d2) * d1;\r\n}\r\n\r\nftype signed_area_parallelogram(point2d p1, point2d p2, point2d p3) {\r\n    return cross(p2 - p1, p3 - p2);\r\n}\r\n\r\nld triangle_area(point2d p1, point2d p2, point2d p3) {\r\n    return abs(signed_area_parallelogram(p1, p2, p3)) / 2.0;\r\n}\r\n\r\nbool clockwise(point2d p1, point2d p2, point2d p3) {\r\n    return signed_area_parallelogram(p1, p2, p3) < 0;\r\n}\r\n\r\npoint2d now;\r\nbool cmpp(pair<point2d,int> a,pair<point2d,int> b){\r\n    return clockwise(now,a.F,b.F);\r\n}\r\n\r\nbool counter_clockwise(point2d p1, point2d p2, point2d p3) {\r\n    return signed_area_parallelogram(p1, p2, p3) > 0;\r\n}\r\n\r\nbool cmp(point2d a, point2d b) {\r\n    return a.x < b.x || (a.x == b.x && a.y < b.y);\r\n}\r\n\r\nbool cw(point2d a, point2d b, point2d c) {\r\n    return a.x*(b.y-c.y)+b.x*(c.y-a.y)+c.x*(a.y-b.y) < 0;\r\n}\r\n\r\nbool ccw(point2d a, point2d b, point2d c) {\r\n    return a.x*(b.y-c.y)+b.x*(c.y-a.y)+c.x*(a.y-b.y) > 0;\r\n}\r\n\r\nld area(const vector<point2d>& fig) {\r\n    ld res = 0;\r\n    for (int i = 0; i < fig.size(); i++) {\r\n        point2d p = i ? fig[i - 1] : fig.back();\r\n        point2d q = fig[i];\r\n        res += (p.x - q.x) * (p.y + q.y);\r\n    }\r\n    return abs(res)/2;\r\n}\r\n\r\nvoid convex_hull(vector<point2d> &a) { //vector<pt> a ro tabdil mikone be convex hullesh\r\n    if (a.size() <= 1)\r\n        return;\r\n\r\n    sort(a.begin(), a.end(), &cmp);\r\n    point2d p1 = a[0], p2 = a.back();\r\n    vector<point2d> up, down;\r\n    up.push_back(p1);\r\n    down.push_back(p1);\r\n    for (int i = 1; i < (int)a.size(); i++) {\r\n        if (i == a.size() - 1 || cw(p1, a[i], p2)) {\r\n            while (up.size() >= 2 && !cw(up[up.size()-2], up[up.size()-1], a[i]))\r\n                up.pop_back();\r\n            up.push_back(a[i]);\r\n        }\r\n        if (i == a.size() - 1 || ccw(p1, a[i], p2)) {\r\n            while(down.size() >= 2 && !ccw(down[down.size()-2], down[down.size()-1], a[i]))\r\n                down.pop_back();\r\n            down.push_back(a[i]);\r\n        }\r\n    }\r\n\r\n    a.clear();\r\n    for (int i = 0; i < (int)up.size(); i++)\r\n        a.push_back(up[i]);\r\n    for (int i = down.size() - 2; i > 0; i--)\r\n        a.push_back(down[i]);\r\n}\r\n\r\npoint2d a[nmax];\r\nbool seen[nmax];\r\n\r\nint main(){\r\n    ios::sync_with_stdio(0);cin.tie(0);cout.tie(0);\r\n    //point2d aa(0,0),bb(1,1),cc(-1,1);\r\n    //cout << clockwise(aa,bb,cc) << ' ' << clockwise(aa,cc,bb) << endl;\r\n    int n;\r\n    cin >> n;\r\n    vpii v;\r\n    fo(i,0,n){\r\n        int x,y;\r\n        cin >> x >> y; // vorodi ro ba int daryaft kardim chon ld kone\r\n        a[i].x = x;\r\n        a[i].y = y;\r\n        v.pb({x,i});\r\n    }\r\n    string s;\r\n    cin >> s;\r\n\r\n    sort(all(v),greater<pii>());\r\n    //foa(i,v) cout << i.F << ' ' << i.S << endl;\r\n    vi ans = {v.back().S};\r\n    v.pop_back();\r\n    int last = ans[0];\r\n    seen[last] = true;\r\n    fo(t,1,n-1){\r\n        vector<pair<point2d,int>> vv;\r\n        now = a[last];\r\n        fo(i,0,n) if(!seen[i]) vv.pb({a[i],i});\r\n        sort(all(vv),cmpp);\r\n        if(s[t-1] == 'R'){\r\n            last = vv[0].S;\r\n        }else{\r\n            last = vv.back().S;\r\n        }\r\n        seen[last] = true;\r\n        ans.pb(last);\r\n    }\r\n    fo(i,0,n) if(!seen[i]) ans.pb(i);\r\n    foa(i,ans) cout << i+1 << ' ';\r\n\r\n    return 0;\r\n}\r\n"
+}

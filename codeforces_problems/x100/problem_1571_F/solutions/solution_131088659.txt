@@ -1,0 +1,36 @@
+{
+    "id": 131088659,
+    "contestId": 1571,
+    "creationTimeSeconds": 1633623928,
+    "relativeTimeSeconds": 6628,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "Roll_Num_56"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.5",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 88,
+    "timeConsumedMillis": 1029,
+    "memoryConsumedBytes": 294604800,
+    "source": "import java.util.*\r\nimport kotlin.collections.ArrayList\r\nimport kotlin.math.max\r\nimport kotlin.math.min\r\n\r\nprivate fun readLn() = readLine()!! // string line\r\nprivate fun readInt() = readLn().toInt() // single int\r\nprivate fun readLong() = readLn().toLong() // single int\r\nprivate fun readDouble() = readLn().toDouble() //single double\r\nprivate fun readStrings() = readLn().split(\" \") // list of strings\r\nprivate fun readInts() = readStrings().map { it.toInt() } // list of ints\r\nprivate fun readDoubles() = readStrings().map { it.toDouble() } // list of Doubles\r\nprivate fun readLongs() = readStrings().map { it.toLong() } // list of longs\r\nconst val N = 5000 + 5\r\n\r\nvar days = Array(N) { 0 }\r\nvar a = ArrayList<Pair<Int, Int>>()\r\nvar n = 0\r\nvar m = 0\r\nvar psum = Array(N) { 0 }\r\nvar mp = Array(N) { 0 }\r\nvar dp = Array(N) { Array(N) { -1 } }\r\nvar vis = Array(N) { Array(N) { false } }\r\n\r\n\r\nfun solve(idx: Int, pos: Int): Int\r\n{\r\n\r\n    if (idx == a.size)\r\n    {\r\n        if (pos <= m + 2)\r\n            return 0\r\n        return (-1e5).toInt()\r\n    }\r\n    if (pos > m)\r\n    {\r\n        return (-1e5).toInt()\r\n    }\r\n    if (vis[idx][pos])\r\n    {\r\n        return dp[idx][pos]\r\n    }\r\n    var ans = (-1e5).toInt()\r\n    var x = a[idx].first\r\n    ans = max(ans, solve(idx + 1, pos))\r\n    ans = max(ans, x + solve(idx + 1, pos + 2 * (x)))\r\n    vis[idx][pos] = true\r\n    dp[idx][pos] = ans\r\n    return ans\r\n}\r\n\r\nvar res = ArrayList<Int>()\r\nvar res2 = ArrayList<Int>()\r\nfun printSol(idx: Int, pos: Int)\r\n{\r\n    if (idx == a.size)\r\n    {\r\n        return\r\n    }\r\n    var x = a[idx].first\r\n    var p = solve(idx + 1, pos)\r\n    var q = x + solve(idx + 1, pos + 2 * (x))\r\n    if (p > q)\r\n    {\r\n        res2.add(idx)\r\n        printSol(idx + 1, pos)\r\n    }\r\n    else\r\n    {\r\n        res.add(idx)\r\n        printSol(idx + 1, pos + 2 * (x))\r\n    }\r\n}\r\n\r\nfun solve()\r\n{\r\n    val (nn, mm) = readInts()\r\n    n = nn\r\n    m = mm\r\n    var pos = 1\r\n    for (i in 0 until n)\r\n    {\r\n        val (x, y) = readInts()\r\n        if (y == 1)\r\n        {\r\n            for (j in pos until pos + x)\r\n            {\r\n                if (j > m)\r\n                {\r\n                    println(-1)\r\n                    return\r\n                }\r\n                days[j] = i + 1\r\n            }\r\n            pos += x\r\n            continue\r\n        }\r\n        else\r\n        {\r\n            a.add(Pair(x, y))\r\n            mp[a.size-1] = i\r\n            psum[a.size - 1] = (if (a.size - 2 >= 0) psum[a.size - 2] else 0) + x\r\n        }\r\n    }\r\n\r\n    fun helper(p1: Int, i: Int): Int\r\n    {\r\n        var xd = p1\r\n        var cnt = 0\r\n        while (true)\r\n        {\r\n            if (cnt == a[i].first)\r\n                break\r\n            if (xd > m)\r\n            {\r\n                return -1\r\n            }\r\n            days[xd] =mp[i] + 1\r\n            cnt++\r\n            xd += 2\r\n        }\r\n        return xd\r\n    }\r\n\r\n    var p1 = pos\r\n    var p2 = pos + 1\r\n    printSol(0, p1)\r\n    for (it in 0 until res.size)\r\n    {\r\n        p1 = helper(p1, res[it])\r\n        if (p1 == -1)\r\n        {\r\n            println(-1)\r\n            return\r\n        }\r\n    }\r\n    for (it in 0 until res2.size)\r\n    {\r\n        p2 = helper(p2, res2[it])\r\n        if (p2 == -1)\r\n        {\r\n            println(-1)\r\n            return\r\n        }\r\n    }\r\n    //println(res)\r\n    //println(res2)\r\n    var vis = MutableList<Boolean>(n+1) { false }\r\n    var ans = MutableList<Int>(n){-1}\r\n    for (i in 1..m)\r\n    {\r\n        if (days[i] == 0 || vis[days[i]])\r\n            continue\r\n        val xd = days[i]\r\n        ans[xd-1] = i\r\n        vis[days[i]] = true\r\n    }\r\n    println(ans.joinToString  (\" \"))\r\n}\r\n\r\nfun main()\r\n{\r\n    var t = 1\r\n    //t = readInt()\r\n    while (t-- > 0)\r\n    {\r\n        solve()\r\n    }\r\n}"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 64202011,
+    "contestId": 1236,
+    "creationTimeSeconds": 1572867926,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "luogu_bot2"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 904,
+    "memoryConsumedBytes": 41881600,
+    "source": "#include <bits/stdc++.h>\n#define pb push_back\n#define ll long long\nusing namespace std;\ntemplate <typename T> void read(T &x) {\n\tx = 0; int f = 1; char c = getchar();\n\twhile (!isdigit(c)) {if (c == '-') f = -1; c = getchar();}\n\twhile (isdigit(c)) x = x * 10 + c - '0', c = getchar(); x *= f;\n}\nconst int N = 500010, mod = 1e9 + 7, inv2 = 5e8 + 4;\nint n, m, l, id[N], pw[N], st[N], vis[N], inv[N];\nvector <int> e[N], in[N]; vector <vector <int> > cyc;\nint sum(int x, int y) {return x + y >= mod ? x + y - mod : x + y;}\nint sub(int x, int y) {return x - y < 0 ? x - y + mod : x - y;}\nint mul(int x, int y) {return 1ll * x * y % mod;}\nvoid dfs(int x, int las = 0) {\n\tvis[x] = 1, st[id[x] = ++l] = x;\n\tfor (int y : e[x]) {\n\t\tif (vis[y] == 2) continue;\n\t\tif (y == las) continue;\n\t\tif (vis[y]) {\n\t\t\tvector <int> tmp; tmp.clear();\n\t\t\tfor (int i = id[y]; i <= l; i++) tmp.pb(st[i]);\n\t\t\tcyc.pb(tmp);\n\t\t} else dfs(y, x);\n\t}\n\tvis[x] = 2, st[l--] = 0;\n}\nint ver() {return sum(mul(n, inv[1]), mul(mul(n, n - 1), inv[2]));}\nint edge() {\n\tint ret = mul(m, inv[2]);\n\tfor (int x = 1; x <= n; x++)\n\t\tfor (int y : e[x]) {\n\t\t\tif (x > y) continue; \n\t\t\tint s1 = m - e[x].size() - e[y].size() + 1, s2 = e[x].size() + e[y].size() - 2;\n\t\t\tret = sum(ret, mul(s1, inv[4])), ret = sum(ret, mul(s2, inv[3]));\n\t\t}\n\treturn ret;\n}\nint cycle() {\n\tint tmp = 0, ret = 0;\n\tfor (auto cir : cyc) tmp = sum(tmp, inv[cir.size()]);\n\tfor (auto cir : cyc) {\n\t\tint siz = cir.size(), val = tmp; ret = sum(ret, inv[siz]);\n\t\tfor (int x : cir) {\n\t\t\tfor (int s : in[x]) val = sub(val, inv[s]);\n\t\t\tval = sum(val, inv[siz]);\n\t\t}\n\t\tval = sub(val, inv[siz]), ret = sum(ret, mul(inv[siz], val));\n\t\tint res = sub(tmp, sum(val, inv[siz]));\n\t\tret = sum(ret, mul(mul(res, 2), inv[siz]));\n\t}\n\treturn ret;\n}\nint veredge() {\n\tint ret = 0;\n\tfor (int i = 1; i <= n; i++) {\n\t\tint s1 = e[i].size(), s2 = m - e[i].size();\n\t\tret = sum(ret, mul(s1, inv[2])), ret = sum(ret, mul(s2, inv[3]));\n\t}\n\treturn ret;\n}\nint vercycle() {\n\tint tmp = 0, ret = 0;\n\tfor (auto cir : cyc) tmp = sum(tmp, inv[cir.size()]);\n\tfor (int i = 1; i <= n; i++) {\n\t\tint ts = 0;\n\t\tfor (int x : in[i]) ts = sum(ts, inv[x]);\n\t\tret = sum(ret, ts), ret = sum(ret, mul(sub(tmp, ts), inv[1]));\n\t}\n\treturn ret;\n}\nint edgecycle() {\n\tint ret = 0;\n\tfor (auto cir : cyc) {\n\t\tint siz = cir.size(), ts = 0; ret = sum(ret, mul(siz, inv[siz]));\n\t\tfor (int x : cir) ts += e[x].size() - 2;\n\t\tret = sum(ret, mul(ts, inv[siz + 1]));\n\t\tret = sum(ret, mul(m - siz - ts, inv[siz + 2]));\n\t}\n\treturn ret;\n}\nint calc1() {\n\tint s1 = sum(ver(), sum(edge(), cycle())), s2 = sub(vercycle(), sum(veredge(), edgecycle()));\n\treturn sum(s1, mul(s2, 2));\n}\nint calc2() {\n\tint ret = sub(mul(n, inv[1]), mul(m, inv[2]));\n\tfor (auto cir : cyc) ret = sum(ret, inv[cir.size()]);\n\treturn mul(ret, ret);\n}\nint main() {\n\tread(n), read(m), pw[0] = inv[0] = 1;\n\tfor (int i = 1; i <= 5e5; i++) pw[i] = mul(pw[i - 1], 2), inv[i] = mul(inv[i - 1], inv2);\n\tfor (int i = 1; i <= m; i++) {\n\t\tint x, y; read(x), read(y);\n\t\te[x].pb(y), e[y].pb(x);\n\t}\n\tdfs(1);\n\tfor (auto cir : cyc) for (int i : cir) in[i].pb(cir.size());\n\tcout << (calc1() - calc2() + mod) % mod << '\\n';\n\treturn 0;\n}"
+}

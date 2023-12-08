@@ -1,0 +1,37 @@
+{
+    "id": 121056893,
+    "contestId": 1406,
+    "creationTimeSeconds": 1625171632,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1406,
+        "index": "E",
+        "name": "Deleting Numbers",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 2600,
+        "tags": [
+            "interactive",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1406,
+        "members": [
+            {
+                "handle": "gravitopple"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1599918300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 512000,
+    "source": "#include<bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef pair<int, int> pii;\r\ntypedef pair<ll, ll> pll;\r\ntypedef vector<int> vi;\r\ntypedef vector<vector<int>> vvi;\r\ntypedef vector<ll> vll;\r\ntypedef vector<vector<ll>> vvll;\r\ntypedef vector<bool> vb;\r\ntypedef tree<ll, null_type, less_equal<ll>, rb_tree_tag, tree_order_statistics_node_update> indexed_set;\r\n\r\ntemplate <typename T, typename U> std::istream&operator>>(std::istream&i, pair<T,U>&p) {i >> p.first >> p.second; return i;}\r\ntemplate<typename T>std::istream&operator>>(std::istream&i,vector<T>&t) {for(auto&v:t){i>>v;}return i;}\r\ntemplate <typename T, typename U> std::ostream&operator<<(std::ostream&o, const pair<T,U>&p) {o << p.first << ' ' << p.second; return o;}\r\ntemplate<typename T>std::ostream&operator<<(std::ostream&o,const vector<T>&t) {if(t.empty())o<<'\\n';for(size_t i=0;i<t.size();++i){o<<t[i]<<\" \\n\"[i == t.size()-1];}return o;}\r\n\r\n#define deb(x) cout << '>' << #x << ':' << x << endl;\r\n#define all(v) v.begin(),v.end()\r\n#define rall(v) v.rbegin(),v.rend()\r\n#define END '\\n'\r\n#define inf 9e18\r\n#define ff first\r\n#define ss second\r\n#define pb push_back\r\n\r\nint queryA(int x) {\r\n    cout << \"A \" << x << endl;\r\n    int val;\r\n    cin >> val;\r\n    return val;\r\n}\r\n\r\nint queryB(int x) {\r\n    cout << \"B \" << x << endl;\r\n    int val;\r\n    cin >> val;\r\n    return val;\r\n}\r\n\r\nvoid queryC(int x) {\r\n    cout << \"C \" << x << endl;\r\n    exit(0);\r\n}\r\n\r\nconst int maxN = 1e5;\r\nvector<int> primes, divs;\r\nvector<int> sv(maxN + 1);\r\n\r\nvoid preprocess() {\r\n    for (ll i = 1; i <= maxN; ++i) sv[i] = i;\r\n    for (ll i = 2; i * i <= maxN; ++i) {\r\n        for (ll j = i * i; j <= maxN; j += i) {\r\n            if (sv[j] == j) sv[j] = i; \r\n        }\r\n    }\r\n    for (int i = 2; i <= maxN; ++i) if (sv[i] == i) primes.pb(i);\r\n}\r\n\r\nvector<int> to_try;\r\n\r\nvoid rec(int idx, int n, ll val) {\r\n    if (idx == (int)divs.size()) {\r\n        to_try.pb(val);\r\n        return;\r\n    }\r\n    rec(idx + 1, n, val);\r\n    val *= divs[idx];\r\n    while (val <= n) {\r\n        rec(idx + 1, n, val);\r\n        val *= divs[idx];\r\n    }\r\n}\r\n\r\nvoid try_all(int x) {\r\n    to_try.pb(1);\r\n    sort(rall(to_try));\r\n    // cerr << to_try;\r\n    for (auto u: to_try) {\r\n        if (queryA(u)) {\r\n            if (u == 99874) assert(x != -1);\r\n            queryC(u);\r\n        }\r\n    }\r\n}\r\n\r\nvoid solve(){\r\n    int n;\r\n    cin >> n;\r\n    int x = 1;\r\n    // 70 * 2 = 140\r\n    int lim = 0;\r\n    for (int i = 2; i * i <= n; ++i) {\r\n        if (sv[i] != i) continue;\r\n        int b = queryB(i);\r\n        int a = queryA(i);\r\n        if (a != 0) x *= i, divs.pb(i);\r\n        lim = i;\r\n    }\r\n\r\n    //Now, x has atmost 1 prime factor in root(n) + 1 to n\r\n    //sqrt -> 9592 + 2 * sqrt(9592) = 9780 + 140 = 9920 (overcounting by about 85)\r\n    while (!primes.empty() && primes.back() > n) primes.pop_back();\r\n    reverse(all(primes));\r\n    while (!primes.empty() && primes.back() <= lim) primes.pop_back();\r\n    int cnt = primes.size();\r\n    int sq = sqrt(cnt);\r\n    if (sq == 0) ++sq;\r\n    reverse(all(primes));\r\n    int todo = -1;\r\n    // cout << \"WE ARE HERE NOW: \" << END;\r\n    // cout << divs << END;\r\n    // cout << primes << END;\r\n    int rem = queryA(1);\r\n    for (int i = 0; i < cnt; i += sq) {\r\n        int now = min(sq, cnt - i);\r\n        for (int j = i; j < min(i + sq, cnt); ++j) {\r\n            int tmp = queryB(primes[j]);\r\n        }\r\n        if (todo != -1) continue;\r\n        int tot = queryA(1);\r\n        if (tot != rem - now) {\r\n            todo = i;\r\n            break;\r\n        }\r\n        rem = tot;\r\n    }\r\n    // cout << \"DOING ANOTHER SQRT: \" << END;\r\n    if (todo != -1) {\r\n        for (int i = todo; i < min(todo + sq, cnt); ++i) {\r\n            int a = queryA(primes[i]);\r\n            if (a != 0) {\r\n                x *= primes[i];\r\n                divs.pb(primes[i]);\r\n                break;\r\n            }\r\n        }\r\n    }\r\n    //O(log n) queries to determine x\r\n    // cout << divs << END;\r\n    // cout << \"LOL: \" << x << endl;\r\n    rec(0, n, x);\r\n    if (n == maxN) to_try.pb(99874);\r\n\r\n    try_all(todo);\r\n}\r\nint main()\r\n{\r\n    ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);\r\n    int t = 1;\r\n    // cin >> t;\r\n    preprocess();\r\n    while(t--){\r\n        solve();\r\n    }\r\n    return 0;\r\n}"
+}

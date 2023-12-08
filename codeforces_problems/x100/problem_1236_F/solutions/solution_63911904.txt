@@ -1,0 +1,38 @@
+{
+    "id": 63911904,
+    "contestId": 1236,
+    "creationTimeSeconds": 1572511004,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "chenkuowen"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 498,
+    "memoryConsumedBytes": 160563200,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\nconst int MAX_N=5+1e6,MOD=1e9+7;\ninline int fpow(int x,int n,int ret=1){\n\tfor(;n;n>>=1,x=1ll*x*x%MOD)\n\t\tn&1?ret=1ll*ret*x%MOD:0;\n\treturn ret;\n}\ninline int mo(int x){ return x>=MOD?x-MOD:x; }\nstruct Graph{\n\tstruct Edge{ int to,nxt; }edge[MAX_N*2];\n\tint head[MAX_N],top;\n\tGraph(){memset(head,-1,sizeof(head)),top=-1; }\n\tinline void add(int x,int y){\n\t\tedge[++top]=(Edge){y,head[x]};\n\t\thead[x]=top;\n\t}\n\tinline void add2(int x,int y){ \n//\t\tprintf(\"(%d %d)\",x,y); \n\t\tadd(x,y); add(y,x); \n\t}\n}G,G1;\nint top_node,n;\nnamespace BUILD{\n\tint stk[MAX_N],top_stk,dfn[MAX_N],low[MAX_N],ti=0;\n\tvoid tarjan(int x,int pre){\n\t\tdfn[x]=low[x]=++ti; stk[++top_stk]=x;\n\t\tfor(int j=G.head[x];~j;j=G.edge[j].nxt){\n\t\t\tint y=G.edge[j].to;\n\t\t\tif(y!=pre){\n\t\t\t\tif(dfn[y]==0){\n\t\t\t\t\ttarjan(y,x); low[x]=min(low[x],low[y]);\n\t\t\t\t\tif(low[y]>=dfn[x]){\n\t\t\t\t\t\t++top_node;\n\t\t\t\t\t\tG1.add2(x,top_node);\n\t\t\t\t\t\twhile(stk[top_stk+1]!=y){\n\t\t\t\t\t\t\tG1.add2(stk[top_stk],top_node);\n\t\t\t\t\t\t\t--top_stk;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}else low[x]=min(low[x],dfn[y]);\n\t\t\t}\n\t\t}\n\t}\n}\nstruct Key{\n\tint x0,x1,x2;\n\tKey(int _x0=1,int _x1=0,int _x2=0){ x0=_x0,x1=_x1,x2=_x2; }\n\tinline Key operator*(int p){\n\t\treturn Key(1ll*x0*p%MOD,1ll*x1*p%MOD,1ll*x2*p%MOD);\n\t}\n\tinline Key operator+(int d){\n\t\treturn Key(x0,(x1+1ll*d*x0)%MOD,(x2+2ll*d*x1+1ll*d*d%MOD*x0)%MOD);\n\t}\n\tvoid print(){\n\t\tprintf(\"{%d %d %d}\",x0,x1,x2);\n\t}\n};\ninline Key operator*(Key a,Key b){\n\treturn Key(1ll*a.x0*b.x0%MOD,(1ll*a.x1*b.x0+1ll*a.x0*b.x1)%MOD\n\t\t,(1ll*a.x2*b.x0+1ll*a.x0*b.x2+2ll*a.x1*b.x1)%MOD);\n}\ninline Key operator+(Key a,Key b){\n\treturn Key(mo(a.x0+b.x0),mo(a.x1+b.x1),mo(a.x2+b.x2));\n}\nKey f[MAX_N][3],g[MAX_N][2][3];\nvoid dfs(int x,int pre){\n\tvector<int> son;\n\tfor(int j=G1.head[x];~j;j=G1.edge[j].nxt){\n\t\tint y=G1.edge[j].to;\n\t\tif(y!=pre){\n\t\t\tdfs(y,x);\n\t\t\tson.push_back(y);\n\t\t}\n\t}\n\tif(x<=n){\n\t\tf[x][0]=Key()*(MOD+1>>1); f[x][1]=Key()*(MOD+1>>1);\n\t\tfor(auto y:son){\n\t\t\tf[x][0]=f[x][0]*(f[y][0]+(f[y][1]+1)+(f[y][2]+2));\n\t\t\tf[x][1]=f[x][1]*(f[y][0]+f[y][1]+f[y][2]);\n\t\t}\n\t}else{\n\t\tfor(int i=0;i<2;++i) \n\t\t\tfor(int j=0;j<3;++j) \n\t\t\t\tg[0][i][j]=Key(0,0,0);\n\t\tg[0][0][0]=f[son[0]][0];\n\t\tg[0][1][2]=f[son[0]][1];\n\t\tfor(int i=1;i<son.size();++i)\n\t\t\tfor(int t=0;t<2;++t){\n\t\t\t\tg[i][t][0]=f[son[i]][0]*(g[i-1][t][0]\n\t\t\t\t\t+(g[i-1][t][1]+1)+(g[i-1][t][2]+1));\n\t\t\t\tg[i][t][1]=f[son[i]][1]*(g[i-1][t][0]\n\t\t\t\t\t+g[i-1][t][1]);\n\t\t\t\tg[i][t][2]=f[son[i]][1]*g[i-1][t][2];\n\t\t\t}\n\t\tf[x][0]=g[son.size()-1][0][0];\n\t\tf[x][1]=(g[son.size()-1][1][0]+(MOD-1))+g[son.size()-1][0][1]\n\t\t\t+g[son.size()-1][1][2];\n\t\tf[x][2]=g[son.size()-1][1][1]+(MOD-1);\n\t}\n//\tprintf(\"[%d](%d %d %d)(%d %d %d)(%d %d %d)\\n\",x\n//\t\t,f[x][0].x0,f[x][0].x1,f[x][0].x2\n//\t\t,f[x][1].x0,f[x][1].x1,f[x][1].x2\n//\t\t,f[x][2].x0,f[x][2].x1,f[x][2].x2);\n}\nint main(){\n//\tprintf(\"<%lld>\",(2ll*fpow(8,MOD-2)+13ll*fpow(16,MOD-2))%MOD);\n//\tprintf(\"|%lld|\\n\",3ll*fpow(8,MOD-2)%MOD);\n\tint m;  scanf(\"%d%d\",&n,&m); top_node=n;\n\tfor(int i=1;i<=m;++i){\n\t\tint x,y; scanf(\"%d%d\",&x,&y);\n\t\tif(x!=y) G.add2(x,y);\n\t}\n\tBUILD::tarjan(1,0);\n\tdfs(1,0);\n\tKey ans=f[1][0]+(f[1][1]+1);\n//\tprintf(\"[%d %d]\",ans.x1,ans.x2);\n\tprintf(\"%lld\\n\",(ans.x2+MOD-1ll*ans.x1*ans.x1%MOD)%MOD);\n\treturn 0;\n}\n"
+}

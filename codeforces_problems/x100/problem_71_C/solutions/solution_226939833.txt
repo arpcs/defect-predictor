@@ -1,0 +1,37 @@
+{
+    "id": 226939833,
+    "contestId": 71,
+    "creationTimeSeconds": 1696633533,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 71,
+        "index": "C",
+        "name": "Round Table Knights",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 1600,
+        "tags": [
+            "dp",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 71,
+        "members": [
+            {
+                "handle": "Roma_the_king"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1301410800
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 52,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 1638400,
+    "source": "#pragma GCC target(\"avx2,bmi,bmi2,popcnt,lzcnt\")\r\n#pragma GCC optimize(\"Ofast,unroll-loops\")\r\n#include <iostream>\r\n#include <string>\r\n#include <queue>\r\n#include <deque>\r\n#include <stack>\r\n#include <map>\r\n#include <vector>\r\n#include <set>\r\n#include <cmath>\r\n#include <iomanip>\r\n#include <fstream>\r\n#include <sstream>\r\n#include <algorithm>\r\n#include <chrono>\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef unsigned long long ull;\r\ntypedef unsigned long long uint64;\r\ntypedef long long int64;\r\n#define endl '\\n'\r\n\r\nstruct Edge {\r\n\tint x, y;\r\n\tlong long cost;\r\n};\r\n\r\nstruct Vertex {\r\n\tvector<int> to;\r\n\tll pow = 0;\r\n\tll state;\r\n\tbool used = false;\r\n};\r\n\r\nstruct Point {\r\n\tll x, y;\r\n};\r\n\r\nstruct Point1 {\r\n\tll h, w, id;\r\n\tll wID = 0, hID = 0;\r\n\tll hSum = 0, wSum = 0;\r\n\tbool isActive = false;\r\n};\r\n\r\nll monDist(Point p1, Point p2) {\r\n\treturn abs(p1.x - p2.x) + abs(p1.y - p2.y);\r\n}\r\n\r\nll gcd(ll x, ll y) {\r\n\twhile (y) {\r\n\t\tll ost = x % y;\r\n\t\tx = y;\r\n\t\ty = ost;\r\n\t}\r\n\treturn x;\r\n}\r\n\r\nll lcm(ll x, ll y) {\r\n\treturn x / gcd(x, y) * y;\r\n}\r\n\r\nll arifmSum(ll s, ll f) {\r\n\treturn (s + f) * (f - s + 1) / 2;\r\n}\r\n\r\nbool isPermutation(vector<int>& list) {\r\n\tset<ll> list1;\r\n\tfor (auto i : list)\r\n\t\tlist1.insert(i);\r\n\treturn list1.size() == list.size();\r\n}\r\n\r\nll mex(vector<ll>& list) {\r\n\tsort(list.begin(), list.end());\r\n\tll minX = 0;\r\n\tfor (auto i : list) {\r\n\t\tif (i > minX) return minX;\r\n\t\tif (i == minX) minX++;\r\n\t}\r\n\treturn minX;\r\n}\r\n\r\nll distance(ll x1, ll y1, ll x2, ll y2) {\r\n\tull dx = x1 - x2, dy = y1 - y2;\r\n\treturn dx * dx + dy * dy;\r\n}\r\n\r\nstruct Rect {\r\n\tll x1, y1;\r\n\tll x2, y2;\r\n};\r\n\r\nRect inter(Rect p1, Rect p2) {\r\n\tll x1 = max(p1.x1, p2.x1), x2 = min(p1.x2, p2.x2);\r\n\tll y1 = max(p1.y1, p2.y1), y2 = min(p1.y2, p2.y2);\r\n\treturn {x1, y1, x2, y2};\r\n}\r\n\r\nll binPow(ll x, ll y) {\r\n\tll mult = 1;\r\n\twhile (y > 0) {\r\n\t\tif (y % 2) {\r\n\t\t\tmult *= x;\r\n\t\t\ty--;\r\n\t\t}\r\n\t\telse {\r\n\t\t\tx *= x;\r\n\t\t\ty /= 2;\r\n\t\t}\r\n\t}\r\n\treturn mult;\r\n}\r\n\r\nvector<ll> getPrimals(ll x) {\r\n\tvector<bool> list(x);\r\n\tvector<ll> primals;\r\n\tfor (int i = 2; i < x; i++) {\r\n\t\tif (list[i]) continue;\r\n\t\tfor (int j = i * 2; j < x; j += i) list[j] = true;\r\n\t\tprimals.push_back(i);\r\n\t}\r\n\r\n\treturn primals;\r\n}\r\n\r\nbool hasCircles(ll x, vector<Vertex>& g) {\r\n\tif (g[x].state == 1)\r\n\t\treturn true;\r\n\r\n\tif (g[x].state == 2)\r\n\t\treturn false;\r\n\r\n\tg[x].state = 1;\r\n\tbool isFound = false;\r\n\tfor (auto y : g[x].to)\r\n\t\tisFound |= hasCircles(y, g);\r\n\tg[x].state = 2;\r\n\r\n\treturn isFound;\r\n}\r\n\r\nvoid topSort(ll x, deque<ll>& ord, vector<Vertex>& g) {\r\n\tif (g[x].used) return;\r\n\tg[x].used = true;\r\n\r\n\tfor (auto y : g[x].to)\r\n\t\ttopSort(y, ord, g);\r\n\tord.push_front(x);\r\n}\r\n\r\nstring toLowerCase(string mes) {\r\n\tstring mes1 = mes;\r\n\tfor (int i = 0; i < mes1.size(); i++)\r\n\t\tif (mes1[i] >= 'A' && mes1[i] <= 'Z')\r\n\t\t\tmes1[i] += 'a' - 'A';\r\n\r\n\treturn mes1;\r\n}\r\n\r\nvector<vector<ll>> transMap(vector<vector<ll>>& map) {\r\n\tll n = map.size();\r\n\tvector<vector<ll>> map1(n, vector<ll>(n));\r\n\tfor (int i = 0; i < n; i++)\r\n\t\tfor (int j = 0; j < n; j++)\r\n\t\t\tmap1[j][n - i - 1] = map[i][j];\r\n\r\n\treturn map1;\r\n}\r\n\r\nbool hasRect(ll x, vector<ll>& list) {\r\n\tll n = list.size();\r\n\r\n\tvector<ll> dp(list.size());\r\n\tfor (int i = 0; i < n; i++) dp[i] = i;\r\n\r\n\tfor (int i = 0; i < n; i++) {\r\n\t\tif (!list[i]) continue;\r\n\r\n\t\tll id = (i + x) % n;\r\n\t\tif (!list[id]) continue;\r\n\r\n\t\tif (dp[i] == id) return true;\r\n\t\tdp[id] = dp[i];\r\n\t}\r\n\treturn false;\r\n}\r\n\r\nvoid solve() {\r\n\tll n;\r\n\tcin >> n;\r\n\r\n\tvector<ll> list(n);\r\n\tfor (int i = 0; i < n; i++) cin >> list[i];\r\n\r\n\tll sqr = sqrt(n) + 1;\r\n\tdeque<ll> divs;\r\n\tfor (int i = 1; i < max(sqr + 1, 30LL); i++) {\r\n\t\tif (n % i) continue;\r\n\t\tif (n / i >= 3) divs.push_back(i);\r\n\t\tif (i >= 3) divs.push_back(n / i);\r\n\t}\r\n\r\n\tfor (auto i : divs) {\r\n\t\tif (!hasRect(i, list)) continue;\r\n\t\tcout << \"YES\" << '\\n';\r\n\t\treturn;\r\n\t}\r\n\r\n\tcout << \"NO\" << '\\n';\r\n}\r\n\r\nint main() {\r\n\tcin.tie(0)->sync_with_stdio(0);\r\n\tcout.tie(0);\r\n\tlong long q = 1;\r\n\t//cin >> q;\r\n\twhile (q--) {\r\n\t\tsolve();\r\n\t}\r\n\treturn 0;\r\n}"
+}

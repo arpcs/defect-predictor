@@ -1,0 +1,36 @@
+{
+    "id": 131085493,
+    "contestId": 1571,
+    "creationTimeSeconds": 1633621642,
+    "relativeTimeSeconds": 4342,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "WiwiHo"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 88,
+    "timeConsumedMillis": 1076,
+    "memoryConsumedBytes": 167628800,
+    "source": "import java.util.*\r\nimport kotlin.math.*\r\n\r\n@JvmField val INPUT = System.`in`\r\n@JvmField val OUTPUT = System.out\r\n\r\n@JvmField val _reader = INPUT.bufferedReader()\r\nfun readLine(): String? = _reader.readLine()\r\nfun readLn() = _reader.readLine()!!\r\n@JvmField var _tokenizer: StringTokenizer = StringTokenizer(\"\")\r\nfun read(): String {\r\n    while (_tokenizer.hasMoreTokens().not()) _tokenizer = StringTokenizer(_reader.readLine() ?: return \"\", \" \")\r\n    return _tokenizer.nextToken()\r\n}\r\nfun readInt() = read().toInt()\r\nfun readDouble() = read().toDouble()\r\nfun readLong() = read().toLong()\r\nfun readStrings(n: Int) = List(n) { read() }\r\nfun readLines(n: Int) = List(n) { readLn() }\r\nfun readInts(n: Int) = List(n) { read().toInt() }\r\nfun readIntArray(n: Int) = IntArray(n) { read().toInt() }\r\nfun readDoubles(n: Int) = List(n) { read().toDouble() }\r\nfun readDoubleArray(n: Int) = DoubleArray(n) { read().toDouble() }\r\nfun readLongs(n: Int) = List(n) { read().toLong() }\r\nfun readLongArray(n: Int) = LongArray(n) { read().toLong() }\r\n\r\nfun <T> printv(v: Collection<T>) {\r\n    v.forEachIndexed { i, t ->\r\n        if (i != 0) print(\" \")\r\n        print(t)\r\n    }\r\n    println()\r\n}\r\n\r\nfun <T : Comparable<T>> lsort(v: MutableList<T>) {\r\n    v.sort()\r\n}\r\n\r\nfun <T : Comparable<T>> gsort(v: MutableList<T>) {\r\n    v.sortDescending()\r\n}\r\n\r\nfun <T, U> mp(t: T, u: U) = Pair(t, u)\r\n\r\nfun ifloor(a: Long, b: Long): Long {\r\n    if (b < 0) return ifloor(-a, -b)\r\n    return if (a xor b > 0) a / b else (a - b + 1) / b\r\n}\r\n\r\nfun iceil(a: Long, b: Long): Long {\r\n    if (b < 0) return iceil(-a, -b)\r\n    return if (a xor b > 0) (a + b - 1) / b else a / b\r\n}\r\n\r\nfun ifloor(a: Int, b: Int) = ifloor(a.toLong(), b.toLong()).toInt()\r\nfun iceil(a: Int, b: Int) = iceil(a.toLong(), b.toLong()).toInt()\r\n\r\ntypealias ll = Long\r\ntypealias pii = Pair<Int, Int>\r\ntypealias pll = Pair<ll, ll>\r\n\r\nval MOD = 1000000007L\r\nval MAX = 2147483647L\r\n\r\nfun <T> List<T>.binarySearchWith(condition: (T) -> Boolean): Int {\r\n    return binarySearch {\r\n        if (condition(it)) 1\r\n        else -1\r\n    }.let { -(it + 1) }\r\n}\r\n\r\nfun List<Int>.lowerBound(i: Int): Int {\r\n    return binarySearchWith { it >= i }\r\n}\r\n\r\nfun List<Int>.upperBound(i: Int): Int {\r\n    return binarySearchWith { it > i }\r\n}\r\n\r\nfun main() {\r\n\r\n    var (n, m) = readInts(2)\r\n\r\n    val a = mutableListOf(-1)\r\n    val id = mutableListOf(-1)\r\n    var sum = 0\r\n    var day = 1\r\n    val ans = MutableList(n) {-1}\r\n    for (i in 0 until n){\r\n        val (k, t) = readInts(2)\r\n        if(t == 1){\r\n            m -= k\r\n            ans[i] = day\r\n            day += k\r\n        };\r\n        else{\r\n            a.add(k)\r\n            id.add(i)\r\n            sum += k\r\n        }\r\n    }\r\n    if(m < 0){\r\n        println(\"-1\")\r\n        return\r\n    }\r\n\r\n    val dp = MutableList(a.size) { MutableList(m + 1) { -1 } }\r\n    dp[0][0] = 0\r\n    for (i in 1 until a.size) {\r\n        for (j in 0..m) {\r\n            if (dp[i - 1][j] != -1) dp[i][j] = j\r\n            if (j - a[i] >= 0 && dp[i - 1][j - a[i]] != -1) {\r\n                dp[i][j] = j - a[i]\r\n            }\r\n        }\r\n    }\r\n\r\n    for (i in 0..m) {\r\n        if(dp[a.size - 1][i] == -1) continue\r\n        if(!(i <= iceil(m, 2) && sum - i <= ifloor(m, 2))) continue\r\n\r\n        var now = i\r\n        val choose = MutableList(a.size) {false}\r\n        for (j in a.size - 1 downTo 1) {\r\n            if(dp[j][now] != now) choose[j] = true\r\n            now = dp[j][now]\r\n        }\r\n\r\n        var t1 = day\r\n        var t2 = day + 1\r\n        for (j in 1 until a.size) {\r\n            if (choose[j]) {\r\n                ans[id[j]] = t1\r\n                t1 += a[j] * 2\r\n            }\r\n            else {\r\n                ans[id[j]] = t2\r\n                t2 += a[j] * 2\r\n            }\r\n        }\r\n        println(ans.joinToString(\" \"))\r\n\r\n        return\r\n    }\r\n    println(\"-1\")\r\n\r\n}"
+}

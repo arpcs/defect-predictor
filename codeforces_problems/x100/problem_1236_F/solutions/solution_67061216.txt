@@ -1,0 +1,38 @@
+{
+    "id": 67061216,
+    "contestId": 1236,
+    "creationTimeSeconds": 1576573804,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "Scut22"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 717,
+    "memoryConsumedBytes": 72396800,
+    "source": "#include<bits/stdc++.h>\n\n#define inf 0x3f3f3f3f\n#define mod 1000000007\n#define pb push_back\n#define sz(a) ((int)a.size())\n#define x first\n#define y second\n\nusing namespace std;\n\ntypedef double DO;\ntypedef long long INT;\ntypedef pair<int, int> pii;\ntypedef vector<int> VI;\n\nconst int NN = 500011;\nVI adj[NN];\nint n, m;\nvector <VI> bcc;\nvector <VI> ring[NN];\nint ind, top, st[NN], vst[NN], low[NN];\nint dp[NN];\nmap<pii, int> mp;\n\nvoid dfs(int u, int fa=0){\n\tvst[u]=low[u]=++ind;\n\tst[top++]=u;\n\tfor(int i=0; i<adj[u].size(); i++){\n\t\tint v=adj[u][i];\n\t\tif(!vst[v]){\n\t\t\tdfs(v, u), low[u]=min(low[u], low[v]);\n\t\t\tif(low[v] >= vst[u]){\n\t\t\t\tbcc.pb(VI(0));\n\t\t\t\tint z;\n\t\t\t\tdo {\n\t\t\t\t\tz=st[--top];\n\t\t\t\t\tbcc.back().pb(z);\n\t\t\t\t} while(z!=v);\n\t\t\t\tbcc.back().pb(u);\n\t\t\t\tif(sz(bcc.back())<3) bcc.pop_back();\n\t\t\t}\n\t\t}\n\t\telse if(v!=fa) low[u]=min(low[u], vst[v]);\n\t}\n}\n\ninline void add(int &u, int v) {\n\tu += v;\n\tif(u >= mod) u -= mod;\n}\n\ninline void sub(int &u, int v) {\n\tu -= v;\n\tif(u < 0) u += mod;\n}\n\nint power(int a, int n, int m, int ans = 1) {\n\tfor(; n; n>>=1, a=(INT)a*a%m) if(n & 1) ans = (INT)ans * a % m;\n\treturn ans;\n}\n\nconst int r2 = power(2, mod-2, mod);\nconst int r4 = power(4, mod-2, mod);\nconst int r8 = power(8, mod-2, mod);\nconst int r16 = power(16, mod-2, mod);\n\ninline int mul(int a, int b) {return (INT)a*b%mod;}\nint calc_node() {\n\tint ans = (INT)n * r2 % mod;\n\tadd(ans, (INT)n*(n-1)%mod*r4%mod);\n\treturn ans;\n}\n\nint calc_edge() {\n\tint ans = (INT)m * r4 % mod;\n\tfor(int u=1; u<=n; u++) {\n\t\tfor(int v : adj[u]) if(u<v) {\n\t\t\tint d = sz(adj[u]) + sz(adj[v]) - 2;\n\t\t\tadd(ans, (INT)d * r8 % mod);\n\t\t\tadd(ans, (INT)(m-d-1) * r16 % mod);\n\t\t}\n\t}\n\treturn ans;\n}\n\nint calc_ring() {\n\tint ans = 0;\n\tint tot = 0;\n\tfor(auto now : bcc) {\n\t\tadd(tot, power(r2, sz(now), mod));\n\t}\n\tans = tot;\n\tfor(auto now : bcc) {\n\t\tint tmp = 0;\n\t\tfor(int u : now) {\n\t\t\tadd(tmp, dp[u]);\n\t\t\tsub(tmp, power(r2, sz(now), mod));\n\t\t}\n\t\tint p = power(r2, sz(now), mod);\n\t\tadd(ans, (INT)tmp * power(r2, sz(now)-1, mod) % mod);\n\t\tadd(ans, ((INT)tot - tmp + mod - p + mod) * power(r2, sz(now), mod) % mod);\n\t}\n\treturn ans;\n}\n\nint calc_node_ring() {\n\tint tot = 0;\n\tfor(auto now : bcc) {\n\t\tadd(tot, power(r2, sz(now), mod));\n\t}\n\tint ans = 0;\n\tfor(int u=1; u<=n; u++) {\n\t\tadd(ans, dp[u]);\n\t\tadd(ans, (INT)(tot-dp[u]+mod) * r2 % mod);\n\t}\n\treturn ans;\n}\n\n\nint calc_node_edge() {\n\tint ans = 0;\n\tfor(int u=1; u<=n; u++) {\n\t\tint s = sz(adj[u]);\n\t\tadd(ans, (INT)s * r4 % mod);\n\t\tadd(ans, (INT)(m-s) * r8 % mod);\n\t}\n\treturn ans;\n}\n\nint calc_edge_ring() {\n\tint tot = 0;\n\tfor(auto now : bcc) {\n\t\tadd(tot, power(r2, sz(now), mod));\n\t}\n\tint ans = 0;\n\tfor(int u=1; u<=n; u++) {\n\t\tfor(int v : adj[u]) if(u<v) {\n\t\t\tif(mp[{u, v}] == 0) {\n\t\t\t\tadd(ans, (INT)(dp[u] + dp[v]) * r2 % mod);\n\t\t\t\tadd(ans, ((INT)tot-dp[u]-dp[v]+mod+mod) * r4 % mod);\n\t\t\t}\n\t\t\telse {\n\t\t\t\tint a=dp[u];\n\t\t\t\tadd(a, dp[v]);\n\t\t\t\tint b=power(r2, mp[{u, v}], mod);\n\t\t\t\tsub(a, b);\n\t\t\t\tadd(ans, (INT)(tot-a+mod) * r4 % mod);\n\t\t\t\tadd(ans, (INT)(a-b+mod) * r2 % mod);\n\t\t\t\tadd(ans, b);\n\t\t\t}\n\t\t}\n\t}\n\treturn ans;\n}\nint calc() {\n\tint ans = 0;\n\tadd(ans, calc_node());\n\tadd(ans, calc_edge());\n\tadd(ans, calc_ring());\n\tsub(ans, 2 * calc_node_edge() % mod);\n\tsub(ans, 2 * calc_edge_ring() % mod);\n\tadd(ans, 2 * calc_node_ring() % mod);\n\treturn ans;\n}\n\nint calc_EX() {\n\tint ans = (INT)n * r2 % mod;\n\tsub(ans, (INT)m * r4 % mod);\n\tfor(auto now : bcc) {\n\t\tadd(ans, power(r2, sz(now), mod));\n\t}\n\treturn ans;\n}\n\nint solve() {\n\tcin >> n >> m;\n\tfor(int i=0; i<m; i++) {\n\t\tint u, v;\n\t\tscanf(\"%d %d\", &u, &v);\n\t\tadj[u].pb(v);\n\t\tadj[v].pb(u);\n\t}\n\tfor(int i=1; i<=n; i++) if(vst[i] == 0) dfs(i);\n\tfor(auto now : bcc) {\n\t\tint pre = now.back();\n\t\tfor(int u : now) {\n\t\t\tadd(dp[u], power(r2, sz(now), mod));\n\t\t\tmp[{u, pre}] = mp[{pre, u}] = sz(now);\n\t\t\tpre = u;\n\t\t}\n\t}\n\tint EX = calc_EX();\n\tint EX2 = calc();\n\tint ans = EX2;\n\tsub(ans, (INT)EX * EX % mod);\n\tcout << ans << endl;\n}\n\nint main() {\n#ifndef\tONLINE_JUDGE\n\tfreopen(\"in.in\", \"r\", stdin);\n\tfreopen(\"out.out\", \"w\", stdout);\n#endif\n\tsolve();\n\treturn 0;\n}\n\n                        "
+}

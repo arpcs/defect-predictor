@@ -1,0 +1,39 @@
+{
+    "id": 54036512,
+    "contestId": 1158,
+    "creationTimeSeconds": 1557674439,
+    "relativeTimeSeconds": 2739,
+    "problem": {
+        "contestId": 1158,
+        "index": "D",
+        "name": "Winding polygonal line",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "constructive algorithms",
+            "geometry",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1158,
+        "members": [
+            {
+                "handle": "brandonzhang"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "room": 15,
+        "startTimeSeconds": 1557671700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 75,
+    "timeConsumedMillis": 421,
+    "memoryConsumedBytes": 409600,
+    "source": "#include <bits/stdc++.h>\r\nconst char nl = '\\n';\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef complex<ll> pt;\r\ntypedef vector<pt> pol;\r\nconst int MOD = 1e9 + 7;\r\nconst int INF = 0x3f3f3f3f;\r\nconst ld EPS = 0;\r\n\r\nld cp(const pt& a, const pt& b) { return imag(conj(a)*b); }\r\ninline bool cmp_lex(const pt& a, const pt& b) {\r\n  return a.real()<b.real()-EPS||(a.real()<=b.real()+EPS&&a.imag()<b.imag()-EPS);}\r\ninline bool cmp_lex_i(const pt& a, const pt& b) {\r\n  return a.imag()<b.imag()-EPS||(a.imag()<=b.imag()+EPS&&a.real()<b.real()-EPS);}\r\nbool cmp_ang(const pt& a, const pt& b, const pt& o) {\r\n  bool aorig = cmp_lex_i(o, a), borig = cmp_lex_i(o, b);\r\n  if (aorig ^ borig) return aorig; else return cp(a-o, b-o) > 0; }\r\npol chull(pol p) {\r\n  sort(p.begin(), p.end(), cmp_lex_i); int top=0, bot=1; pol ch(2*p.size());\r\n  for (int i=0, d=1; i < p.size() && i >= 0; i += d) {\r\n  // If there are no duplicates, can change <= 0 to < 0 to keep redundant points\r\n    while (top > bot && cp(ch[top-1]-ch[top-2], p[i]-ch[top-2]) <= 0) top--;\r\n    ch[top++] = p[i]; if (i == p.size()-1) d = -1, bot = top;\r\n  } ch.resize(max(1, top-1)); return ch; } // pts returned in ccw order.\r\n\r\nint main() {\r\n  ios::sync_with_stdio(0);\r\n  cin.tie(0);\r\n  cout.tie(0);\r\n  int n; cin >> n;\r\n  pol p(n);\r\n  for (int i = 0; i < n; i++) {\r\n    int x, y; cin >> x >> y;\r\n    p[i] = pt(x, y);\r\n  }\r\n  string s; cin >> s;\r\n  vector<int> ans;\r\n  int o;\r\n  {\r\n    vector<int> inds(n); iota(inds.begin(), inds.end(), 0);\r\n    sort(inds.begin(), inds.end(), [&](const int& a, const int& b) {\r\n      return cmp_lex(p[a], p[b]);\r\n    });\r\n    ans = {inds[0]};\r\n    o = inds[0];\r\n  }\r\n  unordered_set<int> inds;\r\n  for (int i = 0; i < n; i++) {\r\n    if (i != o) inds.insert(i);\r\n  }\r\n  for (int i = 1; i < n-1; i++) {\r\n    pol cur;\r\n    for (int j : inds) {\r\n      cur.push_back(p[j]);\r\n    }\r\n    cur.push_back(p[o]);\r\n    cur = chull(cur);\r\n    int j;\r\n    for (j = 0; j < cur.size(); j++) {\r\n      if (cur[j] == p[o]) {\r\n        break;\r\n      }\r\n    }\r\n    assert(j < cur.size());\r\n    if (s[i-1] == 'R') {\r\n      for (int k = 0; k < n; k++) {\r\n        if (p[k] == cur[(j-1+cur.size())%cur.size()]) {\r\n          o = k;\r\n          break;\r\n        }\r\n      }\r\n      ans.push_back(o);\r\n      inds.erase(o);\r\n    } else {\r\n      for (int k = 0; k < n; k++) {\r\n        if (p[k] == cur[(j+1)%cur.size()]) {\r\n          o = k;\r\n          break;\r\n        }\r\n      }\r\n      ans.push_back(o);\r\n      inds.erase(o);\r\n    }\r\n  }\r\n  ans.push_back(*inds.begin());\r\n  for (int i : ans) cout << i+1 << \" \";\r\n  cout << nl;\r\n  return 0;\r\n}\r\n"
+}

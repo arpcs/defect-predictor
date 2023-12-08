@@ -1,0 +1,38 @@
+{
+    "id": 149585185,
+    "contestId": 917,
+    "creationTimeSeconds": 1647242710,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 917,
+        "index": "E",
+        "name": "Upside Down",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3400,
+        "tags": [
+            "data structures",
+            "string suffix structures",
+            "strings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 917,
+        "members": [
+            {
+                "handle": "zhouhuanyi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1517236500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<iostream>\r\n#include<cstdio>\r\n#include<vector>\r\n#define N 600000\r\nusing namespace std;\r\nint read()\r\n{\r\n\tchar c=0;\r\n\tint sum=0;\r\n\twhile (c<'0'||c>'9') c=getchar();\r\n\twhile ('0'<=c&&c<='9') sum=sum*10+c-'0',c=getchar();\r\n\treturn sum;\r\n}\r\nint n,m,q,dfn[N+1],depth[N+1],fa[N+1][21],ans[N+1];\r\nstring s[N+1];\r\nbool used[N+1];\r\nstruct reads\r\n{\r\n\tint num;\r\n\tchar data;\r\n};\r\nvector<reads>p[N+1];\r\nstruct node\r\n{\r\n\tint x,y,num;\r\n};\r\nvector<node>qry[N+1];\r\nstruct SAM\r\n{\r\n\tint ps[N+1],PS1[N+1],PS2[N+1],tr[N+1][26],leng,ed[N+1],edps[N+1],sn[N+1][26],leng[N+1],link[N+1],length,lst,dfn[N+1],lengs;\r\n\tvector<int>E[N+1];\r\n\tvoid build_trie()\r\n\t{\r\n\t\tint top;\r\n\t\tqueue<int>q;\r\n\t\tq.push(0);\r\n\t\twhile (!q.empty())\r\n\t\t{\r\n\t\t\ttop=q.front(),q.pop();\r\n\t\t\tfor (int i=0;i<p[top].size();++i)\r\n\t\t\t\tif (fa[p[top][i].num][0]==top)\r\n\t\t\t\t{\r\n\t\t\t\t\tif (!tr[top][p[top][i].data-'a']) tr[top][p[top][i].data-'a']=++leng;\r\n\t\t\t\t\tps[p[top][i].num]=tr[top][p[top][i].data-'a'],q.push(p[top][i].num);\r\n\t\t\t\t}\r\n\t\t}\r\n\t\treturn;\r\n\t}\r\n\tvoid insert(string s,int num)\r\n\t{\r\n\t\tint x=0;\r\n\t\tfor (int i=0;i<s.length();++i)\r\n\t\t{\r\n\t\t\tif (!tr[x][s[i]-'a']) tr[x][s[i]-'a']=++length;\r\n\t\t\tx=tr[x][s[i]-'a'];\r\n\t\t}\r\n\t\tPS1[num]=x,x=0;\r\n\t\tfor (int i=(int)(s.length())-1;i>=0;--i)\r\n\t\t{\r\n\t\t\tif (!tr[x][s[i]-'a']) tr[x][s[i]-'a']=++length;\r\n\t\t\tx=tr[x][s[i]-'a'];\r\n\t\t}\r\n\t\tPS2[num]=x;\r\n\t\treturn;\r\n\t}\r\n\tvoid init()\r\n\t{\r\n\t\tlink[0]=-1;\r\n\t\treturn;\r\n\t}\r\n\tint append(int num,char c)\r\n\t{\r\n\t\tint nw=++length,p=lst,q,clone;\r\n\t\ted[nw]=num,leng[nw]=leng[lst]+1;\r\n\t\twhile (p!=-1&&!sn[p][c-'a']) sn[p][c-'a']=nw,p=link[p];\r\n\t\tif (p!=-1)\r\n\t\t{\r\n\t\t\tq=son[p][c-'a'];\r\n\t\t\tif (leng[q]==leng[p]+1) link[nw]=q;\r\n\t\t\telse\r\n\t\t\t{\r\n\t\t\t\tclone=++length,link[clone]=link[q],leng[clone]=leng[p]+1;\r\n\t\t\t\tfor (int i=0;i<26;++i) sn[clone][i]=sn[q][i];\r\n\t\t\t\twhile (p!=-1&&sn[p][c-'a']==q) sn[p][c-'a']=clone,p=link[p];\r\n\t\t\t\tlink[nw]=link[q]=clone;\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn nw;\r\n\t}\r\n\tvoid build_SAM()\r\n\t{\r\n\t\tint top;\r\n\t\tqueue<int>q;\r\n\t\tq.push(0);\r\n\t\twhile (!q.empty())\r\n\t\t{\r\n\t\t\ttop=q.front(),q.pop();\r\n\t\t\tfor (int i=0;i<26;++i)\r\n\t\t\t\tif (sn[top][i])\r\n\t\t\t\t    edps[sn[top][i]]=append(edps[top],i+'a'),q.push(sn[top][i]);\r\n\t\t}\r\n\t\treturn;\r\n\t}\r\n\tvoid append_link()\r\n\t{\r\n\t\tfor (int i=1;i<=length;++i) E[link[i]].push_back(i);\t\r\n\t\treturn;\r\n\t}\r\n\tvoid dfs(int x)\r\n\t{\r\n\t\tdfn[x]=++lengs,sz[x]=1;\r\n\t\tfor (int i=0;i<E[x].size();++i) dfs(E[x][i]),sz[x]+=sz[E[x][i]];\r\n\t\treturn;\r\n\t}\r\n\tint LENG(int x,int y)\r\n\t{\r\n\t\treturn dfn[x]<=dfn[y]&&dfn[y]<=dfn[x]+sz[x]-1;\r\n\t}\r\n\tvoid solve()\r\n\t{\r\n\t\tS.build_trie(),S.init(),S.build_SAM(),S.append_link(),S.dfs(0);\r\n\t\treturn;\r\n\t}\r\n};\r\nSAM S;\r\nstruct bit\r\n{\r\n\tint c[N+1];\r\n\tint lowbit(int x)\r\n\t{\r\n\t\treturn x&(-x);\r\n\t}\r\n\tvoid add(int x,int d)\r\n\t{\r\n\t\tfor (;x<=n;x+=lowbit(x)) c[x]+=d;\r\n\t\treturn;\r\n\t}\r\n\tint Sum(int x)\r\n\t{\r\n\t\tint res=0;\r\n\t\tfor (;x>=1;x-=lowbit(x)) res+=c[x];\r\n\t\treturn res;\r\n\t}\r\n};\r\nbit T;\r\nvoid dfs(int x)\r\n{\r\n\tused[x]=1;\r\n\tfor (int i=0;i<p[x].size();++i)\r\n\t\tif (!used[p[x][i].num])\r\n\t\t\tfa[p[x][i].num][0]=x,depth[p[x][i].num]=depth[x]+1,dfs(p[x][i].num);\r\n\treturn;\r\n}\r\nint get(int x,int d)\r\n{\r\n\tfor (int i=0;i<=log(n)/log(2);++i)\r\n\t\tif ((1<<i)&d)\r\n\t\t\tx=fa[x][i];\r\n\treturn x;\r\n}\r\nint lca(int x,int y)\r\n{\r\n\tif (depth[x]<depth[y]) swap(x,y);\r\n\tfor (int i=log(n)/log(2);i>=0;--i)\r\n\t\tif (depth[fa[x][i]]>=depth[y])\r\n\t\t\tx=fa[x][i];\r\n\tif (x==y) return x;\r\n\tfor (int i=log(n)/log(2);i>=0;--i)\r\n\t\tif (fa[x][i]!=fa[y][i])\r\n\t\t\tx=fa[x][i],y=fa[y][i];\r\n\treturn fa[x][0];\r\n}\r\nvoid dfs2(int x)\r\n{\r\n\tfor (int i=0;i<chs[x].size();++i) ans[chs[x][i].num]-=T.Sum(dfn[chs[x][i].x])-T.Sum(dfn[fa[chs[x][i].y][0]]);\r\n\tT.add(dfn[S.PS[x]],1),T.add(dfn[S.PS[x]]+sz[S.PS[x]],-1);\r\n\tfor (int i=0;i<S.E[x].size();++i) dfs2(S.E[x][i]);\r\n\tfor (int i=0;i<chs[x].size();++i) ans[chs[x][i].num]+=T.Sum(dfn[chs[x][i].x])-T.Sum(dfn[fa[chs[x][i].y][0]]);\r\n\treturn;\r\n}\r\nint main()\r\n{\r\n\tint x,y,z;\r\n\tchar c;\r\n\tn=read(),m=read(),q=read();\r\n\tfor (int i=1;i<=n-1;++i) x=read(),y=read(),c=getchar(),p[x].push_back((reads){y,c}),p[y].push_back((reads){x,c});\r\n\tdepth[1]=1,dfs(1),dfs2(1);\r\n\tfor (int i=1;i<=log(n)/log(2);++i)\r\n\t\tfor (int j=1;j<=n;++j)\r\n\t\t\tfa[j][i]=fa[fa[j][i-1]][i-1];\r\n\tfor (int i=1;i<=m;++i) cin>>s[i],S.insert(s[i]);\r\n\tS.solve();\r\n\tfor (int i=1;i<=q;++i) x=read(),y=read(),z=read(),qry[z].push_back((node){x,y,i});\r\n\tfor (int i=1;i<=m;++i)\r\n\t{\r\n\t\tx=S.ps[PS2[i]];\r\n\t\tfor (int j=1;j<=s[i].length();++j)\r\n\t\t{\r\n\t\t\tif (S.leng[S.link[x]]>=s[i].length()+1-j) x=S.link[x];\r\n\t\t\tA[j]=x;\r\n\t\t}\r\n\t\tx=S.ps[PS1[i]];\r\n\t\tfor (int j=s[i].length();j>=1;--j)\r\n\t\t{\r\n\t\t\tif (S.leng[S.link[x]]>=j) x=S.link[x];\r\n\t\t\tB[j]=x;\r\n\t\t}\r\n\t\tfor (int j=0;j<qry[i].size();++j)\r\n\t\t{\r\n\t\t\tz=lca(qry[i][j].x,qry[i][j].y);\r\n\t\t\tif (depth[qry[i][j].x]-depth[z]>=s.length()) chs[A[s[i].length()]].push_back((node){qry[i][j].x,get(qry[i][j].x,depth[qry[i][j].x]-depth[z]-s.length()),qry[i][j].num});\r\n\t\t\tif (depth[qry[i][j].y]-depth[z]>=s.length()) chs[B[1]].push_back((node){qry[i][j].y,get(qry[i][j].y,depth[qry[i][j].y]-depth[z]-s.length()),qry[i][j].num});\r\n\t\t}\r\n\t}\r\n\tdfs2(1);\r\n\tfor (int i=0;i<\r\n\treturn 0;\r\n}\r\n"
+}

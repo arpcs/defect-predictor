@@ -1,0 +1,38 @@
+{
+    "id": 68644621,
+    "contestId": 1236,
+    "creationTimeSeconds": 1578818352,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "vjudge5"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 264,
+    "memoryConsumedBytes": 31334400,
+    "source": "#include <cstdio>\n#include <vector>\nusing namespace std;\n\nconst int MAXN = 500000;\nconst int MOD = int(1E9) + 7;\n\nstruct mint{\n\tint x; mint(int _x=0) : x(_x) {}\n\tfriend mint operator + (mint a, mint b) {return a.x + b.x >= MOD ? a.x + b.x - MOD : a.x + b.x;}\n\tfriend mint operator - (mint a, mint b) {return a.x - b.x < 0 ? a.x - b.x + MOD : a.x - b.x;}\n\tfriend mint operator * (mint a, mint b) {return 1LL*a.x*b.x%MOD;}\n\tfriend void operator += (mint &a, mint b) {a = a + b;}\n\tfriend void operator -= (mint &a, mint b) {a = a - b;}\n\tfriend void operator *= (mint &a, mint b) {a = a * b;}\n};\n\nconst mint INV2 = (MOD + 1) >> 1;\n\nmint ipw2[MAXN + 10];\nvoid init() {\n\tipw2[0] = 1;\n\tfor(int i=1;i<=MAXN+5;i++)\n\t\tipw2[i] = ipw2[i-1]*INV2;\n}\n\nstruct edge{\n\tint to; edge *nxt;\n}edges[2*MAXN + 5], *adj[MAXN + 5], *ecnt = edges;\nvoid addedge(int u, int v) {\n\tedge *p = (++ecnt);\n\tp->to = v, p->nxt = adj[u], adj[u] = p;\n\tp = (++ecnt);\n\tp->to = u, p->nxt = adj[v], adj[v] = p;\n}\n\nmint sum[MAXN + 5], deg[MAXN + 5], siz[MAXN + 5], all;\n\nvector<int>v[MAXN + 5];\nint n, m, tot;\n\nint dfn[MAXN + 5], stk[MAXN + 5], dcnt, tp;\nvoid dfs(int x, int f) {\n\tdfn[x] = (++dcnt), stk[++tp] = x;\n\tfor(edge *p=adj[x];p;p=p->nxt) {\n\t\tif( p->to == f ) continue;\n\t\tif( !dfn[p->to] ) dfs(p->to, x);\n\t\telse if( dfn[p->to] < dfn[x] ) {\n\t\t\ttot++;\n\t\t\tfor(int i=tp;;i--) {\n\t\t\t\tv[tot].push_back(stk[i]);\n\t\t\t\tif( stk[i] == p->to ) break;\n\t\t\t}\n\t\t\tsiz[tot] = v[tot].size(), all += ipw2[v[tot].size()];\n\t\t\tfor(int i=0;i<v[tot].size();i++)\n\t\t\t\tsum[v[tot][i]] += ipw2[v[tot].size()];\n\t\t}\n\t}\n\tstk[tp--] = 0;\n}\n\nmint get1() {\n\tmint ret = 0, cnt = 1LL*m*(m-1)%MOD;\n\tfor(int i=1;i<=n;i++) {\n\t\tret += ipw2[1] + (n - 1)*ipw2[2]; // V * V\n\t\tret -= (deg[i]*ipw2[2] + (m - deg[i])*ipw2[3])*2; // V * E\n\t\tret += deg[i]*(deg[i] - 1)*ipw2[3]; // E * E\n\t\tcnt -= deg[i]*(deg[i]-1);\n\t}\n\tret += cnt*ipw2[4] + m*ipw2[2]; // E * E\n\t\n\tfor(int i=1;i<=tot;i++) {\n\t\tint s = v[i].size();\n\t\tret += (siz[i]*ipw2[s] + (n - siz[i])*ipw2[s+1])*2; // V * F\n\t\tmint p = m - s, q = all - ipw2[s];\n\t\tfor(int j=0;j<v[i].size();j++) {\n\t\t\tint x = v[i][j];\n\t\t\tret -= (deg[x] - 2)*ipw2[s+1]*2; // E * F\n\t\t\tp -= deg[x] - 2;\n\t\t\tret += (sum[x] - ipw2[s])*ipw2[s-1]; // F * F\n\t\t\tq -= (sum[x] - ipw2[s]);\n\t\t}\n\t\tret -= (s*ipw2[s] + p*ipw2[s+2])*2; // E * F\n\t\tret += ipw2[s] + q*ipw2[s]; // F * F\n\t}\n\treturn ret;\n}\n\nmint get2() {\n\tmint ret = 0;\n\tret += n*ipw2[1]; // V\n\tret -= m*ipw2[2]; // E\n\tfor(int i=1;i<=tot;i++) \n\t\tret += ipw2[v[i].size()]; // F\n\treturn ret;\n}\n\nint main() {\n\tinit(); scanf(\"%d%d\", &n, &m);\n\tfor(int i=1;i<=m;i++) {\n\t\tint u, v; scanf(\"%d%d\", &u, &v);\n\t\taddedge(u, v), deg[u] += 1, deg[v] += 1;\n\t}\n\tdfs(1, 0);\n\tmint x = get1(), y = get2();\n\tprintf(\"%d\\n\", (x - y*y).x);\n}\n\t \t\t\t\t\t\t\t\t\t \t  \t\t \t\t\t\t\t\t \t  \t\t"
+}

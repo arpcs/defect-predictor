@@ -1,0 +1,37 @@
+{
+    "id": 204354347,
+    "contestId": 1821,
+    "creationTimeSeconds": 1683130333,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1821,
+        "index": "F",
+        "name": "Timber",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "fft",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1821,
+        "members": [
+            {
+                "handle": "Routec"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1682001300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 99,
+    "timeConsumedMillis": 249,
+    "memoryConsumedBytes": 44134400,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\n#define MOD 998244353\n#define root 3\nusing ll=long long;\n// \u7279\u6b8a\u306a\u5270\u4f59\u3068\u539f\u59cb\u6839\n// (924844033, 5)\n// (998244353, 3)\n// (1012924417, 5)\n// (167772161, 3)\n// (469762049, 3)\n// (1224736769, 3)\n \n \n \nunsigned int add(const unsigned int x, const unsigned int y)\n{\n    return (x + y < MOD) ? x + y : x + y - MOD;\n}\n \nunsigned int sub(const unsigned int x, const unsigned int y)\n{\n    return (x >= y) ? (x - y) : (MOD - y + x);\n}\n \nunsigned int mul(const unsigned int x, const unsigned int y)\n{\n    return (unsigned long long)x * y % MOD;\n}\n \nunsigned int mod_pow(unsigned int x, unsigned int n)\n{\n    unsigned int res = 1;\n    while(n > 0){\n        if(n & 1){ res = mul(res, x); }\n        x = mul(x, x);\n        n >>= 1;\n    }\n    return res;\n}\n \nunsigned int inverse(const unsigned int x)\n{\n    return mod_pow(x, MOD - 2);\n}\n \nvoid ntt(vector<ll>& a, const bool rev = false)\n{\n    unsigned int i, j, k, l, p, q, r, s;\n    const unsigned int size = a.size();\n    if(size == 1) return;\n    vector<ll> b(size);\n    r = rev ? (MOD - 1 - (MOD - 1) / size) : (MOD - 1) / size;\n    s = mod_pow(root, r);\n    vector<unsigned int> kp(size / 2 + 1, 1);\n    for(i = 0; i < size / 2; ++i) kp[i + 1] = mul(kp[i], s);\n    for(i = 1, l = size / 2; i < size; i <<= 1, l >>= 1){\n        for(j = 0, r = 0; j < l; ++j, r += i){\n            for(k = 0, s = kp[i * j]; k < i; ++k){\n                p = a[k + r], q = a[k + r + size / 2];\n                b[k + 2 * r] = add(p, q);\n                b[k + 2 * r + i] = mul(sub(p, q), s);\n            }\n        }\n        swap(a, b);\n    }\n    if(rev){\n        s = inverse(size);\n        for(i = 0; i < size; i++){ a[i] = mul(a[i], s); }\n    }\n}\n \nvector<ll> convolute(const vector<ll>& a, const vector<ll>& b)\n{\n    const ll size = (ll)a.size() + (ll)b.size() - 1;\n    ll t = 1;\n    while(t < size){ t <<= 1; }\n    vector<ll> A(t, 0), B(t, 0);\n    for(ll i = 0; i < (ll)a.size(); i++){ A[i] = a[i]; }\n    for(ll i = 0; i < (ll)b.size(); i++){ B[i] = b[i]; }\n    ntt(A), ntt(B);\n    for (ll i = 0; i < t; i++){ A[i] = mul(A[i], B[i]); }\n    ntt(A, true);\n    A.resize(size);\n    return A;\n}\nll fac[600005];\nll rev[600005];\nll pow2[300005];\nvoid init_(){\nfac[0]=1;\nfor(ll i=1;i<600005;i++)fac[i]=(i*fac[i-1])%MOD;\nrev[0]=1;rev[1]=1;\nfor(ll i=2;i<600005;i++)rev[i]=(((MOD-rev[MOD%i])%MOD)*(MOD/i))%MOD;\nfor(ll i=1;i<600005;i++)rev[i]=(rev[i]*rev[i-1])%MOD;\npow2[0]=1;\nfor(ll i=1;i<300005;i++)pow2[i]=(2*pow2[i-1])%MOD;\n\n}\nll comb(ll n,ll k){\nif(n<k||k<0)return 0;\nll res=(fac[n]*rev[k])%MOD;\nres=(res*rev[n-k])%MOD;return res;\n}\nll N,M,K;\nvoid solve(){\n  if(N-(K+1)*M<0)cout<<0<<endl;\n  else{\n    init_();\n vector<ll>a(K*M+1,0);\n for(ll i=0;i<=M;i++){\n    ll z=(pow2[i]*comb(M,i))%MOD;\n    if((M-i)%2==1)z=(MOD-z)%MOD;\n    a[K*(M-i)]=z;\n }\nvector<ll>b(N+1);\nfor(ll i=0;i<=N;i++)b[i]=comb(i+M-1,M-1);\na=convolute(a,b);ll ans=0;\nfor(ll i=0;i<=N-(K+1)*M;i++)ans=(ans+a[i])%MOD;cout<<ans<<endl;\n\n\n\n  }\n}\nint main(){\ncin>>N>>M>>K;\nsolve();\n    return 0;\n}"
+}

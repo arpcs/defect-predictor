@@ -1,0 +1,35 @@
+{
+    "id": 141606541,
+    "contestId": 1183,
+    "creationTimeSeconds": 1641275690,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1183,
+        "index": "H",
+        "name": "Subsequences (hard version)",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1183,
+        "members": [
+            {
+                "handle": "training4usaco"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1561559700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 33,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <iostream>\n#include <vector>\nusing namespace std;\n\n#define MAXN 100\n\n#define INF 1000000000000ll\n\nlong long prevocc[MAXN][26];\nlong long dp[MAXN][26];\n\nint main() {\n    long long n, k;\n    string str;\n    cin >> n >> k >> str;\n\n    \n    for(long long i = 0; i < n; ++i) {\n        for(long long c = 0; c < 26; ++c) {\n            prevocc[i][c] = -1;\n            if(i == 0) {\n                continue;\n            }\n            prevocc[i][c] = prevocc[i - 1][c];\n        }\n\n        prevocc[i][str[i] - 'a'] = i;\n    }\n\n    for(long long i = 0; i < n; ++i) {\n        dp[i][1] = 1;\n    }\n\n    for(long long i = 1; i < n; ++i) {\n        for(long long len = 2; len < n; ++len) {\n            for(long long c = 0; c < 26; ++c) {\n                if(prevocc[i - 1][c] == -1) {\n                    continue;\n                }\n                dp[i][len] += dp[prevocc[i - 1][c]][len - 1];\n                dp[i][len] = min(dp[i][len], INF);\n            }\n        }\n    }\n\n    --k;    // entire string is free\n\n    long long ans = 0;\n\n    // chose the ones with longest length first\n    for(long long len = n - 1; len >= 1; --len) {\n        long long subsequence = 0;    // number of subsequences with this length\n        for (long long c = 0; c < 26; ++c) {\n\t\t\tif (prevocc[n - 1][c] == -1) {\n\t\t\t\tcontinue;\n\t\t\t}\n            subsequence += dp[prevocc[n - 1][c]][len];\n\t\t}\n\t\tif (subsequence >= k) {\n\t\t\tans += k * (n - len);   // only take amount needed\n\t\t\tk = 0;\n\t\t\tbreak;\n\t\t} \n        else {\n\t\t\tans += subsequence * (n - len); // take all\n\t\t\tk -= subsequence;\n\t\t}\n    }\n\n    if(k > 0) {\n        if(k == 1) {\n            cout << ans + n << endl;\n            return 0;\n        }\n        cout << -1 << endl;\n        return 0;\n    }\n\n    cout << ans << endl;\n\n    return 0;\n}"
+}

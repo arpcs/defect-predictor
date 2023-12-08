@@ -1,0 +1,38 @@
+{
+    "id": 88283855,
+    "contestId": 1236,
+    "creationTimeSeconds": 1596024948,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "hsfzLZH1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 561,
+    "memoryConsumedBytes": 87859200,
+    "source": "#include<cstdio>\r\n#include<cstring>\r\n#include<algorithm>\r\n#include<stack>\r\n#include<vector>\r\nusing namespace std;\r\nconst int maxn=1000010;\r\n#define int long long\r\nconst int mod=1000000007;\r\n//Ans=V-E+F\r\nint ksm(int a,int k)\r\n{\r\n\tint ret=1,x=a%mod;\r\n\twhile(k)\r\n\t{\r\n\t\tif(k&1)ret=ret*x%mod;\r\n\t\tx=x*x%mod;k>>=1;\r\n\t}\r\n\treturn ret;\r\n}\r\nint inv(int a){return ksm(a,mod-2)%mod;}\r\nint n,m,u,v,cur,h[maxn],nxt[maxn],p[maxn],pww2[maxn],deg[maxn];\r\nvoid add_edge(int x,int y)\r\n{\r\n\tdeg[x]++;\r\n\tcur++;\r\n\tnxt[cur]=h[x];\r\n\th[x]=cur;\r\n\tp[cur]=y;\r\n}\r\nint V,E,F,V2,E2,F2,VE,VF,EF,ans;\r\nbool vis[maxn],ins[maxn];\r\nint cnt,st[maxn],top,sumF[maxn],degF[maxn];\r\nvector<int>C[maxn];\r\nvoid dfs(int x)\r\n{\r\n\tvis[x]=true;\r\n\tst[++top]=x;ins[x]=true;\r\n\tfor(int j=h[x];j;j=nxt[j])if(p[j]!=st[top-1])\r\n\t{\r\n\t\tif(!vis[p[j]])dfs(p[j]);\r\n\t\telse if(ins[p[j]])\r\n\t\t{\r\n\t\t\tcnt++;\r\n\t\t\tfor(int i=top;;i--)\r\n\t\t\t{\r\n\t\t\t\tC[cnt].push_back(st[i]);\r\n\t\t\t\tdegF[cnt]+=deg[st[i]]-2; \r\n\t\t\t\tif(st[i]==p[j])break;\r\n\t\t\t}\r\n\t\t\tint t=inv(pww2[C[cnt].size()]);\r\n\t\t\tfor(int i=top;;i--)\r\n\t\t\t{\r\n\t\t\t\tsumF[st[i]]=(sumF[st[i]]+t)%mod;\r\n\t\t\t\tif(st[i]==p[j])break;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tins[st[top]]=false;top--;\r\n}\r\nmain()\r\n{\r\n\tscanf(\"%lld%lld\",&n,&m);\r\n\tpww2[0]=1;for(int i=1;i<=max(n,m)+2;i++)pww2[i]=pww2[i-1]*2ll%mod;\r\n\tfor(int i=1;i<=m;i++)scanf(\"%lld%lld\",&u,&v),add_edge(u,v),add_edge(v,u);\r\n\tfor(int i=1;i<=n;i++)if(!vis[i])dfs(i);\r\n\t//V\r\n\tV=n*inv(2ll)%mod;\r\n\t//E\r\n\tE=m*inv(4ll)%mod;\r\n\t//F\r\n\tfor(int i=1;i<=cnt;i++)F=(F+inv(pww2[C[i].size()]))%mod;\r\n\t//V2\r\n\tV2=(n*n+n)%mod*inv(4ll)%mod;\r\n\t//E2\r\n\tint t=0;for(int i=1;i<=n;i++)t=(t+deg[i]*(deg[i]-1))%mod;\r\n\tE2=(m*inv(4ll)%mod+t*inv(8ll)%mod+(m*m-m-t)%mod*inv(16ll)%mod)%mod;\r\n\t//F2\r\n\tF2=(F+F*F)%mod;\r\n\tfor(int i=1;i<=n;i++)F2=(F2+sumF[i]*sumF[i])%mod;\r\n\tfor(int i=1;i<=cnt;i++)F2=(F2+mod-(C[i].size()+1)*inv(pww2[C[i].size()])%mod*inv(pww2[C[i].size()])%mod)%mod;\r\n\t//VE\r\n\tVE=(inv(2ll)+(n-2)*inv(8ll))%mod*m%mod;\r\n\t//VF\r\n\tfor(int i=1;i<=cnt;i++)VF=(VF+C[i].size()*inv(pww2[C[i].size()])+(n-C[i].size())*inv(pww2[C[i].size()+1]))%mod;\r\n\t//EF\r\n\tfor(int i=1;i<=cnt;i++)EF=(EF\r\n\t+C[i].size()*inv(pww2[C[i].size()])\r\n\t+degF[i]*inv(pww2[C[i].size()+1])\r\n\t+(m-C[i].size()-degF[i])*inv(pww2[C[i].size()+2])\r\n\t)%mod;\r\n\t//Ans=E(x^2)-E(x)^2\r\n\tans=((V2+E2+F2+2*VF-2*VE-2*EF+mod*4)%mod+mod-(V-E+F+mod)%mod*(V-E+F+mod)%mod)%mod;\r\n\tprintf(\"%lld\\n\",ans);\r\n\treturn 0;\r\n}"
+}

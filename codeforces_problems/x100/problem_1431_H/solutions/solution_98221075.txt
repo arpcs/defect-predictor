@@ -1,0 +1,37 @@
+{
+    "id": 98221075,
+    "contestId": 1431,
+    "creationTimeSeconds": 1605200041,
+    "relativeTimeSeconds": 8341,
+    "problem": {
+        "contestId": 1431,
+        "index": "H",
+        "name": "Rogue-like Game",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "*special",
+            "brute force",
+            "greedy",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1431,
+        "members": [
+            {
+                "handle": "vadimmm"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1605191700
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 155,
+    "memoryConsumedBytes": 1740800,
+    "source": "import kotlin.math.max\r\nimport kotlin.math.min\r\n\r\n/**\r\n * Accomplished using the EduTools plugin by JetBrains https://plugins.jetbrains.com/plugin/10081-edutools\r\n */\r\n\r\nfun main() {\r\n  val (n, m, k) = readLine()!!.split(' ').map { it.toInt() }\r\n  val a = readLine()!!.split(' ').map { it.toLong() }\r\n  val b = readLine()!!.split(' ').map { it.toLong() }\r\n  val c = Array(n) {\r\n    readLine()!!.split(' ').map { it.toInt() }.toIntArray()\r\n  }\r\n  val ai = IntArray(n + m)\r\n  val bi = IntArray(n + m)\r\n  val all = run {\r\n    var i = 0\r\n    var j = 0\r\n    LongArray(n + m) { index ->\r\n      when {\r\n        i == a.size -> b[j++]\r\n        j == b.size -> a[i++]\r\n        a[i] < b[j] -> a[i++]\r\n        else -> b[j++]\r\n      }.also {\r\n        ai[index] = i\r\n        bi[index] = j\r\n      }\r\n    }\r\n  }\r\n  val best = run {\r\n    var i = 0\r\n    var j = 0\r\n    var best = 0\r\n    IntArray(n + m) {\r\n      for (x in 0 until i) {\r\n        for (y in j until bi[it]) {\r\n          best = max(best, c[x][y])\r\n        }\r\n      }\r\n      for (x in i until ai[it]) {\r\n        for (y in 0 until bi[it]) {\r\n          best = max(best, c[x][y])\r\n        }\r\n      }\r\n      i = ai[it]\r\n      j = bi[it]\r\n      best\r\n    }\r\n  }\r\n  val dp = Array(2) {\r\n    Array(n + m) {\r\n      arrayListOf<State>()\r\n    }\r\n  }\r\n  var ptr = 0\r\n  val emptyState = State(0L, 0L)\r\n  while (ptr < all.size) {\r\n    if (all[ptr] > 0) break\r\n    dp[0][ptr++].add(emptyState)\r\n  }\r\n  while (ptr < all.size) {\r\n    for (prev in dp[0][ptr - 1]) {\r\n      val diff = all[ptr] - prev.points\r\n      if (diff <= 0) {\r\n        dp[0][ptr].add(prev)\r\n      } else {\r\n        val tripPoints = best[ptr - 1]\r\n        val needSteps = (diff + tripPoints - 1) / tripPoints\r\n        dp[0][ptr].add(State(prev.steps + needSteps, prev.points + needSteps * tripPoints))\r\n      }\r\n    }\r\n\r\n    for (prev in dp[0][ptr - 1]) {\r\n      val diff = all[ptr] - prev.points\r\n      if (diff <= 0) {\r\n        dp[1][ptr].add(prev)\r\n      } else {\r\n        val tripPoints = best[ptr - 1] + k\r\n        val needSteps = (diff + tripPoints - 1) / tripPoints\r\n        dp[1][ptr].add(State(prev.steps + needSteps, prev.points + needSteps * tripPoints, tripPoints))\r\n      }\r\n    }\r\n\r\n    for (prev in dp[1][ptr - 1]) {\r\n      val diff = all[ptr] - prev.points\r\n      if (diff <= 0) {\r\n        dp[1][ptr].add(prev)\r\n      } else {\r\n        val tripPoints = max(prev.best, best[ptr - 1])\r\n        val needSteps = (diff + tripPoints - 1) / tripPoints\r\n        dp[1][ptr].add(State(prev.steps + needSteps, prev.points + needSteps * tripPoints))\r\n      }\r\n    }\r\n\r\n    for (used in 0..1) {\r\n      val stack = dp[used][ptr]\r\n      stack.sortWith { l, r ->\r\n        if (l.steps == r.steps) r.points.compareTo(l.points)\r\n        else l.steps.compareTo(r.steps)\r\n      }\r\n      var j = 1\r\n      for (i in 1 until stack.size) {\r\n        if (stack[i].points > stack[j - 1].points) {\r\n          stack[j++] = stack[i]\r\n        }\r\n      }\r\n      while (stack.size > j) {\r\n        stack.removeLast()\r\n      }\r\n    }\r\n    ptr++\r\n  }\r\n  var answer = Long.MAX_VALUE\r\n  for (used in 0..1) {\r\n    for (state in dp[used].last()) {\r\n      answer = min(answer, state.steps)\r\n    }\r\n  }\r\n  println(answer)\r\n}\r\n\r\ndata class State(val steps: Long, val points: Long, val best: Int = 0)"
+}

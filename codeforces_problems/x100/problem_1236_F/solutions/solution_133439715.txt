@@ -1,0 +1,38 @@
+{
+    "id": 133439715,
+    "contestId": 1236,
+    "creationTimeSeconds": 1635507127,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "Social_Zhao"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 623,
+    "memoryConsumedBytes": 148582400,
+    "source": "#include<bits/stdc++.h>\r\n#define int long long\r\nusing namespace std;\r\n\r\nint get() {\r\n\tint x = 0, f = 1; char c = getchar();\r\n\twhile(!isdigit(c)) { if(c == '-') f = -1; c = getchar(); }\r\n\twhile(isdigit(c)) { x = x * 10 + c - '0'; c = getchar(); }\r\n\treturn x * f;\r\n}\r\n\r\nconst int N = 5e5 + 5, P = 1e9 + 7, inv2 = (P + 1) / 2;\r\nint n, m, ans;\r\nstruct Edge { int v, nxt; } edge[N << 1];\r\nint head[N], tot, deg[N];\r\nint V, E, C, V2, E2, C2, VC, EC, VE;\r\nint bin[N], out[N], top, lst[N], dep[N];\r\nvector<int> cir[N];\r\nmap<int, int> mp[N];\r\n\r\nint qpow(int x, int y) {\r\n\tint res = 1;\r\n\twhile(y) res = res * ((y & 1)? x : 1) % P, x = x * x % P, y >>= 1;\r\n\treturn res;\r\n}\r\n\r\nvoid add(int u, int v) { edge[++tot] = (Edge){ v, head[u] }, head[u] = tot, ++deg[v]; }\r\nvoid inc(int &x, int y) { x = (x + y) % P; }\r\nvoid dec(int &x, int y) { x = (x - y + P) % P; }\r\n\r\nvoid dfs(int u, int fa) {\r\n\tdep[u] = dep[fa] + 1, lst[u] = fa;\r\n\tfor(int i = head[u]; i; i = edge[i].nxt) {\r\n\t\tint v = edge[i].v;\r\n\t\tif(v == fa) continue;\r\n\t\tif(!mp[u][v]) {\r\n\t\t\tinc(E2, inv2 * inv2 % P); // \u4e24\u6761\u76f8\u540c\u7684\u8fb9\r\n\t\t\tinc(E2, (deg[u] + deg[v] - 2) * inv2 % P * inv2 % P * inv2 % P); // \u4e24\u6761\u90bb\u63a5\u7684\u8fb9\r\n\t\t\tinc(E2, (m - deg[u] - deg[v] + 1) * inv2 % P * inv2 % P * inv2 % P * inv2 % P); // \u4e24\u6761\u4e0d\u76f8\u5e72\u7684\u8fb9 \r\n\t\t\tmp[u][v] = mp[v][u] = 1;\r\n\t\t}\r\n\t\t\r\n\t\tif(dep[v]) {\r\n\t\t\tif(dep[v] > dep[u]) continue;\r\n\t\t\tint sze = 1, cnt = deg[v];\r\n\t\t\tfor(int i = u; i != v; i = lst[i]) ++sze, cnt += deg[i];\r\n\t\t\tbin[++top] = sze, out[top] = cnt - 2 * sze;\r\n\t\t\tfor(int i = u; i != v; i = lst[i]) cir[i].push_back(top);\r\n\t\t\tcir[v].push_back(top);\r\n\t\t}\r\n\t\telse {\r\n\t\t\tdfs(v, u);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nmain() {\r\n\tn = get(), m = get();\r\n\tfor(int i = 1, u, v; i <= m; i++) u = get(), v = get(), add(u, v), add(v, u);\r\n\tdfs(1, 0);\r\n\tV = n * inv2 % P, E = m * inv2 % P * inv2 % P;\r\n\tfor(int i = 1; i <= top; i++) {\r\n\t\tinc(C, qpow(inv2, bin[i]));\r\n\t\tinc(C2, qpow(inv2, bin[i]));\r\n\t\t\r\n\t\tinc(VC, qpow(inv2, bin[i]) * bin[i] % P);\r\n\t\tinc(VC, qpow(inv2, bin[i] + 1) * (n - bin[i]) % P);\r\n\t\t\r\n\t\tinc(EC, qpow(inv2, bin[i]) * bin[i] % P);\r\n\t\tinc(EC, qpow(inv2, bin[i] + 1) * out[i] % P);\r\n\t\tinc(EC, qpow(inv2, bin[i] + 2) * (m - bin[i] - out[i]) % P);\r\n\t}\r\n\tfor(int i = 1; i <= top; i++) \r\n\t\tinc(C2, (C - qpow(inv2, bin[i]) + P) * qpow(inv2, bin[i]) % P); \r\n\tV2 = n * (n + 1) % P * inv2 % P * inv2 % P;\r\n\tVE = m * (2 * inv2 % P * inv2 % P + (n - 2) * inv2 % P * inv2 % P * inv2 % P) % P;\r\n\tfor(int i = 1; i <= n; i++) {\r\n\t\tint sum = 0;\r\n\t\tfor(auto j : cir[i]) \r\n\t\t\tinc(sum, qpow(inv2, bin[j]));\r\n\t\tfor(auto j : cir[i]) \r\n\t\t\tinc(C2, (sum - qpow(inv2, bin[j]) + P) % P * qpow(inv2, bin[j]) % P);\r\n\t}\r\n\tint ans = V2 + E2 + C2 - 2 * VE - 2 * EC + 2 * VC - (V - E + C) * (V - E + C) % P;\r\n//\tcout << V2 << \" \" << E2 << \" \" << C2 << \" \" << VC << \" \" << EC << \" \" << VE << \" \" << (V - E + C) * (V - E + C) % P << endl; \r\n\tans = (ans % P + P) % P;\r\n\tcout << ans; \r\n\treturn 0;\r\n}"
+}

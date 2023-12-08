@@ -1,0 +1,37 @@
+{
+    "id": 98220435,
+    "contestId": 1431,
+    "creationTimeSeconds": 1605199573,
+    "relativeTimeSeconds": 7873,
+    "problem": {
+        "contestId": 1431,
+        "index": "H",
+        "name": "Rogue-like Game",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "*special",
+            "brute force",
+            "greedy",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1431,
+        "members": [
+            {
+                "handle": "lucifer1004"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1605191700
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 0,
+    "source": "import java.math.BigInteger\n\nfun readInt(): Int {\n    return readLine()!!.toInt()\n}\n\nfun readLong(): Long {\n    return readLine()!!.toLong()\n}\n\nfun readBigInt(): BigInteger {\n    return readLine()!!.toBigInteger()\n}\n\nfun readInts(): List<Int> {\n    return readLine()!!.split(\" \").map(String::toInt)\n}\n\nfun readLongs(): List<Long> {\n    return readLine()!!.split(\" \").map(String::toLong)\n}\n\nfun readBigInts(): List<BigInteger> {\n    return readLine()!!.split(\" \").map(String::toBigInteger)\n}\n\ndata class Stage(val value: Long, val pa: Int, val pb: Int)\n\nfun main() {\n    val (n, m, k) = readInts()\n    val a = readLongs()\n    val b = readLongs()\n    val c = mutableListOf<List<Int>>()\n    for (i in 0 until n)\n        c.add(readInts())\n    var pa = 0\n    var pb = 0\n    val stages = mutableListOf<Stage>()\n    while (pa < n || pb < m) {\n        if (pb == m || (pa < n && a[pa] <= b[pb])) {\n            while (pa + 1 < n && a[pa + 1] == a[pa])\n                pa++\n            while (pb + 1 < m && b[pb + 1] == a[pa])\n                pb++\n            stages.add(Stage(a[pa], pa, pb))\n            if (pb < m && b[pb] == a[pa])\n                pb++\n            pa++\n        } else {\n            while (pb + 1 < m && b[pb + 1] == a[pa])\n                pb++\n            stages.add(Stage(b[pb], pa, pb))\n            pb++\n        }\n    }\n    val N = stages.size\n    val hi = IntArray(N)\n    hi[0] = c[0][0]\n    for (i in 1 until N) {\n        hi[i] = hi[i - 1]\n        val la = stages[i - 1].pa\n        val lb = stages[i - 1].pb\n        val ca = stages[i].pa\n        val cb = stages[i].pb\n        for (j in 0 until la + 1)\n            for (x in lb + 1 until cb + 1)\n                if (j < n && x < m)\n                    hi[i] = hi[i].coerceAtLeast(c[j][x])\n        for (j in la + 1 until ca + 1)\n            for (x in 0 until cb + 1)\n                if (j < n && x < m)\n                    hi[i] = hi[i].coerceAtLeast(c[j][x])\n    }\n    var ans = Long.MAX_VALUE\n    for (i in 0 until N - 1) {\n        var chi = 0\n        var cvalue = 0L\n        var cruns = 0L\n        for (j in 0 until N) {\n            if (j >= 1) {\n                chi = chi.coerceAtLeast(hi[j - 1])\n                if (j - 1 == i)\n                    chi += k\n            }\n            if (cvalue >= stages[j].value)\n                continue\n            val delta = stages[j].value - cvalue\n            val need = (delta - 1) / chi + 1\n            cruns += need\n            cvalue += need * chi\n        }\n        ans = ans.coerceAtMost(cruns)\n    }\n    println(ans)\n}\n"
+}

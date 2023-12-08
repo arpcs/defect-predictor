@@ -1,0 +1,37 @@
+{
+    "id": 99667663,
+    "contestId": 1431,
+    "creationTimeSeconds": 1606415893,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1431,
+        "index": "H",
+        "name": "Rogue-like Game",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "*special",
+            "brute force",
+            "greedy",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1431,
+        "members": [
+            {
+                "handle": "GeorgeMaharis"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1605191700
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 139,
+    "memoryConsumedBytes": 1536000,
+    "source": "\r\nimport java.lang.Long.min\r\nimport java.util.*\r\nimport kotlin.math.max\r\n\r\n@JvmField val INPUT = System.`in`\r\n@JvmField val OUTPUT = System.out\r\n@JvmField val _reader = INPUT.bufferedReader()\r\nfun readLine(): String? = _reader.readLine()\r\nfun readLn() = _reader.readLine()!!\r\n@JvmField var _tokenizer: StringTokenizer = StringTokenizer(\"\")\r\nfun read(): String {\r\n  while (_tokenizer.hasMoreTokens().not()) _tokenizer = StringTokenizer(_reader.readLine() ?: return \"\", \" \")\r\n  return _tokenizer.nextToken()\r\n}\r\nfun readInt() = read().toInt()\r\nfun readDouble() = read().toDouble()\r\nfun readLong() = read().toLong()\r\nfun readStrings(n: Int) = List(n) { read() }\r\nfun readLines(n: Int) = List(n) { readLn() }\r\nfun readInts(n: Int) = List(n) { read().toInt() }\r\nfun readIntArray(n: Int) = IntArray(n) { read().toInt() }\r\nfun readDoubles(n: Int) = List(n) { read().toDouble() }\r\nfun readDoubleArray(n: Int) = DoubleArray(n) { read().toDouble() }\r\nfun readLongs(n: Int) = List(n) { read().toLong() }\r\nfun readLongArray(n: Int) = LongArray(n) { read().toLong() }\r\n\r\nfun divRoundUp(num : Long, denom: Long) : Long {\r\n  return (num + denom - 1)/denom\r\n}\r\n\r\nprivate fun myAssert(x: Boolean) {\r\n  if (!x) {\r\n    throw AssertionError()\r\n  }\r\n}\r\n\r\nfun main() {\r\n  val n = readInt()\r\n  val m = readInt()\r\n  val k = readInt()\r\n\r\n  val a = LongArray(n)\r\n  val b = LongArray(m)\r\n\r\n  for (i in 0 until n) a[i] = readLong()\r\n  for (i in 0 until m) b[i] = readLong()\r\n\r\n  // sorted unlock thresholds\r\n  val events = (a + b).distinct().sorted()\r\n\r\n  // unlock threshold -> index of events\r\n  val eventIndicesMap = hashMapOf<Long, Int>()\r\n  for (i in events.indices) {\r\n    eventIndicesMap[events[i]] = i\r\n  }\r\n\r\n  // max points among characters unlocked at event i\r\n  val mxPointsPerEvent = LongArray(events.size)\r\n\r\n  for (i in 0 until n) {\r\n    for (j in 0 until m) {\r\n      val cij = readLong()\r\n      val mxab = max(a[i], b[j])\r\n      val eventInd = eventIndicesMap[mxab]\r\n      mxPointsPerEvent[eventInd!!] = max(mxPointsPerEvent[eventInd], cij)\r\n    }\r\n  }\r\n\r\n  myAssert(events[0] == 0L)\r\n\r\n  val evaluate : (Int) -> Long = { guideIndex ->\r\n    mxPointsPerEvent[guideIndex] = mxPointsPerEvent[guideIndex] + k\r\n\r\n    var round = 0L\r\n    var score = 0L\r\n    var bestOption = mxPointsPerEvent[0]\r\n    var nextEventIndex = 1\r\n\r\n    while (nextEventIndex < mxPointsPerEvent.size) {\r\n      val nextThreshold = events[nextEventIndex]\r\n      val diff = nextThreshold - score\r\n      if (diff > 0) {\r\n        round += divRoundUp(diff, bestOption)\r\n        score = divRoundUp(diff, bestOption) * bestOption\r\n      }\r\n      bestOption = max(bestOption, mxPointsPerEvent[nextEventIndex++])\r\n    }\r\n    mxPointsPerEvent[guideIndex] = mxPointsPerEvent[guideIndex] - k\r\n    round\r\n  }\r\n\r\n  var mn = Long.MAX_VALUE\r\n  for (i in mxPointsPerEvent.indices) {\r\n    mn = min(mn, evaluate(i))\r\n  }\r\n  println(mn)\r\n}"
+}
