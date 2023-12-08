@@ -1,0 +1,41 @@
+{
+    "id": 219881577,
+    "contestId": 1706,
+    "creationTimeSeconds": 1692690771,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "LTTrungCHL"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 14643200,
+    "source": "///***LTT***///\r\n/// ->TUYEN QUOC GIA<- ///\r\n#include<bits/stdc++.h>\r\n//#pragma GCC optimize (\"O3\")\r\n//#pragma GCC optimize (\"unroll-loops\")\r\n//#pragma GCC target(\"popcnt\")\r\n//#define int long long\r\n#define endl \"\\n\"\r\n#define F first\r\n#define S second\r\n#define pb push_back\r\n#define CHECKBIT(mask,i) ((mask>>(i) )&1) // == 1 la bat, == 0 la tat\r\n#define OFFBIT(mask,i) ((1<<(i))^mask) // tat bit thu i\r\n#define ONBIT(mask,i) ((1<<(i))mask) // bat bit thu i\r\nusing namespace std;\r\nconst long long oo = 1e9+7;\r\nconst int N = 2 * 1e5 + 10;\r\nint parent1[N], parent2[N], sz1[N], sz[N];\r\nbool check[N];\r\nvector <pair <int ,int>> duyet;\r\nint n, m, q;\r\nint u[N], v[N], qL[N], qR[N], mid[N], r[N], l[N], ans[N];\r\nvector <int> sz2[N];\r\nint find_set(int u){\r\n    if (u == parent1[u]) return u;\r\n    int pu = find_set(parent1[u]);\r\n    parent1[u] = pu;\r\n    return pu;\r\n}\r\nint find_set2(int u){\r\n    if (u == parent2[u]) return u;\r\n    int pu = find_set2(parent2[u]);\r\n    parent2[u] = pu;\r\n    return pu;\r\n}\r\nvoid union_sets2(int u,int v){\r\n    int pu = find_set2(u);\r\n    int pv = find_set2(v);\r\n    if (pu != pv){\r\n        if (sz1[pu] < sz1[pv]) swap(pu,pv);\r\n        sz1[pu] += sz1[pv];\r\n        parent2[pv] = pu;\r\n    }\r\n}\r\nvoid union_sets(int u,int v){\r\n    int pu = find_set(u);\r\n    int pv = find_set(v);\r\n    if (pu != pv){\r\n        if (sz[pu] < sz[pv]) swap(pu,pv);\r\n        sz[pu] += sz[pv];\r\n        for (int i = 0;i < sz2[pv].size();i++){\r\n            if (find_set(sz2[pv][i] - 1) == pu){\r\n                union_sets2(sz2[pv][i] - 1, sz2[pv][i]);\r\n            }\r\n            if (find_set(sz2[pv][i] + 1) == pu){\r\n                union_sets2(sz2[pv][i] + 1, sz2[pv][i]);\r\n            }\r\n            sz2[pu].pb(sz2[pv][i]);\r\n        }\r\n        parent1[pv] = pu;\r\n    }\r\n}\r\nvoid inp(){\r\n    cin >> n >> m >> q;\r\n    for (int i = 1;i <= m;i++){\r\n        cin >> u[i] >> v[i];\r\n    }\r\n    return;\r\n}\r\nvoid solve(){\r\n    for (int i = 1;i <= q;i++){\r\n        ans[i] = m;\r\n        cin >> l[i] >> r[i];\r\n        qL[i] = 0; qR[i] = m;\r\n        if (l[i] == r[i]){\r\n            ans[i] = 0;\r\n            qL[i] = 1; qR[i] = 0;\r\n        }\r\n    }\r\n    while (1){\r\n        bool ok = false;\r\n        duyet.clear();\r\n        for (int i = 1;i <= n;i++){\r\n            sz[i] = 1;\r\n            sz1[i] = 1;\r\n            sz2[i].clear();\r\n            sz2[i].pb(i);\r\n            parent1[i] = i;\r\n            parent2[i] = i;\r\n        }\r\n        for (int i = 1;i <= q;i++){\r\n            check[i] = false;\r\n            if (qL[i] <= qR[i]) ok = true; else continue;\r\n            mid[i] = (qL[i] + qR[i]) /2;\r\n            duyet.pb({i,mid[i]});\r\n        }\r\n        if (!ok){\r\n            break;\r\n        }\r\n        int tt = 0;\r\n        for (int i = 1;i <= m;i++){\r\n            union_sets(u[i],v[i]);\r\n            while (duyet[tt].S == i){\r\n                if (find_set2(l[duyet[tt].F]) == find_set2(r[duyet[tt].F])){\r\n                    check[duyet[tt].F] = true;\r\n                }\r\n                ++tt;\r\n            }\r\n        }\r\n        for (int i = 1;i <= q;i++){\r\n            if (qL[i] > qR[i]) continue;\r\n            if (check[i]){\r\n                    ans[i] = min(ans[i],mid[i]);\r\n                    qR[i] = mid[i] - 1;\r\n            }\r\n            if (!check[i]) qL[i] = mid[i] + 1;\r\n        }\r\n    }\r\n    for (int i = 1;i <= q;i++){\r\n        cout << ans[i] <<\" \";\r\n    }\r\n    cout <<\"\\n\";\r\n    return;\r\n}\r\nint main(){\r\n    ios_base::sync_with_stdio(NULL);\r\n    cin.tie(NULL);\r\n    cout.tie(NULL);\r\n    if (fopen(\"file.inp\", \"r\")){\r\n        freopen(\"file.inp\", \"r\", stdin);\r\n        freopen(\"file.out\", \"w\", stdout);\r\n    }\r\n    int t;\r\n    cin >> t;\r\n    while(t--){\r\n    inp();\r\n    solve();\r\n    }\r\n}\r\n/*\r\n5 5 1\r\n1 2\r\n1 3\r\n2 4\r\n3 4\r\n3 5\r\n2 5\r\n\r\n5 5 5\r\n1 2\r\n1 3\r\n2 4\r\n3 4\r\n3 5\r\n1 4\r\n3 4\r\n2 2\r\n2 5\r\n3 5\r\n\r\n\r\n*/\r\n\r\n\r\n"
+}

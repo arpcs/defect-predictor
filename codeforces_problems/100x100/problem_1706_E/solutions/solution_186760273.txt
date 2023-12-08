@@ -1,0 +1,41 @@
+{
+    "id": 186760273,
+    "contestId": 1706,
+    "creationTimeSeconds": 1672055971,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "snowy2002"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 358,
+    "memoryConsumedBytes": 39628800,
+    "source": "#include<bits/stdc++.h>\r\n#include<ext/pb_ds/assoc_container.hpp>\r\n#define time chrono::system_clock::now().time_since_epoch().count()\r\n#include<ext/pb_ds/tree_policy.hpp>\r\n#define clean(x) memset(x,0,sizeof(x))\r\n#define fil(x,n) fill(x,x+1+n,0)\r\n#define inf 2000000009\r\n#define maxn 500005\r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\nmt19937_64 rnd(time);\r\ncc_hash_table<int,int>mp;\r\n\r\nint read() {\r\n    int x=1,res=0;\r\n    char c=getchar();\r\n    while(c<'0'||c>'9') {\r\n        if(c=='-') x=-1;\r\n        c=getchar();\r\n    }\r\n    while(c>='0'&&c<='9') {\r\n        res=res*10+(c-'0');\r\n        c=getchar();\r\n    }\r\n    return res*x;\r\n}\r\n\r\nstruct LCT{\r\n    int top,ch[maxn][2],f[maxn],q[maxn],val[maxn],ma[maxn],rev[maxn];\r\n    #define ls(x) ch[x][0]\r\n    #define rs(x) ch[x][1]\r\n    void clear(int n) {\r\n        top=0;\r\n        for(int i=0;i<=n+1;i++) {\r\n            ch[i][0]=ch[i][1]=0;\r\n            ma[i]=rev[i]=f[i]=q[i]=val[i]=0;\r\n        }\r\n    }\r\n    void makeroot(int x){access(x);splay(x);rev[x]^=1;}\r\n    int find(int x){access(x);splay(x);while(ch[x][0])x=ch[x][0];return x;}\r\n    void split(int x,int y){makeroot(x);access(y);splay(y);}\r\n    bool isroot(int x){return ch[f[x]][0]!=x&&ch[f[x]][1]!=x;}\r\n    void link(int x,int y){makeroot(x);if(find(y)!=x)f[x]=y;}\r\n    void cut(int x,int y){\r\n        if(find(x)!=find(y)) return; split(x,y);\r\n        if(ch[y][0]==x&&ch[x][1]==0) ch[y][0]=0,f[x]=0;\r\n        if(ch[y][1]==x&&ch[x][0]==0) ch[y][1]=0,f[x]=0;\r\n    }\r\n    void pushup(int x){\r\n        // xr[x]=xr[ch[x][0]]^xr[ch[x][1]]^val[x];\r\n        // sz[x]=(sz[ls(x)]+sz[rs(x)]+1);\r\n        // sum[x]=(val[x]+sum[ls(x)]+sum[rs(x)]);\r\n        ma[x]=max({val[x],ma[ls(x)],ma[rs(x)]});\r\n    }\r\n    void pushdown(int x){\r\n        int l=ch[x][0],r=ch[x][1];\r\n        if(rev[x]){\r\n            rev[l]^=1;rev[r]^=1;rev[x]^=1;\r\n            swap(ch[x][0],ch[x][1]);\r\n        }\r\n    }\r\n    void rotate(int x){\r\n        int y=f[x],z=f[y],l,r;\r\n        if(ch[y][0]==x)l=0;else l=1;r=l^1;\r\n        if(!isroot(y)){if(ch[z][0]==y)ch[z][0]=x;else ch[z][1]=x;}\r\n        f[x]=z;f[y]=x;f[ch[x][r]]=y;\r\n        ch[y][l]=ch[x][r];ch[x][r]=y;\r\n        pushup(y);pushup(x);\r\n    }\r\n    void splay(int x){\r\n        top=1;q[top]=x;\r\n        for(int i=x;!isroot(i);i=f[i]) q[++top]=f[i];\r\n        for(int i=top;i;i--) pushdown(q[i]);\r\n        while(!isroot(x)){\r\n            int y=f[x],z=f[y];\r\n            if(!isroot(y)){\r\n                if((ch[y][0]==x)^(ch[z][0]==y)) rotate(x);\r\n                else rotate(y);\r\n            } rotate(x);\r\n        }\r\n    }\r\n    void access(int x){\r\n        for(int t=0;x;t=x,x=f[x]){\r\n            splay(x),ch[x][1]=t,pushup(x);\r\n        }\r\n    }\r\n}lct;\r\n\r\nstruct ST{\r\n    int tag[maxn<<2],tr[maxn<<2],a[maxn];\r\n    void build(int k,int l,int r)\r\n    {\r\n        if(l==r)\r\n        {\r\n            tr[k]=a[l];\r\n            return;\r\n        }\r\n        int mid=(l+r)>>1;\r\n        build(k<<1,l,mid);\r\n        build(k<<1|1,mid+1,r);\r\n        tr[k]=max(tr[k<<1],tr[k<<1|1]);\r\n    }\r\n    int query(int k,int l,int r,int x,int y)\r\n    {\r\n        if(x<=l&&r<=y) return tr[k];\r\n        int mid=(l+r)>>1,ans=0;\r\n        if(x<=mid) ans=max(ans,query(k<<1,l,mid,x,y));\r\n        if(mid+1<=y) ans=max(ans,query(k<<1|1,mid+1,r,x,y));\r\n        return ans;\r\n    }\r\n}st;\r\n\r\nint f[maxn];\r\nint fi(int x) {\r\n    if(x!=f[x]) f[x]=fi(f[x]);\r\n    return f[x];\r\n}\r\n\r\nvoid solve() {\r\n    int n=read(),m=read(),q=read(),cnt=n;\r\n    lct.clear(n*2);\r\n    for(int i=1;i<=n;i++) f[i]=i;\r\n    for(int i=1;i<=m;i++) {\r\n        int aa=read(),bb=read();\r\n        if(fi(aa)!=fi(bb)) {\r\n            f[fi(aa)]=fi(bb);\r\n            lct.link(++cnt,aa);\r\n            lct.link(cnt,bb);\r\n            lct.val[cnt]=i;\r\n        }\r\n    }\r\n    for(int i=1;i<n;i++) {\r\n        int aa=i,bb=i+1;\r\n        lct.split(aa,bb);\r\n        st.a[i]=lct.ma[bb];\r\n    }\r\n    st.build(1,1,n-1);\r\n    for(int i=1;i<=q;i++) {\r\n        int aa=read(),bb=read()-1;\r\n        if(bb<aa) {cout<<0<<\" \";continue;}\r\n        cout<<st.query(1,1,n-1,aa,bb)<<\" \";\r\n    }\r\n    puts(\"\");\r\n}\r\n\r\nsigned main()\r\n{\r\n    int t=read();\r\n    while(t--) solve();\r\n    return 0;\r\n}"
+}

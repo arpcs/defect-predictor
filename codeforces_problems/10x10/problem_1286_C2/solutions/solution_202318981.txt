@@ -1,0 +1,39 @@
+{
+    "id": 202318981,
+    "contestId": 1286,
+    "creationTimeSeconds": 1681615214,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1286,
+        "index": "C2",
+        "name": "Madhouse (Hard version)",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2800,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "hashing",
+            "interactive",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1286,
+        "members": [
+            {
+                "handle": "mydcwfy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1578233100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 16,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 716800,
+    "source": "// Problem: C2. Madhouse (Hard version)\r\n// Contest: Codeforces - Codeforces Round 612 (Div. 1)\r\n// URL: https://codeforces.com/contest/1286/problem/C2\r\n// Time: 2023-04-15 11:05:39\r\n// Memory Limit: 256 MB\r\n// Time Limit: 1000 ms\r\n// Author: mydcwfy/Fly Wang\r\n// \r\n// Powered by CP Editor (https://cpeditor.org)\r\n\r\n#include <algorithm>\r\n#include <iostream>\r\n#include <cstdio>\r\n#include <set>\r\n\r\nconst int N = 105;\r\nstd::multiset<std::string> s[N];\r\n\r\nstd::string toset(std::string s) { return std::sort(s.begin(), s.end()), s; }\r\n\r\nstd::string substract(std::string a, std::string b)\r\n{\r\n\tint j = 0;\r\n\tstd::string res;\r\n\tfor (int i = 0; i < (int) b.size(); ++ i) {\r\n\t\twhile (a[j] != b[i]) res += a[j ++];\r\n\t\tj ++;\r\n\t}\r\n\twhile (j < (int) a.size()) res += a[j ++];\r\n\treturn res;\r\n}\r\n\r\nbool cover(std::string a, std::string b)\r\n{\r\n\tint j = 0;\r\n\tfor (int i = 0; i < (int) b.size(); ++ i) {\r\n\t\twhile (j < (int) a.size() && a[j] != b[i]) j ++;\r\n\t\tif (j >= (int) a.size()) return false;\r\n\t\tj ++;\r\n\t}\r\n\treturn true;\r\n}\r\n\r\nstd::string read(int l, int r)\r\n{\r\n\tstd::cout << \"? \" << l << ' ' << r << std::endl;\r\n\tint n = r - l + 1;\r\n\tfor (int i = 1; i <= n; ++ i) s[i].clear();\r\n\tfor (int i = 1; i <= n * (n + 1) / 2; ++ i)\r\n\t{\r\n\t\tstd::string cur;\r\n\t\tstd::cin >> cur;\r\n\t\tstd::sort(cur.begin(), cur.end());\r\n\t\ts[cur.size()].insert(cur);\r\n\t}\r\n\tstd::string rem = *s[n].begin(), res(n, 'a');\r\n\tfor (int i = 0; rem.size() >= 2; ++ i) {\r\n\t\tauto& cur = s[n - i - 1];\r\n\t\tfor (int j = 1; j <= i; ++ j)\r\n\t\t\tcur.erase(cur.find(toset(res.substr(j, i - j) + rem + res.substr(n - i, j - 1))));\r\n\t\tauto s1 = toset(rem + res.substr(0, i)), s2 = toset(rem + res.substr(n - i));\r\n\t\tbool rev = false;\r\n\t\tif (!cover(s1, *cur.begin())) std::swap(s1, s2), rev = true;\r\n\t\t// std::cout << s1 << ' ' << s2 << ' ' << *cur.begin() << ' ' << *-- cur.end() << '\\n';\r\n\t\tres[rev ? n - i - 1 : i] = substract(s2, *-- cur.end())[0];\r\n\t\tres[rev ? i : n - i - 1] = substract(s1, *cur.begin())[0];\r\n\t\t// std::cout << i << ' ' << cur.size() << ' ' << rem << ' ' << res[i] << ' ' << res[n - i - 1] << std::endl;\r\n\t\trem = substract(substract(rem, std::string(1, res[i])), std::string(1, res[n - i - 1]));\r\n\t}\r\n\tif (rem.size()) res[n / 2] = rem[0];\r\n\t// std::cout << l << ' ' << r << ' ' << res << '\\n';\r\n\treturn res;\r\n}\r\n\r\nint main()\r\n{\r\n\tstd::cin.tie(0)->sync_with_stdio(false);\r\n\tint n;\r\n\tstd::cin >> n;\r\n\tstd::string all = read(1, n);\r\n\tif (n <= 3) {\r\n\t\tchar st = read(1, 1)[0];\r\n\t\tif (all[0] != st) std::swap(all[0], all[n - 1]);\r\n\t\treturn std::cout << \"! \" << all << '\\n', 0;\r\n\t}\r\n\tstd::string hf1 = read(1, n / 2), hf2 = read(1, n / 2 - 1);\r\n\tauto set = [&](int id, char c) {\r\n\t\tif (all[id] != c) std::swap(all[id], all[n - id - 1]);\r\n\t};\r\n\tif (hf1.size() & 1) {\r\n\t\tint id = hf1.size() / 2;\r\n\t\tset(id, hf1[id]);\r\n\t\twhile (id < (int) hf2.size()) {\r\n\t\t\tif (all[id] != hf2[id]) std::swap(hf2[id], hf2[hf2.size() - id - 1]);\r\n\t\t\tid = hf2.size() - id - 1, set(id, hf2[id]);\r\n\t\t\tif (all[id] != hf1[id]) std::swap(hf1[id], hf1[hf1.size() - id - 1]);\r\n\t\t\tid = hf1.size() - id - 1, set(id, hf1[id]);\r\n\t\t}\r\n\t} else {\r\n\t\tint id = hf2.size() / 2;\r\n\t\tset(id, hf2[id]);\r\n\t\twhile (1) {\r\n\t\t\tif (all[id] != hf1[id]) std::swap(hf1[id], hf1[hf1.size() - id - 1]);\r\n\t\t\tid = hf1.size() - id - 1, set(id, hf1[id]);\r\n\t\t\tif (id >= (int) hf2.size()) break;\r\n\t\t\tif (all[id] != hf2[id]) std::swap(hf2[id], hf2[hf2.size() - id - 1]);\r\n\t\t\tid = hf2.size() - id - 1, set(id, hf2[id]);\r\n\t\t}\r\n\t}\r\n\tstd::cout << \"! \" << all << '\\n';\r\n\treturn 0;\r\n}"
+}

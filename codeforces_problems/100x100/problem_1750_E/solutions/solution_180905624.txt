@@ -1,0 +1,40 @@
+{
+    "id": 180905624,
+    "contestId": 1750,
+    "creationTimeSeconds": 1668379154,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "Bedoo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1667745300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 296,
+    "memoryConsumedBytes": 21811200,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define  ll long long\r\n#define ld long double\r\n#define f first\r\n#define s second\r\nconst int N = 2e5+5;\r\nconst int mod = 998244353;\r\n\r\nint n , pref[N] , lf[N] , rt[N];\r\nll seg[2][N<<2];\r\nstring s;\r\n\r\nvoid update(int id , int node , int st , int en , int idx , int val)\r\n{\r\n    if (st == en)\r\n    {\r\n        seg[id][node] = val;\r\n    }\r\n    else\r\n    {\r\n        int mid = (st+en) >> 1;\r\n        if (st <= idx && idx <= mid)\r\n            update(id , node<<1 , st , mid , idx , val);\r\n        else\r\n            update(id , node<<1|1 , mid+1 , en , idx , val);\r\n        seg[id][node] = seg[id][node<<1] + seg[id][node<<1|1];\r\n    }\r\n}\r\n\r\nll query(int id , int node , int st , int en , int l , int r)\r\n{\r\n    if (en < l || st > r)\r\n        return 0;\r\n\r\n    if (l <= st && en <= r)\r\n        return seg[id][node];\r\n\r\n    int mid = (st+en) >> 1;\r\n    return query(id , node<<1 , st , mid , l , r) + query(id , node<<1|1 , mid+1 , en , l , r);\r\n}\r\n\r\nvoid solve()\r\n{\r\n    stack<int> sk;\r\n    for(int i=1; i<=n; i++)\r\n    {\r\n        if (s[i] == '(') pref[i] = 1;\r\n        else pref[i] = -1;\r\n        pref[i] += pref[i-1];\r\n\r\n        while(!sk.empty() && pref[sk.top()] > pref[i]) sk.pop();\r\n        if (!sk.empty()) lf[i] = sk.top();\r\n        else lf[i] = 0;\r\n        sk.push(i);\r\n    }\r\n    while(!sk.empty()) sk.pop();\r\n\r\n    vector< pair<ll,ll> > v;\r\n    for(int i=n; i>=1; i--)\r\n    {\r\n        while(!sk.empty() && pref[sk.top()] >= pref[i]) sk.pop();\r\n        if (!sk.empty()) rt[i] = sk.top();\r\n        else rt[i] = n+1;\r\n        sk.push(i);\r\n        v.push_back({pref[i] , -i});\r\n    }\r\n\r\n    v.push_back({0,0});\r\n    sort(v.begin() , v.end() , greater< pair<ll,ll> > () );\r\n    ll sumMn = 0;\r\n    for(int i=0; i<v.size(); i++)\r\n    {\r\n        int idx = -v[i].s;\r\n\r\n        if (idx != 0)\r\n        {\r\n            int l = lf[idx]+1 , r = rt[idx]-1;\r\n\r\n            int cnt = query(0 , 1 , 0 , n , l-1 , idx-1);\r\n            ll sm = query(1 , 1 , 0 , n , l-1 , idx-1);\r\n            ll cntRt = r - idx + 1;\r\n            sumMn += cntRt * (cnt * v[i].f - sm);\r\n        }\r\n\r\n        update(0 , 1 , 0 , n , idx , 1);\r\n        update(1 , 1 , 0 , n , idx , v[i].f);\r\n    }\r\n\r\n    ll ans = -sumMn;\r\n    for(int i=0; i<=n; i++)\r\n    {\r\n        update(0 , 1 , 0 , n , i , 0);\r\n        update(1 , 1 , 0 , n , i , 0);\r\n    }\r\n\r\n    for(auto &it : v)\r\n        it.s = -it.s;\r\n\r\n    sort(v.begin() , v.end());\r\n\r\n    for(int i=0; i<v.size(); i++)\r\n    {\r\n        int idx = v[i].s;\r\n        update(0 , 1 , 0 , n , idx , 1);\r\n        update(1 , 1 , 0 , n , idx , v[i].f);\r\n\r\n        if (idx == 0) continue;\r\n\r\n        ll tmp = query(1 , 1 , 0 , n , 0 , idx-1);\r\n        ll cnt = query(0 , 1 , 0 , n , 0 , idx-1);\r\n\r\n        ll tmp2 = cnt * v[i].f - tmp;\r\n        ans += tmp2;\r\n    }\r\n\r\n    cout << ans << \"\\n\";\r\n\r\n    for(int i=0; i<=4*n; i++)\r\n    {\r\n        seg[0][i] = seg[1][i] = 0;\r\n        lf[i] = rt[i] = 0;\r\n    }\r\n}\r\n\r\nint main()\r\n{\r\n    ios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0);\r\n\r\n    int t;\r\n    cin >> t;\r\n    while(t--)\r\n    {\r\n        cin >> n >> s;\r\n        s = ' '+s;\r\n\r\n        solve();\r\n    }\r\n\r\n    return 0;\r\n}"
+}

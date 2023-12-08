@@ -1,0 +1,41 @@
+{
+    "id": 166622862,
+    "contestId": 1706,
+    "creationTimeSeconds": 1659385052,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "Serendipity__"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 436,
+    "memoryConsumedBytes": 39731200,
+    "source": "/*###############################################################################################################\r\n##                                    Author : Kim Tae Yoon (Serendipity__)                                    ##\r\n###############################################################################################################*/\r\n\r\n#include <bits/stdc++.h>\r\n#define fastio std::ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);\r\n#define prntyes cout<<\"Yes\\n\";\r\n#define prntno cout<<\"No\\n\";\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef unsigned long ul;\r\ntypedef unsigned long long ull;\r\ntypedef long double ld;\r\ntypedef pair<int, int> pi;\r\ntypedef pair<ll, ll> pii;\r\ntypedef complex<double> inum;\r\nconst double PI = acos(-1);\r\nconst int INF = 0x3f3f3f3f;\r\nconst ll LLINF = 1000000000000000000LL;\r\nconst ll MAX = 200005; // depending on the problem\r\nconst ll MOD = 998244353; // depending on the problem\r\nstruct DSU {\r\n    int N;\r\n    vector<int> parent, member;\r\n    DSU() { N = 0; }\r\n    DSU(int n) {\r\n        N = n;\r\n        parent.resize(n);\r\n        member.resize(n);\r\n        for (int i = 0; i < n; i++) { parent[i] = -1; member[i] = 1; }\r\n    }\r\n    int root(int n) {\r\n        if (parent[n] == -1) { return n; }\r\n        return parent[n] = root(parent[n]);\r\n    }\r\n    void merge(int r1, int r2) {\r\n        r1 = root(r1);\r\n        r2 = root(r2);\r\n        if (r1 == r2) { return; }\r\n        if (member[r1] < member[r2]) { swap(r1, r2); }\r\n        parent[r2] = r1;\r\n        member[r1] += member[r2];\r\n    }\r\n};\r\n\r\nstruct Weighted_Tree{\r\n    int N,M;\r\n    vector<vector<pii>> adj;\r\n    vector<vector<pii>> C;\r\n    vector<vector<int>> sps;\r\n    vector<vector<ll>> dsps;\r\n    vector<int> H,P;\r\n    vector<ll> D;\r\n\r\n    Weighted_Tree(){N=M=0;}\r\n    Weighted_Tree(int n){\r\n        N=n; M=0;\r\n        adj.resize(N);\r\n        C.resize(N);\r\n        H.resize(N);\r\n        P.resize(N);\r\n        D.resize(N);\r\n        int tmp=1;\r\n        while(tmp<N){tmp<<=1;++M;}\r\n        sps.resize(M);\r\n        dsps.resize(M);\r\n        for (int j=0;j<M;j++){sps[j].resize(N);dsps[j].resize(N);}\r\n        for (int i=0;i<N;i++){H[i]=-1;}\r\n    }\r\n\r\n    void add(int a, int b, int w){\r\n        adj[a].push_back({b,w});\r\n        adj[b].push_back({a,w});\r\n    }\r\n\r\n    void init(int root){\r\n        H[root]=0; D[root]=0;\r\n        dfs(root);\r\n\r\n        for (int j=1;j<M;j++){\r\n            for (int i=0;i<N;i++){\r\n                sps[j][i] = sps[j-1][sps[j-1][i]];\r\n                dsps[j][i] = max(dsps[j-1][i],dsps[j-1][sps[j-1][i]]);\r\n            }\r\n        }\r\n    }\r\n\r\n    void dfs(int n){\r\n        for (auto& it:adj[n]){\r\n            if (H[it.first]==-1){\r\n                C[n].push_back(it);\r\n                P[it.first]=n;\r\n                H[it.first]=H[n]+1;\r\n                D[it.first]=D[n]+it.second;\r\n                dsps[0][it.first]=it.second;\r\n                sps[0][it.first]=n;\r\n                dfs(it.first);\r\n            }\r\n        }\r\n    }\r\n\r\n    int lca(int u, int v){\r\n        if (H[u]>H[v]){swap(u,v);}\r\n        int d = H[v]-H[u];\r\n        if (d>0){\r\n            for (int j=M-1;j>=0;j--){\r\n                if (d>=(1<<j)){\r\n                    d-=(1<<j);\r\n                    v = sps[j][v];\r\n                }\r\n            }\r\n        }\r\n\r\n        if (u==v){return u;}\r\n        for (int j=M-1;j>=0;j--){\r\n            if (sps[j][u]!=sps[j][v]){\r\n                u = sps[j][u];\r\n                v = sps[j][v];\r\n            }\r\n        }\r\n        return sps[0][u];\r\n    }\r\n\r\n    ll dist(int u , int v){\r\n        int p = lca(u,v);\r\n\r\n        ll ret1,ret2; ret1=ret2=0;\r\n\r\n        int d = H[v]-H[p];\r\n        if (d>0){\r\n            for (int j=M-1;j>=0;j--){\r\n                if (d>=(1<<j)){\r\n                    d-=(1<<j);\r\n                    ret1 = max(ret1,dsps[j][v]);\r\n                    v = sps[j][v];\r\n                }\r\n            }\r\n        }\r\n        d = H[u]-H[p];\r\n        if (d>0){\r\n            for (int j=M-1;j>=0;j--){\r\n                if (d>=(1<<j)){\r\n                    d-=(1<<j);\r\n                    ret2 = max(ret2,dsps[j][u]);\r\n                    u = sps[j][u];\r\n                }\r\n            }\r\n        }\r\n        return max(ret1,ret2);\r\n    }\r\n};\r\nstruct maxseg {\r\n    int N;\r\n    vector<ll> a, seg;\r\n    maxseg() { N = 0; }\r\n    maxseg(int n) {\r\n        N = n; \r\n        int M=1;\r\n        while(M<N){M<<=1;}\r\n        a.resize(n + 1);\r\n        seg.resize(M<<1);\r\n    }\r\n\r\n    void maketree(int left, int right, int node) {\r\n        if (left == right) { seg[node] = a[left]; return; }\r\n        int mid = (left + right) / 2;\r\n        maketree(left, mid, node * 2);\r\n        maketree(mid + 1, right, node * 2 + 1);\r\n        seg[node] = max(seg[node * 2], seg[node * 2 + 1]);\r\n    }\r\n    void update(int left, int right, int which, ll val, int node) {\r\n        if (left == right) { a[which] = val; seg[node] = a[left]; return; }\r\n        int mid = (left + right) / 2;\r\n        if (which <= mid) { update(left, mid, which, val, node * 2); }\r\n        else { update(mid + 1, right, which, val, node * 2 + 1); }\r\n        seg[node] = max(seg[node * 2], seg[node * 2 + 1]);\r\n    }\r\n    ll query(int left, int right, int from, int to, int node) {\r\n        if (right<from || left>to) { return -LLINF; }\r\n        if (from <= left && right <= to) { return seg[node]; }\r\n        int mid = (left + right) / 2;\r\n        ll ret = max(query(left, mid, from, to, node * 2), query(mid + 1, right, from, to, node * 2 + 1));\r\n        return ret;\r\n    }\r\n    void maketree() { maketree(1, N, 1); }\r\n    void update(int which, ll val) { update(1, N, which, val, 1); }\r\n    ll query(int from, int to) { return query(1, N, from, to, 1); }\r\n};\r\n\r\nvoid solve() {\r\n    int N,M,Q; cin>>N>>M>>Q;\r\n\r\n    DSU dsu = DSU(N+1);\r\n    Weighted_Tree tree = Weighted_Tree(N+1);\r\n\r\n    for (int i=1;i<=M;i++){\r\n        int u,v; cin>>u>>v;\r\n        if (dsu.root(u)!=dsu.root(v)){\r\n            dsu.merge(u,v);\r\n            tree.add(u,v,i);\r\n        }\r\n    }\r\n    tree.init(1);\r\n\r\n    maxseg seg = maxseg(N);\r\n    for (int i=2;i<=N;i++){\r\n        seg.update(i,tree.dist(i-1,i));\r\n    }\r\n    while(Q--){\r\n        int l,r; cin>>l>>r;\r\n        if (l==r){cout<<\"0 \";}\r\n        else{cout<<seg.query(l+1,r)<<\" \";}\r\n    }\r\n    cout<<\"\\n\";\r\n\r\n\r\n\r\n    \r\n\r\n\r\n\r\n}\r\n\r\nint main() {\r\n    fastio;\r\n    int tc = 1;\r\n    cin >> tc;\r\n    while (tc--) {\r\n        solve();\r\n    }\r\n    return 0;\r\n}\r\n"
+}

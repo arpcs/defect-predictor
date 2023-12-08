@@ -1,0 +1,36 @@
+{
+    "id": 81983070,
+    "contestId": 62,
+    "creationTimeSeconds": 1590855385,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 62,
+        "index": "E",
+        "name": "World Evil",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2700,
+        "tags": [
+            "dp",
+            "flows"
+        ]
+    },
+    "author": {
+        "contestId": 62,
+        "members": [
+            {
+                "handle": "terma"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1298649600
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 92,
+    "memoryConsumedBytes": 7884800,
+    "source": "#include <algorithm>\n#include <iostream>\n#include <cstring>\n#include <vector>\n \nconstexpr int kHmax = 5;\nconstexpr int kWmax = 5000;\nconstexpr size_t kInfinity = 1'000'000'000'000'000'000ULL;\n \nint height, width;\n \nint horizontal[kHmax][kWmax];\nint vertical[kHmax][kWmax];\n \nsize_t dp[kWmax][kHmax+1][(1 << (kHmax+1))];\n \ninline void update(size_t& value, size_t x) {\n    value = std::min(value, x);\n}\n \nsize_t ComputeMaxFlow() {\n    const int maxMask = (1 << (height + 1));\n \n    memset(dp, 255, sizeof(dp));\n \n    dp[1][0][0] = 0;\n    dp[1][0][1] = horizontal[0][0];\n \n    for (int full = 1; full < width; ++full) {\n        for (int row = 1; row < height; ++row) {\n            for (int mask = 0; mask < maxMask; ++mask) {\n                size_t cost = dp[full][row-1][mask];\n                if (cost >= kInfinity) {\n                    cost = kInfinity;\n                }\n                // put zero\n                if (mask & (1 << (row+1))) {\n                    cost += horizontal[row][full-1];\n                }\n                if (mask & (1 << (row-1))) {\n                    cost += vertical[row-1][full];\n                }\n                if (row == height - 1 && (mask & 1)) {\n                    cost += vertical[row][full];\n                }\n                update(dp[full][row][mask & (~(1 << row))], cost);\n                // put one\n                cost = dp[full][row-1][mask];\n                if (cost >= kInfinity) {\n                    cost = kInfinity;\n                }\n                if (!(mask & (1 << (row+1)))) {\n                    cost += horizontal[row][full-1];\n                }\n                if (!(mask & (1 << (row-1)))) {\n                    cost += vertical[row-1][full];\n                }\n                if (row == height - 1 && !(mask & 1)) {\n                    cost += vertical[row][full];\n                }\n                update(dp[full][row][mask | (1 << row)], cost);\n            }\n        }\n        for (int mask = 0; mask < maxMask; ++mask) {\n            size_t cost = dp[full][height-1][mask];\n            if (cost >= kInfinity) {\n                cost = kInfinity;\n            }\n            // put zero\n            if (mask & 1) {\n                cost += horizontal[0][full];\n            }\n            update(dp[full+1][0][(mask << 1) & (maxMask - 1)], cost);\n            // put one\n            cost = dp[full][height-1][mask];\n            if (cost >= kInfinity) {\n                cost = kInfinity;\n            }\n            if (!(mask & 1)) {\n                cost += horizontal[0][full];\n            }\n            update(dp[full+1][0][((mask << 1) + 1) & (maxMask - 1)], cost);\n        }\n    }\n    return std::min(dp[width-1][height-1][maxMask - 1], dp[width-1][height-1][maxMask / 2 - 1]);\n}\n \nint main() {\n    std::ios_base::sync_with_stdio(false);\n    std::cin.tie(nullptr);\n \n    std::cin >> height >> width;\n    for (int j = 0; j < width - 1; ++j) {\n        for (int i = 0; i < height; ++i) {\n            std::cin >> horizontal[i][j];\n        }\n    }\n \n    for (int j = 0; j < width; ++j) {\n        for (int i = 0; i < height; ++i) {\n            std::cin >> vertical[i][j];\n        }\n    }\n \n    std::cout << ComputeMaxFlow() << std::endl;\n \n    return 0;\n}"
+}

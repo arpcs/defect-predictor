@@ -1,0 +1,36 @@
+{
+    "id": 214276747,
+    "contestId": 682,
+    "creationTimeSeconds": 1689644000,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 682,
+        "index": "E",
+        "name": "Alyona and Triangles",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2600,
+        "tags": [
+            "geometry",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 682,
+        "members": [
+            {
+                "handle": "rgnerdplayer"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1466181300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nusing i64 = long long;\r\n\r\nusing dbl = double; // or long double\r\n\r\nconstexpr dbl eps = 1e-9;\r\nint sign(dbl x) {\r\n    return (x > eps) - (x < -eps);\r\n}\r\nint dcmp(dbl a, dbl b) {\r\n    return sign(a - b);\r\n}\r\n\r\ntemplate <typename T>\r\nstruct P {\r\n    T x = 0, y = 0;\r\n    P(T x = 0, T y = 0) : x(x), y(y) {}\r\n    friend istream &operator>>(istream &is, P &p) { return is >> p.x >> p.y; }\r\n    friend ostream &operator<<(ostream &os, P p) { return os << '(' << p.x << \", \" << p.y << ')'; }\r\n    friend bool operator==(P a, P b) { return dcmp(a.x, b.x) == 0 && dcmp(a.y, b.y) == 0; }\r\n    friend bool operator!=(P a, P b) { return !(a == b); }\r\n    P operator-() { return P(-x, -y); }\r\n    P& operator+=(P a) {\r\n        x += a.x, y += a.y;\r\n        return *this;\r\n    }\r\n    P& operator-=(P a) {\r\n        x -= a.x, y -= a.y;\r\n        return *this;\r\n    }\r\n    P& operator*=(T d) {\r\n        x *= d, y *= d;\r\n        return *this;\r\n    }\r\n    P& operator/=(T d) {\r\n        x /= d, y /= d;\r\n        return *this;\r\n    }\r\n    friend P operator+(P a, P b) { return P(a) += b; }\r\n    friend P operator-(P a, P b) { return P(a) -= b; }\r\n    friend P operator*(P a, T d) { return P(a) *= d; }\r\n    friend P operator/(P a, T d) { return P(a) /= d; }\r\n    friend bool operator<(P a, P b) {\r\n        int sx = dcmp(a.x, b.x);\r\n        return sx != 0 ? sx == -1 : dcmp(a.y, b.y) == -1;\r\n    }\r\n};\r\n\r\ntemplate <typename T>\r\nT dot(P<T> a, P<T> b) { return a.x * b.x + a.y * b.y; }\r\n\r\ntemplate <typename T>\r\nT square(P<T> a) { return dot(a, a); }\r\n\r\ntemplate <typename T>\r\ndbl length(P<T> a) { return sqrtl(square(a)); }\r\n\r\ntemplate <typename T>\r\nT cross(P<T> a, P<T> b) { return a.x * b.y - a.y * b.x; }\r\n\r\ntemplate <typename T>\r\nT cross(P<T> p, P<T> a, P<T> b) { return cross(a - p, b - p); }\r\n\r\n// 1 if on a->b's left\r\ntemplate <typename T>\r\nint side(P<T> p, P<T> a, P<T> b) { return sign(cross(p, a, b)) > 0; }\r\n\r\ntemplate <typename T>\r\nbool up(P<T> a) { return sign(a.y) > 0 || sign(a.y) == 0 && sign(a.x) > 0; }\r\n\r\n// 3 colinear? please remember to remove (0, 0)\r\ntemplate <typename T>\r\nbool polar(P<T> a, P<T> b) {\r\n    bool ua = up(a), ub = up(b);\r\n    return ua != ub ? ua : sign(cross(a, b)) == 1;\r\n};\r\n\r\nP<dbl> inCenter(P<dbl> a, P<dbl> b, P<dbl> c) {\r\n    dbl la = length(b - c), lb = length(c - a), lc = length(a - b);\r\n    return (a * la + b * lb + c * lc) / (la + lb + lc);\r\n}\r\n\r\nP<dbl> circumCenter(P<dbl> a, P<dbl> b, P<dbl> c) {\r\n    P<dbl> ba = b - a, ca = c - a;\r\n    dbl db = square(ba), dc = square(ca), d = 2 * cross(ba, ca);\r\n    return a - P<dbl>(ba.y * dc - ca.y * db, ca.x * db - ba.x * dc) / d;\r\n}\r\n\r\nP<dbl> orthoCenter(P<dbl> a, P<dbl> b, P<dbl> c) {\r\n    P ba = b - a, ca = c - a, bc = b - c;\r\n    dbl Y = ba.y * ca.y * bc.y;\r\n    dbl A = ca.x * ba.y - ba.x * ca.y;\r\n    dbl x0 = (Y + ca.x * ba.y * b.x - ba.x * ca.y * c.x) / A;\r\n    dbl y0 = -ba.x * (x0 - c.x) / ba.y + ca.y;\r\n    return {x0, y0};\r\n}\r\n\r\ntemplate <typename T>\r\nvector<P<T>> convexHull(vector<P<T>> a) {\r\n    int n = a.size();\r\n    if (n <= 1) {\r\n        return a;\r\n    }\r\n    sort(a.begin(), a.end());\r\n    vector<P<T>> res(2 * n);\r\n    int j = 0;\r\n    for (int i = 0; i < n; res[j++] = a[i++]) {\r\n        while (j >= 2 && side(res[j - 2], res[j - 1], a[i]) <= 0) { j--; }\r\n    }\r\n    for (int i = n - 2, k = j; i >= 0; res[j++] = a[i--]) {\r\n        while (j > k && side(res[j - 2], res[j - 1], a[i]) <= 0) { j--; }\r\n    }\r\n    res.resize(j - 1);\r\n    return res;\r\n}\r\n\r\nusing Point = P<i64>;\r\n\r\nint main() {\r\n    cin.tie(nullptr)->sync_with_stdio(false);\r\n\r\n#ifdef LOCAL\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n    freopen(\"output.txt\", \"w\", stdout);\r\n#endif\r\n\r\n    auto solve = [&]() {\r\n        int n;\r\n        i64 S;\r\n        cin >> n >> S;\r\n\r\n        vector<Point> p(n);\r\n        for (int i = 0; i < n; i++) {\r\n            cin >> p[i];\r\n        }\r\n\r\n        auto hull = convexHull(p);\r\n        int N = hull.size();\r\n\r\n        vector<Point> res;\r\n        i64 A = 0;\r\n        \r\n        auto area3 = [&](Point a, Point b, Point c) {\r\n            return abs(cross(b - a, c - a));\r\n        };\r\n\r\n        n = hull.size();\r\n\r\n        for (int i = 0, j = 1; i < n; i++) {\r\n            while (j < i + n && cross(hull[(i + 1) % n] - hull[i], hull[(j + 1) % n] - hull[j]) >= 0) {\r\n                j = (j + 1) % n;\r\n            }\r\n            i64 nA = area3(p[i], p[(i + 1) % n], p[j]);\r\n            if (res.empty() || nA > A) {\r\n                res = {p[i], p[(i + 1) % n], p[j]};\r\n                A = nA;\r\n            }\r\n        }\r\n\r\n        for (int i = 0; i < 3; i++) {\r\n            auto p = res[i] + res[(i + 1) % 3] - res[(i + 2) % 3];\r\n            cout << p.x << ' ' << p.y << '\\n';\r\n        }\r\n    };\r\n    \r\n    solve();\r\n    \r\n    return 0;\r\n}"
+}

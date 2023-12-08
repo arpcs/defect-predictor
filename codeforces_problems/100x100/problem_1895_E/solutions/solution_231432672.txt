@@ -1,0 +1,44 @@
+{
+    "id": 231432672,
+    "contestId": 1895,
+    "creationTimeSeconds": 1699172382,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "ashktchm"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "PyPy 3-64",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 2714,
+    "memoryConsumedBytes": 93696000,
+    "source": "import sys, os\r\nfrom math import floor, gcd, fabs, factorial, fmod, sqrt, inf, log\r\nfrom io import BytesIO, IOBase\r\nfrom collections import defaultdict as dd, deque\r\nfrom heapq import merge, heapify, heappop, heappush, nsmallest\r\nfrom bisect import bisect_left as bl, bisect_right as br, bisect\r\n\r\n# region fastio\r\nBUFSIZE = 8192\r\n\r\nclass FastIO(IOBase):\r\n    newlines = 0\r\n\r\n    def __init__(self, file):\r\n        self._fd = file.fileno()\r\n        self.buffer = BytesIO()\r\n        self.writable = \"x\" in file.mode or \"r\" not in file.mode\r\n        self.write = self.buffer.write if self.writable else None\r\n\r\n    def read(self):\r\n        while True:\r\n            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))\r\n            if not b:\r\n                break\r\n            ptr = self.buffer.tell()\r\n            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)\r\n        self.newlines = 0\r\n        return self.buffer.read()\r\n\r\n    def readline(self):\r\n        while self.newlines == 0:\r\n            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))\r\n            self.newlines = b.count(b\"\\n\") + (not b)\r\n            ptr = self.buffer.tell()\r\n            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)\r\n        self.newlines -= 1\r\n        return self.buffer.readline()\r\n\r\n    def flush(self):\r\n        if self.writable:\r\n            os.write(self._fd, self.buffer.getvalue())\r\n            self.buffer.truncate(0), self.buffer.seek(0)\r\n\r\nclass IOWrapper(IOBase):\r\n    def __init__(self, file):\r\n        self.buffer = FastIO(file)\r\n        self.flush = self.buffer.flush\r\n        self.writable = self.buffer.writable\r\n        self.write = lambda s: self.buffer.write(s.encode(\"ascii\"))\r\n        self.read = lambda: self.buffer.read().decode(\"ascii\")\r\n        self.readline = lambda: self.buffer.readline().decode(\"ascii\")\r\n\r\nstdin, stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout) \r\n# endregion\r\n\r\nmod = pow(10, 9) + 7\r\nmod2 = 998244353\r\n\r\ndef inp(): return stdin.readline().strip()\r\ndef iinp(): return int(inp())\r\ndef out(var, end=\"\\n\"): stdout.write(str(var)+\"\\n\")\r\ndef outa(*var, end=\"\\n\"): stdout.write(' '.join(map(str, var)) + end)\r\ndef lmp(): return list(mp())\r\ndef mp(): return map(int, inp().split())\r\ndef l1d(n, val=0): return [val for i in range(n)]\r\ndef l2d(n, m, val=0): return [l1d(m, val) for j in range(n)]\r\ndef ceil(a, b): return (a+b-1)//b\r\nS1 = 'abcdefghijklmnopqrstuvwxyz'\r\nS2 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'\r\ndef isprime(x):\r\n    if x<=1: return False\r\n    if x in (2, 3): return True\r\n    if x%2 == 0: return False\r\n    for i in range(3, int(sqrt(x))+1, 2):\r\n        if x%i == 0: return False\r\n    return True\r\n\r\nfor tt in range(iinp()):\r\n    n = iinp()\r\n    ax = lmp()\r\n    ay = lmp()\r\n    m = iinp()\r\n    bx = lmp()\r\n    by = lmp()\r\n    # if tt==9:\r\n    #     print(n, m)\r\n    #     print(*ax)\r\n    #     print(*ay)\r\n    #     print(*bx)\r\n    #     print(*by)\r\n    sax = sorted([(ax[i], i) for i in range(n)])\r\n    sbx = sorted([(bx[i], i) for i in range(m)])\r\n    say = [(ay[sax[i][1]], sax[i][1]) for i in range(n)]\r\n    sby = [(by[sbx[i][1]], sbx[i][1]) for i in range(m)]\r\n    mx = 0\r\n    mxay = [0]*n\r\n    for i in range(n-1, -1, -1):\r\n        if say[i][0] > mx:\r\n            mx = say[i][0]\r\n            mxay[i] = i\r\n        else:\r\n            mxay[i] = mxay[i+1]\r\n    mx = 0\r\n    mxby = [0]*m\r\n    for i in range(m-1, -1, -1):\r\n        if sby[i][0] > mx:\r\n            mx = sby[i][0]\r\n            mxby[i] = i\r\n        else:\r\n            mxby[i] = mxby[i+1]\r\n\r\n    vis = [0]*(n+m)\r\n    next = [-1]*(n+m)\r\n\r\n    def dfs(i):\r\n        if vis[i]:\r\n            return\r\n        vis[i] = 1\r\n        if i < n:\r\n            nxtMxInd = br(sbx, (ay[i], inf))\r\n            if nxtMxInd >= m:\r\n                return \r\n            next[i] = n + sby[mxby[nxtMxInd]][1]\r\n            dfs(next[i])\r\n        else:\r\n            i -= n\r\n            nxtMxInd = br(sax, (by[i], inf))\r\n            if nxtMxInd >= n:\r\n                return \r\n            next[i+n] = say[mxay[nxtMxInd]][1]\r\n            dfs(next[i+n])\r\n\r\n    for i in range(n+m):\r\n        dfs(i)\r\n    w, l, d = [0]*3\r\n    for i in range(n+m):\r\n        st = set()\r\n        if next[i] >= -1:\r\n            j = i\r\n            while j not in st:\r\n                st.add(j)\r\n                if next[j] == -1:\r\n                    while st:\r\n                        next[st.pop()] = -2 if j < n else -3\r\n                    break\r\n                elif next[j] < 0:\r\n                    while st:\r\n                        next[st.pop()] = next[j]\r\n                    break\r\n                j = next[j]\r\n            while st:\r\n                next[st.pop()] = -4\r\n    for i in range(n):\r\n        if next[i] == -2:\r\n            w += 1\r\n        elif next[i] == -3:\r\n            l += 1\r\n        elif next[i] == -4:\r\n            d += 1\r\n    print(w, d, l)"
+}

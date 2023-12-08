@@ -1,0 +1,40 @@
+{
+    "id": 182328746,
+    "contestId": 1750,
+    "creationTimeSeconds": 1669278126,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "derrick20"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1667745300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 29,
+    "timeConsumedMillis": 77,
+    "memoryConsumedBytes": 2969600,
+    "source": "/**\n * author: derrick20\n * created: 11/24/22 3:04 AM\n */\n#include <bits/stdc++.h>\n\nusing namespace std;\n\n/*\nFor each element in `values`, store the index of the next element to the left\nsatisfying the comparator provided\n */\ntemplate<typename T, typename T_comparator>\nvector<T> find_left(const vector<T> &values, T_comparator &&cmp) {\n    int n = values.size();\n    vector<int> res(n);\n    stack<T> mono;\n    for (int i = 0; i < n; i++) {\n        // While this elem can be wedged before the others, keep popping the back\n        while (!mono.empty() && cmp(values[i], values[mono.top()]))\n            mono.pop();\n        res[i] = mono.empty() ? -1 : mono.top();\n        mono.push(i);\n    }\n    return res;\n}\n\n/*\nFor each element in `values`, store the index of the next element to the right\nsatisfying the comparator provided\n */\ntemplate<typename T, typename T_comparator>\nvector<T> find_right(const vector<T> &values, T_comparator &&cmp) {\n    int n = values.size();\n    vector<int> res(n);\n    stack<T> mono;\n    for (int i = n - 1; i >= 0; i--) {\n        // While this elem can be wedged before the others, keep popping the back\n        while (!mono.empty() && cmp(values[i], values[mono.top()]))\n            mono.pop();\n        res[i] = mono.empty() ? n : mono.top();\n        mono.push(i);\n    }\n    return res;\n}\n\nint main() {\n    ios_base::sync_with_stdio(false), cin.tie(nullptr);\n    int T; cin >> T;\n    while (T--) {\n        int N; cin >> N;\n        string s; cin >> s;\n        vector<int> depth(N + 1);\n        for (int i = 1; i <= N; i++) {\n            depth[i] = depth[i - 1] + (s[i - 1] == '(' ? 1 : -1);\n        }\n        vector<int> left = find_left(depth, less<>());\n        vector<int> right = find_right(depth, less_equal<>());\n\n        int64_t ans = 0;\n        for (int i = 0; i <= N; i++) {\n            int64_t cnt = ((int64_t) right[i] - i) * ((int64_t) i - left[i]) - 1;\n            ans -= cnt * depth[i];\n        }\n        sort(depth.begin(), depth.end());\n        for (int i = 0; i <= N; i++) {\n            ans += (int64_t) i * depth[i];\n        }\n        cout << ans << \"\\n\";\n    }\n    return 0;\n}"
+}

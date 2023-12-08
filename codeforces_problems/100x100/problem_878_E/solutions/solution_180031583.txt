@@ -1,0 +1,36 @@
+{
+    "id": 180031583,
+    "contestId": 878,
+    "creationTimeSeconds": 1667877332,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "Bronya19C"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\n#define lson rt<<1\r\n#define rson rt<<1|1\r\n\r\nusing namespace std;\r\nconst int mo=1000000007;\r\nint n,q;\r\nint a[100005];\r\nlong long ksum[100005];\r\nint sum[100005],nsum[100005];\r\nint l[100005],r[100005];\r\nvector<int>Q[100005];\r\nint pw[100005],ipw[100005];\r\nint siz[100005];\r\nint fast_pow(int s,int p){\r\n\tint sum=1;\r\n\twhile(p){\r\n\t\tif(p&1)sum=1ll*sum*s%mo;\r\n\t\ts=1ll*s*s%mo;\r\n\t\tp>>=1;\r\n\t}\r\n\treturn sum;\r\n}\r\nint add(int A,int B){\r\n\treturn (A+B>=mo?A+B-mo:A+B);\r\n}\r\nint t[100005];\r\nvoid build(int l,int r,int rt){\r\n\tif(l==r){\r\n\t\tt[rt]=add(a[l],mo);\r\n\t\treturn;\r\n\t}\r\n\tint mid=l+r>>1;\r\n\tbuild(l,mid,lson);\r\n\tbuild(mid+1,r,rson);\r\n\tt[rt]=add(t[lson],1ll*t[rson]*pw[mid-l+1]%mo);\r\n}\r\nint Find(int l,int r,int L,int R,int rt){\r\n\tif(l>=L&&r<=R)return 1ll*pw[l-L]*t[rt]%mo;\r\n\tint mid=l+r>>1;\r\n\tint sum=0;\r\n\tif(mid>=L)sum=add(sum,Find(l,mid,L,R,lson));\r\n\tif(mid<R)sum=add(sum,Find(mid+1,r,L,R,rson));\r\n\treturn sum;\r\n}\r\nset<int>st;\r\nlong long pw1[50];\r\nint ans[100005];\r\n__int128 yi=1;\r\nint main(){\r\n\tscanf(\"%d%d\",&n,&q);\r\n\tfor(int i=1;i<=n;i++)scanf(\"%d\",&a[i]);\r\n\tfor(int i=1;i<=q;i++)scanf(\"%d%d\",&l[i],&r[i]),Q[r[i]].push_back(i);\r\n\tpw1[0]=1;\r\n\tpw[0]=1;\r\n\tfor(int i=1;i<=n;i++)pw[i]=add(pw[i-1],pw[i-1]);\r\n\tfor(int i=1;i<=45;i++)pw1[i]=pw1[i-1]*2ll;\r\n\tipw[1]=fast_pow(2,mo-2);\r\n\tfor(int i=1;i<=n;i++)ipw[i]=1ll*ipw[i-1]*ipw[1]%mo;\r\n\tipw[0]=1;\r\n\tbuild(1,n,1);\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tksum[i]=a[i];siz[i]=1;nsum[i]=add(mo,a[i]);\r\n\t\tbool pd=false;\r\n\t\twhile(ksum[i]>0&&!st.empty()){\r\n\t\t\tauto v=st.end();v--;\r\n\t\t\tint u=*(v);\r\n\t\t\tst.erase(v);\r\n\t\t\tsiz[i]+=siz[u];\r\n\t\t\tnsum[i]=add(nsum[u],1ll*nsum[i]*pw[siz[u]]%mo);\r\n\t\t\tif(siz[u]>45||yi*ksum[i]*siz[u]>1e14){\r\n\t\t\t\tpd=true;\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t\tksum[i]=ksum[u]+1ll*ksum[i]*pw1[siz[u]]%mo;\r\n\t\t}\r\n\t\tif(pd){\r\n\t\t\twhile(!st.empty()){\r\n\t\t\t\tauto v=st.end();v--;\r\n\t\t\t\tint u=*v;\r\n\t\t\t\tst.erase(v);\r\n\t\t\t\tsiz[i]+=siz[u];\r\n\t\t\t\tnsum[i]=add(nsum[u],1ll*nsum[i]*pw[siz[u]]%mo);\r\n\t\t\t\tksum[i]=ksum[u]+1ll*ksum[i]*pw1[siz[u]]%mo;\r\n\t\t\t}\r\n\t\t}\r\n\t\tsum[i]=nsum[i];\r\n\t\tif(!st.empty()){\r\n\t\t\tauto u=st.end();u--;\r\n\t\t\tsum[i]=add(sum[i],sum[*u]);\r\n\t\t}\r\n\t\tst.insert(i);\r\n\t\tfor(int j=0;j<Q[i].size();j++){\r\n\t\t\tint u=Q[i][j];\r\n\t\t\tauto now=st.lower_bound(l[u]);\r\n\t\t\tans[u]=add(Find(1,n,l[u],(*now),1),2ll*add(sum[i],mo-sum[*now])%mo);\r\n\t\t}\r\n\t}\r\n\tfor(int i=1;i<=q;i++)printf(\"%d\\n\",ans[i]);\r\n\treturn 0;\r\n}"
+}

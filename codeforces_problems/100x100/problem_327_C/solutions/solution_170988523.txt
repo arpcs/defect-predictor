@@ -1,0 +1,36 @@
+{
+    "id": 170988523,
+    "contestId": 327,
+    "creationTimeSeconds": 1662404999,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 327,
+        "index": "C",
+        "name": "Magic Five",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 1700,
+        "tags": [
+            "combinatorics",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 327,
+        "members": [
+            {
+                "handle": "Falcon-64"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1372941000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <set>\r\n#include <map>\r\n#include <numeric>\r\n#include <cmath>\r\n#include<algorithm>\r\n#include <iomanip>\r\n#include<unordered_set>\r\n#include <queue>\r\n#include <stack>\r\n\r\n#define ll long long\r\nll Mod = 1e9 + 7;\r\nusing namespace std;\r\nconst int N = 1e5 + 1;\r\nbool not_prime[N];\r\nset<ll> factors;\r\n\r\nvoid fac(ll num) {\r\n    ll fixedNum = num;\r\n    for (int i = 2; i * i <= num; i++) {\r\n        if (num % i == 0)\r\n            factors.insert(i);\r\n        while (num % i == 0) {\r\n            num /= i;\r\n        }\r\n    }\r\n    if (num != 1) {\r\n        factors.insert(num);\r\n    }\r\n}\r\n\r\nvoid Merge(vector<int> &v, int left, int mid, int right) {\r\n\r\n    int l = left, r = mid + 1;\r\n    vector<int> ans;\r\n    while (l != mid + 1 && r != right + 1) {\r\n        if (v[l] >= v[r]) {\r\n            ans.push_back(v[r]);\r\n            r++;\r\n        } else {\r\n            ans.push_back(v[l]);\r\n            l++;\r\n        }\r\n    }\r\n    while (l != mid + 1) {\r\n        ans.push_back(v[l]);\r\n        l++;\r\n    }\r\n    while (r != right + 1) {\r\n        ans.push_back(v[r]);\r\n        r++;\r\n    }\r\n    for (int i = left; i < ans.size(); i++) {\r\n        v[i] = ans[i - left];\r\n    }\r\n}\r\n\r\nvoid MergeSort(vector<int> &v, int left, int right) {\r\n    if (left < right) {\r\n        int mid = (left + right) / 2;\r\n        MergeSort(v, left, mid);\r\n        MergeSort(v, mid + 1, right);\r\n        Merge(v, left, mid, right);\r\n\r\n    }\r\n}\r\n\r\nint NumOfComponents = 0;\r\n\r\nvoid dfs(vector<vector<int>> &v, vector<bool> &vis, int source) {\r\n    if (vis[source])\r\n        return;\r\n    vis[source] = true;\r\n    for (auto it: v[source]) {\r\n        dfs(v, vis, it);\r\n    }\r\n}\r\n\r\nvoid num_con_comp(vector<vector<int>> &v, vector<bool> &vis, int c) {\r\n    dfs(v, vis, c);\r\n    NumOfComponents++;\r\n    for (int i = 1; i < v.size(); i++) {\r\n        if (!vis[i]) {\r\n            dfs(v, vis, i);\r\n            NumOfComponents++;\r\n        }\r\n    }\r\n}\r\n\r\nll modInverse(ll a, ll b, ll m) {\r\n    ll res = 1;\r\n    while (b) {\r\n        if (b % 2)\r\n            res = (res * a) % m;\r\n\r\n        b /= 2;\r\n        a = (a * a) % m;\r\n    }\r\n    return res;\r\n}\r\n\r\nll power(ll a, ll b) {\r\n\r\n    if (b == 0) return 1;\r\n    ll tmp = power(a, b / 2);\r\n    ll result = tmp * tmp;\r\n    if (b % 2 == 1)result *= a;\r\n    return result;\r\n}\r\n\r\nll MulInverse(ll a, ll b) {\r\n    ll ans = 1;\r\n    ll mod = b + 2;\r\n    while (b) {\r\n        if (b & 1) ans *= a, ans %= mod;\r\n        a *= a;\r\n        a %= mod;\r\n        b /= 2;\r\n    }\r\n    return ans;\r\n}\r\n\r\nset<ll> divisors;\r\n\r\nvoid divs(ll num) {\r\n    for (int i = 1; i * i <= num; i++) {\r\n        if (num % i == 0)\r\n            divisors.insert(i);\r\n        if (num % i == 0 && num / i != i)\r\n            divisors.insert(num / i);\r\n    }\r\n}\r\n\r\nunsigned ll modular(unsigned ll a,unsigned ll b) {\r\n    ll ans = 1;\r\n    while (b) {\r\n        if (b & 1) ans *= a, ans %= Mod;\r\n        a *= a;\r\n        a %= Mod;\r\n        b /= 2;\r\n    }\r\n    return ans;\r\n}\r\n\r\nint main() {\r\n    string s;\r\n    ll k, ans = 0, n = 0;\r\n    cin >> s >> k;\r\n    n = s.size();\r\n    for (int i = 0; i < n; i++) {\r\n        if (s[i] == '0' | s[i] == '5') {\r\n            ll T = (modular(2, n * k) - 1);\r\n            ll de = (modular(2, n) - 1);\r\n            T *= modular(2, i);\r\n            T *= modular(de, Mod - 2);\r\n            T %= Mod;\r\n            ans += T;\r\n            ans %= Mod;\r\n        }\r\n    }\r\n    cout << ans << endl;\r\n    return 0;\r\n}"
+}

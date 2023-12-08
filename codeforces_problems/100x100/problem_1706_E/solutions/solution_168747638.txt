@@ -1,0 +1,41 @@
+{
+    "id": 168747638,
+    "contestId": 1706,
+    "creationTimeSeconds": 1660784151,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "sniffleheim"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n\r\nconst int MAXN = 2e5+5;\r\nvector<int> sz;\r\nvector<int> par;\r\nvector<vector<pair<int,int> > > adj;\r\nvector<pair<int,int> > tree_par;\r\npair<int,int> max_edge[MAXN][20];\r\nvector<int> dist;\r\n\r\nint dsu_find(int x) {\r\n    if (par[x] != x)\r\n        par[x] = dsu_find(x);\r\n    return x;\r\n}\r\n\r\nbool dsu_merge(int x, int y) {\r\n    x = dsu_find(x);\r\n    y = dsu_find(y);\r\n    if (x == y)\r\n        return false;\r\n\r\n    if (sz[x] <= sz[y]) {\r\n        par[x] = y;\r\n        sz[y] += sz[x];\r\n    }\r\n    else {\r\n        par[y] = x;\r\n        sz[x] += sz[y];\r\n    }\r\n    return true;\r\n}\r\n\r\nvoid dfs(int x, int x_par, int edge_wt) {\r\n    tree_par[x] = {x_par, edge_wt};\r\n    for (auto next : adj[x]) {\r\n        if (next[0] != x_par) {\r\n            dist[next[0]] = dist[x] + 1;\r\n            dfs(next[0], x, next[1]);\r\n        }\r\n    }\r\n}\r\n\r\nint lca(int x, int y) {\r\n    if (dist[x] > dist[y])\r\n        swap(x, y);\r\n    int res = 0;\r\n    for (int i = 19; i >= 0; --i) {\r\n        if (dist[x] + (1<<i) <= dist[y]) {\r\n            res = max(res, max_edge[x][i].second);\r\n            x = max_edge[x][i].first;\r\n        }\r\n    }\r\n    for (int i = 19; (i >= 0) && (x != y); --i) {\r\n        if (i == 0 || max_edge[x][i].first != max_edge[y][i].first) {\r\n            res = max(res, max_edge[x][i].second);\r\n            res = max(res, max_edge[y][i].second);\r\n            x = max_edge[x][i].first;\r\n            y = max_edge[y][i].first;\r\n        }\r\n    }\r\n    return res;\r\n}\r\n\r\ntemplate<class T>\r\nclass MaxSegmentTree {\r\n\tprivate:\r\n\t\t/** The operation to use for combining two elements. (Must be associative) */\r\n\t\tT comb(T a, T b) { return std::max(a, b); }\r\n\t\tconst T DEFAULT = 0;  // Will overflow if T is an int\r\n\r\n\t\tvector<T> segtree;\r\n\t\tint len;\r\n\tpublic:\r\n\t\tMaxSegmentTree(int len) : len(len), segtree(len * 2, DEFAULT) { }\r\n\r\n\t\t/** Sets the value at ind to val. */\r\n\t\tvoid set(int ind, T val) {\r\n\t\t\tassert(0 <= ind && ind < len);\r\n\t\t\tind += len;\r\n\t\t\tsegtree[ind] = val;\r\n\t\t\tfor (; ind > 1; ind /= 2) {\r\n\t\t\t\tsegtree[ind >> 1] = comb(segtree[ind], segtree[ind ^ 1]);\r\n\t\t\t}\r\n\t\t}\r\n\r\n\t\t/** @return the maximum element in the range [start, end) */\r\n\t\tT range_max(int start, int end) {\r\n\t\t\tassert(0 <= start && start < len && 0 < end && end <= len);\r\n\t\t\tT sum = DEFAULT;\r\n\t\t\tfor (start += len, end += len; start < end; start /= 2, end /= 2) {\r\n\t\t\t\tif ((start & 1) != 0) {\r\n\t\t\t\t\tsum = comb(sum, segtree[start++]);\r\n\t\t\t\t}\r\n\t\t\t\tif ((end & 1) != 0) {\r\n\t\t\t\t\tsum = comb(sum, segtree[--end]);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\treturn sum;\r\n\t\t}\r\n};\r\n\r\nvoid solve() {\r\n    int N, M, Q;\r\n    cin >> N >> M >> Q;\r\n    sz.clear();\r\n    sz.resize(N);\r\n    par.clear();\r\n    par.resize(N);\r\n    adj.clear();\r\n    adj.resize(N);\r\n    tree_par.clear();\r\n    tree_par.resize(N);\r\n    dist.clear();\r\n    dist.resize(N);\r\n    for (int i = 0; i < N; ++i) {\r\n        par[i] = i;\r\n        sz[i] = 1;\r\n    }\r\n    for (int i = 0; i < M; ++i) {\r\n        int x, y; cin >> x >> y;\r\n        --x; --y;\r\n        if (!mg(x, y)) {\r\n            adj[x].push_back({y, i});\r\n            adj[y].push_back({x, i});\r\n        }\r\n    }\r\n    dfs(0, -1, -1);\r\n    for (int i = 0; i < 20; ++i) {\r\n        for (int j = 0; j < N; ++j) {\r\n            if (i == 0) {\r\n                max_edge[j][i] = tree_par[j];\r\n            }\r\n            else {\r\n                int half_point = max_edge[j][i-1].first;\r\n                max_edge[j][i].first = (half_point == -1) \r\n                                        ? -1\r\n                                        : max_edge[half_point][i-1].first;\r\n                max_edge[j][i].second = (half_point == -1) \r\n                                        ? max_edge[j][i-1].second; \r\n                                        : max(max_edge[j][i-1].second, max_edge[half_point][i-1].second);\r\n            }\r\n        }\r\n    }\r\n    MaxSegmentTree seg = MaxSegmentTree(N-1);\r\n    for (int i = 0; i < N-1; ++i) {\r\n        seg.set(i, lca(i, i+1));\r\n    }\r\n\r\n    for (int i = 0; i < Q; ++i) {\r\n        int x, y; cin >> x >> y;\r\n        --x; --y;\r\n        \r\n        cout << (x==y) ? 0 : seg.range_max(x, y-1) << \" \";\r\n    }\r\n    cout << \"\\n\";\r\n    return;\r\n}\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n\r\n    int T; cin >> T;\r\n    while(T) {\r\n        T--;\r\n        solve();\r\n    }\r\n}"
+}

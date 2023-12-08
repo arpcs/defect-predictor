@@ -1,0 +1,36 @@
+{
+    "id": 133966706,
+    "contestId": 1096,
+    "creationTimeSeconds": 1635782018,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1096,
+        "index": "F",
+        "name": "Inversion Expectation",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1096,
+        "members": [
+            {
+                "handle": "satabond"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1546007700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 32,
+    "timeConsumedMillis": 1294,
+    "memoryConsumedBytes": 5120000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\nusing ll = long long;\r\nusing ld = long double;\r\n\r\ntemplate<int MOD>\r\nclass ModInt {\r\npublic:\r\n    int v;\r\n    ModInt() : v(0) {}\r\n    ModInt(long long _v) {\r\n        v = int((-MOD < _v && _v < MOD) ? (_v) : (_v % MOD));\r\n        if (v < 0) v += MOD; \r\n    }\r\n    friend bool operator==(const ModInt &a, const ModInt &b) { return a.v == b.v; }\r\n    friend bool operator!=(const ModInt &a, const ModInt &b) { return a.v != b.v; }\r\n    friend bool operator<(const ModInt &a, const ModInt &b) { return a.v < b.v; }\r\n    friend bool operator<=(const ModInt &a, const ModInt &b) { return a.v <= b.v; }\r\n    friend bool operator>(const ModInt &a, const ModInt &b) { return a.v > b.v; }\r\n    friend bool operator>=(const ModInt &a, const ModInt &b) { return a.v >= b.v; }\r\n    ModInt& operator+=(const ModInt &a) {\r\n        if ((v += a.v) >= MOD) v -= MOD;\r\n        return *this; \r\n    }\r\n    ModInt& operator-=(const ModInt &a) {\r\n        if ((v -= a.v) < 0) v += MOD;\r\n        return *this; \r\n    }\r\n    ModInt& operator*=(const ModInt &a) {\r\n        v = 1LL * v * a.v % MOD;\r\n        return *this; \r\n    }\r\n    ModInt& operator/=(const ModInt &a) {\r\n        return (*this) *= inv(a); \r\n    }\r\n    friend ModInt fpow(ModInt a, long long x) {\r\n        ModInt res = 1; assert(x >= 0);\r\n        for (; x; x /= 2, a *= a) if (x & 1) res *= a;\r\n        return res; \r\n    }\r\n    friend ModInt inv(ModInt a) {\r\n        assert(a.v != 0);\r\n        return fpow(a, MOD - 2); \r\n    }\r\n    ModInt operator+() const { return ModInt(v); }\r\n    ModInt operator-() const { return ModInt(-v); }\r\n    ModInt operator++() const { return *this += 1; }\r\n    ModInt operator--() const { return *this -= 1; }\r\n \r\n    friend ModInt operator+(ModInt a, const ModInt &b) { return a += b; }\r\n    friend ModInt operator-(ModInt a, const ModInt &b) { return a -= b; }\r\n    friend ModInt operator*(ModInt a, const ModInt &b) { return a *= b; }\r\n    friend ModInt operator/(ModInt a, const ModInt &b) { return a /= b; }\r\n \r\n    friend istream& operator>>(istream &is, ModInt &v) { is >> v.v; return is; }\r\n    friend ostream& operator<<(ostream &os, const ModInt &v) { os << v.v; return os; }\r\n};\r\n \r\nconst int MOD = 998244353;\r\nusing Mint = ModInt<MOD>;\r\n\r\nMint countInversion(const vector<int>& ve, int n) {\r\n    vector<Mint> bit(n + 1);\r\n    const auto get = [&](int a) -> Mint {\r\n        Mint ret = 0;\r\n        while (a) {\r\n            ret += bit[a];\r\n            a -= a & (-a);\r\n        }\r\n        return ret;\r\n    };\r\n    const auto upd = [&](int a, int val) -> void {\r\n        while (a <= n) {\r\n            bit[a] += val;\r\n            a += a & (-a);\r\n        }\r\n    };\r\n    Mint ret = 0;\r\n    for (int i = 0; i < ve.size(); i++) {\r\n        ret += get(n) - get(ve[i] - 1);\r\n        upd(ve[i], 1);\r\n    }\r\n    return ret;\r\n}\r\n\r\nvoid solve() {\r\n    int n;\r\n    cin >> n;\r\n    int ksg = 0;\r\n    vector<bool> udah(n);\r\n    vector<int> ve, blm, p(n);\r\n    for (int i = 0; i < n; i++) {\r\n        cin >> p[i];\r\n        if (p[i] == -1) {\r\n            ksg++;\r\n            ve.emplace_back(i);\r\n        } else {\r\n            udah[--p[i]] = true;\r\n        }\r\n    }\r\n    for (int i = 0; i < n; i++) {\r\n        if (!udah[i]) {\r\n            blm.emplace_back(i);\r\n        }\r\n    }\r\n    vector<int> init;\r\n    for (int i = 0; i < n; i++) {\r\n        if (p[i] != -1) {\r\n            cerr << p[i] << '\\n';\r\n            init.emplace_back(p[i] + 1);\r\n        }\r\n    }\r\n    Mint exp = countInversion(init, n);\r\n    if (ksg == 0) {\r\n        cout << exp << '\\n';\r\n        return;\r\n    }\r\n    for (int i = 0; i < n; i++) {\r\n        int d = lower_bound(ve.begin(), ve.end(), i) - ve.begin();\r\n        int u = ve.size() - (upper_bound(ve.begin(), ve.end(), i) - ve.begin());\r\n        if (p[i] != -1) {\r\n            int choose1 = blm.size() - (upper_bound(blm.begin(), blm.end(), p[i]) - blm.begin());\r\n            int choose2 = lower_bound(blm.begin(), blm.end(), p[i]) - blm.begin();\r\n            Mint add = (Mint(d) * Mint(choose1) / Mint(ksg)) + (Mint(u) * Mint(choose2) / Mint(ksg));\r\n            exp += add;\r\n        } else {\r\n            Mint add = (Mint(d) / Mint(2)); \r\n            exp += add;\r\n        }\r\n    }\r\n    cout << exp << '\\n';\r\n}\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0); cout.tie(0);\r\n\r\n    int TC = 1;\r\n    for(int i = 1; i <= TC; i++) {\r\n        solve();\r\n    }\r\n  \r\n    return 0;\r\n}"
+}

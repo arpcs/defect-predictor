@@ -1,0 +1,35 @@
+{
+    "id": 31465205,
+    "contestId": 521,
+    "creationTimeSeconds": 1508283205,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 521,
+        "index": "D",
+        "name": "Shop",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2800,
+        "tags": [
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 521,
+        "members": [
+            {
+                "handle": "vjudge3"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1425279600
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 155,
+    "timeConsumedMillis": 156,
+    "memoryConsumedBytes": 13107200,
+    "source": "#include<cstdio>\n#include<queue>\n#include<vector>\n#include<algorithm>\nusing namespace std;\nconst int N=1e5+5;\nint num[N],assign_mx[N],assign_id[N];\ntypedef __int64 ll;\nstruct Add{\n    int type,val,id;\n    ll a,b;\n    inline bool operator <(const Add &tmp)const{\n        return val>tmp.val;\n    }\n};\nvector<Add>add[N];\nstruct Mul{\n    int type,id,add_id1,add_id2;\n    ll a,b;\n    inline bool operator <(const Mul &tmp)const{\n        return a*tmp.b<b*tmp.a;\n    }\n};\npriority_queue<Mul>pque;\nstruct Ans{\n    int type,id;\n    inline bool operator <(const Ans &tmp)const{\n        return type<tmp.type;\n    }\n}ans[N];\nvoid rd(int &res){\n    res=0;\n    char c;\n    while(c=getchar(),c<48);\n    do res=(res<<3)+(res<<1)+(c^48);\n        while(c=getchar(),c>47);\n}\nint main(){\n    int n,m,K;\n    rd(n);rd(m);rd(K);\n    for(int i=1;i<=n;++i){\n        rd(num[i]);\n        assign_mx[i]=num[i];\n        add[i].clear();\n    }\n    while(!pque.empty())pque.pop();\n    for(int i=1,type,tar,val;i<=m;++i){\n        rd(type);rd(tar);rd(val);\n        if(type==1){\n            if(val>assign_mx[tar]){\n                assign_mx[tar]=val;\n                assign_id[tar]=i;\n            }\n        }\n        else if(type==2)add[tar].push_back((Add){2,val,i});\n        else pque.push((Mul){3,i,-1,-1,val-1,1});\n    }\n    for(int i=1;i<=n;++i){\n        if(assign_mx[i]>num[i])\n            add[i].push_back((Add){1,assign_mx[i]-num[i],assign_id[i]});\n        if(!add[i].size())continue;\n        sort(add[i].begin(),add[i].end());\n        ll sum=num[i];\n        for(int j=0;j<add[i].size();++j){\n            add[i][j].b=sum;\n            sum+=add[i][j].val;\n            add[i][j].a=add[i][j].val;\n        }\n        pque.push((Mul){add[i][0].type,add[i][0].id,i,0,add[i][0].a,add[i][0].b});\n    }\n    int tot=0;\n    while(K--){\n        if(pque.empty())break;\n        Mul cur=pque.top();\n        if(cur.a<=0)break;\n        pque.pop();\n        ans[tot++]=(Ans){cur.type,cur.id};\n        if(cur.type<3){\n            int id1=cur.add_id1,id2=cur.add_id2;\n            if(id2<add[id1].size()-1)pque.push((Mul){add[id1][id2+1].type,add[id1][id2+1].id,id1,id2+1,add[id1][id2+1].a,add[id1][id2+1].b});\n        }\n    }\n    printf(\"%d\\n\",tot);\n    sort(ans,ans+tot);\n    for(int i=0;i<tot;++i)\n        printf(\"%d%c\",ans[i].id,i==tot-1?'\\n':' ');\n    return 0;\n}\n   \t     \t\t\t \t\t \t  \t\t\t \t\t\t \t \t\t"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 221888972,
+    "contestId": 878,
+    "creationTimeSeconds": 1693887649,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "bkifhr8"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 264,
+    "memoryConsumedBytes": 32051200,
+    "source": "#include <bits/stdc++.h>\n#define MOD 1000000007\n#define INF 2000000007ll\nusing namespace std;\n\nconst int r2=500000004;\n\nint n,q,a[100010],nxt[100010][20],val[100010][20],sum[100010],pw[100010],rev[100010],sz[400010];\nlong long minv[400010],maxv[400010],tag1[400010],tag2[400010];\n\ninline void add1(int &x,int y)\n{\n\tx+=y;\n\tif(x>=MOD) x-=MOD;\n}\n\ninline void add2(int &x,int y)\n{\n\tx+=y;\n\tif(x<0) x+=MOD;\n}\n\ninline int query(int l,int r)\n{\n\tint ans=sum[r];add2(ans,-sum[l-1]);\n\tans=1ll*ans*rev[l-1]%MOD;\n\treturn ans;\n}\n\ninline void build(int o,int l,int r)\n{\n\tminv[o]=0;maxv[o]=0;tag1[o]=1;tag2[o]=0;\n\tif(l==r) sz[o]=1;\n\telse{\n\t\tint mid=(l+r)/2;\n\t\tbuild(o*2,l,mid);\n\t\tbuild(o*2+1,mid+1,r);\n\t\tsz[o]=sz[o*2]+sz[o*2+1];\n\t}\n}\n\ninline void pushdown(int o)\n{\n\tif(tag1[o]!=1){\n\t\ttag1[o*2]*=tag1[o];tag2[o*2]*=tag1[o];minv[o*2]*=tag1[o];maxv[o*2]*=tag1[o];\n\t\ttag1[o*2+1]*=tag1[o];tag2[o*2+1]*=tag1[o];minv[o*2+1]*=tag1[o];maxv[o*2+1]*=tag1[o];\n\t\ttag1[o]=1;\n\t}\n\tif(tag2[o]!=0){\n\t\ttag2[o*2]+=tag2[o];minv[o*2]+=tag2[o];maxv[o*2]+=tag2[o];\n\t\ttag2[o*2+1]+=tag2[o];minv[o*2+1]+=tag2[o];maxv[o*2+1]+=tag2[o];\n\t\ttag2[o]=0;\n\t}\n}\n\ninline void pushup(int o)\n{\n\tminv[o]=INF;maxv[o]=-INF;\n\tif(sz[o*2]) minv[o]=min(minv[o],minv[o*2]),maxv[o]=max(maxv[o],maxv[o*2]);\n\tif(sz[o*2+1]) minv[o]=min(minv[o],minv[o*2+1]),maxv[o]=max(maxv[o],maxv[o*2+1]);\n\tsz[o]=sz[o*2]+sz[o*2+1];\n}\n\ninline void update1(int o,int l,int r,int x,int y,int v)\n{\n\tif(r<x||l>y) return;\n\tif(x<=l&&r<=y){\n\t\ttag1[o]*=v;tag2[o]*=v;minv[o]*=v;maxv[o]*=v;\n\t\treturn;\n\t}\n\tpushdown(o);\n\tint mid=(l+r)/2;\n\tupdate1(o*2,l,mid,x,y,v);\n\tupdate1(o*2+1,mid+1,r,x,y,v);\n\tpushup(o);\n}\n\ninline void update2(int o,int l,int r,int x,int y,int v)\n{\n\tif(r<x||l>y) return;\n\tif(x<=l&&r<=y){\n\t\ttag2[o]+=v;minv[o]+=v;maxv[o]+=v;\n\t\treturn;\n\t}\n\tpushdown(o);\n\tint mid=(l+r)/2;\n\tupdate2(o*2,l,mid,x,y,v);\n\tupdate2(o*2+1,mid+1,r,x,y,v);\n\tpushup(o);\n}\n\ninline void update3(int o,int l,int r,int x)\n{\n\tif(r<x||l>x) return;\n\tif(x<=l&&r<=x){\n\t\tsz[o]=0;\n\t\treturn;\n\t}\n\tpushdown(o);\n\tint mid=(l+r)/2;\n\tupdate3(o*2,l,mid,x);\n\tupdate3(o*2+1,mid+1,r,x);\n\tpushup(o);\n}\n\ninline int Find1(int o,int l,int r,int x,int y)\n{\n\tif(r<x||l>y) return -1;\n\tif(x<=l&&r<=y){\n\t\tif(!sz[o]||minv[o]>=0ll) return -1;\n\t\tif(l==r) return l;\n\t\tpushdown(o);\n\t\tint mid=(l+r)/2;\n\t\tint res=Find1(o*2,l,mid,x,y);\n\t\tif(res!=-1) return res;\n\t\treturn Find1(o*2+1,mid+1,r,x,y);\n\t}\n\tpushdown(o);\n\tint mid=(l+r)/2;\n\tint res=Find1(o*2,l,mid,x,y);\n\tif(res!=-1) return res;\n\treturn Find1(o*2+1,mid+1,r,x,y);\n}\n\ninline int Find2(int o,int l,int r,int x,int y)\n{\n\tif(r<x||l>y) return -1;\n\tif(x<=l&&r<=y){\n\t\tif(!sz[o]||maxv[o]<INF) return -1;\n\t\tif(l==r) return l;\n\t\tpushdown(o);\n\t\tint mid=(l+r)/2;\n\t\tint res=Find2(o*2,l,mid,x,y);\n\t\tif(res!=-1) return res;\n\t\treturn Find2(o*2+1,mid+1,r,x,y);\n\t}\n\tpushdown(o);\n\tint mid=(l+r)/2;\n\tint res=Find2(o*2,l,mid,x,y);\n\tif(res!=-1) return res;\n\treturn Find2(o*2+1,mid+1,r,x,y);\n}\n\nsigned main()\n{\n\tios::sync_with_stdio(false);cin.tie(0);\n\tcin>>n>>q;\n\tfor(int i=1;i<=n;i++) cin>>a[i];\n\tpw[0]=1;\n\tfor(int i=1;i<=n;i++) pw[i]=1ll*pw[i-1]*2%MOD;\n\trev[0]=1;\n\tfor(int i=1;i<=n;i++) rev[i]=1ll*rev[i-1]*r2%MOD;\n\tfor(int i=1;i<=n;i++){\n\t\tsum[i]=sum[i-1];\n\t\tadd1(sum[i],1ll*(MOD+a[i])%MOD*pw[i-1]%MOD);\n\t}\n\tbuild(1,1,n);\n\tfor(int i=n;i>=1;i--){\n\t\tupdate1(1,1,n,i,n,2);update2(1,1,n,i,n,a[i]);\n\t\twhile(true){\n\t\t\tint pos=Find1(1,1,n,i,n);\n\t\t\tif(pos==-1) break;\n\t\t\tnxt[pos][0]=i-1;\n\t\t\tupdate3(1,1,n,pos);\n\t\t}\n\t\twhile(true){\n\t\t\tint pos=Find2(1,1,n,i,n);\n\t\t\tif(pos==-1) break;\n\t\t\tnxt[pos][0]=0;\n\t\t\tupdate3(1,1,n,pos);\n\t\t}\n\t}\n\tfor(int i=1;i<=n;i++){\n\t\tval[i][0]=query(nxt[i][0]+1,i);\n\t}\n\tfor(int i=1;i<20;i++){\n\t\tfor(int j=1;j<=n;j++){\n\t\t\tnxt[j][i]=nxt[nxt[j][i-1]][i-1];\n\t\t\tval[j][i]=val[j][i-1];add1(val[j][i],val[nxt[j][i-1]][i-1]);\n\t\t}\n\t}\n\tfor(int i=1;i<=q;i++){\n\t\tint l,r;cin>>l>>r;\n\t\tint now=(MOD+a[l])%MOD;\n\t\tif(l<r){\n\t\t\tl++;\n\t\t\tint pos=r,sum=0;\n\t\t\tfor(int j=20-1;j>=0;j--){\n\t\t\t\tif(nxt[pos][j]>=l){\n\t\t\t\t\tadd1(sum,val[pos][j]);pos=nxt[pos][j];\n\t\t\t\t}\n\t\t\t}\n\t\t\tadd1(sum,query(l,pos));\n\t\t\tsum=1ll*sum*2%MOD;\n\t\t\tadd1(now,sum);\n\t\t}\n\t\tcout<<now<<'\\n';\n\t}\n\treturn 0;\n}\n \t  \t    \t \t\t  \t\t\t\t\t \t \t \t\t \t \t"
+}

@@ -1,0 +1,44 @@
+{
+    "id": 232682063,
+    "contestId": 1895,
+    "creationTimeSeconds": 1699908775,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "quaha"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 311,
+    "memoryConsumedBytes": 80588800,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <cmath>\r\n#include <algorithm>\r\n#include <string>\r\n#include <map>\r\n\r\nusing namespace std;\r\nusing ll = long long;\r\n\r\n#define INF 2e9 + 1\r\n\r\n//#define int ll\r\n#define ii pair<int, int>\r\n\r\nvector<int> types;\r\nvector<vector<int>> MonoReEdges;\r\nvector<vector<int>> BiReEdges;\r\n\r\nvoid dfs(bool IsMono, int curr_V, int marker) {\r\n\tif (IsMono) {\r\n\t\ttypes[curr_V] = marker;\r\n\t\tfor (int next_V : MonoReEdges[curr_V]) {\r\n\t\t\tdfs(!IsMono, next_V, marker);\r\n\t\t}\r\n\t}\r\n\telse {\r\n\t\tfor (int next_V : BiReEdges[curr_V]) {\r\n\t\t\tdfs(!IsMono, next_V, marker);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nvoid solve() {\r\n\r\n\tint N;\r\n\tcin >> N;\r\n\r\n\tvector<ii> Monocarp(N, { 0, 0 }); // attack, defence\r\n\tfor (int i = 0; i < N; i++) {\r\n\t\tcin >> Monocarp[i].first;\r\n\t}\r\n\tfor (int i = 0; i < N; i++) {\r\n\t\tcin >> Monocarp[i].second;\r\n\t}\r\n\tMonocarp.push_back({ INF, 0 });\r\n\tMonocarp.push_back({ -INF, 0 });\r\n\tsort(Monocarp.begin(), Monocarp.end());\r\n\r\n\tvector<ii> Msuffs(N + 2, { -1, -1 });\r\n\tfor (int i = N; i > 0; i--) {\r\n\t\tMsuffs[i] = max(Msuffs[i + 1], { Monocarp[i].second, i });\r\n\t}\r\n\r\n\tint M;\r\n\tcin >> M;\r\n\r\n\tvector<ii> Bicarp(M, { 0, 0 });\r\n\tfor (int i = 0; i < M; i++) {\r\n\t\tcin >> Bicarp[i].first;\r\n\t}\r\n\tfor (int i = 0; i < M; i++) {\r\n\t\tcin >> Bicarp[i].second;\r\n\t}\r\n\tBicarp.push_back({ INF, 0 });\r\n\tBicarp.push_back({ -INF, 0 });\r\n\tsort(Bicarp.begin(), Bicarp.end());\r\n\r\n\tvector<ii> Bsuffs(M + 2, { -1, -1 });\r\n\tfor (int i = M; i > 0; i--) {\r\n\t\tBsuffs[i] = max(Bsuffs[i + 1], { Bicarp[i].second, i });\r\n\t}\r\n\r\n\t//cout << \"-----Mono-----\\n\";\r\n\t//for (int i = 1; i <= N; i++) {\r\n\t//\tcout << i << \") \" << Monocarp[i].first << \" / \" << Monocarp[i].second << '\\n';\r\n\t//}\r\n\t//cout << \"-----Bi-----\\n\";\r\n\t//for (int i = 1; i <= M; i++) {\r\n\t//\tcout << i << \") \" << Bicarp[i].first << \" / \" << Bicarp[i].second << '\\n';\r\n\t//}\r\n\r\n\tvector<int> NextAfterMono(N + 1, -1);\r\n\tfor (int i = 1; i <= N; i++) {\r\n\t\tint curr_def = Monocarp[i].second;\r\n\t\tint l = 0;\r\n\t\tint r = M + 1;\r\n\t\twhile (r - l > 1) {\r\n\t\t\tint m = (l + r) / 2;\r\n\t\t\tif (Bicarp[m].first > curr_def) {\r\n\t\t\t\tr = m;\r\n\t\t\t}\r\n\t\t\telse {\r\n\t\t\t\tl = m;\r\n\t\t\t}\r\n\t\t}\r\n\t\tif (Bicarp[r].first != INF) {\r\n\t\t\tNextAfterMono[i] = Bsuffs[r].second;\r\n\t\t}\r\n\t}\r\n\r\n\tvector<int> NextAfterBi(M + 1, -1);\r\n\tfor (int i = 1; i <= M; i++) {\r\n\t\tint curr_def = Bicarp[i].second;\r\n\t\tint l = 0;\r\n\t\tint r = N + 1;\r\n\t\twhile (r - l > 1) {\r\n\t\t\tint m = (l + r) / 2;\r\n\t\t\tif (Monocarp[m].first > curr_def) {\r\n\t\t\t\tr = m;\r\n\t\t\t}\r\n\t\t\telse {\r\n\t\t\t\tl = m;\r\n\t\t\t}\r\n\t\t}\r\n\t\tif (Monocarp[r].first != INF) {\r\n\t\t\tNextAfterBi[i] = Msuffs[r].second;\r\n\t\t}\r\n\t}\r\n\r\n\t//for (int i = 1; i <= N; i++) {\r\n\t//\tcout << NextAfterMono[i] << ' ';\r\n\t//}\r\n\t//cout << \"\\n\";\r\n\t//for (int i = 1; i <= M; i++) {\r\n\t//\tcout << NextAfterBi[i] << ' ';\r\n\t//}\r\n\t//cout << \"\\n\";\r\n\r\n\tMonoReEdges.assign(N + 1, {});\r\n\tfor (int i = 1; i <= M; i++) {\r\n\t\tif (NextAfterBi[i] == -1) {\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tMonoReEdges[NextAfterBi[i]].push_back(i);\r\n\t}\r\n\r\n\tBiReEdges.assign(M + 1, {});\r\n\tfor (int i = 1; i <= N; i++) {\r\n\t\tif (NextAfterMono[i] == -1) {\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tBiReEdges[NextAfterMono[i]].push_back(i);\r\n\t}\r\n\r\n\ttypes.assign(N + 1, 0);\r\n\tfor (int i = 1; i <= N; i++) {\r\n\t\tif (NextAfterMono[i] == -1) {\r\n\t\t\tdfs(true, i, 1);\r\n\t\t}\r\n\t}\r\n\tfor (int i = 1; i <= M; i++) {\r\n\t\tif (NextAfterBi[i] == -1) {\r\n\t\t\tdfs(false, i, -1);\r\n\t\t}\r\n\t}\r\n\tint cnt1 = 0;\r\n\tint cnt2 = 0;\r\n\tint cnt3 = 0;\r\n\tfor (int i = 1; i <= N; i++) {\r\n\t\tif (types[i] == 1) {\r\n\t\t\tcnt1++;\r\n\t\t}\r\n\t\tif (types[i] == 0) {\r\n\t\t\tcnt2++;\r\n\t\t}\r\n\t\tif (types[i] == -1) {\r\n\t\t\tcnt3++;\r\n\t\t}\r\n\t}\r\n\tcout << cnt1 << \" \" << cnt2 << \" \" << cnt3 << '\\n';\r\n\ttypes.clear();\r\n\tMonoReEdges.clear();\r\n\tBiReEdges.clear();\r\n}\r\n\r\nint32_t main() {\r\n\r\n\tios_base::sync_with_stdio(false);\r\n\tcin.tie(nullptr);\r\n\r\n\tint t;\r\n\tcin >> t;\r\n\t//t = 1;\r\n\r\n\twhile (t--) {\r\n\t\tsolve();\r\n\t}\r\n\r\n\treturn 0;\r\n}"
+}

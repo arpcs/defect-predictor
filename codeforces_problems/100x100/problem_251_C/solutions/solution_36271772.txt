@@ -1,0 +1,37 @@
+{
+    "id": 36271772,
+    "contestId": 251,
+    "creationTimeSeconds": 1521024298,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 251,
+        "index": "C",
+        "name": "Number Transformation",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2000,
+        "tags": [
+            "dp",
+            "greedy",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 251,
+        "members": [
+            {
+                "handle": "wewark"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1354807800
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 1496,
+    "memoryConsumedBytes": 68710400,
+    "source": "\ufeff#include <bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef vector<ll> vi;\r\ntypedef vector<ll> vll;\r\ntypedef vector<vi> vvi;\r\ntypedef pair<int, int> pii;\r\ntypedef vector<pii> vii;\r\ntypedef vector<bool> vb;\r\ntypedef vector<string> vs;\r\nconst int di[] = { -1, 0, 1, 0, -1, 1, 1, -1 };\r\nconst int dj[] = { 0, 1, 0, -1, -1, 1, -1, 1 };\r\nconst ll MOD = 1e9 + 7;\r\nconst ll INF = 1e9;\r\nconst long double EPS = 1e-7;\r\n#define all(n) n.begin(),n.end()\r\n\r\nint gcd(int a, int b) {\r\n\treturn b == 0 ? a : gcd(b, a % b);\r\n}\r\n\r\nint lcm(int a, int b) {\r\n\treturn abs(a * b) / gcd(a, b);\r\n}\r\n\r\nll a, b, k;\r\nll lc;\r\n\r\ninline vector<char> formation(ll cur) {\r\n\tvb vis(15); vis[1] = true;\r\n\tvector<char> ret({ 1 });\r\n\tfor (int i = 2; i <= k; i++) {\r\n\t\tint x = cur % i;\r\n\t\tif (x && !vis[x]) {\r\n\t\t\tret.push_back(x);\r\n\t\t\tvis[x] = true;\r\n\t\t}\r\n\t}\r\n\treturn ret;\r\n}\r\n\r\nvll mem(730000, -1);\r\nll solve(ll cur) {\r\n\tif (a + cur == a) return 0;\r\n\tif (a + cur < a) return LLONG_MAX / 2;\r\n\r\n\tll& ret = mem[cur];\r\n\tif (~ret) return ret;\r\n\tret = LLONG_MAX / 2;\r\n\r\n\tvector<char> ch = formation(a + cur);\r\n\tfor (char& i : ch) {\r\n\t\tll v = a + cur - i;\r\n\t\tif (v >= a)\r\n\t\t\tret = min(ret, 1 + solve(v - a));\r\n\t}\r\n\treturn ret;\r\n}\r\n\r\ntypedef pair<ll, ll> pll;\r\nll lb;\r\n\r\nll BFS() {\r\n\t//priority_queue<pll, vector<pll>, greater<pll>> q;\r\n\tqueue<pll> q;\r\n\tq.push({ 0, b - b % lc });\r\n\tvector<ll> dist(2 * lc + 100, LLONG_MAX);\r\n\tvector<ll> fdist(lc, -1);\r\n\tdist[b - (b - b % lc)] = 0;\r\n\r\n\tll ret = LLONG_MAX;\r\n\twhile (!q.empty()) {\r\n\t\tll cur = q.front().second;\r\n\t\tll d = q.front().first;\r\n\t\tq.pop();\r\n\r\n\t\tif (d > dist[b - cur])\r\n\t\t\tcontinue;\r\n\r\n\t\tif (cur == a) {\r\n\t\t\tret = min(ret, d);\r\n\t\t\tcontinue;\r\n\t\t}\r\n\r\n\t\tif (~fdist[cur % lc]) {\r\n\t\t\tll prv = fdist[cur % lc];\r\n\t\t\tll dcyc = d - prv;\r\n\t\t\tret = min(ret, prv + (cur - a + lc) / lc * dcyc + solve((cur - a) % lc));\r\n\t\t\t//cout << cur << \" \" \r\n\t\t\t//\t<< prv << \" \" \r\n\t\t\t//\t<< (cur - a + lc) << \" \"\r\n\t\t\t//\t<< dcyc << \" \"\r\n\t\t\t//\t<< (cur - a + lc) / lc * dcyc << \" \"\r\n\t\t\t//\t<< solve((cur - a) % lc) << \" \"\r\n\t\t\t//\t<< ret << endl;\r\n\t\t\t//cin.get();\r\n\t\t}\r\n\t\tfdist[cur % lc] = d;\r\n\r\n\t\tvector<char> ch = formation(cur);\r\n\t\tfor (char& i : ch) {\r\n\t\t\tll v = cur - i;\r\n\t\t\tll x = dist[b - cur];\r\n\t\t\tif (v >= a && v > lb &&\r\n\t\t\t\tx + 1 < dist[b - v]) {\r\n\t\t\t\tdist[b - v] = x + 1;\r\n\t\t\t\tq.push(pll(d + 1, v));\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn ret == LLONG_MAX ? 0 : ret;\r\n}\r\n\r\nint main() {\r\n\tios::sync_with_stdio(false), cin.tie(0);\r\n\tcin >> b >> a >> k;\r\n\r\n\tlc = 1;\r\n\tfor (int i = 2; i <= k; i++) {\r\n\t\tlc = lcm(lc, i);\r\n\t}\r\n\tlb = b - 2ll * lc - 10;\r\n\r\n\tif (b <= lc) {\r\n\t\tcout << solve(b - a) << endl;\r\n\t}\r\n\telse {\r\n\t\tll r = BFS();\r\n\t\tmem.assign(730000, -1);\r\n\t\ta = b - b % lc;\r\n\t\tr += solve(b - a);\r\n\t\tcout << r << endl;\r\n\t}\r\n\tcin.ignore(), cin.get();\r\n}"
+}

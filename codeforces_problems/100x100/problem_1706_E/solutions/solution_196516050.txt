@@ -1,0 +1,41 @@
+{
+    "id": 196516050,
+    "contestId": 1706,
+    "creationTimeSeconds": 1678285089,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "bkifhr10"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 296,
+    "memoryConsumedBytes": 33177600,
+    "source": "#include <bits/stdc++.h>\n#include <ext/pb_ds/assoc_container.hpp> // Common file\n#include <ext/pb_ds/tree_policy.hpp> // Including tree_order_statistics_node_update\nusing namespace std;\nusing namespace __gnu_pbds;\ntemplate<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;\ntemplate<typename Q> using priority_queue_r = priority_queue<Q, vector<Q>, greater<Q>>;\nusing ll = long long;using ld = long double;\n#define el '\\n'\n#define F  first\n#define S  second\n#define sz(v) (ll)(v).size()\n#define ZOON ios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0);\n#define FILE freopen(\"inputf.in\",\"r\",stdin); freopen(\"outputf.out\",\"w\",stdout);\nint dx[]={1, -1,0, 0, 1, 1, -1, -1}, dy[]={0, 0, 1, -1, 1, -1, -1, 1};\n\n// START OF CODEEEEE\nconst ll mod =  998244353, N = 2e5+2, LOG = 20;\n\n\nint up[N][LOG], n, m, q, t, in[N], out[N];\nvector<int> graph[N];\n\nint arr[N];\n\nstruct DisjointSet\n{\n\tvector<int>pr, sz;\n\tvector<vector<int>>children;\n\tvoid init(int n)\n\t{\n\t\tpr.resize(n+5);\n\t\tchildren.resize(n+5, {});\n\t\tfor(int i=0;i<=n;i++)\n\t\t{\n\t\t\tchildren[i].push_back(i);\n\t\t\tpr[i] = i;\n\t\t}\n\t}\n\n\tint find(int x)\n\t{\n\t\treturn pr[x] = (pr[x]==x? x : find(pr[x]));\n\t}\n\n\tvoid unite(int a, int b, int ind)\n\t{\n\t\ta = find(a);\n\t\tb = find(b);\n\n\t\tif(a == b)\n\t\t\treturn;\n\n\t\t// cout<<a<<' '<<b<<\"   UNITE\"<<endl; \n\t\tif(sz(children[a]) < sz(children[b]))\n\t\t\tswap(a, b);\n\n\t\tfor(auto i : children[b])\n\t\t{\n\t\t\tint nxt = i+1, prv = i-1;\n\n\t\t\tif(prv>0 && find(prv) == a)\n\t\t\t\tarr[prv] = ind;\n\n\t\t\tif(nxt<=n && find(nxt) == a)\n\t\t\t\tarr[i] = ind;\n\n\t\t\tchildren[a].push_back(i);\n\t\t}\n\t\t\n\t\tchildren[b].clear();\n\t\tpr[b] = a;\n\t}\n\n};\n\nstruct SegmentTree\n{\n\tvector<int>seg;\n\tint neutral = -1;\n\tvoid init(int n)\n\t{\n\t\tn = n;\n\t\tseg.resize(4*n);\n\n\t\tbuild(1, 1, n-1);\n\t}\n\n\tint merge(int &a, int &b)\n\t{\n\t\treturn max(a, b);\t\n\t}\n\n\n\tvoid build(int node, int l, int r)\n\t{\n\t\t// cout<<node<<' '<<l<<' '<<' '<<r<<\" BUILD\"<<endl;\n\t\tif(l == r)\n\t\t{\n\t\t\tseg[node] = arr[l];\n\t\t\treturn;\n\t\t}\n\n\t\tint mid = (l+r) >>1;\n\n\t\tbuild(node <<1, l, mid);\n\t\tbuild(node <<1 |1, mid+1, r);\n\t\t\n\t\tseg[node] = merge(seg[node <<1], seg[node <<1 |1]);\n\t}\n\n\n\tint query(int node, int l, int r, int lq, int rq)\n\t{\n\t\t// cout<<node<<' '<<l<<' '<<r<<' '<<lq<<' '<<rq<<\"   QUERY\"<<endl;\n\t\tif(r < lq || l > rq)\n\t\t\treturn neutral;\n\n\t\tif(l>=lq && r<=rq)\n\t\t\treturn seg[node];\n\n\t\tint mid = (l+r)>>1;\n\n\t\tint q1 = query(node<<1, l, mid, lq, rq);\n\t\tint q2 = query(node<<1 |1, mid+1, r, lq, rq);\n\t\t\n\t\treturn merge(q1, q2);\n\t}\n\n\n};\n\nvoid dfs(int cur, int pr)\n{\n\tin[cur] = t++;\n\tup[cur][0] = pr;\n\n\tfor(int bit=1;bit<LOG;bit++)\n\t\tup[cur][bit] = up[up[cur][bit-1]][bit-1];\n\n\n\tfor(auto i : graph[cur])\n\t{\n\t\tif(i!=pr)\n\t\t\tdfs(i, cur);\n\t}\n\n\tout[cur] = t++;\n}\n\n\nbool childOf(int a, int b)\n{\n\treturn in[a]>=in[b] && out[a]<=out[b];\n}\n\n\nint lca(int a, int b)\n{\n\tif(childOf(a, b))\n\t\treturn b;\n\tif(childOf(b, a))\n\t\treturn a;\n\n\n\tfor(int i=LOG-1;i>=0;i--)\n\t{\n\t\tif(!childOf(a, up[b][i]))\n\t\t\tb = up[b][i];\n\t}\n\n\treturn up[b][0];\n}\n\n\n\nvoid test()\n{\n\tcin>>n>>m>>q;\n\n\tDisjointSet dsu;\n\tdsu.init(n);\n\n\tfor(int i=1;i<=m;i++)\n\t{\n\t\tint a, b;cin>>a>>b;\n\n\t\tdsu.unite(a, b, i);\n\t}\n\n\t// for(int i=1;i<=n;i++)\n\t// \tcout<<arr[i]<<' ';\n\t// cout<<endl;\n\n\tSegmentTree segTree;\n\tsegTree.init(n);\n\n\n\twhile(q--)\n\t{\n\t\tint l, r;cin>>l>>r;\n\n\t\tif(l == r)\n\t\t\tcout<<0<<\" \";\n\t\telse\n\t\t\tcout<<segTree.query(1, 1, n-1, l, r-1)<<' ';\n\t}\n\n\tcout<<endl;\n}\n\nint main()\n{\n\t#ifndef ONLINE_JUDGE\n\t\tFILE\n\t#endif\n\n\tZOON\n\n\tint test_cases=1;\n\tcin>>test_cases;\n\n\twhile(test_cases--)\n\t\ttest();\n\n\treturn 0;\n}\n\n\n\n\n\n\n\n\t  \t    \t\t \t \t\t\t  \t\t \t     \t\t\t\t"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 142678211,
+    "contestId": 666,
+    "creationTimeSeconds": 1642149201,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 666,
+        "index": "B",
+        "name": "World Tour",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2000,
+        "tags": [
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 666,
+        "members": [
+            {
+                "handle": "Arinoor"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1461947700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 36454400,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\n#define ios\t\t\t\tios_base::sync_with_stdio(false), cin.tie(0), cout.tie(0)\n#define all(x)\t\t\tx.begin(), x.end()\n#define pb\t\t\t\tpush_back\n#define mp\t\t\t\tmake_pair\n#define fi\t\t\t\tfirst\n#define se\t\t\t\tsecond\n#define bug(str, x)\t\t\tcerr << str << \" : \" << x << '\\n'\n\ntypedef long long ll;\ntypedef pair<int, int> pii;\nconst int maxn = 3e3 + 10;\nconst int inf = 1e9 + 10;\nconst int mod = 1e9 + 7;\n\nbool visited[maxn];\nint h[maxn][maxn];\nint f[maxn][2][3];\nvector<int> G[maxn];\n\nvoid bfs(int s){\n\tqueue<int> Q;\n\tQ.push(s);\n\tfill_n(h[s], maxn, -inf);\n\tmemset(visited, false, sizeof visited);\n\th[s][s] = 0;\n\tvisited[s] = true;\n\twhile(!Q.empty()){\n\t\tint v = Q.front();\n\t\tQ.pop();\n\t\tfor(int u : G[v])\n\t\t\tif(!visited[u]){\n\t\t\t\th[s][u] = h[s][v] + 1;\n\t\t\t\tvisited[u] = true;\n\t\t\t\tQ.push(u);\n\t\t\t}\n\t}\n}\n\nint update(int v, int t, int ptr, int u){\n\twhile(f[v][t][ptr] == u)\n\t\tptr ++;\n\treturn ptr;\n}\n\nint main(){\n\tios;\n\tint n, m;\n\tcin >> n >> m;\n\tfor(int i = 0; i < m; i ++){\n\t\tint u, v;\n\t\tcin >> u >> v;\n\t\tG[u].pb(v);\n\t}\n\tfor(int i = 1; i <= n; i ++)\n\t\tbfs(i);\n\tfor(int v = 1; v <= n; v ++){\n\t\tfor(int i = 0; i < 2; i ++){\n\t\t\tint mx1 = -inf - 1, mx2 = -inf - 1, mx3 = -inf - 1;\n\t\t\tint v1, v2, v3;\n\t\t\tfor(int u = 1; u <= n; u ++){\n\t\t\t\tif(u == v)\n\t\t\t\t\tcontinue;\n\t\t\t\tint tp = i ? h[v][u] : h[u][v];\n\t\t\t\tif(tp > mx1){\n\t\t\t\t\tmx3 = mx2, v3 = v2;\n\t\t\t\t\tmx2 = mx2, v2 = v1;\n\t\t\t\t\tmx1 = tp, v1 = u;\n\t\t\t\t}\n\t\t\t\telse if(tp > mx2){\n\t\t\t\t\tmx3 = mx2, v3 = v2;\n\t\t\t\t\tmx2 = tp, v2 = u;\n\t\t\t\t}\n\t\t\t\telse if(tp > mx3)\n\t\t\t\t\tmx3 = tp, v3 = u;\n\t\t\t}\n\t\t\tf[v][i][0] = v1;\n\t\t\tf[v][i][1] = v2;\n\t\t\tf[v][i][2] = v3;\n\t\t}\n\t}\n\tint ans = 0;\n\tint v1, v2, v3, v4;\n\tfor(int v = 1; v <= n; v ++){\n\t\tfor(int u = 1; u <= n; u ++){\n\t\t\tif(u == v)\n\t\t\t\tcontinue;\n\t\t\tint res = h[v][u];\n\t\t\tint u1, u2 = v, u3 = u, u4;\n\t\t\tint pv = update(v, 0, 0, u);\n\t\t\tint pu = update(u, 1, 0, v);\n\t\t\tif(f[v][0][pv] != f[u][1][pu]){\n\t\t\t\tres += h[f[v][0][pv]][v] + h[u][f[u][1][pu]];\n\t\t\t\tu1 = f[v][0][pv];\n\t\t\t\tu4 = f[u][1][pu];\n\t\t\t}\n\t\t\telse{\n\t\t\t\tint npv = update(v, 0, pv + 1, u);\n\t\t\t\tint npu = update(u, 1, pu + 1, v);\n\t\t\t\tint res1 = h[f[v][0][npv]][v] + h[u][f[u][1][pu]];\n\t\t\t\tint res2 = h[f[v][0][pv]][v] + h[u][f[u][1][npu]];\n\t\t\t\tif(res1 > res2){\n\t\t\t\t\tres += res1;\n\t\t\t\t\tu1 = f[v][0][npv];\n\t\t\t\t\tu4 = f[u][1][pu];\n\t\t\t\t}\n\t\t\t\telse{\n\t\t\t\t\tres += res2;\n\t\t\t\t\tu1 = f[v][0][pv];\n\t\t\t\t\tu4 = f[u][1][npu];\n\t\t\t\t}\n\t\t\t}\n\t\t\tif(res > ans){\n\t\t\t\tans = res;\n\t\t\t\tv1 = u1, v2 = u2, v3 = u3, v4 = u4;\n\t\t\t}\n\t\t}\n\t}\n\tcout << v1 << ' ' << v2 << ' ' << v3 << ' ' << v4 << '\\n';\n}\n"
+}

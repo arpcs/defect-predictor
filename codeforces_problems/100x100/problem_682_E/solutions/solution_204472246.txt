@@ -1,0 +1,36 @@
+{
+    "id": 204472246,
+    "contestId": 682,
+    "creationTimeSeconds": 1683213485,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 682,
+        "index": "E",
+        "name": "Alyona and Triangles",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2600,
+        "tags": [
+            "geometry",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 682,
+        "members": [
+            {
+                "handle": "RedLeaf"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1466181300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 66,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 307200,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing LL = long long int;\r\nusing P = pair<LL,LL>;\r\nusing Vec = pair<LL,LL>;\r\n\r\nVec operator - (P lhs, P rhs) { return Vec(lhs.first - rhs.first, lhs.second - rhs.second); }\r\nLL cross(Vec lhs, Vec rhs) { return lhs.first * rhs.second - lhs.second * rhs.first; }\r\n\r\n\r\nvector<P> monotone_chain(vector<P> &arr, int n) {\r\n    sort(arr.begin(), arr.end(), [](P const &lhs, P const &rhs) {\r\n        if (lhs.first != rhs.first) return lhs.first < rhs.first;\r\n        else return lhs.second < rhs.second; \r\n    });\r\n    auto add_to_hull = [&] (vector<P> &convex_hull, P pt) {\r\n        while (convex_hull.size() > 1) {\r\n            Vec prev = convex_hull.end()[-1] - convex_hull.end()[-2];\r\n            Vec me = pt - convex_hull.back();\r\n            if (cross(prev, me) <= 0) convex_hull.pop_back();\r\n            else break;\r\n        }\r\n        convex_hull.emplace_back(pt);\r\n    };\r\n    // lower hull\r\n    vector<P> lower_hull {arr[0], arr[1]};\r\n    for (int i = 2; i < n; i++) add_to_hull(lower_hull, arr[i]);\r\n    // upper hull\r\n    vector<P> upper_hull {arr.end()[-1], arr.end()[-2]};\r\n    for (int i = n-3; i >= 0; i--) add_to_hull(upper_hull, arr[i]);\r\n\r\n    lower_hull.pop_back();\r\n    upper_hull.pop_back();\r\n    lower_hull.insert(lower_hull.end(), upper_hull.begin(), upper_hull.end());\r\n\r\n    /*\r\n    cerr << \"convex hull: \";\r\n    for (auto [x, y] : lower_hull) cerr << \"(\" << x << \",\" << y << \")\" << endl;\r\n    */\r\n\r\n    return lower_hull;\r\n}\r\n\r\ntuple<P,P,P> largest_triangle(vector<P> const &convex_hull) {\r\n    int n = convex_hull.size();\r\n    tuple<int,int,int> best(-1, -1, -1);\r\n    LL best_area = 0;\r\n    for (int i = 0; i + 2 < n; i++) for (int j = i + 1, k = j + 1; j < n; j++) {\r\n        Vec base = convex_hull[j] - convex_hull[i];\r\n        while (k + 1 < n) {\r\n            Vec prev = convex_hull[k] - convex_hull[i];\r\n            Vec me = convex_hull[k+1] - convex_hull[i];\r\n            /*\r\n            cerr << \"base(\" << base.first << \", \" << base.second << \")\" << endl;\r\n            cerr << \"prev(\" << prev.first << \", \" << prev.second << \")\" << endl;\r\n            cerr << \"me(\" << me.first << \", \" << me.second << \")\" << endl;\r\n            cerr << \"(\" << i << \",\" << j << \",\" << k << \") => \";\r\n            cerr << cross(base, prev) << \", \" << cross(base, me) << endl;\r\n            */\r\n            if (cross(base, prev) <= cross(base, me)) k++;\r\n            else break;\r\n        }\r\n        LL area = cross(base, convex_hull[k] - convex_hull[i]);\r\n        if (area > best_area) {\r\n            best_area = area;\r\n            best = make_tuple(i, j, k); \r\n        }\r\n    }\r\n    auto [i, j, k] = best;\r\n\r\n    /*\r\n    cerr << \"best triangle: \" << i << \", \" << j << \", \" << k << endl;\r\n    cerr << \"(\" << convex_hull[i].first << \",\" << convex_hull[i].second << \")\";\r\n    cerr << \"(\" << convex_hull[j].first << \",\" << convex_hull[j].second << \")\";\r\n    cerr << \"(\" << convex_hull[k].first << \",\" << convex_hull[k].second << \")\";\r\n    cerr << endl;\r\n    */\r\n\r\n    return make_tuple(convex_hull[i], convex_hull[j], convex_hull[k]);\r\n}\r\n\r\nvoid solve() {\r\n    int n; cin >> n;\r\n    LL s; cin >> s;\r\n    vector<P> arr(n);\r\n    for (auto &[x, y] : arr) cin >> x >> y;\r\n    vector<P> convex_hull = monotone_chain(arr, n);\r\n    auto [a, b, c] = largest_triangle(convex_hull);\r\n\r\n    cout << a.first + (b.first - c.first) << \" \" << a.second + (b.second - c.second) << \"\\n\";\r\n    cout << b.first + (c.first - a.first) << \" \" << b.second + (c.second - a.second) << \"\\n\";\r\n    cout << c.first + (a.first - b.first) << \" \" << c.second + (a.second - b.second) << \"\\n\";\r\n}\r\n\r\nint main() {\r\n    ios::sync_with_stdio(false); cin.tie(0);\r\n    int T = 1;\r\n    while (T--) {\r\n        solve();\r\n    }\r\n}\r\n\r\n\r\n\r\n"
+}

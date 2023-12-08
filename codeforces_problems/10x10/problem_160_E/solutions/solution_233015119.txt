@@ -1,0 +1,37 @@
+{
+    "id": 233015119,
+    "contestId": 160,
+    "creationTimeSeconds": 1700163521,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 160,
+        "index": "E",
+        "name": "Buses and People",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 160,
+        "members": [
+            {
+                "handle": "ftuknights"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1331046000
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 342,
+    "memoryConsumedBytes": 27033600,
+    "source": "#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define MAXN 100000\r\nstruct event {\r\n\tint s, f, t, type, id;\r\n};\r\n\r\nset< pair<int, int> > T[4 * MAXN + 10];\r\n\r\nvoid update(int id, int l, int r, int i, event e) {\r\n\tif (r < i || i < l) return;\r\n\t//cout << id << \" \" << l << \" \" << r << endl;\r\n\tif (l <= i && i <= r) T[id].insert({e.s, e.id});\r\n\tif (l == r) return;\r\n\tint mid = (l + r) >> 1;\r\n\tupdate(id << 1, l, mid, i, e);\r\n\tupdate(id << 1 | 1, mid + 1, r, i, e);\r\n}\r\n\r\nvoid remove(int id, pair<int, int> e) {\r\n\tif (id > 4 * MAXN) return;\r\n\tif (T[id].find(e) == T[id].end()) return;\r\n\tT[id].erase(e);\r\n\tremove(id << 1, e);\r\n\tremove(id << 1 | 1, e);\r\n}\r\n\r\npair<int, int> get(int id, int l, int r, int ql, int qr) {\r\n\tif (r < ql || qr < l) return {0, 0};\r\n\tif (ql <= l && r <= qr) {\r\n\t\t//cout << id << \" \" << l << \" \" << r << endl;\r\n\t\tif (T[id].size() == 0) return {0, 0};\r\n\r\n\t\treturn *(T[id].rbegin());\r\n\t}\r\n\tint mid = (l + r) >> 1;\r\n\tpair<int, int> getl = get(id << 1, l, mid, ql, qr);\r\n\tpair<int, int> getr = get(id << 1 | 1, mid + 1, r, ql, qr);\r\n\tif (getl.first > getr.first) return getl;\r\n\treturn getr;\r\n}\r\n\r\n\r\nbool cmp(event e1, event e2) {\r\n\tif (e1.t < e2.t) return true;\r\n\tif (e1.t > e2.t) return false;\r\n\treturn e1.type < e2.type;\r\n}\r\n\r\nvoid solve() {\r\n\tint n, m;\r\n\tcin >> n >> m;\r\n\tvector<event> a(n + m);\r\n\tfor (int i = 0; i < n; i++) {\r\n\t\tcin >> a[i].s >> a[i].f >> a[i].t;\r\n\t\ta[i].type = 1;\r\n\t\ta[i].id = i;\r\n\t}\r\n\r\n\tfor (int i = 0; i < m; i++) {\r\n\t\tcin >> a[i + n].s >> a[i + n].f >> a[i + n].t;\r\n\t\ta[i + n].type = 0;\r\n\t\ta[i + n].id = i;\r\n\t}\r\n\r\n\tset<int> s;\r\n\ts.clear();\r\n\tfor (int i = 0; i < n + m; i++) {\r\n\t\ts.insert(a[i].f);\r\n\t}\r\n\r\n\tmap<int, int> ma;\r\n\tint now = 0;\r\n\tfor (auto x: s) {\r\n\t\tnow++;\r\n\t\tma[x] = now;\r\n\t}\r\n\r\n\tfor (int i = 0; i < n + m; i++) a[i].f = ma[a[i].f];\r\n\tsort(a.begin(), a.end(), cmp);\r\n\r\n\t//for (auto x: a) cout << x.s << \" \" << x.f << \" \" << x.t << \" \" << x.id << \" \" << x.type << endl;\r\n\r\n\t\r\n\tvector<int> res(m, -1);\r\n\tfor (int i = 0; i < n + m; i++) {\r\n\t\t//cout << i << endl;\r\n\t\tif (a[i].type == 0) {\r\n\t\t\tupdate(1, 1, now, a[i].f, a[i]);\r\n\t\t\t// cout << \"Update:\" << endl;\r\n\t\t\t// for (auto x: T[1]) cout << x.first << \" \" << x.second << endl;\r\n\t\t\t// cout << \"Done: Update\" << endl;\r\n\t\t} else {\r\n\t\t\twhile (1) {\r\n\t\t\t\tpair<int, int> p = get(1, 1, now, 1, a[i].f);\r\n\t\t\t\t//cout << a[i].f << endl;\r\n\t\t\t\t//cout << p.first << \" \" << p.second << endl;\r\n\t\t\t\tif (p.first >= a[i].s) {\r\n\t\t\t\t\tres[p.second] = a[i].id + 1;\r\n\t\t\t\t\tremove(1, p);\r\n\t\t\t\t} else break;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\r\n\t\r\n\t\r\n\tfor (auto x: res) cout << x << \" \";\r\n\r\n\treturn;\r\n\r\n}\r\n\r\nint main() {\r\n//\tfreopen(\"D:\\\\LEARNING\\\\CP\\\\IN_OUT\\\\input.txt\",\"r\",stdin);\r\n//\tfreopen(\"D:\\\\LEARNING\\\\CP\\\\IN_OUT\\\\output.txt\", \"w\", stdout);\r\n\tios_base::sync_with_stdio(0);\r\n\tcin.tie(0); cout.tie(0);\r\n\tint ntest;\r\n\tntest = 1;\r\n\twhile (ntest--) {\r\n\t\tsolve();\r\n\t}\r\n\treturn 0;\r\n\r\n}\r\n"
+}

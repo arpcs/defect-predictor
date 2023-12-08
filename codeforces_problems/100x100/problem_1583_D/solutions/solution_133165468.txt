@@ -1,0 +1,37 @@
+{
+    "id": 133165468,
+    "contestId": 1583,
+    "creationTimeSeconds": 1635257104,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1583,
+        "index": "D",
+        "name": "Omkar and the Meaning of Life",
+        "type": "PROGRAMMING",
+        "points": 1750.0,
+        "rating": 1800,
+        "tags": [
+            "constructive algorithms",
+            "greedy",
+            "interactive"
+        ]
+    },
+    "author": {
+        "contestId": 1583,
+        "members": [
+            {
+                "handle": "tepumasuta"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1634468700
+    },
+    "programmingLanguage": "Python 3",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 5632000,
+    "source": "from dataclasses import dataclass\nfrom itertools import chain\n\n\n@dataclass\nclass Segment:\n    included: list\n    inversed: bool\n\n    @property\n    def left(self):\n        return self.included[0]\n\n    @property\n    def right(self):\n        return self.included[-1]\n\n    @property\n    def middle(self):\n        return self.included[len(self.included) // 2]\n\n    @property\n    def middle_index(self):\n        return len(self.included) // 2\n\n    def inside(self, val):\n        return self.left <= val <= self.right\n\n    def cut_till(self, index):\n        self.included = list(filter(lambda x: x > index, self.included))\n    \n    \n\ndef build_segments(filled):\n    positions = []\n    for i, val in enumerate(filled):\n        if val is False:\n            positions.append(i)\n\n    return (Segment(positions, False),)\n\n\ndef cut_in_half(segment):\n    left_half = Segment(segment.included[:segment.middle_index], False)\n    right_half = Segment(segment.included[segment.middle_index:], False)\n\n    yield left_half\n    yield right_half\n\n\ndef process_segment(segment):\n    if segment.inversed:\n        yield from cut_in_half(segment)\n    else:\n        yield Segment(segment.included, True)\n\n\ndef build_response(filled, segment, lvalue, rvalue):\n    if not segment.included: return ''\n    if segment.inversed:\n        lvalue, rvalue = rvalue, lvalue\n\n    left_half = ' '.join(filled[i] or lvalue for i in range(segment.left, segment.middle))\n    right_half = ' '.join(filled[i] or rvalue for i in range(segment.middle, segment.right + 1))\n\n    if not left_half:\n        return right_half\n    if not right_half:\n        return left_half\n    return left_half + ' ' + right_half\n\n\ndef get_response(filled, lvalue, rvalue, segments):\n    res = '? '\n    if len(segments) and range(segments[0].left):\n        res += ' '.join(filled[i] for i in range(segments[0].left)) + ' '\n    for i, segment in enumerate(segments):\n        res += build_response(filled, segment, lvalue, rvalue) + ' '\n        if i + 1 < len(segments) and range(segment.right + 1, segments[i + 1].left):\n            res += ' '.join(filled[i] for i in range(segment.right + 1, segments[i + 1].left)) + ' '\n    if len(segments):\n        res += ' '.join(filled[i] for i in range(segments[-1].right + 1, len(filled)))\n\n    if not len(segments):\n        ' '.join(filled[i])\n\n    return res\n\n\n### IMPLEMETING\n\ndef build_outfilled_response(filled, looking, found, segment):\n    res = ' '.join(\n        chain(((filled[i] if i != found else looking) or filled[found] for i in range(segment.left, segment.middle)),\n              (filled[i] or looking for i in range(segment.middle, segment.right + 1)))\n    )\n\n    return res\n\n\n\n\ndef get_outfilled_response(filled, looking, found, segment):\n    res = '? '\n\n    res += ' '.join((filled[i] if i != found else looking) or filled[found] for i in range(segment.left))\n    res += ' ' + build_outfilled_response(filled, looking, found, segment) + ' '\n    res += ' '.join((filled[i] if i != found else looking) or filled[found] for i in range(segment.right + 1, len(filled)))\n\n    return res\n\n\ndef ask(response):\n    print(response, flush=True)\n    ans = int(input())\n\n    return ans\n\n\ndef main():\n    responses_amount = int(input())\n    filled = [False] * responses_amount\n\n    order = [(str(i + 1), str(responses_amount - i)) for i in range(responses_amount // 2)]\n\n    for smallest, biggest in order:\n        found = False\n        divided_segments = build_segments(filled)\n        fisrt_pos = None\n        while not found:\n            response = get_response(filled, smallest, biggest, divided_segments)\n            answer = ask(response)\n            if answer:\n                fisrt_pos = answer\n                d = responses_amount + 1 - int(response[fisrt_pos * 2])\n                found = True\n            else:\n                divided_segments = tuple(filter(lambda x: len(x.included) > 0, chain.from_iterable(map(process_segment, divided_segments))))\n\n        filled[fisrt_pos - 1] = str(d)\n\n        divided_segments = tuple(filter(lambda x: len(x.included) > 0, divided_segments))\n\n        found = fisrt_pos - 1\n        looking = smallest if filled[found] == biggest else biggest\n\n        for seg in divided_segments:\n            if seg.inside(found):\n                search_segment = seg\n                break\n\n        search_segment.included.remove(found)\n        search_segment.cut_till(found)\n\n        solved = False\n        while not solved:\n            if len(search_segment.included) == 1:\n                second_pos = search_segment.included[0]\n                solved = True\n                break\n\n            response = get_outfilled_response(filled, looking, found, search_segment)\n            answer = ask(response)\n            if answer:\n                search_segment, _ = cut_in_half(search_segment)\n            else:\n                _, search_segment = cut_in_half(search_segment)\n\n        filled[second_pos] = looking\n\n    if responses_amount % 2 == 1:\n        for i in range(len(filled)):\n            if not filled[i]:\n                filled[i] = str(responses_amount // 2 + 1)\n                break\n\n    print('! ' + ' '.join(filled), flush=True)\n\n\n\nif __name__ == '__main__':\n    main()\n"
+}

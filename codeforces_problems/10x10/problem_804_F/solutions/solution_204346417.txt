@@ -1,0 +1,39 @@
+{
+    "id": 204346417,
+    "contestId": 804,
+    "creationTimeSeconds": 1683124656,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 804,
+        "index": "F",
+        "name": "Fake bullions",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3400,
+        "tags": [
+            "combinatorics",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 804,
+        "members": [
+            {
+                "handle": "ClHg2"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1493909400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 301056000,
+    "source": "#include <algorithm>\r\n#include <array>\r\n#include <cstddef>\r\n#include <cstdint>\r\n#include <fstream>\r\n#include <initializer_list>\r\n#include <iostream>\r\n#include <numeric>\r\n#include <stack>\r\n#include <string>\r\n#include <utility>\r\n#include <vector>\r\n\r\nnamespace {\r\nusing std::cin;\r\nusing std::cout;\r\nusing std::int64_t;\r\nusing std::size_t;\r\n\r\nnamespace base {\r\ntemplate <typename T, size_t... sizes>\r\nstruct NestedArray {};\r\n\r\ntemplate <typename T, size_t size, size_t... sizes>\r\nstruct NestedArray<T, size, sizes...> {\r\n  using Type = std::array<typename NestedArray<T, sizes...>::Type, size>;\r\n};\r\n\r\ntemplate <typename T>\r\nstruct NestedArray<T> {\r\n  using Type = T;\r\n};\r\n\r\ntemplate <typename T, size_t... sizes>\r\nusing Array = typename NestedArray<T, sizes...>::Type;\r\n\r\nvoid OptimizeIO() {\r\n  std::ios::sync_with_stdio(false);\r\n  cin.tie(nullptr), cout.tie(nullptr);\r\n}\r\n\r\nvoid OptimizeIO(const std::string &input_file, const std::string &output_file) {\r\n  static std::ifstream input_stream(input_file);\r\n  static std::ofstream output_stream(output_file);\r\n  cin.rdbuf(input_stream.rdbuf());\r\n  cout.rdbuf(output_stream.rdbuf());\r\n  cin.tie(nullptr), cout.tie(nullptr);\r\n}\r\n}  // namespace base\r\n\r\nusing base::Array;\r\n\r\nconst int kMod = 1.0e9 + 7;\r\n\r\nnamespace mod {\r\ninline void Add(int &a, int b) {\r\n  a += b;\r\n  if (a >= kMod) a -= kMod;\r\n}\r\n\r\ninline void Mul(int &a, int b) { a = static_cast<int64_t>(a) * b % kMod; }\r\n\r\ninline int Prod(int a, int b) { return static_cast<int64_t>(a) * b % kMod; }\r\n\r\ninline int Prod(std::initializer_list<int> list) {\r\n  return std::accumulate(list.begin(), list.end(), static_cast<int64_t>(1),\r\n                         [](int64_t prod, int x) { return prod * x % kMod; });\r\n}\r\n\r\nint Pow(int a, int b) {\r\n  int ans = 1, prod = a;\r\n\r\n  while (b) {\r\n    if (b & 1) Mul(ans, prod);\r\n    Mul(prod, prod), b >>= 1;\r\n  }\r\n\r\n  return ans;\r\n}\r\n\r\ninline int Inv(int a) { return Pow(a, kMod - 2); }\r\n}  // namespace mod\r\n\r\nconst int kMaxN = 5005, kMaxM = 2.0e6 + 5, kMax4M = kMaxM * 4;\r\nint n, a, b, time_stamp, tot;\r\nArray<int, kMaxN> s, dfn, low, start, fac, inv_fac;\r\nArray<int, kMaxN, kMaxN> g;\r\nArray<bool, kMaxN> in_stack;\r\nArray<bool, kMax4M> f;\r\nArray<std::vector<int>, kMaxN> c;\r\nArray<std::vector<int>, kMax4M> edge;\r\nstd::stack<int, std::vector<int>> stack;\r\nstd::vector<std::pair<int, int>> ppk;\r\n\r\nstruct Node {\r\n  int real, fake;\r\n};\r\n\r\ninline bool operator<(const Node &a, const Node &b) {\r\n  return a.real + a.fake > b.real + b.fake;\r\n}\r\n\r\nArray<Node, kMaxN> gold_bar;\r\n\r\nint Gcd(int a, int b) { return b == 0 ? a : Gcd(b, a % b); }\r\n\r\ninline void AddEdge(int u, int v) { edge[u].emplace_back(v); }\r\n\r\nvoid Link(int u, int v, int d) {\r\n  for (int r = 0; r < d; r++) {\r\n    int x = ++tot, y = ++tot;\r\n    for (int i = r; i < s[u]; i += d) AddEdge(start[u] + i, x);\r\n    for (int i = r; i < s[v]; i += d) AddEdge(y, start[v] + i);\r\n    AddEdge(x, y);\r\n  }\r\n}\r\n\r\nvoid Tarjan(int u) {\r\n  dfn[u] = low[u] = ++time_stamp;\r\n  stack.emplace(u), in_stack[u] = true;\r\n\r\n  for (int v = 1; v <= n; v++) {\r\n    if (!g[u][v]) continue;\r\n\r\n    if (!dfn[v]) {\r\n      Tarjan(v), low[u] = std::min(low[u], low[v]);\r\n    } else if (in_stack[v]) {\r\n      low[u] = std::min(low[u], dfn[v]);\r\n    }\r\n  }\r\n\r\n  if (dfn[u] == low[u]) {\r\n    std::vector<int> scc;\r\n    int d = 0;\r\n\r\n    while (true) {\r\n      int cur = stack.top();\r\n      stack.pop();\r\n      in_stack[cur] = false;\r\n      scc.emplace_back(cur);\r\n      d = Gcd(d, s[cur]);\r\n      if (cur == u) break;\r\n    }\r\n\r\n    int size = scc.size();\r\n\r\n    if (size > 1) {\r\n      for (int i = 0; i < size; i++) Link(scc[i], scc[(i + 1) % size], d);\r\n    }\r\n\r\n    ppk.emplace_back(u, d);\r\n  }\r\n}\r\n\r\nvoid Dfs(int u) {\r\n  f[u] = true;\r\n\r\n  for (int v : edge[u]) {\r\n    if (!f[v]) Dfs(v);\r\n  }\r\n}\r\n\r\nvoid Init() {\r\n  fac[0] = 1;\r\n  for (int i = 1; i <= n; i++) fac[i] = mod::Prod(fac[i - 1], i);\r\n  inv_fac[n] = mod::Inv(fac[n]);\r\n  for (int i = n; i >= 1; i--) inv_fac[i - 1] = mod::Prod(inv_fac[i], i);\r\n}\r\n\r\ninline int Choose(int n, int m) {\r\n  if (n < 0) return 0;\r\n  return mod::Prod({fac[n], inv_fac[m], inv_fac[n - m]});\r\n}\r\n\r\nint Main() {\r\n  base::OptimizeIO();\r\n  cin >> n >> a >> b;\r\n\r\n  for (int i = 1; i <= n; i++) {\r\n    std::string str;\r\n    cin >> str;\r\n    for (int j = 1; j <= n; j++) g[i][j] = (str[j - 1] - '0');\r\n  }\r\n\r\n  for (int i = 1; i <= n; i++) {\r\n    std::string str;\r\n    cin >> s[i] >> str;\r\n    c[i].reserve(s[i]);\r\n    for (int j = 1; j <= s[i]; j++) c[i].emplace_back(str[j - 1] - '0');\r\n  }\r\n\r\n  for (int i = 1; i <= n; i++) start[i] = tot + 1, tot += s[i];\r\n\r\n  for (int i = 1; i <= n; i++) {\r\n    if (!dfn[i]) Tarjan(i);\r\n  }\r\n\r\n  for (int i = ppk.size() - 1; i > 0; i--) {\r\n    Link(ppk[i].first, ppk[i - 1].first, Gcd(ppk[i].second, ppk[i - 1].second));\r\n  }\r\n\r\n  for (int i = 1; i <= n; i++) {\r\n    for (int j = 0; j < s[i]; j++) {\r\n      if (c[i][j]) Dfs(start[i] + j), gold_bar[i].real++;\r\n    }\r\n  }\r\n\r\n  for (int i = 1; i <= n; i++) {\r\n    for (int j = 0; j < s[i]; j++) {\r\n      if (!c[i][j] && f[start[i] + j]) gold_bar[i].fake++;\r\n    }\r\n  }\r\n\r\n  std::sort(gold_bar.begin() + 1, gold_bar.begin() + n + 1);\r\n  Init();\r\n  int ans = 0;\r\n\r\n  for (int i = 1; i <= n; i++) {\r\n    if (i <= a) {\r\n      mod::Add(ans, Choose(i - 1, b - 1));\r\n      continue;\r\n    }\r\n\r\n    int t = 0, lim = gold_bar[i].real + gold_bar[i].fake;\r\n    for (int j = 1; j < i; j++) t += (gold_bar[j].real <= lim);\r\n\r\n    for (int k = 0; k <= t - i + a; k++) {\r\n      mod::Add(ans, mod::Prod(Choose(t, k), Choose(i - t - 1, b - k)));\r\n    }\r\n  }\r\n\r\n  cout << ans << \"\\n\";\r\n  return 0;\r\n}\r\n}  // namespace\r\n\r\nint main() { return Main(); }\r\n"
+}

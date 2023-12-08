@@ -1,0 +1,41 @@
+{
+    "id": 165751908,
+    "contestId": 1706,
+    "creationTimeSeconds": 1658820394,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "Aksnov"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "PyPy 3-64",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 77,
+    "memoryConsumedBytes": 13004800,
+    "source": "import os\r\nimport sys\r\nfrom io import BytesIO, IOBase\r\n\r\nimport sys\r\nimport threading\r\n\r\nthreading.stack_size(250 * 1024 * 1024)\r\nsys.setrecursionlimit(5000)\r\n\r\n\r\nBUFSIZE = 8192\r\n \r\nclass FastIO(IOBase):\r\n    newlines = 0\r\n \r\n    def __init__(self, file):\r\n        self._fd = file.fileno()\r\n        self.buffer = BytesIO()\r\n        self.writable = \"x\" in file.mode or \"r\" not in file.mode\r\n        self.write = self.buffer.write if self.writable else None\r\n \r\n    def read(self):\r\n        while True:\r\n            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))\r\n            if not b:\r\n                break\r\n            ptr = self.buffer.tell()\r\n            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)\r\n        self.newlines = 0\r\n        return self.buffer.read()\r\n \r\n    def readline(self):\r\n        while self.newlines == 0:\r\n            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))\r\n            self.newlines = b.count(b\"\\n\") + (not b)\r\n            ptr = self.buffer.tell()\r\n            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)\r\n        self.newlines -= 1\r\n        return self.buffer.readline()\r\n \r\n    def flush(self):\r\n        if self.writable:\r\n            os.write(self._fd, self.buffer.getvalue())\r\n            self.buffer.truncate(0), self.buffer.seek(0)\r\n \r\n \r\nclass IOWrapper(IOBase):\r\n    def __init__(self, file):\r\n        self.buffer = FastIO(file)\r\n        self.flush = self.buffer.flush\r\n        self.writable = self.buffer.writable\r\n        self.write = lambda s: self.buffer.write(s.encode(\"ascii\"))\r\n        self.read = lambda: self.buffer.read().decode(\"ascii\")\r\n        self.readline = lambda: self.buffer.readline().decode(\"ascii\")\r\n \r\n \r\nsys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)\r\ninput = lambda: sys.stdin.readline().rstrip(\"\\r\\n\")\r\n\r\nclass DisjointSet:\r\n    def __init__(self, size):\r\n        self.U = [[i, 1] for i in range(size)]\r\n        \r\n    def root(self, e):\r\n        u = self.U[e]\r\n\r\n        if u[0] != e:\r\n            r = self.U[e] = self.root(u[0])\r\n            return r\r\n\r\n        return u\r\n\r\n    def union(self, first, second):\r\n        uFirst, uSecond = self.root(first), self.root(second)\r\n\r\n        if uFirst[1] < uSecond[1]:\r\n            uFirst, uSecond = uSecond, uFirst\r\n\r\n        if uSecond[0] != uFirst[0]:\r\n            uSecond[0] = uFirst[0]\r\n            uFirst[1] += uSecond[1]\r\n            \r\n        return uFirst\r\n\r\n    def clear(self):\r\n        for i in range(len(self.U)):\r\n            self.U[i] = [i, 1] \r\n\r\ndef expand(dsu, M, s, e):\r\n    def append(x, y):\r\n        S.append((min(x, y), max(x, y)))\r\n        if x in M:\r\n            M.pop(x)\r\n        if y in M:\r\n            M.pop(y)\r\n\r\n    S = []\r\n\r\n    if (s - 1) in M:\r\n        append(M[s - 1], s - 1)\r\n    elif dsu.root(s - 1) == dsu.root(s):\r\n        append(s - 1, s)\r\n    if (s + 1) in M:\r\n        append(s + 1, M[s + 1])\r\n    elif dsu.root(s + 1) == dsu.root(s):\r\n        append(s, s + 1)\r\n\r\n\r\n    if (e - 1) in M:\r\n        append(e - 1, M[e - 1])\r\n    elif dsu.root(e - 1) == dsu.root(e):\r\n        append(e - 1, e)\r\n    if (e + 1) in M:\r\n        append((e + 1, M[e + 1]))\r\n    elif dsu.root(e + 1) == dsu.root(e):\r\n        append(e, e + 1)\r\n\r\n    if not S:\r\n        return []\r\n\r\n    append(s, s)\r\n    append(e, e)\r\n\r\n    S = list(set(S))\r\n    S.sort()\r\n\r\n    R = []\r\n    start, end = S[0]\r\n    for si, ei in S[1:]:\r\n        if end >= si:\r\n            end = max(end, ei)\r\n        else:\r\n            if start != end:\r\n                R.append((start, end))\r\n            start, end = si, ei\r\n    if start != end:\r\n        R.append((start, end))\r\n\r\n#    print(S, R)\r\n    for s, e in R:\r\n        M[s] = e\r\n        M[e] = s\r\n\r\n    return R\r\n\r\n\r\n\r\nT = int(input())\r\nfor _ in range(T):\r\n    n, m, q = map(int, input().split())\r\n\r\n    first = [[]] * (m + 2)\r\n    dsu = DisjointSet(n + 20)\r\n    M = {}\r\n    for i in range(m):\r\n        s, e = map(int, input().split())\r\n        if dsu.root(s) != dsu.root(e):\r\n            dsu.union(s, e)\r\n            first[i + 1] = expand(dsu, M, s, e)\r\n\r\n#    print(first)\r\n\r\n    R = []\r\n    for _ in range(q):\r\n        a, b = map(int, input().split())\r\n        if a == b:\r\n            R.append(0)\r\n        else:\r\n            l, r = 0, m + 1\r\n            while l + 1 < r:\r\n                S = first[(l + r)//2]\r\n                flag = False\r\n                for s, e in S:\r\n                    if s <= a and b <= e:\r\n                        flag = True\r\n                        break\r\n                if flag:\r\n                    r = (l + r)//2\r\n                else:\r\n                    l = (l + r)//2\r\n\r\n            R.append(r)\r\n\r\n    print(\" \".join(str(r) for r in R))\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n"
+}

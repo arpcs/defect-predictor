@@ -1,0 +1,40 @@
+{
+    "id": 203380137,
+    "contestId": 1750,
+    "creationTimeSeconds": 1682381700,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "apoorv_me"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1667745300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 29,
+    "timeConsumedMillis": 61,
+    "memoryConsumedBytes": 6144000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#ifdef LOCAL\r\n#include \"../debug.h\"\r\n#else\r\n#define dbg(...) \"11-111\"\r\n#endif\r\n\r\ntemplate<class T>\r\nstruct BIT{\r\n    int n;\r\n    vector<T> tree;\r\n    BIT(int __n = 0) : n(__n + 1){\r\n        tree = vector<T>(n, 0);\r\n    }\r\n    BIT(const vector<T> &a, int __n) : n(__n + 1){\r\n        tree.resize(n);\r\n        for(int i = 0 ; i < n - 1 ; i++) {\r\n            pointupdate(i, a[i]);\r\n        }\r\n    }\r\n    void update(int i, T delta){\r\n        for(i++ ; i < n ; i += (i & -i))    tree[i] += delta;\r\n    }\r\n    T psum(int i){\r\n        T sum = 0;\r\n        for(i++ ; i > 0 ; i -= i & -i)    sum += tree[i];\r\n        return sum;\r\n    }\r\n    T rsum(int i, int j){\r\n        return (psum(j) - psum(i-1));\r\n    }\r\n};\r\n\r\nint32_t main() {\r\n    ios_base::sync_with_stdio(0);   cin.tie(0);\r\n    \r\n    auto solve = [&](int testcase) -> void {\r\n        int n;  cin >> n;\r\n        string s;   cin >> s;\r\n        vector<int> pf(n + 1);\r\n        for(int i = 0 ; i < n ; i++)    pf[i + 1] = pf[i] + (s[i] == '(' ? 1 : -1);\r\n\r\n        stack<int> stk;\r\n        vector<long long> ans(n + 1, 1);\r\n        for(int i = 0 ; i <= n ; i++) {\r\n            while(!stk.empty() && pf[stk.top()] > pf[i]) {\r\n                stk.pop();\r\n            }\r\n            ans[i] *= i - (!stk.empty() ? stk.top() : -1);\r\n            stk.push(i);\r\n        }\r\n        dbg(ans);\r\n        while(!stk.empty()) stk.pop();\r\n        for(int i = n ; i >= 0 ; i--) {\r\n            while(!stk.empty() && pf[stk.top()] >= pf[i])   stk.pop();\r\n            ans[i] *= (!stk.empty() ? stk.top() : n + 1) - i;\r\n            stk.push(i);\r\n        }\r\n\r\n        long long res = 0;\r\n\r\n        BIT<int> bit(2 * n + 5);\r\n        bit.update(n, 1);\r\n        for(int i = 1 ; i <= n ; i++) {\r\n            res += bit.psum(n + pf[i]) * pf[i];\r\n            dbg(n + pf[i], bit.psum(n + pf[i]));\r\n            bit.update(n + pf[i], 1);\r\n        }\r\n\r\n\r\n        bit = 2 * n + 5;\r\n        bit.update(n + pf[n], 1);\r\n        for(int i = n - 1 ; i >= 0 ; i--) {\r\n            bit.update(n + pf[i], 1);\r\n            res += bit.psum(n + pf[i] - 1) * pf[i];\r\n            dbg(n + pf[i], bit.psum(n + pf[i] - 1));\r\n        }\r\n        dbg(res);\r\n\r\n        dbg(ans, pf);\r\n        for(int i = 1 ; i <= n ; i++) {\r\n            ans[i]--;\r\n            res -= pf[i] * ans[i];\r\n            dbg(pf[i], ans[i], res);\r\n        }\r\n        cout << res << \"\\n\";\r\n    };\r\n\r\n    int tests;   cin >> tests;\r\n    for(int test = 1 ; test <= tests ; test++)\r\n        solve(test);\r\n\r\n    return 0;\r\n}\r\n\r\n"
+}

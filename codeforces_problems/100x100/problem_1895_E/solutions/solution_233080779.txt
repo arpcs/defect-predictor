@@ -1,0 +1,44 @@
+{
+    "id": 233080779,
+    "contestId": 1895,
+    "creationTimeSeconds": 1700224579,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "cjnwq"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 249,
+    "memoryConsumedBytes": 307200,
+    "source": "#include <vector>\n#include <array>\n#include <stack>\n#include <queue>\n#include <list>\n#include <bitset>\n#include <set>\n#include <map>\n#include <unordered_set>\n#include <unordered_map>\n#include <algorithm>\n#include <numeric>\n#include <iostream>\n#include <iomanip>\n#include <string>\n#include <chrono>\n#include <random>\n#include <cmath>\n#include <cassert>\n#include <climits>\n#include <cstring>\n#include <cstdlib>\n#include <functional>\n#include <sstream>\n\n// #include <DebugTracing.hpp>\n#define print(...)\nusing namespace std;\n\nclass FenwickTree {\n    public:\n        FenwickTree(int n) : N(n), data(N, 0) {\n            h = 0;\n            while (1 << (h + 1) <= N) {\n                ++h;\n            }\n        }\n\n        void reset() {\n            fill(data.begin(), data.end(), 0);\n        }\n\n        void put(int x, int v) {\n            assert(x >= 0);\n            for (; x < N; x |= x + 1) {\n                data[x] += v;\n            }\n        }\n\n        int get(int x) {\n            assert(x < N);\n            int res = 0;\n            for (; x >= 0; x = (x & (x + 1)) - 1) {\n                res += data[x];\n            }\n            return res;\n        }\n\n\n        int get(int l, int r) {\n            if (l > r) {\n                return 0;\n            }\n            return get(r) - get(l - 1);\n        }\n\n\n    private:\n        int N;\n        int h;\n        vector<int> data;\n};\n\n\nclass Solution {\npublic:\n    vector<int> solve(vector<vector<int>>& A, vector<vector<int>>& B) {\n        int n = (int) A[0].size();\n        int m = (int) B[0].size();\n\n        vector<int> X;\n        for (auto& V : A) {\n            for (auto x : V) {\n                X.push_back(x);\n            }\n        }\n        for (auto& V : B) {\n            for (auto x : V) {\n                X.push_back(x);\n            }\n        }\n        sort(X.begin(), X.end());\n        X.resize(unique(X.begin(), X.end()) - X.begin());\n        auto index = [&](int x) {\n            return lower_bound(X.begin(), X.end(), x) - X.begin();\n        };\n\n        for (auto& V : A) {\n            for (auto& x : V) {\n                x = index(x);\n            }\n        }\n        for (auto& V : B) {\n            for (auto& x : V) {\n                x = index(x);\n            }\n        }\n\n        int sz = (int) X.size();\n        vector<vector<FenwickTree>> fts(2, vector<FenwickTree>(2, sz + 1));\n\n\n        vector<pair<int,int>> P;\n        for (int i = 0; i < n; ++i) {\n            P.push_back({A[1][i], i << 1 | 0});\n        }\n        for (int i = 0; i < m; ++i) {\n            P.push_back({B[1][i], i << 1 | 1});\n        }\n\n        vector<vector<int>> degs(2);\n        {\n            auto& D = degs[0];\n            D.resize(n, 0);\n            vector<int> BX = B[0];\n            sort(BX.begin(), BX.end());\n            for (int i = 0; i < n; ++i) {\n                int d = A[1][i];\n                auto it = upper_bound(BX.begin(), BX.end(), d);\n                D[i] = m - (int)(it - BX.begin());\n            }\n        }\n        {\n            auto& D = degs[1];\n            D.resize(m, 0);\n            vector<int> AX = A[0];\n            sort(AX.begin(), AX.end());\n            for (int i = 0; i < m; ++i) {\n                int d = B[1][i];\n                auto it = upper_bound(AX.begin(), AX.end(), d);\n                D[i] = n - (int)(it - AX.begin());\n            }        \n        }\n\n        sort(P.rbegin(), P.rend());\n\n        vector<int> res(3, 0);\n        for (auto [d, key] : P) {\n            int idx = key >> 1;\n            int side = key & 1;\n            \n            int f = 1;\n            if (fts[side ^ 1][1].get(sz - 1 - (d + 1)) != 0) {\n                f = 2;\n            } else if (fts[side ^ 1][0].get(sz - 1 - (d + 1)) == degs[side][idx]) {\n                f = 0;\n            }\n\n            int a = side == 0 ? A[0][idx] : B[0][idx];\n            if (f == 0) {\n                fts[side][1].put(sz - 1 - a, 1);\n            }\n            if (f == 2) {\n                fts[side][0].put(sz - 1 - d, 1);\n            }\n            \n            print(side, idx, d, f);\n            if (side == 0) {\n                res[f] += 1;\n            }\n        }\n        return res;\n    }\n};\n\nint main(int argc, char** argv) {\n    ios::sync_with_stdio(false);\n    cin.tie(0);\n    cout << fixed << setprecision(12);\n\n\n    Solution sol;\n    int t;\n    cin >> t;\n    while (t-- > 0) {\n        int n;\n        cin >> n;\n        vector<vector<int>> A(2, vector<int>(n));\n        for (int i = 0; i < 2; ++i) {\n            for (int j = 0; j < n; ++j) {\n                cin >> A[i][j];\n            }\n        }\n        int m;\n        cin >> m;\n        vector<vector<int>> B(2, vector<int>(m));\n        for (int i = 0; i < 2; ++i) {\n            for (int j = 0; j < m; ++j) {\n                cin >> B[i][j];\n            }\n        }\n        auto res = sol.solve(A, B);\n        for (auto x : res) {\n            cout << x << ' ';\n        }\n        cout << '\\n';\n    }\n\n    return 0;\n}"
+}

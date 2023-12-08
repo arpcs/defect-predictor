@@ -1,0 +1,41 @@
+{
+    "id": 170559753,
+    "contestId": 1706,
+    "creationTimeSeconds": 1662107942,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "YHJia"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 405,
+    "memoryConsumedBytes": 89088000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing ll = long long;\r\n#define int long long \r\n#define fi first\r\n#define se second\r\n#define pb push_back\r\n#define sz(x) ((int)x.size())\r\n#define rep(i, a, n) for (int i = a; i <= n; i ++ )\r\n#define dep(i, a, n) for (int i = n; i >= a; i -- )\r\n#define dbg(x) cerr << \"debug: \" << #x << \": \" << (x) << '\\n';\r\n#define dbg2(x, y) cerr << \"debug: \" << #x << \": \" << (x) << \" \" << #y << \": \" << y << '\\n';\r\nconstexpr int N = 1e5 + 5, M = 22;\r\nint n, m, q, a[N];\r\nstruct edge {\r\n    int u, v, val;\r\n}e[N * 2];\r\nvector<pair<int, int>> adj[N];\r\nint p[N], fa[N][30], val[N][30], depth[N];\r\n\r\nint find(int u) {\r\n    return p[u] == u ? u : p[u] = find(p[u]);\r\n}\r\n\r\nbool kruskal(int n, int m, edge* e) {\r\n    int cnt = 0;\r\n    iota(p, p + n + 1, 0);\r\n    rep(i, 1, n) {\r\n        adj[i].clear();\r\n    }\r\n    for (int i = 1; i <= m; i ++ ) {\r\n        int u = e[i].u, v = e[i].v, val = e[i].val;\r\n        int fx = find(u), fy = find(v);\r\n        if (fx != fy) {\r\n            adj[u].pb({v, val}), adj[v].pb({u, val});\r\n            p[fx] = fy;\r\n            cnt++;\r\n        }\r\n    }\r\n    return (cnt == n - 1);\r\n}\r\n\r\nvoid dfs(int u, int f) {\r\n    depth[u] = depth[f] + 1;\r\n    for (auto x : adj[u]) {\r\n        if (x.first == f) continue;\r\n        int v = x.first, w = x.second;\r\n        fa[v][0] = u;\r\n        val[v][0] = w;\r\n        for (int i = 1; i <= 20; i ++ ) {\r\n            fa[v][i] = fa[fa[v][i - 1]][i - 1];\r\n            val[v][i] = max(val[v][i - 1], val[fa[v][i - 1]][i - 1]);\r\n        }\r\n        dfs(v, u);\r\n    }\r\n    return;\r\n}\r\n\r\nint LCA(int u, int v) {\r\n    if (depth[u] < depth[v]) {\r\n        swap(u, v);\r\n    }\r\n    int ans = 0;\r\n    for (int i = 20; i >= 0; i -- ) {\r\n        if (depth[u] - (1 << i) >= depth[v]) {\r\n            ans = max(ans, val[u][i]);\r\n            u = fa[u][i];\r\n        }\r\n    }\r\n    if (u == v) return ans;\r\n    for (int i = 20; i >= 0; i -- ) {\r\n        if (fa[u][i] != fa[v][i]) {\r\n            ans = max(val[u][i], ans);\r\n            ans = max(val[v][i], ans);\r\n            u = fa[u][i];\r\n            v = fa[v][i];\r\n        }\r\n    }\r\n    return max({ans, val[u][0], val[v][0]});\r\n}\r\n\r\nstruct ST {\r\n    int mx[M][N];\r\n    void init(int n, int *a) {\r\n        int k = __lg(n);\r\n        for (int i = 1; i <= n; i ++ ) {\r\n            mx[0][i] = a[i];\r\n        }\r\n        for (int j = 1; j <= k; j ++ ) {\r\n            for (int i = 1; i + (1 << j) - 1 <= n; i ++ ) {\r\n                mx[j][i] = max(mx[j - 1][i], mx[j - 1][i + (1 << j - 1)]);\r\n            }\r\n        }\r\n    }\r\n    int querymx(int l, int r) {\r\n        if (l > r) {\r\n            swap(l, r);\r\n        }\r\n        int k = __lg(r - l + 1);\r\n        return max(mx[k][l], mx[k][r - (1 << k) + 1]);\r\n    }\r\n}tree;\r\n\r\nvoid solve() {\r\n    cin >> n >> m >> q;\r\n    rep(i, 1, m) {\r\n        cin >> e[i].u >> e[i].v;\r\n        e[i].val = i;\r\n    }\r\n    kruskal(n, m, e);\r\n    dfs(1, 0);\r\n    for (int i = 1; i <= n - 1; i ++ ) {\r\n        a[i] = LCA(i, i + 1);\r\n    }\r\n    tree.init(n, a);\r\n    rep(i, 1, q) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        if (u == v) {\r\n            cout << 0 << \" \\n\"[i == q];\r\n        } else {\r\n            if (u > v) {\r\n                swap(u, v);\r\n            }\r\n            cout << tree.querymx(u, v - 1) << \" \\n\"[i == q];\r\n        }\r\n    }\r\n}\r\n\r\nsigned main(void) {\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(nullptr), cout.tie(nullptr);\r\n\tint t = 1;\r\n    cin >> t;\r\n\twhile (t -- ) {\r\n\t\tsolve();\r\n\t}\r\n\treturn 0;\r\n} \r\n"
+}

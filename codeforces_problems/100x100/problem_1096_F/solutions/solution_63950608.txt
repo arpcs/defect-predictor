@@ -1,0 +1,36 @@
+{
+    "id": 63950608,
+    "contestId": 1096,
+    "creationTimeSeconds": 1572555823,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1096,
+        "index": "F",
+        "name": "Inversion Expectation",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1096,
+        "members": [
+            {
+                "handle": "_HossamYehia_"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1546007700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 6348800,
+    "source": "#pragma GCC optimize (\"O3\")\r\n#include <bits/stdc++.h>\r\n#define ll long long\r\n#define IO ios_base::sync_with_stdio(0),cin.tie(0),cout.tie(0);\r\nusing namespace std;\r\nconst int N = 2e5 + 5, M = 2 * N + 5;\r\n\r\nll MOD(998244353);\r\nint sz(-1);\r\nstruct BIT{\r\n    int N = 1 << 19;\r\n    int tree[1 << 19];\r\n    BIT(){\r\n        memset(tree, 0, sizeof tree);\r\n        init();\r\n    }\r\n    int getSum(int i){\r\n        if (i == -1)\r\n            return -1;\r\n        int res = 0;\r\n        for (i++; i; i -= i & (-i))\r\n            res += tree[i - 1];\r\n        return res;\r\n    }\r\n    void add(int i, int v){\r\n        ++sz;\r\n        for (i++; i <= N; i += i &(-i))\r\n            tree[i-1] += v;\r\n    }\r\n    int find(int t){ // lower bound\r\n        int s = 0;\r\n        for (int sz = N >> 1; sz; sz >>=1)\r\n            if (tree[(s + sz) - 1] < t)\r\n                t -= tree[(s += sz) - 1];\r\n        return s;\r\n    }\r\n    void init(){\r\n        add(0, -1);\r\n    }\r\n    void insert(int x){\r\n        add(x, 1);\r\n    }\r\n    int count(int x){\r\n        return getSum(x) - getSum(x - 1);\r\n    }\r\n    int at(int i){\r\n        return find(i);\r\n    }\r\n    void eraseAll(int x){\r\n        add(x, -count(x));\r\n    }\r\n    void eraseNum(int x,int cnt){\r\n        add(x, -min(cnt,count(x)));\r\n    }\r\n    void eraseOne(int x){\r\n        if (count(x))\r\n            add(x, -1);\r\n    }\r\n    int lower_bound(int v){\r\n        return getSum(v - 1) + 1;\r\n    }\r\n    int upper_bound(int v){\r\n        return lower_bound(v + 1);\r\n    }\r\n    int size(){\r\n        return getSum(N - 1) + 1;\r\n    }\r\n};\r\n\r\nll pow(ll a, ll b){\r\n    ll x=1,y=a;\r\n    while(b > 0){\r\n        if(b%2 == 1)\r\n        {\r\n            x=(x*y);\r\n            if(x>MOD) x%=MOD;\r\n        }\r\n        y = (y*y);\r\n        if(y>MOD) y%=MOD;\r\n        b /= 2;\r\n    }\r\n    return x;\r\n}\r\nll InverseEuler(ll n){\r\n    return pow(n, MOD - 2);\r\n}\r\n\r\nint a[N];\r\nbool vis[N];\r\nll cnt[N], f[N];\r\n\r\nint main(){\r\n    int n;\r\n    scanf(\"%d\", &n);\r\n    for(int i = 0 ; i < n ; ++i){\r\n        scanf(\"%d\", a + i);\r\n        if(~a[i])vis[a[i]] = true;\r\n    }\r\n    vector<int> mawgod, mshmawgod;\r\n    for(int i = 1 ; i <= n ; ++i){\r\n        if(vis[i])mawgod.emplace_back(i);\r\n        else mshmawgod.emplace_back(i);\r\n    }\r\n    ll ans = 0;\r\n    BIT bt;\r\n    for(auto x : mawgod){\r\n        // cout << sz << \" \" << bt.lower_bound(x) << endl;\r\n        ans += (sz - bt.lower_bound(x));\r\n        ans %= MOD;\r\n        bt.add(x, 1);\r\n    }\r\n    // cout << \"Ans1 = \" << ans << endl;\r\n    ll len = mshmawgod.size();\r\n    \r\n    /*****************************************/\r\n    ans += ((len * (len - 1)) * InverseEuler(2LL));\r\n    ans %= MOD;\r\n    /*****************************************/\r\n    \r\n    // cout << \"Ans2 = \" << ans << endl;\r\n    for(int i = n - 1 ; ~i ; --i)\r\n        cnt[i] = cnt[i + 1] + (a[i] == -1);\r\n    \r\n    f[0] = 1;\r\n    for(int i = 1 ; i <= n ; ++i)\r\n        f[i] = (f[i - 1] * i) % MOD;\r\n    \r\n    for(int i = 0 ; i < n ; ++i){\r\n        if(a[i] == -1)continue;\r\n        int mkan = lower_bound(mshmawgod.begin(), mshmawgod.end(), a[i]) - mshmawgod.begin();\r\n        // cout << cnt[i] << \" \" << mkan << endl;\r\n        /*****************************************/\r\n        ans += (1LL * cnt[i] * mkan * f[len - 1]);\r\n        ans %= MOD;\r\n        /*****************************************/\r\n    }\r\n    \r\n    // cout << \"Ans3 = \" << ans << endl;\r\n    // cout << ans << \" \" << InverseEuler(f[len]) << endl;\r\n    \r\n    printf(\"%lld\\n\", (ans * InverseEuler(f[len])) % MOD);\r\n}"
+}

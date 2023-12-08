@@ -1,0 +1,34 @@
+{
+    "id": 118920441,
+    "contestId": 5,
+    "creationTimeSeconds": 1623277368,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 5,
+        "index": "E",
+        "name": "Bindian Signalizing",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 5,
+        "members": [
+            {
+                "handle": "DeadFox"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1269100800
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 2462,
+    "memoryConsumedBytes": 124518400,
+    "source": "#include <cmath>\n\n#include <algorithm>\n#include <iostream>\n#include <map>\n#include <set>\n#include <string>\n#include <tuple>\n#include <vector>\n\nint main() {\n  std::ios::sync_with_stdio(false);\n  std::cin.tie(nullptr);\n  size_t n;\n  std::cin >> n;\n  std::vector<int32_t> h(n);\n  std::map<int32_t, std::vector<size_t>> positions;\n  for(size_t i = 0; i < n; ++i){\n    std::cin >> h[i];\n    positions[h[i]].push_back(i);\n  }\n  if(positions.size() == 1){\n    std::cout << n * (n - 1) / 2 << '\\n';\n    return 0;\n  }\n  std::vector<size_t> is_set(n);\n  std::vector<size_t> left(n);\n  std::vector<size_t> right(n);\n  uint64_t result = 0;\n  uint64_t neighs = 2;\n  size_t id = 0;\n  for(const auto& [k, poss]: positions){\n    size_t last = n + 1;\n    size_t count = 0;\n    id += poss.size();\n    if(id + 1 == n){\n      neighs = 1;\n    }\n    if(id == n){\n      uint64_t cur = poss.size();\n      result += cur * (cur - 1) / 2;\n      break;\n    }\n    size_t ptr = 0;\n    for(;; ++ptr){\n      const size_t pos = poss[ptr];\n      const size_t prev = pos == 0 ? n - 1 : pos - 1;\n      if(is_set[prev]){\n        const size_t l = (prev - left[prev] - 1 + n) % n;\n        if(poss[(ptr - 1 + poss.size()) % poss.size()] != l){\n          break;\n        }\n      }else{\n        if(poss[(ptr - 1 + poss.size()) % poss.size()] != prev){\n          break;\n        }\n      }\n    }\n    for(size_t i = 0; i < poss.size(); ++i){\n      const size_t pos = poss[(ptr + i) % poss.size()];\n      is_set[pos] = true;\n      const size_t prev = pos == 0 ? n - 1 : pos - 1;\n      const size_t next = pos + 1 == n ? 0 : pos + 1;\n      if(is_set[prev]){\n        if(is_set[next]){\n          const size_t l = (prev - left[prev] + n) % n;\n          const size_t r = (next + right[next]) % n;\n          const size_t tot = (r - l + n) % n;\n          if(l == last){\n            count += 1;\n          }else{\n            result += count * (count - 1) / 2;\n            last = l;\n            count = 1;\n          }\n          right[l] = tot;\n          left[r] = tot;\n        }else{\n          const size_t l = (prev - left[prev] + n) % n;\n          const size_t tot = left[prev] + 1;\n          if(l == last){\n            count += 1;\n          }else{\n            result += count * (count - 1) / 2;\n            last = l;\n            count = 1;\n          }\n          right[l] = tot;\n          left[pos] = tot;\n        }\n      }else if(is_set[next]){\n        const size_t r = (next + right[next]) % n;\n        const size_t tot = right[next] + 1;\n        result += count * (count - 1) / 2;\n        last = pos;\n        count = 1;\n        right[pos] = tot;\n        left[r] = tot;\n      }else{\n        result += count * (count - 1) / 2;\n        last = pos;\n        count = 1;\n      }\n    }\n    result += count * (count - 1) / 2 + poss.size() * neighs;\n  }\n  std::cout << result << '\\n';\n}\n"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 231431454,
+    "contestId": 386,
+    "creationTimeSeconds": 1699171751,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 386,
+        "index": "D",
+        "name": "Game with Points",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2100,
+        "tags": [
+            "dp",
+            "graphs",
+            "implementation",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 386,
+        "members": [
+            {
+                "handle": "Hamed_Ghaffari"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1389906900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 60,
+    "timeConsumedMillis": 546,
+    "memoryConsumedBytes": 10547200,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef long long       ll;\r\ntypedef pair<int, int>  pii;\r\n\r\n#define FastIO          cin.tie(NULL); cout.tie(NULL); ios_base::sync_with_stdio(false);\r\n#define FileIO          freopen(\"input.txt\", \"r\", stdin); freopen(\"output.txt\", \"w\", stdout);\r\n#define F               first\r\n#define S               second\r\n#define max_heap(T)     priority_queue<T>\r\n#define min_heap(T)     priority_queue<T, vector<T>, greater<T>>\r\n#define fr(i,a,b)       for(int i=a;i<b;i++)\r\n#define frr(i,a,b)      for(int i=a;i>b;i--)\r\n#define frin(i,A)       for(auto &i : A)\r\n#define sz(x)           (int)x.size()\r\n#define all(A)          A.begin(), A.end()\r\n#define mins(a,b)       a = min(a,b)\r\n#define maxs(a,b)       a = max(a,b)\r\n#define pb              push_back\r\n#define popcnt          __builtin_popcount\r\n#define setprec(x)      cout << fixed << setprecision(x)\r\n#define kill(x)         cout << x << '\\n', exit(0)\r\n#define killt(x)        cout << x << '\\n', return\r\n#define md(a)           (a%MOD+MOD)%MOD\r\n\r\nconst ll  INF  = 2e9;\r\nconst ll  MOD  = 1e9 + 7;\r\nconst int MAXN = 73;\r\nconst int LOG  = 30;\r\n\r\n#define T third\r\nstruct state { int first, second, third; } par[MAXN][MAXN][MAXN];\r\nint n, dis[MAXN][MAXN][MAXN];\r\nchar A[MAXN][MAXN];\r\n\r\nvector<state> adj(state st) {\r\n    vector<state> res;\r\n    fr(i, 1, n+1)\r\n        if(i != st.F && i != st.S && i != st.T) {\r\n            if(A[st.F][i] == A[st.S][st.T])\r\n                res.pb({i, st.S, st.T});\r\n            if(A[st.S][i] == A[st.F][st.T])\r\n                res.pb({st.F, i, st.T});\r\n            if(A[st.T][i] == A[st.F][st.S])\r\n                res.pb({st.F, st.S, i});\r\n        }\r\n    return res;\r\n}\r\n\r\nvoid bfs(state st) {\r\n    fr(i, 1, n+1)\r\n        fr(j, 1, n+1)\r\n            fr(k, 1, n+1)\r\n                dis[i][j][k] = INF;\r\n    dis[st.F][st.S][st.T] = 0;\r\n    queue<state> q; q.push(st);\r\n    while(sz(q)>0) {\r\n        state v = q.front(); q.pop();\r\n        vector<state> g = adj(v);\r\n        frin(u, g)\r\n            if(dis[u.F][u.S][u.T] == INF) {\r\n                dis[u.F][u.S][u.T] = dis[v.F][v.S][v.T]+1;\r\n                par[u.F][u.S][u.T] = v;\r\n                q.push(u);\r\n            }\r\n    }\r\n}\r\n\r\nvoid solve() {\r\n    cin >> n;\r\n    int a, b, c;\r\n    cin >> a >> b >> c;\r\n    fr(i, 1, n+1)\r\n        fr(j, 1, n+1)\r\n            cin >> A[i][j];\r\n    bfs({a, b, c});\r\n    vector<state> goal = {{1,2,3}, {1,3,2}, {2,1,3}, {2,3,1}, {3,1,2}, {3,2,1}};\r\n    int mn = INF;\r\n    state e;\r\n    frin(i, goal)\r\n        if(dis[i.F][i.S][i.T] < mn) {\r\n            mn = dis[i.F][i.S][i.T];\r\n            e = i;\r\n        }\r\n    if(mn == INF)\r\n        kill(-1);\r\n    cout << mn << '\\n';\r\n    vector<pii> ans;\r\n    while(e.F != a || e.S != b || e.T != c) {\r\n        if(e.F != par[e.F][e.S][e.T].F) ans.pb({par[e.F][e.S][e.T].F, e.F});\r\n        if(e.S != par[e.F][e.S][e.T].S) ans.pb({par[e.F][e.S][e.T].S, e.S});\r\n        if(e.T != par[e.F][e.S][e.T].T) ans.pb({par[e.F][e.S][e.T].T, e.T});\r\n        e = par[e.F][e.S][e.T];\r\n    }\r\n    while(sz(ans)>0) {\r\n        cout << ans.back().F << ' ' << ans.back().S << '\\n';\r\n        ans.pop_back();\r\n    }\r\n}\r\n\r\nint32_t main() {\r\n    FastIO\r\n    int T = 1;\r\n    // cin >> T;\r\n    while(T--)\r\n        solve();\r\n    return 0;\r\n}"
+}

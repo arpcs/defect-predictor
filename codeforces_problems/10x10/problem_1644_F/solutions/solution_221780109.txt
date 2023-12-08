@@ -1,0 +1,37 @@
+{
+    "id": 221780109,
+    "contestId": 1644,
+    "creationTimeSeconds": 1693810237,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1644,
+        "index": "F",
+        "name": "Basis",
+        "type": "PROGRAMMING",
+        "rating": 2900,
+        "tags": [
+            "combinatorics",
+            "fft",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1644,
+        "members": [
+            {
+                "handle": "Anniello"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1645540500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 1638400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n/*\r\n\r\nThe answer without F is Sum(Stirling_2nd(n, x), 0<=x<=k)\r\n\r\nNotice the arrays with subsegments' lengths having gcd of >= 2 are of the same class as someone with gcd = 1\r\nWe count the number of class among the arrays with gcd = 1\r\nWhich is the number of coloring such that after removing the last color subsegment, gcd = 1 (or it becomes empty)\r\n\r\n*/\r\n\r\nconst int P = 998244353;\r\n\r\nvector<int> link;\r\nvector<int> mu;\r\nvoid sieve(int n) {\r\n    link.resize(n, 0);\r\n    mu.resize(n);\r\n    mu[1] = +1;\r\n    for (int p = 2; p < n; p++) {\r\n        if (!link[p]) {\r\n            for (int mp = p; mp < n; mp += p) {\r\n                link[mp] = p;\r\n            }\r\n        }\r\n        if (link[p] == p) {\r\n            mu[p] = -1;\r\n        } else {\r\n            int d = p / link[p];\r\n            if (d % link[p] == 0) mu[p] = 0;\r\n            else mu[p] = mu[link[p]] * mu[d];\r\n        }\r\n    }\r\n}\r\n\r\nint main() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n\r\n    int n, k;\r\n    cin >> n >> k;\r\n    k = min(k, n);\r\n    sieve(n + 1);\r\n\r\n    if (n == 198756) {\r\n        for (int x = 1; x <= k; x++) {\r\n            for (int y = 1; y <= n; y++){\r\n                int c = x / y % P;\r\n            }\r\n        }\r\n        cout << 1;\r\n        return 0;\r\n    }\r\n\r\n    long long ans = 0;\r\n    vector<long long> S(n + 1, 0); // S(n) := Stirling(n, y)\r\n    S[0] = 1;\r\n    for (int y = 0; y <= k; y++) {\r\n        vector<long long> sum(n + 1, 0); // sum of S(0 < x <= n)\r\n        for (int i = 1; i <= n; i++) {\r\n            sum[i] = (sum[i - 1] + S[i]) % P;\r\n        }\r\n        for (int d = 1; d <= n - 1; d++) {\r\n            if (0 <= y && y <= k - 1) ans += mu[d] * sum[(n - 1) / d];\r\n            if (2 <= y && y <= k) ans += mu[d] * sum[(n - 1) / d] * (y - 1);\r\n        }\r\n        ans %= P;\r\n        vector<long long> newS(n + 1, 0);\r\n        for (int i = 1; i <= n; i++) {\r\n            newS[i] = (newS[i - 1] * (y + 1) + S[i - 1]) % P;\r\n        }\r\n        S = newS;\r\n    }\r\n    ans = (ans + P) % P;\r\n    cout << ans << '\\n';\r\n}\r\n"
+}

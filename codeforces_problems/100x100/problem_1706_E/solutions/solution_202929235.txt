@@ -1,0 +1,41 @@
+{
+    "id": 202929235,
+    "contestId": 1706,
+    "creationTimeSeconds": 1682060947,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "mayer1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 75468800,
+    "source": "// LUOGU_RID: 108587796\n#include <cmath>\n#include <cstdio>\n#include <cstring>\n#include <iomanip>\n#include <iostream>\n#include <algorithm>\n#include <bitset>\n#include <string>\n#include <vector>\n#include <deque>\n#include <queue>\n#include <stack>\n#include <map>\n#include <set>\nusing std::cin;\nusing std::cout;\nconst int N = 2e5 + 10;\nint n, m, q, cnt;\nint val[N << 1];\nint f[N << 1];\nint find(int x) { return f[x] == x ? x : f[x] = find(f[x]); }\nstd::vector<int> e[N << 1];\nint dep[N << 1], fa[N << 1][20];\nvoid dfs(int x, int fat)\n{\n    dep[x] = dep[fat] + 1;\n    fa[x][0] = fat;\n    for (int i = 1; i < 20; i++)\n        fa[x][i] = fa[fa[x][i - 1]][i - 1];\n    for (auto y : e[x])\n        dfs(y, x);\n}\nint lca(int x, int y)\n{\n    if (dep[x] < dep[y])\n        std::swap(x, y);\n    for (int i = 19; i >= 0; i--)\n        if (dep[x] - dep[y] >= (1 << i))\n            x = fa[x][i];\n    if (x == y)\n        return x;\n    for (int i = 19; i >= 0; i--)\n        if (fa[fa[x][i]][0] != fa[fa[y][i]][0])\n            x = fa[x][i], y = fa[y][i];\n    return fa[x][0];\n}\nint lg[N << 1], s[N << 1][20];\nvoid st()\n{\n    for (int i = 2; i < n; i++)\n        lg[i] = lg[i >> 1] + 1;\n    for (int i = 1; i < n; i++)\n        s[i][0] = val[lca(i, i + 1)];\n    for (int j = 1; j < 20; j++)\n        for (int i = 1; i + (1 << j) - 1 < n; i++)\n            s[i][j] = std::max(s[i][j - 1], s[i + (1 << (j - 1))][j - 1]);\n}\nvoid solve()\n{\n    cin >> n >> m >> q;\n    cnt = n;\n    for (int i = 1; i <= 2 * n - 1; i++)\n        f[i] = i, e[i].clear();\n    for (int x, y, i = 1; i <= m; i++)\n    {\n        cin >> x >> y;\n        int fx = find(x), fy = find(y);\n        if (fx != fy)\n        {\n            val[++cnt] = i;\n            f[fx] = f[fy] = cnt;\n            e[cnt].push_back(fx);\n            e[cnt].push_back(fy);\n        }\n    }\n    dfs(cnt, cnt);\n    st();\n    for (int x, y; q--;)\n    {\n        cin >> x >> y;\n        if (x != y)\n        {\n            int k = lg[y - x];\n            cout << std::max(s[x][k], s[y - (1 << k)][k]) << ' ';\n        }\n        else cout << \"0 \";\n    }\n    cout << '\\n';\n}\nsigned main()\n{\n    // freopen(\".in\",\"r\",stdin);\n    // freopen(\".out\",\"w\",stdout);\n    std::ios::sync_with_stdio(false);\n    // cin.tie(0), cout.tie(0);\n    int T;\n    cin >> T;\n    while (T--)\n        solve();\n    return 0;\n}"
+}

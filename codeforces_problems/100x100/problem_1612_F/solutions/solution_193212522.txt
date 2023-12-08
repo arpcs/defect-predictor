@@ -1,0 +1,37 @@
+{
+    "id": 193212522,
+    "contestId": 1612,
+    "creationTimeSeconds": 1676131746,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1612,
+        "index": "F",
+        "name": "Armor and Weapons",
+        "type": "PROGRAMMING",
+        "rating": 2800,
+        "tags": [
+            "brute force",
+            "dp",
+            "greedy",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1612,
+        "members": [
+            {
+                "handle": "YeXiaoRain"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1637573700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 102707200,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\ntypedef long long ll;\ntypedef long long i64;\ntypedef int i32;\n#define rep(i,a,n) for(i64 i=(a);i<(i64)(n);i++)\n\ni64 read(){i64 r;scanf(\"%lld\",&r);return r;}\n\nvector<int> a2b[200010];\nconst int PWR = 30; // fib(30) > 2e5\n\nvector dpa(PWR,vector<ll>(200010,0)); // dpa[step][a] = maxb\nvector dpb(PWR,vector<ll>(200010,0)); // dpb[step][b] = maxa\n\nint main(){\n  ll n=read();\n  ll m=read();\n  int q=read();\n  while(q--){\n    int a=read();\n    int b=read();\n    a2b[a].push_back(b);\n  }\n  rep(a,1,n+1) if(a2b[a].size()>1) sort(begin(a2b[a]),end(a2b[a]));\n\n  dpa[0][1] = 1;\n  dpb[0][1] = 1;\n  auto hasab = [&](int a,int b) -> bool{\n    int ib = lower_bound(begin(a2b[a]),end(a2b[a]),b) - begin(a2b[a]);\n    return ib < (int)size(a2b[a]) and a2b[a][ib] == b;\n  };\n  rep(step,1,PWR){\n    // printf(\"step = %lld\\n\",step);\n    auto update=[&](ll na,ll nb,vector<vector<ll>>&va, vector<vector<ll>>&vb,auto has){\n      // va[step-1][a] = max(a+va[step][a]+(?1), a+wb+(?1) (vb[step][wb] >= a))`\n      rep(a,1,na+1){\n        if(va[step-1][a] == 0) break;\n        va[step][a] = min(a + va[step-1][a] + has(a,va[step-1][a]),nb);\n      }\n      int prea=1;\n      rep(b,1,nb+1){\n        if(vb[step-1][b] == 0) break;\n        int mxa = vb[step-1][b];\n        int nexta = min(b+mxa+has(b,mxa),na);\n        rep(a,prea,nexta+1) va[step][a] = max(va[step][a],b);\n        if(nexta == na) break;\n        prea = nexta+1;\n      }\n    };\n    auto hasba=[&](int b,int a){return hasab(a,b);};\n    update(n,m,dpa,dpb,hasab);\n    update(m,n,dpb,dpa,hasba);\n    if(dpa[step][n] == m || dpb[step][m] == n) {\n      printf(\"%lld\\n\",step);\n      return 0;\n    }\n  }\n  assert(false);\n  if(n < m){\n    int b = dpa[PWR-1][n];\n    assert(b > 0) ;\n    int ans=PWR-1;\n    while(b <= m){\n      b = min(m, n + b + hasab(n,b));\n      ans++;\n    }\n    printf(\"%d\\n\",ans);\n  }else{\n    int a = dpb[PWR-1][m];\n    assert(a > 0) ;\n    int ans=PWR-1;\n    while(a <= n){\n      a = min(n, a + m + hasab(a,m));\n      ans++;\n    }\n    printf(\"%d\\n\",ans);\n  }\n\n  return 0;\n}\n"
+}

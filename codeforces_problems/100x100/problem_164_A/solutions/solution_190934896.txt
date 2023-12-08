@@ -1,0 +1,36 @@
+{
+    "id": 190934896,
+    "contestId": 164,
+    "creationTimeSeconds": 1674887660,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 164,
+        "index": "A",
+        "name": "Variable, or There and Back Again",
+        "type": "PROGRAMMING",
+        "points": 500.0,
+        "rating": 1700,
+        "tags": [
+            "dfs and similar",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 164,
+        "members": [
+            {
+                "handle": "wang.senyuan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1333897500
+    },
+    "programmingLanguage": "Go",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 1228800,
+    "source": "package main\n\nimport (\n\t\"bufio\"\n\t\"bytes\"\n\t\"fmt\"\n\t\"os\"\n)\n\nfunc main() {\n\treader := bufio.NewReader(os.Stdin)\n\tn, m := readTwoNums(reader)\n\tV := readNNums(reader, n)\n\tE := make([][]int, m)\n\tfor i := 0; i < m; i++ {\n\t\tE[i] = readNNums(reader, 2)\n\t}\n\tres := solve(n, V, E)\n\n\tvar buf bytes.Buffer\n\n\tfor i := 0; i < n; i++ {\n\t\tbuf.WriteString(fmt.Sprintf(\"%d\\n\", res[i]))\n\t}\n\n\tfmt.Print(buf.String())\n}\n\nfunc readFloat64(bs []byte, pos int, r *float64) int {\n\tvar first float64\n\tvar second float64\n\texp := 1.0\n\tvar dot bool\n\tfor pos < len(bs) && (bs[pos] == '.' || isDigit(bs[pos])) {\n\t\tif bs[pos] == '.' {\n\t\t\tdot = true\n\t\t} else if !dot {\n\t\t\tfirst = first*10 + float64(bs[pos]-'0')\n\t\t} else {\n\t\t\tsecond = second*10 + float64(bs[pos]-'0')\n\t\t\texp *= 10\n\t\t}\n\t\tpos++\n\t}\n\t*r = first + second/exp\n\t//fmt.Fprintf(os.Stderr, \"%.6f \", *r)\n\treturn pos\n}\n\nfunc isDigit(b byte) bool {\n\treturn b >= '0' && b <= '9'\n}\n\nfunc readUint64(bytes []byte, from int, val *uint64) int {\n\ti := from\n\n\tvar tmp uint64\n\tfor i < len(bytes) && bytes[i] >= '0' && bytes[i] <= '9' {\n\t\ttmp = tmp*10 + uint64(bytes[i]-'0')\n\t\ti++\n\t}\n\t*val = tmp\n\n\treturn i\n}\n\nfunc readInt(bytes []byte, from int, val *int) int {\n\ti := from\n\tsign := 1\n\tif bytes[i] == '-' {\n\t\tsign = -1\n\t\ti++\n\t}\n\ttmp := 0\n\tfor i < len(bytes) && bytes[i] >= '0' && bytes[i] <= '9' {\n\t\ttmp = tmp*10 + int(bytes[i]-'0')\n\t\ti++\n\t}\n\t*val = tmp * sign\n\treturn i\n}\n\nfunc readString(reader *bufio.Reader) string {\n\ts, _ := reader.ReadString('\\n')\n\tfor i := 0; i < len(s); i++ {\n\t\tif s[i] == '\\n' || s[i] == '\\r' {\n\t\t\treturn s[:i]\n\t\t}\n\t}\n\treturn s\n}\n\nfunc readNum(reader *bufio.Reader) (a int) {\n\tbs, _ := reader.ReadBytes('\\n')\n\treadInt(bs, 0, &a)\n\treturn\n}\n\nfunc readTwoNums(reader *bufio.Reader) (a int, b int) {\n\tres := readNNums(reader, 2)\n\ta, b = res[0], res[1]\n\treturn\n}\n\nfunc readThreeNums(reader *bufio.Reader) (a int, b int, c int) {\n\tres := readNNums(reader, 3)\n\ta, b, c = res[0], res[1], res[2]\n\treturn\n}\n\nfunc readNNums(reader *bufio.Reader, n int) []int {\n\tres := make([]int, n)\n\tx := 0\n\tbs, _ := reader.ReadBytes('\\n')\n\tfor i := 0; i < n; i++ {\n\t\tfor x < len(bs) && (bs[x] < '0' || bs[x] > '9') && bs[x] != '-' {\n\t\t\tx++\n\t\t}\n\t\tx = readInt(bs, x, &res[i])\n\t}\n\treturn res\n}\n\nfunc solve(n int, V []int, E [][]int) []int {\n\tg := NewGraph(n, len(E))\n\n\tfor _, e := range E {\n\t\tu, v := e[0], e[1]\n\t\tu--\n\t\tv--\n\t\tg.AddEdge(u, v)\n\t}\n\n\tvis := make([]bool, n)\n\n\tans := make([]int, n)\n\n\tvar dfs func(u int) bool\n\n\tdfs = func(u int) bool {\n\t\t// vis[u] = 0\uff0c V[u] = 0, and can reach from some i, V[i] = 1\n\t\tif vis[u] {\n\t\t\treturn ans[u] == 1 && V[u] != 1\n\t\t}\n\n\t\tif V[u] == 2 {\n\t\t\tans[u] = 1\n\t\t\treturn true\n\t\t}\n\n\t\tvis[u] = true\n\n\t\tfor i := g.node[u]; i > 0; i = g.next[i] {\n\t\t\tv := g.to[i]\n\t\t\tif V[v] == 0 || V[v] == 2 {\n\t\t\t\tif dfs(v) {\n\t\t\t\t\tans[u] = 1\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\treturn ans[u] == 1\n\t}\n\n\tfor i := 0; i < n; i++ {\n\t\tif !vis[i] && V[i] == 1 {\n\t\t\tdfs(i)\n\t\t}\n\t}\n\n\tfor i := 0; i < n; i++ {\n\t\tif ans[i] < 0 {\n\t\t\tans[i] = 0\n\t\t}\n\t}\n\treturn ans\n}\n\ntype Graph struct {\n\tnode []int\n\tnext []int\n\tto   []int\n\tcur  int\n}\n\nfunc NewGraph(n int, e int) *Graph {\n\tg := new(Graph)\n\tg.node = make([]int, n)\n\tg.next = make([]int, e+1)\n\tg.to = make([]int, e+1)\n\treturn g\n}\n\nfunc (g *Graph) AddEdge(u, v int) {\n\tg.cur++\n\tg.next[g.cur] = g.node[u]\n\tg.node[u] = g.cur\n\tg.to[g.cur] = v\n}\n"
+}

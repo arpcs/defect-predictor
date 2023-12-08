@@ -1,0 +1,37 @@
+{
+    "id": 231452340,
+    "contestId": 1419,
+    "creationTimeSeconds": 1699183100,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1419,
+        "index": "C",
+        "name": "Killjoy",
+        "type": "PROGRAMMING",
+        "points": 1250.0,
+        "rating": 1500,
+        "tags": [
+            "greedy",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1419,
+        "members": [
+            {
+                "handle": "andryweru"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1600526100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <iostream>\n#include <math.h>\n#include <vector>\n\n\nint max_addition(int current_rating, int killjoy_rating){\n    return 4000 - (killjoy_rating - current_rating);\n}\n\nint max_addition(std::vector<int> array_infected, int amount_infected, int old_size){\n    return 4000 * old_size - amount_infected;\n}\n\nint max_subtraction(int current_rating, int killjoy_rating){\n    return -4000 - (killjoy_rating - current_rating);\n}\n\nint max_subtraction(std::vector<int> array_infected, int amount_infected, int old_size){\n    return -4000 * old_size - amount_infected;\n}\n\nvoid GetArrayHealthyAccounts(std::vector<int> &array_rating_healthy, std::vector<int> &array_rating_infected, int killjoy_rating, int &amount_rating_infected, int old_size){\n    std::vector<int> result = std::vector<int>();\n    int j = 0;\n    int amount_rating_difference = 0;\n    for (size_t i = 0; i < array_rating_healthy.size(); i++)\n    {\n        amount_rating_difference += array_rating_healthy[i];\n    }\n    \n    if(amount_rating_difference < 0){\n        if( amount_rating_difference + max_addition(array_rating_infected, amount_rating_infected, old_size) < 0){\n            amount_rating_difference += max_addition(array_rating_infected, amount_rating_infected, old_size);\n            amount_rating_infected += max_addition(array_rating_infected, amount_rating_infected, old_size);\n        } else{\n            amount_rating_infected -= amount_rating_difference;\n            amount_rating_difference = 0;\n        }\n    } else{\n        if( amount_rating_difference + max_subtraction(array_rating_infected, amount_rating_infected, old_size) > 0){\n            amount_rating_difference += max_subtraction(array_rating_infected, amount_rating_infected, old_size);\n            amount_rating_infected += max_subtraction(array_rating_infected, amount_rating_infected,old_size);\n        } else{\n            amount_rating_infected -= amount_rating_difference;\n            amount_rating_difference = 0;\n        } \n    }\n\n    if(amount_rating_difference == 0)\n        array_rating_healthy.clear();\n    else{\n        while (amount_rating_difference !=0)\n        {\n        amount_rating_difference -= array_rating_healthy[j];\n        \n        if(amount_rating_difference < 0){\n            if(amount_rating_difference + max_addition(array_rating_healthy[j],killjoy_rating) < 0){\n                amount_rating_difference += max_addition(array_rating_healthy[j],killjoy_rating);\n                array_rating_healthy[j] += max_addition(array_rating_healthy[j], killjoy_rating); \n            } else {\n                array_rating_healthy[j] -= amount_rating_difference;\n                amount_rating_difference = 0;\n            }\n        } else {\n            if(amount_rating_difference + max_subtraction(array_rating_healthy[j],killjoy_rating) > 0){\n                amount_rating_difference += max_subtraction(array_rating_healthy[j],killjoy_rating);\n                array_rating_healthy[j] += max_subtraction(array_rating_healthy[j], killjoy_rating); \n            } else {\n                array_rating_healthy[j] -= amount_rating_difference;\n                amount_rating_difference = 0;\n            }\n        }\n            ++j;\n        }\n\n        while(array_rating_healthy.size() != j)\n        {\n            array_rating_infected.push_back(0);\n            amount_rating_infected += killjoy_rating - array_rating_healthy[j];\n            array_rating_healthy.erase(array_rating_healthy.begin() + j);\n        }\n        \n    } \n    \n    \n}\n\n\n\n\nint GetNumberOfSteps(std::vector<int> &array_rating_healthy, std::vector<int> &array_rating_infected, int killjoy_rating){\n    int result = 0, amount_rating_infected = 0, new_amount;\n    int old_size;\n    size_t infected_size;\n    for (int i = 0; i < array_rating_healthy.size(); ++i)\n    {\n        if(array_rating_healthy[i] == 0){\n            array_rating_infected.push_back(killjoy_rating);\n            amount_rating_infected += killjoy_rating - array_rating_healthy[i];\n            array_rating_healthy.erase(array_rating_healthy.begin() + i);\n            --i;\n        }\n    }\n\n    if(array_rating_healthy.size() != 0){\n        old_size = array_rating_infected.size();\n        new_amount = 0;\n        infected_size = array_rating_infected.size();\n        for (size_t i = 0; i < infected_size; ++i)\n        {\n            array_rating_infected.push_back(array_rating_healthy[0]);\n            new_amount += killjoy_rating -array_rating_healthy[0];\n            array_rating_healthy.erase(array_rating_healthy.begin());\n        }\n        \n        GetArrayHealthyAccounts(array_rating_healthy, array_rating_infected, killjoy_rating, amount_rating_infected, old_size);\n        ++result;\n        amount_rating_infected += new_amount;\n    }\n\n    infected_size = array_rating_infected.size();\n    \n    while(array_rating_healthy.size() > infected_size){\n    \n            array_rating_healthy.erase(array_rating_healthy.begin(), array_rating_healthy.begin() + infected_size - 1);\n            infected_size <<= 1;\n        \n \n    }\n\n    if(array_rating_healthy.size() != 0)\n        ++result;\n\n    return result;\n    \n}\n\n\nint main(){\n\nsize_t number_of_inputs, ArraySize, killjoy_rating;\n    std::vector<int> array;\n    std::cin >> number_of_inputs;\n    std::vector<int> array_rating_healthy = std::vector<int>();\n    std::vector<int> array_rating_infected = std::vector<int>();\n    for (size_t i = 0; i < number_of_inputs; ++i)\n    {\n\n        std::cin >> ArraySize >> killjoy_rating;\n        array_rating_healthy.resize(ArraySize);\n        for (size_t j = 0; j < array_rating_healthy.size(); ++j)\n        {\n            std::cin >> array_rating_healthy[j];\n            //array_rating_healthy[j] = -4000 + (rand() % 8000);\n            array_rating_healthy[j] = killjoy_rating - array_rating_healthy[j];\n        }\n        std::cout << GetNumberOfSteps(array_rating_healthy,array_rating_infected,killjoy_rating) << '\\n';\n\n        array_rating_infected.clear();      \n    }\n\n    return 0;\n}"
+}

@@ -1,0 +1,39 @@
+{
+    "id": 230670901,
+    "contestId": 804,
+    "creationTimeSeconds": 1698753022,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 804,
+        "index": "F",
+        "name": "Fake bullions",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3400,
+        "tags": [
+            "combinatorics",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 804,
+        "members": [
+            {
+                "handle": "WaterSL"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1493909400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 109,
+    "timeConsumedMillis": 607,
+    "memoryConsumedBytes": 362905600,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nnamespace IO {\r\n\t#if ONLINE_JUDGE\r\n\t#define getc() (IS == IT && (IT = (IS = ibuf) + fread(ibuf, 1, IL, stdin), IS == IT) ? EOF : *IS++)\r\n\t#else\r\n\t#define getc() getchar()\r\n\t#endif\r\n\tconst int IL = 1 << 21, OL = 1 << 21;\r\n\tint olen = 0;\r\n\tchar ibuf[IL], *IS = ibuf, *IT = ibuf, obuf[OL];\r\n\tinline int read() {\r\n\t\tregister char ch = getc(); register int x = 0, f = 1;\r\n\t\twhile(!isdigit(ch)) { if(ch == '-') f = -1; ch = getc(); }\r\n\t\twhile(isdigit(ch)) x = x * 10 + ch - 48, ch = getc();\r\n\t\treturn x * f;\r\n\t}\r\n\tinline double readdb() {\r\n\t\tregister char ch = getc(); register double x = 0, f = 1;\r\n\t\twhile(!isdigit(ch)) { if(ch == '-') f = -1; ch = getc(); }\r\n\t\twhile(isdigit(ch)) x = x * 10 + ch - 48, ch = getc();\r\n\t\tif(ch == '.') {\r\n\t\t\tregister double b = 0.1;\r\n\t\t\tch = getc();\r\n\t\t\twhile(isdigit(ch)) x += (ch - 48) * b, b *= 0.1, ch = getc();\r\n\t\t}\r\n\t\treturn x * f;\r\n\t}\r\n\tinline int readstr(char *s) {\r\n\t\tregister char ch = getc(); register int len = 0;\r\n\t\twhile(!isdigit(ch)) ch = getc();\r\n\t\twhile(isdigit(ch)) s[++len] = ch, ch = getc();\r\n\t\treturn len;\r\n\t}\r\n\tinline void flush() { fwrite(obuf, 1, olen, stdout); olen = 0; }\r\n\tinline void putc(register char ch) { obuf[olen++] = ch; }\r\n\ttemplate<class T>\r\n\tinline void write(register T x) {\r\n\t\tif(x < 0) obuf[olen++] = '-', x = -x;\r\n\t\tif(x > 9) write(x / 10);\r\n\t\tobuf[olen++] = x % 10 + 48;\r\n\t}\r\n} using namespace IO;\r\nconst int N = 5e3 + 10, M = 2e6 + 10, mod = 1e9 + 7;\r\nint qpow(int a, int k) {\r\n\tint res = 1;\r\n\tfor(; k; a = 1ll * a * a % mod, k >>= 1)\r\n\t\tif(k & 1) res = 1ll * res * a % mod;\r\n\treturn res;\r\n} \r\nint n, m, a[N];\r\nstruct edge {\r\n\tint to, nxt;\r\n} e[N * N];\r\nint head[N], ecnt;\r\nvoid add(int u, int v) {\r\n\te[++ecnt] = {v, head[u]};\r\n\thead[u] = ecnt;\r\n}\r\nchar s[N][N];\r\nint dfn[N], low[N], tim, sum[N], bel[N], gc[N], cnt;\r\nbool vis[N];\r\nvector<int> vc[N], g[N], h[N];\r\nvector<bool> vs[N];\r\nstack<int> st;\r\nint mn[N], mx[N];\r\nvoid tarjan(int u) {\r\n\tdfn[u] = low[u] = ++tim;\r\n\tvis[u] = 1;\r\n\tst.push(u);\r\n\tfor(int i = head[u], v; i; i = e[i].nxt) {\r\n\t\tv = e[i].to;\r\n\t\tif(!dfn[v]) {\r\n\t\t\ttarjan(v);\r\n\t\t\tlow[u] = min(low[u], low[v]);\r\n\t\t}\r\n\t\telse if(vis[v]) low[u] = min(low[u], dfn[v]);\r\n\t}\r\n\tif(dfn[u] == low[u]) {\r\n\t\t++cnt;\r\n\t\tint v;\r\n\t\tdo {\r\n\t\t\tv = st.top();\r\n\t\t\tst.pop();\r\n\t\t\tbel[v] = cnt;\r\n\t\t\tvis[v] = 0;\r\n\t\t\tsum[cnt] += a[v];\r\n\t\t\tgc[cnt] = __gcd(gc[cnt], a[v]);\r\n\t\t\tvc[cnt].push_back(v);\r\n\t\t} while(v != u);\r\n\t}\r\n}\r\nint E[N][N], du[N], nxt[N], gg[N];\r\nint tmp[N], tot;\r\nchar t[M];\r\nint ans;\r\nvoid calc(int x, int i) {\r\n\tif(!sum[x]) return;\r\n\tif(vs[x][i]) return;\r\n\tvs[x][i] = 1;\r\n\tsum[x] -= g[x][i];\r\n\tif(!nxt[x]) return;\r\n\tint y = nxt[x];\r\n\tif(!sum[y]) return;\r\n\tfor(int j = i % gg[x]; j < gc[y]; j += gg[x])\r\n\t\tcalc(y, j);\r\n}\r\nint fac[M], ifac[M];\r\nint C(int n, int m) { return 1ll * fac[n] * ifac[n - m] % mod * ifac[m] % mod; }\r\nint main() {\r\n\t\r\n\tfac[0] = 1;\r\n\tfor(int i = 1; i <= 2e6; i++)\r\n\t\tfac[i] = 1ll * fac[i - 1] * i % mod;\r\n\tifac[2000000] = qpow(fac[2000000], mod - 2);\r\n\tfor(int i = 2e6 - 1; ~i; i--)\r\n\t\tifac[i] = 1ll * ifac[i + 1] * (i + 1) % mod; \r\n//\tcout << ifac[0] << endl;\r\n\tn = read();\r\n\tint A = read(), B = read();\r\n\tfor(int i = 1; i <= n; i++) {\r\n\t\treadstr(s[i]);\r\n\t\tfor(int j = 1; j <= n; j++)\r\n\t\t\tif(s[i][j] == '1') add(i, j);\r\n\t}\r\n\tfor(int i = 1; i <= n; i++) {\r\n\t\ta[i] = read();\r\n\t\th[i].resize(a[i]);\r\n\t\treadstr(t);\r\n\t\tfor(int j = 1; j <= a[i]; j++)\r\n\t\t\th[i][j - 1] = t[j] == '1', mn[i] += t[j] - '0';\r\n\t}\r\n\tfor(int i = 1; i <= n; i++)\r\n\t\tif(!dfn[i]) tarjan(i);\r\n\tfor(int i = 1; i <= n; i++)\r\n\t\tfor(int j = 1; j <= n; j++)\r\n\t\t\tif(bel[i] != bel[j] && s[i][j] == '1')\r\n\t\t\t\tE[bel[i]][bel[j]] = 1;\r\n\tfor(int i = 1; i <= cnt; i++)\r\n\t\tfor(int j = 1; j <= cnt; j++)\r\n\t\t\tif(E[i][j]) du[j]++;\r\n\tqueue<int> q;\r\n\tfor(int i = 1; i <= cnt; i++)\r\n\t\tif(!du[i]) q.push(i);\r\n\twhile(!q.empty()) {\r\n\t\tint u = q.front();\r\n\t\tq.pop();\r\n\t\ttmp[++tot] = u;\r\n\t\tfor(int i = 1; i <= cnt; i++)\r\n\t\t\tif(E[u][i]) {\r\n\t\t\t\tdu[i]--;\r\n\t\t\t\tif(!du[i]) q.push(i);\r\n\t\t\t}\r\n\t}\r\n\tfor(int i = 1; i <= cnt; i++)\r\n\t\tnxt[tmp[i]] = tmp[i + 1];\r\n\tfor(int i = 1; i <= cnt; i++) {\r\n\t\tg[i].resize(gc[i]);\r\n\t\tvs[i].resize(gc[i]);\r\n\t\tfor(auto x : vc[i])\r\n\t\t\tfor(int j = 0; j < a[x]; j++)\r\n\t\t\t\tg[i][j % gc[i]]++;\r\n\t\tif(i < cnt) gg[tmp[i]] = __gcd(gc[tmp[i]], gc[tmp[i + 1]]);\r\n\t}\r\n\tfor(int i = 1; i <= n; i++)\r\n\t\tfor(int j = 0; j < a[i]; j++)\r\n\t\t\tif(h[i][j]) calc(bel[i], j % gc[bel[i]]);\r\n\tfor(int i = 1; i <= n; i++)\r\n\t\tfor(int j = 0; j < a[i]; j++)\r\n\t\t\tif(vs[bel[i]][j % gc[bel[i]]]) mx[i]++;\r\n\tfor(int i = 1; i <= n; i++) {\r\n\t\tint cnt1 = 0, cnt2 = 0;\r\n//\t\tcout << mn[i] << ' ' << mx[i] << endl;\r\n\t\tfor(int j = 1; j <= n; j++) {\r\n\t\t\tif(i == j) continue;\r\n\t\t\tif(mx[i] < mn[j])\r\n\t\t\t\tcnt1++;\r\n\t\t\telse if(make_pair(mx[j], j) > make_pair(mx[i], i))\r\n\t\t\t\tcnt2++;\r\n\t\t}\r\n\t\tif(cnt1 > A - 1) continue;\r\n\t\tfor(int j = max({0, B - cnt1 - 1}); j <= min({B - 1, cnt2, A - cnt1 - 1}); j++)\r\n\t\t\tans = (ans + 1ll * C(cnt2, j) * C(cnt1, B - j - 1) % mod) % mod;\r\n\t}\r\n\tcout << ans;\r\n\treturn 0;\r\n}"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 189848568,
+    "contestId": 386,
+    "creationTimeSeconds": 1674223323,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 386,
+        "index": "D",
+        "name": "Game with Points",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2100,
+        "tags": [
+            "dp",
+            "graphs",
+            "implementation",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 386,
+        "members": [
+            {
+                "handle": "streichg"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1389906900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\r\n#include <climits>\r\n#include <vector>\r\n#include <cmath>\r\n#include <queue>\r\n#include <map>\r\n\r\nusing namespace std;\r\n\r\nint main() {\r\n    int n;\r\n    cin >> n;\r\n\r\n    vector<int> stones(3);\r\n    for (int i = 0; i < 3; i++) {\r\n        int u;\r\n        cin >> u;\r\n        u -= 1;\r\n        stones[i] = u;\r\n    }\r\n\r\n    vector<vector<char>> colors(n, vector<char>(n));\r\n    for (int i = 0; i < n; i++) {\r\n        for (int j = 0; j < n; j++) cin >> colors[i][j];\r\n    }\r\n\r\n    auto pack = [&](vector<int> &p) {\r\n        return p[0] + n * p[1] + (n * n) * p[2];\r\n    };\r\n\r\n    auto unpack = [&](int s, vector<int> &p) {\r\n        p[0] = s % n;\r\n        p[1] = (s / n) % n;\r\n        p[2] = (s / (n * n)) % n;\r\n    };\r\n\r\n    int n_states = pow(n, 3);\r\n\r\n    map<int, vector<int>> edges(n_states);\r\n    for (int i = 0; i < n_states; i++) {\r\n        vector<int> p(3); \r\n        unpack(i, p); \r\n\r\n        if (p[0] == p[1] || p[0] == p[2] || p[1] == p[2]) continue;\r\n\r\n        for (int j = 0; j < 3; j++) {\r\n            int a = p[j];\r\n            int b = p[(j + 1) % 3];\r\n            int c = p[(j + 2) % 3];\r\n\r\n            for (int u = 0; u < n; u++) {\r\n                if (u == a || u == b || u == c) continue;\r\n                if (colors[b][c] != colors[a][u]) continue;\r\n    \r\n                vector<int> q = p;\r\n                q[j] = u;\r\n                edges[i].push_back(pack(q));\r\n            }\r\n        }\r\n    }\r\n\r\n    vector<int> dist(n_states, INT_MAX);\r\n\r\n    queue<int> q;    \r\n    int s = pack(stones);\r\n    q.push(s);\r\n    dist[s] = 0;\r\n\r\n    while (!q.empty()) {\r\n        int u = q.front();\r\n        q.pop();\r\n\r\n        for (int v : edges[u]) {\r\n            if (dist[v] != INT_MAX) continue;\r\n            dist[v] = dist[u] + 1;\r\n            q.push(v);\r\n        }\r\n    }\r\n    \r\n    int result = INT_MAX;\r\n    int u;\r\n    for (int a = 0; a < 3; a++) {\r\n        for (int b = 0; b < 3; b++) {\r\n            if (b == a) continue; \r\n            for (int c = 0; c < 3; c++) {\r\n                if (c == a || c == b) continue;\r\n\r\n                vector<int> t = {a, b, c}; \r\n                int v = pack(t);\r\n                if (dist[v] < result) {\r\n                    result = min(result, dist[pack(t)]);\r\n                    u = v; \r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    if (result != INT_MAX) {\r\n        cout << result << endl;\r\n\r\n        vector<pair<int, int>> path;\r\n\r\n        for (int i = 0; i < result; i++) {\r\n            for (int v : edges[u]) {\r\n                if (dist[v] == dist[u] - 1) {\r\n                    vector<int> su(3);\r\n                    unpack(u, su);\r\n\r\n                    vector<int> sv(3);\r\n                    unpack(v, sv);\r\n\r\n                    for (int j = 0; j < 3; j++) {\r\n                        if (su[j] != sv[j]) {\r\n                            path.push_back({sv[j] + 1, su[j] + 1});\r\n                            break;\r\n                        }\r\n                    }\r\n\r\n                    u = v;\r\n                    break;\r\n                }\r\n            }\r\n        }    \r\n\r\n        for (int i = result - 1; i >= 0; i--) {\r\n            cout << path[i].first << \" \" << path[i].second << endl;\r\n        }\r\n    } else cout << -1 << endl;\r\n}"
+}

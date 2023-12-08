@@ -1,0 +1,41 @@
+{
+    "id": 172247269,
+    "contestId": 1706,
+    "creationTimeSeconds": 1663248486,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "green_gold_dog"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 1606,
+    "memoryConsumedBytes": 77516800,
+    "source": "#include <bits/stdc++.h>\n\nusing namespace std;\n\ntypedef long long ll;\ntypedef double db;\ntypedef long double ldb;\ntypedef complex<double> cd;\n\nconst ll INF64 = 9'000'000'000'000'000'000, INF32 = 2'000'000'000, MOD = 1'000'000'007;\nconst db PI = acos(-1);\nconst bool IS_FILE = false, IS_TEST_CASES = true;\n\nrandom_device rd;\nmt19937 rnd32(rd());\nmt19937_64 rnd64(rd());\n\ntemplate<typename T>\nbool assign_max(T& a, T b) {\n\tif (b > a) {\n\t\ta = b;\n\t\treturn true;\n\t}\n\treturn false;\n}\n\ntemplate<typename T>\nbool assign_min(T& a, T b) {\n\tif (b < a) {\n\t\ta = b;\n\t\treturn true;\n\t}\n\treturn false;\n}\n\ntemplate<typename T>\nT square(T a) {\n\treturn a * a;\n}\n\nstruct BIT {\n\tvector<ll> tree;\n\tvector<ll> arr;\n\tll size;\n\tBIT(ll n) {\n\t\tarr.resize(n + 1, 0);\n\t\ttree.resize(n + 1, 0);\n\t\tsize = n;\n\t}\n\tvoid change(ll x, ll y) {\n\t\tx++;\n\t\ty -= arr[x];\n\t\tarr[x] += y;\n\t\tfor (; x <= size; x += x & -x) {\n\t\t\ttree[x] += y;\n\t\t}\n\t}\n\tll get(ll x) {\n\t\tx++;\n\t\treturn arr[x];\n\t}\n\tll get_pref(ll x) {\n\t\tll ans = 0;\n\t\tfor (; x > 0; x -= x & -x) {\n\t\t\tans += tree[x];\n\t\t}\n\t\treturn ans;\n\t}\n\tll get(ll l, ll r) {\n\t\treturn get_pref(r) - get_pref(l);\n\t}\n};\n\nstruct DSU {\n\tvector<ll> p;\n\tDSU(ll n) {\n\t\tp.resize(n, 0);\n\t\tfor (ll i = 0; i < n; i++) {\n\t\t\tp[i] = i;\n\t\t}\n\t}\n\tll get(ll x) {\n\t\treturn (p[x] == x ? x : p[x] = get(p[x]));\n\t}\n\tbool unite(ll a, ll b) {\n\t\ta = get(a);\n\t\tb = get(b);\n\t\tif (a == b) {\n\t\t\treturn false;\n\t\t}\n\t\tp[b] = a;\n\t\treturn true;\n\t}\n};\n\nvoid solve() {\n\tll n, m, q;\n\tcin >> n >> m >> q;\n\tvector<pair<ll, ll>> arr(m);\n\tfor (ll i = 0; i < m; i++) {\n\t\tcin >> arr[i].first >> arr[i].second;\n\t\tarr[i].first--;\n\t\tarr[i].second--;\n\t}\n\tif (n <= 0) {\n\t\tvector<tuple<ll, ll, ll>> na;\n\t\tDSU d(n);\n\t\tfor (ll i = 0; i < m; i++) {\n\t\t\tif (d.unite(arr[i].first, arr[i].second)) {\n\t\t\t\tna.emplace_back(arr[i].first, arr[i].second, i + 1);\n\t\t\t}\n\t\t}\n\t\tfor (ll i = 0; i < q; i++) {\n\t\t\tll l, r;\n\t\t\tcin >> l >> r;\n\t\t\tl--;\n\t\t\tDSU d(n);\n\t\t\tfor (ll i = 0; i <= na.size(); i++) {\n\t\t\t\tll c1 = d.get(l);\n\t\t\t\tbool b = true;\n\t\t\t\tfor (ll j = l + 1; j < r; j++) {\n\t\t\t\t\tif (c1 != d.get(j)) {\n\t\t\t\t\tb = false;\n\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif (b) {\n\t\t\t\t\tif (i == 0) {\n\t\t\t\t\t\tcout << 0 << ' ';\n\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\t\t\t\t\tcout << get<2>(na[i - 1]) << ' ';\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t\td.unite(get<0>(na[i]), get<1>(na[i]));\n\t\t\t}\n\t\t}\n\t\tcout << '\\n';\n\t\treturn;\n\t}\n\tvector<ll> ql(q), qr(q), l(q), r(q);\n\tvector<vector<ll>> mid(m + 1);\n\tfor (ll i = 0; i < q; i++) {\n\t\tcin >> ql[i] >> qr[i];\n\t\tql[i]--;\n\t\tl[i] = -1;\n\t\tr[i] = m;\n\t\tmid[(l[i] + r[i]) / 2].push_back(i);\n\t}\n\tll LOG = 20;\n\tvector<ll> p(n);\n\tfor (ll i = 0; i < n; i++) {\n\t\tp[i] = rnd64() % INF32 + 1;\n\t}\n\tfor (ll _ = 0; _ < LOG; _++) {\n\t\tBIT bit(n);\n\t\tvector<vector<ll>> pr(n);\n\t\tDSU d(n);\n\t\tfor (ll j = 0; j < n; j++) {\n\t\t\tpr[j].push_back(j);\n\t\t\tbit.change(j, p[j]);\n\t\t}\n\t\tfor (ll i = 0; i < m; i++) {\n\t\t\t for (auto j : mid[i]) {\n\t\t\t\tll x = bit.get(ql[j], qr[j]), y = bit.get(ql[j]);\n\t\t\t\tif (x % y == 0 && x / y == qr[j] - ql[j]) {\n\t\t\t\t\tr[j] = i;\n\t\t\t\t} else {\n\t\t\t\t\tl[j] = i;\n\t\t\t\t}\n\t\t\t\tif (r[j] - l[j] > 1) {\n\t\t\t\t\tmid[(r[j] + l[j]) / 2].push_back(j);\n\t\t\t\t}\n\t\t\t}\n\t\t\tmid[i].clear();\n\t\t\tll a = arr[i].first, b = arr[i].second;\n\t\t\ta = d.get(a);\n\t\t\tb = d.get(b);\n\t\t\tif (a != b) {\n\t\t\t\tif (pr[a].size() < pr[b].size()) {\n\t\t\t\t\tswap(a, b);\n\t\t\t\t}\n\t\t\t\td.unite(a, b);\n\t\t\t\tfor (auto j : pr[b]) {\n\t\t\t\t\tpr[a].push_back(j);\n\t\t\t\t\tbit.change(j, p[a]);\n\t\t\t\t}\n\t\t\t\tpr[b].clear();\n\t\t\t}\n\t\t}\n\t}\n\tfor (ll i = 0; i < q; i++) {\n\t\tcout << r[i] << ' ';\n\t}\n\tcout << '\\n';\n}\n\nint main() {\n\tif (IS_FILE) {\n\t\tfreopen(\"\", \"r\", stdin);\n\t\tfreopen(\"\", \"w\", stdout);\n\t}\n    \tios_base::sync_with_stdio(false);\n    \tcin.tie(0);\n    \tcout.tie(0);\n\tll t = 1;\n\tif (IS_TEST_CASES) {\n\t\tcin >> t;\n\t}\n\tfor (ll i = 0; i < t; i++) {\n\t\tsolve();\n\t}\n}\n"
+}

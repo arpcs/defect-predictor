@@ -1,0 +1,40 @@
+{
+    "id": 223783243,
+    "contestId": 1750,
+    "creationTimeSeconds": 1694997172,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "racccccoon"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1667745300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 29,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 9830400,
+    "source": "// LUOGU_RID: 125062716\n#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\nconst int N=2e5+5;\r\nchar a[N];int n;\r\nll ans,sum;int tot;\r\nstruct node{\r\n\tint l,r;\r\n}L[N],R[N];//\u5de6\u62ec\u53f7\u4e2a\u6570,\u53f3\u62ec\u53f7\u4e2a\u6570\r\nll s[N],s0[N],s1[N];\r\nvoid solve(int l,int r){\r\n\tif(l==r)return;\r\n\tint mid=(l+r)>>1;\r\n\tint szL=mid-l+1,szR=r-mid;\r\n\ttot=0;int cl=0,cr=0,f=0;\r\n\tll sl=0,sr=0;\r\n\tfor(int i=mid;i>=l;--i){\r\n\t\tchar c=a[i];\r\n\t\tif(c==')')\r\n\t\t\tcr++;\r\n\t\telse{\r\n\t\t\tif(cr)cr--,f++;\r\n\t\t\telse cl++;\r\n\t\t}\r\n\t\tL[i-l+1]={cl,cr},sl+=f;\r\n\t}\r\n\tsort(L+1,L+szL+1,[](node x,node y){return x.l<y.l;});\r\n\ttot=cl=cr=f=0;\r\n\tfor(int i=mid+1;i<=r;++i){\r\n\t\tchar c=a[i];\r\n\t\tif(c=='(')\r\n\t\t\tcl++;\r\n\t\telse{\r\n\t\t\tif(cl)cl--,f++;\r\n\t\t\telse cr++;\r\n\t\t}\r\n\t\tR[i-mid]={cl,cr},sr+=f;\r\n\t}\r\n\tsort(R+1,R+szR+1,[](node x,node y){return x.r<y.r;});\r\n\tans+=(ll)sl*szR+(ll)sr*szL;\r\n\ts[0]=s[szR+1]=0;\r\n\tfor(int i=1;i<=szR;++i)\r\n\t\ts[i]=s[i-1]+R[i].r;\r\n\tint tp=0;\r\n\tfor(int i=1;i<=szL;++i){\r\n\t\twhile(tp+1<=szR&&R[tp+1].r<=L[i].l)tp++;\r\n\t\tans+=s[tp]+(ll)(szR-tp)*L[i].l;\r\n\t}\r\n\tsolve(l,mid),solve(mid+1,r);\r\n}\r\nvoid solve2(int l,int r){\r\n\tif(l==r)return;\r\n\tint mid=(l+r)>>1;\r\n\tint szL=mid-l+1,szR=r-mid;\r\n\ttot=0;int cl=0,cr=0;\r\n\tfor(int i=mid;i>=l;--i){\r\n\t\tchar c=a[i];\r\n\t\tif(c==')')\r\n\t\t\tcr++;\r\n\t\telse cl++;\r\n\t\tL[i-l+1]={cl,cr};\r\n\t}\r\n\tsort(L+1,L+szL+1,[](node x,node y){return x.l-x.r<y.l-y.r;});\r\n\tcl=cr=0;\r\n\tfor(int i=mid+1;i<=r;++i){\r\n\t\tchar c=a[i];\r\n\t\tif(c=='(')\r\n\t\t\tcl++;\r\n\t\telse cr++;\r\n\t\tR[i-mid]={cl,cr};\r\n\t}\r\n\tsort(R+1,R+szR+1,[](node x,node y){return x.l-x.r>y.l-y.r;});\r\n\ts0[0]=s0[szR+1]=s1[0]=s1[szR+1]=0;\r\n\tfor(int i=1;i<=szR;++i)\r\n\t\ts0[i]=s0[i-1]+R[i].l;\r\n\tfor(int i=szR;i>=1;--i)\r\n\t\ts1[i]=s1[i+1]+R[i].r;\r\n\tint tp=0;\r\n\tfor(int i=1;i<=szL;++i){\r\n\t\twhile(tp+1<=szR&&L[i].l+R[tp+1].l>=L[i].r+R[tp+1].r)tp++;\r\n\t\tsum+=(ll)L[i].l*tp+(ll)L[i].r*(szR-tp)+s0[tp]+s1[tp+1];\r\n\t}\r\n\tsolve2(l,mid),solve2(mid+1,r);\r\n}\r\nint c[N][2];\r\nvoid work(){\r\n\tscanf(\"%d%s\",&n,a+1);\r\n\tsolve(1,n),solve2(1,n);\r\n\tsum+=n;\r\n\tprintf(\"%lld\\n\",sum-ans);\r\n\tans=sum=0;\r\n}\r\nint main(){\r\n// \tfreopen(\"T5.in\",\"r\",stdin);\r\n// \tfreopen(\"T5.out\",\"w\",stdout);\r\n\tint t;cin>>t;\r\n\twhile(t--)\r\n\twork();\r\n}"
+}

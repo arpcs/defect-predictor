@@ -1,0 +1,40 @@
+{
+    "id": 180283400,
+    "contestId": 1750,
+    "creationTimeSeconds": 1668072377,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "HLY111"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1667745300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 13516800,
+    "source": "#include<cstdio>\r\n#include<algorithm>\r\n#include<iostream>\r\n#include<vector>\r\n#include<stack>\r\nusing namespace std;\r\nchar S[200005];\r\nlong long Add[200005],Tr[800005],RRem[200005];\r\nstruct rem{\r\n\tlong long N,id;\r\n};\r\n//\u627e\u5de6\u53f3\u4e24\u8fb9\u6bd4\u81ea\u5df1\u5c0f\u7684\u6570\u91cf\r\n//\u627e\u5de6\u53f3\u4e24\u8fb9\u6bd4\u81ea\u5df1\u5c0f\u7684\u7b2c\u4e00\u4e2a\r\nvoid build(long long l,long long r,long long v){\r\n\tTr[v]=0;\r\n\tif(l==r)\r\n\t\treturn ;\r\n\tlong long mid=(l+r)/2;\r\n\tbuild(l,mid,v*2);\r\n\tbuild(mid+1,r,v*2+1);\r\n}\r\nvoid insert(long long l,long long r,long long v,long long Num){\r\n\tif(l==r){\r\n\t\tTr[v]++;\r\n\t\treturn ;\r\n\t}\r\n\tlong long mid=(l+r)/2;\r\n\tif(Num<=mid)\r\n\t\tinsert(l,mid,v*2,Num);\r\n\telse\r\n\t\tinsert(mid+1,r,v*2+1,Num);\r\n\tTr[v]=Tr[v*2]+Tr[v*2+1];\r\n}\r\nlong long query(long long l,long long r,long long v,long long L,long long R){\r\n\tif(L<=l&&r<=R)\r\n\t\treturn Tr[v];\r\n\tlong long mid=(l+r)/2,Add=0;\r\n\tif(L<=mid)\r\n\t\tAdd+=query(l,mid,v*2,L,R);\r\n\tif(mid<R)\r\n\t\tAdd+=query(mid+1,r,v*2+1,L,R);\r\n\treturn Add;\r\n}\r\nlong long Find1(vector<long long>Num,long long n){\r\n\tbuild(1,2*n+1,1);\r\n\tlong long Ans=0;\r\n\tstack<struct rem>S;//\u5355\u8c03\u961f\u5217\r\n\tstruct rem Put;\r\n\tfor(long long i=0;i<n;i++){\r\n\t\tinsert(1,2*n+1,1,Num[i]+n+1);\r\n\t\tAns+=(Num[i]*query(1,2*n+1,1,1,Num[i]+n+1));\r\n\t\twhile(!S.empty()&&S.top().N>Num[i]){\r\n\t\t\tRRem[n-S.top().id-1]=(i-S.top().id);\r\n\t\t\tS.pop();\r\n\t\t}\r\n\t\tPut.id=i;\r\n\t\tPut.N=Num[i];\r\n\t\tS.push(Put);\r\n\t}\r\n\twhile(!S.empty()){\r\n\t\tRRem[n-S.top().id-1]=(n-S.top().id);\r\n\t\tS.pop();\r\n\t}\r\n\treturn Ans;\r\n}\r\nlong long Find2(vector<long long>Num,long long n){\r\n\tbuild(1,2*n+1,1);\r\n\tlong long Ans=0;\r\n\tstack<struct rem>S;//\u5355\u8c03\u961f\u5217\r\n\tstruct rem Put;\r\n\tfor(long long i=0;i<n;i++){\r\n\t\tinsert(1,2*n+1,1,Num[i]+n+1);\r\n\t\tAns+=(Num[i]*query(1,2*n+1,1,1,Num[i]+n));//\u4e0d\u91cd\u590d\u7b97\u81ea\u5df1\u548c\u540c\u81ea\u5df1\u4e00\u6837\u7684\u5927\u7684 \r\n\t\twhile(!S.empty()&&S.top().N>=Num[i]){\r\n\t\t\tAns-=((i-S.top().id)*RRem[S.top().id]*S.top().N);\r\n\t\t\tS.pop();\r\n\t\t}\r\n\t\tPut.id=i;\r\n\t\tPut.N=Num[i];\r\n\t\tS.push(Put);\r\n\t}\r\n\twhile(!S.empty()){\r\n\t\tAns-=((n-S.top().id)*RRem[S.top().id]*S.top().N);\r\n\t\tS.pop();\r\n\t}\r\n\treturn Ans;\r\n}\r\nint main(void){\r\n\tint t;\r\n\tscanf(\"%d\",&t);\r\n\twhile(t--){\r\n\t\tint n;\r\n\t\tscanf(\"%d\",&n);\r\n\t\tscanf(\"%s\",S+1);\r\n\t\tvector<long long>Num;\r\n\t\tlong long now=0;\r\n\t\tNum.push_back(0);\r\n\t\tfor(int i=1;i<=n;i++){\r\n\t\t\tif(S[i]=='(')\r\n\t\t\t\tnow++;\r\n\t\t\telse\r\n\t\t\t\tnow--;\r\n\t\t\tNum.push_back(now);\r\n\t\t}\r\n\t\tlong long Ans=0;\r\n\t\tAns+=Find1(Num,n+1);\r\n\t\treverse(Num.begin(),Num.end());\r\n\t\tAns+=Find2(Num,n+1);\r\n\t\tprintf(\"%lld\\n\",Ans);\r\n\t}\r\n}"
+}

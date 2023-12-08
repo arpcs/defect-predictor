@@ -1,0 +1,41 @@
+{
+    "id": 167528238,
+    "contestId": 1706,
+    "creationTimeSeconds": 1659970408,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "vjudge1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "Ruby 3",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\n\n#define mk(a , b) make_pair(a , b)\n\nusing namespace std ;\n\ntemplate <typename T>\nT rd(T &x)\n{\n\tx = 0 ; int f = 1 ; char ch = getchar() ;\n\twhile(ch < '0' || ch > '9'){if(ch == '-') f = -1 ; ch = getchar() ;}\n\twhile(ch >= '0' && ch <= '9'){x = (x << 1) + (x << 3) + (ch ^48) ; ch = getchar() ;}\n\treturn x *= f ;\n}\ntemplate <typename T , typename ...A>\nvoid rd(T &x , A &...a)\n{\n\trd(x) ; rd(a...) ;\n}\n\nconst int N = 1e5 + 5 ;\nconst int M = N << 2 ;\ntypedef pair<int, int> PII ;\n\nstruct Edge\n{\n\tint  u , v , w , next ;\n}edge[M] , e[M] ;\nint head[M] , siz ;\nvoid add_edge(int u , int v)\n{\n\tedge[++siz] = {u , v , 0 , head[u]} ;\n\thead[u] = siz ;\n}\n\nint n , m , q , L , S ;\n\nint fa[M] , dis[M] ;\nvoid init()\n{\n\tfor(int i = 1 ; i <= L ; i++)\n\t\tfa[i] = i , dis[i] = 0 ;\n\tmemset(head , 0 , sizeof head) ;\n\tsiz = 0 ;\n//\tsort(e + 1 , e + m + 1) ;\n}\n\nint find(int x)\n{\n\tif(x == fa[x]) return x ;\n\treturn fa[x] = find(fa[x]) ;\n}\n\nvoid Kruskal()\n{\n\tL = n + n - 1 ; S = n ;\n\tinit() ;\n\t\n\tfor(int i = 1 ; i <= n ; i++)\n\t{\n\t\tint u = find(e[i].u) , v = find(e[i].v) , w = e[i].w ;\n\t\tif(u != v)\n\t\t{\n\t\t\tS++ ;\n\t\t\tfa[v] = fa[u] = fa[S] ;\n\t\t\tadd_edge(S , u) ; add_edge(S , v) ;\n\t\t\tadd_edge(u , S) ; add_edge(v , S) ; dis[S] = w ;\n\t\t\tif(S == L) break ;\n\t\t}\n\t}\n}\n\nint f[N][26] , depth[N] ;\n\nvoid dfs(int u , int fa)\n{\n//\tcout << u << ' ' << fa << '\\n' ;\n\tdepth[u] = depth[fa] + 1 ;\n\tf[u][0] = fa ;\n\tfor(int i = 1 ; i < 25 ; i++)\n\t\tf[u][i] = f[f[u][i - 1]][i - 1] ;\n\t\n\tfor(int i = head[u] ; i ; i = edge[i].next)\n\t{\n\t\tint v = edge[i].v ;\n\t\tif(v != fa) dfs(v , u) ;\n\t}\n}\n\nint LCA(int x , int y)\n{\n\tif(depth[x] < depth[y]) swap(x , y) ;\n\tfor(int i = 25 ; i + 1 ; i--)\n\t\tif(depth[f[x][i]] >= depth[y])\n\t\t\tx = f[x][i] ;\n//\t\telse break ;\n\tif(x == y) return x ;\n\tfor(int i = 25 ; i + 1 ; i--)\n\t\tif(f[x][i] != f[y][i])\n\t\t\tx = f[x][i] , y = f[y][i] ;\n\treturn f[x][0] ;\n}\n\nint Tree_[N * 3] , lca[N] ;\n\n#define mid ((l + r) >> 1)\n#define ls (k << 1)\n#define rs (k << 1 | 1)\n\nvoid pushup(int k)\n{\n\tTree_[k] = max(Tree_[ls] , Tree_[rs]) ;\n}\n\nvoid build(int l , int r , int k)\n{\n\tif(l == r){Tree_[k] = lca[l] ; return ;}\n\tbuild(l , mid , ls) ;\n\tbuild(mid + 1 , r , rs) ;\n\tpushup(k) ;\n}\n\nint query(int l , int r , int x , int y , int k)\n{\n\tif(x <= l && r <= y){return Tree_[k] ;}\n\tint res = 0 ;\n\tif(mid >= x) res = max(res , query(l , mid , x , y ,ls)) ;\n\tif(y > mid)  res = max(res , query(mid + 1 , r , x , y , rs)) ;\n\treturn res ;\n}\n#undef mid\n#undef ls\n#undef rs\n\nint main()\n{\n//\tfreopen(\"qav.in\" , \"r\" , stdin) ;\n//\tfreopen(\"qav.out\", \"w\" , stdout) ;\n\t\n\tint T ; rd(T) ;\n\twhile(T--)\n\t{\n\t\trd(n , m , q) ;\n\t\tfor(int i = 1 , u , v ; i <= m ; i++)\n\t\t{\n\t\t\trd(u , v) ;\n\t\t\te[i] = Edge{u , v , i , 0} ;\n\t\t}\n\t\t\n\t\tKruskal() ;\n\t\tdfs(S , S) ;\n\t\t\n\t\tmemset(lca , 0 , sizeof lca) ;\n\t\tfor(int i = 1 ; i < n ; i++)\n\t\t\tlca[i] = dis[LCA(i , i + 1)] ;\n\t\t\n\t\tmemset(Tree_ , 0 , sizeof Tree_) ;\n\t\tbuild(1 , n - 1 , 1) ;\n\t\t\n\t\tfor(int i = 1 , x , y ; i <= q ; i++)\n\t\t{\n\t\t\trd(x , y) ;if(x == y) printf(\"0 \") ;\n\t\t\telse printf(\"%d \" , query(1 , n - 1 , x , y - 1 , 1) ) ;\n\t\t}\n\t\tprintf(\"\\n\") ;\n\t}\n\n\treturn 0 ;\n}\n\t \t\t\t\t \t\t\t \t \t\t \t\t\t\t  \t\t\t\t\t   \t"
+}

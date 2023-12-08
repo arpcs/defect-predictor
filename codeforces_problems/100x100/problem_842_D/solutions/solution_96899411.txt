@@ -1,0 +1,36 @@
+{
+    "id": 96899411,
+    "contestId": 842,
+    "creationTimeSeconds": 1603812648,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 842,
+        "index": "D",
+        "name": "Vitya and Strange Lesson",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "binary search",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 842,
+        "members": [
+            {
+                "handle": "GrgA.exe"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1504019100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 1716,
+    "memoryConsumedBytes": 76697600,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nconst int MAXN = 3 * 1048577, MAXNUMB = 3 * 1e5 + 20;\r\n\r\nconst int MAXBIT = 20;\r\n\r\nint globX = 0;\r\n\r\nint powers[21];\r\n\r\nint getBit(int n, int pos)\r\n{\r\n    return (n >> (pos - 1)) & 1;\r\n}\r\n\r\n\r\n\r\nint getFromBit(string s)\r\n{\r\n    int n = 0;\r\n    //reverse(s.begin(), s.end());\r\n    for(int i = 0; i < s.size(); i++)\r\n    {\r\n        n += (s[i] - '0') * powers[s.size() - i - 1];\r\n    }\r\n    return n;\r\n}\r\n\r\nclass Bor\r\n{\r\n    int sz = 1;\r\n\r\n    unordered_map <int, bool> was;\r\n\r\n    struct vertex\r\n    {\r\n        int next[2];\r\n        bool isTerminal;\r\n        int numbOfTerm, leaf;\r\n        vertex()\r\n        {\r\n            isTerminal = false;\r\n            numbOfTerm = 0;\r\n            next[0] = next[1] = 0;\r\n            leaf = 0;\r\n        }\r\n\r\n        bool empty()\r\n        {\r\n            if(next[0] == 0 && next[1] == 0)\r\n                return true;\r\n            else\r\n                return false;\r\n        }\r\n\r\n    };\r\n\r\n    vertex t[MAXN];\r\n\r\n    bool used[MAXN];\r\n\r\n    void add(string &s)\r\n    {\r\n        int v = 0;\r\n        for(int i = 0; i < s.size(); i++)\r\n        {\r\n            //t[v].numbOfTerm++;\r\n            int c = s[i] - '0';\r\n            if(t[v].next[c] == 0)\r\n            {\r\n                t[v].next[c] = sz;\r\n                sz++;\r\n            }\r\n            v = t[v].next[c];\r\n            //t[v].isTerminal = true;\r\n        }\r\n        //t[v].numbOfTerm++;\r\n    }\r\n\r\n    void addTermVert(string s)\r\n    {\r\n        int v = 0;\r\n        for(int i = 0; i < s.size(); i++)\r\n        {\r\n            if(!was[getFromBit(s)])\r\n            t[v].numbOfTerm++;\r\n            int c = s[i] - '0';\r\n            v = t[v].next[c];\r\n        }\r\n        if(!was[getFromBit(s)])\r\n        t[v].numbOfTerm++;\r\n        t[v].isTerminal = true;\r\n        was[getFromBit(s)] = true;\r\n    }\r\n\r\n    void calcSizes(int v)\r\n    {\r\n        used[v] = true;\r\n        for(auto u : t[v].next)\r\n        {\r\n            if(!used[u])\r\n            {\r\n                calcSizes(u);\r\n            }\r\n        }\r\n        if(!t[v].empty())\r\n        {\r\n            t[v].leaf = t[t[v].next[0]].leaf + t[t[v].next[1]].leaf;\r\n        }\r\n        else\r\n        {\r\n            t[v].leaf = 1;\r\n        }\r\n    }\r\n\r\n    bool isExist(string &s)\r\n    {\r\n        int v = 0;\r\n        for(int i = 0; i < s.size(); i++)\r\n        {\r\n            int c = s[i] - '0';\r\n            if(t[v].next[c] == 0)\r\n            {\r\n                return false;\r\n            }\r\n            v = t[v].next[c];\r\n        }\r\n        return t[v].isTerminal;\r\n    }\r\n\r\n    int numbOfDiff()\r\n    {\r\n        int ans = 0;\r\n        for(int i = 0; i < sz; i++)\r\n        {\r\n            if(t[i].isTerminal)\r\n            {\r\n                ans++;\r\n            }\r\n        }\r\n        return ans;\r\n    }\r\n\r\n    string KLeks(int k)\r\n    {\r\n        int v = 0;\r\n        string ans = \"\";\r\n        while(k > 0)\r\n        {\r\n            for(int i = 0; i < 2; i++)\r\n            {\r\n                if(k > t[t[v].next[i]].numbOfTerm)\r\n                {\r\n                    k -= t[t[v].next[i]].numbOfTerm;\r\n                }\r\n                else\r\n                {\r\n                    ans += i;\r\n                    v = t[v].next[i];\r\n                    if(t[v].isTerminal)\r\n                    {\r\n                        k--;\r\n                    }\r\n                    break;\r\n                }\r\n            }\r\n        }\r\n        return ans;\r\n    }\r\n\r\n    int getAns()\r\n    {\r\n        string ans = \"\";\r\n        int v = 0;\r\n        while(ans.size() < MAXBIT)\r\n        {\r\n            int c = 0 ^ getBit(globX, MAXBIT - ans.size());\r\n            if(t[t[v].next[c]].leaf - t[t[v].next[c]].numbOfTerm > 0)\r\n            {\r\n                v = t[v].next[c];\r\n                ans += '0';\r\n            }\r\n            else\r\n            {\r\n                v = t[v].next[1 - c];\r\n                ans += '1';\r\n            }\r\n\r\n        }\r\n        return getFromBit(ans);\r\n    }\r\n\r\npublic:\r\n\r\n    void Add(string s)\r\n    {\r\n        add(s);\r\n    }\r\n\r\n    bool IsExist(string &s)\r\n    {\r\n        return isExist(s);\r\n    }\r\n\r\n    int numberOfDifferent()\r\n    {\r\n        return numbOfDiff();\r\n    }\r\n\r\n    string kLeks(int k)\r\n    {\r\n        return KLeks(k);\r\n    }\r\n\r\n    void AddTermVert(string s)\r\n    {\r\n        addTermVert(s);\r\n    }\r\n\r\n    int GetAns()\r\n    {\r\n        return getAns();\r\n    }\r\n\r\n    void CalcSizes()\r\n    {\r\n        calcSizes(0);\r\n    }\r\n};\r\n\r\nBor b;\r\n\r\nbool isDigit(char c)\r\n{\r\n    return '0' <= c && c <= '9';\r\n}\r\n\r\nint toInt(string s)\r\n{\r\n    int n = 0;\r\n    for(int i = 0; i < s.size(); i++)\r\n    {\r\n        n += (s[i] - '0') * pow(10, s.size() - i - 1);\r\n    }\r\n    return n;\r\n}\r\n\r\nstring toBit(int n)\r\n{\r\n    string s;\r\n    while(n > 0)\r\n    {\r\n        int r = n % 2;\r\n        s += r + '0';\r\n        n /= 2;\r\n    }\r\n    while(s.size() < MAXBIT)\r\n    {\r\n        s += '0';\r\n    }\r\n    reverse(s.begin(), s.end());\r\n    return s;\r\n}\r\n\r\nint main()\r\n{\r\n    ios_base::sync_with_stdio(false);\r\n    cout.tie(0);\r\n    powers[0] = 1;\r\n    for(int i = 1; i <= MAXBIT; i++)\r\n    {\r\n        powers[i] = powers[i - 1] * 2;\r\n    }\r\n    int n, m;\r\n    cin >> n >> m;\r\n    for(int i = 0; i <= MAXNUMB; i++)\r\n    {\r\n        b.Add(toBit(i));\r\n    }\r\n    int a[n];\r\n    for(int i = 0; i < n; i++)\r\n    {\r\n        cin >> a[i];\r\n        b.AddTermVert(toBit(a[i]));\r\n    }\r\n    b.CalcSizes();\r\n    for(int i = 0; i < m; i++)\r\n    {\r\n        int x;\r\n        cin >> x;\r\n        globX ^= x;\r\n        cout << b.GetAns() << endl;\r\n    }\r\n\treturn 0;\r\n}\r\n"
+}

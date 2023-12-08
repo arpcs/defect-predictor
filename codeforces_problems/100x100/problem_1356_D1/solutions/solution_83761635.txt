@@ -1,0 +1,33 @@
+{
+    "id": 83761635,
+    "contestId": 1356,
+    "creationTimeSeconds": 1592148684,
+    "relativeTimeSeconds": 171084,
+    "problem": {
+        "contestId": 1356,
+        "index": "D1",
+        "name": "Quantum Classification - 1",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1356,
+        "members": [
+            {
+                "handle": "Acceleraizer"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1591977600
+    },
+    "programmingLanguage": "Q#",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 389,
+    "memoryConsumedBytes": 6860800,
+    "source": "namespace Solution {\r\n    open Microsoft.Quantum.MachineLearning;\r\n    open Microsoft.Quantum.Arrays;\r\n    open Microsoft.Quantum.Math;\r\n    open Microsoft.Quantum.Diagnostics;\r\n    open Microsoft.Quantum.Intrinsic;\r\n\r\n        operation Train (trainingVectors : Double[][], trainingLabels : Int[], initialParameters : Double[][]) : (Double[], Double) {\r\n        // Combine training data and labels into a single data structure\r\n        let samples = Mapped(\r\n            LabeledSample,\r\n            Zip(trainingVectors, trainingLabels)\r\n        );\r\n        \r\n        // Define a set of models we're going to try training;\r\n        // in this case all models have the same structure but differ in the value of initial parameters\r\n        let models = Mapped(\r\n            SequentialModel(ClassifierStructure(), _, 0.0),\r\n            initialParameters\r\n        );\r\n        \r\n        // use all samples both for training and for validation\r\n        let defaultSchedule = SamplingSchedule([0..Length(samples) - 1]);\r\n        let (optimizedModel, nMisses) = TrainSequentialClassifier(\r\n            models,\r\n            samples,\r\n            DefaultTrainingOptions()\r\n                w/ LearningRate <- 2.0\r\n                w/ Tolerance <- 0.0005,\r\n            defaultSchedule,\r\n            defaultSchedule\r\n        );\r\n        Message($\"Training complete, found optimal parameters: {optimizedModel::Parameters}, {optimizedModel::Bias} with {nMisses} misses\");\r\n        return (optimizedModel::Parameters, optimizedModel::Bias);\r\n    }\r\n\r\n\r\n    function ClassifierStructure () : ControlledRotation[] {\r\n        return [\r\n            ControlledRotation((0, new Int[0]), PauliY, 0)\r\n        ];\r\n    }\r\n\r\n    operation Solve () : (ControlledRotation[], (Double[], Double)) {\r\n        // your code here\r\n        return (ClassifierStructure(), ([3.1447999999999925], 0.0023000000000000242));\r\n    }\r\n}"
+}

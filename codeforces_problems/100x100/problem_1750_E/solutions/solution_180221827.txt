@@ -1,0 +1,40 @@
+{
+    "id": 180221827,
+    "contestId": 1750,
+    "creationTimeSeconds": 1668010855,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "lajixtc"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1667745300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 29,
+    "timeConsumedMillis": 312,
+    "memoryConsumedBytes": 13824000,
+    "source": "#include <bits/stdc++.h>\r\n#define fx first\r\n#define fy second\r\n#define mp make_pair\r\n#define pb push_back\r\n\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef pair<int,int> pii;\r\nconst int N = 2e5 + 10;\r\nconst int mod = 998244353;\r\nint add(int x,int y){\r\n\tx += y;\r\n\tif (x >= mod) x -= mod;\r\n\treturn x;\r\n}\r\nint sub(int x,int y){\r\n\tx -= y;\r\n\tif (x < 0) x += mod;\r\n\treturn x;\r\n}\r\nint qpow(int x,int y){\r\n\tint res = 1;\r\n\twhile (y){\r\n\t\t  if (y & 1) res = 1ll * x * res % mod;\r\n\t\t  x = 1ll * x * x % mod;y >>= 1;\r\n\t}\r\n\treturn res;\r\n}\r\n\r\nchar s[N];\r\nint a[N] , n;\r\nint T;\r\n\r\n\r\nstruct fenwick{\r\n\tll c[N << 1];\r\n\tint lb(int x){\r\n\t\treturn x & (-x);\r\n\t}\r\n\tvoid Mdy(int x,ll v){\r\n\t\twhile (x <= 2 * n + 1){\r\n\t\t\tc[x] += v;\r\n\t\t\tx += lb(x);\r\n\t\t}\r\n\t}\t\r\n\tvoid mdy(int x,ll v){\r\n\t\tx += n + 1;\r\n\t\tMdy(x , v);\r\n\t}\r\n\tll Qry(int x){\r\n\t\tll ans = 0;\r\n\t\twhile (x){\r\n\t\t\tans += c[x];\r\n\t\t\tx -= lb(x);\r\n\t\t}\r\n\t\treturn ans;\r\n\t}\r\n\tll qry(int x){\r\n\t\treturn Qry(x + n + 1);\r\n\t}\r\n}c0 , c1 , c2 , c3;\r\n\r\nll ans = 0;\r\nvoid solve(int l,int r){\r\n\tif (l == r) {\r\n\t\tans += a[l] < 0 ? a[l] : 0;\r\n\t\tans -= a[l] > 0 ? a[l] : 0;\r\n\t\treturn;\r\n\t}\r\n\t\r\n\tint mid = l + r >> 1;\r\n\tsolve(l , mid);\r\n\tsolve(mid + 1 , r);\r\n\t\r\n\tint sum = 0 , premin = n + 1;\r\n\tll sums = 0;\r\n\tfor (int i = mid + 1;i <= r;i++){\r\n\t\tsum += a[i];\r\n\t\tpremin = min(premin , sum);\r\n\t\tc0.mdy(premin , 1);\r\n\t\tc1.mdy(premin , premin);\r\n\t\tc2.mdy(sum , sum);\r\n\t\tc3.mdy(sum , 1);\r\n\t\tsums += sum;\r\n\t}\r\n\t\r\n\tll tans = 0;\r\n\tsum = 0;premin = n + 1;\r\n\tfor (int i = mid;i >= l;i--){\r\n\t\tsum += a[i];\r\n\t\tpremin = min(premin + a[i] , a[i]);\r\n\t\t\r\n\t\t\r\n\t\tll cntsmall0 = c0.qry(premin - sum) , cntsmall1 = 0;\r\n\t\t\r\n\t\tif (premin < 0) {\r\n\t\t\tans += 1ll * (r - mid - cntsmall0) * premin;\r\n\t\t}\r\n\t\t\r\n\t\tcntsmall0 = c0.qry(min(-sum , premin - sum)) , cntsmall1 = c1.qry(min(-sum , premin - sum));\r\n\t\t\r\n\t\tans += 1ll * sum * cntsmall0 + cntsmall1;\t\r\n\t\tcntsmall0 = c3.qry(-sum) , cntsmall1 = c2.qry(-sum);\r\n\t\t\r\n\t\tans -= 1ll * (r - mid - cntsmall0) * sum + sums - cntsmall1;\r\n\t}\r\n\t\r\n\tsum = 0 , premin = n + 1;\r\n\tfor (int i = mid + 1;i <= r;i++){\r\n\t\tsum += a[i];\r\n\t\tpremin = min(premin , sum);\r\n\t\tc0.mdy(premin , -1);\r\n\t\tc1.mdy(premin , -premin);\r\n\t\tc2.mdy(sum , -sum);\r\n\t\tc3.mdy(sum , -1);\r\n\t}\r\n}\r\nint main(){\r\n\tcin >> T;\r\n\twhile (T--){\r\n\t\tscanf(\"%d\",&n);\r\n\t\tscanf(\"%s\",s+1);\r\n\t\tfor (int i = 1;i <= n;i++) a[i] = (s[i] == '(' ? 1 : -1);\r\n\t\r\n\t\tll tans = 0;\r\n\t\tfor (int i = 1;i <= n;i++){\r\n\t\t\tll sum = 0 , premin = n + 5;\r\n\t\t\tfor (int j = i;j <= n;j++){\r\n\t\t\t\tsum += a[j];\r\n\t\t\t\tpremin = min(premin , sum);\r\n\t\t\t\ttans += max(0ll , -premin);\r\n\t\t\t}\r\n\t\t}\r\n\t\tans = 0;\r\n\t\tsolve(1 , n);\r\n\t\t\r\n\t\tans = -ans;\r\n\t\tprintf(\"%lld\\n\",ans);\r\n\t}\r\n\t\r\n\treturn 0;\r\n}\r\n/*\r\n1\r\n4\r\n)()(\r\n*/"
+}

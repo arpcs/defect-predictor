@@ -1,0 +1,41 @@
+{
+    "id": 186850943,
+    "contestId": 1726,
+    "creationTimeSeconds": 1672130679,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "D",
+        "name": "Edge Split",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "probabilities",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "AustinJiang"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "/*\r\n * Author: Austin Jiang\r\n * Date: 12/27/2022 12:22:32 AM\r\n * Problem:\r\n * Source:\r\n * Description:\r\n*/\r\n\r\n//#pragma GCC optimize(2)\r\n//#pragma GCC optimize(3)\r\n#include<bits/stdc++.h>\r\n//#define int long long\r\n#define pb push_back\r\n#define fir first\r\n#define sec second\r\n#define endl '\\n'\r\n#define lb lower_bound\r\n#define ub upper_bound\r\n#define all(v) v.begin(),v.end()\r\n#define PQ priority_queue\r\n#define random(a,b) rand()%(b-a+1)+a\r\n#define rep(i,x,y) for(int i=(x);i<=(y);i++)\r\n#define per(i,x,y) for(int i=(x);i>=(y);i--)\r\nusing namespace std;\r\nusing ll = long long;\r\nusing PI = pair<int,int>;\r\nusing VI = vector<int>;\r\nusing VPI = vector<PI>;\r\n\r\nnamespace fast_io{\r\n\tinline int read() {int x=0; bool f=0; char ch=0; while(!isdigit(ch)) f=ch=='-',ch=getchar(); while(isdigit(ch)) x=x*10+ch-'0',ch=getchar(); return f?-x:x;}\r\n\tinline ll readLL() {ll x=0; bool f=0; char ch=0; while(!isdigit(ch)) f=ch=='-',ch=getchar(); while(isdigit(ch)) x=x*10+ch-'0',ch=getchar(); return f?-x:x;}\r\n\tinline int read(int &x) {return x=read();}\r\n    template<typename T> inline void write(T x) {if(x<0) x=-x,putchar('-'); if(x>9) write(x/10); putchar(x%10+'0');}\r\n\ttemplate<typename T> inline void write(T x,char let) {write(x),putchar(let);}\r\n} using namespace fast_io;\r\n\r\n/* Common constants, functions, and data structures */\r\nconst int INF = 0x3f3f3f3f;\r\nconst ll LLINF = 0x3f3f3f3f3f3f3f3f;\r\nconst int MOD = 1e9+7;\r\nconst int dir[8][2] = {{1,0},{0,1},{0,-1},{-1,0},{1,1},{1,-1},{-1,1},{-1,-1}};\r\n\r\nnamespace comfun{\r\n\ttemplate<typename T> inline T lowbit(T x){return x&-x;}\r\n\ttemplate<typename T> inline T gcd(T a,T b){return b?gcd(b,a%b):a;}\r\n\ttemplate<typename T> inline T lcm(T a,T b){return a/gcd(a,b)*b;}\r\n\ttemplate<typename T> inline T chkmax(T &a,T b){return a=max(a,b);}\r\n\ttemplate<typename T> inline T chkmin(T &a,T b){return a=min(a,b);}\r\n\ttemplate<typename T> inline T qpow(T a,T b){T ans=1;while(b){if(b&1) ans*=a,ans%=MOD;a*=a,a%=MOD;b>>=1;}return ans;}\r\n\ttemplate<typename T> inline T inv(T x){return qpow(x,MOD-2);}\r\n\ttemplate<typename T> inline bool is_prime(T x){if(x==1) return false; for(T i=2;i*i<=x;i++) if(x%i==0) return false; return true;}\r\n} using namespace comfun;\r\n\r\nstruct fenwick{\r\n\tint sum[(int)1e6+10];\r\n\tvoid add(int x,int y){ for(int i=x;i<=1e6;i+=lowbit(i)) sum[i]+=y;}\r\n\tint ask(int x,int y){ int res=0; for(int i=y;i>0;i-=lowbit(i)) res+=sum[i];\r\n\tfor(int i=x-1;i>0;i-=lowbit(i)) res-=sum[i]; return res;}\r\n};\r\n\r\nstruct interval_fenwick{\r\n\tint d[(int)1e6+10][2];\r\n\tvoid update(int x,int v){for(int i=x;i<=1e6;i+=lowbit(i))d[i][0]+=v,d[i][1]+=v*x;}\r\n\tint query(int x,int k){int ans=0;for(int i=x;i>0;i-=lowbit(i)) ans+=d[i][k];return ans;}\r\n\tvoid add(int x,int y,int v){update(x,v),update(y+1,-v);}\r\n\tint ask(int x,int y){return (y+1)*query(y,0)-query(y,1)-x*query(x-1,0)+query(x-1,1);}\r\n};\r\n\r\n/* ========================================| Main Program |======================================== */\r\n\r\nconst int N = 1e5+10;\r\nint n,m,vis[N],ans[N];\r\nVPI e[N];\r\n\r\nvoid dfs(int u){\r\n\tvis[u]=1;\r\n\tfor(auto edge:e[u]){\r\n\t\tint v=edge.fir,id=edge.sec;\r\n\t\tif(!vis[v]&&!ans[id]&&in[u]>1&&in[v]>1){\r\n\t\t\tans[id]=1;\r\n\t\t\tin[u]--;\r\n\t\t\tin[v]--;\r\n\t\t\tdfs(v);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nvoid solve(int Case){\r\n\tcin>>n>>m;\r\n\trep(i,1,n){\r\n\t\tvis[i]=0;\r\n\t\te[i].clear();\r\n\t}\r\n\trep(i,1,m){\r\n\t\tint u,v;\r\n\t\tcin>>u>>v;\r\n\t\te[u].pb({v,i});\r\n\t\te[v].pb({u,i});\r\n\t\tans[i]=0;\r\n\t}\r\n\trep(i,1,n) if(!vis[i]) dfs(i);\r\n\trep(i,1,m) cout<<ans[i];\r\n\tcout<<endl;\r\n}\r\n\r\n/* ======================================| Main Program End |====================================== */\r\n\r\nsigned main(){\r\n    //int size(512<<20);  //512M\r\n    //__asm__(\"movq %0, %%rsp\\n\"::\"r\"((char*)malloc(size)+size));\r\n\t//cin.tie(nullptr)->sync_with_stdio(false);\r\n\t//freopen(\"in.txt\",\"r\",stdin);\r\n\t//freopen(\"stdout.txt\",\"w\",stdout);\r\n\t//srand(time(0));\r\n\tint CASE=1;\r\n\tcin>>CASE;\r\n\trep(Case,1,CASE) solve(Case);\r\n\t//system(\"fc stdout.txt out.txt\");\r\n    //exit(0);\r\n\treturn 0;\r\n}\r\n\r\n/* stuff you should look for\r\n\t* read questions at least 3 times!!!\r\n    * think more and then code!!!\r\n    * partial points are GOD.\r\n\t* remember to initialize variables\r\n    * don't stuck on one question for two long (like 30-45 min)\r\n    * Debug: (a) read your code once, check overflow, check edge case\r\n    * Debug: (b) create your own test case\r\n    * Debug: (c) duipai\r\n*/\r\n"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 63291793,
+    "contestId": 878,
+    "creationTimeSeconds": 1571918256,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "hello_world2005"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 171,
+    "memoryConsumedBytes": 35328000,
+    "source": "#include <algorithm>\r\n#include <cstdio>\r\n#include <vector>\r\n\r\n#define int long long\r\n\r\nconst int N = 500010;\r\nconst int MOD = 1e9 + 7;\r\n\r\nint n, q;\r\nint a[N];\r\nstruct Block {\r\n  int l, r;\r\n\r\n  Block() : l(0), r(0) {}\r\n  Block(int _l, int _r) : l(_l), r(_r) {}\r\n\r\n  bool operator<(const Block& rhs) const {\r\n    return l != rhs.l ? l < rhs.l : r < rhs.r;\r\n  }\r\n};\r\nstd::vector<int> que[N];\r\nstd::vector<Block> block;\r\nint l[N], r[N];\r\nint sum[N];\r\nint pos[N];\r\nint sze;\r\nint ans[N];\r\n\r\nint FastPow(int a, int b) {\r\n  int res = 1;\r\n  while (b) {\r\n    if (b & 1)\r\n      res = 1ll * res * a % MOD;\r\n    a = 1ll * a * a % MOD;\r\n    b >>= 1;\r\n  }\r\n  return res;\r\n}\r\n\r\nvoid Check(int& x) {\r\n  while (x < 0)\r\n    x += MOD;\r\n  x %= MOD;\r\n}\r\n\r\nint F(int l, int r) {\r\n  int res = 0;\r\n  for (int i = r; i >= l; --i)\r\n    res = res * 2 + a[i];\r\n  return res;\r\n}\r\n\r\nint G(int l, int r) {\r\n  if (l > r)\r\n    return 0;\r\n  int res = (sum[l] - sum[r + 1] * FastPow(2, r - l + 1)) % MOD;\r\n  Check(res);\r\n  return res;\r\n}\r\n\r\nsigned main() {\r\n  scanf(\"%lld%lld\", &n, &q);\r\n  for (int i = 1; i <= n; ++i)\r\n    scanf(\"%lld\", &a[i]);\r\n  for (int i = n; i >= 1; --i)\r\n    sum[i] = (sum[i + 1] * 2 + a[i]) % MOD;\r\n  for (int i = 1; i <= q; ++i) {\r\n    scanf(\"%lld%lld\", &l[i], &r[i]);\r\n    que[r[i]].push_back(i);\r\n  }\r\n  for (int i = 1; i <= n; ++i) {\r\n    if (a[i] <= 0) {\r\n      block.push_back(Block(i, i));\r\n      Check(pos[sze] = (pos ? pos[sze - 1] : 0) + a[i]);\r\n      ++sze;\r\n    } else {\r\n      int tot = a[i];\r\n      bool flag = true;\r\n      for (int j = (int)block.size() - 1; j >= 0; --j) {\r\n        // printf(\"%lld\\n\", j);\r\n        Block pre = block[j];\r\n        block.pop_back();\r\n        if (pre.r - pre.l + 1 >= 30)\r\n          break;\r\n        tot *= FastPow(2, pre.r - pre.l + 1);\r\n        tot += F(pre.l, pre.r);\r\n        if (tot <= 0) {\r\n          Check(pos[j] = (j ? pos[j - 1] : 0) + G(pre.l, i));\r\n          block.push_back(Block(pre.l, i));\r\n          flag = false;\r\n          break;\r\n        }\r\n        if (tot >= MOD)\r\n          break;\r\n      }\r\n    // printf(\"i: %lld\\n\", i);\r\n      if (flag) {\r\n        block.clear();\r\n        pos[0] = G(0, i);\r\n        block.push_back(Block(0, i));\r\n      }\r\n    }\r\n    sze = block.size();\r\n    for (int j : que[i]) {\r\n      int p = std::upper_bound(block.begin(), block.end(), Block(l[j], N)) -\r\n              block.begin();\r\n      if (p < (int)block.size()) {\r\n        ans[j] = G(l[j], block[p].l - 1);\r\n        Check(ans[j] += 2ll * (pos[sze - 1] - (p ? pos[p - 1] : 0)));\r\n      } else {\r\n        ans[j] = G(l[j], i);\r\n      }\r\n    }\r\n  }\r\n  for (int i = 1; i <= q; ++i)\r\n    printf(\"%lld\\n\", ans[i]);\r\n  return 0;\r\n}"
+}

@@ -1,0 +1,41 @@
+{
+    "id": 173834744,
+    "contestId": 1726,
+    "creationTimeSeconds": 1664380217,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "D",
+        "name": "Edge Split",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "probabilities",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "neanderthal"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\n#include <vector>\n\nusing namespace std;\n\nbool node_has_red_edges(int u, auto &edges)\n{\n    for (auto &edge : edges[u])\n    {\n        if (edge.second)\n            return true;\n    }\n    return false;\n}\n\nvoid colorEdge(int u, int v, auto &edges, bool red = true)\n{\n    for (auto &edge : edges[u])\n    {\n        if (edge.first == v)\n        {\n            edge.second = red;\n        }\n    }\n\n    for (auto &edge : edges[v])\n    {\n        if (edge.first == u)\n        {\n            edge.second = red;\n        }\n    }\n}\n\nint color_red_dfs(int u, int toColorCount, auto &edges)\n{\n    int cntColored = 0;\n    for (auto &edge : edges[u])\n    {\n        if (!edge.second && cntColored < toColorCount)\n        {\n\n            cntColored++;\n            colorEdge(u, edge.first, edges, true);\n            cntColored += color_red_dfs(edge.first, toColorCount - cntColored, edges);\n            break;\n        }\n    }\n    return cntColored;\n}\n\nint main()\n{\n\n    int t, n, m;\n    cin >> t;\n\n    for (int k = 0; k < t; k++)\n    {\n\n        cin >> n >> m;\n        vector<vector<pair<int, bool>>> edges(n + 1, vector<pair<int, bool>>());\n        vector<pair<int, int>> edgesInput;\n        vector<pair<int, int>> extraEdges;\n\n        int u, v;\n        int cntReg = 0;\n        for (int i = 0; i < m; i++)\n        {\n            cin >> u >> v;\n            edgesInput.push_back(pair<int, int>(u, v));\n            if (edges[u].size() < 2 && edges[v].size() < 2)\n            {\n                edges[u].push_back(pair<int, bool>(v, false));\n                edges[v].push_back(pair<int, bool>(u, false));\n                cntReg++;\n            }\n            else\n            {\n                extraEdges.push_back(pair<int, int>(u, v));\n            }\n        }\n\n        // find root if exists\n        int root = 1;\n        for (int i = 1; i < n + 1; i++)\n        {\n            if (edges[i].size() == 1)\n            {\n                root = i;\n                break;\n            }\n        }\n        color_red_dfs(root, cntReg / 2, edges);\n        for (auto &exEdge : extraEdges)\n        {\n            u = exEdge.first;\n            v = exEdge.second;\n            edges[u].push_back(pair<int, bool>(v, false));\n            edges[v].push_back(pair<int, bool>(u, false));\n            if (!node_has_red_edges(u, edges) || !node_has_red_edges(v, edges))\n                colorEdge(u, v, edges, true);\n        }\n\n        for (auto &inputEdge : edgesInput)\n        {\n            for (auto &edge : edges[inputEdge.first])\n            {\n                if (edge.first == inputEdge.second)\n                {\n                    cout << edge.second;\n                    break;\n                }\n            }\n        }\n        cout << endl;\n    }\n    return 0;\n}"
+}

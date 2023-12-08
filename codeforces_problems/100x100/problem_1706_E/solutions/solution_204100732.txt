@@ -1,0 +1,41 @@
+{
+    "id": 204100732,
+    "contestId": 1706,
+    "creationTimeSeconds": 1682911203,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "areke"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\n#include <string>\n#include <math.h>\n#include <fstream>\n#include <sstream>\n#include <algorithm>\n#include <iomanip>\n#include <vector>\n#include <map>\n#include <set>\n#include <stack>\n#include <limits>\n#include <assert.h>\n#include <queue>\n#include <list>\n#include <assert.h>\n#include <array>\n#include <cstring>\nusing namespace std;\n\n\ntemplate <class T> \nstruct Seg {\n\tvector<T> seg;\n\tint sz;\n\tconst T ID = 0;\n\tvoid init(int n) {\n\t\tsz = 1;\n\t\twhile (sz <= n) sz *= 2;\n\t\tseg.assign(2 * sz, ID);\n\t}\n\n\tT comb(T a, T b) {\n    return max(a, b);\n\t}\n\n\tT query(int l, int r, int tl, int tr, int ind) {\n\t\tif (l <= tl && r >= tr) {\n\t\t\treturn seg[ind];\n\t\t}\n\t\tif (l > tr || r < tl) return ID;\n\t\tT left = query(l, r, tl, (tl + tr) / 2, 2 * ind + 1);\n\t\tT right = query(l, r, (tl + tr ) / 2 + 1, tr, 2 * ind + 2);\n\t\treturn comb(left, right); \n\t}\n\n\tvoid pull(int ind) {\n\t\tseg[ind] = comb(seg[2 * ind + 1], seg[2 * ind + 2]);\n\t\tif (ind == 0) return;\n\t\tpull((ind - 1) / 2);\n\t}\n\n\tvoid upd(int ind, T v) {\n\t\tseg[ind + sz - 1] = v;\n\t\tpull((ind + sz - 2) / 2); \n\t}\n};\n\nstruct DSUrb {\n\tint comp = 0;\n\tvector<int> e; void init(int n) { e = vector<int>(n,-1); comp = n; }\n\tint get(int x) { return e[x] < 0 ? x : get(e[x]); } \n\tbool sameSet(int a, int b) { return get(a) == get(b); }\n\tint size(int x) { return -e[get(x)]; }\n\tvector<array<int,5> > mod;\n\tbool unite(int x, int y) { // union-by-rank\n\t\tx = get(x), y = get(y); \n\t\tif (x == y) { mod.push_back({-1,-1,-1,-1, 0}); return 0; }\n\t\tif (e[x] > e[y]) swap(x,y);\n\t\tcomp--;\n\t\tmod.push_back({x,y,e[x],e[y], 1});\n\t\te[x] += e[y]; e[y] = x; return 1;\n\t}\n\tint components() {\n\t\treturn comp;\n\t}\n\tvoid rollback() {\n\t\tauto a = mod.back(); mod.pop_back();\n\t\tcomp += a[4];\n\t\tif (a[0] != -1) e[a[0]] = a[2], e[a[1]] = a[3];\n\t}\n};\n\nint main() {\n\tios_base::sync_with_stdio(false);\n\tcin.tie(NULL);\n\tint tests;\n\tcin >> tests;\n\tfor (int test = 1; test <= tests; test++) {\n\t\tint n, m, q;\n\t\tcin >> n >> m >> q;\n\t\tvector<pair<int, int> > e;\n\t\tfor (int i = 0; i < m; i++) {\n\t\t\tint x, y;\n\t\t\tcin >> x >> y;\n\t\t\tx--;\n\t\t\ty--;\n\t\t\te.push_back({x, y});\n\t\t}\n\t\tint x = sqrt(m) + 1;\n\t\tvector<DSUrb> d(x);\n\t\tfor (int i = 0; i < x; i++) {\n\t\t\td[i].init(n);\n\t\t}\n\t\tfor (int i = 0; i < m; i++) {\n\t\t\tfor (int j = x - 1; j >= 0; j--) {\n\t\t\t\tif (j <= i / sqrt(m)) break;\n\t\t\t\td[j].unite(e[i].first, e[i].second);\n\t\t\t}\n\t\t}\n\t\tint el = m / sqrt(m);\n\t\tvector<int> res(n - 1, 1e9);\n\t\tfor (int i = 0; i < n - 1; i++) {\n\t\t\tfor (int j = 0; j < x; j++) {\n\t\t\t\tif (d[j].sameSet(i, i + 1)) {\n\n\t\t\t\t\tint ind = j - 1;\n\t\t\t\t\t\n\t\t\t\t\t\n\t\t\t\t\tfor (int k = 0; k <= el; k++) {\n\t\t\t\t\t\tint a = el * ind + k;\n\t\t\t\t\t\td[ind].unite(e[a].first, e[a].second);\n\t\t\t\t\t\tif (d[ind].sameSet(i, i + 1)) {\n\t\t\t\t\t\t\tres[i] = a + 1;\n\t\t\t\t\t\t\tfor (int l = 0; l < k; l++) {\n\t\t\t\t\t\t\t\td[ind].rollback();\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tSeg<int> seg;\n\t\tseg.init(n - 1);\n\t\tfor (int i = 0; i < n - 1; i++) {\n\t\t\tseg.upd(i, res[i]);\n\t\t}\n\t\tfor (int i = 0; i < q; i++) {\n\t\t\tint l, r;\n\t\t\tcin >> l >> r;\n\t\t\tl--;\n\t\t\tr--;\n\t\t\tif (l == r) {\n\t\t\t\tcout << 0 << \" \\n\"[i == q - 1];\n\t\t\t} else {\n\t\t\t\tcout << seg.query(l, r - 1, 0, seg.sz - 1, 0) << \" \\n\"[i == q - 1];\n\t\t\t}\n\n\t\t}\n\n\n\t}\n\n\t// IF STUCK:\n\t\t// DIV CONQUER?\n\t\t// CONSIDER SMALL CASES\n\treturn 0;\n}\n"
+}

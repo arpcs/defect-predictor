@@ -1,0 +1,36 @@
+{
+    "id": 42029573,
+    "contestId": 878,
+    "creationTimeSeconds": 1535122117,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "darobaronabaro"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 2355200,
+    "source": "#include <bits/stdc++.h>\n\n#define F first\n#define S second\n#define pii pair<int, int>\n#define pb push_back\n\nusing namespace std;\n\ntypedef long long ll;\ntypedef long double ld;\n\nconst int maxN = 1e5 + 10;\nconst int oo = 1e9, mod = 1e9 + 7;\n\nll f[maxN];\nint a[maxN], ptr[maxN], ps[maxN];\nint sum[maxN];\n\nint power(int A, int B)\n{\n\tif(B == 0) return 1;\n\tll res = power(A, B/2);\n\tres *= res, res %= mod;\n\tif(B & 1) res *= A, res %= mod;\n\treturn res;\n}\n\nint get(int l, int r)\n{\n\tll res = ps[r] + mod - ps[l]; res %= mod;\n\tres *= power(power(2, l), mod - 2); res %= mod;\n\treturn res;\n}\n\nint main()\n{\n\tios_base::sync_with_stdio(0); cin.tie(0);\n\tint n, q; cin >> n >> q;\n\tfor (int i=0; i<n; i++) cin >> a[i];\n\t\n\tmemset(ptr, -1, sizeof ptr);\n\n\tint p = 1;\n\tfor (int i=1; i<=n; i++)\n\t{\n\t\tps[i] = ((ll)ps[i - 1] + 1LL * p * ((ll)a[i - 1] + mod)) % mod;\n\t\tp *= 2, p %= mod;\n\t}\n\n\tvector <pii> blocks;\n\n\tll las = 0;\n\tfor (int i=n-1; i>=0; i--)\n\t{\n\t\tif(2 * las + a[i] >= 0) las = 2 * las + a[i];\n\t\telse \n\t\t{\n\t\t\tint r = n;\n\t\t\tfor (int j=i; j<n && ptr[j] == -1; j++) ptr[j] = i, r = j + 1;\n\t\t\tblocks.pb({i, r});\n\t\t\tlas = 0;\n\t\t\tcontinue ;\n\t\t}\n\n\t\tif(las >= oo || i == 0)\n\t\t{\n\t\t\tint r = n;\n\t\t\tfor (int j=0; j<n && ptr[j] == -1; j++)\n\t\t\t\tptr[j] = 0, r = j + 1;\n\t\t\tblocks.pb({0, r});\n\t\t\tbreak ;\n\t\t}\n\n\t}\n\treverse(blocks.begin(), blocks.end());\n\n\tint sz = blocks.size();\n\n\tfor (int i=1; i<=sz; i++)\n\t{\n\t\tsum[i] = sum[i - 1];\n\t\tint l = blocks[i].F, r = blocks[i].S;\n\t\tsum[i] += (2LL * get(l, r)) % mod;\n\t\tsum[i] %= mod;\n\t}\n\n\tfor (int i=0; i<q; i++)\n\t{\n\t\tint l, r; cin >> l >> r;\n\t\tl --;\n\t\tll ans = 0;\n\n\t\tint idr = upper_bound(blocks.begin(), blocks.end(), pii(r, -1)) - blocks.begin();\n\t\tidr--;\n\n\t\tint lf = ptr[r - 1];\n\t\tif(lf > l) ans += 2LL * get(lf, r) % mod, ans %= mod;\n\n\t\tint idl = lower_bound(blocks.begin(), blocks.end(), pii(l + 1, -1)) - blocks.begin();\n\n\t\tif(idl <= idr) ans += (sum[idr] - sum[idl] + mod) % mod, ans %= mod;\n\n\t\tidl --;\n\n\t\tint rg = min(r, blocks[idl].S);\n\t\tans += get(l, rg), ans %= mod;\n\n\t\tcout << ans << '\\n';\n\n\t}\n\n}\n"
+}

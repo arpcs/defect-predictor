@@ -1,0 +1,39 @@
+{
+    "id": 207343490,
+    "contestId": 1062,
+    "creationTimeSeconds": 1685100619,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1062,
+        "index": "E",
+        "name": "Company",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1062,
+        "members": [
+            {
+                "handle": "M998244353"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1542209700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 35328000,
+    "source": "//#pragma GCC optimize(\"Ofast\",\"unroll-loops\",\"O3\")\r\n//#pragma GCC target(\"sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,avx,avx2,tune=native\")\r\n#include<bits/stdc++.h>\r\n#include <iostream>\r\n#include <fstream>\r\nusing namespace std;\r\nusing cd=complex<double>;\r\n#define fi first\r\n#define PI acos(-1)\r\n#define se second\r\n#define eps 1e-10\r\n#define IOS ios::sync_with_stdio(0);cin.tie(0);cout.tie(0)\r\n#define HP(x) cout<<fixed<<setprecision(x);\r\n#define popcnt(x) __builtin_popcountll(x)\r\n#define all(obj) (obj).begin(), (obj).end()\r\n#define rall(obj) (obj).rbegin(), (obj).rend()\r\n#define sumv(a) accumulate(all(a), 0LL)\r\n#define lb(v,a) (lower_bound(begin(v),end(v),a)-begin(v))\r\n#define ub(v,a) (upper_bound(begin(v),end(v),a)-begin(v))\r\n#define inq(x,l,r) (l<=x&& x<=r)\r\ntypedef long long ll;\r\ntypedef unsigned long long ull;\r\ntypedef string str;\r\ntypedef long double db;\r\ntypedef pair<ll,ll> pll;\r\ntypedef pair<db,db> pdd;\r\ntypedef pair<int,int> pii;\r\ntypedef pair<ll,pll> pp;\r\ntypedef vector<ll> vl;\r\ntypedef vector<int> vi;\r\ntypedef vector<db> vd;\r\ntypedef vector<str> vs;\r\ntypedef vector<vector<ll>> mal;\r\ntypedef vector<vector<int>> mai;\r\ntypedef vector<vector<str>> mas;\r\ntypedef vector<vector<db>> mad;\r\nmt19937_64 rnd(chrono::system_clock::now().time_since_epoch().count());//rnd()%n,shuffle(a+1,a+1+n,rnd);\r\nconst ll N=1e5+5,M=1e9,mod=998244353,ha=13331,G=1e4;\r\nll n,q,dis[N],f[N][20];\r\nstruct ppp{ll l,r,f1,f2,pos;}tr[N*4];\r\nvector<ll> edge[N];\r\nvoid dfs(ll u,ll fa,ll dp){\r\n    dis[u]=dp;\r\n    for(ll i=1;i<=18;i++){\r\n        f[u][i]=f[f[u][i-1]][i-1];\r\n    }\r\n    for(auto v:edge[u]){\r\n        if(v==fa) continue;\r\n        f[v][0]=u;dfs(v,u,dp+1);\r\n    }\r\n}\r\nll lca(ll x,ll y){\r\n    if(x==-1) return y;if(y==-1) return x;\r\n    if(dis[x]<dis[y]) swap(x,y);\r\n    for(ll i=18;i>=0;i--){\r\n        if(dis[f[x][i]]>=dis[y]) x=f[x][i];\r\n        if(x==y) return y;\r\n    }\r\n    for(ll i=18;i>=0;i--){\r\n        if(f[x][i]!=f[y][i]) x=f[x][i],y=f[y][i];\r\n    }\r\n    return f[x][0];\r\n}\r\nppp up(ppp i,ppp j){\r\n    ppp v;v.l=i.l;v.r=j.r;\r\n    v.f1=lca(i.f1,j.f1);\r\n    ll fi=lca(i.f2,j.f1),fj=lca(i.f1,j.f2);\r\n    if(dis[fi]>dis[fj]) v.f2=fi,v.pos=i.pos;\r\n    else v.f2=fj,v.pos=j.pos;\r\n    return v;\r\n}\r\nvoid build(ll i,ll l,ll r){\r\n    tr[i].l=l;tr[i].r=r;tr[i].f1=tr[i].f2=tr[i].pos=-1;\r\n    if(l==r){tr[i].f1=tr[i].pos=l;return;}\r\n    ll m=(l+r)/2;build(i*2,l,m);build(i*2+1,m+1,r);\r\n    tr[i]=up(tr[i*2],tr[i*2+1]);\r\n}\r\nppp query(ll i,ll l,ll r){\r\n    if(tr[i].l>=l&&tr[i].r<=r) return tr[i];\r\n    ll m=(tr[i].l+tr[i].r)/2;\r\n    if(r<=m) return query(i*2,l,r);\r\n    else if(l>m) return query(i*2+1,l,r);\r\n    else return up(query(i*2,l,r),query(i*2+1,l,r));\r\n}\r\nint main(){\r\n    IOS;cin>>n>>q;\r\n    for(ll i=2;i<=n;i++){\r\n        ll x;cin>>x;\r\n        edge[x].push_back(i);\r\n        edge[i].push_back(x);\r\n    }\r\n    dfs(1,0,0);build(1,1,n);dis[0]=-1;\r\n    while(q--){\r\n        ll l,r;cin>>l>>r;\r\n        ppp now=query(1,l,r);\r\n        cout<<now.pos<<\" \"<<dis[now.f2]<<\"\\n\";\r\n    }\r\n\r\n}\r\n"
+}

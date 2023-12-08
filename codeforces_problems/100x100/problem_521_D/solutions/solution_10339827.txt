@@ -1,0 +1,35 @@
+{
+    "id": 10339827,
+    "contestId": 521,
+    "creationTimeSeconds": 1426693554,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 521,
+        "index": "D",
+        "name": "Shop",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2800,
+        "tags": [
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 521,
+        "members": [
+            {
+                "handle": "Kepnu4"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1425279600
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 10,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 13312000,
+    "source": "#include <iostream>\r\n#include <cstdio>\r\n#include <cstdlib>\r\n#include <cstring>\r\n#include <vector>\r\n#include <algorithm>\r\n#include <set>\r\n#include <map>\r\n#include <cassert>\r\n#include <ctime>\r\n#include <numeric>\r\n\r\nusing namespace std;\r\n\r\n#define sqr(a) ((a)*(a))\r\n#define two(a) (1 << (a))\r\n#define has(mask, a) ((mask) & two(a) ? 1 : 0)\r\n\r\nclass Frac {\r\n    public:\r\n    long long first, second;\r\n    int id, type, ans;\r\n\r\n    bool operator < (const Frac &b) const {\r\n        long double aa = (long double)first * b.second;\r\n        long double bb = (long double)second * b.first;\r\n\r\n        return aa > bb;\r\n    }\r\n};\r\n\r\nint k, n, m, a[100005], pos[100005][5];\r\n\r\nvector<long long> sum[100005];\r\nvector<pair<int, int> > can[100005][5];\r\n\r\nset<Frac> s;\r\n\r\nvoid load() {\r\n    cin >> k >> n >> m;\r\n    for (int i = 0;i < k;i++) {\r\n        scanf(\"%d\", &a[i]);\r\n    }\r\n\r\n    for (int i = 0;i < n;i++) {\r\n        int t, j, b;\r\n        scanf(\"%d%d%d\", &t, &j, &b);\r\n        t--, j--;\r\n\r\n        can[j][t].push_back(make_pair(b, i));\r\n    }\r\n\r\n    for (int i = 0;i < k;i++) {\r\n        for (int j = 0;j < 3;j++) {\r\n            sort(can[i][j].begin(), can[i][j].end());\r\n            reverse(can[i][j].begin(), can[i][j].end());\r\n        }\r\n    }\r\n\r\n    for (int i = 0;i < k;i++) {\r\n        if ((int)can[i][1].size() == 0) continue;\r\n        sum[i].push_back(can[i][1][0].first);\r\n        for (int j = 1;j < (int)can[i][1].size();j++) {\r\n            sum[i].push_back(sum[i].back()+ can[i][1][j].first);\r\n        }\r\n    }\r\n}\r\n\r\nvoid add(int id, int type) {\r\n    if (pos[id][type] == (int)can[id][type].size()) return;\r\n\r\n    Frac res;\r\n    res.id = id;\r\n    res.type = type;\r\n\r\n    int tt = pos[id][type]++;\r\n    res.ans = can[id][type][tt].second;\r\n\r\n    if (type == 0) {\r\n        res.first = can[id][type][tt].first;    \r\n        res.second = a[id];\r\n    } else if (type == 1) {\r\n        res.first = sum[id][tt] + a[id];\r\n        res.second = a[id];\r\n    } else {\r\n        res.first = can[id][type][tt].first;\r\n        res.second = 1;\r\n    }\r\n\r\n    s.insert(res);\r\n}\r\n\r\nvoid solve() {\r\n    for (int i = 0;i < k;i++) {\r\n        for (int j = 0;j < 3;j++) {\r\n            add(i, j);\r\n        }\r\n    }\r\n\r\n    vector<pair <int, int> > ans;\r\n    while(m > 0 && (int)s.size() > 0) {\r\n        m--;\r\n        Frac cur = *s.begin();\r\n        if (cur.first <= cur.second) break;\r\n\r\n        if (cur.type == 0) {\r\n            int tt = pos[cur.id][1] - 1;\r\n            if (tt >= 0) {\r\n                Frac aa = cur;\r\n                aa.ans = can[cur.id][1][tt].second;\r\n                aa.first = sum[cur.id][tt] + a[cur.id];\r\n                aa.second = a[cur.id];\r\n\r\n                if (s.find(aa) != s.end()) {\r\n                    s.erase(aa);\r\n                    aa.first = cur.first + sum[cur.id][tt];\r\n                    aa.second = cur.first;\r\n                    s.insert(aa);\r\n                }\r\n            }\r\n            a[cur.id] = cur.first;\r\n        }\r\n\r\n        ans.push_back(make_pair(cur.type, cur.ans));\r\n        s.erase(cur);\r\n\r\n        add(cur.id, cur.type);\r\n    }\r\n\r\n    sort(ans.begin(), ans.end());\r\n    cout << ans.size() << endl;\r\n    for (int i = 0;i < (int)ans.size();i++) {\r\n        cout << ans[i].second + 1 << \" \";\r\n    }\r\n    cout << endl;\r\n}\r\n\r\nint main() {\r\n    #ifdef MY_LOCAL\r\n        freopen (\"a.in\", \"r\", stdin);\r\n    #endif\r\n\r\n    load();\r\n    solve();\r\n\r\n    return 0;\r\n}\r\n"
+}

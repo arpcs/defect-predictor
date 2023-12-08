@@ -1,0 +1,41 @@
+{
+    "id": 166417208,
+    "contestId": 1706,
+    "creationTimeSeconds": 1659299894,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "ZsibbadtKubikus"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 374,
+    "memoryConsumedBytes": 60723200,
+    "source": "#include <bits/stdc++.h>\r\n\r\n#pragma GCC optimize(\"O3\")\r\n#pragma GCC target(\"sse4\")\r\n#pragma GCC target(\"avx2\")\r\n\r\n#define deb(x) cerr << #x << \" = \" << x << \"\\n\"\r\n#define all(x) (x).begin(), (x).end()\r\n#define len(x) (int) x.size()\r\n#define lsb(x) (x) & -(x)\r\n#define l(x) (x << 1) + 1\r\n#define r(x) (x << 1) + 2\r\n\r\n#define xx first\r\n#define yy second\r\n#define mp make_pair\r\n#define pb push_back\r\n#define lb lower_bound\r\n#define ub upper_bound\r\n\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef pair <int, int> pii;\r\ntypedef pair <ld, ld> pld;\r\ntypedef pair <ll, ll> pll;\r\n\r\nconst ll infll = numeric_limits <ll>::max() >> 1;\r\nconst int inf = numeric_limits <int>::max() >> 1;\r\nconst int N = 2e5 + 1;\r\nconst int L = 20;\r\nint n, m, q, tc, mxm[N], spt[N][L];\r\n\r\nstruct Graph {\r\n    int par[N];\r\n    int hgt[N];\r\n    int wgt[N];\r\n    int anc[N][L];\r\n    int mxm[N][L];\r\n    vector <pii> adj[N];\r\n} graph;\r\n\r\nstruct Dsu {\r\n    int par[N];\r\n    int cnt[N];\r\n\r\n    int root(int u) { return par[u] == u? u: par[u] = root(par[u]); }\r\n\r\n    void unite(int u, int v) {\r\n        u = root(u), v = root(v);\r\n\r\n        if (cnt[u] < cnt[v]) {\r\n            swap(u, v);\r\n        }\r\n        cnt[u] += cnt[v];\r\n        par[v] = u;\r\n    }\r\n} dsu;\r\n\r\ninline int lg(int x) {\r\n    return 31 - __builtin_clz(x);\r\n}\r\n\r\nvoid clear() {\r\n    for (int i = 1; i <= n; ++i) {\r\n        graph.par[i] = 0;\r\n        graph.hgt[i] = 0;\r\n        graph.wgt[i] = 0;\r\n        graph.adj[i].clear();\r\n    }\r\n}\r\n\r\nvoid calc_spt() {\r\n    for (int i = 1; i < n; ++i) {\r\n        spt[i][0] = mxm[i];\r\n    }\r\n    for (int j = 1; j < L; ++j) {\r\n        for (int i = 1; i + (1 << j) <= n; ++i) {\r\n            spt[i][j] = max(spt[i][j - 1], spt[i + (1 << j - 1)][j - 1]);\r\n        }\r\n    }\r\n}\r\n\r\nvoid input()\r\n{\r\n    cin >> n >> m >> q;\r\n    for (int i = 1; i <= n; ++i) {\r\n        dsu.cnt[i] = 1;\r\n        dsu.par[i] = i;  \r\n    }\r\n    for (int i = 1; i <= m; ++i) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n\r\n        if (dsu.root(u) != dsu.root(v)) {\r\n            graph.adj[u].pb({v, i});\r\n            graph.adj[v].pb({u, i});\r\n            dsu.unite(u, v);\r\n        }\r\n    }\r\n}\r\n\r\nvoid dfs(int u) {\r\n    graph.anc[u][0] =\r\n    graph.par[u];\r\n    graph.mxm[u][0] =\r\n    graph.wgt[u];\r\n    for (int i = 1; i < L; ++i) {\r\n        graph.anc[u][i] =\r\n        graph.anc[graph.anc[u][i - 1]][i - 1];\r\n    }\r\n    for (int i = 1; i < L; ++i) {\r\n        graph.mxm[u][i] = max(\r\n            graph.mxm[u][i - 1],\r\n            graph.mxm[graph.anc[u][i - 1]][i - 1]\r\n        );\r\n    }\r\n    for (pii p: graph.adj[u]) {\r\n        int v = p.xx;\r\n        int w = p.yy;\r\n        if (graph.par[u] == v) {\r\n            continue;\r\n        }\r\n        graph.wgt[v] = w;\r\n        graph.par[v] = u;\r\n        graph.hgt[v] =\r\n        graph.hgt[u] + 1;\r\n        dfs(v);\r\n    }\r\n}\r\n\r\nint lca(int u, int v) {\r\n    if (graph.hgt[u] < graph.hgt[v]) {\r\n        swap(u, v);\r\n    }\r\n    int k = graph.hgt[u] - graph.hgt[v];\r\n    for (int i = 0; i < L; ++i) {\r\n        if (k >> i & 1) {\r\n            u = graph.anc[u][i];\r\n        }\r\n    }\r\n    if (u == v) {\r\n        return u;\r\n    }\r\n    for (int i = L - 1; i >= 0; --i) {\r\n        if (graph.anc[u][i] != graph.anc[v][i]) {\r\n            u = graph.anc[u][i];\r\n            v = graph.anc[v][i];\r\n        }\r\n    }\r\n    return graph.par[u];\r\n}\r\n\r\nint max_path_query(int u, int k) {\r\n    int res = 0;\r\n    for (int i = 0; i < L; ++i) {\r\n        if (k >> i & 1) {\r\n            res = max(res, graph.mxm[u][i]);\r\n            u = graph.anc[u][i];\r\n        }\r\n    }\r\n    return res;\r\n}\r\n\r\nint greatest_weight(int u, int v) {\r\n    int a = lca(u, v), res = 0;\r\n    res = max(res, max_path_query(u, graph.hgt[u] - graph.hgt[a]));\r\n    res = max(res, max_path_query(v, graph.hgt[v] - graph.hgt[a]));\r\n    return res;\r\n}\r\n\r\nint query(int l, int r) {\r\n    int lgx = lg(r - l + 1);\r\n    return max(spt[l][lgx], spt[r - (1 << lgx) + 1][lgx]);\r\n}\r\n\r\nvoid solve()\r\n{\r\n    dfs(1);\r\n    for (int i = 1; i < n; ++i) {\r\n        mxm[i] = greatest_weight(i, i + 1);\r\n    }\r\n    calc_spt();\r\n    for (int i = 0; i < q; ++i) {\r\n        int l, r;\r\n        cin >> l >> r; r--;\r\n\r\n        if (l > r) {\r\n            cout << \"0 \";\r\n        } else {\r\n            cout << query(l, r) << \" \";\r\n        }\r\n    }\r\n    cout << \"\\n\";\r\n}\r\n\r\nint main()\r\n{\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(0), cout.tie(0);\r\n    cin >> tc;\r\n    while (tc--) {\r\n        clear();\r\n        input();\r\n        solve();\r\n    }\r\n}\r\n"
+}

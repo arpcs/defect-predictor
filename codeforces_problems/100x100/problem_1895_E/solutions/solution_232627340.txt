@@ -1,0 +1,44 @@
+{
+    "id": 232627340,
+    "contestId": 1895,
+    "creationTimeSeconds": 1699878001,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "wish-nu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 343,
+    "memoryConsumedBytes": 34713600,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\n#define int long long\n\nvoid solve() {\n    int N;\n    cin >> N;\n    vector<int> a1(N);\n    for (int i = 0; i < N; ++i) cin >> a1[i];\n    int maxA1 = *max_element(a1.begin(), a1.end());\n    vector<int> d1(N);\n    for (int i = 0; i < N; ++i) cin >> d1[i];\n    vector<pair<int, int>> ad1;\n    for (int i = 0; i < N; ++i) {\n        ad1.push_back({a1[i], d1[i]});\n    }\n\n    int M;\n    cin >> M;\n    vector<int> a2(M);\n    for (int i = 0; i < M; ++i) cin >> a2[i];    \n    int maxA2 = *max_element(a2.begin(), a2.end());\n    vector<int> d2(M);\n    for (int i = 0; i < M; ++i) cin >> d2[i];\n    vector<pair<int, int>> ad2;\n    for (int i = 0; i < M; ++i) {\n        ad2.push_back({a2[i], d2[i]});\n    }\n\n    sort(ad1.begin(), ad1.end());\n    sort(ad2.begin(), ad2.end());\n\n    vector<int> parent(N + 3);\n    for (int i = 0; i < N + 3; ++i) {\n        parent[i] = i;\n    }\n\n    int win = N, draw = N + 1, lost = N + 2;\n    int visitedNow = -1;\n\n    vector<int> bestCard1(N + 1, N - 1);\n    for (int i = N - 1; i >= 0; --i) {\n        if (ad1[i].second > ad1[bestCard1[i + 1]].second) {\n            bestCard1[i] = i;\n        } else {\n            bestCard1[i] = bestCard1[i + 1];\n        }\n    }\n\n    vector<int> bestDefense2(M + 1, 0);\n    for (int i = M - 1; i >= 0; --i) {\n        bestDefense2[i] = max(bestDefense2[i + 1], ad2[i].second);\n    }\n\n    auto binarySearch = [&](int defense, bool player1) {\n        vector<pair<int, int>> &arr = player1 ? ad1 : ad2;\n        if (arr[0].first > defense) return 0LL;\n        int OK = arr.size() - 1;\n        int NG = 0;\n        while (abs(OK - NG) > 1) {\n            int mid = (OK + NG) / 2;\n            if (arr[mid].first > defense) {\n                OK = mid;\n            } else {\n                NG = mid;\n            }\n        }\n        return OK;\n    };\n\n    auto dfs = [&](int card) {\n        bool isPlayerOne = false;\n        int defense = ad1[card].second;\n        vector<int> component = {card};\n        while (true) {\n            if (isPlayerOne) {\n                if (maxA1 <= defense) {\n                    parent[card] = lost;\n                    for (int card : component) parent[card] = lost;\n                    return;\n                }\n                int fromCard = binarySearch(defense, true);\n                int bestCard = bestCard1[fromCard];\n                int bestDefense = ad1[bestCard].second;\n                if (parent[bestCard] == visitedNow) {\n                    for (int card : component) parent[card] = draw;\n                    return;\n                }\n                if (parent[bestCard] >= N) {\n                    for (int card : component) parent[card] = parent[bestCard];\n                    return;\n                }\n                card = bestCard;\n                parent[card] = visitedNow;\n                component.push_back(card);\n                defense = bestDefense;\n            } else {\n                if (maxA2 <= defense) {\n                    for (int card : component) parent[card] = win;\n                    return;\n                }\n                int fromCard = binarySearch(defense, false);\n                int bestDefense = bestDefense2[fromCard];\n                defense = bestDefense;\n            }\n            isPlayerOne = !isPlayerOne;\n        }\n    };\n\n    for (int card = 0; card < N; ++card) {\n        if (parent[card] == card) dfs(card);\n    }\n\n    int nwins = 0, ndraws = 0, nloss = 0;\n    for (int card = 0; card < N; ++card) {\n        if (parent[card] == win) nwins += 1;\n        else if (parent[card] == lost) nloss += 1;\n        else ndraws += 1;\n    }\n\n    cout << nwins << \" \" << ndraws << \" \" << nloss << \"\\n\";\n}\n\nint32_t main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n\n    int t;\n    cin >> t;\n    cin.ignore(); // consume newline\n    while (t--) {\n        solve();\n    }\n    return 0;\n}\n"
+}

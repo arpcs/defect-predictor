@@ -1,0 +1,36 @@
+{
+    "id": 58371392,
+    "contestId": 878,
+    "creationTimeSeconds": 1565073757,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "pufanyi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 14,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 7987200,
+    "source": "#define _CRT_SECURE_NO_WARNINGS\r\n\r\n#include <map>\r\n#include <ctime>\r\n#include <cmath>\r\n#include <cstdio>\r\n#include <cctype>\r\n#include <vector>\r\n#include <bitset>\r\n#include <cstdlib>\r\n#include <cstring>\r\n#include <fstream>\r\n#include <iostream>\r\n#include <algorithm>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long LL;\r\n\r\ninline char gc() {\r\n\tstatic const int L = 233333;\r\n\tstatic char sxd[L], *sss = sxd, *ttt = sxd;\r\n\tif (sss == ttt) {\r\n\t\tttt = (sss = sxd) + fread(sxd, 1, L, stdin);\r\n\t\tif (sss == ttt) {\r\n\t\t\treturn EOF;\r\n\t\t}\r\n\t}\r\n\treturn *sss++;\r\n}\r\n\r\n#define dd c = getchar()\r\n#ifndef dd\r\n#define dd c = gc()\r\n#endif\r\ninline char readalpha() {\r\n\tchar dd;\r\n\tfor (; !isalpha(c); dd);\r\n\treturn c;\r\n}\r\n\r\ninline char readchar() {\r\n\tchar dd;\r\n\tfor (; c == ' '; dd);\r\n\treturn c;\r\n}\r\n\r\ntemplate <class T>\r\ninline bool read(T& x) {\r\n\tbool flg = false;\r\n\tchar dd;\r\n\tx = 0;\r\n\tfor (; !isdigit(c); dd) {\r\n\t\tif (c == '-') {\r\n\t\t\tflg = true;\r\n\t\t} else if(c == EOF) {\r\n\t\t\treturn false;\r\n\t\t}\r\n\t}\r\n\tfor (; isdigit(c); dd) {\r\n\t\tx = (x << 1) + (x << 3) + (c ^ 48);\r\n\t}\r\n\tif (flg) {\r\n\t\tx = -x;\r\n\t}\r\n\treturn true;\r\n}\r\n#undef dd\r\n\r\ntemplate <class T>\r\ninline void write(T x) {\r\n\tif (x < 0) {\r\n\t\tputchar('-');\r\n\t\tx = -x;\r\n\t}\r\n\tif (x < 10) {\r\n\t\tputchar(x | 48);\r\n\t\treturn;\r\n\t}\r\n\twrite(x / 10);\r\n\tputchar((x % 10) | 48);\r\n}\r\n\r\ntypedef long long LL;\r\n\r\nconst int maxn = 100005;\r\nconst LL mod = 1000000007;\r\nconst LL inv2 = 500000004;\r\n\r\nint n, Q;\r\nLL aa[maxn];\r\nint fa[maxn];\r\nLL qzh[maxn];\r\nLL ans[maxn];\r\nLL qzhans[maxn];\r\nLL gg[maxn];\r\nLL inv[maxn];\r\nint rrr[maxn];\r\nint flg[maxn];\r\n\r\n#define lowbit(x) (x & -x)\r\n\r\nstruct Tree {\r\n\tLL no[maxn];\r\n\r\n\tinline void add(int pla, LL x) {\r\n\t\t// cout << \"add \" << pla << ' ' << x << endl;\r\n\t\tfor (; pla <= n; pla += lowbit(pla)) {\r\n\t\t\t(no[pla] += x) %= mod;\r\n\t\t}\r\n\t}\r\n\r\n\tinline LL query(int pla) {\r\n\t\tLL ans = 0;\r\n\t\tfor (; pla; pla -= lowbit(pla)) {\r\n\t\t\t(ans += no[pla]) %= mod;\r\n\t\t}\r\n\t\treturn ans;\r\n\t}\r\n} tr;\r\n\r\ninline int getfa(int x) {\r\n\treturn fa[x] == x ? x : getfa(fa[x]);\r\n}\r\n\r\nstruct Query {\r\n\tint l, r, id;\r\n\tfriend bool operator < (Query a, Query b) {\r\n\t\treturn a.r < b.r;\r\n\t}\r\n} q[maxn];\r\n\r\ninline void Merge(int a) {\r\n\tint xxx = getfa(a);\r\n\tint fff = getfa(xxx - 1);\r\n\tint len = xxx - fff;\r\n//\tcout << \"Merge \" << len << ' ' << gg[len] << ' ' << qzhans[xxx] * gg[len] % mod << endl;\r\n\tqzhans[fff] += qzhans[xxx] * gg[len];\r\n\tif (qzhans[fff] > mod) {\r\n\t\tqzhans[fff] %= mod;\r\n\t\tflg[xxx] = true;\r\n\t}\r\n\tflg[fff] = flg[xxx];\r\n\tfa[xxx] = fff;\r\n\ttr.add(xxx, -qzhans[xxx]);\r\n\ttr.add(fff, qzhans[xxx] * gg[len] % mod);\r\n\trrr[fff] = a;\r\n}\r\n\r\ninline LL QQ(int l, int r) {\r\n\t// cout << \"R = \" << r << endl;\r\n\tint kl = getfa(l);\r\n\tif (kl == getfa(r)) {\r\n\t\tLL ans = (((qzh[r] - qzh[l - 1]) % mod * inv[l]) % mod + mod) % mod;\r\n\t\treturn ans;\r\n\t}\r\n\tint rr = rrr[kl];\r\n\tLL ans = (qzh[rr] - qzh[l - 1]) % mod * inv[l] % mod;\r\n//\tcout << \"getans \" << rr << ' ' << qzh[rr] << ' ' << l << ' ' << qzh[l - 1] << endl;\r\n//\tif (kl == 1) {\r\n//\t\tcout << \"anss = \" << ans << endl;\r\n//\t\tcout << \"ans = \" << ans << endl;\r\n//\t}\r\n//\tcout << \"qqqq \" << r << ' ' << tr.query(r) << ' ' << rr << endl;\r\n\tans += tr.query(r) - tr.query(rr);\r\n\t((ans %= mod) += mod) %= mod;\r\n\treturn ans;\r\n}\r\n\r\nint main() {\r\n\t// cout << mod << endl;\r\n\tread(n), read(Q);\r\n\tfor (int i = 1; i <= n; ++i) {\r\n\t\tread(aa[i]);\r\n\t}\r\n\tint now = 1;\r\n\tgg[0] = inv[0] = 1;\r\n\tfor (int i = 1; i <= n; ++i) {\r\n\t\tgg[i] = (gg[i - 1] << 1) % mod;\r\n\t\tinv[i] = (inv[i - 1] * inv2) % mod;\r\n\t}\r\n\tfor (int i = 1; i <= n; ++i) {\r\n\t\tqzh[i] = (qzh[i - 1] + (aa[i] * gg[i] % mod)) % mod;\r\n\t}\r\n\tfor (int i = 1; i <= Q; ++i) {\r\n\t\tread(q[i].l), read(q[i].r), q[i].id = i;\r\n\t\tif (q[i].r == 1) {\r\n\t\t\tnow++;\r\n\t\t\tans[q[i].id] = (aa[1] + mod) % mod;\r\n\t\t}\r\n\t}\r\n//\tif (n == 50) {\r\n//\t\tfor (int i = 24; i <= 30; ++i) {\r\n//\t\t\tprintf(\"%lld\\n\", aa[i]);\r\n//\t\t}\r\n//\t\treturn 0;\r\n//\t}\r\n\tsort(q + 1, q + Q + 1);\r\n\t// puts(\"alb\");\r\n\tfa[1] = 1;\r\n\tqzhans[1] = aa[1] << 1;\r\n\ttr.add(1, qzhans[1]);\r\n\tfor (int i = 2; i <= n; ++i) {\r\n\t\tqzhans[i] = aa[i] << 1;\r\n\t\tfa[i] = i;\r\n\t\ttr.add(i, qzhans[i]);\r\n\t\t// cout << i << endl;\r\n\t\twhile (getfa(i) > 1 && (qzhans[getfa(i)] >= 0 || flg[getfa(i)])) {\r\n\t\t\t// cout << getfa(i) << endl;\r\n\t\t\tMerge(i);\r\n//\t\t\tcout << i << ' ' << qzhans[getfa(i)] << ' ' << getfa(i) << endl;\r\n\t\t}\r\n\t\t// cout << i << endl;\r\n\t\twhile (now <= Q && q[now].r == i) {\r\n\t\t\t// cout << \"QQQ \" << q[now].l << ' ' << q[now].r << endl;\r\n\t\t\tans[q[now].id] = ((QQ(q[now].l, q[now].r) % mod) + mod) % mod;\r\n\t\t\tnow++;\r\n\t\t}\r\n\t}\r\n\tfor (int i = 1; i <= Q; ++i) {\r\n\t\twrite(ans[i]);\r\n\t\tputs(\"\");\r\n\t}\r\n\treturn 0;\r\n}\r\n\r\n/*\r\n4 1\r\n593536087 56559483 -439122178 -126803734\r\n4 4\r\n*/\r\n\r\n/*\r\n7 1\r\n845337335\r\n918157931\r\n-393208824\r\n-795497732\r\n-208348583\r\n521115289\r\n619393959\r\n1 7\r\n*/"
+}

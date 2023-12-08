@@ -1,0 +1,41 @@
+{
+    "id": 166028793,
+    "contestId": 1706,
+    "creationTimeSeconds": 1659025332,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "ygznb"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 1684,
+    "memoryConsumedBytes": 145920000,
+    "source": "#include <iostream>\r\n#include <algorithm>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\nstruct L{\r\n\tll u,v,w;\r\n}l[200005];\r\nll t;\r\nll n,m,q;\r\nll ei,fi;\r\nll fa[400005],fir[400005],vis[400005];\r\nll w[400005], tr[5000005],fat[400005][22];\r\nll ans[400005],de[400005];\r\npair<ll,ll> e[200005]; \r\n\r\nll find(ll a){\r\n\tif(a == fa[a]) return a;\r\n\treturn fa[a] = find(fa[a]);\r\n}\r\nvoid addage(ll u,ll v){\r\n\te[++ei] = {v,fir[u]};\r\n\tfir[u] = ei;\r\n}\r\n\r\nvoid dfs(ll u){\r\n\tvis[u] = true;\r\n\tfor(ll i = 1; i <= 20; i++) fat[u][i] = fat[fat[u][i-1]][i-1];\r\n\tfor(ll i = fir[u],v; i; i = e[i].second){\r\n\t\tv = e[i].first;\r\n\t\tde[v] = de[u] + 1;\r\n\t\tfat[v][0] = u;\r\n\t\tdfs(v);\r\n\t}\r\n}\r\n\r\nll asklca(ll u,ll v){\r\n\tif(de[u] < de[v]) swap(u,v);\r\n\tfor(ll i = 20; i >= 0; i--){\r\n\t\tif(de[fat[u][i]] >= de[v]) u = fat[u][i];\r\n\t}\r\n\tif(u == v) return u;\r\n\tfor(ll i = 20; i >= 0; i--){\r\n\t\tif(fat[u][i] ^ fat[v][i]){\r\n\t\t\tu = fat[u][i];\r\n\t\t\tv = fat[v][i];\r\n\t\t}\r\n\t}\r\n\treturn fat[u][0];\r\n}\r\n\r\nvoid build(ll u,ll l,ll r){\r\n\tif(l >= r){\r\n\t\ttr[u] = ans[l];\r\n\t\treturn;\r\n\t}\r\n\tll mid = (l + r) >> 1;\r\n\tbuild(u << 1, l, mid);\r\n\tbuild(u << 1 | 1, mid + 1, r);\r\n\ttr[u] = max(tr[u << 1], tr[u << 1 | 1]);\r\n}\r\n\r\nll query(ll u,ll l,ll r,ll ql,ll qr){\r\n\tif(ql <= l && qr >= r) return tr[u];\r\n\tll res = 0, mid = (l + r) >> 1;\r\n\tif(ql <= mid) res = max(res, query(u << 1,l,mid,ql,qr));\r\n\tif(qr > mid) res = max(res, query(u << 1 | 1, mid + 1,r,ql,qr));\r\n\treturn res;\r\n}\r\n\r\nvoid solve(){\r\n\tcin >> n >> m >> q;\r\n\tfor(ll i = 1; i <= m; i++) {\r\n\t\tcin >> l[i].u >> l[i].v;\r\n\t\tl[i].w = i;\r\n\t}\r\n\tfor(ll i = 1; i <= 2 * n; i++) fa[i] = i, fir[i] = vis[i] = 0;\r\n\tfi = n;\r\n\tei = 0;\r\n\tfor(ll i = 1,u,v,uf,vf; i <= m; i++){\r\n\t\tu = l[i].u;\r\n\t\tv = l[i].v;\r\n\t\tuf = find(u);\r\n\t\tvf = find(v);\r\n\t\tif(uf != vf){\r\n\t\t\tfa[uf] = fa[vf] = ++ fi;\r\n\t\t\tw[fi] = l[i].w;\r\n\t\t\taddage(fi,uf);\r\n\t\t\taddage(fi,vf);\r\n\t\t}\r\n\t}\r\n\tfor(ll i = fi; i > n; i--){\r\n\t\tif(!vis[i]){\r\n\t\t\tde[i] = 1;\r\n\t\t\tfat[i][0] = i;\r\n\t\t\tdfs(i);\r\n\t\t}\r\n\t}\r\n\tfor(ll i = 1,l; i < n; i++){\r\n\t\tl = asklca(i,i+1);\r\n\t\tans[i] = w[l];\r\n\t}\r\n\tbuild(1,1,n-1);\r\n\tfor(ll i = 1,l,r; i <= q; i++){\r\n\t\tcin >> l >> r;\r\n\t\tif(l == r) cout << 0 << ' ';\r\n\t\telse cout << query(1,1,n - 1,l,r-1) << ' ';\r\n\t}\r\n\tcout << endl;\r\n}\r\n\r\nint main(){\r\n\tcin >> t;\r\n\twhile(t--) solve();\r\n\treturn 0;\r\n}"
+}

@@ -1,0 +1,41 @@
+{
+    "id": 208095074,
+    "contestId": 1726,
+    "creationTimeSeconds": 1685647544,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "D",
+        "name": "Edge Split",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "probabilities",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "cover_drive"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 512000,
+    "source": "#include <bits/stdc++.h>\r\n#include <set>\r\n#define ll long long \r\n#define pb push_back\r\n#define pii pair<int,int>\r\n#define fi first\r\n#define se second\r\n#define debug(x) cerr<<#x<<\" \"<<x<<\"\\n\";\r\n#define debug2(x,y) cerr<<#x<<\" \"<<x<<\" \"<<#y<<\" \"<<y<<\"\\n\";\r\n#include <chrono>\r\n#include <random>\r\nusing namespace std;\r\nconst int mod=998244353;\r\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\r\nstruct custom_hash {\r\n    static uint64_t splitmix64(uint64_t x) {\r\n        x += 0x9e3779b97f4a7c15;\r\n        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;\r\n        x = (x ^ (x >> 27)) * 0x94d049bb133111eb;\r\n        return x ^ (x >> 31);\r\n    }\r\n    size_t operator()(uint64_t x) const {\r\n        static const uint64_t FIXED_RANDOM = chrono::steady_clock::now().time_since_epoch().count();\r\n        return splitmix64(x + FIXED_RANDOM);\r\n    }\r\n};\r\n\r\n//unordered_map<lli,lli,custom_hash> ed;\r\n//unordered_map<lli,lli,custom_hash> mp;\r\nll getRandomNumber(ll l, ll r) {return uniform_int_distribution<ll>(l, r)(rng);} \r\n\r\nint expo(int a,int b){\r\n    if(b==0)return 1;\r\n    ll z=expo(a,b/2);\r\n    z*=z;\r\n    z%=mod;\r\n    if(b&1){\r\n        z*=1ll*a;\r\n        z%=mod;\r\n    }\r\n    return z;\r\n}\r\nvector<vector<pair<int,int>>>adj;\r\nvector<vector<pair<int,int>>>adj1;\r\nset<int>st;\r\nset<pair<int,int>>edges;\r\nbool dfs1(int p,int s){\r\n    st.insert(s);\r\n    bool f=false;\r\n    for(auto &z:adj1[s]){\r\n        if(z.fi!=p){\r\n            if(st.count(z.fi)){\r\n                return true;\r\n            }\r\n        f|=dfs1(s,z.fi);\r\n        }\r\n    }\r\n    return f;\r\n}\r\nint ct;\r\nbool cycle(int u){\r\n    if(ct<3){\r\n        return false;\r\n    }\r\n    st.clear();\r\n    return dfs1(-1,u);\r\n\r\n}\r\nbool check(int u,int v,int edge_num){\r\n    if(ct>3){\r\n        return true;\r\n    }\r\n    if(u>v){\r\n        swap(u,v);\r\n    }\r\n    if(edges.count({u,v})){\r\n        return false;\r\n    }\r\n    \r\n    adj1[u].push_back({v,edge_num});\r\n    adj1[v].push_back({u,edge_num});\r\n    ct++;\r\n   \r\n    if(cycle(u)){\r\n        assert(adj1[u].size()>0);\r\n        adj1[u].pop_back();\r\n        assert(adj1[v].size()>0);\r\n        adj1[v].pop_back();\r\n        ct--;\r\n        return false;\r\n    }\r\n    edges.insert({u,v});\r\n    return true;\r\n}\r\nbool presentInSet(int u,int v){\r\n    if(u>v){\r\n        swap(u,v);\r\n    }\r\n    return(edges.count({u,v}));\r\n}\r\nvector<bool>vis;\r\nvoid dfs(int p,int s,int edge_num){\r\n    vis[s]=true;\r\n    for(auto &z:adj[s]){\r\n        if(z.fi!=p){\r\n            if(vis[z.fi]){\r\n                //a cycle found so add to blue if it doesn't form any cycle\r\n                if(!check(s,z.fi,z.se) && !presentInSet(s,z.fi)){\r\n                    if(p!=-1){\r\n                    check(p,s,edge_num);\r\n                    // debug2(p,s);\r\n                    }\r\n                }\r\n                // debug2(s,z.fi);\r\n            }\r\n            else{\r\n                dfs(s,z.fi,z.se);\r\n            }\r\n        }\r\n    }\r\n    \r\n}\r\nvoid solve(){\r\nint n,m;\r\ncin>>n>>m;\r\nadj.clear();\r\nadj.resize(n+1);\r\nvis.clear();\r\nvis.resize(n+1,false);\r\nadj1.clear();\r\nadj1.resize(n+1);\r\nct=0;\r\nedges.clear();\r\nfor(int i=1;i<=m;i++){\r\n    int u,v;\r\n    cin>>u>>v;\r\n    adj[u].push_back({v,i});\r\n    adj[v].push_back({u,i});\r\n}\r\nif(m==n-1){\r\n    for(int i=1;i<=m;i++){\r\n        cout<<i%2;\r\n    }\r\n    cout<<\"\\n\";\r\n    return;\r\n}\r\ndfs(-1,1,0);\r\nvector<int>mark(m+1,0);\r\n\r\nfor(int i=1;i<=n;i++){\r\n    for(auto &z:adj1[i]){\r\n        assert(z.se>=1 && z.se<=m);\r\n        mark[z.se]=1;\r\n    }\r\n}\r\ndebug(ct);\r\nif(ct!=(m-n+1)){\r\n    for(int i=1;i<=n;i++){\r\n        for(auto &z:adj1[i]){\r\n            debug2(i,z.fi);\r\n        }\r\n    }\r\n}\r\nassert(ct<=(m-n+1));\r\nfor(int i=1;i<=m;i++){\r\n    cout<<mark[i];\r\n}\r\ncout<<\"\\n\";\r\n\r\n}\r\nint main() {\r\n    #ifndef ONLINE_JUDGE\r\n    freopen(\"error.txt\", \"w\", stderr);\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n    freopen(\"output.txt\", \"w\", stdout);\r\n    #endif\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n    cout.tie(NULL);\r\n  int t=1;\r\n  cin>>t;\r\n  while(t--){\r\n    solve();\r\n  }\r\n    \r\n}"
+}

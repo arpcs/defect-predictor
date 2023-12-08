@@ -1,0 +1,41 @@
+{
+    "id": 232510348,
+    "contestId": 1706,
+    "creationTimeSeconds": 1699795804,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "BerryPie"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 15,
+    "timeConsumedMillis": 685,
+    "memoryConsumedBytes": 29696000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nconst int MAXN = 100000+5;\r\nconst int MAXM = 200000+5;\r\nint T, n, m, q, cnt, tot, dfncnt;\r\nint par[MAXN*2], fa[MAXN*2][20], dfn[MAXN], cs[MAXN];\r\nint ch[MAXN*2][2], mx[MAXN*4], mn[MAXN*4], dep[MAXN*2];\r\n\r\nint find(int u){\r\n\treturn par[u] == u ? u : par[u] = find(par[u]);\r\n}\r\n\r\nvoid link(int u, int v, int w){\r\n\tu = find(u);\r\n\tv = find(v);\r\n\tif(u == v)  return;\r\n\tpar[u] = par[v] = ++cnt;\r\n\tfa[u][0] = fa[v][0] = cnt;\r\n\tch[cnt][0] = u;\r\n\tch[cnt][1] = v;\r\n\tcs[cnt-n] = w;\r\n}\r\n\r\nvoid dfs(int u){\r\n\tif(u <= n){\r\n\t\tdfn[u] = ++dfncnt;\r\n\t\treturn;\r\n\t}\r\n\tdep[ch[u][0]] = dep[ch[u][1]] = dep[u]+1;\r\n\tdfs(ch[u][0]);\r\n\tdfs(ch[u][1]);\r\n}\r\n\r\nvoid push_up(int x){\r\n\tint ls = x<<1, rs = x<<1|1;\r\n\tif(dfn[mx[ls]] > dfn[mx[rs]]){\r\n\t\tmx[x] = mx[ls];\r\n\t}\r\n\telse{\r\n\t\tmx[x] = mx[rs];\r\n\t}\r\n\tif(dfn[mn[ls]] < dfn[mn[rs]]){\r\n\t\tmn[x] = mn[ls];\r\n\t}\r\n\telse{\r\n\t\tmn[x] = mn[rs];\r\n\t}\r\n}\r\n\r\nvoid build(int x, int l, int r){\r\n\tif(l == r){\r\n\t\tmx[x] = mn[x] = l;\r\n\t\treturn;\r\n\t}\r\n\tint mid = l+r >> 1;\r\n\tbuild(x<<1, l, mid);\r\n\tbuild(x<<1|1, mid+1, r);\r\n\tpush_up(x);\r\n}\r\n\r\nint qmin(int x, int l, int r, int L, int R){\r\n\tif(L <= l && r <= R)  return mn[x];\r\n\tint mid = l+r >> 1;\r\n\tif(R <= mid)  return qmin(x<<1, l, mid, L, R);\r\n\tif(L > mid)  return qmin(x<<1|1, mid+1, r, L, R);\r\n\tint t1 = qmin(x<<1, l, mid, L, mid), t2 = qmin(x<<1|1, mid+1, r, mid+1, R);\r\n\treturn dfn[t1] < dfn[t2] ? t1 : t2;\r\n}\r\n\r\nint qmax(int x, int l, int r, int L, int R){\r\n\tif(L <= l && r <= R)  return mx[x];\r\n\tint mid = l+r >> 1;\r\n\tif(R <= mid)  return qmax(x<<1, l, mid, L, R);\r\n\tif(L > mid)  return qmax(x<<1|1, mid+1, r, L, R);\r\n\tint t1 = qmax(x<<1, l, mid, L, mid), t2 = qmax(x<<1|1, mid+1, r, mid+1, R);\r\n\treturn dfn[t1] > dfn[t2] ? t1 : t2;\r\n}\r\n\r\nint getlca(int u, int v){\r\n\tif(dep[u] < dep[v])  swap(u, v);\r\n\tfor(int j = 18; j >= 0; j--){\r\n\t\tif((dep[u]-dep[v])>>j&1){\r\n\t\t\tu = fa[u][j];\r\n\t\t}\r\n\t}\r\n\tif(u == v)  return u;\r\n\tfor(int j = 18; j >= 0; j--){\r\n\t\tif(fa[u][j] != fa[v][j]){\r\n\t\t\tu = fa[u][j];\r\n\t\t\tv = fa[v][j];\r\n\t\t}\r\n\t}\r\n\treturn fa[u][0];\r\n}\r\n\r\nint main(){\r\n\tscanf(\"%d\", &T);\r\n\twhile(T--){\r\n\t\tscanf(\"%d%d%d\", &n, &m, &q);\r\n\t\tfor(int i = 1; i < 2*n; i++)\r\n\t\t\tpar[i] = i;\r\n\t\tcnt = n;\r\n\t\tfor(int i = 1; i <= m; i++){\r\n\t\t\tint u, v;\r\n\t\t\tscanf(\"%d%d\", &u, &v);\r\n\t\t\tlink(u, v, i);\r\n\t\t}\r\n\t\tdfncnt = 0;\r\n\t\tdep[cnt] = 1;\r\n\t\tfa[cnt][0] = 0;\r\n\t\tdfs(cnt);\r\n\t\tbuild(1, 1, n);\r\n\t\tfor(int j = 1; j <= 18; j++){\r\n\t\t\tfor(int i = 1; i <= cnt; i++){\r\n\t\t\t\tfa[i][j] = fa[fa[i][j-1]][j-1];\r\n\t\t\t}\r\n\t\t}\r\n\t\twhile(q--){\r\n\t\t\tint l, r;\r\n\t\t\tscanf(\"%d%d\", &l, &r);\r\n\t\t\tint u = qmin(1, 1, n, l, r), v = qmax(1, 1, n, l, r);\r\n\t\t\t// printf(\"uv %d %d\\n\", u, v);\r\n\t\t\tprintf(\"%d \", cs[getlca(u, v) - n]);\r\n\t\t}\r\n\t\tputchar('\\n');\r\n\t}\r\n\treturn 0;\r\n}"
+}

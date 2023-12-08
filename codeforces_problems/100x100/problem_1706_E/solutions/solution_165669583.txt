@@ -1,0 +1,41 @@
+{
+    "id": 165669583,
+    "contestId": 1706,
+    "creationTimeSeconds": 1658751908,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "solego"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 717,
+    "memoryConsumedBytes": 106700800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\n\r\nconst int N = 300010;\r\nconst int M = 800010;\r\nint n, m, Q;\r\nint h[N], e[M], ne[M], w[M], idx;\r\nvoid add(int a, int b, int c) {\r\n\te[idx] = b, w[idx] = c, ne[idx] = h[a], h[a] = idx++;\r\n}\r\n\r\nint p[N];\r\nint find(int x) {\r\n\tif (x != p[x]) p[x] = find(p[x]);\r\n\treturn p[x];\r\n} \r\n\r\nconst int Mdep = 20; \r\nint mx[N][Mdep];\r\nint f[N][Mdep];\r\nint dep[N];\r\nvoid dfs(int u, int fa, int val) {\r\n//\tcout << \"node: \" << u << \"\\n\";\r\n//\tcout << \"node: \" << u << \", val: \" << val << \"\\n\";\r\n\tf[u][0] = fa;\r\n\tmx[u][0] = val;\r\n\tdep[u] = dep[fa] + 1;\r\n\t\r\n\tfor (int i = 1; i < Mdep; ++i) {\r\n\t\tf[u][i] = f[f[u][i - 1]][i - 1];\r\n\t\tmx[u][i] = max(mx[f[u][i - 1]][i - 1], mx[u][i - 1]);\r\n\t}\r\n\t\r\n\tfor (int i = h[u]; i != -1; i = ne[i])\r\n\t\tif (e[i] != fa) dfs(e[i], u, w[i]);\r\n}\r\n\r\nint getAnsByLca(int a, int b) {\r\n\tif (dep[a] < dep[b]) swap(a, b);\r\n\t\r\n\tint res = 0;\r\n\tfor (int k = Mdep - 1; k >= 0; --k)\r\n\t\tif (dep[f[a][k]] >= dep[b]) {\r\n\t\t\tres = max(res, mx[a][k]);\r\n\t\t\ta = f[a][k];\r\n\t\t}\r\n\t\t\r\n\tif (a == b) return res;\r\n\t\r\n\tfor (int k = Mdep - 1; k >= 0; --k) {\r\n\t\tif (f[a][k] != f[b][k]) {\t\r\n\t\t\tres = max(res, mx[a][k]);\r\n\t\t\tres = max(res, mx[b][k]);\r\n\t\t\ta = f[a][k];\r\n\t\t\tb = f[b][k];\r\n\t\t}\r\n\t}\r\n\tres = max(res, mx[a][0]);\r\n\tres = max(res, mx[b][0]);\r\n\treturn res;\r\n}\r\n\r\nint rmq[N][20];\r\n\r\nvoid solve() {\r\n\tscanf(\"%d%d%d\", &n, &m, &Q);\r\n\t\r\n\tfor (int i = 1; i <= n + m; ++i) h[i] = -1;\r\n\tfor (int i = 1; i <= n; ++i) p[i] = i;\r\n\tidx = 0;\r\n\t\r\n\tint tot = n;\r\n\tfor (int i = 1; i <= m; ++i) {\r\n\t\tint a, b; \r\n\t\tscanf(\"%d%d\", &a, &b);\r\n\t\tint pa = find(a), pb = find(b);\r\n\t\tif (pa != pb) {\r\n\t\t\tp[pa] = pb;\r\n\t\t\t++tot;\r\n\t\t\tadd(tot, a, i);\r\n\t\t\tadd(a, tot, i);\r\n\t\t\tadd(tot, b, i);\r\n\t\t\tadd(b, tot, i);\r\n\t\t}\r\n\t}\r\n\t\r\n\tdfs(1, 0, -1);\r\n\t\r\n\tfor (int i = 1; i < n; ++i)\r\n\t\trmq[i][0] = getAnsByLca(i, i + 1);\r\n\tfor (int j = 1; j < 20; ++j) \r\n\t\tfor (int i = 1; i < n; ++i) \r\n\t\t\trmq[i][j] = max(rmq[i][j - 1], rmq[min(i + (1 << (j - 1)), n)][j - 1]);\r\n\t\t\r\n\tvector<int> ans;\r\n\tfor (int i = 1; i <= Q; ++i) {\r\n\t\tint l, r;\r\n\t\tscanf(\"%d%d\", &l, &r);\r\n\t\tif (l == r) ans.push_back(0);\r\n\t\telse {\r\n\t\t\tint len = r - l;\r\n\t\t\tint base = 0;\r\n\t\t\twhile ((1 << base) <= len) base += 1;\r\n\t\t\tbase -= 1;\r\n\t\t\tans.push_back(max(rmq[l][base], rmq[r - (1 << base)][base]));\r\n\t\t}\r\n\t}\r\n\tfor (int i = 0; i < Q; ++i) cout << ans[i] << \" \\n\"[i == Q - 1];\r\n}\r\n\r\nint main()\r\n{\r\n\tint T = 1;\r\n\tscanf(\"%d\", &T);\r\n\tfor (int i = 1; i <= T; ++i) {\r\n\t\tsolve();\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

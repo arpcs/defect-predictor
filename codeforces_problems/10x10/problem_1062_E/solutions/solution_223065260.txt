@@ -1,0 +1,39 @@
+{
+    "id": 223065260,
+    "contestId": 1062,
+    "creationTimeSeconds": 1694512042,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1062,
+        "index": "E",
+        "name": "Company",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1062,
+        "members": [
+            {
+                "handle": "iliaaaaa"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1542209700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 234,
+    "memoryConsumedBytes": 35225600,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\ntypedef pair<int, int> pii;\ntypedef vector<pii> vpii;\n\nconst int N = 1e5 + 7, LG = 20;\nint n, q, h[N], ans[LG][N], source[LG][N], sp[LG][N], par[LG][N];\nvector<int> adj[N];\n\nvoid read_input() {\n\tcin >> n >> q;\n\tfor (int i = 1; i < n; i++) {\n\t\tcin >> par[0][i];\n\t\tpar[0][i]--;\n\t\tadj[par[0][i]].push_back(i);\n\t}\n}\n\nvoid dfs(int u) {\n\tfor (int v: adj[u]) {\n\t\th[v] = 1 + h[u];\n\t\tdfs(v);\n\t}\n}\n\nint k_par(int u, int k) {\n\tfor (int i = 0; i < LG; i++)\n\t\tif ((k >> i) & 1) \n\t\t\tu = par[i][u];\n\treturn u;\n}\n\nint lca(int u, int v) {\n\tif (h[u] < h[v])\n\t\tswap(u, v);\n\tu = k_par(u, h[u] - h[v]);\n\tfor (int i = LG - 1; i >= 0; i--)\n\t\tif (par[i][u] != par[i][v]) \n\t\t\tu = par[i][u], v = par[i][v];\n\treturn u == v? u: par[0][u];\n}\n\nvoid prepare() {\n\tdfs(0);\n\tfor (int i = 1; i < LG; i++)\n\t\tfor (int u = 0; u < n; u++)\n\t\t\tpar[i][u] = par[i - 1][par[i - 1][u]];\n\tfor (int i = 0; i < n; i++)\n\t\tsp[0][i] = i;\n\tfor (int j = 1; j < LG; j++)\n\t\tfor (int i = 0; i + (1 << j) <= n; i++)\n\t\t\tsp[j][i] = lca(sp[j - 1][i], sp[j - 1][i + (1 << (j - 1))]);\n\tfor (int u = 0; u < n - 1; u++) {\n\t\tint v = u + 1;\n\t\tif (h[u] > h[v]) {\n\t\t\tans[1][u] = v;\n\t\t\tsource[1][u] = u;\n\t\t}\n\t\telse {\n\t\t\tans[1][u] = u;\n\t\t\tsource[1][u] = v;\n\t\t}\n\t}\n\n\tfor (int j = 2; j < LG; j++)\n\t\tfor (int i = 0; i + (1 << j) - 1 < n; i++) {\n\t\t\tint u = lca(source[j - 1][i], sp[j - 1][i + (1 << (j - 1))]);\n\t\t\tint v = lca(sp[j - 1][i], source[j - 1][i + (1 << (j - 1))]);\n\t\t\tif (h[u] > h[v]) {\n\t\t\t\tans[j][i] = ans[j - 1][i];\n\t\t\t\tsource[j][i] = u;\n\t\t\t}\n\t\t\telse {\n\t\t\t\tans[j][i] = ans[j - 1][i + (1 << (j - 1))];\n\t\t\t\tsource[j][i] = v;\n\t\t\t}\n\t\t}\n}\n\nvpii to_binary(int l, int r) {\n\tvpii res;\n\tint m = r - l + 1;\n\tfor (int i = LG - 1; i >= 0; i--)\n\t\tif ((m >> i) & 1) {\n\t\t\tres.push_back(pii(l, i));\n\t\t\tl += (1 << i);\n\t\t}\n\treturn res;\n}\n\nvector<int> plc(vpii &p) {\n\tvector<int> pre_lca;\n\tfor (auto [u, pw]: p) {\n\t\tif (pre_lca.empty())\n\t\t\tpre_lca.push_back(sp[pw][u]);\n\t\telse\n\t\t\tpre_lca.push_back(lca(pre_lca.back(), sp[pw][u]));\n\t}\n\treturn pre_lca;\n}\n\n\nvoid get(int l, int r) {\n\tvpii p = to_binary(l, r);\n\tif (p.size() == 1) {\n\t\tint u = l, id = p[0].second;\n\t\tcout << ans[id][u] + 1 << ' ' << h[source[id][u]] << '\\n';\n\t\treturn;\n\t}\n\tvector<int> pre_lca = plc(p);\n\treverse(p.begin(), p.end());\n\tvector<int> suf_lca = plc(p);\n\treverse(suf_lca.begin(), suf_lca.end());\n\treverse(p.begin(), p.end());\n\tint candid = 0, mx = -1;\n\tfor (int i = 0; i < p.size(); i++) {\n\t\tif (i == 0) {\n\t\t\tint u = lca(source[p[i].second][p[i].first], suf_lca[i + 1]);\n\t\t\tif (h[u] > mx) {\n\t\t\t\tcandid = ans[p[i].second][p[i].first];\n\t\t\t\tmx = h[u];\n\t\t\t}\n\t\t}\n\t\telse if (i == p.size() - 1) {\n\t\t\tint u, candid2;\n\t\t\tif (p[i].second == 0) {\n\t\t\t\tu = pre_lca[i - 1];\n\t\t\t\tcandid2 = r;\n\t\t\t}\n\t\t\telse {\n\t\t\t\tu = lca(source[p[i].second][p[i].first], pre_lca[i - 1]);\n\t\t\t\tcandid2 = ans[p[i].second][p[i].first];\n\t\t\t}\n\t\t\tif (h[u] > mx) {\n\t\t\t\tcandid = candid2;\n\t\t\t\tmx = h[u];\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\tint candid2 = ans[p[i].second][p[i].first];\n\t\t\tint u = lca(lca(pre_lca[i - 1], suf_lca[i + 1]), source[p[i].second][p[i].first]);\n\t\t\tif (h[u] > mx) {\n\t\t\t\tcandid = candid2;\n\t\t\t\tmx = h[u];\n\t\t\t}\n\t\t}\n\t}\n\tcout << candid + 1 << ' ' << mx << '\\n';\n}\n\nvoid write_output() {\n\twhile (q--) {\n\t\tint l, r;\n\t\tcin >> l >> r;\n\t\tget(--l, --r);\n\t}\n}\n\nint main() {\n\tios:: sync_with_stdio(0), cin.tie(0), cout.tie(0);\n\tread_input(), prepare(), write_output();\n\treturn 0;\n}\n"
+}

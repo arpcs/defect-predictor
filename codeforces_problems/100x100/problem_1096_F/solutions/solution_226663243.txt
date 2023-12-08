@@ -1,0 +1,36 @@
+{
+    "id": 226663243,
+    "contestId": 1096,
+    "creationTimeSeconds": 1696457898,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1096,
+        "index": "F",
+        "name": "Inversion Expectation",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1096,
+        "members": [
+            {
+                "handle": "Throckmorton"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1546007700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 32,
+    "timeConsumedMillis": 390,
+    "memoryConsumedBytes": 12902400,
+    "source": "#include <algorithm>\n#include <iomanip>\n#include <ios>\n#include <ctype.h>\n#include <bit>\n#include <iostream>\n#include <vector>\n#include <unordered_set>\n#include <map>\n#include <set>\n#include <queue>\n#include <cmath>\n#include <cassert>\n#include <functional>\n#include <numeric>\n\n\nusing lli = long long int;\nusing ulli = unsigned long long int;\nconst lli INF64 = 1e18;\n\nint getNextBit(ulli n, int i)\n{\n    for (int j = i; j >= 0; j--)\n    {\n        if ((n >> j) & 1)\n        {\n            return j;\n        }\n    }\n    return -1;\n}\n\nlli modInverse(lli a, lli m)\n{\n    return a <= 1 ? a : m - (long long)(m/a) * modInverse(m % a, m) % m;\n}\n\nlli modFact(lli n, lli mod)\n{\n    if (n >= mod)\n        return 0;\n \n    lli result = 1;\n    for (lli i = 1; i <= n; i++)\n        result = (result * i) % mod;\n \n    return result;\n}\n\nlli mulUnderMod(lli a, lli z, lli mod)\n{\n    lli r = mod % a;\n    lli q = (mod - r) / a;\n    lli ret = (a * (z % q)) - ((r * (z / q)) % mod);\n\n    return ret < 0 ? ret + mod : ret;\n}\n\n\ntemplate <class T>\nlli setDiff(T& a, T& b)\n{\n    lli ret = 0;\n    for (auto& ai: a)\n    {\n        if (!b.contains(ai))\n        {\n            ret++;\n        }\n    }\n    return ret;\n}\n\n\ntemplate <class X>\nstruct SegTree {\n    int n;\n    std::function< X(X, X) > f;\n    std::vector<X> tree;\n\n    SegTree(std::vector<X>& a, std::function< X(X, X)> f)\n    {\n        this->n = a.size();\n        this->f = f;\n        this->tree.resize(4*n);\n        this->build(a, 1, 0, n-1);\n    }\n\n    void build(std::vector<X>& a, int v, int left, int right) {\n        //return;\n        if (left == right) {\n            tree[v] = a[left];\n        } else {\n            int mid = (left + right) / 2;\n            build(a, v*2, left, mid);\n            build(a, v*2+1, mid+1, right);\n            tree[v] = f(tree[v*2], tree[v*2+1]);\n        }\n    }\n\n    X query(int q_left, int q_right)\n    {\n        return query(1, 0, n-1, q_left, q_right);\n    }\n\n    X query(int v, int t_left, int t_right, int q_left, int q_right) {\n        if (q_left > q_right) \n            return X{};\n        if (q_left == t_left && q_right == t_right) {\n            return tree[v];\n        }\n        int t_mid = (t_left + t_right) / 2;\n        return f(\n                query(v*2,   t_left,  t_mid,   q_left,                    std::min(q_right, t_mid)),\n                query(v*2+1, t_mid+1, t_right, std::max(q_left, t_mid+1), q_right));\n    }\n\n    void update(lli pos, X& new_val)\n    {\n        update(1, 0, n-1, pos, new_val);\n    }\n\n    void update(int v, int t_left, int t_right, int pos, X& new_val) {\n        if (t_left == t_right) {\n            tree[v] = std::copy(new_val);\n        } else {\n            int t_mid = (t_left + t_right) / 2;\n            if (pos <= t_mid)\n                update(v*2, t_left, t_mid, pos, new_val);\n            else\n                update(v*2+1, t_mid+1, t_right, pos, new_val);\n            tree[v] = f(tree[v*2], tree[v*2+1]);\n        }\n    }\n};\n\n\nstruct SimpleSegTree {\n    int n;\n    std::vector<lli> tree;\n\n    SimpleSegTree(lli n)\n    {\n        this->n = n;\n        this->tree = std::vector<lli>(n);\n    }\n\n    void inc(int idx)\n    {\n        for (int i = idx; i < this->n; i |= i+1)\n        {\n            this->tree[i]++;\n        }\n    }\n\n    lli psum(int idx)\n    {\n        lli ret = 0;\n        for (int i = idx; i >= 0; i = (i & (i+1)) - 1)\n        {\n            ret += this->tree[i];\n        }\n        return ret;\n    }\n};\n\n\nstruct Pair\n{\n    long long int a;\n    long long int b;\n};\n\ntemplate<class X>\nX max(const X& a, const X& b)\n{\n    return a > b ? a : b;\n}\n\n\n\nvoid solve() {\n    const lli BITS = 32;\n    const lli MOD = 998244353;\n    long long int n, k, q, x, m, a, b;\n    std::string line;\n    std::cin >> n;\n\n    std::vector<lli> A(n);\n    std::set<lli> provided;\n\n    auto T = SimpleSegTree(n+1);\n\n\n    lli n_inversions = 0;\n    int added = 0;\n    for (int i = 0; i < n; i++)\n    {\n        std::cin >> A[i];\n        if (A[i] != -1)\n        {\n            n_inversions += added - T.psum(A[i]);\n            n_inversions %= MOD;\n            T.inc(A[i]);\n            provided.insert(A[i]);\n            added++;\n        }\n    }\n\n    std::vector<lli> missing;\n    for (int i = 1; i <= n; i++)\n    {\n        if (!provided.contains(i))\n        {\n            missing.push_back(i);\n        }\n    }\n\n    lli missing_fac = 1;\n    lli missing_facm1 = 1;\n\n    for (int i = 1; i <= missing.size(); i++)\n    {\n        missing_fac = (missing_fac * i) % MOD;\n        if (i < missing.size())\n            missing_facm1 = missing_fac;\n    }\n   \n    n_inversions = (n_inversions * missing_fac) % MOD;\n\n    lli half_invs1 = 0;\n    lli acc = 0;\n    for (int i = 0; i < n; i++)\n    {\n        if (A[i] != -1)\n        {\n            acc = (acc + std::distance(\n                    missing.begin(), \n                    std::lower_bound(missing.begin(), missing.end(), A[i]))) % MOD;\n        } \n        else\n        {\n            half_invs1 = (half_invs1 + acc) % MOD;\n        }\n    }\n    acc = 0;\n    lli half_invs2 = 0;\n    for (int i = n-1; i >= 0; i--)\n    {\n        if (A[i] != -1)\n        {\n            acc = (acc + std::distance(\n                    std::lower_bound(missing.begin(), missing.end(), A[i]),\n                    missing.end())) % MOD;\n        } \n        else\n        {\n            half_invs2 = (half_invs2 + acc) % MOD;\n        }\n    }\n    \n    lli half_invs = ((half_invs1 + half_invs2) * missing_facm1) % MOD;\n\n\n    lli neg_invs = (missing.size() * (missing.size() - 1) / 2) % MOD;\n    for (int i = missing.size(); i >= 3; i--)\n    {\n        neg_invs = (neg_invs * i) % MOD;\n    }\n\n    //std::cout << \"Both pos \" << n_inversions << \"\\n\";\n    //std::cout << \"One pos \" << half_invs << \"\\n\";\n    //std::cout << \"Neither pos \" << neg_invs << \"\\n\";\n    \n    lli total_invs = (n_inversions + half_invs + neg_invs) % MOD;\n    //std::cout << \"Total invs \" << total_invs << \"\\n\";\n\n\n    lli Q_inv = modInverse(missing_fac, MOD);\n\n    lli ret = (total_invs * Q_inv) % MOD;\n\n    std::cout << ret << \"\\n\";\n\n\n}\n\n\nint main() {\n    int64_t t, n ,m, d;\n    t = 1;\n    //std::cin >> t;\n    while(t--)\n    {\n        solve();\n    }\n}\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+}

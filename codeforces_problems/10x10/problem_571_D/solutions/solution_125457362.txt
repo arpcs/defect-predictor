@@ -1,0 +1,38 @@
+{
+    "id": 125457362,
+    "contestId": 571,
+    "creationTimeSeconds": 1628583074,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 571,
+        "index": "D",
+        "name": "Campus",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 3100,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dsu",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 571,
+        "members": [
+            {
+                "handle": "kcn999"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1440261000
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 81,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 186060800,
+    "source": "#include <cstdio>\r\n#include <cstring>\r\n#include <algorithm>\r\n#include <cctype>\r\n#define MAX_N (500000 + 5)\r\n#define LL long long\r\nusing namespace std;\r\nint n, m;\r\nstruct Tree {\r\n\tint l, r;\r\n\tLL sum;\r\n} t[MAX_N * 20];\r\nint fa[MAX_N * 2], siz[MAX_N * 2], nxt[MAX_N * 2];\r\nint ed[MAX_N * 2], lst[MAX_N * 2];\r\nint rt[MAX_N], num;\r\nint Find(int x) {\r\n\tif (fa[x] == x) return x;\r\n\treturn fa[x] = Find(fa[x]); \r\n}\r\nvoid Insert(int &x, int l, int r, int pos, LL val) {\r\n\tif (!x) x = ++num;\r\n\tif (l == r) {\r\n\t\tt[x].sum = val;\r\n\t\treturn;\r\n\t}\r\n\tint mid = l + r >> 1;\r\n\tif (pos <= mid) Insert(t[x].l, l, mid, pos, val);\r\n\telse Insert(t[x].r, mid + 1, r, pos, val);\r\n\tt[x].sum += val;\r\n}\r\nLL Query(int x, int l, int r, int L) {\r\n\tif (r <= L || !x) return 0;\r\n\tif (L < l) return t[x].sum;\r\n\tint mid = l + r >> 1;\r\n\treturn Query(t[x].l, l, mid, L) + Query(t[x].r, mid + 1, r, L); \r\n}\r\nint main() {\r\n\tscanf(\"%d%d\", &n, &m);\r\n\tfor (int i = 1; i <= n * 2; ++i) {\r\n\t\tfa[i] = i;\r\n\t\tsiz[i] = 1;\r\n\t}\r\n\tchar op;\r\n\tint x, y;\r\n\tfor (int i = 1; i <= m; ++i) {\r\n\t\top = getchar();\r\n\t\twhile (!isalpha(op)) op = getchar();\r\n\t\tif (op == 'U') {\r\n\t\t\tscanf(\"%d%d\", &x, &y);\r\n\t\t\tif (siz[Find(x)] >= siz[Find(y)]) {\r\n\t\t\t\ted[fa[y]] = i;\r\n\t\t\t\tnxt[fa[y]] = fa[x];\r\n\t\t\t\tsiz[fa[x]] += siz[fa[y]];\r\n\t\t\t\tfa[fa[y]] = fa[x];\r\n\t\t\t}\r\n\t\t\telse {\r\n\t\t\t\ted[fa[x]] = i;\r\n\t\t\t\tnxt[fa[x]] = fa[y];\r\n\t\t\t\tsiz[fa[y]] += siz[fa[x]];\r\n\t\t\t\tfa[fa[x]] = fa[y];\r\n\t\t\t}\r\n\t\t}\r\n\t\telse if (op == 'M') {\r\n\t\t\tscanf(\"%d%d\", &x, &y);\r\n\t\t\tx += n, y += n;\r\n\t\t\tif (siz[Find(x)] >= siz[Find(y)]) {\r\n\t\t\t\ted[fa[y]] = i;\r\n\t\t\t\tnxt[fa[y]] = fa[x];\r\n\t\t\t\tsiz[fa[x]] += siz[fa[y]];\r\n\t\t\t\tfa[fa[y]] = fa[x];\r\n\t\t\t}\r\n\t\t\telse {\r\n\t\t\t\ted[fa[x]] = i;\r\n\t\t\t\tnxt[fa[x]] = fa[y];\r\n\t\t\t\tsiz[fa[y]] += siz[fa[x]];\r\n\t\t\t\tfa[fa[x]] = fa[y];\r\n\t\t\t}\r\n\t\t}\r\n\t\telse if (op == 'A') {\r\n\t\t\tscanf(\"%d\", &x);\r\n\t\t\tx = Find(x);\r\n\t\t\tInsert(rt[x], 1, m, i, siz[x]); \r\n\t\t}\r\n\t\telse if (op == 'Z') {\r\n\t\t\tscanf(\"%d\", &x);\r\n\t\t\tx = Find(x + n);\r\n\t\t\tlst[x] = i;\r\n\t\t}\r\n\t\telse {\r\n\t\t\tscanf(\"%d\", &x);\r\n\t\t\tint tim = 0, tmp = 0;\r\n\t\t\tfor (int i = x + n; i; i = nxt[i]) {\r\n\t\t\t\tif (lst[i] > tmp) tim = max(tim, lst[i]);\r\n\t\t\t\ttmp = ed[i];\r\n\t\t\t}\r\n\t\t\tLL ans = 0;\r\n\t\t\ttmp = 0;\r\n\t\t\tfor (int i = x; i; i = nxt[i]) {\r\n\t\t\t\tans += Query(rt[i], 1, m, max(tim, tmp));\r\n\t\t\t\ttmp = ed[i];\r\n\t\t\t}\r\n\t\t\tprintf(\"%lld\\n\", ans);\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}"
+}

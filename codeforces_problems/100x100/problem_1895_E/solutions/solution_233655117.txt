@@ -1,0 +1,44 @@
+{
+    "id": 233655117,
+    "contestId": 1895,
+    "creationTimeSeconds": 1700552640,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "adam01"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 607,
+    "memoryConsumedBytes": 64512000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\n\r\n#define int ll\r\n\r\nconst int N = 3e5 + 5;\r\nstruct node{int s, t;}a[N], b[N];\r\nint n, m, f[N], g[N];\r\n\r\nvector<int> va, vb;\r\n\r\nstruct sgt\r\n{\r\n    int a[N << 2], tag[N << 2];\r\n    void pd(int x)\r\n    {\r\n        a[x << 1] += tag[x], a[x << 1 | 1] += tag[x];\r\n        tag[x << 1] += tag[x], tag[x << 1 | 1] += tag[x];\r\n        tag[x] = 0;\r\n    }\r\n    void pu(int x) {a[x] = min(a[x << 1], a[x << 1 | 1]);}\r\n    void upd(int ql, int qr, int l, int r, int x, int v)\r\n    {\r\n        if(ql > qr) return;\r\n        if(ql <= l && r <= qr) return a[x] += v, tag[x] += v, void();\r\n        int mid = l + r >> 1; pd(x);\r\n        if(mid >= ql) upd(ql, qr, l, mid, x << 1, v);\r\n        if(mid < qr) upd(ql, qr, mid + 1, r, x << 1 | 1, v);\r\n        pu(x);\r\n    }\r\n    void find(int l, int r, int x, vector<int> &v)\r\n    {\r\n        if(l == r && a[x] == 0)\r\n        {\r\n            v.push_back(l);\r\n            a[x] = 1e9;\r\n            return;\r\n        }\r\n        int mid = l + r >> 1; pd(x);\r\n        if(a[x << 1] == 0) find(l, mid, x << 1, v);\r\n        if(a[x << 1 | 1] == 0) find(mid + 1, r, x << 1 | 1, v);\r\n        pu(x);\r\n    }\r\n    void clear(int l, int r, int x)\r\n    {\r\n        a[x] = tag[x] = 0;\r\n        if(l == r)\r\n            return;\r\n        int mid = l + r >> 1;\r\n        clear(l, mid, x << 1);\r\n        clear(mid + 1, r, x << 1 | 1);\r\n    }\r\n}ta, tb;\r\n\r\nvoid solve()\r\n{\r\n    // memset(ta.a, 0, sizeof ta.a);\r\n    // memset(ta.tag, 0, sizeof ta.tag);\r\n    // memset(tb.a, 0, sizeof tb.a);\r\n    // memset(tb.tag, 0, sizeof tb.tag);\r\n    va.clear(), vb.clear();\r\n    \r\n    int mxs1 = 0, mxs2 = 0;\r\n    cin >> n;\r\n    for(int i = 1; i <= n; i ++) cin >> a[i].s, mxs1 = max(mxs1, a[i].s);\r\n    for(int i = 1; i <= n; i ++) cin >> a[i].t;\r\n    cin >> m;\r\n    for(int i = 1; i <= m; i ++) cin >> b[i].s, mxs2 = max(mxs2, b[i].s);\r\n    for(int i = 1; i <= m; i ++) cin >> b[i].t;\r\n    ta.clear(1, n, 1);\r\n    tb.clear(1, m, 1);\r\n    \r\n    sort(a + 1, a + n + 1, [](node x, node y){return x.t < y.t;});\r\n    sort(b + 1, b + m + 1, [](node x, node y){return x.t < y.t;});\r\n    for(int i = 1; i <= n; i ++) f[i] = a[i].t;\r\n    for(int i = 1; i <= m; i ++) g[i] = b[i].t;\r\n\r\n    for(int i = 1; i <= n; i ++)\r\n        tb.upd(1, lower_bound(g + 1, g + m + 1, a[i].s) - g - 1, 1, m, 1, 1);\r\n    for(int i = 1; i <= m; i ++)\r\n        ta.upd(1, lower_bound(f + 1, f + n + 1, b[i].s) - f - 1, 1, n, 1, 1);\r\n\r\n    int ra = 0, rb = 0, rf = 0, rg = 0;\r\n    while(1)\r\n    {\r\n        ta.find(1, n, 1, va);\r\n        tb.find(1, m, 1, vb);\r\n        int r = 0;\r\n        int tag = 0;\r\n        for(int i = ra; i < va.size(); i ++)\r\n        {\r\n            r = max(r, (int)(lower_bound(g + 1, g + m + 1, a[va[i]].s) - g - 1));\r\n        }\r\n        tb.upd(1, r, 1, m, 1, 1e7);\r\n        for(int j = rg + 1; j <= r; j ++)\r\n        {\r\n            ta.upd(1, lower_bound(f + 1, f + n + 1, b[j].s) - f - 1, 1, n, 1, -1);\r\n        }\r\n        if(r <= rg) tag |= 1;\r\n        rg = max(rg, r);ra = va.size();\r\n        r = 0;\r\n        for(int i = rb; i < vb.size(); i ++)\r\n        {\r\n            r = max(r, (int)(lower_bound(f + 1, f + n + 1, b[vb[i]].s) - f - 1));\r\n        }\r\n        ta.upd(1, r, 1, n, 1, 1e7);\r\n        for(int j = rf + 1; j <= r; j ++)\r\n        {\r\n            tb.upd(1, lower_bound(g + 1, g + m + 1, a[j].s) - g - 1, 1, m, 1, -1);\r\n        }\r\n        if(r <= rf) tag |= 2;\r\n        rf = max(rf, r);rb = vb.size();\r\n        if(tag == 3) break;\r\n    }\r\n    // cerr << va.size() << \" \" << vb.size();\r\n    cout << ra << \" \" << n - ra - rf << \" \" << rf << \"\\n\";\r\n}\r\n\r\nsigned main()\r\n{\r\n    // freopen(\"D:/test.txt\", \"r\", stdin);\r\n    ios::sync_with_stdio(false);cin.tie(0);\r\n    int t;cin >> t;while(t --) solve();\r\n\r\n    return 0;\r\n}"
+}

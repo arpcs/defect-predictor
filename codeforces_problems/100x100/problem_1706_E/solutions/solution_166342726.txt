@@ -1,0 +1,41 @@
+{
+    "id": 166342726,
+    "contestId": 1706,
+    "creationTimeSeconds": 1659271054,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "saber008"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 29696000,
+    "source": "#include<bits/stdc++.h>\r\n#define endl '\\n'\r\n\r\nusing namespace std;\r\n\r\ntypedef pair<int, int> PII;\r\ntypedef long long LL;\r\n\r\nconst int w = 100010, W = w * 2;\r\n\r\nint n, m, k;\r\nint h[w], e[W], ne[W], op[W], idx;\r\nint depth[w], fa[w][20];\r\nint v[w];\r\nint f[w][22];\r\nint ff[w][22];\r\n//MST\r\nint p[w];\r\nint find(int x)\r\n{\r\n\tif(p[x] != x)p[x] = find(p[x]);\r\n\treturn p[x];\r\n}\r\n\r\nvoid add(int a, int b, int c)\r\n{\r\n    e[idx] = b, ne[idx] = h[a], op[idx] = c, h[a] = idx++;\r\n}\r\n\r\nvoid bfs(int root)\r\n{\r\n    for(int i = 0;i <= n;i++)depth[i] = 0x3f3f3f3f;\r\n    depth[0] = 0, depth[root] = 1;\r\n\r\n    queue<int> q;\r\n    q.push(root);\r\n\r\n    while(q.size())\r\n    {\r\n        int t = q.front();\r\n        q.pop();\r\n\r\n        for(int i = h[t]; ~i; i = ne[i])\r\n        {\r\n            int j = e[i];\r\n            if(depth[j] > depth[t] + 1)\r\n            {\r\n                depth[j] = depth[t] + 1;\r\n                q.push(j);\r\n                fa[j][0] = t;\r\n                f[j][0] = op[i];\r\n                for(int k = 1;k <= 15;k++){\r\n                    fa[j][k] = fa[fa[j][k - 1]][k - 1];\r\n                    f[j][k] = max(f[j][k - 1], f[f[j][k - 1]][k - 1]);\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\nint lca(int a, int b)\r\n{\r\n\tint ans = 0;\r\n    if(depth[a] < depth[b])swap(a, b);\r\n    for(int k = 15;k >= 0;k--)\r\n        if(depth[fa[a][k]] >= depth[b]){\r\n        \tans = max(ans, f[a][k]);\r\n            a = fa[a][k];\r\n        }\r\n\r\n    if(a == b)return ans;\r\n\r\n    for(int k = 15;k >= 0;k--)\r\n        if(fa[a][k] != fa[b][k])\r\n        {\r\n        \tans = max(ans, max(f[a][k], f[b][k]));\r\n            a = fa[a][k];\r\n            b = fa[b][k];\r\n        }\r\n    ans = max(ans, max(f[a][0], f[b][0]));\r\n    return ans;\r\n}\r\n\r\n\r\nvoid init()\r\n{\r\n\tfor(int i = 0;i <= n;i++){\r\n\t\th[i] = -1;\r\n\t\tdepth[i] = 0;\r\n\t\tp[i] = i;\r\n\t\tv[i] = 0;\r\n\t}\r\n\tidx = 0;\r\n}\r\n\r\nint query(int l, int r)\r\n{\r\n    int len = r - l + 1;\r\n    int k = log(len) / log(2);\r\n    return max(ff[l][k], ff[r - (1 << k) + 1][k]);\r\n}\r\n\r\n\r\nvoid solve()\r\n{\r\n\tcin >> n >> m >> k;\r\n\tinit();\r\n\r\n\tfor(int i = 1;i <= m;i++){\r\n\t\tint a, b;\r\n\t\tcin >> a >> b;\r\n\t\tint fa = find(a);\r\n\t\tint fb = find(b);\r\n\r\n\t\tif(fa != fb){\r\n\t\t\tp[fa] = fb;\r\n\t\t\tadd(a, b, i);\r\n\t\t\tadd(b, a, i);\r\n\t\t}\r\n\t}\r\n\r\n\tbfs(1);\r\n\tfor(int i = 2;i <= n;i++){\r\n\t\tv[i] = lca(i - 1, i);\r\n\t}\r\n\r\n\tfor(int j = 0;j < 20;j++)\r\n        for(int i = 1;i + (1 << j) - 1 <= n;i++)\r\n            if(!j)ff[i][j] = v[i];\r\n            else ff[i][j] = max(ff[i][j - 1], ff[i + (1 << j - 1)][j - 1]);\r\n\r\n\r\n    while(k--){\r\n    \tint l, r;\r\n\r\n    \tcin >> l >> r;\r\n    \tif(l == r)cout << \"0 \";\r\n    \telse cout << query(l + 1, r) << ' ';\r\n    }\r\n    cout << endl;\r\n\r\n}\r\n\r\nint main()\r\n{\r\n\tstd::ios::sync_with_stdio(false);\r\n\tcin.tie(0);\r\n\r\n\tint T;\r\n\tcin >> T;\r\n\t//T = 1;\r\n\twhile(T--)\r\n\t{\r\n\t\tsolve();\r\n\t}\r\n\r\n\treturn 0;\r\n}\r\n"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 123001686,
+    "contestId": 887,
+    "creationTimeSeconds": 1626686776,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 887,
+        "index": "F",
+        "name": "Row of Models",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2500,
+        "tags": [
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 887,
+        "members": [
+            {
+                "handle": "darkkcyan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509725100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 106,
+    "timeConsumedMillis": 468,
+    "memoryConsumedBytes": 30515200,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\n// #define constexpr(...) (__VA_ARGS__)  \nusing ll = long long;\nusing ld = long double;\nconst ld eps = 1e-8;\n// for matching the kactl notes\n#define sz(x) ((int)x.size())\n#define rep(i,a,b) for (int i = (int)(a); i < (int)(b); ++i) \n#define all(a) (a).begin(), (a).end()\n#define print_op(type) ostream& operator<<(ostream& out, const type& u)\n// DEBUGING TEMPLETE ////////////////////////////////////////////////////////////////////////{{{\n#define db(val) \"[\"#val\" = \"<<(val)<<\"] \"\n#define CONCAT_(x, y) x##y\n#define CONCAT(x, y) CONCAT_(x, y)\n#ifdef LOCAL_DEBUG   \n#   define clog cerr << flush << string(__db_level * 2, ' ')\n#   define DB() debug_block CONCAT(dbbl, __LINE__)\n    int __db_level = 0;\n    struct debug_block {\n        debug_block() { clog << \"{\" << endl; ++__db_level; }\n        ~debug_block() { --__db_level; clog << \"}\" << endl; }\n    };\n#else\n#   define clog if (0) cerr\n#   define DB(...)\n#endif\n\ntemplate<class U, class V> ostream& operator<<(ostream& out, const pair<U, V>& p) {\n    return out << \"(\" << p.first << \", \" << p.second << \")\";\n}\n\ntemplate<size_t i, class T> ostream& print_tuple_utils(ostream& out, const T& tup) {\n    if constexpr(i == tuple_size<T>::value) return out << \")\"; \n    else return print_tuple_utils<i + 1, T>(out << (i ? \", \" : \"(\") << get<i>(tup), tup); \n}\n\ntemplate<class ...U> ostream& operator<<(ostream& out, const tuple<U...>& tup) {\n    return print_tuple_utils<0, tuple<U...>>(out, tup);\n}\n\ntemplate<class Con, class = decltype(begin(declval<Con>()))>\ntypename enable_if<!is_same<Con, string>::value, ostream&>::type\noperator<<(ostream& out, const Con& container) { \n    out << \"{\";\n    for (auto it = container.begin(); it != container.end(); ++it)\n        out << (it == container.begin() ? \"\" : \", \") << *it;\n    return out << \"}\";\n}\n// ACTUAL SOLUTION START HERE ////////////////////////////////////////////////////////////////}}}\n\nconst int maxn = 501010;\nint n, k;\nint a[maxn];\n\nbool brute() {\n    vector<int> b(a, a + n);\n    b.push_back(-1);\n    auto check = [&] {\n        vector<int> st = {n};\n        for (int i = n; i--; ) {\n            while (b[st.back()] >= b[i]) st.pop_back();\n            if (st.back() - i > k) return false;\n            st.push_back(i);\n        }\n        return true;\n    };\n    \n    if (check()) return true;\n    rep(i, 0, n) {\n        rep(f, i + 1, n) {\n            if (a[i] <= a[f]) continue;\n            swap(b[i], b[f]);\n            if (check()) return true;\n            swap(b[i], b[f]);\n        }\n    }\n    return false;\n}\n\nbool solve() {\n#define nope() return false;\n    a[n] = -1;\n    map<int, int> spare;\n    \n    vector<int> st = {n};\n    for (int i = n; i--; ) {\n        while (a[st.back()] >= a[i]) {\n            st.pop_back();\n        }\n        st.push_back(i);\n    }\n    \n    clog << db(st) << endl;\n    bool used = false;\n    rep(i, 1, sz(st)) {\n        rep(f, st[i] + 1, st[i - 1]) {\n            spare[a[f]] = f;\n        }\n        if (st[i - 1] - st[i] <= k) continue;\n        DB();\n        clog << db(i) << endl;\n        clog << db(st) << endl;\n        clog << db(st[i]) << db(st[i - 1]) << endl;\n        clog << db(spare) << endl;\n        if (used) nope();\n        used = true;\n        bool ok = false;\n        auto it = spare.lower_bound(a[st[i]]);\n        if (it != spare.begin()) {\n            --it;\n            if (it->first > a[st[i - 1]]) {\n                rep(f, st[i] + 1, st[i - 1]) {\n                    if (f - st[i] > k or st[i - 1] - f > k) continue;\n                    ok = true;\n                    swap(a[f], a[it->second]);\n                    st.push_back(f);\n                    break;\n                }\n            }\n        }\n        clog << db(ok) << endl;\n        clog << db(st) << endl;\n        if (ok) continue;\n        if (i > 1 and st[i - 2] - st[i] <= 2 * k) {\n            int u = st[i - 2] - k;\n            clog << db(u) << endl;\n            swap(a[st[i - 1]], a[u]);\n            st[i - 1] = u;\n            clog << db(st) << endl;\n            continue;\n        }\n        nope();\n    }\n    clog << db(vector<int>(a, a + n)) << endl;\n    return true;\n}\n\nauto print_ans(bool x) {\n    cout << (x ? \"YES\" : \"NO\") << endl;\n}\n\nmt19937 rng;\n#define rand() ((int)(rng() >> 1))\nvoid check() { \n    while (true) {\n        ofstream inp(\"main.inp\");\n        n = rand() % 10 + 1;\n        k = rand() % n + 1;\n        rep(i, 0, n) a[i] = rand() % 10 + 1;\n        inp << n << ' ' << k << endl;\n        rep(i, 0, n) inp << a[i] << ' ';\n        inp << endl;\n        \n        auto exp = brute();\n        auto ans = solve();\n        inp << db(ans) << db(exp) << endl;\n        inp.close();\n        if (ans == exp) {\n            cout << \"OK\" << endl;\n            continue;\n        }\n        cout << \"FAILED\" << endl;\n        exit(0);\n    }\n}\n\nint main() {  \n    // check();       \n#ifdef LOCAL \n    freopen(\"main.inp\", \"r\", stdin); \n    freopen(\"main.out\", \"w\", stdout);  \n    freopen(\".log\", \"w\", stderr);\n#endif\n    ios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0);\n    cin >> n >> k;\n    rep(i, 0, n) cin >> a[i];\n    \n    \n#ifdef LOCAL\n    print_ans(brute());\n#endif\n    print_ans(solve());\n    \n    return 0;\n}\n\n// vim: foldmethod=marker\n\n"
+}

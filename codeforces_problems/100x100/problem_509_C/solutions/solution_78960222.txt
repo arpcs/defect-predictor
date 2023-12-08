@@ -1,0 +1,36 @@
+{
+    "id": 78960222,
+    "contestId": 509,
+    "creationTimeSeconds": 1588590550,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 509,
+        "index": "C",
+        "name": "Sums of Digits",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "dp",
+            "greedy",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 509,
+        "members": [
+            {
+                "handle": "verma_ankit484"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1422705600
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 545,
+    "memoryConsumedBytes": 1433600,
+    "source": "//verma_ankit484\r\n\r\n#include <bits/stdc++.h>\r\n//#include <ext/pb_ds/assoc_container.hpp>\r\n//#include <ext/pb_ds/tree_policy.hpp>\r\n\r\n#define int long long\r\n#define IOS ios::sync_with_stdio(0); cin.tie(0); cout.tie(0);\r\n#define endl \"\\n\"\r\n#define pb push_back\r\nconst int mod = (int) 1e9+7;\r\n\r\nusing namespace std;\r\n//using namespace __gnu_pbds;\r\n\r\n//#define ordered_set tree<int, null_type,less<int>, rb_tree_tag,tree_order_statistics_node_update>\r\nconst int vl = INT_MAX - 1;\r\n\r\nint dp[301][301][2];\r\n\r\nint N, len;\r\nstring str;\r\nstring sans;\r\n\r\nint rec(int idx, int lft, int foo) {\r\n  if (idx > 300 or lft < 0) return INT_MAX;\r\n  if (lft == 0) {\r\n    if (foo < 1 or idx < N) return INT_MAX;\r\n    return idx;\r\n  }\r\n  int &ans = dp[idx][lft][foo];\r\n  if (ans != vl) return ans;\r\n  ans = INT_MAX;\r\n  for (int i = 9; i >= 0; i--) {\r\n    if (idx >= N) {\r\n      ans = min(ans, rec(idx + 1, lft - i, 1));\r\n    } else {\r\n      int i2 = N - 1 - idx;\r\n      if (i < str[i2] - '0') ans = min(ans, rec(idx + 1, lft - i, 0));\r\n      else if (i == str[i2] - '0') ans = min(ans, rec(idx + 1, lft - i, max(foo, 0ll)));\r\n      else ans = min(ans, rec(idx + 1, lft - i, 1));\r\n    }\r\n  }\r\n  return ans;\r\n}\r\n\r\n\r\nint rec2(int idx, int lft, int foo) {\r\n  if (lft < 0) return 0;\r\n  if (idx == len) {\r\n    if (lft == 0 and foo) return 1;\r\n    return 0;\r\n  }\r\n  int &ans = dp[idx][lft][foo];\r\n  if (ans != -1) return ans;\r\n  ans = 0;\r\n  int i2 = N - (len - idx);\r\n  for (int i = 0; i <= 9; i++) {\r\n    if (i2 < 0 and idx + i != 0) {\r\n      ans = max(ans, rec2(idx + 1, lft - i, 1ll));\r\n      continue;\r\n    }\r\n    if (i2 < 0) continue;\r\n    if (foo) {\r\n      ans = max(ans, rec2(idx + 1, lft - i, 1ll));\r\n    } else {\r\n      if (i > str[i2] - '0') ans = max(ans, rec2(idx + 1, lft - i, 1ll));\r\n      else if (i == str[i2] - '0') ans = max(ans, rec2(idx + 1, lft - i, 0ll));\r\n    }\r\n  }\r\n  return ans;\r\n}\r\n\r\nvoid trace(int idx, int lft, int foo) {\r\n  if (idx == len) return;\r\n  int ans = dp[idx][lft][foo];\r\n  int i2 = N - (len - idx);\r\n  for (int i = 0; i <= 9; i++) {\r\n    if (i2 < 0 and idx + i != 0) {\r\n      if (rec2(idx + 1, lft - i, 1ll)) {\r\n        sans.pb(i + '0');\r\n        trace(idx + 1, lft - i, 1ll);\r\n        return;\r\n      }\r\n      continue;\r\n    }\r\n    if (i2 < 0) continue;\r\n    if (foo) {\r\n      if (rec2(idx + 1, lft - i, 1ll)) {\r\n        sans.pb(i + '0');\r\n        trace(idx + 1, lft - i, 1ll);\r\n        return;\r\n      }\r\n    } else {\r\n      if (i > str[i2] - '0') {\r\n        if (rec2(idx + 1, lft - i, 1ll)) {\r\n          sans.pb(i + '0');\r\n          trace(idx + 1, lft - i, 1ll);\r\n          return;\r\n        }\r\n      }\r\n      else if (i == str[i2] - '0') {\r\n        if (rec2(idx + 1, lft - i, 0ll)) {\r\n          sans.pb(i + '0');\r\n          trace(idx + 1, lft - i, 0ll);\r\n          return;\r\n        }\r\n      }\r\n    }\r\n  }\r\n}\r\n\r\nvoid mmset() {\r\n  for (int i = 0; i <= 300; i++) {\r\n    for (int j = 0; j <= 300; j++) dp[i][j][0] = dp[i][j][1] = vl;\r\n  }\r\n}\r\n\r\nvoid mmset2(int leng) {\r\n  for (int i = 0; i <= leng + 1; i++) {\r\n    for (int j = 0; j <= 300; j++) dp[i][j][0] = dp[i][j][1] = -1;\r\n  }\r\n}\r\n\r\nint32_t main() {\r\n  IOS\r\n  #ifdef AV\r\n  freopen(\"input.txt\", \"r\", stdin);\r\n  #endif\r\n  int n;\r\n  cin >> n;\r\n  vector<int> vc(n);\r\n  for (int i = 0; i < n; i++) cin >> vc[i];\r\n  vector<string> ans;\r\n  string pr;\r\n  for (int i = 0; i < n; i++) {\r\n    mmset();\r\n    sans.clear();\r\n    str = pr;\r\n    N = str.length();\r\n    len = rec(0, vc[i], 0);\r\n    mmset2(len);\r\n    rec2(0, vc[i], 0);\r\n    trace(0, vc[i], 0);\r\n    cout << sans << endl;\r\n    pr = sans;\r\n  }\r\n  return 0;\r\n}\r\n"
+}

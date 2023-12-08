@@ -1,0 +1,41 @@
+{
+    "id": 211291572,
+    "contestId": 1726,
+    "creationTimeSeconds": 1687912804,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "D",
+        "name": "Edge Split",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "probabilities",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "-Neel-"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "PyPy 3-64",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 92,
+    "memoryConsumedBytes": 6860800,
+    "source": "import math\r\nfrom sys import stdin\r\ninput = stdin.readline\r\n#// - remember to add .strip() when input is a string\r\n\r\nfrom types import GeneratorType\r\ndef bootstrap(f, stack=[]):\r\n    def wrappedfunc(*args, **kwargs):\r\n        if stack:\r\n            return f(*args, **kwargs)\r\n        else:\r\n            to = f(*args, **kwargs)\r\n            while True:\r\n                if type(to) is GeneratorType:\r\n                    stack.append(to)\r\n                    to = next(to)\r\n                else:\r\n                    stack.pop()\r\n                    if not stack:\r\n                        break\r\n                    to = stack[-1].send(to)\r\n            return to\r\n    return wrappedfunc\r\n@bootstrap\r\ndef dfs1(cur,prev):\r\n  #print(cur)\r\n  seen[cur] = True\r\n  neighbours = edges[cur]\r\n  if len(neighbours) == 1:\r\n    #seen[neighbours[0][0]] = True\r\n    yield 0\r\n  for neighbour in neighbours:\r\n    if neighbour[0] != prev:\r\n      if seen[neighbour[0]]:\r\n        #cycle found\r\n        ans[neighbour[1]] = \"1\"\r\n      else:\r\n        yield dfs1(neighbour[0],cur)\r\n        \r\n  yield 0\r\n\r\nt = int(input())\r\nfor _ in range(t):\r\n\r\n  n,m = map(int,input().split())\r\n\r\n  edges = [[] for i in range(n+1)]\r\n  edges_representation2 = []\r\n  for i in range(m):\r\n    u,v = map(int,input().split())\r\n    edges[u].append([v,i])\r\n    edges[v].append([u,i])\r\n    edges_representation2.append([u,v])\r\n  \r\n  #if m == n-1 then tree\r\n  #c1 + c2 in this case will always be n+1\r\n  #proven true\r\n\r\n  if m == n-1:\r\n    ans = [\"0\" for i in range(m)]\r\n    print(\"\".join(ans))\r\n    continue\r\n\r\n  #if m == n then tree with one extra edge added\r\n  #c1 + c2 in this case will be n iff edges in cycle have edges of both colours.\r\n  #this is smallest possible c1 + c2\r\n  #proven true\r\n\r\n  if m == n:\r\n    ans = [\"0\" for i in range(m)]\r\n    seen = [False for i in range(n+1)]\r\n    dfs1(1,0)\r\n    print(\"\".join(ans))\r\n    continue\r\n\r\n  #if m == n+1 then tree with two extra edges added\r\n  #c1 + c2 in this case will be n-1 if all edges of tree are red and extra two edges are blue\r\n  #this is smallest possible c1 + c2 and is always obtainable using above construction\r\n  #proven true\r\n\r\n  if m == n+1:\r\n    ans = [\"0\" for i in range(m)]\r\n    seen = [False for i in range(n+1)]\r\n    dfs1(1,0)\r\n    print(\"\".join(ans))\r\n    continue\r\n\r\n\r\n  #if m == n+2 then tree with three extra edges added\r\n  #difference here is all 3 edges may be part of a cycle depending on dfs order\r\n  #means we might have a redundant blue edge that could be used elsewhere to reduce c2.\r\n  #c1 + c2 in this case will be n-2 but we need to make sure 3 blue edges don't form cycle.\r\n  #proven true\r\n  \r\n  if m == n+2:\r\n    ans = [\"0\" for i in range(m)]\r\n    seen = [False for i in range(n+1)]\r\n    dfs1(1,0)\r\n    #check if 3 blue edges form cycle. If they do reassign one of the blue edges.\r\n    nodes_connected_by_blue_edges = []\r\n    indof0 = -1\r\n    indof1 = -1\r\n    for i in range(len(ans)):\r\n      if ans[i] == \"1\":\r\n        indof1 = i\r\n        nodes_connected_by_blue_edges.append(edges_representation2[i][0])\r\n        nodes_connected_by_blue_edges.append(edges_representation2[i][1])\r\n      else:\r\n        indof0 = i\r\n    nodes_connected_by_blue_edges = set(nodes_connected_by_blue_edges)\r\n    #print(nodes_connected_by_blue_edges)\r\n    if len(nodes_connected_by_blue_edges) == 3:\r\n      ans[indof0] = \"1\"\r\n      ans[indof1] = \"0\"     \r\n    if n == 161:\r\n      print(ans.count(\"0\"))\r\n    print(\"\".join(ans))\r\n    continue"
+}

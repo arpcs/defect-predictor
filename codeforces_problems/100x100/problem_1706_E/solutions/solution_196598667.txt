@@ -1,0 +1,41 @@
+{
+    "id": 196598667,
+    "contestId": 1706,
+    "creationTimeSeconds": 1678352956,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "pctirziu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <cmath>\r\n\r\nusing namespace std;\r\nconst int nmax = 2e2 + 5;\r\nint parent[nmax], sizes[nmax], rmq[nmax][20], rasp[nmax], depth[nmax], tata[nmax], dp[20][nmax], edgemaxim[20][nmax];\r\nvector <pair<int, int>> edge[nmax];\r\nint logaritm(int x)\r\n{\r\n    return log2(x);\r\n}\r\nint find_parent(int x)\r\n{\r\n    if(x == parent[x])\r\n        return x;\r\n    return parent[x] = find_parent(parent[x]);\r\n}\r\nvoid unite(int x, int y)\r\n{\r\n    x = find_parent(x);\r\n    y = find_parent(y);\r\n    if(x == y)\r\n        return ;\r\n    if(sizes[x] > sizes[y])\r\n        swap(x, y);\r\n    sizes[y] += sizes[x];\r\n    parent[x] = y;\r\n}\r\nvoid dfs(int node, int parentnode)\r\n{\r\n    depth[node] = depth[parentnode] + 1;\r\n    tata[node] = parentnode;\r\n    for(int i = 0; i < edge[node].size(); i++){\r\n        int child = edge[node][i].first;\r\n        if(child == parentnode)\r\n            continue;\r\n        dp[0][child] = node;\r\n        edgemaxim[0][child] = edge[node][i].second;\r\n        for(int j = 1; j < 20; j++){\r\n            dp[j][i] = dp[j - 1][dp[j - 1][i]];\r\n            edgemaxim[j][i] = max(edgemaxim[j - 1][i], edgemaxim[j - 1][dp[j - 1][i]]);\r\n        }\r\n        dfs(child, node);\r\n    }\r\n}\r\nint drummaxim(int x, int y)\r\n{\r\n    if(depth[x] < depth[y])\r\n        swap(x, y);\r\n    int diferenta = depth[x] - depth[y];\r\n    int lg = logaritm(depth[x]);\r\n    int maxx = -1;\r\n    for(int i = 0; (1 << i) <= diferenta; i++)\r\n        if(diferenta & (1 << i)){\r\n            maxx = max(maxx, edgemaxim[i][x]);\r\n            x = dp[i][x];\r\n        }\r\n    if(x == y)\r\n        return maxx;\r\n    for(int i = lg; i >= 0; i--){\r\n        if(dp[i][x] != dp[i][y]){\r\n            maxx = max(maxx, edgemaxim[i][x]);\r\n            x = dp[i][x];\r\n            maxx = max(maxx, edgemaxim[i][y]);\r\n            y = dp[i][y];\r\n        }\r\n    }\r\n    return max(maxx, max(edgemaxim[0][x], edgemaxim[0][y]));\r\n}\r\nvoid rmq_precalc(int n)\r\n{\r\n    for(int i = 1; i <= n; i++)\r\n        rmq[i][0] = rasp[i];\r\n    for(int j = 1; (1 << j) <= n; j++){\r\n        for(int i = 1; i + (1 << j) - 1 <= n; i++)\r\n            rmq[i][j] = max(rmq[i][j - 1], rmq[i + (1 << (j - 1))][j - 1]);\r\n    }\r\n}\r\nint query(int x, int y)\r\n{\r\n    int lg = logaritm(y - x + 1);\r\n    if(rmq[x][lg] >= rmq[y - (1 << lg) + 1][lg])\r\n        return rmq[x][lg];\r\n    return rmq[y - (1 << lg) + 1][lg];\r\n}\r\nint main()\r\n{\r\n    int t;\r\n    cin >> t;\r\n    while(t--){\r\n        int n, m, q;\r\n        cin >> n >> m >> q;\r\n        for(int i = 1; i <= n; i++)\r\n            parent[i] = i, sizes[i] = 1;\r\n        for(int i = 1; i <= m; i++){\r\n            int x, y;\r\n            cin >> x >> y;\r\n            x = find_parent(x);\r\n            y = find_parent(y);\r\n            if(x != y){\r\n                unite(x, y);\r\n                edge[x].push_back({y, i});\r\n                edge[y].push_back({x, i});\r\n            }\r\n        }\r\n        depth[0] = -1;\r\n        dfs(find_parent(1), 0);\r\n        for(int i = 2; i <= n; i++)\r\n            rasp[i] = drummaxim(i - 1, i);\r\n        rmq_precalc(n);\r\n        while(q--){\r\n            int x, y;\r\n            cin >> x >> y;\r\n            if(x == y){\r\n                cout << \"0 \";\r\n                continue;\r\n            }\r\n            cout << query(x + 1, y) << \" \";\r\n        }\r\n        for(int i = 1; i <= n; i++){\r\n            parent[i] = sizes[i] = rasp[i] = depth[i] = tata[i] = 0;\r\n            for(int j = 0; (1 << j) <= n; j++)\r\n                rmq[i][j] = dp[j][i] = edgemaxim[j][i] = 0;\r\n            edge[i].clear();\r\n        }\r\n    }\r\n    return 0;\r\n}\r\n"
+}

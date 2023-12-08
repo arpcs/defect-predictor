@@ -1,0 +1,44 @@
+{
+    "id": 231485520,
+    "contestId": 1895,
+    "creationTimeSeconds": 1699199728,
+    "relativeTimeSeconds": 4828,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "parsa-golestani"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1699194900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 483,
+    "memoryConsumedBytes": 26828800,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\n#define F first\n#define S second\n#define pb push_back \n\ntypedef long long ll;\ntypedef pair<int,int> pii;\ntypedef pair<int,pair<int,int>> pinp;\n    \nconst int N = 300'000;\nconst int A = 1'000'000;\nconst int T = 2;\n\nint n[2], a[2][N + 10], b[2][N + 10];\nint ind[2][A + 10], mx[2][N + 10], ans[3];\nvector<pair<int, int>> vec[2];\n\nvoid readInput() {\n    for (int t = 0; t < T; t++) {\n        cin >> n[t];\n        for (int i = 1; i <= n[t]; i++)\n            cin >> b[t][i];\n        vec[t].clear();\n        for (int i = 1; i <= n[t]; i++) {\n            cin >> a[t][i];\n            vec[t].push_back({b[t][i], a[t][i]});\n        }\n        sort(a[t] + 1, a[t] + n[t] + 1);\n        sort(vec[t].begin(), vec[t].end());\n    }\n}\n\nvoid calcInd(int t) {\n    for (int i = 1; i <= n[t ^ 1]; i++) {\n        int l = 0, r = n[t] + 1;\n        while (r - l > 1) {\n            int mid = (l + r) >> 1;\n            if (vec[t][mid - 1].first > a[t ^ 1][i])\n                r = mid;\n            else\n                l = mid;\n        }\n        ind[t][a[t ^ 1][i]] = r;\n    }\n}\n\nvoid calcMx(int t) {\n    mx[t][n[t] + 1] = 0;\n    for (int i = n[t]; i >= 1; i--)\n        mx[t][i] = max(mx[t][i + 1], vec[t][i - 1].second);\n}\n\nint check(int val) {\n    int pnt = 0, cnt = n[0] + n[1] + 20;\n    while (ind[pnt ^ 1][val] <= n[pnt ^ 1] && cnt) {\n        val = mx[pnt ^ 1][ind[pnt ^ 1][val]];\n        pnt ^= 1;\n        cnt--;\n    }\n    if (cnt == 0)\n        return 0;\n    if (pnt == 0)\n        return 1;\n    return -1;\n}\n\nint solve(int type) {\n    int l = 0, r = n[0] + 1;\n    while (r - l > 1) {\n        int mid = (l + r) >> 1;\n        if (type <= check(a[0][mid]))\n            r = mid;\n        else\n            l = mid;\n    }\n    return r;\n}\n\nvoid solve() {\n    readInput();\n    for (int t = 0; t < T; t++) {\n        calcInd(t);\n        calcMx(t);\n    }\n    sort(a[0] + 1, a[0] + n[0] + 1);\n    int t1 = solve(-1);\n    int t2 = solve(0);\n    int t3 = solve(1);\n    int ansLose = t2 - t1, ansDraw = t3 - t2, ansWin = n[0] - t3 + 1;\n    cout << ansWin << ' ' << ansDraw << ' ' << ansLose << '\\n';\n}\n    \nint main() {\n    ios_base::sync_with_stdio(false); cin.tie(0); cout.tie(0);\n    int t;\n    cin >> t;\n    while (t--)\n        solve();\n    cout.flush();\n    return 0;\n}"
+}

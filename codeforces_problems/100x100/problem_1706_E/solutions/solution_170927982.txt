@@ -1,0 +1,41 @@
+{
+    "id": 170927982,
+    "contestId": 1706,
+    "creationTimeSeconds": 1662369620,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "KL42"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 451,
+    "memoryConsumedBytes": 77107200,
+    "source": "#include <cstdio>\r\n#include <vector>\r\n#define pb push_back\r\nusing namespace std;\r\ntemplate <class Type>\r\nvoid read (Type &x)\r\n{\r\n    char c;\r\n    bool flag = false;\r\n    while ((c = getchar()) < '0' || c > '9')\r\n        c == '-' && (flag = true);\r\n    x = c - '0';\r\n    while ((c = getchar()) >= '0' && c <= '9')\r\n        x = (x << 1) + (x << 3) + c - '0';\r\n    flag && (x = ~x + 1);\r\n}\r\ntemplate <class Type, class ...rest>\r\nvoid read (Type &x, rest &...y) { read(x), read(y...); }\r\ntemplate <class Type>\r\nvoid write (Type x)\r\n{\r\n    x < 0 && (putchar('-'), x = ~x + 1);\r\n    x > 9 && (write(x / 10), 0);\r\n    putchar('0' + x % 10);\r\n}\r\nconst int N = 4e5 + 10, M = 20;\r\nvector <int> g[N];\r\nint n, tot, m, q, lg[N], p[N], d[N], w[N], v[N][M];\r\nint fa (int x) { return p[x] == x ? x : p[x] = fa(p[x]); }\r\nnamespace LCA\r\n{\r\n    int stmp, id[N], st[N][M];\r\n    int dmin (int a, int b) { return d[a] < d[b] ? a : b; }\r\n    void dfs (int x)\r\n    {\r\n        st[id[x] = ++stmp][0] = x;\r\n        for (int i : g[x])\r\n        {\r\n            d[i] = d[x] + 1;\r\n            dfs(i), st[++stmp][0] = x;\r\n        }\r\n    }\r\n    void init ()\r\n    {\r\n        stmp = 0;\r\n        int rt = fa(1); d[rt] = 0; dfs(rt);\r\n        for (int k = 0; k < lg[stmp]; ++k)\r\n            for (int i = stmp + 1 - (1 << k + 1); i; --i)\r\n                st[i][k + 1] = dmin(st[i][k], st[i + (1 << k)][k]);\r\n    }\r\n    int lca (int a, int b)\r\n    {\r\n        a = id[a], b = id[b];\r\n        if (a > b) swap(a, b);\r\n        int k = lg[b - a + 1];\r\n        return dmin(st[a][k], st[b - (1 << k) + 1][k]);\r\n    }\r\n}\r\nint main ()\r\n{\r\n    int T; read(T);\r\n    for (int i = 2; i < N; ++i) lg[i] = lg[i >> 1] + 1;\r\n    while (T--)\r\n    {\r\n        read(n, m, q);\r\n        tot = n;\r\n        for (int i = 1; i <= n; ++i)\r\n            p[i] = i, g[i].clear();\r\n        for (int i = 1, a, b; i <= m; ++i)\r\n        {\r\n            read(a, b);\r\n            a = fa(a), b = fa(b);\r\n            if (a == b) continue;\r\n            p[a] = p[b] = ++tot, p[tot] = tot;\r\n            w[tot] = i;\r\n            g[tot].pb(a), g[tot].pb(b);\r\n        }\r\n        LCA::init();\r\n        for (int i = 1; i < n; ++i)\r\n            v[i][0] = w[LCA::lca(i, i + 1)];\r\n        for (int k = 0; k < lg[n - 1]; ++k)\r\n            for (int i = n - (1 << k + 1); i; --i)\r\n                v[i][k + 1] = max(v[i][k], v[i + (1 << k)][k]);\r\n        for (int l, r; q; --q)\r\n        {\r\n            read(l, r);\r\n            if (l == r) write(0);\r\n            else { int k = lg[r - l]; write(max(v[l][k], v[r - (1 << k)][k])); }\r\n            putchar(' ');\r\n        }\r\n        puts(\"\");\r\n    }\r\n    return 0;\r\n}"
+}

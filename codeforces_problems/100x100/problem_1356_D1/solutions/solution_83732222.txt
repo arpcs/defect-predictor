@@ -1,0 +1,33 @@
+{
+    "id": 83732222,
+    "contestId": 1356,
+    "creationTimeSeconds": 1592124890,
+    "relativeTimeSeconds": 147290,
+    "problem": {
+        "contestId": 1356,
+        "index": "D1",
+        "name": "Quantum Classification - 1",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1356,
+        "members": [
+            {
+                "handle": "tabr"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1591977600
+    },
+    "programmingLanguage": "Q#",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "namespace Microsoft.Quantum.Samples {\r\n    open Microsoft.Quantum.Convert;\r\n    open Microsoft.Quantum.Intrinsic;\r\n    open Microsoft.Quantum.Canon;\r\n    open Microsoft.Quantum.Arrays;\r\n    open Microsoft.Quantum.MachineLearning;\r\n    open Microsoft.Quantum.Math;\r\n\r\n    function WithProductKernel(scale : Double, sample : Double[]) : Double[] {\r\n        return sample + [scale * Fold(TimesD, 1.0, sample)];\r\n    }\r\n\r\n    function Preprocessed(samples : Double[][]) : Double[][] {\r\n        let scale = 1.0;\r\n\r\n        return Mapped(\r\n            WithProductKernel(scale, _),\r\n            samples\r\n        );\r\n    }\r\n\r\n    function DefaultSchedule(samples : Double[][]) : SamplingSchedule {\r\n        return SamplingSchedule([\r\n            0..Length(samples) - 1\r\n        ]);\r\n    }\r\n\r\n    function ClassifierStructure() : ControlledRotation[] {\r\n        return [\r\n            ControlledRotation((0, new Int[0]), PauliX, 4),\r\n            ControlledRotation((0, new Int[0]), PauliZ, 5),\r\n            ControlledRotation((1, new Int[0]), PauliX, 6),\r\n            ControlledRotation((1, new Int[0]), PauliZ, 7),\r\n            ControlledRotation((0, [1]), PauliX, 0),\r\n            ControlledRotation((1, [0]), PauliX, 1),\r\n            ControlledRotation((1, new Int[0]), PauliZ, 2),\r\n            ControlledRotation((1, new Int[0]), PauliX, 3)\r\n        ];\r\n    }\r\n\r\n    operation TrainHalfMoonModel(\r\n        trainingVectors : Double[][],\r\n        trainingLabels : Int[],\r\n        initialParameters : Double[][]\r\n    ) : (Double[], Double) {\r\n        let samples = Mapped(\r\n            LabeledSample,\r\n            Zip(Preprocessed(trainingVectors), trainingLabels)\r\n        );\r\n        Message(\"Ready to train.\");\r\n        let (optimizedModel, nMisses) = TrainSequentialClassifier(\r\n            Mapped(\r\n                SequentialModel(ClassifierStructure(), _, 0.0),\r\n                initialParameters\r\n            ),\r\n            samples,\r\n            DefaultTrainingOptions()\r\n                w/ LearningRate <- 0.1\r\n                w/ MinibatchSize <- 15\r\n                w/ Tolerance <- 0.005\r\n                w/ NMeasurements <- 10000\r\n                w/ MaxEpochs <- 16\r\n                w/ VerboseMessage <- Message,\r\n            DefaultSchedule(trainingVectors),\r\n            DefaultSchedule(trainingVectors)\r\n        );\r\n        Message($\"Training complete, found optimal parameters: {optimizedModel::Parameters}\");\r\n        return (optimizedModel::Parameters, optimizedModel::Bias);\r\n    }\r\n\r\n    operation ValidateHalfMoonModel(\r\n        validationVectors : Double[][],\r\n        validationLabels : Int[],\r\n        parameters : Double[],\r\n        bias : Double\r\n    ) : Double {\r\n        let samples = Mapped(\r\n            LabeledSample,\r\n            Zip(Preprocessed(validationVectors), validationLabels)\r\n        );\r\n        let tolerance = 0.005;\r\n        let nMeasurements = 10000;\r\n        let results = ValidateSequentialClassifier(\r\n            SequentialModel(ClassifierStructure(), parameters, bias),\r\n            samples,\r\n            tolerance,\r\n            nMeasurements,\r\n            DefaultSchedule(validationVectors)\r\n        );\r\n        return IntAsDouble(results::NMisclassifications) / IntAsDouble(Length(samples));\r\n    }\r\n\r\n    operation ClassifyHalfMoonModel(\r\n        samples : Double[][],\r\n        parameters : Double[],\r\n        bias : Double,\r\n        tolerance  : Double,\r\n        nMeasurements : Int\r\n    )\r\n    : Int[] {\r\n        let model = Default<SequentialModel>()\r\n            w/ Structure <- ClassifierStructure()\r\n            w/ Parameters <- parameters\r\n            w/ Bias <- bias;\r\n        let features = Preprocessed(samples);\r\n        let probabilities = EstimateClassificationProbabilities(\r\n            tolerance, model,\r\n            features, nMeasurements\r\n        );\r\n        return InferredLabels(model::Bias, probabilities);\r\n    }\r\n\r\n    operation Solve(): (ControlledRotation[], (Double[], Double)) {\r\n        let a = ClassifierStructure();\r\n        let b = [0.059450484357, 3.03496867278, 2.0485937655953905, 0.6140980651553907, 1.0249087443353908, 1.289129519615391, 4.140124891565391];\r\n        let c = 5.503529549585392;\r\n        return (a, (b, c));\r\n    }\r\n}"
+}

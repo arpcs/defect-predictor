@@ -1,0 +1,41 @@
+{
+    "id": 181312685,
+    "contestId": 1706,
+    "creationTimeSeconds": 1668690330,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "yimuhua"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 202,
+    "memoryConsumedBytes": 28876800,
+    "source": "// LUOGU_RID: 94385562\n#include <bits/stdc++.h>\r\nusing namespace std;\r\nnamespace IO {\r\n\tinline char gc() {\r\n\t\tstatic const int IN_LEN = 1 << 18 | 1;\r\n\t\tstatic char buf[IN_LEN], *s, *t;\r\n\t\treturn (s == t) && (t = (s = buf) + fread(buf, 1, IN_LEN, stdin)), s == t ? -1 : *s++;\r\n\t}\r\n\ttemplate <typename T>\r\n\tinline void read(T &x) {\r\n\t\tstatic char ch, ff;\r\n\t\tch = gc(), ff = 0;\r\n\t\tfor(; !isdigit(ch); ch = gc())\r\n\t\t\tff |= ch == '-';\r\n\t\tfor(x = 0; isdigit(ch); ch = gc())\r\n\t\t\tx = (x << 3) + (x << 1) + (ch ^ 48);\r\n\t\tff && (x = -x);\r\n\t\treturn;\r\n\t}\r\n\ttemplate <typename T, typename ...t>\r\n\tvoid read(T&x, t& ...y) {\r\n\t\tread(x), read(y...);\r\n\t\treturn;\r\n\t}\r\n\ttemplate <typename T>\r\n\tinline void print(T x) {\r\n\t\tstatic int pr, pri[105], temp;\r\n\t\tpr = 0, temp = x;\r\n\t\tif(x < 0)\r\n\t\t\tfputc('-', stdout), x = -x;\r\n\t\tif(!x) {\r\n\t\t\tfputc(48, stdout);\r\n\t\t\treturn;\r\n\t\t}\r\n\t\twhile(x)\r\n\t\t\tpri[++pr] = x % 10, x /= 10;\r\n\t\tfor(; pr; pr--)\r\n\t\t\tfputc(pri[pr] + 48, stdout);\r\n\t\tx = temp;\r\n\t\treturn;\r\n\t}\r\n\ttemplate <typename T, typename ...t>\r\n\tvoid print(T&x, t& ...y) {\r\n\t\tprint(x), fputc(' ', stdout), print(y...);\r\n\t\treturn;\r\n\t}\r\n}\r\nusing namespace IO;\r\nvector<int> v[200005];\r\nint t, n, m, q, cnt, a[100005], b[200005], fa[200005], siz[200005], top[200005], son[200005], dep[200005];\r\nstruct node {\r\n\tint x, y;\r\n}e[200005];\r\nstruct ST {\r\n\tint dp[100005][30], lg[100005];\r\n\tvoid init() {\r\n\t\tlg[0] = -1;\r\n\t\tfor(int i = 1; i <= n; i++)\r\n\t\t\tdp[i][0] = a[i], lg[i] = lg[i >> 1] + 1;\r\n\t\tfor(int j = 1; 1 << j <= n; j++)\r\n\t\t\tfor(int i = 1; i + (1 << j) - 1 <= n; i++)\r\n\t\t\t\tdp[i][j] = max(dp[i][j - 1], dp[i + (1 << j - 1)][j - 1]);\r\n\t\treturn;\r\n\t}\r\n\tint query(int l, int r) {\r\n\t\tif(l > r)\r\n\t\t\treturn 0;\r\n\t\tint p = lg[r - l + 1];\r\n\t\treturn max(dp[l][p], dp[r - (1 << p) + 1][p]);\r\n\t}\r\n}S;\r\nstruct BCJ {\r\n\tint fa[100005];\r\n\tvoid init() {\r\n\t\tiota(fa + 1, fa + n + 1, 1);\r\n\t\treturn;\r\n\t}\r\n\tint find(int x) {\r\n\t\tif(fa[x] == x)\r\n\t\t\treturn x;\r\n\t\treturn fa[x] = find(fa[x]);\r\n\t}\r\n\tvoid unionn(int x, int y) {\r\n\t\tfa[find(x)] = find(y);\r\n\t\treturn;\r\n\t}\r\n}B;\r\nvoid kruskal() {\r\n\tB.init(), cnt = n;\r\n\tfor(int i = 1, fx, fy; i <= m; i++) {\r\n\t\tfx = B.find(e[i].x), fy = B.find(e[i].y);\r\n\t\tif(fx != fy)\r\n\t\t\tb[++cnt] = i, v[cnt].push_back(fx), v[cnt].push_back(fy), B.fa[cnt] = B.fa[fx] = B.fa[fy] = cnt;\r\n\t}\r\n\treturn;\r\n}\r\nvoid dfs1(int x) {\r\n\tsiz[x] = 1;\r\n\tfor(int i : v[x]) {\r\n\t\tdep[i] = dep[fa[i] = x] + 1, dfs1(i), siz[x] += siz[i];\r\n\t\tif(!son[x] || siz[son[x]] < siz[i])\r\n\t\t\tson[x] = i;\r\n\t}\r\n\treturn;\r\n}\r\nvoid dfs2(int x, int tp) {\r\n\ttop[x] = tp;\r\n\tif(son[x])\r\n\t\tdfs2(son[x], tp);\r\n\tfor(int i : v[x])\r\n\t\tif(i != son[x])\r\n\t\t\tdfs2(i, i);\r\n\treturn;\r\n}\r\nint lca(int x, int y) {\r\n\twhile(top[x] != top[y])\r\n\t\tif(dep[top[x]] > dep[top[y]])\r\n\t\t\tx = fa[top[x]];\r\n\t\telse\r\n\t\t\ty = fa[top[y]];\r\n\treturn dep[x] > dep[y] ? y : x;\r\n}\r\nint main() {\r\n\tread(t);\r\n\twhile(t--) {\r\n\t\tread(n, m, q), fill(son, son + 2 * n + 1, 0);\r\n\t\tfor(int i = 1; i <= 2 * n; i++)\r\n\t\t\tv[i].clear();\r\n\t\tfor(int i = 1; i <= m; i++)\r\n\t\t\tread(e[i].x, e[i].y);\r\n\t\tkruskal(), dep[cnt] = fa[cnt] = 0, dfs1(cnt), dfs2(cnt, cnt);\r\n\t\tfor(int i = 1; i < n; i++)\r\n\t\t\ta[i] = b[lca(i, i + 1)];\r\n\t\tS.init();\r\n\t\tfor(int l, r; q--;)\r\n\t\t\tread(l, r), print(S.query(l, r - 1)), fputc(' ', stdout);\r\n\t\tfputc('\\n', stdout);\r\n\t}\r\n\treturn 0;\r\n}"
+}

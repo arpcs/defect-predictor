@@ -1,0 +1,36 @@
+{
+    "id": 10111832,
+    "contestId": 521,
+    "creationTimeSeconds": 1425284442,
+    "relativeTimeSeconds": 4842,
+    "problem": {
+        "contestId": 521,
+        "index": "D",
+        "name": "Shop",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2800,
+        "tags": [
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 521,
+        "members": [
+            {
+                "handle": "yosupo"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "room": 3,
+        "startTimeSeconds": 1425279600
+    },
+    "programmingLanguage": "GNU C++0x",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "PRETESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "//#define NDEBUG\n\n#include <iostream>\n#include <cstring>\n#include <algorithm>\n#include <vector>\n#include <map>\n#include <queue>\n#include <set>\n#include <tuple>\n#include <cassert>\n#include <numeric>\n\nusing namespace std;\ntypedef long long ll;\n\nconst int MK = 100100;\ntypedef pair<ll, ll> P;\ntypedef pair<double, ll> PD;\n\nll k, n, m;\n\nvector<P> mul;\ndouble mulsum[MK];\nvoid mulcalc() {\n    mulsum[0] = 0;\n    for (int i = 0; i < (int)mul.size(); i++) {\n        mulsum[i+1] = mulsum[i] + mul[i].first;\n    }\n}\n\nll d[MK];\nint addn;\nvector<P> add[MK];\nint addc[MK];\nvector<PD> addres;\ndouble addsum[MK];\nvoid addcalc() {\n    priority_queue<PD> q;\n    for (int i = 0; i < k; i++) {\n        if (add[i].size()) {\n            q.push(PD( (double)(add[i][0].first+d[i]) / d[i], i ));\n        }\n    }    \n    addsum[0] = 0;\n    for (int i = 0; i < addn; i++) {\n        double x; int p;\n        tie(x, p) = q.top(); q.pop();\n        P ap = add[p][addc[p]];\n        addc[p]++;\n        addres.push_back(PD(x, ap.second));\n        d[p] += ap.first;\n        if (addc[p] == (int)add[p].size()) continue;\n        q.push(PD( (double)(add[p][addc[p]].first + d[p]) / d[p], p));\n    }\n    addsum[0] = 0;\n    for (int i = 0; i < addn; i++) {\n        addsum[i+1] = addsum[i] + addres[i].first;\n    }\n}\n\nvector<int> res;\nvoid solve() {\n    addcalc();\n    mulcalc();\n    double r = -1;\n    int ri = -1;\n    for (int i = m-mul.size(); i <= addn; i++) {\n        if (r < addsum[i]+mulsum[m-i]) {\n            r = addsum[i]+mulsum[m-i];\n            ri = i;\n        }\n    }\n    for (int i = 0; i < ri; i++) {\n        res.push_back(addres[i].second);\n    }\n    for (int i = 0; i < m-ri; i++) {\n        res.push_back(mul[i].second);\n    }\n}\n\nP as[MK];\n\nint main() {\n    fill_n(as, MK, P(-1, -1));\n    int kk, nn, mm;\n    scanf(\"%d %d %d\", &kk, &nn, &mm);\n    k = kk; n = nn; m = mm;\n    for (int i = 0; i < k; i++) {\n        int dd;\n        scanf(\"%d\", &dd);\n        d[i] = dd;\n    }\n    for (int i = 0; i < n; i++) {\n        int tt, pp, bb;\n        scanf(\"%d %d %d\", &tt, &pp, &bb); pp--;\n        ll t = tt, p = pp, b = bb;\n        if (t == 1) {\n            as[p] = max(as[p], P(b, i));\n        } else if (t == 2) {\n            add[p].push_back(P(b, i));\n        } else {\n            mul.push_back(P(b, i));\n        }\n    }\n    for (int i = 0; i < k; i++) {\n        if (as[i].first <= d[i]) continue;\n        as[i].first -= d[i];\n        add[i].push_back(as[i]);\n    }\n    n = 0;\n    n += mul.size();\n    sort(mul.begin(), mul.end(), greater<P>());\n    for (int i = 0; i < k; i++) {\n        addn += add[i].size();\n        n += add[i].size();\n        sort(add[i].begin(), add[i].end(), greater<P>());\n    }\n    m = min(m, n);\n    solve();\n    printf(\"%d\\n\", (int)res.size());\n    for (int d: res) {\n        printf(\"%d \", d+1);\n    }\n    printf(\"\\n\");\n    return 0;\n}"
+}

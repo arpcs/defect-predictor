@@ -1,0 +1,36 @@
+{
+    "id": 81705888,
+    "contestId": 878,
+    "creationTimeSeconds": 1590669866,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "daklqw"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 108,
+    "memoryConsumedBytes": 8192000,
+    "source": "#include <bits/stdc++.h>\n\nconst int MAXN = 100010;\nconst int mod = 1000000007;\ntypedef long long LL;\nvoid reduce(int & x) { x += x >> 31 & mod; }\nint mul(int a, int b) { return (LL) a * b % mod; }\nint pow(int a, int b, int res = 1) {\n\tfor (; b; b >>= 1, a = mul(a, a)) if (b & 1) res = mul(res, a);\n\treturn res;\n}\nint remod(LL x) { x %= mod; return x + (x >> 63 & mod); }\nint n, Q;\nstd::vector<int> qrys[MAXN];\nint ls[MAXN], ansl[MAXN], A[MAXN];\nint suc[MAXN], pw2[MAXN];\nint get(int l, int r) {\n\treturn (suc[l] + (LL) (mod - suc[r + 1]) * pw2[r - l + 1]) % mod;\n}\nint fa[MAXN], siz[MAXN], sm[MAXN], smmod[MAXN];\nint find(int x) { return x == fa[x] ? x : fa[x] = find(fa[x]); }\nconst int inf = 1e9;\nint pre[MAXN], str[MAXN], top;\nvoid merge(int x, int y) {\n\tif (siz[x] >= 30 || (sm[x] + ((LL) sm[y] << siz[x])) >= inf)\n\t\tsm[y] = inf;\n\telse sm[y] = sm[x] + (sm[y] << siz[x]);\n\tsmmod[y] = ((LL) smmod[y] * pw2[siz[x]] + smmod[x]) % mod;\n\tstr[--top] = y;\n\treduce(pre[top] = pre[top - 1] + smmod[y] - mod);\n\tsiz[y] += siz[x]; fa[x] = y;\n}\nint main() {\n\t*pw2 = 1;\n\tfor (int i = 1; i != MAXN; ++i)\n\t\treduce(pw2[i] = pw2[i - 1] * 2 - mod);\n\tstd::ios_base::sync_with_stdio(false), std::cin.tie(0);\n\tstd::cin >> n >> Q;\n\tfor (int i = 1; i <= n; ++i) fa[i] = i, siz[i] = 1;\n\tfor (int i = 1; i <= n; ++i) std::cin >> A[i];\n\tfor (int i = 1; i <= n; ++i) smmod[i] = remod(sm[i] = A[i]);\n\tfor (int i = n; i; --i)\n\t\tsuc[i] = remod(suc[i + 1] * 2ll + A[i]);\n\tfor (int i = 1, r; i <= Q; ++i)\n\t\tstd::cin >> ls[i] >> r, qrys[r].push_back(i);\n\tfor (int i = 1; i <= n; ++i) {\n\t\treduce(pre[top + 1] = smmod[i] + pre[top] - mod);\n\t\tstr[++top] = i;\n\t\twhile (sm[i] > 0 && siz[i] != i) merge(i - siz[i], i);\n\t\tfor (auto t : qrys[i]) {\n\t\t\tint r = find(ls[t]);\n\t\t\tint at = std::lower_bound(str + 1, str + 1 + top, r) - str;\n\t\t\tint ans = (get(ls[t], r) + (pre[top] - pre[at] + mod) * 2ll) % mod;\n\t\t\tansl[t] = ans;\n\t\t}\n\t}\n\tfor (int i = 1; i <= Q; ++i)\n\t\tstd::cout << ansl[i] << '\\n';\n\treturn 0;\n}\n"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 36743918,
+    "contestId": 878,
+    "creationTimeSeconds": 1522406334,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "lessmeaning"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 202,
+    "memoryConsumedBytes": 16179200,
+    "source": "#include <iostream>\r\n#include <iomanip>\r\n#include <string>\r\n#include <set>\r\n#include <map>\r\n#include <unordered_set>\r\n#include <unordered_map>\r\n#include <queue>\r\n#include <vector>\r\n#include <cassert>\r\n#include <fstream>\r\n#include <algorithm>\r\n#include <list>\r\n#include <random>\r\n#include <ctime>\r\n#include <cmath>\r\n#include <random>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef long double ld;\r\n#define int ll\r\ntypedef pair<int, int> pii;\r\ntypedef pair<ll, ll> pll;\r\ntypedef vector<int> vi;\r\ntypedef vector< vi > vvi;\r\ntypedef vector< vvi > vvvi;\r\ntypedef vector<short> vs;\r\ntypedef vector<vs> vvs;\r\ntypedef vector<vvs> vvvs;\r\ntypedef vector<ll> vl;\r\ntypedef vector<vl> vvl;\r\ntypedef vector<vvl> vvvl;\r\ntypedef pair<ld, ld> pld;\r\n\r\n#define mp(a,b) make_pair(a,b)\r\n#define pb(a) push_back(a)\r\n#define ALL(a) a.begin(),a.end()\r\n#define sqr(x) (x) * (x)\r\n#define fori(i, n) for(int i = 0; i < int(n); ++i)\r\n\r\nvoid mmin(ll &a, ll b) {\r\n\ta = min(a, b);\r\n}\r\n\r\nconst ll M = 1e9 + 7;\r\nconst ll INF = 8e9;\r\nll pw(ll a, ll p) {\r\n\tif (!p) return 1;\r\n\tll ret = pw(a, p >> 1);\r\n\tret = (ret * ret) % M;\r\n\tif (p & 1) ret = (ret * a) % M;\r\n\treturn ret;\r\n}\r\n\r\nvl naive(int n, vl a, vector<pll> queries) {\r\n\tvl ret;\r\n\tfor (auto q : queries) {\r\n\t\tint l = q.first - 1;\r\n\t\tint r = q.second - 1;\r\n\t\t\r\n\t\tll ans = 0;\r\n\t\tll cur = 0;\r\n\t\tll cur_mod = 0;\r\n\t\tfor (int i = r; i > l; --i) {\r\n\t\t\tif (cur >= 0) {\r\n\t\t\t\tcur *= 2LL;\r\n\t\t\t\tcur_mod = (cur_mod * 2LL) % M;\r\n\t\t\t} else {\r\n\t\t\t\tans = (cur_mod + ans) % M;\r\n\t\t\t\tcur = 0;\r\n\t\t\t\tcur_mod = 0;\r\n\t\t\t}\r\n\t\t\tcur += 2LL * a[i];\r\n\t\t\tmmin(cur, INF);\r\n\t\t\tcur_mod = (cur_mod + 2LL * a[i] + M) % M;\r\n\t\t}\r\n\t\t\r\n\t\tans = (ans + cur_mod) % M;\r\n\t\tans = (ans + a[l] + M) % M;\r\n\t\tret.pb(ans);\r\n\t}\r\n\treturn ret;\r\n}\r\n\r\nconst int N = 1e5 + 9;\r\nll hsh[N];\r\n\r\nint pref_dp[N];\r\nll cost_dp[N];\r\nll dp[N];\r\nll a[N];\r\nint n;\r\nll pw2[N];\r\n\r\nll get_hash(int l, int r) {\r\n\t++r;\r\n\treturn (M + hsh[l] - (hsh[r] * pw2[r - l]) % M) % M;\r\n}\r\n\r\nvoid dfs(int &j, ll &cur) {\r\n\tif (j < 0) return;\r\n\tif (cur > 0) {\r\n\t\tint nxj = pref_dp[j];\r\n\t\tint need_pw = j - nxj + 1;\r\n\t\tif (need_pw >= 32) {\r\n\t\t\tj = 0;\r\n\t\t\tcur = INF;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tcur *= (1 << need_pw);\r\n\t\tif (cur < INF) cur += cost_dp[j];\r\n\t\tif (cur >= INF) {\r\n\t\t\tcur = INF;\r\n\t\t\tj = 0;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tj = nxj;\r\n\t\tif (cur >= 0) {\r\n\t\t\t--j;\r\n\t\t\tdfs(j, cur);\r\n\t\t}\r\n\t} else {\r\n\t\tcur = cost_dp[j];\r\n\t\tj = pref_dp[j];\r\n\t\tif (cur >= 0) {\r\n\t\t\t--j;\r\n\t\t\tdfs(j, cur);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nint t[N << 2];\r\n\r\nvoid build(int v, int tl, int tr) {\r\n\tif (tl == tr) {\r\n\t\tt[v] = pref_dp[tl];\r\n\t\treturn;\r\n\t}\r\n\tint tm = (tl + tr) >> 1;\r\n\tbuild(v << 1 , tl, tm);\r\n\tbuild(v << 1 | 1, tm + 1, tr);\r\n\tt[v] = min(t[v << 1], t[v << 1 | 1]);\r\n}\r\n\r\npii super_get(int v, int tl, int tr, int l, int r, int par) {\r\n\tif (l > r) return mp(INF, INF);\r\n\tif (tl == tr) return mp(pref_dp[tl], tl);\r\n\tint tm = (tl + tr) >> 1;\r\n\tif (tl == l && tr == r) {\r\n\t\tif (t[v << 1 | 1] < par) return super_get(v << 1 | 1, tm + 1, tr, tm + 1, r, par);\r\n\t\telse if (t[v << 1] < par) return super_get(v << 1, tl, tm, l, tm, par);\r\n\t\treturn mp(INF, INF);\r\n\t}\r\n\tpii ret = super_get(v << 1 | 1, tm + 1, tr, max(tm + 1, l), r, par);\r\n\tif (ret.first < par) return ret;\r\n\treturn super_get(v << 1, tl, tm, l, min(tm, r), par);\r\n}\r\n\r\n\r\nvl solve(vector<pll> queries) {\r\n\tfor (int i = n - 1; i >= 0; --i) \r\n\t\thsh[i] = (2LL * (a[i] + M + hsh[i + 1])) % M;\r\n\t\r\n\tpref_dp[0] = 0;\r\n\tcost_dp[0] = 2LL * a[0];\r\n\tfor (int i = 1; i < n; ++i) {\r\n\t\tll cur = 2LL * a[i];\r\n\t\tint j = i;\r\n\t\tif (cur >= 0) {\r\n\t\t\t--j;\r\n\t\t\tdfs(j, cur);\r\n\t\t}\r\n\t\tj = max(j, 0LL);\r\n\t\tpref_dp[i] = j;\r\n\t\t//cout << \"pref_dp[\" << i << \"] = \" << pref_dp[i] << endl;\r\n\t\tcost_dp[i] = cur;\r\n\t}\r\n\t\r\n\r\n\tfor (int i = 0; i < n; ++i) {\r\n\t\tint j = pref_dp[i];\r\n\t\tdp[i] = get_hash(j, i);\r\n\t\tif (j) dp[i] = (dp[i] + dp[j - 1]) % M;\r\n\t}\r\n\tbuild(1, 0, n - 1);\r\n\tvl ans;\r\n\tfor (auto query : queries) {\r\n\t\tint l = query.first;\r\n\t\tint r = query.second - 1;\r\n\t\tif (l > r) {\r\n\t\t\tans.pb((a[l - 1] + M) % M);\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tint j = pref_dp[r];\r\n\t\tll cur = 0;\r\n\t\t//cout << \"j = \" << j << endl;\r\n\t\tif (j <= l) {\r\n\t\t\tcur = get_hash(l, r);\r\n\t\t} else {\r\n\t\t\tpii p = super_get(1, 0, n - 1, l, j - 1, l);\r\n\t\t\tint i = p.second;\r\n\t\t\t//cout << \"j = \" << j << endl;\r\n\t\t\t//cout << \"i = \" << i << endl;\r\n\t\t\tcur = get_hash(j, r);\r\n\t\t\tif (p.first < l) {\r\n\t\t\t\tcur = (cur + get_hash(l, i)) % M;\r\n\t\t\t\tcur = (cur + dp[j - 1] - dp[i] + M) % M;\r\n\t\t\t} else {\r\n\t\t\t\tcur = (cur + dp[j - 1] - dp[l - 1] + M) % M;\r\n\t\t\t}\r\n\t\t}\r\n\t\tcur = (cur + a[l - 1] + M) % M;\r\n\t\tans.pb(cur);\r\n\t}\r\n\treturn ans;\r\n}\r\n\r\n\r\nsigned main() {\r\n\tios_base::sync_with_stdio(0);\r\n\tcin.tie(0);\r\n\tcout.tie(0);\r\n\t\r\n\tpw2[0] = 1;\r\n\tfor (int i = 1; i < N; ++i) \r\n\t\tpw2[i] = (2LL * pw2[i - 1]) % M;\r\n\t\r\n\tint q;\r\n\tcin >> n >> q;\r\n\tfori (i, n)\r\n\t\tcin >> a[i];\r\n\tvector<pll> queries(q);\r\n\tfori (i, q) \r\n\t\tcin >> queries[i].first >> queries[i].second;\r\n\t\t\r\n\tvl ans = solve(queries);\r\n\tfor (auto x : ans)\r\n\t\tcout << x << \" \";\r\n}\r\n"
+}

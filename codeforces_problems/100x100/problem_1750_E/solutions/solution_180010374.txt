@@ -1,0 +1,40 @@
+{
+    "id": 180010374,
+    "contestId": 1750,
+    "creationTimeSeconds": 1667848858,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "Lucina"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1667745300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 29,
+    "timeConsumedMillis": 61,
+    "memoryConsumedBytes": 10752000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int nax = 4e5 + 10;\r\n\r\nvoid debug() {\r\n    cout << '\\n';\r\n}\r\n\r\ntemplate <typename H, typename ...T>\r\nvoid debug(const H &head, const T&... tail) {\r\n    cout << head << ' ';\r\n    debug(tail...);\r\n}\r\n\r\n#ifndef DEBUG\r\n    #define debug(...) 42\r\n#endif // DEBUG\r\n\r\ntemplate <typename T = int64_t>\r\nstruct BIT {\r\n    int n;\r\n    vector <T> bit;\r\n\r\n    BIT (int n) : n(n + 2), bit(n + 3, T()) {}\r\n\r\n    void update(int i, T val) {\r\n        i += 1;\r\n        for (; i <= n ; i += i & -i) bit[i] += val;\r\n    }\r\n\r\n    T get(int i) {\r\n        i += 1;\r\n        T res = 0;\r\n        for (; i > 0 ; i -= i & -i) res += bit[i];\r\n        return res;\r\n    }\r\n\r\n    T get(int l, int r) {\r\n        return get(r + 1) - get(l);\r\n    }\r\n};\r\n\r\nint n;\r\nchar s[nax];\r\nint sum_b[nax];\r\nint64_t sum_balance[nax];\r\n\r\nvoid solve() {\r\n    cin >> n >> s + 1;\r\n    vector <pair <int, int>> e;\r\n    e.emplace_back(0, 0);\r\n    for (int i = 1 ; i <= n ; ++ i) {\r\n        sum_b[i] = sum_b[i - 1] + (s[i] == '(' ? 1 : -1);\r\n        sum_balance[i] = sum_balance[i - 1] + sum_b[i];\r\n        e.emplace_back(sum_b[i], i);\r\n    }\r\n\r\n    sort(e.begin(), e.end());\r\n    int64_t ans = 0;\r\n    BIT <int64_t> sum(n);\r\n    BIT <int> cnt(n);\r\n\r\n    for (const auto &[v, i] : e) {\r\n        int64_t sum_lft = sum.get(i), cnt_lft = cnt.get(i);\r\n        ans +=  cnt_lft * v - sum_lft;\r\n        sum.update(i, v), cnt.update(i, 1);\r\n    }\r\n\r\n    int64_t stk_sum = 0;\r\n    vector <pair <int64_t, int>> stk;\r\n    for (int i = n ; i >= 0 ; -- i) {\r\n        while (!stk.empty() && sum_b[stk.back().second] >= sum_b[i]) {\r\n            stk_sum -= stk.back().first;\r\n            stk.pop_back();\r\n        }\r\n        if (!stk.empty()) {\r\n            ans -= stk_sum - 1ll * sum_b[i] * (n - stk.back().second + 1);\r\n        }\r\n        int64_t add = 1ll * sum_b[i] * ((stk.empty() ? n + 1 : stk.back().second) - i);\r\n        stk.emplace_back(add, i);\r\n        stk_sum += add;\r\n    }\r\n\r\n    cout << ans << '\\n';\r\n}\r\n\r\nint main() {\r\n    cin.tie(0)->sync_with_stdio(false);\r\n    int T;\r\n\r\n    for (cin >> T ; T -- ;) {\r\n        solve();\r\n    }\r\n}\r\n"
+}

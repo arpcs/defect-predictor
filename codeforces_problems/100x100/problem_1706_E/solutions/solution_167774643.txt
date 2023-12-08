@@ -1,0 +1,41 @@
+{
+    "id": 167774643,
+    "contestId": 1706,
+    "creationTimeSeconds": 1660145421,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "Ann"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 1092,
+    "memoryConsumedBytes": 12800000,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nstruct DSU {\r\n    int n;\r\n    vector<int> f;\r\n    vector<vector<int>> s;\r\n    DSU(int _n) : n(_n), f(_n), s(_n) {\r\n        for (int i = 0; i < n; i++) {\r\n            f[i] = i;\r\n            s[i] = {i};\r\n        }\r\n    }\r\n    bool unionize(int x, int y, vector<int> &favor, int k) {\r\n        x = f[x];\r\n        y = f[y];\r\n        if (x == y) return false;\r\n        if (s[y].size() > s[x].size()) swap(x, y);\r\n        for (auto mem : s[y]) {\r\n            s[x].push_back(mem);\r\n            f[mem] = x;\r\n            if (mem - 1 >= 0 && f[mem - 1] == x && favor[mem] == -1) favor[mem] = k;\r\n            if (mem + 1 < n && f[mem + 1] == x && favor[mem + 1] == -1) favor[mem + 1] = k;\r\n        }\r\n        return true;\r\n    }\r\n};\r\n\r\nstruct SegmentTree {\r\n    int n;\r\n    vector<int> tree;\r\n    SegmentTree(int _n, vector<int> &a) : n(_n), tree(4 * _n) {\r\n        build(a, 0, 0, n - 1);\r\n    }\r\n    void build(vector<int> &a, int idx, int l, int r) {\r\n        if (l == r) {\r\n            tree[idx] = a[l];\r\n        } else {\r\n            int m = (l + r) / 2;\r\n            build(a, 2 * idx + 1, l, m);\r\n            build(a, 2 * idx + 2, m + 1, r);\r\n            tree[idx] = max(tree[2 * idx + 1], tree[2 * idx + 2]);\r\n        }\r\n    }\r\n    int query(int ql, int qr, int idx, int l, int r) {\r\n        if (r < ql || qr < l) {\r\n            return -1;\r\n        }\r\n        if (ql <= l && r <= qr) {\r\n            return tree[idx];\r\n        }\r\n        int m = (l + r) / 2;\r\n        int a = query(ql, qr, 2 * idx + 1, l, m);\r\n        int b = query(ql, qr, 2 * idx + 2, m + 1, r);\r\n        return max(a, b);\r\n    }\r\n    int query(int ql, int qr) {\r\n        return query(ql, qr, 0, 0, n - 1);\r\n    }\r\n};\r\n\r\nvoid solve() {\r\n    int n, m, q;\r\n    cin >> n >> m >> q;\r\n    vector<int> f(n, -1);\r\n    DSU dsu(n);\r\n    for (int i = 0; i < m; i++) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        u--;\r\n        v--;\r\n        dsu.unionize(u, v, f, i);\r\n    }\r\n\r\n    SegmentTree st(n, f);\r\n    while (q--) {\r\n        int l, r;\r\n        cin >> l >> r;\r\n        l--;\r\n        r--;\r\n        cout << st.query(l + 1, r) + 1 << \" \";\r\n    }\r\n    cout << \"\\n\";\r\n}\r\n\r\nint main() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n\r\n    int t;\r\n    cin >> t;\r\n    while (t--) {\r\n        solve();\r\n    }\r\n}\r\n"
+}

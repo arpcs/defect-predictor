@@ -1,0 +1,36 @@
+{
+    "id": 42660333,
+    "contestId": 976,
+    "creationTimeSeconds": 1536377759,
+    "relativeTimeSeconds": 2459,
+    "problem": {
+        "contestId": 976,
+        "index": "C",
+        "name": "Nested Segments",
+        "type": "PROGRAMMING",
+        "rating": 1500,
+        "tags": [
+            "greedy",
+            "implementation",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 976,
+        "members": [
+            {
+                "handle": "oXman038"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1536375300
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 14028800,
+    "source": "#include <bits/stdc++.h>\r\n#define f first\r\n#define s second\r\n#define ll long long\r\n#define MP make_pair\r\n#define PB push_back\r\n#define INF ((1<<30)-1)\r\n#define MOD 1000000007\r\n#define MAXN 200100\r\n#define EPS 1e-9\r\n#define INFLL 1e18\r\nusing namespace std;\r\nFILE *in,*out;\r\n\r\n/*\r\n  #######################   SIMPLE SEGMENT   ##########################\r\n  #####################################################################\r\n*/\r\nconst int SEG_SIZE = 2000100;\r\n\r\nstruct node{\r\n    int val;\r\n    node()\r\n    {\r\n        val = -INF;\r\n    }\r\n    node(int x)\r\n    {\r\n        val = x;\r\n    }\r\n};\r\ntypedef struct node node;\r\nnode seg[SEG_SIZE];\r\n\r\nvoid s_MERGE(node& res,node& a,node& b)\r\n{\r\n    res.val = max(a.val,b.val);\r\n}\r\n\r\nvoid s_SET(node& res,node& a)\r\n{\r\n    res.val = a.val;\r\n}\r\n\r\nvoid s_ADD(node& res,node& a)\r\n{\r\n    res.val += a.val;\r\n}\r\n\r\nnode q_MAX(node a,node b)\r\n{\r\n    if(a.val<b.val)\r\n    {\r\n        return b;\r\n    }\r\n    else\r\n    {\r\n        return a;\r\n    }\r\n}\r\n\r\nnode q_MIN(node a,node b)\r\n{\r\n    if(a.val == -INF && b.val==-INF)\r\n        return node();\r\n    if(a.val == -INF)\r\n        return b;\r\n    if(b.val == -INF)\r\n        return a;\r\n    if(a.val>b.val)\r\n    {\r\n        return b;\r\n    }\r\n    else\r\n    {\r\n        return a;\r\n    }\r\n}\r\n\r\nvoid s_update(void (&opr)(node&,node&),int root,int l,int r,int ind,node& val)\r\n{\r\n    if(ind < l || r < ind)\r\n        return;\r\n    if(l==r)\r\n    {\r\n        opr(seg[root],val);\r\n        return;\r\n    }\r\n    int mid = (l+r)/2;\r\n    s_update(opr,root*2,l,mid,ind,val);\r\n    s_update(opr,root*2+1,mid+1,r,ind,val);\r\n    s_MERGE(seg[root],seg[root*2],seg[root*2+1]);\r\n    return;\r\n}\r\n\r\nnode s_query(node (&opr)(node,node),int root,int l,int r,int lx,int rx)\r\n{\r\n    if(lx<=l && r<=rx)\r\n        return seg[root];\r\n    if(rx<l || r<lx)\r\n        return node();\r\n    int mid = (l+r)/2;\r\n    node r1 = s_query(opr,root*2,l,mid,lx,rx);\r\n    node r2 = s_query(opr,root*2+1,mid+1,r,lx,rx);\r\n    node res = opr(r1,r2);\r\n    return res;\r\n}\r\n\r\n/*\r\n  #######################   SIMPLE SEGMENT   ##########################\r\n  #####################################################################\r\n*/\r\n// !!!!! SEG_SIZE = 2000100\r\n// s_MERGE => max => s_query(q_MAX,1,0,N,lx,rx);\r\n// s_update(s_SET,1,0,N,i,*(new node(1)));\r\n// s_update(s_ADD,1,0,N,i,*(new node(1)));\r\n\r\nint N,M,K;\r\npair<pair<int,int>, int> arx[300100];\r\nint cords[600100];\r\n\r\n#ifdef ONLINE_JUDGE\r\n\r\n#pragma GCC optimize (\"O3\")\r\n#pragma GCC target (\"sse4\")\r\n\r\n#include <ext/pb_ds/tree_policy.hpp>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/rope>\r\n\r\nusing namespace __gnu_pbds;\r\nusing namespace __gnu_cxx;\r\n\r\ntemplate <class T> using Tree = tree<T, null_type, less<T>, rb_tree_tag,tree_order_statistics_node_update>;\r\n\r\nnamespace mapOp {\r\n    const int tmp = chrono::high_resolution_clock::now().time_since_epoch().count();\r\n\r\n    template<class T> struct hsh {\r\n        size_t operator()(const T& x) const { \r\n            return hash<T>{}(x)^tmp; // avoid anti-hash tests?\r\n        }\r\n    };\r\n\r\n    template<class a, class b> using um = gp_hash_table<a,b,hsh<a>>;\r\n\r\n    template<class a, class b> b get(um<a,b>& u, a x) {\r\n        if (u.find(x) == u.end()) return 0;\r\n        return u[x];\r\n    }\r\n}\r\nusing namespace mapOp;\r\n\r\n#else\r\n\r\n#define um unordered_map\r\ntemplate<class a, class b> b get(unordered_map<a,b>& u, a x) {\r\n    if (u.find(x) == u.end()) return 0;\r\n    return u[x];\r\n}\r\n#endif\r\num<int,int> name;\r\n\r\n\r\nint read()\r\n{\r\n    int i,j,k;\r\n    int x,y;\r\n    cin >> N;\r\n    for(i=0;i<N;i++)\r\n    {\r\n        cin >> x >> y;\r\n        cords[i*2] = x;\r\n        cords[i*2+1] = y;\r\n        arx[i].f.f = x;\r\n        arx[i].f.s = y;\r\n        arx[i].s = i+1;\r\n    }\r\n    sort(cords,cords+2*N);\r\n    i = unique(cords,cords+2*N) - cords;\r\n    M = i;\r\n    for(i=0;i<M;i++)\r\n    {\r\n        name[cords[i]] = i;\r\n    }\r\n    for(i=0;i<N;i++)\r\n    {\r\n        // printf(\"<%d %d>\\n\",arx[i].f.f,arx[i].f.s);\r\n        arx[i].f.f = name[arx[i].f.f];\r\n        arx[i].f.s = name[arx[i].f.s];\r\n        // printf(\"<%d %d>\\n\",arx[i].f.f,arx[i].f.s);\r\n    }\r\n    sort(arx,arx+N);\r\n    node temp;\r\n    for(i=0;i<N;i++)\r\n    {\r\n        temp = s_query(q_MAX,1,0,M+1,arx[i].f.s,M+1);\r\n        if(temp.val>0)\r\n        {\r\n            cout << arx[i].s << \" \" << temp.val << \"\\n\";\r\n            return 0;\r\n        }\r\n        s_update(s_SET,1,0,M+1,arx[i].f.s,*(new node(arx[i].s)));\r\n        // temp = s_query(q_MAX,1,0,M+1,0,arx[i].f.s);\r\n        // cout << temp.val << endl;\r\n    }\r\n    cout << \"-1 -1\\n\";\r\n    return 0;\r\n}\r\n\r\nint main()\r\n{\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n    cout.tie(nullptr);\r\n    // in = fopen(\"A.in\",\"r\");\r\n    // out  = fopen(\"A.out\",\"w\");\r\n    in = stdin;\r\n    out = stdout;\r\n    read();\r\n    return 0;\r\n}\r\n//////////// !!!!!!!!!! Check\r\n// Interactive problems => Deactiave read optimizer!\r\n\r\n//////////// Sublime Snippets\r\n// forx\r\n// fory\r\n// vectorx\r\n// pairx\r\n// sizex\r\n// mod_operations\r\n// graph_edges\r\n\r\n// lca\r\n// rmq\r\n// fft\r\n// bigint\r\n// bigint_fft\r\n// bigint_normal\r\n// hash_gnu\r\n// simple_segment\r\n// tree_decomposition\r\n// number_theory"
+}

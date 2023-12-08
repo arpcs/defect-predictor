@@ -1,0 +1,36 @@
+{
+    "id": 84348538,
+    "contestId": 682,
+    "creationTimeSeconds": 1592585835,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 682,
+        "index": "E",
+        "name": "Alyona and Triangles",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2600,
+        "tags": [
+            "geometry",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 682,
+        "members": [
+            {
+                "handle": "ZsibbadtKubikus"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1466181300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\n#include <ext/pb_ds/priority_queue.hpp>\r\n//#pragma GCC optimize(\"O3\")\r\n//#pragma GCC target(\"sse4\")\r\n//#pragma GCC target(\"avx2\")\r\n\r\n#define deb(x) cout << #x << \" = \" << x << \"\\n\"\r\n#define all(x) (x).begin(), (x).end()\r\n#define len(x) (ll) x.size()\r\n#define lsb(x) (x) & -(x)\r\n#define l(x) (x << 1) + 1\r\n#define r(x) (x << 1) + 2\r\n#define v(x) (ll)(x - 'a')\r\n\r\n#define xx first\r\n#define yy second\r\n#define mp make_pair\r\n#define pb push_back\r\n#define lb lower_bound\r\n#define ub upper_bound\r\n\r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef pair <ll, ll> pii;\r\ntypedef pair <ld, ld> pld;\r\ntypedef pair <ll, ll> pll;\r\n\r\ntemplate <class T1, class T2 = less <T1>> using pb_heap = __gnu_pbds::priority_queue <T1, T2, binary_heap_tag>;\r\ntemplate <class T1, class T2 = null_type, class T3 = less <T1>> using pb_map = tree <T1, T2, T3, rb_tree_tag, tree_order_statistics_node_update>;\r\ntemplate <class T1, class T2 = null_type, class T3 = hash <T1>> using pb_umap = gp_hash_table <T1, T2, T3>;\r\ntemplate <class T1, class T2, class T3 = hash <T1>> using umap = unordered_map <T1, T2, T3>;\r\ntemplate <class T> using uset = unordered_set <T>;\r\ntemplate <class T> using vec = vector <T>;\r\n\r\nconst ll infll = numeric_limits <ll>::max() >> 1;\r\nconst ll inf = numeric_limits <ll>::max() >> 1;\r\nconst ll N = 5001;\r\nll n, ans, ix, jx, kx;\r\n\r\nstruct Pt {\r\n    ll x, y;\r\n\r\n    ll det(const Pt &p) {\r\n        return x * p.y - y * p.x;\r\n    }\r\n\r\n    ll ccw(const Pt &a, const Pt &b) const {\r\n        Pt va = *this - a;\r\n        Pt vb = *this - b;\r\n        return va.det(vb);\r\n    }\r\n    Pt operator + (const Pt &p) const {\r\n        return {x + p.x, y + p.y};\r\n    }\r\n    Pt operator - (const Pt &p) const {\r\n        return {x - p.x, y - p.y};\r\n    }\r\n} pt[N];\r\n\r\nvec <Pt> ch;\r\n\r\nvoid input() {\r\n    cin >> n;\r\n    for(ll i = 0; i < n; ++i) {\r\n        cin >> pt[i].x;\r\n        cin >> pt[i].y;\r\n    }\r\n    sort(pt, pt + n, [](Pt x, Pt y) {\r\n        return mp(x.y, x.x) < mp(y.y, y.x);\r\n    });\r\n}\r\n\r\nvec <Pt> convex_hull() {\r\n    vec <Pt> lower;\r\n    vec <Pt> upper;\r\n    lower.resize(2 * n);\r\n    upper.resize(2 * n);\r\n    ll j = 0;\r\n    ll k = 0;\r\n    for(ll i = 0; i < n; ++i) {\r\n        while(j >= 2 && lower[j - 2].ccw(lower[j - 1], pt[i]) <= 0) {\r\n            j--;\r\n        }\r\n        while(k >= 2 && upper[k - 2].ccw(upper[k - 1], pt[i]) >= 0) {\r\n            k--;\r\n        }\r\n        lower[j++] = pt[i];\r\n        upper[k++] = pt[i];\r\n    }\r\n    lower.resize(j);\r\n    upper.resize(k);\r\n    for(ll i = k - 2; i >= 1; --i) {\r\n        lower.pb(upper[i]);\r\n    }\r\n    return lower;\r\n}\r\n\r\nll area(Pt &a, Pt &b, Pt &c) {\r\n    return abs(a.det(b) + b.det(c) + c.det(a));\r\n}\r\n\r\nvoid solve() {\r\n    ch = convex_hull();\r\n    n = len(ch);\r\n    for(ll i = 0; i < n; ++i) {\r\n        ll k = i + 1;\r\n        for(ll j = i + 2; j != i; j = (j + 1) % n) {\r\n            while(area(ch[i], ch[k + 1], ch[j]) > area(ch[i], ch[k], ch[j])) {\r\n                k = (k + 1) % n;\r\n            }\r\n            ll res = area(ch[i], ch[k], ch[j]);\r\n            if(res > ans) {\r\n                ans = res;\r\n                ix = i;\r\n                jx = j;\r\n                kx = k;\r\n            }\r\n        }\r\n    }\r\n    Pt a = ch[ix] + ch[jx] - ch[kx];\r\n    Pt b = ch[ix] + ch[kx] - ch[jx];\r\n    Pt c = ch[jx] + ch[kx] - ch[ix];\r\n    cout << a.x << \" \" << a.y << \"\\n\";\r\n    cout << b.x << \" \" << b.y << \"\\n\";\r\n    cout << c.x << \" \" << c.y << \"\\n\";\r\n}\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(0), cout.tie(0);\r\n    input();\r\n    solve();\r\n}\r\n\r\n/*\r\n9\r\n3 1    \r\n6 1\r\n8 4\r\n8 6\r\n5 6\r\n2 6\r\n1 2\r\n3 4\r\n5 3\r\n*/"
+}

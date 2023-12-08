@@ -1,0 +1,37 @@
+{
+    "id": 229745166,
+    "contestId": 1209,
+    "creationTimeSeconds": 1698262050,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1209,
+        "index": "D",
+        "name": "Cow and Snacks",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 1700,
+        "tags": [
+            "dfs and similar",
+            "dsu",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1209,
+        "members": [
+            {
+                "handle": "Gikon3"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1568466300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 36,
+    "timeConsumedMillis": 577,
+    "memoryConsumedBytes": 16384000,
+    "source": "#include <iostream>\n#include <set>\n#include <map>\n#include <vector>\n#include <stack>\n\n#define GRAPH_MEM\n//#define GRAPH_FAST\n//#define DSU\n\n#if defined(GRAPH_MEM)\nclass Graph\n{\n    struct Node\n    {\n        std::vector<int> neighbours;\n    };\n\n    struct Store\n    {\n        int node;\n        int prev;\n        int no;\n        bool prevFl;\n    };\n\npublic:\n    Graph(int max) :\n        max_(max)\n    {\n    }\n\n    void add(int a, int b)\n    {\n        Node* n0 = &graph[a];\n        Node* n1 = &graph[b];\n        n0->neighbours.push_back(b);\n        n1->neighbours.push_back(a);\n        unused_.insert(a);\n        unused_.insert(b);\n    }\n\n    int calculate()\n    {\n        std::vector<bool> view(max_ + 1);\n        std::stack<Store> stack;\n        int count = 0;\n        bool last = false;\n\n        stack.push({graph.begin()->first, 0, 0, false});\n\n        while (!unused_.empty() || !last) {\n            last = unused_.empty();\n\n            while (!stack.empty()) {\n                Store store = stack.top();\n                stack.pop();\n                view[store.node] = true;\n                unused_.erase(store.node);\n\n                for (; store.no < graph[store.node].neighbours.size(); ++store.no) {\n                    if (store.prev != graph[store.node].neighbours[store.no] && !view[graph[store.node].neighbours[store.no]]) {\n                        stack.push({store.node, store.prev, store.no + 1, store.prevFl});\n                        stack.push({graph[store.node].neighbours[store.no], store.node, 0, false});\n                        break;\n                    }\n                    else if (store.prev == graph[store.node].neighbours[store.no] && !store.prevFl) {\n                        store.prevFl = true;\n                    }\n                    else {\n                        ++count;\n                    }\n                }\n            }\n\n            if (!unused_.empty()) {\n                const int node = *unused_.begin();\n                unused_.erase(node);\n                if (!view[node])\n                    stack.push({node, 0, 0, false});\n            }\n        }\n\n        return count / 2;\n    }\n\n    void dump(std::ostream& os) const\n    {\n        for (const auto& [key, nodes] : graph) {\n            std::cout << key << std::endl;\n            for (const auto& n : nodes.neighbours)\n                std::cout << \"  \" << n << std::endl;\n        }\n    }\n\nprivate:\n    std::map<int, Node> graph;\n    std::set<int> unused_;\n    int max_;\n};\n\n#elif defined(GRAPH_FAST)\nclass Graph\n{\n    struct Node\n    {\n        std::vector<Node*> neighbours;\n    };\n\n    struct Store\n    {\n        Node* node;\n        Node* prev;\n        std::vector<Node*>::iterator it;\n        bool prevFl;\n    };\n\npublic:\n    void add(int a, int b)\n    {\n        Node* n0 = &graph[a];\n        Node* n1 = &graph[b];\n        n0->neighbours.push_back(n1);\n        n1->neighbours.push_back(n0);\n        unused_.insert(n0);\n        unused_.insert(n1);\n    }\n\n    int calculate()\n    {\n        std::set<Node*> view;\n        std::stack<Store> stack;\n        int count = 0;\n        bool last = false;\n\n        stack.push({&graph.begin()->second, nullptr, graph.begin()->second.neighbours.begin(), false});\n\n        while (!unused_.empty() || !last) {\n            last = unused_.empty();\n\n            while (!stack.empty()) {\n                Store store = stack.top();\n                stack.pop();\n                view.insert(store.node);\n                unused_.erase(store.node);\n\n                for (; store.it != store.node->neighbours.end(); ++store.it) {\n                    if (*store.it != store.prev && !view.contains(*store.it)) {\n                        stack.push({store.node, store.prev, store.it + 1, store.prevFl});\n                        stack.push({*store.it, store.node, (*store.it)->neighbours.begin(), false});\n                        break;\n                    }\n                    else if (*store.it == store.prev && !store.prevFl) {\n                        store.prevFl = true;\n                    }\n                    else {\n                        ++count;\n                    }\n                }\n            }\n\n            if (!unused_.empty()) {\n                Node* node = *unused_.begin();\n                unused_.erase(node);\n                if (!view.contains(node))\n                    stack.push({node, nullptr, node->neighbours.begin(), false});\n            }\n        }\n\n        return count / 2;\n    }\n\n    void dump(std::ostream& os) const\n    {\n        for (const auto& [key, nodes] : graph) {\n            std::cout << key << std::endl;\n            for (const auto& n : nodes.neighbours)\n                std::cout << \"  \" << n << std::endl;\n        }\n    }\n\nprivate:\n    std::map<int, Node> graph;\n    std::set<Node*> unused_;\n};\n#endif\n\n#if defined(GRAPH_MEM) || defined(GRAPH_FAST)\nint main()\n{\n    int nGuests = 0;\n    int nSnacks = 0;\n    std::cin >> nSnacks >> nGuests;\n\n#if defined(GRAPH_FAST)\n    Graph graph;\n#elif defined(GRAPH_MEM)\n    Graph graph{nSnacks};\n#endif\n    for (int i = 0; i < nGuests; ++i) {\n        int a = 0;\n        int b = 0;\n        std::cin >> a >> b;\n        graph.add(a, b);\n    }\n\n    std::cout << graph.calculate();\n}\n#endif\n\n#if defined(DSU)\nclass Dsu\n{\npublic:\n    Dsu(int size) :\n        tree_(size), rank_(size)\n    {\n        for (int i = 0; i < tree_.size(); ++i)\n            tree_[i] = i;\n    }\n\n    int root(int val)\n    {\n        if (val == tree_[val])\n            return val;\n\n        tree_[val] = root(tree_[val]);\n        return tree_[val];\n    }\n\n    bool merge(int a, int b)\n    {\n        int ra = root(a);\n        int rb = root(b);\n\n        if (ra == rb)\n            return false;\n\n        if (rank_[ra] < rank_[rb]) {\n            tree_[ra] = rb;\n        }\n        else if (rank_[rb] < rank_[ra]) {\n            tree_[rb] = ra;\n        }\n        else {\n            tree_[ra] = rb;\n            ++rank_[rb];\n        }\n\n        return true;\n    }\n\nprivate:\n    std::vector<int> tree_;\n    std::vector<int> rank_;\n};\n\nint main()\n{\n    int nGuests = 0;\n    int nSnacks = 0;\n    std::cin >> nSnacks >> nGuests;\n\n    Dsu dsu(nSnacks + 1);\n    int count = 0;\n    for (int i = 0; i < nGuests; ++i) {\n        int a = 0;\n        int b = 0;\n        std::cin >> a >> b;\n\n        count += static_cast<bool>(!dsu.merge(a, b));\n    }\n\n    std::cout << count << std::endl;\n}\n#endif\n"
+}

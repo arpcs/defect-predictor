@@ -1,0 +1,37 @@
+{
+    "id": 235991060,
+    "contestId": 160,
+    "creationTimeSeconds": 1701833214,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 160,
+        "index": "E",
+        "name": "Buses and People",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 160,
+        "members": [
+            {
+                "handle": "cjZYZtcl"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1331046000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 14438400,
+    "source": "// LUOGU_RID: 138392295\n#include<bits/stdc++.h>\nusing namespace std;\n#define pb push_back\n#define pr pair<int, int>\n#define mid (l + r) / 2\n#define ls num << 1\n#define rs num << 1 | 1\n\nconst int N = 2e5 + 5;\n\nstruct node {\n    int x, l, r, id;\n} a[N], b[N];\n\npr tr[N << 2];\n\nint c[N], ans[N];\n\ninline int read() {\n    int x = 0, mm = 1;\n    char ch = getchar();\n\n    while (!isdigit(ch)) {\n        if (ch == '-') mm = -1;\n        ch = getchar();\n    }\n\n    while (isdigit(ch)) {\n        x = x * 10 + ch - 48;\n        ch = getchar();\n    }\n\n    return x * mm;\n}\n\ninline void write(int x) {\n    if (x < 0) {\n        putchar('-');\n        write(-x);\n        return;\n    }\n\n    if (x >= 10) write(x / 10);\n    putchar(x % 10 + '0');\n}\n\nvoid update(int num) {\n    tr[num] = max(tr[ls], tr[rs]);\n}\n\nvoid build(int l, int r, int num) {\n    if (l == r) {\n        tr[num].first = -1;\n        tr[num].second = -1;\n        return;\n    }\n\n    build(l, mid, ls);\n    build(mid + 1, r, rs);\n\n    update(num);\n}\n\nvoid update(int l, int r, int x, pr k, int num) {\n    if (l == r) {\n        tr[num] = max(tr[num], k);\n        return;\n    }\n\n    if (x <= mid) update(l, mid, x, k, ls);\n    else update(mid + 1, r, x, k, rs);\n\n    update(num);\n}\n\nint query(int l, int r, int x, int k, int num) {\n    if (l == r) {\n        return tr[num].second;\n    }\n\n    if (x <= l) {\n        if (tr[ls].first >= k) return query(l, mid, x, k, ls);\n        else return query(mid + 1, r, x, k, rs);\n    }\n\n    if (x <= mid) {\n        int x = query(l, mid, x, k, ls);\n        if (x == -1) {\n            if (tr[rs].first >= k) return tr[rs].second;\n            return -1;\n        }\n        return x;\n    }\n\n    return query(mid + 1, r, x, k, rs);\n}\n\nsigned main() {\n    int n = read(), m = read(), k = 0;\n\n    for (int i = 1; i <= n; i++) {\n        a[i].l = read();\n        a[i].r = read();\n        c[++k] = a[i].x = read();\n        a[i].id = i;\n    }\n\n    for (int i = 1; i <= m; i++) {\n        b[i].l = read();\n        b[i].r = read();\n        c[++k] = b[i].x = read();\n        b[i].id = i;\n    }\n\n    sort(c + 1, c + k + 1);\n    k = unique(c + 1, c + k + 1) - c - 1;\n\n    for (int i = 1; i <= n; i++) {\n        a[i].x = lower_bound(c + 1, c + k + 1, a[i].x) - c;\n    }\n\n    for (int i = 1; i <= m; i++) {\n        b[i].x = lower_bound(c + 1, c + k + 1, b[i].x) - c;\n    }\n\n    sort(a + 1, a + n + 1, [](node x, node y) {\n        return x.l < y.l;\n    });\n\n    sort(b + 1, b + m + 1, [](node x, node y) {\n        return x.l < y.l;\n    });\n\n    int t = 0;\n\n    build(1, k, 1);\n\n    for (int i = 1; i <= m; i++) {\n        while (t < n && a[t + 1].l <= b[i].l) {\n            t++;\n            update(1, k, a[t].x, {a[t].r, a[t].id}, 1);\n        }\n\n        ans[b[i].id] = query(1, k, b[i].x, b[i].r, 1);\n    }\n\n    for (int i = 1; i <= m; i++) {\n        write(ans[i]);\n        putchar(' ');\n    }\n}"
+}

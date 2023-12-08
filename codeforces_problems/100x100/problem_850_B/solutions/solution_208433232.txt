@@ -1,0 +1,36 @@
+{
+    "id": 208433232,
+    "contestId": 850,
+    "creationTimeSeconds": 1685888292,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 850,
+        "index": "B",
+        "name": "Arpa and a list of numbers",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2100,
+        "tags": [
+            "implementation",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 850,
+        "members": [
+            {
+                "handle": "ytkn"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1504535700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 153,
+    "timeConsumedMillis": 686,
+    "memoryConsumedBytes": 67481600,
+    "source": "#include <iostream>\n#include <algorithm>\n#include <iomanip>\n#include <vector>\n#include <queue>\n#include <deque>\n#include <set>\n#include <map>\n#include <tuple>\n#include <cmath>\n#include <numeric>\n#include <functional>\n#include <cassert>\n#include <random>\n\n#define debug_value(x) cerr << \"line\" << __LINE__ << \":<\" << __func__ << \">:\" << #x << \"=\" << x << endl;\n#define debug(x) cerr << \"line\" << __LINE__ << \":<\" << __func__ << \">:\" << x << endl;\n\ntemplate<class T> inline bool chmax(T& a, T b) { if (a < b) { a = b; return 1; } return 0; }\ntemplate<class T> inline bool chmin(T& a, T b) { if (a > b) { a = b; return 1; } return 0; }\n\nusing namespace std;\ntypedef long long ll;\n\ntemplate<typename T>\nvector<vector<T>> vec2d(int n, int m, T v){\n    return vector<vector<T>>(n, vector<T>(m, v));\n}\n\ntemplate<typename T>\nvector<vector<vector<T>>> vec3d(int n, int m, int k, T v){\n    return vector<vector<vector<T>>>(n, vector<vector<T>>(m, vector<T>(k, v)));\n}\n\ntemplate<typename T>\nvoid print_vector(vector<T> v, char delimiter=' '){\n    if(v.empty()) {\n        cout << endl;\n        return;\n    }\n    for(int i = 0; i+1 < v.size(); i++) cout << v[i] << delimiter;\n    cout << v.back() << endl;\n}\n\nstd::random_device rnd;\nstd::mt19937 mt(rnd());\nstd::mt19937_64 mt_ll(rnd());\n\nint randint(const int l, const int r){\n    return mt()%(r - l) + l;\n}\n\nlong long randll(const long long l, const long long r){\n    return mt_ll()%(r - l) + l;\n}\n\nclass Eratosthenes{\n    public:\n    int m;\n    vector<bool> is_prime;\n    vector<int> primes;\n    Eratosthenes(int m_){\n        m = m_;\n        init();\n    }\n    private:\n    void init(){\n        is_prime.assign(m+1, true);\n        is_prime[0] = false, is_prime[1] = false;\n        for(int i = 2; i <= m; i++){\n            if(is_prime[i]){\n                primes.push_back(i);\n                for(int j = 2; i*j <= m; j++) is_prime[i*j] = false;\n            }\n        }\n    }\n};\n\nconst int N = 1000200;\n\nint cnt[N+1];\nint cnt_mul[N+1];\nEratosthenes et(N);\nvector<int> prime_facs[N+1];\n\nvoid init(){\n    for(int p: et.primes){\n        for(int i = 1; i*p <= N; i++){\n            prime_facs[i*p].push_back(p);\n        }\n    }\n}\n\nint main(){\n    ios::sync_with_stdio(false);\n    cin.tie(0);\n    cout << setprecision(10) << fixed;\n    init();\n    int n; cin >> n;\n    ll x, y; cin >> x >> y;\n    vector<int> a(n);\n    for(int i = 0; i < n; i++) {\n        cin >> a[i];\n        cnt[a[i]]++;\n        // a[i] = randint(1, N+1);\n    }\n    ll ans = 1e18;\n    for(int a = 2; a <= N; a++){\n        for(int i = 1; i*a <= N; i++){\n            cnt_mul[a] += cnt[a*i];\n        }\n        chmin(ans, (n-cnt_mul[a])*x);\n    }\n    map<int, ll> memo;\n    auto get_min = [&](int p){\n        if(memo.count(p)) return memo[p];\n        ll ans = 0;\n        for(int t: a){\n            int r = t%p;\n            if(r == 0) continue;\n            ll s = p-r;\n            ans += min(x, s*y); \n        }\n        memo[p] = ans;\n        return ans;\n    };\n    int iter = 40;\n    while(iter--){\n        int i = randint(0, n);\n        for(int p: prime_facs[a[i]]) chmin(ans, get_min(p));\n        for(int p: prime_facs[a[i]+1]) chmin(ans, get_min(p));\n    }\n    cout << ans << endl;\n}"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 208686634,
+    "contestId": 878,
+    "creationTimeSeconds": 1686049821,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "lyx123886a123886"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 187,
+    "memoryConsumedBytes": 19046400,
+    "source": "#include<bits/stdc++.h>\r\n#define int long long\r\nusing namespace std;\r\nconst int mod=1000000007;\r\nconst int N=100500;\r\nconst int LIM=2000000000;\r\nint read()\r\n{\r\n\tchar ch=getchar();int res=0,fl=1;\r\n\twhile(ch<'0'||ch>'9'){if(ch=='-') fl=-1;ch=getchar();}\r\n\twhile(ch>='0'&&ch<='9'){res=res*10+ch-'0';ch=getchar();}\r\n\treturn res*fl;\r\n}\r\nvoid write(int x) {\r\n\tif(x<0) {\r\n\t\tputchar('-');\r\n\t\tx=-x;\r\n\t}\r\n\tif(x>9) write(x/10);\r\n\tputchar(x%10+'0');\r\n\treturn ;\r\n}\r\nint q_pow(int a,int x) {\r\n\tint res=1;\r\n\tfor(;x;x>>=1,a=a*a%mod) if(x&1) res=res*a%mod;\r\n\treturn res;\r\n}\r\nint two[N],n,a[N],inv[N];\r\nstruct segment_tree{\r\n\tint sum[N<<2],tg[N<<2];\r\n\tvoid push_up(int k) {\r\n\t\tsum[k]=(sum[k<<1]+sum[k<<1|1])%mod;\r\n\t\treturn ;\r\n\t}\r\n\tvoid mul(int k,int z) {\r\n\t\ttg[k]=tg[k]*z%mod;\r\n\t\tsum[k]=sum[k]*z%mod;\r\n\t\treturn ;\r\n\t}\r\n\tvoid push_down(int k) {\r\n\t\tif(tg[k]==1) return ;\r\n\t\tmul(k<<1,tg[k]);\r\n\t\tmul(k<<1|1,tg[k]);\r\n\t\ttg[k]=1;\r\n\t\treturn ;\r\n\t}\r\n\tvoid modify(int k,int l,int r,int x,int y,int z) {\r\n\t\tif(l>=x&&r<=y) \r\n\t\t{\r\n\t\t\tmul(k,z);\r\n\t\t\treturn ;\r\n\t\t}\r\n\t\tint mid=l+r>>1;\r\n\t\tpush_down(k);\r\n\t\tif(x<=mid) modify(k<<1,l,mid,x,y,z);\r\n\t\tif(y>=mid+1) modify(k<<1|1,mid+1,r,x,y,z);\r\n\t\tpush_up(k);\r\n\t\treturn ;\r\n\t}\r\n\tint query(int k,int l,int r,int x,int y) {\r\n\t\tif(l>=x&&r<=y) return sum[k];\r\n\t\tint mid=l+r>>1,res=0;\r\n\t\tpush_down(k);\r\n\t\tif(x<=mid) res=(res+query(k<<1,l,mid,x,y))%mod;\r\n\t\tif(y>=mid+1) res=(res+query(k<<1|1,mid+1,r,x,y))%mod;\r\n\t\treturn res;\r\n\t}\r\n\tvoid build(int k,int l,int r) {\r\n\t\ttg[k]=1;\r\n\t\tif(l==r) {\r\n\t\t\tsum[k]=a[l];\r\n\t\t\treturn ;\r\n\t\t}\r\n\t\tint mid=l+r>>1;\r\n\t\tbuild(k<<1,l,mid);\r\n\t\tbuild(k<<1|1,mid+1,r);\r\n\t\tpush_up(k);\r\n\t\treturn ;\r\n\t}\r\n}T;\r\nstruct Q{\r\n\tint id,l;\r\n};\r\nvector<Q> ask[N];\r\nint ans[N];\r\nstruct seg{\r\n\tint l,r,sum;\r\n}st[N];\r\nint top=0;\r\nvoid solve() {\r\n\tfor(int idx=1;idx<=n;++idx) {\r\n\t\tst[++top]=(seg){idx,idx,a[idx]};\r\n\t\twhile(top>1&&st[top].sum>=0/*!!*/) {\r\n\t\t\tif(st[top].sum==0) {\r\n\t\t\t\tT.modify(1,1,n,st[top].l,st[top].r,two[st[top-1].r-st[top-1].l+1]);//\u8981\u6539\u7684!!\u56e0\u4e3a\u4e0d\u4e00\u5b9a\u5168\u67e5!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\u8c03\u4e86\u4e00\u5929!!!!!!!!!!!\r\n\t\t\t\tst[top-1].r=st[top].r;\r\n\t\t\t\ttop--;\r\n\t\t\t\tbreak;//0\u5c31\u76f4\u63a5\u5408\u5e76\u4e0a\r\n\t\t\t}\r\n\t\t\t\r\n\t\t\tint tmp=st[top-1].r-st[top-1].l+1;\r\n\t\t\tif(tmp>=31||(st[top].sum<<tmp)>=LIM) {//>=1e9\u5219\u53ef\u4ee5\u4e00\u76f4\u5408\u5e76\u5230\u5934\r\n\t\t\t\twhile(top>1) {\r\n\t\t\t\t/*\twrite(st[top].l);\r\n\t\t\t\t\tputchar(' ');\r\n\t\t\t\t\twrite(st[top].r);\r\n\t\t\t\t\tputchar(' ');\r\n\t\t\t\t\twrite(st[top-1].r-st[top-1].l+1);\r\n\t\t\t\t\tputchar('\\n');*/\r\n\t\t\t\t\tT.modify(1,1,n,st[top].l,st[top].r,two[st[top-1].r-st[top-1].l+1]);\r\n\t\t\t\t\tst[top-1].r=st[top].r;\r\n\t\t\t\t\ttop--;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\t\r\n\t\t\telse {//\u4e00\u822c\u60c5\u51b5\uff0c\u6b63\u5e38\u5408\u5e76\u4e00\u6b21\r\n\t\t\t\t/*write(st[top].l);\r\n\t\t\t\tputchar(' ');\r\n\t\t\t\twrite(st[top].r);\r\n\t\t\t\tputchar(' ');\r\n\t\t\t\twrite(st[top-1].r-st[top-1].l+1);\r\n\t\t\t\tputchar('\\n');*/\r\n\t\t\t\tT.modify(1,1,n,st[top].l,st[top].r,two[tmp]);\r\n\t\t\t\tst[top-1].sum+=st[top].sum<<tmp;\r\n\t\t\t\tst[top-1].r=st[top].r;\r\n\t\t\t\ttop--;\r\n\t\t\t}\r\n\t\t}\r\n\t\t\r\n\t\tfor(int i=0;i<ask[idx].size();++i) {\r\n\t\t\tint l=1,r=top,L=ask[idx][i].l;\r\n\t\t\twhile(l<r) {\r\n\t\t\t\tint mid=l+r>>1;\r\n\t\t\t\tif(st[mid].r<L) l=mid+1;\r\n\t\t\t\telse r=mid;\r\n\t\t\t}//\u5e94\u8be5\u627e\u5230\u5f00\u5934\u6240\u5c5e\u6bb5\uff0c\u5206\u4e24\u90e8\u5206\u8ba1\u7b97\r\n\t\t\tint now=l;\r\n\t\t\tif(now==top) ans[ask[idx][i].id]=1ll*T.query(1,1,n,L,st[now].r)*inv[L-st[now].l]%mod;\r\n\t\t\telse {\r\n\t\t\t\tint res1=T.query(1,1,n,L,st[now].r)*inv[L-st[now].l]%mod,res2=(T.query(1,1,n,st[now+1].l,idx)<<1)%mod;////*2!!\r\n\t\t\t\tans[ask[idx][i].id]=(res1+res2)%mod;\r\n\t\t\t//\tprintf(\"(%d,%d)   %d   %d,%d  %d\\n\",st[now].l,st[now].r,L,res1,res2,L-st[now].l);\r\n\t\t\t}\r\n\t\t//\tans[ask[idx][i].id]=T.query(1,1,n,ask[idx][i].l,idx);//\u4e0d\u80fd\u76f4\u63a5\u67e5\uff0c\u56e0\u4e3a\u7b2c\u4e00\u6bb5\u4e0d\u5b8c\u6574!!\r\n\t\t}\r\n\t\t/*putchar('\\n');\r\n\t\tputchar('\\n');\r\n\t\tfor(int i=1;i<=top;++i) {\r\n\t\t\tputchar('(');\r\n\t\t\twrite(st[i].l);\r\n\t\t\tputchar(' ');\r\n\t\t\twrite(st[i].r);\r\n\t\t\tputchar(' ');\r\n\t\t\twrite(st[i].sum);\r\n\t\t\tputchar(')');\r\n\t\t\tputchar('\\n');\r\n\t\t}\r\n\t\tputchar('\\n');\r\n\t\tputchar('\\n');\r\n\t\tif(idx==90){\r\n\t\tfor(int i=1;i<=73;++i) {\r\n\t\t\twrite((T.query(1,1,n,i,i)+mod)%mod);\r\n\t\t\tputchar(' ');\r\n\t\t} \r\n\t\tputchar('\\n');\r\n\t\tputchar('\\n');}*/\r\n\t}\r\n//\tfor(int i=1;i<=top;++i) printf(\"(%d,%d,%d)\\n\",st[i].l,st[i].r,st[i].sum);\r\n//\tfor(int i=1;i<=n;++i) printf(\"%d \",T.query(1,1,n,i,i));\r\n//\tprintf(\"\\n\");\r\n\treturn ;\r\n}\r\nsigned main()\r\n{\r\n//\tfreopen(\"CF878E.in\",\"r\",stdin);\r\n//\tfreopen(\"CF878E.out\",\"w\",stdout);\r\n\ttwo[0]=1;\r\n\tfor(int i=1;i<N;++i) two[i]=(two[i-1]<<1)%mod;\r\n\tinv[0]=1;\r\n\tinv[1]=q_pow(2,mod-2);\r\n\tfor(int i=2;i<N;++i) inv[i]=(inv[i-1]*inv[1])%mod;//inv[1]\r\n\t\r\n\tn=read();\r\n\tint m=read();\r\n\tfor(int i=1;i<=n;++i) a[i]=read();\r\n\tT.build(1,1,n);\r\n\tfor(int i=1;i<=m;++i) {\r\n\t\tint l=read(),r=read();\r\n\t\task[r].push_back((Q){i,l});\r\n\t}\r\n\tsolve();\r\n\tfor(int i=1;i<=m;++i) //printf(\"%lld\\n\",(ans[i]+mod)%mod);\r\n\t{\r\n\t\twrite((ans[i]+mod)%mod);\r\n\t\tputchar('\\n');\r\n\t}\r\n\treturn 0;\r\n}"
+}

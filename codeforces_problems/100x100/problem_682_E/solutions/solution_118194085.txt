@@ -1,0 +1,36 @@
+{
+    "id": 118194085,
+    "contestId": 682,
+    "creationTimeSeconds": 1622638161,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 682,
+        "index": "E",
+        "name": "Alyona and Triangles",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2600,
+        "tags": [
+            "geometry",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 682,
+        "members": [
+            {
+                "handle": "spacewalker"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1466181300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 100249600,
+    "source": "#include <bits/stdc++.h>\n\nusing namespace std;\nusing ll = long long;\n\nstruct point {\n    ll x, y; \n    point() : x(0), y(0) {}\n    point(ll x, ll y) : x(x), y(y) {}\n    point operator + (const point &ot) const {\n        return point(x + ot.x, y + ot.y); \n    }\n    point operator * (const ll &c) const {\n        return point(c * x, c * y);\n    }\n    point operator - (const point &ot) const {\n        return *this + ot * -1;\n    }\n    ll dot(const point &ot) const {\n        return x * ot.x + y * ot.y;\n    }\n    ll cross(const point &ot) const {\n        return x * ot.y - y * ot.x;\n    }\n    bool operator < (const point &ot) const {\n        return make_pair(x, y) < make_pair(ot.x, ot.y);\n    }\n};\n\n// negative if widdershins / 0 if collinear / positive if clockwise\nll handedness(const point &a, const point &b, const point &c) {\n    return (c - b).cross(b - a);\n}\n\nvector<point> chull(vector<point> pts) { // monotone chain algo\n    if (pts.empty()) return pts;\n    sort(begin(pts), end(pts));\n    vector<point> lower, upper;\n    for (point p : pts) {\n        while (upper.size() >= 2 && handedness(upper[upper.size() - 2], upper[upper.size() - 1], p) <= 0) upper.pop_back();\n        upper.push_back(p);\n    }\n    reverse(begin(pts), end(pts));\n    for (point p : pts) {\n        while (lower.size() >= 2 && handedness(lower[lower.size() - 2], lower[lower.size() - 1], p) <= 0) lower.pop_back();\n        lower.push_back(p);\n    }\n    lower.pop_back(); upper.pop_back();\n    lower.insert(end(lower), begin(upper), end(upper));\n    return lower;\n}\n\nll twiceSignedArea(point a, point b, point c) {\n    return a.x * b.y + b.x * c.y + c.x * a.y - (a.y * b.x + b.y * c.x + c.y * a.x);\n}\n\nusing si = short int;\nconstexpr int NMAX = 5000;\npair<si, si> farthest[NMAX][NMAX];\n\nbool isFarthestTriplet(int a, int b, int c) {\n    return a != -1 && b != -1 && c != -1 && (farthest[a][b].first == c || farthest[a][b].second == c);\n}\n\npoint completePar(point a, point b, point c) {\n    return a + c - b;\n}\n\nint main() {\n    int n; ll s; scanf(\"%d %lld\", &n, &s);\n    vector<point> pts(n);\n    for (int i = 0; i < n; ++i) scanf(\"%lld %lld\", &pts[i].x, &pts[i].y);\n    vector<point> ch = chull(pts);\n    auto getpt = [&] (int i) {\n        return ch[i + (i >= n ? -n : 0)];\n    };\n    /*\n    for (auto [a, b] : ch) {\n        printf(\"ch %lld %lld\\n\", a, b);\n    }\n    */\n    for (int si = 0; si < n; ++si) {\n        for (int i = 0; i < n; ++i) farthest[si][i].first = farthest[si][i].second = -1;\n        int cfo = 2;\n        for (int offset = 1; offset < n - 1; ++offset) {\n            cfo = max(cfo, offset + 1);\n            auto atwiceawt = [&] (int other) { // twice area (with third)\n                return abs(twiceSignedArea(getpt(si), getpt(si + offset), getpt(si + other)));\n            };\n            while (cfo < n - 1 && atwiceawt(cfo) < atwiceawt(cfo + 1)) ++cfo;\n            farthest[si][(si + offset)%n].first = (si + cfo) % n;\n            if (cfo < n - 1 && atwiceawt(cfo) == atwiceawt(cfo + 1)) farthest[si][(si + offset) % n].second = (si + cfo + 1) % n;\n        }\n    }\n    auto getViableTriplet = [&] () -> tuple<int, int, int> {\n        for (int i = 0; i < n; ++i) {\n            for (int off = 1; off < n - 1; ++off) {\n                int a = i, b = (i + off) % n, c1 = farthest[a][b].first, c2 = farthest[a][b].second;\n                if (isFarthestTriplet(a, b, c1) && isFarthestTriplet(b, c1, a) && isFarthestTriplet(c1, a, b)) {\n                    return {a, b, c1};\n                }\n                if (isFarthestTriplet(a, b, c2) && isFarthestTriplet(b, c2, a) && isFarthestTriplet(c2, a, b)) {\n                    return {a, b, c2};\n                }\n            }\n        }\n        return {-1, -1, -1};\n    };\n    auto [pxi, pyi, pzi] = getViableTriplet();\n    assert(pzi != -1);\n    point px = getpt(pxi), py = getpt(pyi), pz = getpt(pzi);\n    point ans1 = completePar(px, py, pz), ans2 = completePar(py, pz, px), ans3 = completePar(pz, px, py);\n    printf(\"%lld %lld\\n\", ans1.x, ans1.y);\n    printf(\"%lld %lld\\n\", ans2.x, ans2.y);\n    printf(\"%lld %lld\\n\", ans3.x, ans3.y);\n}\n"
+}

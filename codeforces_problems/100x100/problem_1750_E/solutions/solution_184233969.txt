@@ -1,0 +1,40 @@
+{
+    "id": 184233969,
+    "contestId": 1750,
+    "creationTimeSeconds": 1670422675,
+    "relativeTimeSeconds": 5995,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "zlc1114"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1670416680
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 29,
+    "timeConsumedMillis": 77,
+    "memoryConsumedBytes": 37068800,
+    "source": "#include <sstream>\r\n#include <fstream>\r\n#include <cstdio>\r\n#include <iostream>\r\n#include <algorithm>\r\n#include <vector>\r\n#include <set>\r\n#include <map>\r\n#include <string>\r\n#include <cstring>\r\n#include <stack>\r\n#include <queue>\r\n#include <cmath>\r\n#include <ctime>\r\n#include <utility>\r\n#include <cassert>\r\n#include <bitset>\r\n#include <functional>\r\nusing namespace std;\r\n#define REP(I,N) for (I=0;I<N;I++)\r\n#define rREP(I,N) for (I=N-1;I>=0;I--)\r\n#define rep(I,S,N) for (I=S;I<N;I++)\r\n#define rrep(I,S,N) for (I=N-1;I>=S;I--)\r\n#define FOR(I,S,N) for (I=S;I<=N;I++)\r\n#define rFOR(I,S,N) for (I=N;I>=S;I--)\r\n\r\n#define DEBUG\r\n#ifdef DEBUG\r\n#define debug(...) fprintf(stderr, __VA_ARGS__)\r\n#define deputs(str) fprintf(stderr, \"%s\\n\",str)\r\n#else\r\n#define debug(...)\r\n#define deputs(str)\r\n#endif // DEBUG\r\ntypedef unsigned long long ULL;\r\ntypedef unsigned long long ull;\r\ntypedef unsigned int ui;\r\ntypedef long long LL;\r\ntypedef long long ll;\r\ntypedef pair<int,int> pii;\r\ntypedef pair<ll,ll> pll;\r\nconst int INF=0x3f3f3f3f;\r\nconst LL INFF=0x3f3f3f3f3f3f3f3fll;\r\nconst LL M=998244353;\r\nconst LL maxn=1e6+107;\r\nconst double pi=acos(-1.0);\r\nconst double eps=0.0000000001;\r\nLL gcd(LL a, LL b) {return b?gcd(b,a%b):a;}\r\ntemplate<typename T>inline void pr2(T x,int k=64) {ll i; REP(i,k) debug(\"%d\",(x>>i)&1); putchar(' ');}\r\ntemplate<typename T>inline void add_(T &A,int B,ll MOD=M) {A+=B; (A>=MOD) &&(A-=MOD);}\r\ntemplate<typename T>inline void mul_(T &A,ll B,ll MOD=M) {A=(A*B)%MOD;}\r\ntemplate<typename T>inline void mod_(T &A,ll MOD=M) {A%=MOD; A+=MOD; A%=MOD;}\r\ntemplate<typename T>inline void max_(T &A,T B) {(A<B) &&(A=B);}\r\ntemplate<typename T>inline void min_(T &A,T B) {(A>B) &&(A=B);}\r\ntemplate<typename T>inline T abs(T a) {return a>0?a:-a;}\r\ninline ll powMM(ll a, ll b, ll mod=M) {\r\n    ll ret=1;\r\n    for (; b; b>>=1ll,a=a*a%mod)\r\n        if (b&1) ret=ret*a%mod;\r\n    return ret;\r\n}\r\nint startTime;\r\nvoid startTimer() {startTime=clock();}\r\nvoid printTimer() {debug(\"/--- Time: %ld milliseconds ---/\\n\",clock()-startTime);}\r\ntypedef array<int,4> ar4;\r\n\r\nchar s[maxn];\r\nll A[maxn];\r\nll brute_force(int l,int r) {\r\n    ll MIN=0,i;\r\n    FOR(i,l-1,r) min_(MIN,A[i]-A[l-1]);\r\n    // if (A[r]-A[l-1]>0) return -MIN+A[r]-A[l-1];\r\n    // else return -MIN;\r\n    return -MIN; // BIT solve part\r\n}\r\n\r\ninline int lowbit(int x) {return x&-x;}\r\nll C[maxn],V[maxn];\r\nvoid update(int x,int val) {\r\n    for (;x<=4e5;x+=lowbit(x)) C[x]++,V[x]+=val;\r\n}\r\npll query(int x) {\r\n    ll c=0,v=0;\r\n    for (;x;x-=lowbit(x)) c+=C[x],v+=V[x];\r\n    return {c,v};\r\n}\r\nint S[maxn],top;\r\nll SUM[maxn];\r\nint main() {\r\n    int T,_; T=1;\r\n    scanf(\"%d\",&T);\r\n    FOR(_,1,T) {\r\n        int n,i,j,m;\r\n        scanf(\"%d%s\",&n,s+1);\r\n        A[0]=n;\r\n        FOR(i,1,n+n) C[i]=V[i]=0;\r\n        ll ans=0;\r\n        FOR(i,1,n) {\r\n            A[i]=A[i-1];\r\n            if (s[i]=='(') A[i]++; else A[i]--;\r\n            update(A[i-1],A[i-1]);\r\n            auto p=query(A[i]);\r\n            ans+=p.first*A[i]-p.second;\r\n        }\r\n        S[0]=n+1; SUM[0]=0;\r\n        top=0; S[++top]=n; SUM[1]=A[n];\r\n        // FOR(i,1,n) printf(\"%d \",A[i]); puts(\"<- A\");\r\n        rFOR(i,1,n) {\r\n            while (top&&A[S[top]]>=A[i-1]) top--;\r\n            S[++top]=i-1;\r\n            SUM[top]=SUM[top-1]+A[i-1]*(S[top-1]-S[top]);\r\n            ans+=(n+1-i+1)*A[i-1]-SUM[top];\r\n            // printf(\"val=%d; more=%d\\n\",A[i-1],(n+1-i+1)*A[i-1]-SUM[top]);\r\n            // FOR(j,1,top) printf(\"(stk=%d %d sum=%lld) \",S[j],A[S[j]],SUM[j]); puts(\"<= stack\");\r\n        }\r\n        // FOR(i,1,n) FOR(j,i,n) ans+=brute_force(i,j);\r\n        // A[r]>A[l-1]: ans+=\r\n        printf(\"%lld\\n\",ans);\r\n    }\r\n}\r\n/*\r\n10\r\n10\r\n)(())))())\r\n*/"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 17577866,
+    "contestId": 666,
+    "creationTimeSeconds": 1461951419,
+    "relativeTimeSeconds": 3719,
+    "problem": {
+        "contestId": 666,
+        "index": "B",
+        "name": "World Tour",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2000,
+        "tags": [
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 666,
+        "members": [
+            {
+                "handle": "perchema"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "room": 11,
+        "startTimeSeconds": 1461947700
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 16,
+    "timeConsumedMillis": 1013,
+    "memoryConsumedBytes": 204083200,
+    "source": "#include <bits/stdc++.h>\n\nconst size_t MAX_N = 3003;\n\nstruct Vertex {\n\tstd::vector<Vertex*> edges;\n\tint32_t ind;\n};\n\nVertex graph[MAX_N];\nint32_t vertexCnt;\n\nint32_t dist[MAX_N][MAX_N];\n\nvoid input() {\n\tint32_t edgeCnt;\n\tscanf(\"%i %i\", &vertexCnt, &edgeCnt);\n\n\tfor (int32_t i = 0;i < vertexCnt;i++) {\n\t\tgraph[i].ind = i;\n\t}\n\n\tfor (int32_t i = 0;i < edgeCnt;i++) {\n\t\tint32_t f, t;\n\t\tscanf(\"%i %i\", &f, &t);\n\t\tgraph[f - 1].edges.push_back(&graph[t - 1]);\n\t}\n}\n\nvoid calc_dist(int32_t from) {\n\tdist[from][from] = 1;\n\tstd::queue<Vertex*> next;\n\n\tnext.push(&graph[from]);\n\twhile (not next.empty()) {\n\t\tVertex *cur = next.front();\n\t\tnext.pop();\n\n\t\tfor (Vertex *v : cur->edges) {\n\t\t\tif (dist[from][v->ind] == 0) {\n\t\t\t\tdist[from][v->ind] = dist[from][cur->ind] + 1;\n\t\t\t\tnext.push(v);\n\t\t\t}\n\t\t}\n\t}\n}\n\nstd::vector<std::pair<int32_t, int32_t>> sortFrom[MAX_N];\nstd::vector<std::pair<int32_t, int32_t>> sortTo[MAX_N];\n\nvoid calc_sort_dist(int32_t from) {\n\tfor (int32_t i = 0;i < vertexCnt;i++) {\n\t\tsortFrom[from].push_back(std::make_pair(dist[from][i], i));\n\t\tsortTo[from].push_back(std::make_pair(dist[i][from], i));\n\t}\n\tstd::sort(sortFrom[from].begin(), sortFrom[from].end());\n\tstd::sort(sortTo[from].begin(), sortTo[from].end());\n\n\tstd::reverse(sortFrom[from].begin(), sortFrom[from].end());\n\tstd::reverse(sortTo[from].begin(), sortTo[from].end());\n}\n\nint main() {\n\tinput();\n\tfor (int32_t i = 0;i < vertexCnt;i++) {\n\t\tcalc_dist(i);\n\t}\n\tfor (int32_t i = 0;i < vertexCnt;i++) {\n\t\tcalc_sort_dist(i);\n\t}\n\n\n\tint32_t bestSum = -1;\n\tint32_t best1, best2, best3, best4;\n\n\tfor (int32_t cur2 = 0;cur2 < vertexCnt;cur2++) {\n\t\tfor (int32_t cur3 = 0;cur3 < vertexCnt;cur3++) {\n\t\t\tif (cur3 == cur2) {\n\t\t\t\tcontinue;\n\t\t\t}\n\n\t\t\tint32_t ind2 = 0;\n\t\t\tif (sortTo[cur2][ind2].second == cur3) {\n\t\t\t\tind2++;\n\t\t\t}\n\t\t\tint32_t ind3 = 0;\n\t\t\tif (sortFrom[cur3][ind3].second == cur2) {\n\t\t\t\tind3++;\n\t\t\t}\n\n\t\t\t//int32_t curDist = dist[cur2][cur3];\n\t\t\tif (sortTo[cur2][ind2].second == sortFrom[cur3][ind3].second) {\n\t\t\t\tif ((sortTo[cur2][ind2 + 1].first > 1) && (sortFrom[cur3][ind3].first > 1)) {\n\t\t\t\t\tint32_t curSum = sortTo[cur2][ind2 + 1].first + dist[cur2][cur3] + sortFrom[cur3][ind3].first;\n\t\t\t\t\tif (curSum > bestSum) {\n\t\t\t\t\t\tbestSum = curSum;\n\t\t\t\t\t\tbest1 = sortTo[cur2][ind2 + 1].second;\n\t\t\t\t\t\tbest2 = cur2;\n\t\t\t\t\t\tbest3 = cur3;\n\t\t\t\t\t\tbest4 = sortFrom[cur3][ind3].second;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif ((sortTo[cur2][ind2].first > 1) && (sortFrom[cur3][ind3 + 1].first > 1)) {\n\t\t\t\t\tint32_t curSum = sortTo[cur2][ind2].first + dist[cur2][cur3] + sortFrom[cur3][ind3 + 1].first;\n\t\t\t\t\tif (curSum > bestSum) {\n\t\t\t\t\t\tbestSum = curSum;\n\t\t\t\t\t\tbest1 = sortTo[cur2][ind2].second;\n\t\t\t\t\t\tbest2 = cur2;\n\t\t\t\t\t\tbest3 = cur3;\n\t\t\t\t\t\tbest4 = sortFrom[cur3][ind3 + 1].second;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tif ((sortTo[cur2][ind2].first > 1) && (sortFrom[cur3][ind3].first > 1)) {\n\t\t\t\t\tint32_t curSum = sortTo[cur2][ind2].first + dist[cur2][cur3] + sortFrom[cur3][ind3].first;\n\t\t\t\t\tif (curSum > bestSum) {\n\t\t\t\t\t\tbestSum = curSum;\n\t\t\t\t\t\tbest1 = sortTo[cur2][ind2].second;\n\t\t\t\t\t\tbest2 = cur2;\n\t\t\t\t\t\tbest3 = cur3;\n\t\t\t\t\t\tbest4 = sortFrom[cur3][ind3].second;\n\t\t\t\t\t\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n\tprintf(\"%i %i %i %i\\n\", best1 + 1, best2 + 1, best3 + 1, best4 + 1);\n}\n"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 186291743,
+    "contestId": 666,
+    "creationTimeSeconds": 1671648527,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 666,
+        "index": "B",
+        "name": "World Tour",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2000,
+        "tags": [
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 666,
+        "members": [
+            {
+                "handle": "Mtaylor"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1461947700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 36454400,
+    "source": "// Mtaylor\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define pb push_back\r\n#define fi first\r\n#define se second\r\n#define mp make_pair\r\n#define endl '\\n';\r\n#define sz(x) ((int)(x).size())\r\n#define all(x) (x).begin(), (x).end()\r\n#define rall(x) (x).rbegin(), (x).rend()\r\nvoid dbg_out() { cerr << endl; }\r\ntemplate <typename Head, typename... Tail>\r\nvoid dbg_out(Head H, Tail... T) {\r\n    cerr << ' ' << H;\r\n    dbg_out(T...);\r\n}\r\n#define dbg(...) cerr << \"(\" << #__VA_ARGS__ << \"):\", dbg_out(__VA_ARGS__)\r\ntypedef long long ll;\r\nconst int N = 3e3 + 5;\r\n\r\nvector<int> adj[N];\r\nint dist[N][N];\r\nvector<int> ord[2][N];\r\nint n, m;\r\nbool vis[N];\r\nvoid bfs(int src) {\r\n    for (int i = 0; i < n; i++) {\r\n        dist[src][i] = 1e9;\r\n        vis[i] = 0;\r\n    }\r\n    queue<int> q;\r\n    q.push(src);\r\n    vis[src] = 1;\r\n    dist[src][src] = 0;\r\n    while (!q.empty()) {\r\n        int u = q.front();\r\n        q.pop();\r\n        for (auto v : adj[u]) {\r\n            if (vis[v]) continue;\r\n            dist[src][v] = dist[src][u] + 1;\r\n            vis[v] = 1;\r\n            q.push(v);\r\n        }\r\n    }\r\n    for (int i = 0; i < n; i++) {\r\n        if (dist[src][i] < 1e9) {\r\n            ord[0][src].pb(i);\r\n        }\r\n    }\r\n\r\n    sort(all(ord[0][src]),\r\n         [src](int a, int b) { return dist[src][a] < dist[src][b]; });\r\n}\r\n\r\nvoid solve() {\r\n    cin >> n >> m;\r\n    for (int i = 0; i < m; i++) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        --u, --v;\r\n        adj[u].pb(v);\r\n    }\r\n    for (int i = 0; i < n; i++) {\r\n        bfs(i);\r\n    }\r\n    for (int i = 0; i < n; i++) {\r\n        for (int j = 0; j < n; j++) {\r\n            if (i == j) continue;\r\n            if (dist[i][j] >= 1e9) continue;\r\n            ord[1][j].pb(i);\r\n        }\r\n    }\r\n\r\n    for (int i = 0; i < n; i++) {\r\n        sort(all(ord[1][i]),\r\n             [i](int a, int b) { return dist[a][i] < dist[b][i]; });\r\n    }\r\n    vector<int> ans;\r\n    int mxdist = 0;\r\n    for (int i = 0; i < n; i++) {\r\n        for (int j = 0; j < n; j++) {\r\n            if (i == j) continue;\r\n            if (dist[i][j] >= 1e9) continue;\r\n            int d = dist[i][j];\r\n            bool rem_j = 0;\r\n            bool rem_i = 0;\r\n            if (ord[1][i].back() == j) {\r\n                ord[1][i].pop_back();\r\n                rem_j = 1;\r\n            }\r\n            if (ord[0][j].back() == i) {\r\n                ord[0][j].pop_back();\r\n                rem_i = 1;\r\n            }\r\n            if (ord[1][i].size() >= 1 && ord[0][j].size() >= 1) {\r\n                if (ord[1][i].back() != ord[0][j].back()) {\r\n                    d += dist[ord[1][i].back()][i] + dist[j][ord[0][j].back()];\r\n                    if (d > mxdist) {\r\n                        mxdist = d;\r\n                        ans = {i, j, ord[1][i].back(), ord[0][j].back()};\r\n                    }\r\n                } else {\r\n                    if (ord[1][i].size() >= 2) {\r\n                        ord[1][i].pop_back();\r\n                        d += dist[ord[1][i].back()][i] +\r\n                             dist[j][ord[0][j].back()];\r\n                        if (d > mxdist) {\r\n                            mxdist = d;\r\n                            ans = {i, j, ord[1][i].back(), ord[0][j].back()};\r\n                        }\r\n                        ord[1][i].pb(ord[0][j].back());\r\n                    }\r\n                    if (ord[0][j].size() >= 2) {\r\n                        ord[0][j].pop_back();\r\n                        d += dist[ord[1][i].back()][i] +\r\n                             dist[j][ord[0][j].back()];\r\n                        if (d > mxdist) {\r\n                            mxdist = d;\r\n                            ans = {i, j, ord[1][i].back(), ord[0][j].back()};\r\n                        }\r\n                        ord[0][j].pb(ord[1][i].back());\r\n                    }\r\n                }\r\n            }\r\n            if (rem_i) ord[0][j].pb(j);\r\n            if (rem_j) ord[1][i].pb(j);\r\n        }\r\n    }\r\n    cout << ans[2] + 1 << \" \" << ans[0] + 1 << \" \" << ans[1] + 1 << \" \"\r\n         << ans[3] + 1 << endl;\r\n}\r\n\r\nint main() {\r\n    // freopen(\"input.txt\", \"r\", stdin);\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n    int T;\r\n    // cin >>T;\r\n    T = 1;\r\n    while (T--) {\r\n        solve();\r\n    }\r\n    return 0;\r\n}\r\n"
+}

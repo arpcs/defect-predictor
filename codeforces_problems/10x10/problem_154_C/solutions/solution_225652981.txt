@@ -1,0 +1,37 @@
+{
+    "id": 225652981,
+    "contestId": 154,
+    "creationTimeSeconds": 1695905937,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 154,
+        "index": "C",
+        "name": "Double Profiles",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2300,
+        "tags": [
+            "graphs",
+            "hashing",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 154,
+        "members": [
+            {
+                "handle": "samuel159753"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1330095600
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 826,
+    "memoryConsumedBytes": 40140800,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <utility>\r\n#include <algorithm>\r\n\r\nusing namespace std;\r\n\r\nusing Number = long long int;\r\nusing Index = int;\r\n\r\nstruct HashMetaData {\r\n    const Number prime, mod;\r\n    vector<Number> primePowers;\r\n};\r\n\r\nvoid preparePrimes(HashMetaData &hashMetaData, const Index n) {\r\n    hashMetaData.primePowers.resize(n);\r\n    hashMetaData.primePowers[0] = 1;\r\n    for (Index i = 1; i < n; ++i) {\r\n        hashMetaData.primePowers[i] = (hashMetaData.primePowers[i-1] * hashMetaData.prime) % hashMetaData.mod;\r\n    }\r\n}\r\n\r\nNumber calculateHash(const vector<Index> &values, const HashMetaData &hashMetaData) {\r\n    Number hash = 0;\r\n    for (Index i = 0; i < values.size(); ++i) {\r\n        hash = (hash + hashMetaData.primePowers[values[i] - 1]) % hashMetaData.mod;\r\n    }\r\n    return hash;\r\n}\r\n\r\nvoid addFriend(pair<Index, Number> &element, const Index newFriend, const HashMetaData &hash) {\r\n    ++element.first;\r\n    element.second = (element.second + hash.primePowers[newFriend]) % hash.mod;\r\n}\r\n\r\nNumber countDoublesInIdentities(vector<pair<Index, Number>> &identities) {\r\n    sort(identities.begin(), identities.end());\r\n    \r\n    Number result = 0, doublesCount = 0;\r\n    for (Index i = 2; i < identities.size(); ++i) { // skip identity of 0 and start from 1\r\n        if (identities[i].first == identities[i-1].first && \r\n            identities[i].second == identities[i-1].second) {\r\n            ++doublesCount;\r\n            result += doublesCount;\r\n        } else {\r\n            doublesCount = 0;\r\n        }\r\n    }\r\n    return result;\r\n}\r\n\r\nint main()\r\n{\r\n    Index n, m;\r\n    cin >> n >> m;\r\n    \r\n    HashMetaData hash({31, 414507281407});\r\n    preparePrimes(hash, n+1);\r\n    \r\n    vector<pair<Index, Number>> identities(n+1, {0, 0});\r\n    for (Index i = 0; i < m; ++i) {\r\n        Index a, b;\r\n        scanf(\"%d%d\", &a, &b);\r\n        addFriend(identities[a], b, hash);\r\n        addFriend(identities[b], a, hash);\r\n    }\r\n    vector<pair<Index, Number>> identitiesWithSelf(identities);\r\n    Number result = countDoublesInIdentities(identities);\r\n    \r\n    for (Index i = 1; i <= n; ++i)\r\n        addFriend(identitiesWithSelf[i], i, hash);\r\n    \r\n    result += countDoublesInIdentities(identitiesWithSelf);\r\n    \r\n    cout << result << endl;\r\n    return 0;\r\n}\r\n"
+}

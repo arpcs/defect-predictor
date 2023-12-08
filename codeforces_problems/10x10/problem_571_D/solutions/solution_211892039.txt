@@ -1,0 +1,38 @@
+{
+    "id": 211892039,
+    "contestId": 571,
+    "creationTimeSeconds": 1688353695,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 571,
+        "index": "D",
+        "name": "Campus",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 3100,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dsu",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 571,
+        "members": [
+            {
+                "handle": "zyc070419"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1440261000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 81,
+    "timeConsumedMillis": 935,
+    "memoryConsumedBytes": 118886400,
+    "source": "// LUOGU_RID: 113818523\n#include <bits/stdc++.h>\r\n#define int long long\r\n#define ls (rt << 1)\r\n#define rs (rt << 1 | 1)\r\nusing namespace std;\r\nconst int N = 5e5 + 10;\r\n\r\nstruct node {\r\n\tint opt, x, y;\r\n\tnode (int a = 0, int b = 0, int c = 0) {opt = a; x = b; y = c;}\r\n}q[N];\r\nint n, T, dfn[N][2], sz[N], low[N][2], num, t[N << 2][2], ans[N];\r\nvector<int> g[N][2], Q[N];\r\nbool vis[N][2];\r\n\r\nvoid dfs(int x, int opt) {\r\n\tdfn[x][opt] = low[x][opt] = ++num;\r\n\tfor (auto y : g[x][opt]) dfs(y, opt);\r\n}\r\n\r\nvoid update1(int rt, int l, int r, int ql, int qr, int val) {\r\n\tif (ql <= l && r <= qr) return t[rt][1] = max(t[rt][1], val), void();\r\n\tint mid = (l + r) >> 1;\r\n\tif (ql <= mid) update1(ls, l, mid, ql, qr, val);\r\n\tif (qr > mid) update1(rs, mid + 1, r, ql, qr, val);\r\n}\r\n\r\nint query1(int rt, int l, int r, int pos) {\r\n\tif (l == r) return t[rt][1];\r\n\tint mid = (l + r) >> 1;\r\n\tif (pos <= mid) return max(t[rt][1], query1(ls, l, mid, pos));\r\n\telse return max(t[rt][1], query1(rs, mid + 1, r, pos));\r\n}\r\n\r\nvoid update0(int rt, int l, int r, int ql, int qr, int val) {\r\n\tif (ql <= l && r <= qr) return t[rt][0] += val, void();\r\n\tint mid = (l + r) >> 1;\r\n\tif (ql <= mid) update0(ls, l, mid, ql, qr, val);\r\n\tif (qr > mid) update0(rs, mid + 1, r, ql, qr, val);\r\n}\r\n\r\nint query0(int rt, int l, int r, int pos) {\r\n\tif (l == r) return t[rt][0];\r\n\tint mid = (l + r) >> 1;\r\n\tif (pos <= mid) return t[rt][0] + query0(ls, l, mid, pos);\r\n\telse return t[rt][0] + query0(rs, mid + 1, r, pos);\r\n}\r\n\r\nsigned main() {\r\n\tchar opt; int x, y;\r\n\tscanf(\"%lld%lld\", &n, &T);\r\n\tfor (int i = 1; i <= n; ++i) sz[i] = 1;\r\n\tfor (int qwq = 1; qwq <= T; ++qwq) {\r\n\t\tcin >> opt;\r\n\t\tif (opt == 'U') {\r\n\t\t\tscanf(\"%lld%lld\", &x, &y);\r\n\t\t\tq[qwq] = node(0, x, y);\r\n\t\t\tg[x][0].push_back(y);\r\n\t\t\tvis[y][0] = true;\r\n\t\t}else if (opt == 'M') {\r\n\t\t\tscanf(\"%lld%lld\", &x, &y);\r\n\t\t\tq[qwq] = node(1, x, y);\r\n\t\t\tg[x][1].push_back(y);\r\n\t\t\tvis[y][1] = true;\r\n\t\t}else if (opt == 'A') {\r\n\t\t\tscanf(\"%lld\", &x);\r\n\t\t\tq[qwq] = node(2, x, 0);\r\n\t\t}else if (opt == 'Z') {\r\n\t\t\tscanf(\"%lld\", &x);\r\n\t\t\tq[qwq] = node(3, x, 0);\r\n\t\t}else {\r\n\t\t\tscanf(\"%lld\", &x);\r\n\t\t\tq[qwq] = node(4, x, 0);\r\n\t\t}\r\n\t}\r\n\tfor (int i = 1; i <= n; ++i)\r\n\t\tif (!vis[i][0]) dfs(i, 0);\r\n\tnum = 0;\r\n\tfor (int i = 1; i <= n; ++i)\r\n\t\tif (!vis[i][1]) dfs(i, 1);\r\n\tfor (int qwq = 1; qwq <= T; ++qwq) {\r\n\t\tx = q[qwq].x; y = q[qwq].y;\r\n\t\tif (q[qwq].opt == 1) low[x][1] = low[y][1];\r\n\t\telse if (q[qwq].opt == 3) update1(1, 1, n, dfn[x][1], low[x][1], qwq);\r\n\t\telse if (q[qwq].opt == 4) {\r\n\t\t\tint tmp = query1(1, 1, n, dfn[x][1]);\r\n\t\t\tQ[tmp].push_back(qwq);\r\n\t\t}\r\n\t}\r\n\tfor (int qwq = 1; qwq <= T; ++qwq) {\r\n\t\tx = q[qwq].x; y = q[qwq].y;\r\n\t\tif (q[qwq].opt == 0) low[x][0] = low[y][0], sz[x] += sz[y];\r\n\t\telse if (q[qwq].opt == 2) update0(1, 1, n, dfn[x][0], low[x][0], sz[x]);\r\n\t\telse if (q[qwq].opt == 4) printf(\"%lld\\n\", query0(1, 1, n, dfn[x][0]) - ans[qwq]);\r\n\t\tfor (auto tmp : Q[qwq]) ans[tmp] = query0(1, 1, n, dfn[q[tmp].x][0]);\r\n\t}\r\n\treturn 0;\r\n}"
+}

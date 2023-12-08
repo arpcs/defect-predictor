@@ -1,0 +1,36 @@
+{
+    "id": 82882297,
+    "contestId": 1096,
+    "creationTimeSeconds": 1591556733,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1096,
+        "index": "F",
+        "name": "Inversion Expectation",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1096,
+        "members": [
+            {
+                "handle": "LUL____SEPLED1305"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1546007700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 265,
+    "memoryConsumedBytes": 5324800,
+    "source": "/**Isn't this too easy?**/\r\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int N = 2e5+10;\r\nconst int MOD = 998244353;\r\nint n,i,ans,counti;\r\nint a[N];\r\nint quick[N];\r\nint quick_space[N];\r\nvector<int> lef;\r\nbool missing[N];\r\n\r\n\r\n/**Copied from Geekforgeek on counting inversion page**/\r\nint _mergeSort(int arr[], int temp[], int left, int right);\r\nint merge(int arr[], int temp[], int left, int mid, int right);\r\n\r\n/* This function sorts the input array and returns the\r\n   number of inversions in the array */\r\nint mergeSort(int arr[], int array_size)\r\n{\r\n    int* temp = (int*)malloc(sizeof(int) * array_size);\r\n    return _mergeSort(arr, temp, 0, array_size - 1);\r\n}\r\n\r\n/* An auxiliary recursive function that sorts the input array and\r\n  returns the number of inversions in the array. */\r\nint _mergeSort(int arr[], int temp[], int left, int right)\r\n{\r\n    int mid, inv_count = 0;\r\n    if (right > left) {\r\n        /* Divide the array into two parts and call _mergeSortAndCountInv()\r\n       for each of the parts */\r\n        mid = (right + left) / 2;\r\n\r\n        /* Inversion count will be sum of inversions in left-part, right-part\r\n      and number of inversions in merging */\r\n        inv_count += _mergeSort(arr, temp, left, mid);\r\n        inv_count += _mergeSort(arr, temp, mid + 1, right);\r\n\r\n        /*Merge the two parts*/\r\n        inv_count += merge(arr, temp, left, mid + 1, right);\r\n    }\r\n    return inv_count;\r\n}\r\n\r\n/* This funt merges two sorted arrays and returns inversion count in\r\n   the arrays.*/\r\nint merge(int arr[], int temp[], int left, int mid, int right)\r\n{\r\n    int i, j, k;\r\n    int inv_count = 0;\r\n\r\n    i = left; /* i is index for left subarray*/\r\n    j = mid; /* j is index for right subarray*/\r\n    k = left; /* k is index for resultant merged subarray*/\r\n    while ((i <= mid - 1) && (j <= right)) {\r\n        if (arr[i] <= arr[j]) {\r\n            temp[k++] = arr[i++];\r\n        }\r\n        else {\r\n            temp[k++] = arr[j++];\r\n\r\n            /*this is tricky -- see above explanation/diagram for merge()*/\r\n            inv_count = inv_count + (mid - i);\r\n        }\r\n    }\r\n\r\n    /* Copy the remaining elements of left subarray\r\n   (if there are any) to temp*/\r\n    while (i <= mid - 1)\r\n        temp[k++] = arr[i++];\r\n\r\n    /* Copy the remaining elements of right subarray\r\n   (if there are any) to temp*/\r\n    while (j <= right)\r\n        temp[k++] = arr[j++];\r\n\r\n    /*Copy back the merged elements to original array*/\r\n    for (i = left; i <= right; i++)\r\n        arr[i] = temp[i];\r\n\r\n    return inv_count;\r\n}\r\n\r\nint plusi(int a,int b)\r\n{\r\n    long long cur = (0LL+a+b)%MOD;\r\n    return (int) cur;\r\n}\r\n\r\nint multi(int a,int b)\r\n{\r\n    long long cur = (1LL*a*b)%MOD;\r\n    return (int) cur;\r\n}\r\n\r\nint power(int base, int pow)\r\n{\r\n    if(pow == 1)\r\n        return base;\r\n    else\r\n    {\r\n        int cur = power(base,pow/2);\r\n        int get = multi(cur,cur);\r\n        if(pow%2==1)\r\n            get = multi(get,base);\r\n        return get;\r\n    }\r\n}\r\n\r\nint inverse(int base)\r\n{\r\n    return power(base,MOD-2);\r\n}\r\n\r\nint main()\r\n{\r\n    cin>>n;\r\n    for(i=0;i<n;i++)\r\n    {\r\n        cin>>a[i];\r\n        if(a[i]!=-1)\r\n            missing[a[i]-1] = true;\r\n        if(a[i]!=-1)\r\n        {\r\n            lef.push_back(a[i]);\r\n            counti++;\r\n        }\r\n    }\r\n    int cur = 0, cur_space = 0;\r\n    for(i=0;i<n;i++)\r\n    {;\r\n        if(!missing[i])\r\n            cur++;\r\n        if(a[i]==-1)\r\n            cur_space ++;\r\n        quick[i] = cur;\r\n        quick_space[i] = cur_space;\r\n    }\r\n    int total_miss = quick[n-1];\r\n    int inv_total_miss = inverse(total_miss);\r\n    for(i=0;i<n;i++)\r\n    {\r\n        if(a[i]!=-1)\r\n        {\r\n            int here = i;\r\n            int val = a[i]-1;\r\n            int af = multi(total_miss - quick_space[here],inv_total_miss);\r\n            af = multi(af,quick[val]);\r\n            int bef = multi(quick_space[here],inv_total_miss);\r\n            bef = multi(total_miss - quick[val], bef);\r\n            af = plusi(af,bef);\r\n            ans = plusi(ans,af);\r\n        }\r\n    }\r\n    int ins = multi(total_miss,total_miss-1);\r\n    ins = multi(ins,inverse(4));\r\n    ans = plusi(ans,ins);\r\n    int inv=0;\r\n    int me[counti];\r\n    for(i=0;i<counti;i++)\r\n        me[i] = lef[i];\r\n    inv = mergeSort(me,counti);\r\n    ans = plusi(inv,ans);\r\n    cout<<ans;\r\n    return 0;\r\n}\r\n"
+}

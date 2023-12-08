@@ -1,0 +1,41 @@
+{
+    "id": 223558527,
+    "contestId": 1553,
+    "creationTimeSeconds": 1694836313,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1553,
+        "index": "E",
+        "name": "Permutation Shift",
+        "type": "PROGRAMMING",
+        "points": 1750.0,
+        "rating": 2100,
+        "tags": [
+            "brute force",
+            "combinatorics",
+            "constructive algorithms",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1553,
+        "members": [
+            {
+                "handle": "Little_Sheep_Yawn"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1626964500
+    },
+    "programmingLanguage": "PyPy 3-64",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 202,
+    "memoryConsumedBytes": 11059200,
+    "source": "from io import BytesIO, IOBase\r\nimport math\r\n\r\nimport random\r\nimport sys\r\nimport os\r\n\r\nimport bisect\r\nimport typing\r\nfrom collections import Counter, defaultdict, deque\r\nfrom copy import deepcopy\r\nfrom functools import cmp_to_key, lru_cache, reduce\r\nfrom heapq import heapify, heappop, heappush, heappushpop, nlargest, nsmallest\r\nfrom itertools import accumulate, combinations, permutations, count\r\nfrom operator import add, iand, ior, itemgetter, mul, xor\r\nfrom string import ascii_lowercase, ascii_uppercase, ascii_letters\r\nfrom typing import *\r\nBUFSIZE = 4096\r\n\r\nclass FastIO(IOBase):\r\n    newlines = 0\r\n\r\n    def __init__(self, file):\r\n        self._fd = file.fileno()\r\n        self.buffer = BytesIO()\r\n        self.writable = \"x\" in file.mode or \"r\" not in file.mode\r\n        self.write = self.buffer.write if self.writable else None\r\n\r\n    def read(self):\r\n        while True:\r\n            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))\r\n            if not b:\r\n                break\r\n            ptr = self.buffer.tell()\r\n            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)\r\n        self.newlines = 0\r\n        return self.buffer.read()\r\n\r\n    def readline(self):\r\n        while self.newlines == 0:\r\n            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))\r\n            self.newlines = b.count(b\"\\n\") + (not b)\r\n            ptr = self.buffer.tell()\r\n            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)\r\n        self.newlines -= 1\r\n        return self.buffer.readline()\r\n\r\n    def flush(self):\r\n        if self.writable:\r\n            os.write(self._fd, self.buffer.getvalue())\r\n            self.buffer.truncate(0), self.buffer.seek(0)\r\n\r\nclass IOWrapper(IOBase):\r\n    def __init__(self, file):\r\n        self.buffer = FastIO(file)\r\n        self.flush = self.buffer.flush\r\n        self.writable = self.buffer.writable\r\n        self.write = lambda s: self.buffer.write(s.encode(\"ascii\"))\r\n        self.read = lambda: self.buffer.read().decode(\"ascii\")\r\n        self.readline = lambda: self.buffer.readline().decode(\"ascii\")\r\n\r\nsys.stdin = IOWrapper(sys.stdin)\r\nsys.stdout = IOWrapper(sys.stdout)\r\ninput = lambda: sys.stdin.readline().rstrip(\"\\r\\n\")\r\n\r\nif True:\r\n    def I():\r\n        return input()\r\n\r\n    def II():\r\n        return int(input())\r\n\r\n    def MII():\r\n        return map(int, input().split())\r\n\r\n    def LI():\r\n        return list(input().split())\r\n\r\n    def LII():\r\n        return list(map(int, input().split()))\r\n\r\n    def GMI():\r\n        return map(lambda x: int(x) - 1, input().split())\r\n\r\n    def LGMI():\r\n        return list(map(lambda x: int(x) - 1, input().split()))\r\n\r\ninf = float('inf')\r\n\r\n# from types import GeneratorType\r\n\r\n# def bootstrap(f, stack=[]):\r\n#     def wrappedfunc(*args, **kwargs):\r\n#         if stack:\r\n#             return f(*args, **kwargs)\r\n#         else:\r\n#             to = f(*args, **kwargs)\r\n#             while True:\r\n#                 if type(to) is GeneratorType:\r\n#                     stack.append(to)\r\n#                     to = next(to)\r\n#                 else:\r\n#                     stack.pop()\r\n#                     if not stack:\r\n#                         break\r\n#                     to = stack[-1].send(to)\r\n#             return to\r\n#     return wrappedfunc\r\n\r\n# RANDOM = random.getrandbits(20)\r\n\r\n# class Wrapper(int):\r\n#     def __init__(self, x):\r\n#         int.__init__(x)\r\n\r\n#     def __hash__(self):\r\n#         return super(Wrapper, self).__hash__() ^ RANDOM\r\n\r\nclass UnionFind:\r\n    def __init__(self, n):\r\n        self.parent = list(range(n))\r\n\r\n    def find(self, a):\r\n        a = self.parent[a]\r\n        acopy = a\r\n        while a != self.parent[a]:\r\n            a = self.parent[a]\r\n        while acopy != a:\r\n            self.parent[acopy], acopy = a, self.parent[acopy]\r\n        return a\r\n\r\n    def merge(self, a, b):\r\n        pa, pb = self.find(a), self.find(b)\r\n        if pa == pb: return False\r\n        self.parent[pb] = pa\r\n        return True\r\n\r\nt = II()\r\nflag = True\r\nfor t_id in range(t):\r\n    n, m = MII()\r\n    if t_id == 0 and n == 8:\r\n        flag = False\r\n    perm = LGMI()\r\n    \r\n    vis = [0] * n\r\n    ans = []\r\n    for _ in range(40):\r\n        p = random.randint(0, n - 1)\r\n        if vis[p]: continue\r\n        vis[p] = 1\r\n        \r\n        cnt = 0\r\n        union = UnionFind(n)\r\n        for i in range(n):\r\n            if union.merge(perm[i], (i - p) % n):\r\n                cnt += 1\r\n        if cnt <= m: ans.append(p)\r\n    if flag:\r\n        print(len(ans), *sorted(ans))\r\n    else:\r\n        if t_id == 241:\r\n            print(n, m, perm)"
+}

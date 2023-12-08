@@ -1,0 +1,36 @@
+{
+    "id": 32088048,
+    "contestId": 887,
+    "creationTimeSeconds": 1509948149,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 887,
+        "index": "F",
+        "name": "Row of Models",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2500,
+        "tags": [
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 887,
+        "members": [
+            {
+                "handle": "J_X"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509725100
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 106,
+    "timeConsumedMillis": 311,
+    "memoryConsumedBytes": 64102400,
+    "source": "#include <iostream>\r\n#include <cstdio>\r\n#include <cstring>\r\n#include <algorithm>\r\n#include <tuple>\r\n\r\nusing namespace std;\r\n\r\ntypedef pair<int, int> pii;\r\n\r\nconst int maxn = 5e5 + 5;\r\nconst int maxk = 22;\r\nconst int INF = 1 << 30;\r\n\r\nint a[maxn], b[maxn], d[maxn][maxk], mm[maxn], d1[maxn], d2[maxn], f[maxn];\r\npii p[maxn], q[maxn];\r\n\r\nint rmq(int l, int r)\r\n{\r\n    int k = mm[r - l + 1];\r\n    return min(d[l][k], d[r - (1 << k) + 1][k]);\r\n}\r\n\r\nint gao(int l, int r, int x)\r\n{\r\n    while(l < r)\r\n    {\r\n        int m = (l + r) >> 1;\r\n        if(rmq(l, m) < x) r = m;\r\n        else l = m + 1;\r\n    }\r\n    return l;\r\n}\r\n\r\ntuple<int, int, int> get_p(int n, int k)\r\n{\r\n    int l = -1, r = -1, m = INF;\r\n    for(int i = n; i > 0; --i)\r\n    {\r\n        if(d1[i] - i <= k)\r\n        {\r\n            if(d2[i] - i > k)\r\n            {\r\n                if(b[d1[i]] == INF) f[d1[i]] = i;\r\n                b[d1[i]] = min(b[d1[i]], a[i]);\r\n            }\r\n        }\r\n        else\r\n        {\r\n            if(l == -1)\r\n            {\r\n                l = i + 1, r = i + k, m = a[i];\r\n            }\r\n            else\r\n            {\r\n                if(i + k < l) return make_tuple(-1, -1, -1);\r\n                r = i + k, m = min(m, a[i]);\r\n            }\r\n        }\r\n    }\r\n    return make_tuple(l, r, m);\r\n}\r\n\r\nbool solve(int n, int k, int l, int r, int m)\r\n{\r\n//    cout << l << ' ' << r << ' ' << b[n] << endl;\r\n    int cnt = 0, cntq = 0;\r\n    for(int i = l; i <= r; ++i) p[++cnt] = pii(a[i], i);\r\n    sort(p + 1, p + cnt + 1);\r\n    for(int i = r + 1; i <= n; ++i) q[++cntq] = pii(b[i], a[i]);\r\n    sort(q + 1, q + cntq + 1);\r\n    int now = 0;\r\n    for(int i = cnt, j = cntq; i > 0; --i)\r\n    {\r\n        while(j > 0 && q[j].first > p[i].first)\r\n        {\r\n            if(q[j].second < m) now = max(now, q[j].second);\r\n            --j;\r\n        }\r\n        if(now > rmq(p[i].second + 1, min(p[i].second + k, n + 1))) return true;\r\n    }\r\n    for(int i = r + 1; i <= n; ++i) if(a[i] < m && f[i] && f[i] <= r && rmq(max(f[i], l) + 1, min(r + k, n + 1)) < a[i]) return true;\r\n    return false;\r\n}\r\n\r\nint main()\r\n{\r\n    int n, k;\r\n    scanf(\"%d%d\", &n, &k);\r\n    mm[0] = -1;\r\n    for(int i = 1; i <= n; ++i)\r\n    {\r\n        scanf(\"%d\", &a[i]);\r\n        b[i] = INF;\r\n        mm[i] = i & (i - 1) ? mm[i - 1] : mm[i - 1] + 1;\r\n        d[i][0] = a[i];\r\n    }\r\n    for(int j = 1; 1 << j <= n + 1; ++j)\r\n    {\r\n        for(int i = 1; i + (1 << j) - 1 <= n + 1; ++i) d[i][j] = min(d[i][j - 1], d[i + (1 << (j - 1))][j - 1]);\r\n    }\r\n    for(int i = 1; i <= n; ++i)\r\n    {\r\n        d1[i] = gao(i + 1, n + 1, a[i]);\r\n        if(d1[i] <= n) d2[i] = gao(d1[i] + 1, n + 1, a[i]);\r\n        else d2[i] = n + 1;\r\n    }\r\n    int l, r, m;\r\n    tie(l, r, m) = get_p(n, k);\r\n    if(m == -1) puts(\"NO\");\r\n    else if(m == INF) puts(\"YES\");\r\n    else if(solve(n, k, l, r, m)) puts(\"YES\");\r\n    else puts(\"NO\");\r\n    return 0;\r\n}\r\n"
+}

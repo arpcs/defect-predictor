@@ -1,0 +1,41 @@
+{
+    "id": 191839561,
+    "contestId": 1706,
+    "creationTimeSeconds": 1675430046,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "2949767807qwer"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 639,
+    "memoryConsumedBytes": 145920000,
+    "source": "#include<bits/stdc++.h>\r\n#define int long long\r\n#define lson (i<<1)\r\n#define rson (i<<1|1)\r\n#define mid ((l+r)>>1)\r\nusing namespace std;\r\nconst int N=800020;\r\nconst int inf=1e9;\r\nconst int mod=998244353;\r\ninline int read()\r\n{\r\n\tint x=0,f=1;\r\n\tchar ch=getchar();\r\n\twhile(ch<'0'||ch>'9') {if(ch=='-') f=-1;ch=getchar();}\r\n\twhile(ch>='0'&&ch<='9') {x=(x<<3)+(x<<1)+(ch^48);ch=getchar();}\r\n\treturn x*f;\r\n}\r\ninline void write(int x)\r\n{\r\n\tif(x<0) putchar('-'),x=-x;\r\n\tif(x>9) write(x/10);\r\n\tputchar(x%10+'0');\r\n}\r\ninline void write(int x,char s)\r\n{\r\n\twrite(x);\r\n\tputchar(s);\r\n}\r\n\r\n\r\n\r\nstruct segment_tree\r\n{\r\n\tint L[N],R[N],lz[N],sum1[N],sum2[N],input[N];\r\n    inline void pushup(int i)\r\n    {\r\n        sum1[i]=max(sum1[lson],sum1[rson]);\r\n        sum2[i]=min(sum2[lson],sum2[rson]);\r\n    }\r\n\tinline void build(int i,int l,int r)\r\n\t{\r\n\t\tL[i]=l,R[i]=r,lz[i]=0;\r\n\t\tif(l==r) \r\n\t\t{\r\n\t\t\tsum1[i]=sum2[i]=input[l];\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tbuild(lson,l,mid);\r\n\t\tbuild(rson,mid+1,r);\r\n\t\tpushup(i);\r\n\t}\r\n\tinline int querymax(int i,int l,int r)\r\n\t{\r\n\t\tif(L[i]>=l&&R[i]<=r) return sum1[i];\r\n\t\tint s=0;\r\n\t\tif(R[lson]>=l) s=max(s,querymax(lson,l,r));\r\n\t\tif(L[rson]<=r) s=max(s,querymax(rson,l,r));\r\n\t\treturn s;\r\n\t}\r\n    inline int querymin(int i,int l,int r)\r\n\t{\r\n\t\tif(L[i]>=l&&R[i]<=r) return sum2[i];\r\n\t\tint s=inf;\r\n\t\tif(R[lson]>=l) s=min(s,querymin(lson,l,r));\r\n\t\tif(L[rson]<=r) s=min(s,querymin(rson,l,r));\r\n\t\treturn s;\r\n\t}\r\n}t;\r\n\r\n\r\n\r\nstruct YeLn\r\n{\r\n    int next,to;\r\n}edge[N];\r\nint head[N],cnt;\r\ninline void add(int u,int v)\r\n{\r\n    edge[++cnt].to=v;\r\n    edge[cnt].next=head[u];\r\n    head[u]=cnt;\r\n}\r\n\r\n\r\nstruct edge\r\n{\r\n    int u,v,w;\r\n    friend bool operator<(edge a,edge b) {return a.w<b.w;}\r\n}e[N];\r\nint n,m,rt,f[N],val[N];\r\ninline int fid(int x)\r\n{\r\n    if(x==f[x]) return x;\r\n    return f[x]=fid(f[x]);\r\n}\r\ninline void ex_kruskal()\r\n{\r\n    for(int i=1;i<2*n;i++) f[i]=i;\r\n    sort(e+1,e+1+m);\r\n    int tot=n;\r\n    for(int i=1;i<=m;i++)\r\n    {\r\n        int u=fid(e[i].u),v=fid(e[i].v);\r\n        if(u!=v)\r\n        {\r\n            tot++;\r\n            f[u]=f[v]=tot;\r\n            add(tot,u),add(tot,v);\r\n            val[tot]=e[i].w;\r\n            if(tot==2*n-1) {rt=tot;break;}\r\n        }\r\n    }\r\n}\r\n\r\n\r\nint dep[N],son[N],fa[N],sz[N],top[N],id[N],refe[N],idcnt;\r\ninline void dfs1(int u,int fat)\r\n{\r\n    fa[u]=fat;\r\n    sz[u]=1;\r\n    dep[u]=dep[fat]+1;\r\n    int maxn=-1;\r\n    for(int i=head[u];i;i=edge[i].next)\r\n    {\r\n        int v=edge[i].to;\r\n        if(v==fat) continue;\r\n        dfs1(v,u);\r\n        sz[u]+=sz[v];\r\n        if(sz[v]>maxn) maxn=sz[v],son[u]=v;\r\n    }\r\n}\r\ninline void dfs2(int u,int tp)\r\n{\r\n    id[u]=++idcnt;\r\n    refe[idcnt]=u;\r\n    top[u]=tp;\r\n    if(!son[u]) return;\r\n    dfs2(son[u],tp);\r\n    for(int i=head[u];i;i=edge[i].next)\r\n    {\r\n        int v=edge[i].to;\r\n        if(v==fa[u]||v==son[u]) continue;\r\n        dfs2(v,v);\r\n    }\r\n}\r\ninline int LCA(int u,int v)\r\n{\r\n    while(top[u]!=top[v])\r\n    {\r\n        if(dep[top[u]]<dep[top[v]]) swap(u,v);\r\n        u=fa[top[u]];\r\n    }\r\n    return dep[u]<dep[v]?u:v;\r\n}\r\n\r\ninline void init()\r\n{\r\n    cnt=0,idcnt=0;\r\n    for(int i=1;i<=2*n;i++)\r\n    {\r\n        refe[i]=0;\r\n        head[i]=0;\r\n        dep[i]=0;\r\n        son[i]=0;\r\n        val[i]=0;\r\n        top[i]=0;\r\n        id[i]=0;\r\n        sz[i]=0;\r\n        fa[i]=0;\r\n    }\r\n}\r\nvoid sol()\r\n{\r\n    n=read(),m=read();\r\n    init();\r\n    int q=read();\r\n    for(int i=1;i<=m;i++) e[i].u=read(),e[i].v=read(),e[i].w=i;\r\n    ex_kruskal();\r\n    dfs1(rt,0);\r\n    dfs2(rt,rt);\r\n    for(int i=1;i<=n;i++) t.input[i]=id[i];\r\n    t.build(1,1,n);\r\n    for(int i=1;i<=q;i++)\r\n    {\r\n        int l=read(),r=read();\r\n        int minn=t.querymin(1,l,r);\r\n        int maxn=t.querymax(1,l,r);\r\n        int u=refe[minn],v=refe[maxn];\r\n        write(val[LCA(u,v)],' ');\r\n    }\r\n    putchar('\\n');\r\n}\r\nsigned main()\r\n{\r\n\tint T=read();\r\n    while(T--) sol();\r\n\treturn 0;\r\n}"
+}

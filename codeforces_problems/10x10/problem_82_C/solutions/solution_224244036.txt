@@ -1,0 +1,37 @@
+{
+    "id": 224244036,
+    "contestId": 82,
+    "creationTimeSeconds": 1695267069,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 82,
+        "index": "C",
+        "name": "General Mobilization",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2000,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 82,
+        "members": [
+            {
+                "handle": "y_kx_b"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1304694000
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 103,
+    "timeConsumedMillis": 592,
+    "memoryConsumedBytes": 51404800,
+    "source": "// LUOGU_RID: 125399376\n// Problem: General Mobilization\r\n// Contest: Luogu\r\n// URL: https://www.luogu.com.cn/problem/CF82C\r\n// Memory Limit: 250 MB\r\n// Time Limit: 2000 ms\r\n// \r\n// Powered by CP Editor (https://cpeditor.org)\r\n\r\n#include<bits/stdc++.h>\r\n#define gc getchar\r\n#define itn int\r\n#define x first\r\n#define y second\r\n#define eb emplace_back\r\n#define em emplace\r\n#define pb push_back\r\n#define db double\r\n#define y1 yy1_yyds\r\nusing namespace std; typedef long long ll; typedef unsigned long long ull;\r\n// https://www.luogu.com.cn/discuss/522581 About \"const\"\r\nll read() {\r\n\tll x = 0; short fh = 1; char ch = gc();\r\n\twhile (!isdigit(ch)) {\r\n\t\tif (ch == '-') fh = -1;\r\n\t\tif (ch < 10) exit(0); \r\n\t\tch = gc();\r\n\t}\r\n\twhile (isdigit(ch))\r\n\t\tx = x * 10 + (ch ^ 48), ch = gc();\r\n\treturn fh * x;\r\n}\r\n#ifndef ONLINE_JUDGE\r\nvoid debug() {cerr << \"\\n\";}\r\ntemplate<typename Typ1> void debug(Typ1 arg) {cerr << arg << \"\\n\";}\r\ntemplate<typename Typ1, typename ...Typ2> void debug(Typ1 arg, Typ2 ...args) {\r\n\tcerr << arg << \" \", debug(args...);\r\n}\r\n#else\r\nvoid debug() {}\r\ntemplate<typename Typ1> void debug(Typ1 arg) {}\r\ntemplate<typename Typ1, typename ...Typ2> void debug(Typ1 arg, Typ2 ...args) {}\r\n#endif\r\nvoid writeln(ll arg) {printf(\"%lld\\n\", arg);}\r\ntemplate<typename ...Typ2> void writeln(ll arg, Typ2 ...args) {\r\n\tprintf(\"%lld \", arg), writeln(args...);\r\n}\r\ntypedef pair <int, int> pii; typedef pair <ll, ll> pll;\r\nconst char Y_E_S[] = \"YES\", N__O[] = \"NO\";\r\n// const char Y_E_S[] = \"Yes\", N__O[] = \"No\";\r\n// #define infinite_testcase\r\n// #define multiple_testcase\r\n// #define output_Yes_No\r\nconst int DUST = 327, N = 5004, M = -1;\r\n// int a[N][N];\r\n\r\nint head[N], to[N << 1], ne[N << 1], www[N << 1], idx1 = 0;\r\nvoid add(int u, int v, int W = 1) {\r\n    www[idx1] = W, to[idx1] = v, ne[idx1] = head[u], head[u] = idx1++;\r\n}\r\nvoid addd(int u, int v, int W = 1) {add(u, v, W), add(v, u, W);}\r\nint fa[N], w[N];//\u540e\u8005\u4e3a\uff1a\u4e00\u5929\u6700\u591a\u901a\u8fc7 u->fa[u] \u7684\u4eba\u6570\uff08\u8fb9\u6743\u4e0b\u6c89\uff09\r\n\r\nint a[N];\r\npii p[N];//first: t, second: \r\nint timer = 0, id[N];\r\nshort ans[N][N];\r\nvoid dfs1(int u, int f) {\r\n\tfa[u] = f;\r\n\tint dfnx = ++timer;\r\n\tid[dfnx] = u;\r\n\tfor(int e = head[u], v; ~e; e = ne[e]) if((v = to[e]) != f) {\r\n\t\tw[v] = www[e], dfs1(v, u);\r\n\t}\r\n\tint dfny = timer;\r\n\tif(u == 1) return;\r\n\tint n = 0;\r\n\tfor(int i = dfnx; i <= dfny; i++) p[n++] = pii(ans[u][id[i]], id[i]);\r\n\tsort(p, p + n);\r\n\tpriority_queue<pii> Q;\r\n\tfor(int i = 0; i < n; i++) {\r\n\t\tint t = p[i].x; Q.em(-a[p[i].y], p[i].y);\r\n\t\twhile(i + 1 < n && p[i + 1].x == t) i++, Q.em(-a[p[i].y], p[i].y);\r\n\t\twhile(!Q.empty() && !(i + 1 < n && p[i + 1].x == t)) {\r\n\t\t\tfor(int j = 0; !Q.empty() && j < w[u]; j++) {\r\n\t\t\t\tint v = Q.top().y; Q.pop();\r\n\t\t\t\tans[fa[u]][v] = t + 1;\r\n\t\t\t}\r\n\t\t\tt++;\r\n\t\t}\r\n\t}\r\n}\r\nbool major(int Case = 1) {\r\n\tmemset(head, -1, sizeof head);\r\n\t// debug(sizeof a / 1048576.);\r\n\tint n = read();\r\n\tfor(int i = 1; i <= n; i++) a[i] = read();\r\n\tfor(int i = 1; i < n; i++) {\r\n\t\tint u = read(), v = read(), ww = read();\r\n\t\taddd(u, v, ww);\r\n\t}\r\n\tdfs1(1, 0);\r\n\tfor(int i = 1; i <= n; i++) printf(\"%d%c\", ans[1][i], \" \\n\"[i == n]);\r\n\tfor(int i = 1; i <= n; i++) assert(ans[1][i] <= n);\r\n\treturn Case ^= Case ^ Case;\r\n}\r\nvoid initial_function(int argc, char **argv) {\r\n\t**argv = argc; /* <- place_holder\r\n\tyou won't give up no matter what happens, will you?\r\n\tcode time: \r\n\t---\r\n\t\r\n\t*/\r\n}\r\nsigned main(int argc, char **argv) {\r\n\tinitial_function(argc, argv);\r\n\tint Case = 1, Maxcase = 1;\r\n\tfor (\r\n#ifdef multiple_testcase\r\n\t\t  Maxcase = read()\r\n#endif\r\n\t\t\t\t     \t  ;\r\n#ifndef infinite_testcase\r\n\t\t\t\t\t\t\tCase <= Maxcase\r\n#endif\r\n\t\t\t\t     \t\t\t\t\t   ; Case++)\r\n#ifdef output_Yes_No\r\n\t\tputs(major(Case) ? Y_E_S : N__O);\r\n#else\r\n\t\tmajor(Case);\r\n#endif\r\n\treturn DUST ^ 0x147;\r\n}\r\n\r\n"
+}

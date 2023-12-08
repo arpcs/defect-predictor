@@ -1,0 +1,39 @@
+{
+    "id": 219738742,
+    "contestId": 1286,
+    "creationTimeSeconds": 1692586850,
+    "relativeTimeSeconds": 4250,
+    "problem": {
+        "contestId": 1286,
+        "index": "C2",
+        "name": "Madhouse (Hard version)",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2800,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "hashing",
+            "interactive",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1286,
+        "members": [
+            {
+                "handle": "He_Ren"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1692582600
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 47,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 921600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef pair<int,int> pii;\r\nconst int MAXN = 1e2 + 5;\r\n\r\nusing Data = array<int,26>;\r\n\r\nchar getone(Data A,Data B)\r\n{\r\n\tfor(int i=0; i<(int)A.size(); ++i)\r\n\t\tif(A[i] != B[i])\r\n\t\t\treturn i + 'a';\r\n\treturn 0;\r\n}\r\n\r\nstruct DS\r\n{\r\n\tint len;\r\n\tvector<Data> bak[MAXN];\r\n\tvoid trim(void)\r\n\t{\r\n\t\tfor(int i=1; i<=len; ++i)\r\n\t\t\tsort(bak[i].begin(), bak[i].end());\r\n\t}\r\n\tchar get(string pre,string suf)\r\n\t{\r\n\t\tint k = len - max((int)pre.size(), (int)suf.size());\r\n\t\t\r\n\t\tvector<char> has(len+1, 0);\r\n\t\tfor(int i=0; i<(int)pre.size(); ++i)\r\n\t\t\thas[i+1] = pre[i];\r\n\t\tfor(int i=0; i<(int)suf.size(); ++i)\r\n\t\t\thas[len-(int)suf.size()+i+1] = suf[i];\r\n\t\t\r\n\t\tvector<Data> oth;\r\n\t\tData more; more.fill(0);\r\n\t\tfor(int i=1; i+k-1<=len; ++i)\r\n\t\t{\r\n\t\t\tData cur = bak[len][0];\r\n\t\t\tbool flag = 0;\r\n\t\t\tfor(int j=1; j<=len; ++j) if(j<i || j>i+k-1)\r\n\t\t\t{\r\n\t\t\t\tif(!has[j]) flag = 1;\r\n\t\t\t\telse --cur[has[j] - 'a'];\r\n\t\t\t}\r\n\t\t\tif(flag) more = cur;\r\n\t\t\telse oth.emplace_back(cur);\r\n\t\t}\r\n\t\t\r\n\t\tsort(oth.begin(), oth.end());\r\n\t\tint i = 0;\r\n\t\twhile(i<(int)oth.size() && oth[i] == bak[k][i])\r\n\t\t\t++i;\r\n\t\t\r\n\t\treturn getone(more, bak[k][i]);\r\n\t}\r\n\tData getall(void) const\r\n\t{\r\n\t\treturn bak[len][0];\r\n\t}\r\n};\r\n\r\nDS ask(int l,int r)\r\n{\r\n\tprintf(\"? %d %d\\n\",l,r);\r\n\tfflush(stdout);\r\n\t\r\n\tDS res;\r\n\tres.len = r-l+1;\r\n\t\r\n\tint tot = (r-l+1) * (r-l+2) / 2;\r\n\twhile(tot--)\r\n\t{\r\n\t\tstatic char t[MAXN];\r\n\t\tscanf(\"%s\",t+1);\r\n\t\t\r\n\t\tint len = strlen(t+1);\r\n\t\t\r\n\t\tData cur; cur.fill(0);\r\n\t\tfor(int i=1; i<=len; ++i)\r\n\t\t\t++cur[t[i] - 'a'];\r\n\t\t\r\n\t\tres.bak[len].emplace_back(cur);\r\n\t}\r\n\t\r\n\tres.trim();\r\n\treturn res;\r\n}\r\n\r\nstring getsub(int l,int r)\r\n{\r\n\tif(l > r) return \"\";\r\n\tif(l == r)\r\n\t{\r\n\t\tauto res = ask(l, r).getall();\r\n\t\tfor(int i=0; i<(int)res.size(); ++i)\r\n\t\t\tif(res[i])\r\n\t\t\t\treturn {(char)(i + 'a')};\r\n\t\treturn {0};\r\n\t}\r\n\t\r\n\tauto A = ask(l, r), B = ask(l, r-1);\r\n\t\r\n\tstring pre, suf;\r\n\tsuf += getone(A.getall(), B.getall());\r\n\t\r\n\tfor(int i=0; l+i<r-i; ++i)\r\n\t{\r\n\t\tpre += A.get(pre, suf);\r\n\t\tif(l+i+1 <= r-i-1)\r\n\t\t{\r\n\t\t\tauto t = suf; t.pop_back();\r\n\t\t\tsuf = B.get(pre, t) + suf;\r\n\t\t}\r\n\t}\r\n\treturn pre + suf;\r\n}\r\n\r\nint main(void)\r\n{\r\n\tint n;\r\n\tscanf(\"%d\",&n);\r\n\t\r\n\tint d = n / 3;\r\n\tstring ans = getsub(1, n - d);\r\n\t\r\n\tif(d == 0)\r\n\t{\r\n\t\tcout << \"! \" << ans;\r\n\t\treturn 0;\r\n\t}\r\n\t\r\n\tauto A = ask(n - 2 * d + 1, n);\r\n\t\r\n\tstring suf;\r\n\tfor(int i=1; i<=d; ++i)\r\n\t{\r\n\t\tstring pre;\r\n\t\tfor(int j=1; j<=i; ++j)\r\n\t\t\tpre += ans[(int)ans.size() - d + j - 1];\r\n\t\tsuf = A.get(pre, suf) + suf;\r\n\t}\r\n\t\r\n\tans += suf;\r\n\tcout << \"! \" << ans;\r\n\treturn 0;\r\n}\r\n"
+}

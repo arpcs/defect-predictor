@@ -1,0 +1,41 @@
+{
+    "id": 230929795,
+    "contestId": 1706,
+    "creationTimeSeconds": 1698909624,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "QwQwf"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 46182400,
+    "source": "#pragma GCC target(\"sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,avx,avx2\")\r\n#pragma GCC optimize(\"Ofast\",\"unroll-loops\",\"inline\")\r\n#include<bits/stdc++.h>\r\n#define ll long long\r\n//#define int ll\r\n#define pb push_back\r\nusing namespace std;\r\nconst int N=2e5+20,LGN=21;\r\nnamespace FastIO{\r\n\tstruct IO {\r\n\t    char ibuf[(1 << 20) + 1], *iS, *iT, obuf[(1 << 20) + 1], *oS;\r\n\t    IO() : iS(ibuf), iT(ibuf), oS(obuf) {} ~IO() { fwrite(obuf, 1, oS - obuf, stdout); }\r\n//\t\t#if ONLINE_JUDGE\r\n\t\t#define gh() (iS == iT ? iT = (iS = ibuf) + fread(ibuf, 1, (1 << 20) + 1, stdin), (iS == iT ? EOF : *iS++) : *iS++)\r\n//\t\t#else\r\n//\t\t#define gh() getchar()\r\n//\t\t#endif\r\n\t\tinline bool eof (const char &ch) { return ch == ' ' || ch == '\\n' || ch == '\\r' || ch == 't' || ch == EOF; }\r\n\t    inline long long read() {\r\n\t        char ch = gh();\r\n\t        long long x = 0;\r\n\t        bool t = 0;\r\n\t        while (ch < '0' || ch > '9') t |= ch == '-', ch = gh();\r\n\t        while (ch >= '0' && ch <= '9') x = (x << 1) + (x << 3) + (ch ^ 48), ch = gh();\r\n\t        return t ? ~(x - 1) : x;\r\n\t    }\r\n\t    inline void read (char *s) {\r\n\t    \tchar ch = gh(); int l = 0;\r\n\t    \twhile (eof(ch)) ch = gh();\r\n\t    \twhile (!eof(ch)) s[l++] = ch, ch = gh();\r\n\t    }\r\n\t    inline void read (double &x) {\r\n\t    \tchar ch = gh(); bool t = 0;\r\n\t    \twhile (ch < '0' || ch > '9') t |= ch == '-', ch = gh();\r\n\t    \twhile (ch >= '0' && ch <= '9') x = x * 10 + (ch ^ 48), ch = gh();\r\n\t    \tif (ch != '.') return t && (x = -x), void(); ch = gh();\r\n\t    \tfor (double cf = 0.1; '0' <= ch && ch <= '9'; ch = gh(), cf *= 0.1) x += cf * (ch ^ 48);\r\n\t    \tt && (x = -x);\r\n\t    }\r\n\t    inline void pc (char ch) {\r\n\t    \t#ifdef ONLINE_JUDGE\r\n\t    \tif (oS == obuf + (1 << 20) + 1) fwrite(obuf, 1, oS - obuf, stdout), oS = obuf; \r\n\t    \t*oS++ = ch;\r\n\t    \t#else\r\n\t    \tputchar(ch);\r\n\t    \t#endif\r\n\t\t}\r\n\t\ttemplate<typename _Tp>\r\n\t    inline void write (_Tp x) {\r\n\t    \tstatic char stk[64], *tp = stk;\r\n\t    \tif (x < 0) x = ~(x - 1), pc('-');\r\n\t\t\tdo *tp++ = x % 10, x /= 10;\r\n\t\t\twhile (x);\r\n\t\t\twhile (tp != stk) pc((*--tp) | 48);\r\n\t    }\r\n\t    inline void write (char *s) {\r\n\t    \tint n = strlen(s);\r\n\t    \tfor (int i = 0; i < n; i++) pc(s[i]);\r\n\t    }\r\n\t} io;\r\n\tinline long long read () { return io.read(); }\r\n\ttemplate<typename Tp>\r\n\tinline void read (Tp &x) { io.read(x); }\r\n\ttemplate<typename _Tp>\r\n\tinline void write (_Tp x) { io.write(x); }\r\n}\r\nusing namespace FastIO;\r\nvector<int> e[N];\r\nint u[N],v[N],F[N],lg[N],w[N],g[LGN][N/2],f[LGN][N/2];\r\nint tot,n,m,Q;\r\ninline int find(int x){return x==F[x]?x:F[x]=find(F[x]);}\r\nint fa[N],sz[N],son[N],top[N],dep[N],dfn[N],id[N],dfc;\r\nvoid dfs1(int u,int F){\r\n\tdep[u]=dep[F]+1;fa[u]=F;sz[u]=1;\r\n\tfor(int v:e[u]){\r\n\t\tdfs1(v,u);sz[u]+=sz[v];\r\n\t\tif(sz[v]>sz[son[u]]) son[u]=v;\r\n\t}\r\n}\r\nvoid dfs2(int u,int tp){\r\n\ttop[u]=tp;\r\n\tif(son[u]) dfs2(son[u],tp);\r\n\tfor(int v:e[u]) if(v!=son[u]) dfs2(v,v); \r\n}\r\nvoid dfs(int u){\r\n\tdfn[id[u]=++dfc]=u;\r\n\tfor(int v:e[u]) dfs(v);\r\n}\r\nint lca(int x,int y){\r\n\twhile(top[x]!=top[y]){\r\n\t\tif(dep[top[x]]<dep[top[y]]) swap(x,y);\r\n\t\tx=fa[top[x]];\r\n\t}\r\n\treturn dep[x]<dep[y]?x:y;\r\n}\r\nint qry(int l,int r,bool op){\r\n\tint k=lg[r-l+1];\r\n\treturn !op?min(f[k][l],f[k][r-(1<<k)+1]):max(g[k][l],g[k][r-(1<<k)+1]);\r\n}\r\nvoid solve(){\r\n\tn=read();m=read();Q=read();dfc=0;\r\n\tfor(int i=1;i<=tot;i++) son[i]=F[i]=w[i]=0,e[i].clear();\r\n\tfor(int i=1;i<=n;i++) F[i]=i;\r\n\tfor(int i=1;i<=m;i++) u[i]=read(),v[i]=read();\r\n\ttot=n;\r\n\tfor(int i=1;i<=m;i++){\r\n\t\tint fu=find(u[i]),fv=find(v[i]);\r\n\t\tif(fu!=fv) ++tot,F[fu]=F[fv]=F[tot]=tot,w[tot]=i,e[tot].pb(fu),e[tot].pb(fv);\r\n\t}\r\n\tdfs(tot);dfs1(tot,0);dfs2(tot,tot);\r\n\tfor(int i=1;i<=n;i++) f[0][i]=id[i],g[0][i]=id[i];\r\n\tfor(int j=1;j<LGN;j++) for(int i=1;i+(1<<j)-1<=n;i++){\r\n\t\tf[j][i]=min(f[j-1][i],f[j-1][i+(1<<j-1)]);\r\n\t\tg[j][i]=max(g[j-1][i],g[j-1][i+(1<<j-1)]);\r\n\t}\r\n\tint res=0;\r\n\tfor(int i=1,l,r;i<=Q;i++){\r\n\t\tl=read(),r=read();\r\n\t\tint u=qry(l,r,0),v=qry(l,r,1);\r\n\t\twrite(w[lca(dfn[u],dfn[v])]);io.pc(' ');\r\n\t}\r\n\tcout<<'\\n';\r\n}\r\nsigned main(){\r\n\tlg[0]=-1;for(int i=1;i<N;i++) lg[i]=lg[i>>1]+1;\r\n\tint T=read();\r\n\twhile(T--) solve();\r\n\treturn 0;\r\n}\r\n/*\r\n2\r\n2 1 3\r\n1 2\r\n1 1\r\n1 2\r\n2 2\r\n3 2 6\r\n2 1\r\n1 3\r\n1 1\r\n1 2\r\n1 3\r\n2 2\r\n2 3\r\n3 3\r\n*/"
+}

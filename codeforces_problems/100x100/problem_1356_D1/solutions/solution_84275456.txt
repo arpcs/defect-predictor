@@ -1,0 +1,33 @@
+{
+    "id": 84275456,
+    "contestId": 1356,
+    "creationTimeSeconds": 1592513495,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1356,
+        "index": "D1",
+        "name": "Quantum Classification - 1",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1356,
+        "members": [
+            {
+                "handle": "Hennkka"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1591977600
+    },
+    "programmingLanguage": "Q#",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 343,
+    "memoryConsumedBytes": 6963200,
+    "source": "\ufeffnamespace Solution {\r\n    open Microsoft.Quantum.Convert;\r\n    open Microsoft.Quantum.Intrinsic;\r\n    open Microsoft.Quantum.Canon;\r\n    open Microsoft.Quantum.Arrays;\r\n    open Microsoft.Quantum.MachineLearning;\r\n    open Microsoft.Quantum.Math;\r\n\r\n    operation Solve () : (ControlledRotation[], (Double[], Double)) {\r\n        return (ClassifierStructure(), ([3.13792675], 0.0073506));\r\n    }\r\n\r\n    function DefaultSchedule(samples : Double[][]) : SamplingSchedule {\r\n        return SamplingSchedule([\r\n            0..Length(samples) - 1\r\n        ]);\r\n    }\r\n\r\n    function ClassifierStructure() : ControlledRotation[] {\r\n        return [\r\n            // ControlledRotation((0, new Int[0]), PauliX, 0),\r\n            // ControlledRotation((0, new Int[0]), PauliY, 1),\r\n            // ControlledRotation((0, new Int[0]), PauliZ, 2),\r\n            ControlledRotation((0, new Int[0]), PauliY, 0),\r\n        ];\r\n    }\r\n\r\n\r\n    operation Train(\r\n        trainingVectors : Double[][],\r\n        trainingLabels : Int[],\r\n        initialParameters : Double[][]\r\n    ) : (Double[], Double) {\r\n        // convert training data and labels into a single data structure\r\n        let samples = Mapped(\r\n            LabeledSample,\r\n            Zip(trainingVectors, trainingLabels)\r\n        );\r\n        let (optimizedModel, nMisses) = TrainSequentialClassifier(\r\n            Mapped(\r\n                SequentialModel(ClassifierStructure(), _, 0.0),\r\n                initialParameters\r\n            ),\r\n            samples,\r\n            DefaultTrainingOptions()\r\n                w/ LearningRate <- 2.0\r\n                w/ Tolerance <- 0.0005,\r\n            DefaultSchedule(trainingVectors),\r\n            DefaultSchedule(trainingVectors)\r\n        );\r\n        Message($\"Training complete, found optimal parameters: {optimizedModel::Parameters}, {optimizedModel::Bias} with {nMisses} misses\");\r\n        return (optimizedModel::Parameters, optimizedModel::Bias);\r\n    }\r\n\r\n\r\n    // Entry point for using the model to classify the data; takes validation data and model parameters as inputs and uses hard-coded classifier structure.\r\n    operation Classify(\r\n        samples : Double[][],\r\n        parameters : Double[],\r\n        bias : Double,\r\n        tolerance  : Double,\r\n        nMeasurements : Int\r\n    )\r\n    : Int[] {\r\n        let model = Default<SequentialModel>()\r\n            w/ Structure <- ClassifierStructure()\r\n            w/ Parameters <- parameters\r\n            w/ Bias <- bias;\r\n        let probabilities = EstimateClassificationProbabilities(\r\n            tolerance, model,\r\n            samples, nMeasurements\r\n        );\r\n        return InferredLabels(model::Bias, probabilities);\r\n    }\r\n}"
+}

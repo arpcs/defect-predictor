@@ -1,0 +1,35 @@
+{
+    "id": 160383254,
+    "contestId": 1183,
+    "creationTimeSeconds": 1655071859,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1183,
+        "index": "H",
+        "name": "Subsequences (hard version)",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1183,
+        "members": [
+            {
+                "handle": "lgalindo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1561559700
+    },
+    "programmingLanguage": "PyPy 3-64",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "// sacado del tutorial: https://codeforces.com/blog/entry/68003\n\n#include <iostream>\n#include <cstdint>\n#include <inttypes.h>\n\n#define MIN(a, b) ((a < b) ? a : b)\n\nstatic int lst[100][26];\nstatic int64_t dp[101][101];\n\nint main(void) {\n    int n, k;\n    scanf(\"%d %d\", &n, &k);\n    k--;\n\n    char s[101] = {};\n    scanf(\"%s\", s);\n\n    // inicializar matriz lst\n    for (int i = 0; i < n; i++) {\n        for (int j = 0; j < 26; j++) lst[i][j] = -1;\n    }\n    lst[0][s[0] - 'a'] = 0;\n\n    // calcular matriz lst\n    for (int i = 1; i < n; i++) {\n        char c = s[i] - 'a';\n        for (int j = 0; j < 26; j++) {\n            if (c == j) lst[i][j] = i;\n            else lst[i][j] = lst[i - 1][j];\n        }\n    }\n\n    // inicializar matriz dp, como fue creado con static, todos los valores son\n    // por defecto cero y solo tenemos que inicializar los 1's de la segunda\n    // columna\n    for (int i = 0; i < n; i++) dp[i][1] = 1;\n\n    // calcular matriz dp\n    for (int j = 2; j < n; j++) {\n        for (int i = 1; i < n; i++) {\n            int64_t dp_val = dp[i][j];\n            for (int c = 0; c < 26; c++) {\n                int lst_val = lst[i - 1][c];\n                if (lst_val != -1) dp_val += dp[lst_val][j - 1];\n\n                dp_val = MIN(dp_val, (int64_t)1e12);\n            }\n            dp[i][j] = dp_val;\n        }\n    }\n\n    // calcular respuesta\n    int64_t sum = 0;\n    for (int j = n - 1; j > 0; j--) {\n        int64_t cnt = 0;\n        for (int c = 0; c < 26; c++) {\n            int lst_val = lst[n - 1][c];\n            if (lst_val != -1) cnt += dp[lst_val][j];\n\n            cnt = MIN(cnt, (int64_t)1e12);\n        }\n\n        if (cnt >= k) {\n            sum += k*(n - j);\n            k = 0;\n            break;\n        } else {\n            sum += cnt*(n - j);\n            k -= cnt;\n        }\n    }\n\n    if (k == 1) {\n        sum += n;\n        k--;\n    }\n    int64_t ans = (k > 0) ? -1 : sum;\n    printf(\"%\" PRIi64 \"\", ans);\n\n    return 0;\n}\n"
+}

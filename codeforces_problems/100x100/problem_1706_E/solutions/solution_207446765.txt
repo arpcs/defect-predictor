@@ -1,0 +1,41 @@
+{
+    "id": 207446765,
+    "contestId": 1706,
+    "creationTimeSeconds": 1685176725,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "gdf_yhm"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\n#define int long long\r\nusing namespace std;\r\nconst int maxn=100010;\r\nconst int inf=1e9;\r\ninline int read(){\r\n\tint x=0,f=1;\r\n\tchar ch=getchar();\r\n\twhile(ch<'0'||ch>'9'){if(ch=='-')f=-1;ch=getchar();}\r\n\twhile(ch>='0'&&ch<='9'){x=(x<<3)+(x<<1)+(ch-48);ch=getchar();}\r\n\treturn x*f;\r\n}\r\n\r\nint n,m,p;\r\nint head[maxn],tot;\r\nstruct nd{\r\n\tint nxt,to,val;\r\n}e[maxn<<1];\r\nvoid add(int u,int v,int w){\r\n\te[++tot]={head[u],v,w};\r\n\thead[u]=tot;\r\n}\r\nint f[maxn],ans[maxn];\r\nint fd(int x){\r\n\tif(x==f[x])return x;\r\n\treturn f[x]=fd(f[x]);\r\n}\r\nint dep[maxn],fa[maxn][21],mx[maxn][21];\r\nvoid dfs(int u,int ff){\r\n\tfor(int i=1;;1<<i<=dep[u];i++)fa[u][i]=fa[fa[u][i-1]][i-1],mx[u][i]=max(mx[u][i-1],mx[fa[u][i-1]][i-1]);\r\n\tfor(int i=head[u];i;i=e[i].nxt){\r\n\t\tint v=e[i].to;\r\n\t\tif(v!=ff){\r\n\t\t\tfa[v][0]=u;\r\n\t\t\tmx[v][0]=e[i].val;\r\n\t\t\tdep[v]=dep[u]+1;\r\n\t\t\tdfs(v,u);\r\n\t\t}\r\n\t}\r\n}\r\nint lca(int u,int v){\r\n\tint res=0;\r\n\tif(dep[u]<dep[v])swap(u,v);\r\n\tfor(int i=log2(dep[u]);i>=0;i--){\r\n\t\tif(dep[fa[u][i]]>=dep[v]){\r\n\t\t\tres=max(res,mx[u][i]);\r\n\t\t\tu=fa[u][i];\r\n\t\t}\r\n\t}\r\n\tif(u==v)return res;\r\n\tfor(int i=log2(dep[u]);i>=0;i--){\r\n\t\tif(fa[u][i]!=fa[v][i]){\r\n\t\t\tres=max({res,mx[u][i],mx[v][i]});\r\n\t\t\tu=fa[u][i];v=fa[v][i];\r\n\t\t}\r\n\t}\r\n\tres=max({res,mx[u][0],mx[v][0]});\r\n\treturn res;\r\n}\r\nint tree[maxn<<2];\r\nvoid build(int nd,int l,int r){\r\n\tif(l==r){\r\n\t\ttree[nd]=ans[l];\r\n\t\treturn ;\r\n\t}\r\n\tint mid=l+r>>1,ls=nd<<1,rs=nd<<1|1;\r\n\tbuild(ls,l,mid);build(rs,mid+1,r);\r\n\ttree[nd]=max(tree[ls],tree[rs]);\r\n}\r\nint query(int nd,int l,int r,int ql,int qr){\r\n\tif(l==r)return tree[nd];\r\n\tint mid=l+r>>1,ls=nd<<1,rs=nd<<1|1,ans=0;\r\n\tif(ql<=mid)ans=query(ls,l,mid,ql,qr);\r\n\tif(qr>mid)ans=max(ans,query(rs,mid+1,r,ql,qr));\r\n\treturn ans;\r\n}\r\n\r\nint T;\r\nsigned main(){\r\n\tT=read();\r\n\twhile(T--){\r\n\t\tn=read();m=read();p=read();\r\n\t\tfor(int i=1;i<=n;i++)f[i]=i;\r\n\t\tfor(int i=1;i<=m;i++){\r\n\t\t\tint u,v;\r\n\t\t\tu=read();v=read();\r\n\t\t\tif(fd(u)!=fd(v)){\r\n\t\t\t\tadd(u,v,i);add(v,u,i);\r\n\t\t\t\tf[fd(u)]=fd(v);\r\n\t\t\t}\r\n\t\t}\r\n\t\tdep[1]=1;dfs(1,0);\r\n\t\tfor(int i=1;i<n;i++){\r\n\t\t\tans[i]=lca(i,i+1);\r\n\t\t}\r\n\t\tbuild(1,1,n-1);\r\n\t\twhile(p--){\r\n\t\t\tint u,v;\r\n\t\t\tu=read();v=read();\r\n\t\t\tif(u==v)printf(\"0 \");\r\n\t\t\telse printf(\"%lld \",query(1,1,n-1,u,v-1));\r\n\t\t}\r\n\t\tprintf(\"\\n\");\r\n\t\tfor(int i=1;i<=n;i++)head[i]=0;\r\n\t\ttot=0;\r\n\t}\r\n\t\r\n}"
+}

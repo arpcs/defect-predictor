@@ -1,0 +1,39 @@
+{
+    "id": 212740009,
+    "contestId": 1062,
+    "creationTimeSeconds": 1688767260,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1062,
+        "index": "E",
+        "name": "Company",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1062,
+        "members": [
+            {
+                "handle": "IPRIT"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1542209700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <bits/stdc++.h>\n\nusing namespace std;\n\nint n, m;\nvector<long long> d;\nvector<int> in;\nvector<vector<int>> dp;\nvector<vector<int>> g;\nint timer = 0;\n\nvoid dfs(int v, int p) {\n    d[v] = d[p] + 1;\n    dp[v][0] = p;\n    in[v] = timer++;\n    for (int i = 1; i < 24; i++) dp[v][i] = dp[dp[v][i - 1]][i - 1];\n    for (auto t : g[v]) {\n        if (t != p) {\n            dfs(t, v);\n        }\n    }\n}\n\nint lca(int v, int u) {\n    if(v == -1) return u;\n    if(u == -1) return v;\n    if (d[v] > d[u]) swap(v, u);\n    int dr = d[u] - d[v];\n    int lll = 0;\n    while (dr) {\n        if (dr & 1) {\n            u = dp[u][lll];\n        }\n        lll++;\n        dr >>= 1;\n    }\n    if (v == u) return v;\n    for (int l = 23; l >= 0; l--) {\n        if (dp[v][l] != dp[u][l]) {\n            v = dp[v][l];\n            u = dp[u][l];\n        }\n    }\n    return dp[v][0];\n}\n\nvector<vector<pair<int, int>>> createSTMin(int n, vector<int>& arr) {\n    int logn = __lg(n - 1) + 1;\n    vector<vector<pair<int, int>>> st(logn, vector<pair<int, int>>(n));\n    for (int i = 0; i < n; i++) st[0][i] = {arr[i], i};\n    for (int lv = 1; lv < logn; lv++) {\n        for (int l = 0; l + (1 << lv) <= n; l++) {\n            st[lv][l] = min(st[lv - 1][l], st[lv - 1][l + (1 << (lv - 1))]);\n        }\n    }\n    return st;\n}\n\npair<int, int> minST(vector<vector<pair<int, int>>>& st, int l, int r) {\n    if (l > r) swap(l, r);\n    r++;\n    int j = __lg(r - l);\n    return min(st[j][l], st[j][r - (1 << j)]);\n}\n\nvector<vector<pair<int, int>>> createSTMax(int n, vector<int>& arr) {\n    int logn = __lg(n - 1) + 1;\n    vector<vector<pair<int, int>>> st(logn, vector<pair<int, int>>(n));\n    for (int i = 0; i < n; i++) st[0][i] = {arr[i], i};\n    for (int lv = 1; lv < logn; lv++) {\n        for (int l = 0; l + (1 << lv) <= n; l++) {\n            st[lv][l] = max(st[lv - 1][l], st[lv - 1][l + (1 << (lv - 1))]);\n        }\n    }\n    return st;\n}\n\npair<int, int> maxST(vector<vector<pair<int, int>>>& st, int l, int r) {\n    if (l > r) swap(l, r);\n    r++;\n    int j = __lg(r - l);\n    return max(st[j][l], st[j][r - (1 << j)]);\n}\n\nvector<vector<pair<int, int>>> stMin, stMax;\n\nint lca2(int l, int r) {\n    if(l > r) return -1;\n    int a = minST(stMin, l, r).second;\n    int b = maxST(stMax, l, r).second;\n    // printf(\"seg %d-%d = vtx %d %d\\n\", l + 1, r + 1, a + 1, b + 1);\n    return lca(a, b);\n}\n\nint main() {\n    int n, m;\n    cin >> n >> m;\n    d.resize(n);\n    g.resize(n);\n    in.resize(n);\n    dp.resize(n, vector<int>(24));\n    for(int i = 1; i < n; i++) {\n        int p;\n        cin >> p;\n        g[p - 1].push_back(i);\n    }\n    dfs(0, 0);\n    stMin = createSTMin(n, in);\n    stMax = createSTMax(n, in);\n    while (m--) {\n        int l, r;\n        cin >> l >> r;\n        l--; r--;\n        int a = minST(stMin, l, r).second;\n        int b = maxST(stMax, l, r).second;\n        int a1 = lca(lca2(l, a - 1), lca2(a + 1, r));\n        int a2 = lca(lca2(l, b - 1), lca2(b + 1, r));\n        // cout << \"cds: \" << a + 1 << ' ' << b + 1 << '\\n';\n        if(d[a1] > d[a2]) {\n            cout << a + 1 << ' ' << d[a1] - 1 << '\\n';\n        } else {\n            cout << b + 1 << ' ' << d[a2] - 1 << '\\n';\n        }\n    }\n}\n\n/* Sat Jul 08 2023 01:00:45 GMT+0300 (Moscow Standard Time) */\n\n/* Sat Jul 08 2023 01:00:50 GMT+0300 (Moscow Standard Time) */\n"
+}

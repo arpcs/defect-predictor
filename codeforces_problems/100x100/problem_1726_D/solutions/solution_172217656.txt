@@ -1,0 +1,41 @@
+{
+    "id": 172217656,
+    "contestId": 1726,
+    "creationTimeSeconds": 1663229848,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "D",
+        "name": "Edge Split",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "probabilities",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": ".utk."
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 77,
+    "timeConsumedMillis": 1996,
+    "memoryConsumedBytes": 79360000,
+    "source": "/*\n\u2588\u2588\u2557\u2591\u2591\u2591\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2557\u2591\u2591\u2588\u2588\u2557\n\u2588\u2588\u2551\u2591\u2591\u2591\u2588\u2588\u2551\u255a\u2550\u2550\u2588\u2588\u2554\u2550\u2550\u255d\u2588\u2588\u2551\u2591\u2588\u2588\u2554\u255d\n\u2588\u2588\u2551\u2591\u2591\u2591\u2588\u2588\u2551\u2591\u2591\u2591\u2588\u2588\u2551\u2591\u2591\u2591\u2588\u2588\u2588\u2588\u2588\u2550\u255d\u2591\n\u2588\u2588\u2551\u2591\u2591\u2591\u2588\u2588\u2551\u2591\u2591\u2591\u2588\u2588\u2551\u2591\u2591\u2591\u2588\u2588\u2554\u2550\u2588\u2588\u2557\u2591\n\u255a\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255d\u2591\u2591\u2591\u2588\u2588\u2551\u2591\u2591\u2591\u2588\u2588\u2551\u2591\u255a\u2588\u2588\u2557\n\u2591\u255a\u2550\u2550\u2550\u2550\u2550\u255d\u2591\u2591\u2591\u2591\u255a\u2550\u255d\u2591\u2591\u2591\u255a\u2550\u255d\u2591\u2591\u255a\u2550\u255d\n*/\n#include <bits/stdc++.h>\nusing namespace std;\n#define int long long\n#define ll long long\n#define pii pair<ll, ll>\nint32_t mod = 1e9 + 7;\n\nvoid utk()\n{\n    ll n, m;\n    cin >> n >> m;\n    vector<set<ll>> adj(n);\n    set<pii> edges;\n    vector<pii> e1;\n    for (ll i = 0; i < m; i++)\n    {\n        ll u, v;\n        cin >> u >> v;\n        u--, v--;\n        edges.insert({min(u, v), max(u, v)});\n        e1.push_back({min(u, v), max(u, v)});\n        adj[u].insert(v);\n        adj[v].insert(u);\n    }\n    if (m == n - 1)\n    {\n        for (ll i = 0; i < m; i++)\n            cout << 0;\n        cout << '\\n';\n        return;\n    }\n    vector<ll> vis(n, 0);\n    pii e = {-1, -1};\n    map<pii, bool> col;\n    set<ll> blue;\n    const auto dfs = [&](const auto &self, ll v, ll p) -> bool\n    {\n        vis[v] = 1;\n        for (auto u : adj[v])\n        {\n            if (u != p)\n            {\n                if (vis[u] == 0)\n                {\n                    if (self(self, u, v))\n                        return true;\n                }\n                else if (vis[u] == 1)\n                {\n                    e = {min(u, v), max(u, v)};\n                    return true;\n                }\n            }\n        }\n        vis[v] = 2;\n        return false;\n    };\n\n    dfs(dfs, 0, -1);\n    col[e] = 1;\n    adj[e.first].erase(e.second);\n    adj[e.second].erase(e.first);\n    blue.insert(e.first);\n    blue.insert(e.second);\n    edges.erase(e);\n\n    for (auto &i : vis)\n        i = 0;\n\n    if (edges.size() == n - 1)\n    {\n        for (auto i : e1)\n            cout << col[i];\n        cout << '\\n';\n        return;\n    }\n\n    dfs(dfs, 0, -1);\n    col[e] = 1;\n    adj[e.first].erase(e.second);\n    adj[e.second].erase(e.first);\n    edges.erase(e);\n    blue.insert(e.first);\n    blue.insert(e.second);\n    for (auto &i : vis)\n        i = 0;\n\n    if (edges.size() == n - 1)\n    {\n        for (auto i : e1)\n            cout << col[i];\n        cout << '\\n';\n        return;\n    }\n\n    if (blue.size() != 3)\n    {\n        dfs(dfs, 0, -1);\n        col[e] = 1;\n        adj[e.first].erase(e.second);\n        adj[e.second].erase(e.first);\n        edges.erase(e);\n        blue.insert(e.first);\n        blue.insert(e.second);\n        for (auto &i : vis)\n            i = 0;\n\n        if (edges.size() == n - 1)\n        {\n            for (auto i : e1)\n                cout << col[i];\n            cout << '\\n';\n            return;\n        }\n    }\n    else\n    {\n        vector<ll> parent(n, -1);\n        ll cs = -1, ce = -1;\n        const auto dfs2 = [&](const auto &self, ll v, ll p) -> bool\n        {\n            vis[v] = 1;\n            for (auto u : adj[v])\n            {\n                if (u != p)\n                {\n                    if (vis[u] == 0)\n                    {\n                        parent[u] = v;\n                        if (self(self, u, v))\n                            return true;\n                    }\n                    else if (vis[u] == 1)\n                    {\n                        cs = u, ce = v;\n                        return true;\n                    }\n                }\n            }\n            vis[v] = 2;\n            return false;\n        };\n\n        vector<pii> cycle;\n        dfs2(dfs2, 0, -1);\n        for (ll i = ce; i != cs; i = parent[i])\n        {\n            cycle.push_back({min(parent[i], i), max(parent[i], i)});\n        }\n        cycle.push_back({min(cs, ce), max(cs, ce)});\n        vector<bool> nhp(n, 0);\n        for (auto i : blue)\n            nhp[i] = 1;\n        for (auto [u, v] : cycle)\n        {\n            if (nhp[u] == 0 || nhp[v] == 0)\n            {\n                e = {u, v};\n                col[e] = 1;\n                break;\n            }\n        }\n        for (auto i : e1)\n            cout << col[i];\n        cout << '\\n';\n        return;\n    }\n}\n\nint32_t main()\n{\n    ios::sync_with_stdio(false), cin.tie(NULL);\n    ll t = 0;\n    cin >> t;\n    while (t--)\n    {\n\n        utk();\n    }\n}"
+}

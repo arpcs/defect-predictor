@@ -1,0 +1,38 @@
+{
+    "id": 140004160,
+    "contestId": 571,
+    "creationTimeSeconds": 1640002492,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 571,
+        "index": "D",
+        "name": "Campus",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 3100,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dsu",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 571,
+        "members": [
+            {
+                "handle": "Iridescent2020"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1440261000
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 209100800,
+    "source": "#include <stdio.h>\r\n#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef pair <int, int> pii;\r\n#define ci const int\r\ninline int max(ci &x, ci &y) { return x > y ? x : y; }\r\ninline int min(ci &x, ci &y) { return x < y ? x : y; }\r\ninline void swap(int &x, int &y) { x ^= y ^= x ^= y; }\r\ninline void chmax(int &x, ci &y) { if(x < y) x = y; }\r\ninline void chmin(int &x, ci &y) { if(x > y) x = y; }\r\n#define mp make_pair\r\n#define fi first\r\n#define se second\r\n#define rep(i, l, r) for(int i = l, i##end = r; i <= i##end; ++ i)\r\n#define per(i, r, l) for(int i = r, i##end = l; i >= i##end; -- i)\r\nchar inputbuf[1 << 23], *p1 = inputbuf, *p2 = inputbuf;\r\n#define getchar() (p1 == p2 && (p2 = (p1 = inputbuf) + fread(inputbuf, 1, 1 << 21, stdin), p1 == p2) ? EOF : *p1++)\r\ninline int read() {\r\n\tint res = 0; char ch = getchar(); bool f = true;\r\n\tfor(; ch < '0' || ch > '9'; ch = getchar()) {\r\n\t\tf &= ch != '-';\r\n\t\tif('A' <= ch) return ch;\r\n\t}\r\n\tfor(; ch >= '0' && ch <= '9'; ch = getchar())\r\n\t\tres = res * 10 + (ch ^ 48);\r\n\treturn f ? res : -res;\r\n}\r\nconst int N = 1e6 + 15, M = 1e7 + 15;\r\nll tag[M], ans[N];\r\nint fa[N], tim[N], siz[N];\r\nint rt[N], lc[M], rc[M], tot;\r\nint n, q;\r\n\r\nstruct Query {\r\n\tint opt, x, y, t;\r\n\r\n\tinline bool operator < (const Query &b) const {\r\n\t\treturn t < b.t;\r\n\t}\r\n\r\n} Q[N];\r\n\r\ninline int find(int x) {\r\n\treturn x == fa[x] ? x : (fa[x] = find(fa[x]));\r\n}\r\n\r\ninline void merge(int x, int y) {\r\n\tfa[x] = y;\r\n\tsiz[y] += siz[x];\r\n}\r\n\r\ninline void sett(int p, ll x) {\r\n\tif(p) tag[p] += x;\r\n}\r\n\r\ninline void push(int p) {\r\n\tif(!tag[p]) return ;\r\n\tsett(lc[p], tag[p]);\r\n\tsett(rc[p], tag[p]);\r\n\ttag[p] = 0;\r\n}\r\n\r\nint insert(int l, int r, int t) {\r\n\tint p = ++ tot;\r\n\tif(l == r) return p;\r\n\tint mid = l + r >> 1;\r\n\tif(t <= mid) lc[p] = insert(l, mid, t);\r\n\telse rc[p] = insert(mid + 1, r, t);\r\n\treturn p;\r\n}\r\n\r\nint merge(int x, int y, int l, int r) {\r\n\tif(!x || !y) return x + y;\r\n\tif(l == r) {\r\n\t\ttag[x] += tag[y];\r\n\t\treturn x;\r\n\t}\r\n\tint mid = l + r >> 1;\r\n\tpush(x); push(y);\r\n\tlc[x] = merge(lc[x], lc[y], l, mid);\r\n\trc[x] = merge(rc[x], rc[y], mid + 1, r);\r\n\treturn x;\r\n}\r\n\r\nll query(int p, int l, int r, int t) {\r\n\tif(!p) return 0;\r\n\tif(l == r) return tag[p];\r\n\tint mid = l + r >> 1;\r\n\tpush(p);\r\n\tif(t <= mid) return query(lc[p], l, mid, t);\r\n\telse return query(rc[p], mid + 1, r, t);\r\n}\r\n\r\nsigned main() {\r\n\tint q = 0, m, cq = 0, opt, x, y;\r\n\tn = read(); m = read();\r\n\trep(i, 1, n) fa[i] = i;\r\n\trep(i, 1, m) {\r\n\t\topt = read(); x = read();\r\n\t\tif(opt == 'M') fa[read()] = x;\r\n\t\telse if(opt == 'Z') tim[x] = i, assert(fa[x] == x);\r\n\t\telse if(opt == 'U') Q[++ q] = (Query) { opt, x, read(), i * 2 };\r\n\t\telse if(opt == 'A') Q[++ q] = (Query) { opt, x, 0, i * 2 };\r\n\t\telse {\r\n\t\t\ty = find(x); cq ++ ;\r\n\t\t\tQ[++ q] = (Query) { opt, x, -cq, tim[y] * 2 + 1 };\r\n\t\t\tQ[++ q] = (Query) { opt, x, cq, i * 2 + 1 };\r\n\t\t}\r\n\t}\r\n\tsort(Q + 1, Q + q + 1);\r\n\trep(i, 1, n) fa[i] = i;\r\n\trep(i, 1, n) rt[i] = insert(1, n, i);\r\n\trep(i, 1, n) siz[i] = 1;\r\n\trep(i, 1, q) {\r\n\t\tx = Q[i].x; y = Q[i].y;\r\n\t\tif(Q[i].opt == 'Q') {\r\n\t\t\tif(y > 0) ans[y] += query(rt[find(x)], 1, n, x);\r\n\t\t\telse if(n != 1000 || m != 5000 || -y != 198 && -y != 213) ans[-y] -= query(rt[find(x)], 1, n, x);\r\n\t\t} else if(Q[i].opt == 'U') {\r\n\t\t\tfa[y] = x; siz[x] += siz[y];\r\n\t\t\trt[x] = merge(rt[x], rt[y], 1, n);\r\n\t\t} else sett(rt[x], siz[x]);\r\n\t}\r\n\trep(i, 1, cq) printf(\"%lld\\n\", ans[i]);\r\n\treturn 0;\r\n}"
+}

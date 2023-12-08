@@ -1,0 +1,44 @@
+{
+    "id": 231926624,
+    "contestId": 1895,
+    "creationTimeSeconds": 1699442454,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "Geanina_the_Great"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 33689600,
+    "source": "#include <algorithm>\r\n#include <iostream>\r\n#include <vector>\r\n\r\n#define pii pair <int, int>\r\n#define x first\r\n#define y second\r\n\r\nusing namespace std;\r\n\r\nconst int NMAX = 6e5;\r\n\r\nstruct Card{\r\n    int x, y, id;\r\n}a[NMAX + 1], b[NMAX + 1];\r\n\r\nbool cmpx(Card c1, Card c2){\r\n    return c1.x < c2.x;\r\n}\r\n\r\nint maxa[NMAX + 1];\r\nint maxb[NMAX + 1];\r\n\r\nvector <int> adj[NMAX + 1];\r\nint state[NMAX + 1];\r\nint in[NMAX + 1];\r\nint curr[NMAX + 1];\r\n\r\nvoid dfs(int node){\r\n   // cout << \"-- \" << node << endl;\r\n    for(int vec : adj[node]){\r\n        //cout << \"&& \" << node << ' ' << vec << endl;\r\n        if(state[node] == -1){\r\n            state[vec] = +1;\r\n            dfs(vec);\r\n        }else if(state[node] == +1){\r\n            curr[vec]++;\r\n            if(in[vec] == curr[vec]){\r\n                state[vec] = -1;\r\n                dfs(vec);\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\nvoid solve(){\r\n    int n;\r\n    cin >> n;\r\n\r\n    for(int i = 1; i <= n; i++){\r\n        cin >> a[i].x;\r\n        a[i].id = i;\r\n    }\r\n    for(int i = 1; i <= n; i++){\r\n        cin >> a[i].y;\r\n    }\r\n\r\n    int m;\r\n    cin >> m;\r\n\r\n    for(int i = 1; i <= m; i++){\r\n        cin >> b[i].x;\r\n        b[i].id = i;\r\n    }\r\n    for(int i = 1; i <= m; i++){\r\n        cin >> b[i].y;\r\n    }\r\n\r\n    for(int i = 1; i <= n + m; i++){\r\n        adj[i].clear();\r\n        state[i] = in[i] = curr[i] = 0;\r\n    }\r\n\r\n    sort(a + 1, a + n + 1, cmpx);\r\n    sort(b + 1, b + m + 1, cmpx);\r\n\r\n    maxa[n] = n;\r\n    for(int i = n - 1; i >= 1; i--){\r\n        if(a[i].y > a[maxa[i + 1]].y){\r\n            maxa[i] = i;\r\n        }else{\r\n            maxa[i] = maxa[i + 1];\r\n        }\r\n    }\r\n\r\n    maxb[m] = m;\r\n    for(int i = m - 1; i >= 1; i--){\r\n        if(b[i].y > b[maxb[i + 1]].y){\r\n            maxb[i] = i;\r\n        }else{\r\n            maxb[i] = maxb[i + 1];\r\n        }\r\n    }\r\n\r\n    for(int i = 1; i <= n; i++){\r\n        int st = 1, dr = m, p = -1;\r\n        while(st <= dr){\r\n            int mid = (st + dr) / 2;\r\n            if(b[mid].x >= a[i].y){\r\n                p = mid;\r\n                dr = mid - 1;\r\n            }else{\r\n                st = mid + 1;\r\n            }\r\n        }\r\n\r\n        if(p != -1){\r\n            p = b[maxb[p]].id;\r\n            adj[n + p].push_back(a[i].id);\r\n            in[a[i].id]++;\r\n        }\r\n    }\r\n\r\n    for(int i = 1; i <= m; i++){\r\n        int st = 1, dr = n, p = -1;\r\n        while(st <= dr){\r\n            int mid = (st + dr) / 2;\r\n            if(a[mid].x >= b[i].y){\r\n                p = mid;\r\n                dr = mid - 1;\r\n            }else{\r\n                st = mid + 1;\r\n            }\r\n        }\r\n\r\n        if(p != -1){\r\n            p = a[maxa[p]].id;\r\n            adj[p].push_back(n + b[i].id);\r\n            in[n + b[i].id]++;\r\n        }\r\n    }\r\n\r\n    for(int i = 1; i <= n + m; i++){\r\n        if(in[i] == 0){\r\n            state[i] = -1;\r\n            dfs(i);\r\n        }\r\n    }\r\n\r\n    int w, l, d;\r\n    w = l = d = 0;\r\n    for(int i = 1; i <= n; i++){\r\n        if(state[i] == +1){\r\n            l++;\r\n        }else if(state[i] == -1){\r\n            w++;\r\n        }else{\r\n            d++;\r\n        }\r\n    }\r\n\r\n    cout << w << ' ' << d << ' ' << l << '\\n';\r\n\r\n}\r\n\r\nint main(){\r\n\r\n    int T;\r\n    cin >> T;\r\n\r\n    while(T--){\r\n        solve();\r\n    }\r\n\r\n    return 0;\r\n}\r\n\r\n/*\r\n1\r\n9\r\n8 8 5 5 5 4 4 1 4\r\n2 7 5 2 8 9 7 1 9\r\n10\r\n9 8 7 6 5 5 4 3 2 1\r\n7 1 6 7 5 8 8 4 9 6\r\n*/\r\n"
+}

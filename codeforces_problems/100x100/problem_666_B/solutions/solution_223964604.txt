@@ -1,0 +1,36 @@
+{
+    "id": 223964604,
+    "contestId": 666,
+    "creationTimeSeconds": 1695086862,
+    "relativeTimeSeconds": 3162,
+    "problem": {
+        "contestId": 666,
+        "index": "B",
+        "name": "World Tour",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2000,
+        "tags": [
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 666,
+        "members": [
+            {
+                "handle": "ORzyzRO"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1695083700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 41,
+    "timeConsumedMillis": 327,
+    "memoryConsumedBytes": 73216000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define int long long\r\n#define pr pair<int, int>\r\n#define pb push_back\r\n#define mid (l + r) / 2\r\n#define ls num << 1\r\n#define rs num << 1 | 1\r\n\r\nconst int N = 3e3 + 5, inf = 1e12;\r\n\r\nstruct lis {\r\n    int id[3], val[3];\r\n\r\n    lis() {\r\n        for (int i = 0; i < 3; i++) id[i] = 0, val[i] = -inf;\r\n    }\r\n\r\n    void ins(int ro, int v) {\r\n        if (val[0] < v) {\r\n            id[2] = id[1];\r\n            id[1] = id[0];\r\n            id[0] = ro;\r\n            val[2] = val[1];\r\n            val[1] = val[0];\r\n            val[0] = v;\r\n        }\r\n        else if (val[1] < v) {\r\n            id[2] = id[1];\r\n            id[1] = ro;\r\n            val[2] = val[1];\r\n            val[1] = v;\r\n        }\r\n        else if (val[2] < v) {\r\n            id[2] = ro;\r\n            val[2] = v;\r\n        }\r\n    }\r\n} path[N], Path[N];\r\n\r\nvector<int> v[N];\r\nqueue<int> q;\r\nmap<pr, int> Map;\r\n\r\nint dis[N][N], vis[N];\r\nint n, m;\r\n\r\ninline int read() {\r\n    int x = 0, m = 1;\r\n    char ch = getchar();\r\n\r\n    while (!isdigit(ch)) {\r\n        if (ch == '-') m = -1;\r\n        ch = getchar();\r\n    }\r\n\r\n    while (isdigit(ch)) {\r\n        x = x * 10 + ch - 48;\r\n        ch = getchar();\r\n    }\r\n\r\n    return x * m;\r\n}\r\n\r\ninline void write(int x) {\r\n    if (x < 0) {\r\n        putchar('-');\r\n        write(-x);\r\n        return;\r\n    }\r\n\r\n    if (x >= 10) write(x / 10);\r\n    putchar(x % 10 + 48);\r\n}\r\n\r\nvoid bfs(int s) {\r\n    for (int i = 1; i <= n; i++) dis[s][i] = inf, vis[i] = 0;\r\n    dis[s][s] = 0;\r\n    vis[s] = 1;\r\n    q.push(s);\r\n\r\n    while (!q.empty()) {\r\n        int ro = q.front();\r\n        q.pop();\r\n\r\n        for (auto u : v[ro]) {\r\n            if (!vis[u]) {\r\n                vis[u] = 1;\r\n                dis[s][u] = dis[s][ro] + 1;\r\n                q.push(u);\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\nsigned main() {\r\n    n = read(), m = read();\r\n\r\n    Map.clear();\r\n\r\n    for (int i = 1; i <= m; i++) {\r\n        int x = read(), y = read();\r\n        if (Map[{x, y}] == 1 || x == y) continue;\r\n        Map[{x, y}] = 1;\r\n        v[x].pb(y);\r\n    }\r\n\r\n    for (int i = 1; i <= n; i++) {\r\n        bfs(i);\r\n        path[i] = lis();\r\n        Path[i] = lis();\r\n    }\r\n\r\n    for (int i = 1; i <= n; i++) {\r\n        for (int j = 1; j <= n; j++) {\r\n            if (i == j || dis[j][i] == inf) continue;\r\n            path[i].ins(j, dis[j][i]);\r\n        }\r\n    }\r\n\r\n    for (int i = 1; i <= n; i++) {\r\n        for (int j = 1; j <= n; j++) {\r\n            if (i == j || dis[i][j] == inf) continue;\r\n            Path[i].ins(j, dis[i][j]);\r\n        }\r\n    }\r\n\r\n    int ans = 0, ansx1, ansx2, ansx3, ansx4;\r\n\r\n    for (int i = 1; i <= n; i++) {\r\n        for (int j = 1; j <= n; j++) {\r\n            if (i == j || dis[i][j] == inf) continue;\r\n            int ti = 0, tj = 0;\r\n            if (path[i].id[0] == j) ti++;\r\n            if (Path[j].id[0] == i) tj++;\r\n\r\n            int ni = ti, nj = tj;\r\n            ni++;\r\n            nj++;\r\n\r\n            if (path[i].id[ni] == j) ni++;\r\n            if (Path[j].id[nj] == i) nj++;\r\n\r\n            if (path[i].id[ti] != Path[j].id[tj]) {\r\n                if (ans < path[i].val[ti] + Path[j].val[tj] + dis[i][j]) {\r\n                    ans = path[i].val[ti] + Path[j].val[tj] + dis[i][j];\r\n                    ansx1 = path[i].id[ti], ansx2 = i, ansx3 = j, ansx4 = Path[j].id[tj];\r\n                }\r\n            }\r\n            else {\r\n                int x = path[i].val[ti] + Path[j].val[nj], y = path[i].val[ni] + Path[j].val[tj];\r\n                int x1 = path[i].id[ti], x2 = i, x3 = j, x4 = Path[j].id[nj], x5 = path[i].id[ni], x6 = Path[j].id[tj];\r\n                if (x < y) {\r\n                    x = y;\r\n                    x1 = x5;\r\n                    x4 = x6;\r\n                }\r\n                x += dis[i][j];\r\n\r\n                if (ans < x) {\r\n                    ans = x;\r\n                    ansx1 = x1, ansx2 = x2, ansx3 = x3, ansx4 = x4;\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    write(ansx1);\r\n    putchar(' ');\r\n    write(ansx2);\r\n    putchar(' ');\r\n    write(ansx3);\r\n    putchar(' ');\r\n    write(ansx4);\r\n}"
+}

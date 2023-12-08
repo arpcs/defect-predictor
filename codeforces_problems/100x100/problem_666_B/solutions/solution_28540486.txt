@@ -1,0 +1,36 @@
+{
+    "id": 28540486,
+    "contestId": 666,
+    "creationTimeSeconds": 1500015722,
+    "relativeTimeSeconds": 6541,
+    "problem": {
+        "contestId": 666,
+        "index": "B",
+        "name": "World Tour",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2000,
+        "tags": [
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 666,
+        "members": [
+            {
+                "handle": "knock_out"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1500009180
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 41,
+    "timeConsumedMillis": 4648,
+    "memoryConsumedBytes": 39628800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std ;\r\ntypedef vector<int> VI;\r\ntypedef long double LD;\r\ntypedef long long int LLI;\r\ntypedef pair <int, int> PII;\r\ntypedef pair <LLI, LLI> PLLILLI;\r\n#define F first\r\n#define S second\r\n#define endl '\\n'\r\n#define MP make_pair\r\n#define PB push_back\r\n#define ALL(x) x.begin(), x.end()\r\n#define FOR(i,start,stop) for (int i = start, _stop = stop; i <= _stop; i++)\r\n#define ROF(i,start,stop) for (int i = start, _stop = stop; i >= _stop; i--)\r\n#define TR(it,container) for ( __typeof (container.begin()) it = container.begin(); it != container.end(); it++)\r\n#ifdef ONLINE_JUDGE\r\n    #define IN_OUT\r\n    #define FAST ios::sync_with_stdio (false); cin.tie(NULL)\r\n    #define TESTCASES\r\n    #define WAIT\r\n    #define dbg(...)\r\n    #define PVV(arr,n)\r\n    #define PA(arr,n)\r\n    #define PAA(arr,n,m)\r\n#else\r\n    #include \"DEBUG.txt\" \r\n    string F_N = (string)__FILE__;\r\n    #define IN_OUT freopen((\"in\" + F_N.substr(F_N.length() - 5, 1) + \".txt\").c_str(), \"r\", stdin); freopen(\"out.txt\", \"w\", stdout)\r\n#endif\r\n//--------------------------------------------------------------------------------------------------------------------------------\r\nconst int N = 3e3, M = 5e3, INF = 1e6;\r\nint n, m;\r\nVI e[N + 1];\r\nint dist[N + 1][N + 1];\r\nbitset<N + 1> visited;\r\nVI ans(4);\r\nset<PII> farthest[N + 1];\r\nset<pair<int, PII>> temp[N + 1];\r\nint total;\r\n\r\nvoid init()\r\n{\r\n    total = 0;\r\n    ans[0] = 0;\r\n    FOR (i, 0, N)\r\n    {\r\n        e[i].clear();\r\n        farthest[i].clear();\r\n        temp[i].clear();\r\n    }\r\n    fill_n(&dist[0][0], (N + 1) * (N + 1), -INF);\r\n}\r\n\r\nvoid bfs(int u)\r\n{\r\n    queue<int> q;\r\n    q.push(u);\r\n    dist[u][u] = 0;\r\n    visited[u] = 1;\r\n    while (q.empty() == false)\r\n    {\r\n        int cur = q.front();\r\n        q.pop();\r\n        FOR (i, 0, e[cur].size() - 1)\r\n        {\r\n            int v = e[cur][i];\r\n            if (visited[v] == 0)\r\n            {\r\n                visited[v] = 1;\r\n                dist[u][v] = dist[u][cur] + 1;\r\n                q.push(v);\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\nvoid consider(int u)\r\n{\r\n    VI local_ans(4);\r\n    FOR (v, 1, n)\r\n    {\r\n        if (u == v)\r\n        {\r\n            continue;\r\n        }\r\n        local_ans[0] = u;\r\n        local_ans[1] = v;\r\n\r\n        for (auto it = temp[v].rbegin(); it != temp[v].rend(); it++)\r\n        {\r\n            if (dist[u][v] + it->F > total)\r\n            {\r\n                int w = it->S.F;\r\n                int x = it->S.S;    \r\n                if (w == u || w == v || x == w || x == u || x == v)\r\n                {\r\n                    continue;\r\n                }\r\n                local_ans[2] = w;\r\n                local_ans[3] = x;\r\n                ans = local_ans;\r\n                total = dist[u][v] + it->F;\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\nvoid solve()\r\n{\r\n    FOR (i, 1, n)\r\n    {\r\n        visited.reset();\r\n        bfs(i);\r\n        FOR (j, 1, n)\r\n        {\r\n            farthest[i].insert({dist[i][j], j});\r\n            if (farthest[i].size() > 5)\r\n            {\r\n                auto it = farthest[i].begin();\r\n                auto it1 = it;\r\n                it1++;\r\n                //dbg(\"in\");\r\n                farthest[i].erase(it, it1);\r\n            }\r\n        }\r\n        //cout << farthest[i].size() << endl;\r\n        //dbg(i, farthest[i]);\r\n    }\r\n    FOR (i, 1, n)\r\n    {\r\n        FOR (j, 1, n)\r\n        {\r\n            TR (it, farthest[j])\r\n            {\r\n                temp[i].insert({dist[i][j] + it->F, {j, it->S}});\r\n                if (temp[i].size() > 5)\r\n                {\r\n                    temp[i].erase(temp[i].begin());\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    PAA(dist, n + 1, n + 1);\r\n    FOR (i, 1, n)\r\n    {\r\n        consider(i);\r\n    }\r\n    dbg(total);\r\n    FOR (i, 0, 3)\r\n    {\r\n        cout << ans[i] << \" \";\r\n    }\r\n    cout << endl;\r\n}\r\n\r\nint main()\r\n{\r\n    IN_OUT;\r\n    FAST;\r\n    TESTCASES\r\n    {\r\n        init();\r\n        cin >> n >> m;\r\n        FOR (i, 0, m - 1)\r\n        {\r\n            int u, v;\r\n            cin >> u >> v;\r\n            e[u].PB(v);\r\n        }\r\n        solve();\r\n    }\r\n    WAIT;\r\n    return 0;\r\n}"
+}

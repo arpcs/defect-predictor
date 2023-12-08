@@ -1,0 +1,36 @@
+{
+    "id": 212945696,
+    "contestId": 878,
+    "creationTimeSeconds": 1688895668,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "ReineRabbit"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 37,
+    "timeConsumedMillis": 187,
+    "memoryConsumedBytes": 10444800,
+    "source": "#include<iostream>\r\n#include<cstdio>\r\n#include<string>\r\n#include<cstring>\r\n#include<vector>\r\n#include<algorithm>\r\nusing namespace std;\r\ntypedef long long ll;\r\nconst ll N=1e5+5;\r\nconst ll mod=1e9+7;\r\nconst ll lim=100000000000100ll;\r\nll n,q,a[N],l,r,pw[N],ipw[N];\r\nstruct node{\r\n\tll ql;ll qr;ll qid;\r\n}qu[N];\r\nll ans[N],s[N];\r\nll sta[N],stp;\r\nll stasum[N],modsum[N],len[N];\r\nll realsum[N];\r\ninline void read(ll &x) \r\n{\r\n\tll f=1;char c;\r\n\tfor(x=0,c=getchar();c<'0'||c>'9';c=getchar()) if(c=='-') f=-1;\r\n\tfor(;c>='0'&&c<='9';c=getchar()) x=(x<<1)+(x<<3)+(c^48); x*=f;\r\n} \r\ninline ll mn(ll _x,ll _y){return _x<_y?_x:_y;}\r\ninline ll mx(ll _x,ll _y){return _x>_y?_x:_y;}\r\ninline ll ab(ll _x){return _x<0?-_x:_x;}\r\ninline ll qpow(ll base,ll cnt){\r\n\tll rest=1;\r\n\twhile(cnt){\r\n\t\tif(cnt&1) rest=1ll*rest*base%mod;\r\n\t\tbase=1ll*base*base%mod;\r\n\t\tcnt>>=1;\r\n\t}\r\n\treturn rest;\r\n}\r\ninline ll rec(ll x){return (x<0?x+mod:x);}\r\ninline ll modadd(ll x,ll y){x+=y;return (x>=mod?x-mod:x);}\r\ninline ll modsub(ll x,ll y){x-=y;return (x<0?x+mod:x);}\r\n\r\ninline bool cmp(node p,node q){return p.qr<q.qr;}\r\ninline void sta_push(ll v,ll pos){\r\n\tif(v<0||stp==0){\r\n\t\tsta[++stp]=pos;\r\n\t\tmodsum[stp]=rec(v);\r\n\t\tstasum[stp]=(stasum[stp-1]+2ll*modsum[stp]%mod)%mod;\r\n\t\tlen[stp]=1;realsum[stp]=v;\r\n\t\treturn ;\r\n\t}\r\n\tsta[stp]=pos;\r\n\tmodsum[stp]=(modsum[stp]+1ll*rec(v)*pw[len[stp]]%mod)%mod;\r\n\tstasum[stp]=(stasum[stp-1]+2ll*modsum[stp]%mod)%mod;\r\n\tif(len[stp]>=48||v>=(lim-realsum[stp]+(1ll<<len[stp])-1)/(1ll<<len[stp])||realsum[stp]==lim) realsum[stp]=lim;\r\n\telse realsum[stp]+=1ll*v*(1ll<<len[stp]);\r\n\t++len[stp];\r\n\twhile(stp>1&&realsum[stp]>=0){\r\n\t\tmodsum[stp-1]=(modsum[stp-1]+1ll*modsum[stp]*pw[len[stp-1]]%mod)%mod;\r\n\t\tstasum[stp-1]=(stasum[stp-2]+2ll*modsum[stp-1]%mod)%mod;\r\n\t\tif(len[stp-1]>=48||realsum[stp]>=(lim-realsum[stp-1]+(1ll<<len[stp-1])-1)/(1ll<<len[stp-1])||realsum[stp-1]==lim||realsum[stp]==lim)\r\n\t\t\trealsum[stp-1]=lim;\r\n\t\telse realsum[stp-1]+=1ll*realsum[stp]*(1ll<<len[stp-1]);\r\n\t\tlen[stp-1]+=len[stp];sta[stp-1]=sta[stp];\r\n\t\t--stp;\r\n\t}\r\n\treturn ;\r\n}\r\ninline ll query(ll l,ll r){\r\n\tll el=1,er=stp,mid,bl=stp,rest=0;\r\n\twhile(el<=er){\r\n\t\tmid=el+er>>1;\r\n\t\tif(l>=sta[mid-1]+1) {bl=mid;el=mid+1;}\r\n\t\telse er=mid-1;\r\n\t}\r\n\trest=modsub(stasum[stp],stasum[bl]);\r\n\trest=modadd(rest,1ll*modsub(s[sta[bl]],s[l-1])*ipw[l]%mod);\r\n\treturn rest;\r\n}\r\nint main()\r\n{\r\n\tread(n);read(q);\r\n\tfor(int i=1;i<=n;i++) read(a[i]);\r\n\tpw[0]=1;for(ll i=1;i<=n;i++) pw[i]=2ll*pw[i-1]%mod;\r\n\tipw[n]=qpow(pw[n],mod-2);\r\n\tfor(int i=n-1;i>=0;i--) ipw[i]=2ll*ipw[i+1]%mod;\r\n\tfor(int i=1;i<=n;i++) s[i]=(s[i-1]+1ll*pw[i]*rec(a[i])%mod)%mod;\r\n\tfor(int i=1;i<=q;i++){\r\n\t\tread(qu[i].ql);read(qu[i].qr);\r\n\t\tqu[i].qid=i;\r\n\t}\r\n\tsort(qu+1,qu+q+1,cmp);\r\n\tfor(int i=1,j=1;i<=q;i++){\r\n\t\twhile(j<=qu[i].qr){\r\n\t\t\tsta_push(a[j],j);++j;\r\n\t\t}\r\n\t\tans[qu[i].qid]=query(qu[i].ql,qu[i].qr);\r\n\t}\r\n\tfor(int i=1;i<=q;i++) printf(\"%lld\\n\",ans[i]);\r\n\treturn 0;\r\n}  \r\n"
+}

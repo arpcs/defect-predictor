@@ -1,0 +1,36 @@
+{
+    "id": 210980634,
+    "contestId": 164,
+    "creationTimeSeconds": 1687656029,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 164,
+        "index": "A",
+        "name": "Variable, or There and Back Again",
+        "type": "PROGRAMMING",
+        "points": 500.0,
+        "rating": 1700,
+        "tags": [
+            "dfs and similar",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 164,
+        "members": [
+            {
+                "handle": "rr_"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1333897500
+    },
+    "programmingLanguage": "D",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 36,
+    "timeConsumedMillis": 468,
+    "memoryConsumedBytes": 24268800,
+    "source": "import core.bitop, std.bitmanip;\r\nimport core.checkedint;\r\nimport std.algorithm, std.functional, std.meta;\r\nimport std.array, std.container;\r\nimport std.bigint;\r\nimport std.conv;\r\nimport std.math, std.numeric;\r\nimport std.range, std.range.interfaces;\r\nimport std.stdio, std.string;\r\nimport std.ascii, std.typecons;\r\nimport std.datetime.date;\r\n\r\nvoid main(string[] args) {\r\n    int n, m;\r\n    readf!\"%s %s\"(n, m); readln;\r\n\r\n    enum State {\r\n        IGNORE = 0,\r\n        ASSIGN = 1,\r\n        USING = 2\r\n    }\r\n\r\n    auto f = readln.chomp.split.map!(pipe!(to!int, x => cast(State)x)).array;\r\n\r\n    auto g = new int[][] (n);\r\n    foreach (_; 0 .. m) {\r\n        int a, b;\r\n        readf!\"%s %s\"(a, b); readln;\r\n\r\n        --a, --b;\r\n        g[a] ~= b;\r\n    }\r\n\r\n    auto starts = f.enumerate()\r\n        .filter!(t => t.value == State.ASSIGN).array\r\n        .map!(t => t.index.to!int).array;\r\n    \r\n    auto q = DList!int(starts);\r\n    auto vis = new bool[] (n);\r\n    vis[] = false;\r\n    while (!q.empty()) {\r\n        auto v = q.front();\r\n        q.removeFront();\r\n\r\n        if (vis[v]) { continue; }\r\n        vis[v] = true;\r\n\r\n        foreach (u; g[v]) {\r\n            if (vis[u]) { continue; }\r\n            if (f[u] == State.ASSIGN) { continue; }\r\n\r\n            q ~= u;\r\n        }\r\n    }\r\n\r\n    auto revg = new int[][] (n);\r\n    foreach (v; 0 .. n) {\r\n        foreach (u; g[v]) {\r\n            revg[u] ~= v;\r\n        }\r\n    }\r\n\r\n    auto ends = f.enumerate()\r\n        .filter!(t => t.value == State.USING).array\r\n        .map!(t => t.index.to!int).array;\r\n\r\n    auto revvis = new bool[] (n);\r\n    revvis[] = false;\r\n\r\n    auto revq = DList!int(ends);\r\n    while (!revq.empty()) {\r\n        auto v = revq.front();\r\n        revq.removeFront();\r\n\r\n        if (revvis[v]) { continue; }\r\n        revvis[v] = true;\r\n        if (f[v] == State.ASSIGN) { continue; }\r\n\r\n        foreach (u; revg[v]) {\r\n            if (revvis[u]) { continue; }\r\n\r\n            revq ~= u;\r\n        }\r\n    }\r\n\r\n    debug { writeln(vis, ' ', revvis); }\r\n\r\n    auto interesting = n.iota.map!(i => vis[i] && revvis[i]).array;\r\n    interesting.each!(pipe!(to!int, writeln));\r\n}"
+}

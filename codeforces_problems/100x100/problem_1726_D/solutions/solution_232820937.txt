@@ -1,0 +1,41 @@
+{
+    "id": 232820937,
+    "contestId": 1726,
+    "creationTimeSeconds": 1700030700,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "D",
+        "name": "Edge Split",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "probabilities",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "yvbf"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "Java 8",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 77,
+    "timeConsumedMillis": 1357,
+    "memoryConsumedBytes": 67072000,
+    "source": "import java.io.*;\r\nimport java.util.*;\r\n\r\n\r\npublic class Main {\r\nboolean MULTI_CASE = true;\r\nboolean ALWAYS_FLUSH = false;\r\n\r\n\r\nvoid go() {\r\n    int n = nextInt();\r\n    int m = nextInt();\r\n    edges = inEdges(m);\r\n    d = edges2List(edges, n);\r\n    dfsSpan();\r\n    Set<Long> leftEdges = new HashSet<>();\r\n    Set<Integer> leftDots = new HashSet<>();\r\n    int last0 = -1, last1 = -1;\r\n    for (int i = 0; i < n; ++i) {\r\n        for (int j = 0; j < d[i].length; ++j) {\r\n            if (!dInTree[i][j]) {\r\n                leftEdges.add(enc(i, d[i][j]));\r\n                leftDots.add(i);\r\n                leftDots.add(d[i][j]);\r\n                last0 = i;\r\n                last1 = d[i][j];\r\n            }\r\n        }\r\n    }\r\n    if (m - n == 2 && leftDots.size() == 3) { // left edges form a circle.\r\n        walkEnd = last1;\r\n        pull = -1;\r\n        walk(last0, -1);\r\n        leftEdges.remove(enc(last0, last1));\r\n        leftEdges.remove(enc(last1, last0));\r\n        leftEdges.add(enc(pull, last1));\r\n        leftEdges.add(enc(last1, pull));\r\n    }\r\n    for (int[] en : edges) {\r\n        if (leftEdges.contains(enc(en[0], en[1]))) so(0);\r\n        else so(1);\r\n    }\r\n    sl();\r\n}\r\n\r\nlong enc(int x, int y) {\r\n    return ((long) x) << 32 | y;\r\n}\r\n\r\nint walkEnd;\r\nint pull;\r\n\r\nint[][] edges;\r\nint[][] d;\r\nboolean[][] dInTree;\r\nboolean[] vertexInTree;\r\nint[][] opid;\r\n\r\nvoid dfsSpan() {\r\n    int n = d.length;\r\n    int m = edges.length;\r\n    vertexInTree = new boolean[n];\r\n    dInTree = new boolean[n][0];\r\n    for (int i = 0; i < n; ++i) dInTree[i] = new boolean[d[i].length];\r\n    dfsSpanTree(0);\r\n}\r\n\r\nvoid dfsSpanTree(int cur) {\r\n    vertexInTree[cur] = true;\r\n    for (int i = 0; i < d[cur].length; ++i) {\r\n        int x = d[cur][i];\r\n        if (!vertexInTree[x]) {\r\n            dInTree[cur][i] = true;\r\n            dInTree[x][opid[cur][i]] = true;\r\n            dfsSpanTree(x);\r\n        }\r\n    }\r\n}\r\n\r\nvoid walk(int cur, int fa) {\r\n    for (int i = 0; i < d[cur].length; ++i) {\r\n        int x = d[cur][i];\r\n        if (x == fa) continue;\r\n        if (!dInTree[cur][i]) continue;\r\n        if (x == walkEnd) {\r\n            pull = cur;\r\n            return;\r\n        }\r\n        walk(x, cur);\r\n        if (pull != -1) return;\r\n    }\r\n}\r\n\r\nint[][] inEdges(int n) {\r\n    int[][] edges = new int[n][2];\r\n    for (int i = 0; i < n; ++i)\r\n        for (int j = 0; j < 2; ++j)\r\n            edges[i][j] = nextInt() - 1;\r\n    return edges;\r\n}\r\n\r\nint[][] edges2List(int[][] edges, int n) {\r\n    int[] g = new int[n];\r\n    for (int[] en : edges) {\r\n        g[en[0]]++;\r\n        g[en[1]]++;\r\n    }\r\n    int[][] r = new int[n][0];\r\n    opid = new int[n][0];\r\n    for (int i = 0; i < n; ++i) {\r\n        r[i] = new int[g[i]];\r\n        opid[i] = new int[g[i]];\r\n    }\r\n    int[] ri = new int[n];\r\n    for (int[] en : edges) {\r\n        opid[en[0]][ri[en[0]]] = ri[en[1]];\r\n        opid[en[1]][ri[en[1]]] = ri[en[0]];\r\n        r[en[0]][ri[en[0]]++] = en[1];\r\n        r[en[1]][ri[en[1]]++] = en[0];\r\n    }\r\n    return r;\r\n}\r\n\r\n\r\n/**\r\n * Input.\r\n */\r\nInputStream inStream;\r\nbyte[] inBuff = new byte[1024];\r\nint inBuffCursor = 0, inBuffLen = 0;\r\n\r\nboolean isVisibleChar(int c) {\r\n    return 33 <= c && c <= 126;\r\n}\r\n\r\nboolean hasNextByte() {\r\n    if (inBuffCursor < inBuffLen) return true;\r\n    inBuffCursor = 0;\r\n    try {\r\n        inBuffLen = inStream.read(inBuff);\r\n    } catch (Exception e) {\r\n        e.printStackTrace();\r\n    }\r\n    return inBuffLen > 0;\r\n}\r\n\r\nboolean hasNext() {\r\n    while (hasNextByte() && !isVisibleChar(inBuff[inBuffCursor])) inBuffCursor++;\r\n    return hasNextByte();\r\n}\r\n\r\nint nextByte() {\r\n    return hasNextByte() ? inBuff[inBuffCursor++] : -1;\r\n}\r\n\r\nString next() {\r\n    if (!hasNext()) throw new RuntimeException(\"no next.\");\r\n    StringBuilder sb = new StringBuilder();\r\n    int b = nextByte();\r\n    while (isVisibleChar(b)) {\r\n        sb.appendCodePoint(b);\r\n        b = nextByte();\r\n    }\r\n    return sb.toString();\r\n}\r\n\r\nlong nextLong() {\r\n    if (!hasNext()) throw new RuntimeException(\"no next.\");\r\n    long result = 0;\r\n    boolean negative = false;\r\n    int b = nextByte();\r\n    if (b < '0') {\r\n        if (b == '-') negative = true;\r\n        else if (b != '+') throw new RuntimeException(\"long number must start with +/-.\");\r\n        b = nextByte();\r\n    }\r\n    while (isVisibleChar(b)) {\r\n        if (b < '0' || b > '9') throw new RuntimeException(\"wrong digit in long:\" + (char) b);\r\n        // TODO: may overflow here, even if it is a valid Long, eg.-(1<<63).\r\n        result = result * 10 + (b - '0');\r\n        b = nextByte();\r\n    }\r\n    return negative ? -result : result;\r\n}\r\n\r\nint nextInt() {\r\n    long x = nextLong();\r\n    if (x < Integer.MIN_VALUE || x > Integer.MAX_VALUE)\r\n        throw new RuntimeException(\"int overflow:\" + x);\r\n    return (int) x;\r\n}\r\n\r\ndouble nextDouble() {\r\n    return Double.parseDouble(next());\r\n}\r\n\r\n/**\r\n * Output.\r\n */\r\nPrintWriter printOut = new PrintWriter(System.out);\r\n\r\nvoid so(Object obj, boolean newLine) {\r\n    if (newLine) printOut.println(obj);\r\n    else printOut.print(obj);\r\n    if (ALWAYS_FLUSH) printOut.flush();\r\n}\r\n\r\nvoid so(Object obj) {\r\n    so(obj, false);\r\n}\r\n\r\nvoid sl(Object obj) {\r\n    so(obj, true);\r\n}\r\n\r\nvoid sl() {\r\n    sl(\"\");\r\n}\r\n\r\n/**\r\n * Main.\r\n */\r\nvoid mainGo() {\r\n    try {\r\n        inStream = new FileInputStream(\"src/main.in\");\r\n        ALWAYS_FLUSH = true;\r\n    } catch (Exception e) {\r\n        inStream = System.in;\r\n    }\r\n    while (hasNext()) {\r\n        if (MULTI_CASE) {\r\n            int T = nextInt();\r\n            if (T == 0) break;\r\n            for (int i = 0; i < T; ++i) {\r\n                go();\r\n            }\r\n        } else {\r\n            go();\r\n        }\r\n    }\r\n    printOut.flush();\r\n}\r\n\r\npublic static void main(String[] args) throws Exception {\r\n    new Main().mainGo();\r\n}\r\n}\r\n"
+}

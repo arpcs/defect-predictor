@@ -1,0 +1,36 @@
+{
+    "id": 171796270,
+    "contestId": 878,
+    "creationTimeSeconds": 1662977996,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "CrTsIr"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 358,
+    "memoryConsumedBytes": 15360000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int B=400,mod=1000000007;\r\nint n,q,a[100003],ed[17][100003],val[17][100003];\r\nbool vis[100003];\r\nstruct node{\r\n\tint maxn,spe,ret;\r\n}dat[503];\r\nint calc(int l,int r,int given){\r\n\tif(given<0)return 0;\r\n\tfor(int i=r;i>=l;i--)\r\n\t\tif(2ll*given+a[i]>=mod)\r\n\t\t\treturn mod;\r\n\t\telse\r\n\t\t\tif(2*given+a[i]<0)\r\n\t\t\t\treturn -1;\r\n\t\t\telse\r\n\t\t\t\tgiven=2*given+a[i];\r\n\treturn given;\r\n}\r\nint sum[100003],pw[100003],inv[100003];\r\nint query(int l,int r){\r\n\treturn 1ll*(sum[r+1]-sum[l]+mod)*inv[l]%mod;\r\n}\r\nint lb[503],rb[503],m;\r\nint main(){\r\n//\tfreopen(\"d.in\",\"r\",stdin);\r\n//\tfreopen(\"d.out\",\"w\",stdout);\r\n\tscanf(\"%d%d\",&n,&q);\r\n\tfor(int i=0;i<n;i++)\r\n\t\tscanf(\"%d\",a+i);\r\n\tpw[0]=1;for(int i=1;i<100003;i++)pw[i]=2ll*pw[i-1]%mod;\r\n\tinv[0]=1;for(int i=1;i<100003;i++)inv[i]=500000004ll*inv[i-1]%mod;\r\n\tfor(int i=0;i<n;i++)\r\n\t\tsum[i+1]=(sum[i]+1ll*pw[i+1]*(mod+a[i]))%mod;\r\n\tfor(int i=0;i<n;i+=B){\r\n\t\tlb[m]=i;\r\n\t\trb[m]=min(i+B,n)-1;\r\n\t\tvis[rb[m]]=1;\r\n\t\tint l=0,r=mod,mid;\r\n\t\twhile(l!=r){\r\n\t\t\tmid=(l+r>>1);\r\n\t\t\tif(calc(lb[m],rb[m],mid)==mod)\r\n\t\t\t\tr=mid;\r\n\t\t\telse\r\n\t\t\t\tl=mid+1;\r\n\t\t}\r\n\t\tdat[m].maxn=l;\r\n\t\tint val=calc(lb[m],rb[m],l-1);\r\n\t\tif(val>=0)\r\n\t\t\tdat[m].spe=l-1,dat[m].ret=val;\r\n\t\telse\r\n\t\t\tdat[m].spe=-1;\r\n\t\tm++;\r\n\t}vis[n-1]=0;\r\n\tfor(int i=0;i<n;i++){\r\n\t\tint given=0,j;\r\n\t\tfor(j=i;j>=0;j--)\r\n\t\t\tif(!vis[j])\r\n\t\t\t\tif(2ll*given+a[j]>=mod){\r\n\t\t\t\t\tgiven=mod;\r\n\t\t\t\t\ted[0][i]=0;\r\n\t\t\t\t\tbreak;\r\n\t\t\t\t}else\r\n\t\t\t\t\tif(2*given+a[j]<0){\r\n\t\t\t\t\t\tgiven=-1;\r\n\t\t\t\t\t\ted[0][i]=j;\r\n\t\t\t\t\t\tbreak;\r\n\t\t\t\t\t}else\r\n\t\t\t\t\t\tgiven=2*given+a[j];\r\n\t\t\telse\r\n\t\t\t\tbreak;\r\n\t\tif(given>=0&&given<mod)\r\n\t\t\twhile(j>=0){\r\n\t\t\t\tif(given>=dat[j/B].maxn){\r\n\t\t\t\t\ted[0][i]=0;\r\n\t\t\t\t\tbreak;\r\n\t\t\t\t}else\r\n\t\t\t\t\tif(given==dat[j/B].spe)\r\n\t\t\t\t\t\tgiven=dat[j/B].ret;\r\n\t\t\t\t\telse{\r\n\t\t\t\t\t\tfor(;;j--)\r\n\t\t\t\t\t\t\tif(2*given+a[j]<0){\r\n\t\t\t\t\t\t\t\ted[0][i]=j;\r\n\t\t\t\t\t\t\t\tbreak;\r\n\t\t\t\t\t\t\t}else\r\n\t\t\t\t\t\t\t\tgiven=2*given+a[j];\r\n\t\t\t\t\t\tbreak;\r\n\t\t\t\t\t}\r\n\t\t\t\tj-=B;\r\n\t\t\t}\r\n\t\tif(j==-1)\r\n\t\t\ted[0][i]=0;\r\n\t}\r\n\tfor(int i=0;i<n;i++)\r\n\t\tval[0][i]=query(ed[0][i],i);\r\n\tfor(int i=1;i<17;i++)\r\n\t\tfor(int j=0;j<n;j++)\r\n\t\t\tif(ed[i-1][j]){\r\n\t\t\t\ted[i][j]=ed[i-1][ed[i-1][j]-1];\r\n\t\t\t\tval[i][j]=(val[i-1][j]+val[i-1][ed[i-1][j]-1])%mod;\r\n\t\t\t}\r\n\twhile(q--){\r\n\t\tint l,r;\r\n\t\tscanf(\"%d%d\",&l,&r);\r\n\t\tif(l==r){\r\n\t\t\tprintf(\"%d\\n\",(a[l-1]+mod)%mod);\r\n\t\t\tcontinue;\r\n\t\t}r--;\r\n\t\tint ans=(a[l-1]+mod)%mod;\r\n\t\tfor(int i=16;i>=0;i--)\r\n\t\t\tif(ed[i][r]>l){\r\n\t\t\t\tans=(ans+val[i][r])%mod;\r\n\t\t\t\tr=ed[i][r]-1;\r\n\t\t\t}\r\n\t\tans=(ans+query(l,r))%mod;\r\n\t\tprintf(\"%d\\n\",ans);\r\n\t}\r\n}\r\n"
+}

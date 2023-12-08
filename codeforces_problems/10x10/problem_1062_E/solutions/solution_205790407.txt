@@ -1,0 +1,39 @@
+{
+    "id": 205790407,
+    "contestId": 1062,
+    "creationTimeSeconds": 1684044735,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1062,
+        "index": "E",
+        "name": "Company",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1062,
+        "members": [
+            {
+                "handle": "bkifhr7"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1542209700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 54,
+    "timeConsumedMillis": 733,
+    "memoryConsumedBytes": 22220800,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\ntypedef long long ll;\ntypedef vector<int> vi;\n#define endl '\\n'\n#define fo(i,a,b) for(int i=a;i<=b;i++)\n#define rf(i,a,b) for(int i=a;i>=b;i--) \n#define fast_io ios_base::sync_with_stdio(0);\n#define show(x) cout<<x<<endl;\n#define pret(x) cout<<x<<endl; return 0;\n#define disp(x) cout<<x<<\" \";\n#define let(x,y) cout<<x<<\" \"<<y<<endl;\nll MOD=1e9+7;\n\nconst int MAX=100001;\nint clok=0,dp[MAX][20];\nint level[MAX],n,t[4*MAX],g[4*MAX];\nint start[MAX],time_to_id[3*MAX];\n\nvoid build(int a[], int v, int tl, int tr) {\n    if (tl == tr) {\n        t[v] = a[tl];\n        g[v] = a[tl];\n    } else {\n        int tm = (tl + tr) / 2;\n        build(a, v*2, tl, tm);\n        build(a, v*2+1, tm+1, tr);\n        t[v] = max(t[v*2],t[v*2+1]);\n        g[v] = min(g[v*2],g[v*2+1]);\n    }\n}\n\nint find_max(int v, int tl, int tr, int l, int r) {\n    if (l > r) \n        return 0;\n    if (l == tl && r == tr) {\n        return t[v];\n    }\n    int tm = (tl + tr) / 2;\n    return max(find_max(v*2, tl, tm, l, min(r, tm)),find_max(v*2+1, tm+1, tr, max(l, tm+1), r));\n}\n\nint find_min(int v, int tl, int tr, int l, int r) {\n    if (l > r) \n        return 1e8;\n    if (l == tl && r == tr) {\n        return g[v];\n    }\n    int tm = (tl + tr) / 2;\n    return min(find_min(v*2, tl, tm, l, min(r, tm)), find_min(v*2+1, tm+1, tr, max(l, tm+1), r));\n}\n\nvector<int>v[MAX],adj[MAX];\n\nvoid dfs(int id,int p,int l){\n\tlevel[id]=l;\n\tstart[id]=clok++;\n\ttime_to_id[clok-1]=id;\n\tfor(auto i:v[id]){\n\t\tif(i!=p){\n\t\t\tdp[i][0]=id;\n\t\t\tdfs(i,id,l+1);\n\t\t}\n\t}\n\tclok++;\n}\n\nint kan(int x,int k){\n\tint curr=0;\n\twhile(k>0){\n\t\tif(k%2){\n\t\t\tx=dp[x][curr];\n\t\t}\n\t\tk/=2;\n\t\tcurr++;\n\t}\n\treturn x;\n}\n\nint lca(int x,int y){\n\tint k=abs(level[x]-level[y]);\n\tif(level[x]>level[y]) swap(x,y);\n\ty=kan(y,k);\n\tif(y==x) return x;\n\tint ans=0,l=1,r=level[x];\n\twhile(l<=r){\n\t\tint m=(l+r)/2;\n\t\tint tx=kan(x,m);\n\t\tint ty=kan(y,m);\n\t\tif(tx==ty and tx!=0){\n\t\t\tans=tx;\n\t\t\tr=m-1;\n\t\t}\n\t\telse l=m+1;\n\t}\n\treturn ans;\n}\n\nint rangelca(int l,int r){\n\tint mx=find_max(1,1,n,l,r);\n\tint mn=find_min(1,1,n,l,r);\n\treturn lca(time_to_id[mx],time_to_id[mn]);\n}\n\nint find(int x,int l,int r){\n\tif(x==l) return rangelca(l+1,r);\n\telse if(x==r) return rangelca(l,r-1);\n\telse{\n\t\treturn lca(rangelca(l,x-1),rangelca(x+1,r));\n\t}\n}\n\nint main(){\n\tfast_io;\n\tint q;\n\tcin>>n>>q;\n\tfor (int i = 0; i < n-1; ++i)\n\t{\n\t\tint x;\n\t\tcin>>x;\n\t\tv[i+2].push_back(x);\n\t\tv[x].push_back(i+2);\n\t}\n\tdfs(1,-1,0);\n\tbuild(start,1,1,n);\n\tfor (int i = 1; i < 20; ++i)\n\t{\n\t\tfor (int j = 1; j < n+1; ++j)\n\t\t{\n\t\t\tint p=dp[j][i-1];\n\t\t\tif(p!=0) dp[j][i]=dp[p][i-1];\n\t\t}\n\t}\n\twhile(q--){\n\t\tint l,r;\n\t\tcin>>l>>r;\n\t\tint mx=find_max(1,1,n,l,r);\n\t\tint mn=find_min(1,1,n,l,r);\n\t\tint x=find(time_to_id[mx],l,r);\n\t\tint y=find(time_to_id[mn],l,r);\n\t\tif(level[x]>level[y]){\n\t\t\tcout<<(time_to_id[mx])<<\" \"<<level[x]<<endl;\n\t\t}\n\t\telse{\n\t\t\tcout<<(time_to_id[mn])<<\" \"<<level[y]<<endl;\n\t\t}\n\t}\n\treturn 0;\n}\n \t\t \t   \t  \t     \t \t  \t \t    \t\t\n \t   \t\t\t   \t \t\t\t \t\t \t   \t\t\t"
+}

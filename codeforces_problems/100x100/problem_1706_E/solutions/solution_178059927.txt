@@ -1,0 +1,41 @@
+{
+    "id": 178059927,
+    "contestId": 1706,
+    "creationTimeSeconds": 1666851631,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "moonlit_night"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 70553600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#pragma GCC optimize(2)\r\n#define please return\r\n#define ac 0\r\n#define fi first\r\n#define se second\r\n#define lowbit(x) (x&(-x))\r\n#define endl '\\n'\r\n#define pb push_back\r\n#define eb emplace_back\r\n#define mkp make_pair\r\n#define all(x0) x0.begin(),x0.end()\r\n#define ll long long\r\n#define ull unsigned long long\r\n#define pdd pair<double,double>\r\n#define pcc pair<char,char>\r\n#define pci pair<char,int>\r\n#define pll pair<long long,long long>\r\n#define pii pair<int,int>\r\n#define pli pair<long long,int>\r\n#define pil pair<int,long long>\r\n#define IOS ios::sync_with_stdio(0),cin.tie(0),cout.tie(0)\r\n#define mem(x) memset(x,0,sizeof(x))\r\n#define min3(x,y,z) min(x,min(y,z))\r\n#define max3(x,y,z) max(x,max(y,z))\r\n// cout << fixed << setprecision(7)\r\ntemplate <typename _Tp>void input(_Tp &x){\r\n    char ch(getchar());bool f(false);while(!isdigit(ch))f|=ch==45,ch=getchar();\r\n    x=ch&15,ch=getchar();while(isdigit(ch))x=x*10+(ch&15),ch=getchar();\r\n    if(f)x=-x;\r\n}\r\ntemplate <typename _Tp,typename... Args>void input(_Tp &t,Args &...args){input(t);input(args...);}\r\nint const N = 4e5+10;\r\nvector<int> g[N];\r\nint n,m,q,cnt,lg;\r\nstruct edge\r\n{\r\n    int u,v;\r\n}e[N];\r\nint fa[N],w[N],f[N][32];\r\nint fff[N],dep[N],sz[N],son[N],top[N];\r\nint find(int x){\r\n    return fa[x]==x?x:fa[x]=find(fa[x]);\r\n}\r\nvoid kruskal(){\r\n    for(int i=1;i<=2*n;i++)fa[i]=i;\r\n    for(int i=1;i<=m;i++){\r\n        int x=find(e[i].u),y=find(e[i].v);\r\n        if(x==y)continue;\r\n        cnt++;\r\n        w[cnt]=i;\r\n        g[cnt].pb(x);\r\n        g[x].pb(cnt);\r\n        g[cnt].pb(y);\r\n        g[y].pb(cnt);\r\n        fa[x]=fa[y]=cnt;\r\n    }\r\n}\r\n/*\u6811\u94fe\u5256\u5206\u6a21\u677f*/\r\nvoid dfs1(int u,int father)\r\n{\r\n    fff[u]=father;\r\n    dep[u]=dep[father]+1,sz[u]=1;\r\n    for(int v:g[u])\r\n    {\r\n        if(v==father) continue;\r\n        dfs1(v,u);\r\n        sz[u]+=sz[v];\r\n        if(sz[son[u]]<sz[v]) son[u]=v;\r\n    }\r\n}\r\nvoid dfs2(int u,int t)\r\n{\r\n    top[u]=t;\r\n    if(!son[u]) return;\r\n    dfs2(son[u],t);\r\n    for(int v:g[u])\r\n    {\r\n        if(v==fff[u]||v==son[u]) continue;\r\n        dfs2(v,v);\r\n    }\r\n}\r\n\r\n/*\u6811\u5256\u6c42lca\u6a21\u677f*/\r\nint lca(int u,int v)\r\n{\r\n    while(top[u]!=top[v])\r\n    {\r\n        if(dep[top[u]]<dep[top[v]]) swap(u,v);\r\n        u=fa[top[u]];\r\n    }\r\n    return dep[u]<dep[v] ? u:v;\r\n}\r\n\r\nvoid build(){\r\n    for(int i=1;i<=cnt;i++){\r\n        f[i][0]=i;\r\n    }\r\n    for(int j=1;j<=lg;j++){\r\n        for(int i=1;i+(1<<j)-1<=n;i++){\r\n            f[i][j]=lca(f[i][j-1],f[i+(1<<(j-1))][j-1]);\r\n        }\r\n    }\r\n}\r\nint query(int l,int r){\r\n    int k=log2(r-l+1);\r\n    return w[lca(f[l][k],f[r-(1<<k)+1][k])];\r\n}\r\nvoid solve(){\r\n    cin>>n>>m>>q;\r\n    for(int i=0;i<=2*n;i++){\r\n        g[i].clear();\r\n        son[i]=dep[i]=sz[i]=top[i]=fff[i]=0;\r\n    }\r\n    lg=log2(n)+1;\r\n    cnt=n;\r\n    for(int i=1;i<=m;i++){\r\n        cin>>e[i].u>>e[i].v;\r\n    }\r\n    kruskal();\r\n    dfs1(cnt,0);\r\n    dfs2(cnt,0);\r\n    build();\r\n    while(q--){\r\n        int l,r;\r\n        cin>>l>>r;\r\n        cout<<query(l,r)<<\" \";\r\n    }\r\n    cout<<endl;\r\n}\r\nsigned main(){\r\n    int tt=1;\r\n    IOS;\r\n    cin>>tt;\r\n    while(tt--){\r\n        solve();\r\n    }\r\n    please ac;\r\n}"
+}

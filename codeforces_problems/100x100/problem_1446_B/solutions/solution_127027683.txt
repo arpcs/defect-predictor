@@ -1,0 +1,36 @@
+{
+    "id": 127027683,
+    "contestId": 1446,
+    "creationTimeSeconds": 1629963535,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1446,
+        "index": "B",
+        "name": "Catching Cheaters",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 1800,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1446,
+        "members": [
+            {
+                "handle": "ycdzj"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1605450900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 108,
+    "timeConsumedMillis": 202,
+    "memoryConsumedBytes": 5836800,
+    "source": "// ----------------------Template Start----------------------\n#include <cstdio>\n#include <cstring>\n#include <cstdlib>\n#include <string>\n#include <iostream>\n#include <vector>\n#include <map>\n#include <set>\n#include <queue>\n#include <algorithm>\n#include <numeric>\n#include <unordered_map>\n#include <unordered_set>\n#include <bitset>\nusing namespace std;\n \nclass Io {\npublic:\n    static void read(int &val) { scanf(\"%d\", &val); }\n    static void read(long long &val) { scanf(\"%lld\", &val); }\n    static void read(char *val) { scanf(\"%s\", val); }\n    static void read(string &val) {\n        const int BUFFER_SIZE = 2e6 + 5;\n        static char buffer[BUFFER_SIZE];\n        scanf(\"%s\", buffer);\n        val = buffer;\n    }\n    static void read(vector<int> &val, int n) {\n        val.resize(n);\n        for (int i = 0; i < n; i++) {\n            scanf(\"%d\", &val[i]);\n        }\n    }\n    static void read(vector<long long> &val, int n) {\n        val.resize(n);\n        for (int i = 0; i < n; i++) {\n            scanf(\"%lld\", &val[i]);\n        }\n    }\n \n    static void write(int val) { printf(\"%d\\n\", val); }\n    static void write(long long val) { printf(\"%lld\\n\", val); }\n    static void write(double val) { printf(\"%.8f\\n\", val); }\n    static void write(const char *val) { printf(\"%s\\n\", val); }\n    static void write(const string &val) { printf(\"%s\\n\", val.c_str()); }\n    static void write(const vector<int> &val) {\n        for (int i = 0; i < val.size(); i++) {\n            if (i > 0) {\n                putchar(' ');\n            }\n            printf(\"%d\", val[i]);\n        }\n        putchar('\\n');\n    }\n    static void write(const vector<long long> &val) {\n        for (int i = 0; i < val.size(); i++) {\n            if (i > 0) {\n                putchar(' ');\n            }\n            printf(\"%lld\", val[i]);\n        }\n        putchar('\\n');\n    }\n    static void write(const vector<double> &val) {\n        for (int i = 0; i < val.size(); i++) {\n            if (i > 0) {\n                putchar(' ');\n            }\n            printf(\"%.8f\", val[i]);\n        }\n        putchar('\\n');\n    }\n};\n \nclass Mod {\npublic:\n    int mod;\n \n    explicit Mod(int mod_) : mod(mod_) {}\n \n    int add(int a, int b) const { return (a + b) % mod; }\n    int sub(int a, int b) const { return (a + mod - b) % mod; }\n    int mul(long long a, int b) const { return (a * b) % mod; }\n    int pow(long long a, int x) const {\n        int ans = 1;\n        while (x) {\n            if (x & 1) {\n                ans = (ans * a) % mod;\n            }\n            x >>= 1;\n            a = (a * a) % mod;\n        }\n        return ans;\n    }\n    int inv(int x) const {\n        return pow(x, mod - 2);\n    }\n};\n \nclass Math {\npublic:\n    static long long gcd_ex(long long a, long long b, long long &x, long long &y) {\n        if (b == 0) {\n            x = 1;\n            y = 0;\n            return a;\n        }\n        long long ans = gcd_ex(b, a % b, y, x);\n        y -= (a / b) * x;\n        return ans;\n    }\n    static long long gcd(long long a, long long b) {\n        long long x, y;\n        return gcd_ex(a, b, x, y);\n    }\n};\n \nclass Combine {\n    vector<int> fac;\n    vector<int> inv_fac;\n    Mod mod;\n \npublic:\n    explicit Combine(int n, Mod mod_) : fac(n), inv_fac(n), mod(mod_) {\n        fac[0] = 1;\n        for (int i = 1; i < n; i++) {\n            fac[i] = mod.mul(fac[i - 1], i);\n        }\n        inv_fac[n - 1] = mod.inv(fac[n - 1]);\n        for (int i = n - 2; i >= 0; i--) {\n            inv_fac[i] = mod.mul(inv_fac[i + 1], i + 1);\n        }\n    }\n    int arrange(int n, int m) {\n        if (n < m) {\n            return 0;\n        }\n        return mod.mul(fac[n], inv_fac[n - m]);\n    }\n    int combine(int n, int m) {\n        if (n < m) {\n            return 0;\n        }\n        return mod.mul(arrange(n, m), inv_fac[m]);\n    }\n};\n \nclass Dsu {\n    int n;\n    vector<int> f;\n \npublic:\n    explicit Dsu(int n_) : n(n_), f(n_) {\n        for(int i = 0; i < f.size(); i++) {\n            f[i] = i;\n        }\n    }\n    int find(int x) {\n        if(f[x] != x) {\n            f[x] = find(f[x]);\n        }\n        return f[x];\n    }\n    void merge(int x, int y) {\n        x = find(x);\n        y = find(y);\n        f[x] = y;\n    }\n};\n \n// ----------------------Template End----------------------\nclass Solver {\n    int n, m;\n    string a, b;\npublic:\n    void read() {\n        Io::read(n);\n        Io::read(m);\n        Io::read(a);\n        Io::read(b);\n    }\n    void solve() {\n        vector<int> f[2];\n        f[0].assign(m + 1, 0);\n        f[1].assign(m + 1, 0);\n\n        int ans = 0;\n        for(int i = n - 1; i >= 0; i--) {\n            for(int j = m - 1; j >= 0; j--) {\n                f[i & 1][j] = 0;\n                f[i & 1][j] = max(f[i & 1][j], f[(i + 1) & 1][j] - 1);\n                f[i & 1][j] = max(f[i & 1][j], f[i & 1][j + 1] - 1);\n                if(a[i] == b[j]) {\n                    f[i & 1][j] = max(f[i & 1][j], f[(i + 1) & 1][j + 1] + 2);\n                }\n                ans = max(ans, f[i & 1][j]);\n            }\n        }\n\n        Io::write(ans);\n    }\n};\n \nvoid init() {\n    ios::sync_with_stdio(false);\n}\n \nint main() {\n    init();\n \n    int t = 1;\n    //Io::read(t);\n \n    while (t--) {\n        Solver solver;\n        solver.read();\n        solver.solve();\n    }\n    return 0;\n}\n"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 161844991,
+    "contestId": 682,
+    "creationTimeSeconds": 1656234098,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 682,
+        "index": "E",
+        "name": "Alyona and Triangles",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2600,
+        "tags": [
+            "geometry",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 682,
+        "members": [
+            {
+                "handle": "fvogel"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1466181300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 66,
+    "timeConsumedMillis": 2808,
+    "memoryConsumedBytes": 1638400,
+    "source": "/*\r\n * File created on 06/26/2022 at 10:16:29.\r\n * Link to problem: \r\n * Description: \r\n * Time complexity: O()\r\n * Space complexity: O()\r\n * Status: ---\r\n * Copyright: \u24b8 2022 Francois Vogel\r\n*/\r\n\r\n#include <bits/stdc++.h>\r\n\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\n\r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\n\r\n#define pii pair<int, int>\r\n#define pdd pair<ld, ld>\r\n#define f first\r\n#define s second\r\n\r\n#define vi vector<int>\r\n#define all(x) x.begin(), x.end()\r\n#define size(x) (int)((x).size())\r\n#define pb push_back\r\n#define ins insert\r\n#define cls clear\r\n\r\n#define int ll\r\n#define ll long long\r\n#define ld long double\r\n\r\ntypedef tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update> ordered_set;\r\n\r\nld areaTriangle(pdd x, pdd y, pdd z) {\r\n    ld a = sqrtl(powl(x.f - y.f, 2) + powl(x.s - y.s, 2));\r\n    ld b = sqrtl(powl(y.f - z.f, 2) + powl(y.s - z.s, 2));\r\n    ld c = sqrtl(powl(z.f - x.f, 2) + powl(z.s - x.s, 2));\r\n    ld s = (a + b + c) / 2;\r\n    return s * (s - a) * (s - b) * (s - c);\r\n}\r\n\r\nint det(pii x, pii y) {\r\n    return x.f * y.s - x.s * y.f;\r\n}\r\n\r\nint turn(pii x, pii y, pii z) {\r\n    pii vecXY = {y.f - x.f, y.s - x.s};\r\n    pii vecXZ = {z.f - x.f, z.s - x.s};\r\n    return det(vecXY, vecXZ);\r\n}\r\n\r\nvi solveEq(int d, int e, int f) {\r\n    int a = d-e+f;\r\n    int b = d+e-f;\r\n    int c = -d+e+f;\r\n    return {a, b, c};\r\n}\r\n\r\nsigned main() {\r\n    cin.tie(0);\r\n    ios_base::sync_with_stdio(0);\r\n\r\n    int n, maxArea;\r\n    cin >> n >> maxArea;\r\n    pii b [n];\r\n    for (int i = 0; i < n; i++) {\r\n        cin >> b[i].f >> b[i].s;\r\n    }\r\n    sort(b, b+n);\r\n    vi upperHull;\r\n    for (int i = 0; i < n; i++) {\r\n        while (size(upperHull) >= 2 && turn(b[upperHull[size(upperHull)-2]], b[upperHull.back()], b[i]) <= 0) {\r\n            upperHull.pop_back();\r\n        }\r\n        upperHull.pb(i);\r\n    }\r\n    vi lowerHull;\r\n    for (int i = 0; i < n; i++) {\r\n        while (size(lowerHull) >= 2 && turn(b[lowerHull[size(lowerHull)-2]], b[lowerHull.back()], b[i]) >= 0) {\r\n            lowerHull.pop_back();\r\n        }\r\n        lowerHull.pb(i);\r\n    }\r\n    assert(upperHull[0] == lowerHull[0]);\r\n    assert(upperHull.back() == lowerHull.back());\r\n    vector<pii> hull;\r\n    for (int i : upperHull) {\r\n        hull.pb(b[i]);\r\n    }\r\n    reverse(all(lowerHull));\r\n    for (int i = 1; i < size(lowerHull)-1; i++) {\r\n        hull.pb(b[lowerHull[i]]);\r\n    }\r\n    vector<pii> triMax;\r\n    ld areaMax = 0;\r\n    assert(size(hull) >= 3);\r\n    for (int i = 0; i < size(hull); i++) {\r\n        int k = (i+2) % size(hull);\r\n        for (int j = i+1; j < size(hull); j++) if ((j+1)%size(hull) != i) {\r\n            ld curArea = areaTriangle(hull[i], hull[j], hull[k]);\r\n            while ((k+1)%size(hull) != i && curArea < areaTriangle(hull[i], hull[j], hull[(k+1)%size(hull)])) {\r\n                k = (k+1) % size(hull);\r\n                curArea = areaTriangle(hull[i], hull[j], hull[k]);\r\n            }\r\n            assert(i != j && i != k && j != k);\r\n            if (curArea > areaMax) {\r\n                areaMax = curArea;\r\n                triMax = {hull[i], hull[j], hull[k]};\r\n            }\r\n        }\r\n    }\r\n    ld useful = areaTriangle({-96, -7}, triMax[1], triMax[2]);\r\n    vi xCoord = solveEq(triMax[0].f, triMax[1].f, triMax[2].f);\r\n    vi yCoord = solveEq(triMax[0].s, triMax[1].s, triMax[2].s);\r\n    for (int i = 0; i < 3; i++) {\r\n        cout << xCoord[i] << ' ' << yCoord[i] << '\\n';\r\n    }\r\n\r\n    cout.flush();\r\n    int d = 0;\r\n    d++;\r\n}"
+}

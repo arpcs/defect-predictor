@@ -1,0 +1,36 @@
+{
+    "id": 187507452,
+    "contestId": 666,
+    "creationTimeSeconds": 1672564981,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 666,
+        "index": "B",
+        "name": "World Tour",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2000,
+        "tags": [
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 666,
+        "members": [
+            {
+                "handle": "liyuzhe_2333"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1461947700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 41,
+    "timeConsumedMillis": 686,
+    "memoryConsumedBytes": 36556800,
+    "source": "// LUOGU_RID: 98438235\n#include<iostream>\r\n#include<cstring>\r\n#include<queue>\r\nusing namespace std;\r\nint head[3005], G[3005][3005], dis[3005][3], dis2[3005][3], cnt;\r\nbool vis[3005];\r\n\r\nstruct Edge {\r\n    int to, next;\r\n} e[5005];\r\n\r\nstruct Node {\r\n    int u, w;\r\n};\r\nqueue<Node> q;\r\n\r\nvoid add(int u, int v) {\r\n    e[++cnt].to = v;\r\n    e[cnt].next = head[u];\r\n    head[u] = cnt;\r\n}\r\n\r\nvoid bfs(int s) {\r\n    q.push(Node{s, 0});\r\n    while(!q.empty()) {\r\n        int u = q.front().u, w = q.front().w;\r\n        q.pop();\r\n        if(vis[u]) continue;\r\n        vis[u] = true;\r\n        G[s][u] = w;\r\n        for(int i = head[u]; i; i = e[i].next) {\r\n            if(!vis[e[i].to]) q.push(Node{e[i].to, w + 1});\r\n        }\r\n    }\r\n} \r\n\r\nvoid init(int n) {\r\n    int max1, max2, max3, pos1, pos2, pos3;\r\n    for(int i = 1; i <= n; i++) {\r\n        dis[i][0] = dis[i][1] = dis[i][2] = -1e9;\r\n        dis2[i][0] = dis2[i][1] = dis2[i][2] = -1e9;\r\n    }\r\n    for(int i = 1; i <= n; i++) {\r\n        bfs(i); memset(vis, false, sizeof(vis));\r\n    }\r\n    for(int i = 1; i <= n; i++) {\r\n        max1 = max2 = max3 = -1e9;\r\n        pos1 = pos2 = pos3 = 0;\r\n        for(int j = 1; j <= n; j++) {\r\n            if(G[i][j] > max1) {\r\n                max3 = max2, pos3 = pos2;\r\n                max2 = max1, pos2 = pos1;\r\n                max1 = G[i][j], pos1 = j;\r\n            } else if(G[i][j] > max2) {\r\n                max3 = max2, pos3 = pos2;\r\n                max2 = G[i][j], pos2 = j;\r\n            } else if(G[i][j] > max3) max3 = G[i][j], pos3 = j;\r\n        }\r\n        dis[i][0] = pos1, dis[i][1] = pos2, dis[i][2] = pos3;\r\n    }\r\n    for(int i = 1; i <= n; i++) {\r\n        max1 = max2 = max3 = -1e9;\r\n        pos1 = pos2 = pos3 = 0;\r\n        for(int j = 1; j <= n; j++) {\r\n            if(G[j][i] > max1) {\r\n                max3 = max2, pos3 = pos2;\r\n                max2 = max1, pos2 = pos1;\r\n                max1 = G[j][i], pos1 = j;\r\n            } else if(G[j][i] > max2) {\r\n                max3 = max2, pos3 = pos2;\r\n                max2 = G[j][i], pos2 = j;\r\n            } else if(G[j][i] > max3) max3 = G[j][i], pos3 = j;\r\n        }\r\n        dis2[i][0] = pos1, dis2[i][1] = pos2, dis2[i][2] = pos3;\r\n    }\r\n}\r\n\r\nint main() {\r\n    int n, m, u, v, u1, u2, u3, u4, ans = 0;\r\n    scanf(\"%d%d\", &n, &m);\r\n    for(int i = 1; i <= n; i++) {\r\n        for(int j = 1; j <= n; j++) {\r\n            G[i][j] = -1e9;\r\n        }\r\n    }\r\n    for(int i = 1; i <= m; i++) {\r\n        scanf(\"%d%d\", &u, &v);\r\n        add(u, v);\r\n    }\r\n    init(n);\r\n    for(int i = 1; i <= n; i++) {\r\n        for(int j = 1; j <= n; j++) {\r\n            if(i == j) continue;\r\n            for(int k1 = 0; k1 < 3; k1++) {\r\n                if(dis2[i][k1] == j) continue;\r\n                u = dis2[i][k1];\r\n                for(int k2 = 0; k2 < 3; k2++) {\r\n                    if(dis[j][k2] == i || dis[j][k2] == u) continue;\r\n                    v = dis[j][k2];\r\n                    if(u == 0 || v == 0) continue;\r\n                    if(u != i && i != j && j != v) {\r\n                        if(ans < G[u][i] + G[i][j] + G[j][v]) {\r\n                            ans = G[u][i] + G[i][j] + G[j][v];\r\n                            u1 = u, u2 = i, u3 = j, u4 = v;\r\n                        }\r\n                    }\r\n                    \r\n                }\r\n            }\r\n        }\r\n    }\r\n    printf(\"%d %d %d %d\", u1, u2, u3, u4);\r\n    return 0;\r\n}"
+}

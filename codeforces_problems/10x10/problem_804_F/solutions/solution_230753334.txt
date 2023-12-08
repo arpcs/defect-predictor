@@ -1,0 +1,39 @@
+{
+    "id": 230753334,
+    "contestId": 804,
+    "creationTimeSeconds": 1698801448,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 804,
+        "index": "F",
+        "name": "Fake bullions",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3400,
+        "tags": [
+            "combinatorics",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 804,
+        "members": [
+            {
+                "handle": "yangsonghan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1493909400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 49,
+    "timeConsumedMillis": 1496,
+    "memoryConsumedBytes": 206028800,
+    "source": "// LUOGU_RID: 132716175\n#include <bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\nconst int inf = 1e9;\r\nconst ll INF = 1e15;\r\nconst int N = 5e3;\r\nconst int M = 2e6;\r\ninline int read() {\r\n\tint s = 0,f = 1;char ch = getchar();\r\n\twhile (!isdigit(ch)) f = ch == '-' ? -1 : 1, ch = getchar();\r\n\twhile (isdigit(ch)) s = (s << 3) + (s << 1) + ch - '0', ch = getchar();\r\n\treturn s*f;\r\n}\r\n/*\r\n\u7f29\u70b9\u3002\r\n\r\n\u7136\u540e\u4e00\u4e2ascc \u7684\u603b\u91d1\u5e01\u6570\u4e3a\u6240\u6709\u91d1\u5e01\u4f4d\u7f6e\u6a21gcd\u5f97\u5230\u7684\u4e0d\u540c\u4f59\u6570\u4e2a\u6570\u4e58\u4e0asum/gcd\r\n\r\n\u8003\u8651\u76f4\u63a5\u7ef4\u62a4\u6bcf\u4e2ascc \u7684\u4f59\u6570\u96c6\u5408\u3002\r\n\r\n\u6ce8\u610f\u5230\u4e00\u4e2a\u96c6\u5408\u6ee1\u4e86\u540e\u9762\u7684\u6240\u6709scc\u90fd\u4e0d\u9700\u8003\u8651\u3002 \r\n\r\n\u8003\u8651\u76f8\u90bbscc\u5982\u4f55\u8f6c\u79fb\u3002\u76f4\u63a5\u66b4\u529b\uff1f\r\n\r\n\u4fee\u6539\u65f6\u5224\u65ad\u662f\u5426\u4e3a\u6709\u6548\u4fee\u6539\uff0c\u731c\u6d4b\uff1a\u6709\u6548\u4fee\u6539\u6b21\u6570\u4e0d\u591a\u3002 \r\n*/\r\n\r\nint n,q,head[N + 10],cnt,k[N + 10],vis[N + 10];\r\nstruct edge {\r\n\tint v,nxt;\r\n}ed[N * N + 10];\r\nvoid add(int u,int v) {\r\n\ted[++cnt] = {v,head[u]};\r\n\thead[u] = cnt;\r\n}\r\nstack<int> st;\r\nvector<int> vc[N + 10];\r\nint low[N + 10],dfn[N + 10],cc,tot,gc[N + 10],id[N + 10],iid[N + 10];\r\nint a[N + 10],to[N + 10],du[N + 10],mx[N + 10],sum[N + 10],gcc[N + 10];\r\nvector<bool> Vis[N + 10],vv[N + 10];\r\nvoid tarjan(int x) {\r\n\tlow[x] = dfn[x] = ++cc;\r\n\tvis[x] = 1;\r\n\tst.push(x);\r\n\tfor (int i = head[x];i;i = ed[i].nxt) {\r\n\t\tint v = ed[i].v;\r\n\t\tif (!dfn[v]) {\r\n\t\t\ttarjan(v);\r\n\t\t\tlow[x] = min(low[x],low[v]);\r\n\t\t}\r\n\t\telse if (vis[v]) {\r\n\t\t\tlow[x] = min(low[x],dfn[v]);\r\n\t\t}\r\n\t}\r\n\tif (low[x] == dfn[x]) {\r\n\t\ttot ++;\r\n\t\tint t;\r\n\t\tdo {\r\n\t\t\tt = st.top();\r\n\t\t\tst.pop();\r\n\t\t\tvis[t] = 0;\r\n\t\t\tto[t] = tot;\r\n\t\t\tmx[tot] = max(mx[tot],k[t]);\r\n\t\t\tsum[tot] += k[t];\r\n\t\t\tgc[tot] = __gcd(gc[tot],k[t]);\r\n\t\t\tvc[tot].push_back(t);\r\n\t\t} while (t != x);\r\n\t\tVis[tot].resize(gc[tot]);\r\n\t}\r\n}\r\nchar s[N + 10];\r\nint cmp(int x,int y) {\r\n\treturn du[x] > du[y];\r\n}\r\nset<int> S[N + 10];//\u5757i \u4e2d\u51fa\u73b0\u8fc7\u7684\u4f59\u6570 \r\nstring ss[N + 10];\r\nvoid Add(int x,int y);\r\nvoid dfs(int x,int y) {\r\n//\tif (Vis[p][y]) return;\r\n//\tfor (int i = y;i < k[p];i += gc[id[x]]) {\r\n//\t\tAdd(x,i);\r\n//\t}\r\n\tif (x == tot) return;\r\n// \tif (vv[x][y % gcc[x + 1]]) return;\r\n// \tvv[x][y % gcc[x + 1]] = 1;\r\n\tfor (int j = y % gcc[x + 1];j < gc[id[x + 1]];j += gcc[x + 1])\r\n\t\tAdd(x + 1,j);\r\n}\r\nint ans[N + 10];\r\nvoid Add(int x,int y) {\r\n//\tcout << id[x] << ' ' << y << endl;\r\n\tif (Vis[id[x]][y]) return;\r\n\tVis[id[x]][y] = 1;\r\n\tans[id[x]] += sum[id[x]] / gc[id[x]];\r\n\tdfs(x,y);\r\n}\r\nconst int mod = 1e9 + 7;\r\nint qpow(int a,int b) {\r\n\tint res = 1;\r\n\twhile (b) {\r\n\t\tif (b & 1) res = 1ll * res * a % mod;\r\n\t\tb >>= 1, a = 1ll * a * a % mod;\r\n\t}\r\n\treturn res;\r\n}\r\nint jc[N + 10],ivjc[N + 10],c2[N + 10];\r\npair<int,int> c1[N + 10];\r\nint C(int n,int m) {\r\n\tif (n < m) return 0;\r\n\treturn 1ll * jc[n] * ivjc[m] % mod * ivjc[n - m] % mod;\r\n}\r\nint main() {\r\n//\tsystem(\"fc my.out ex_coin3.out\");\r\n//\tfreopen(\"ex_coin3.in\",\"r\",stdin);\r\n//\tfreopen(\"my.out\",\"w\",stdout);\r\n\tn = read();\r\n\tint A = read(),B = read();\r\n\tfor (int i = 1;i <= n;i ++ ) {\r\n\t\tscanf(\"%s\",s+1);\r\n\t\tfor (int j = 1;j <= n;j ++ )\r\n\t\t\tif (s[j] == '1') add(i,j);\r\n\t}\r\n\tfor (int i = 1;i <= n;i ++ ) {\r\n\t\tk[i] = read();\r\n\t\tcin >> ss[i];\r\n//\t\tfor (int j = 0;j < k[i];j ++ ) Vis[i][j] = 1;\r\n\t}\r\n\tfor (int i = 1;i <= n;i ++ ) if (!dfn[i]) tarjan(i);\r\n\tfor (int i = 1;i <= n;i ++ ) {\r\n\t\tfor (int j = head[i];j;j = ed[j].nxt) {\r\n\t\t\tif (to[ed[j].v] != to[i]) du[to[i]] ++;\r\n\t\t}\r\n\t}\r\n\tfor (int i = 1;i <= tot;i ++ ) id[i] = i;\r\n\tsort(id + 1,id + tot + 1,cmp);\r\n\tint Ans = 0;\r\n\tfor (int i = 1;i <= tot;i ++ ) gcc[i] = __gcd(gc[id[i]],gc[id[i - 1]]), iid[id[i]] = i, vv[i - 1].resize(gcc[i]);\r\n\tfor (int i = 1;i <= n;i ++ ) {\r\n\t\tint cc = 0;\r\n\t\tfor (int j = 0;j < ss[i].size();j ++ )\r\n\t\t\tif (ss[i][j] == '1') Add(iid[to[i]],j % gc[to[i]]), cc ++;\r\n\t\tc1[i].first = cc;\r\n\t}\r\n\tfor (int i = 1;i <= n;i ++ )\r\n\t\tif (ans[to[i]]) c1[i].second = ans[to[i]] / sum[to[i]] * k[i];\r\n//\tif (A == 24) {\r\n//\tcout << \"c1:\" << tc1 << endl;\r\n////\tfor (int i = 1;i <= tc1;i ++ ) cout << c1[i] << ' ';puts(\"\");\r\n//\tcout << \"c2:\" << tc2 << endl;\r\n////\tfor (int i = 1;i <= tc2;i ++ ) cout << c2[i] << ' ';puts(\"\");\r\n////\tcout << \"c3:\" << c3 << endl;\r\n//\t}\r\n\tjc[0] = 1;\r\n\tfor (int i = 1;i <= N;i ++ ) jc[i] = 1ll * jc[i - 1] * i % mod;\r\n\tivjc[N] = qpow(jc[N],mod - 2);\r\n\tfor (int i = N - 1;~i;i -- ) ivjc[i] = (i + 1ll) * ivjc[i + 1] % mod;\r\n\tfor (int i = 1;i <= n;i ++ ) {\r\n\t\tint X = 0,Y = 0;\r\n\t\tfor (int j = 1;j <= n;j ++ ) {\r\n\t\t\tif (j == i) continue;\r\n\t\t\tif (c1[j].first > c1[i].second) X ++;\r\n\t\t\telse if (c1[j].second > c1[i].second || (c1[j].second == c1[i].second && j < i)) Y ++;\r\n\t\t}\r\n\t\tif (X >= A) continue;\r\n//\t\tcout << i << ' ' << X << ' ' << Y << endl; \r\n\t\tfor (int j = B - X - 1;j <= min({Y,B - 1,A - X - 1});j ++ )\r\n\t\t\tAns = (Ans + 1ll * C(Y,j) * C(X,B - j - 1)) % mod;\r\n\t}\r\n\tprintf(\"%d\\n\",Ans);\r\n\treturn 0;\r\n}\r\n/*\r\n2 0\r\n01\r\n00\r\n1 1\r\n3 000\r\n*/"
+}

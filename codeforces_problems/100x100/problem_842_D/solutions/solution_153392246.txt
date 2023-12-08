@@ -1,0 +1,36 @@
+{
+    "id": 153392246,
+    "contestId": 842,
+    "creationTimeSeconds": 1649688934,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 842,
+        "index": "D",
+        "name": "Vitya and Strange Lesson",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "binary search",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 842,
+        "members": [
+            {
+                "handle": "iNNNo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1504019100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 249,
+    "memoryConsumedBytes": 12800000,
+    "source": "#include <iostream>\r\n#include <fstream>\r\n#include <ctime> // for random\r\n#include <cstdlib> // for random\r\n#include <vector>\r\n#include <algorithm>\r\n#include <clocale>\r\n#include <string>\r\n#include <cmath>\r\n#include <queue>\r\n#include <iomanip>\r\n#include <stack>\r\n#include <set>\r\n#include <map>\r\n#include <deque>\r\n#include <cassert>\r\n#include <numeric>\r\n#include <unordered_set>\r\n#include <unordered_map>\r\n\r\nusing namespace std;\r\n\r\n/* Begin fast allocation\r\nconst int MAX_MEM = 25e7;\r\nint mpos = 0;\r\nchar mem[MAX_MEM];\r\ninline void * operator new ( size_t n ) {\r\n    assert((mpos += n) <= MAX_MEM);\r\n    return (void *)(mem + mpos - n);\r\n}\r\ninline void operator delete ( void * ) noexcept { } // must have!\r\n/* End fast allocation */\r\n\r\n#pragma GCC optimize(\"O3\")\r\n\r\ntypedef long long ll;\r\ntypedef long double ld;\r\n\r\nconst int INF = 1e9;\r\nconst ll LINF = 1e18;\r\nconst ll MOD = 1e9 + 7;\r\nconst ll extraMOD = 1e9 + 9;\r\n\r\n//#define int long long\r\n\r\nconst int x = 29;\r\n\r\nstruct Node {\r\n    int cnt;\r\n    int go[2];\r\n};\r\n\r\nconst int MAXLEN = 5e5;\r\n\r\nNode bor[MAXLEN];\r\n\r\nint borSize = 0;\r\n\r\nstring toStr(int n) {\r\n    string mask = \"\";\r\n    while (n > 0) {\r\n        mask = char('0' + n % 2) + mask;\r\n        n /= 2;\r\n    }\r\n    while (mask.size() < 20) {\r\n        mask = '0' + mask;\r\n    }\r\n    return mask;\r\n}\r\n\r\nvoid insertToBor(const string& s) {\r\n    int v = 0;\r\n    for (char c : s) {\r\n        bor[v].cnt++;\r\n        int& nxt = bor[v].go[c - '0'];\r\n        if (!nxt)\r\n            nxt = ++borSize;\r\n        v = nxt;\r\n    }\r\n    bor[v].cnt++;\r\n}\r\n\r\nstring plusStr(const string& a, const string& b) {\r\n    string ans = \"\";\r\n    for (int i = 0; i < 20; i++) {\r\n        ans += char('0' + (a[i] + b[i] - 2 * '0') % 2);\r\n    }\r\n    return ans;\r\n}\r\n\r\nstring findInBor(const string& x) {\r\n    string ans = \"\";\r\n    int v = 0;\r\n    for (int i = 0; i < 20; i++) {\r\n        if (x[i] == '0') {\r\n            if (!bor[v].go[0])\r\n                break;\r\n            \r\n            if (bor[bor[v].go[0]].cnt == (1 << (20 - i - 1))) {\r\n                ans += '1';\r\n                if (!bor[v].go[1]) {\r\n                    break;\r\n                }\r\n                v = bor[v].go[1];\r\n            } else {\r\n                ans += '0';\r\n                v = bor[v].go[0];\r\n            }\r\n        } else {\r\n            if (!bor[v].go[1])\r\n                break;\r\n            \r\n            if (bor[bor[v].go[1]].cnt == (1 << (20 - i - 1))) {\r\n                ans += '1';\r\n                if (!bor[v].go[0]) {\r\n                    break;\r\n                }\r\n                v = bor[v].go[0];\r\n            } else {\r\n                ans += '0';\r\n                v = bor[v].go[1];\r\n            }\r\n        }\r\n    }\r\n    while (ans.size() < 20) {\r\n        ans += '0';\r\n    }\r\n    return ans;\r\n}\r\n\r\nint toInt(const string& s) {\r\n    int ans = 0;\r\n    for (char c : s) {\r\n        ans *= 2;\r\n        ans += c - '0';\r\n    }\r\n    return ans;\r\n}\r\n\r\nvoid solve() {\r\n    int n, m;\r\n    cin >> n >> m;\r\n    \r\n    unordered_set <int> S;\r\n    \r\n    for (int i = 0; i < n; i++) {\r\n        int tmp;\r\n        cin >> tmp;\r\n        \r\n        S.insert(tmp);\r\n    }\r\n    \r\n    for (int i : S) {\r\n        insertToBor(toStr(i));\r\n    }\r\n    \r\n    string prev = \"00000000000000000000\";\r\n    \r\n    for (int i = 0; i < m; i++) {\r\n        int x;\r\n        cin >> x;\r\n        \r\n        prev = plusStr(prev, toStr(x));\r\n        \r\n        cout << toInt(findInBor(prev)) << \"\\n\";\r\n    }\r\n}\r\n\r\nsigned main() {\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n//    freopen(\"brackets2num2.in\", \"r\", stdin);\r\n//    freopen(\"brackets2num2.out\", \"w\", stdout);\r\n\r\n    //cout << fixed << setprecision(10);\r\n\r\n    //srand(time(nullptr));\r\n\r\n    int t = 1;\r\n    //cin >> t;\r\n\r\n    while (t--) {\r\n        solve();\r\n    }\r\n\r\n    return 0;\r\n}\r\n\r\n\r\n\r\n\r\n"
+}

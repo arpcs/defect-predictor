@@ -1,0 +1,41 @@
+{
+    "id": 226242002,
+    "contestId": 1706,
+    "creationTimeSeconds": 1696222881,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "yourany"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 545,
+    "memoryConsumedBytes": 81817600,
+    "source": "// LUOGU_RID: 127026145\n#include <iostream>\r\n#include <stdio.h>\r\n#include <string.h>\r\n#include <queue>\r\n#include <math.h>\r\n#include <vector>\r\n#include <algorithm>\r\n#include <iomanip>\r\n#include <stack>\r\n\r\nusing namespace std;\r\n\r\n#define LL long long\r\nconst int N =5e5+10;\r\nconst int INF =0x3f3f3f3f;\r\n\r\ninline int read(){\r\n    int x=0,f=1;\r\n    char ch=getchar();\r\n    while(ch<'0'||ch>'9'){\r\n        if(ch=='-')\r\n            f=-1;\r\n        ch=getchar();\r\n    }\r\n    while(ch>='0'&&ch<='9'){\r\n        x=(x<<1)+(x<<3)+(ch^48);\r\n        ch=getchar();\r\n    }\r\n    return x*f;\r\n}\r\nint t,n,m,q,l,r,cnt;\r\nint f[N],dep[N],st[N][20],num[N];\r\nint head[N],to[N],ne[N],w[N],ids;\r\nbool vis[N];\r\nstruct node{\r\n\tint l,r,sum;\r\n}tree[N<<2];\r\nvoid add(int x,int y){\r\n\tto[++ids]=y,ne[ids]=head[x],head[x]=ids;\r\n}\r\nint find(int x){\r\n\tif(f[x]==x)\r\n\t\treturn x;\r\n\treturn f[x]=find(f[x]);\r\n}\r\nvoid push_up(int id){\r\n\ttree[id].sum=max(tree[id<<1].sum,tree[id<<1|1].sum);\r\n}\r\nvoid build(int id,int l,int r){\r\n\tif(l>r)\r\n\t\treturn;\r\n\ttree[id].l=l,tree[id].r=r;\r\n\ttree[id].sum=0;\r\n\tif(l==r){\r\n\t\ttree[id].sum=num[l];\r\n\t\treturn;\r\n\t}\r\n\tint mid=l+r>>1;\r\n\tbuild(id<<1,l,mid);\r\n\tbuild(id<<1|1,mid+1,r);\r\n\tpush_up(id); \r\n}\r\nvoid dfs(int u,int f){\r\n\tdep[u]=dep[f]+1;\r\n\tfor(int i=1;i<=19;i++)\r\n\t\tst[u][i]=st[st[u][i-1]][i-1];\r\n\tfor(int i=head[u];i;i=ne[i]){\r\n\t\tint v=to[i];\r\n\t\tif(v==f)\r\n\t\t\tcontinue;\r\n\t\tst[v][0]=u;\r\n\t\tdfs(v,u);\r\n\t}\r\n}\r\nint lca(int x,int y){\r\n\tif(dep[x]<dep[y])\r\n\t\tswap(x,y);\r\n    for(int i=19;i>=0;i--)\r\n        if(dep[st[x][i]]>=dep[y])\r\n            x=st[x][i];\r\n    if(x==y)\r\n        return x;\r\n    for(int i=19;i>=0;i--)\r\n        if(st[x][i]!=st[y][i])\r\n            x=st[x][i],y=st[y][i];\r\n    return st[x][0];\r\n}\r\nint ans(int id,int l,int r){\r\n\tif(tree[id].l>r||tree[id].r<l)\r\n\t\treturn 0;\r\n\tif(tree[id].l>=l&&tree[id].r<=r)\r\n\t\treturn tree[id].sum;\r\n\treturn max(ans(id<<1,l,r),ans(id<<1|1,l,r));\r\n}\r\nvoid init()\r\n{\r\n\tids=0;\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tf[i]=i;\r\n\tfor(int i=1;i<=2*n;i++)\r\n\t\thead[i]=ne[i]=dep[i]=num[i]=w[i]=0;\r\n\tcnt=n;\r\n}\r\nint main(){\r\n\tt=read();\r\n\twhile(t--){\r\n\t\tn=read(),m=read(),q=read();\r\n\t\tinit();\r\n\t\tfor(int i=1,x,y;i<=m;i++){\r\n\t\t\tx=read(),y=read();\r\n\t\t\tif(find(x)!=find(y)){\r\n\t\t\t\tcnt++;\r\n\t\t\t\tf[cnt]=cnt;\r\n\t\t\t\tadd(cnt,find(x));\r\n\t\t\t\tadd(cnt,find(y));\r\n\t\t\t\tw[cnt]=i;\r\n\t\t\t\tf[find(y)]=cnt;\r\n\t\t\t\tf[find(x)]=cnt;\r\n\t\t\t}\r\n\t\t}\r\n\t\tfor(int i=cnt;i>n;i--){\r\n\t\t\tif(f[i]==i)\r\n\t\t\t\tdfs(i,0);\r\n\t\t}\r\n\t\tfor(int i=1;i<n;i++){\r\n\t\t\tint l=lca(i,i+1);\r\n\t\t\tnum[i]=w[l];\r\n\t\t}\r\n\t\tbuild(1,1,n-1);\r\n\t\twhile(q--){\r\n\t\t\tl=read(),r=read();\r\n\t\t\tif(l==r){\r\n\t\t\t\tcout<<\"0 \";\r\n\t\t\t\tcontinue; \r\n\t\t\t}\r\n\t\t\tif(l>r)\r\n\t\t\t\tswap(l,r);\r\n\t\t\tprintf(\"%d \",ans(1,l,r-1));\r\n\t\t}\r\n\t\tcout<<endl;\r\n\t}\r\n\treturn 0;\r\n}"
+}

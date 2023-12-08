@@ -1,0 +1,37 @@
+{
+    "id": 71986855,
+    "contestId": 1297,
+    "creationTimeSeconds": 1582818301,
+    "relativeTimeSeconds": 7801,
+    "problem": {
+        "contestId": 1297,
+        "index": "F",
+        "name": "Movie Fan",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "data structures",
+            "greedy",
+            "implementation",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1297,
+        "members": [
+            {
+                "handle": "codelegend"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1582810500
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 217,
+    "memoryConsumedBytes": 1740800,
+    "source": "import kotlin.math.max\n\nprivate fun readLn() = readLine()!! // string line\nprivate fun readInt() = readLn().toInt() // single int\nprivate fun readLong() = readLn().toLong() // single long\nprivate fun readDouble() = readLn().toDouble() // single double\nprivate fun readStrings() = readLn().split(\" \") // list of strings\nprivate fun readInts() = readStrings().map { it.toInt() } // list of ints\nprivate fun readLongs() = readStrings().map { it.toLong() } // list of longs\nprivate fun readDoubles() = readStrings().map { it.toDouble() } // list of doubles\n\nfun main() {\n    val t = readInt()\n    for (tc in 0 until t) {\n        val (n, m) = readInts()\n        val movies = Array(n) {Triple(0, 0, -1)}\n        for (i in 0 until n) {\n            val (a, b) = readInts()\n            movies[i] = Triple(a, b, i)\n        }\n        movies.sortBy { it.second }\n        val cnt = mutableMapOf<Int, Int>()\n        movies.forEach { cnt[it.first] = (cnt[it.first]?:0) + 1 }\n\n        var delay = 0\n        val ans = Array(n) {-1}\n        val used = mutableMapOf<Int, Int>()\n        val free_days = mutableSetOf<Int>()\n\n        val temp = ArrayList<Pair<Int, Int>>()\n        cnt.forEach {\n            temp.add(Pair(it.key, it.value))\n        }\n        temp.sortBy { it.first }\n        temp.reverse()\n        val ranges = ArrayList<Pair<Int, Int>>()\n        for (e in temp) {\n            if (ranges.isEmpty()) {\n                ranges.add(e)\n                continue\n            }\n            var elem = e\n            while (ranges.isNotEmpty() && ranges.last().first - elem.first < elem.second) {\n                elem = Pair(elem.first, elem.second + ranges.last().second)\n                ranges.removeAt(ranges.size - 1)\n            }\n            ranges.add(elem)\n        }\n        for (e in ranges) {\n            for (i in 0 until e.second) {\n                free_days.add(e.first + i)\n            }\n        }\n\n        movies.forEach { movie ->\n            val (a, b, i) = movie\n            // first day >= a which isn't full\n            val day: Int\n            if (free_days.contains(a)) {\n                day = a\n            } else {\n                day = free_days.find { it >= a }!!.toInt()\n                delay = max(delay, day - b)\n            }\n            used[day] = (used[day]?:0) + 1\n            if (used[day] == m) {\n                free_days.remove(day)\n            }\n            ans[i] = day\n        }\n\n        println(delay)\n        println(ans.joinToString(\" \"))\n    }\n}\n\n"
+}

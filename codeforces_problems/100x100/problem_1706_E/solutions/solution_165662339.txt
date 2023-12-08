@@ -1,0 +1,41 @@
+{
+    "id": 165662339,
+    "contestId": 1706,
+    "creationTimeSeconds": 1658748222,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "DangKhoaWillWinIOI2023"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 233,
+    "memoryConsumedBytes": 49766400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nint dsu1[100100];\r\nint dsu2[100100];\r\nint high[100100];\r\nset <pair <int,int> > query[100100];\r\nset <int> all[100100];\r\nint ans[100100];\r\nint f2(int x){\r\n    if (dsu2[x] < 0)return x;\r\n    int r = f2(dsu2[x]);\r\n    dsu2[x] = r;\r\n    return r;\r\n}\r\nvoid join2(int x,int y,int t){\r\n    x = f2(x);\r\n    y = f2(y);\r\n    if (x != y){\r\n        if (dsu2[x] > dsu2[y])swap(x,y);\r\n        dsu2[x] += dsu2[y];\r\n        dsu2[y] = x;\r\n        high[x] = max(high[x],high[y]);\r\n        for (auto tmp:query[y]){\r\n            query[x].insert(tmp);\r\n        }\r\n        auto tmp = query[x].upper_bound({high[x],INT_MAX});\r\n        vector <pair <int,int> > del;\r\n        for (auto it = query[x].begin(); it != tmp; it++){\r\n            ans[(*it).second] = t;\r\n            del.push_back(*it);\r\n        }\r\n        for (auto bruh:del)query[x].erase(bruh);\r\n    }\r\n}\r\nint f1(int x){\r\n    if (dsu1[x] < 0)return x;\r\n    int r = f1(dsu1[x]);\r\n    dsu1[x] = r;\r\n    return r;\r\n}\r\nvoid join1(int x,int y,int t){\r\n    x = f1(x);\r\n    y = f1(y);\r\n    if (x != y){\r\n        if (dsu1[x] > dsu1[y])swap(x,y);\r\n        dsu1[x] += dsu1[y];\r\n        dsu1[y] = x;\r\n        for (auto tmp : all[y]){\r\n            auto ri = all[x].upper_bound(tmp);\r\n            if (ri != all[x].end()){\r\n                if (*ri == tmp + 1){\r\n                    join2(tmp,*ri,t);\r\n                }\r\n            }\r\n            if (ri != all[x].begin()){\r\n                ri = prev(ri);\r\n                if (*ri == tmp - 1){\r\n                    join2(*ri,tmp,t);\r\n                }\r\n            }\r\n            all[x].insert(tmp);\r\n        }\r\n    }\r\n}\r\nint main(){\r\n    ios_base::sync_with_stdio(0);cin.tie(nullptr);cout.tie(nullptr);\r\n    int t;\r\n    cin>>t;\r\n    while (t--){\r\n        int n,m,q;\r\n        cin>>n>>m>>q;\r\n        vector <pair <int,int> > edge(m);\r\n        for (auto &x:edge)cin>>x.first>>x.second;\r\n        memset(dsu1,-1,sizeof (int) * (n + 10));\r\n        memset(dsu2,-1,sizeof (int) * (n + 10));\r\n        for (int i = 1;i <= n;i ++){\r\n            query[i].clear();\r\n        }\r\n        for (int i = 1;i <= q;i ++){\r\n            int l,r;\r\n            cin>>l>>r;\r\n            if (l != r)query[l].insert({r,i});\r\n            else{\r\n                ans[i] = 0;\r\n            }\r\n        }\r\n        for (int i = 1;i <= n;i ++){\r\n            all[i].clear();\r\n            all[i].insert(i);\r\n            high[i] = i;\r\n        }\r\n        for (int i = 0;i < m;i ++){\r\n            join1(edge[i].first,edge[i].second,i+1);\r\n        }\r\n        for (int i = 1;i <= q;i ++){\r\n            cout<<ans[i]<<' ';\r\n        }\r\n        cout<<'\\n';\r\n    }\r\n}\r\n"
+}

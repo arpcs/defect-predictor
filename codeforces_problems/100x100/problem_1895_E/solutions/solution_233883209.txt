@@ -1,0 +1,44 @@
+{
+    "id": 233883209,
+    "contestId": 1895,
+    "creationTimeSeconds": 1700729138,
+    "relativeTimeSeconds": 6878,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "Temmie"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1700722260
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 1887,
+    "memoryConsumedBytes": 175718400,
+    "source": "// hilo\r\n\r\n#if 1\r\nconstexpr const bool is_multi_tests = true;\r\n#else\r\nconstexpr const bool is_multi_tests = false;\r\n#endif\r\n\r\n#include <bits/stdc++.h>\r\n\r\n#define all(x) (x).begin(), (x).end()\r\n#define rall(x) (x).rbegin(), (x).rend()\r\n\r\ntypedef long long ll;\r\ntypedef unsigned long long ull;\r\ntypedef long double ld;\r\n\r\nvoid prep(const int numt);\r\nvoid test_case(const int curt);\r\n\r\nint main() {\r\n\tstd::ios::sync_with_stdio(0); std::cin.tie(0);\r\n\tif constexpr (is_multi_tests) {\r\n\t\tint t;\r\n\t\tstd::cin >> t;\r\n\t\tprep(t);\r\n\t\tfor (int i = 1; i <= t; i++) {\r\n\t\t\ttest_case(i);\r\n\t\t}\r\n\t} else {\r\n\t\tprep(1);\r\n\t\ttest_case(0);\r\n\t}\r\n}\r\n\r\nvoid prep(const int numt) {\r\n}\r\n\r\n#define MWIN 1\r\n#define BWIN 2\r\n#define DRAW 3\r\n\r\n#define MTURN 0\r\n#define BTURN 1\r\n\r\nvoid test_case(const int curt) {\r\n\tint n; std::cin >> n;\r\n\tstd::vector <int> ax(n), ay(n);\r\n\tfor (int& x : ax) std::cin >> x;\r\n\tfor (int& y : ay) std::cin >> y;\r\n\tint m; std::cin >> m;\r\n\tstd::vector <int> bx(m), by(m);\r\n\tfor (int& x : bx) std::cin >> x;\r\n\tfor (int& y : by) std::cin >> y;\r\n\tstd::set <int> vals;\r\n\tfor (int x : ax) vals.insert(x);\r\n\tfor (int x : bx) vals.insert(x);\r\n\tfor (int y : ay) vals.insert(y);\r\n\tfor (int y : by) vals.insert(y);\r\n\tstd::map <int, int> compress_mp;\r\n\tint cN = 1;\r\n\tfor (int x : vals) {\r\n\t\tcompress_mp[x] = cN++;\r\n\t}\r\n\tfor (int& x : ax) x = compress_mp[x];\r\n\tfor (int& y : ay) y = compress_mp[y];\r\n\tfor (int& x : bx) x = compress_mp[x];\r\n\tfor (int& y : by) y = compress_mp[y];\r\n\tstd::vector <int> aord(n), bord(m);\r\n\tstd::iota(all(aord), 0);\r\n\tstd::iota(all(bord), 0);\r\n\tstd::sort(all(aord), [&](int i, int j) {\r\n\t\treturn ax[i] < ax[j];\r\n\t});\r\n\tstd::sort(all(bord), [&](int i, int j) {\r\n\t\treturn bx[i] < bx[j];\r\n\t});\r\n\tstd::map <int, int> amp, bmp;\r\n\tfor (int i = n - 1; i >= 0; i--) {\r\n\t\tint idx = aord[i];\r\n\t\taord[i] = ay[aord[i]];\r\n\t\tif (i + 1 < n) aord[i] = std::max(aord[i], aord[i + 1]);\r\n\t\tamp[ax[idx]] = aord[i];\r\n\t}\r\n\tfor (int i = m - 1; i >= 0; i--) {\r\n\t\tint idx = bord[i];\r\n\t\tbord[i] = by[bord[i]];\r\n\t\tif (i + 1 < m) bord[i] = std::max(bord[i], bord[i + 1]);\r\n\t\tbmp[bx[idx]] = bord[i];\r\n\t}\r\n\tstd::vector <std::vector <int>> dp(2, std::vector <int> (cN + 3, -1));\r\n\tstd::set <std::pair <int, int>> stck;\r\n\tauto f = [&] (auto&& self, int turn, int to_beat) -> int {\r\n\t\tint& d = dp[turn][to_beat];\r\n\t\tif (d != -1) return d;\r\n\t\tif (stck.count({ turn, to_beat })) return dp[turn][to_beat] = DRAW;\r\n\t\tstck.insert({ turn, to_beat });\r\n\t\tauto& mp = turn == MTURN ? amp : bmp;\r\n\t\tauto it = mp.upper_bound(to_beat);\r\n\t\tif (it == mp.end()) {\r\n\t\t\tstck.erase({ turn, to_beat });\r\n\t\t\treturn d = turn == MTURN ? BWIN : MWIN;\r\n\t\t}\r\n\t\td = self(self, turn ^ 1, it->second);\r\n\t\tstck.erase({ turn, to_beat });\r\n\t\treturn d;\r\n\t};\r\n\tint cnt_mwin = 0, cnt_bwin = 0, cnt_draw = 0;\r\n\tfor (int i = 0; i < n; i++) {\r\n\t\tint res = f(f, BTURN, ay[i]);\r\n\t\tif (res == MWIN) cnt_mwin++;\r\n\t\telse if (res == BWIN) cnt_bwin++;\r\n\t\telse cnt_draw++;\r\n\t}\r\n\tstd::cout << cnt_mwin << \" \" << cnt_draw << \" \" << cnt_bwin << \"\\n\";\r\n}\r\n"
+}

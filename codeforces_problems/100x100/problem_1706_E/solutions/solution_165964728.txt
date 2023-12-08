@@ -1,0 +1,41 @@
+{
+    "id": 165964728,
+    "contestId": 1706,
+    "creationTimeSeconds": 1658989043,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "lgswdn"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 54476800,
+    "source": "#include<bits/stdc++.h>\r\n#define int long long\r\nusing namespace std;\r\n#define fi first\r\n#define se second\r\n#define rep(i,a,b) for(int i=(a);i<=(b);i++)\r\n#define per(i,a,b) for(int i=(a);i>=(b);i--)\r\ntypedef pair<int,int> pii;\r\ntypedef vector<int> vi;\r\ntypedef vector<pii> vp;\r\ntypedef unsigned long long ull;\r\ntypedef bitset<509> bset;\r\ntypedef pair<bset,bset> v2;\r\n\r\nlong long read() {\r\n    long long res=0, w=1; char c=getchar();\r\n    while(!isdigit(c)) {if(c=='-') w=-1; c=getchar();}\r\n    while(isdigit(c)) {res=res*10+c-48, c=getchar();}\r\n    return res*w;\r\n}\r\n\r\nconst int N=2e5+9;\r\nint n,m,q,w[N],tot,f[N][19],d[N],dfn[N],tick;\r\nvi e[N];\r\n\r\nint id[N];\r\nint find(int i) {return i==id[i]?i:id[i]=find(id[i]);}\r\n\r\nvoid dfs(int u) {\r\n    if(u<=n) dfn[u]=++tick;\r\n    per(h,18,1) f[u][h]=f[f[u][h-1]][h-1];\r\n    for(auto v:e[u]) {\r\n        f[v][0]=u, d[v]=d[u]+1;\r\n        dfs(v);\r\n    }\r\n}\r\nint lca(int u,int v) {\r\n    if(d[u]<d[v]) swap(u,v);\r\n    per(h,18,0) if(d[f[u][h]]>=d[v]) u=f[u][h];\r\n    per(h,18,0) if(f[u][h]!=f[v][h]) u=f[u][h], v=f[v][h];\r\n    return u==v?u:f[u][0];\r\n}\r\n\r\nnamespace SegT {\r\n    int ls[N<<1],rs[N<<1],tot=1;\r\n    pii t[N<<1];\r\n    pii operator + (pii x,pii y) {\r\n        pii r(0,0);\r\n        if(dfn[x.fi]<dfn[y.fi]) r.fi=x.fi; else r.fi=y.fi;\r\n        if(dfn[x.se]>dfn[y.se]) r.se=x.se; else r.se=y.se;\r\n        return r;\r\n    }\r\n    void build(int p,int l,int r) {\r\n        t[p]=pii(l,l); if(l==r) return; int mid=l+r>>1;\r\n        build(ls[p]=++tot,l,mid), build(rs[p]=++tot,mid+1,r);\r\n        t[p]=t[ls[p]]+t[rs[p]];\r\n    }\r\n    pii qry(int p,int l,int r,int x,int y) {\r\n        if(l==x&&r==y) return t[p]; int mid=l+r>>1;\r\n        if(y<=mid) return qry(ls[p],l,mid,x,y);\r\n        else if(x>mid) return qry(rs[p],mid+1,r,x,y);\r\n        else return qry(ls[p],l,mid,x,mid)+qry(rs[p],mid+1,r,mid+1,y);\r\n    }\r\n    void init() {\r\n        rep(i,1,tot) ls[i]=rs[i]=0, t[i].fi=t[i].se=0;\r\n        tot=1;\r\n    }\r\n}\r\n\r\nsigned main() {\r\n    int T=read();\r\n    while(T--) {\r\n        n=read(), m=read(), q=read(); tot=n, tick=0;\r\n        rep(i,1,2*n) {\r\n            id[i]=i, e[i].clear(), e[i].shrink_to_fit(), d[i]=0;\r\n            rep(h,0,18) f[i][h]=0;\r\n        }\r\n        rep(i,1,m) {\r\n            int u=read(), v=read();\r\n            if(find(u)!=find(v)) {\r\n                u=find(u), v=find(v);\r\n                w[++tot]=i;\r\n                e[tot].emplace_back(u), e[tot].emplace_back(v);\r\n                id[u]=tot, id[v]=tot;\r\n            }\r\n        }\r\n        d[tot]=1; dfs(tot);\r\n        SegT::build(1,1,n);\r\n        rep(i,1,q) {\r\n            int l=read(), r=read();\r\n            pii p=SegT::qry(1,1,n,l,r);\r\n            int x=lca(p.fi,p.se);\r\n            printf(\"%lld \",w[x]);\r\n        }\r\n        puts(\"\");\r\n    }\r\n    return 0;\r\n}"
+}

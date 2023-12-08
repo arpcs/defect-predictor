@@ -1,0 +1,40 @@
+{
+    "id": 181041353,
+    "contestId": 1750,
+    "creationTimeSeconds": 1668489929,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "Nabuko"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1667745300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 29,
+    "timeConsumedMillis": 109,
+    "memoryConsumedBytes": 5324800,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <string>\r\n#include <stack>\r\n#include <map>\r\n#include <algorithm>\r\nusing namespace std;\r\nstruct bit{\r\n    vector<long long> a;\r\n    void resize(long long n){\r\n        a=vector<long long>(n+1);\r\n    }\r\n    void update(long long pos,long long val){\r\n        long long n=(long long)a.size()-1;\r\n        for(long long i=pos;i<=n;i+=i&(-i))\r\n            a[i]+=val;\r\n    }\r\n    long long query(long long pos){\r\n        long long ans=0;\r\n        for(long long i=pos;i;i-=i&(-i))\r\n            ans+=a[i];\r\n        return ans;\r\n    }\r\n    long long query(long long st,long long dr){\r\n        return query(dr)-query(st-1);\r\n    }\r\n};\r\nint main(){\r\n    cin.tie(nullptr)->ios_base::sync_with_stdio(false);\r\n    int q;cin>>q;\r\n    while(q--){\r\n        int n;\r\n        string s;cin>>n>>s;\r\n        s='$'+s;\r\n        vector<long long> pref(n+1);\r\n        for (int i=1;i<=n;++i)\r\n            pref[i]=pref[i-1]+(s[i]==')'?-1:1);\r\n        vector<long long> dp(n+2);\r\n        stack<long long> paranteze;\r\n        for(int i=n;i>=1;--i){\r\n            if (s[i]=='('){\r\n                if (!paranteze.empty()){\r\n                    dp[i]=dp[paranteze.top()+1];\r\n                    paranteze.pop();\r\n                }\r\n            }\r\n            else{\r\n                dp[i]=dp[i+1]+(n-i+1);\r\n                paranteze.push(i);\r\n            }\r\n        }\r\n        long long ans=0;\r\n        for(int i=1;i<=n;++i)\r\n            ans+=dp[i];\r\n        map<long long,long long> norm;\r\n        vector<long long> lesgo=pref;\r\n        sort(lesgo.begin(),lesgo.end());\r\n        long long p=1;\r\n        for(int i=0;i<=n;++i){\r\n            if (norm.find(lesgo[i])==norm.end())\r\n                norm[lesgo[i]]=p++;\r\n        }\r\n        for(int i=0;i<=n;++i)\r\n            lesgo[i]=norm[pref[i]];\r\n        p--;\r\n        bit tree;\r\n        tree.resize(p);\r\n        for(int i=0;i<=n;++i){\r\n            ans+=tree.query(1,lesgo[i])*pref[i];\r\n            tree.update(lesgo[i],1);\r\n        }\r\n        tree.resize(p);\r\n        for(int i=n;i>=0;--i){\r\n            ans+=tree.query(lesgo[i], p)* -pref[i];\r\n            tree.update(lesgo[i],1);\r\n        }\r\n        cout<<ans<<'\\n';\r\n    }\r\n}\r\n"
+}

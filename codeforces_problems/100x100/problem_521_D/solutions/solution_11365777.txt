@@ -1,0 +1,35 @@
+{
+    "id": 11365777,
+    "contestId": 521,
+    "creationTimeSeconds": 1433071744,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 521,
+        "index": "D",
+        "name": "Shop",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2800,
+        "tags": [
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 521,
+        "members": [
+            {
+                "handle": "paulik"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1425279600
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 155,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 6246400,
+    "source": "#include <algorithm>\n#include <vector>\n#include <stdio.h>\nusing namespace std;\n\ntemplate <typename T>\nstruct Operation {\n    T value;\n    int index;\n\n    Operation(T value = 0, int index = 0)\n        : value(value)\n        , index(index)\n    { }\n\n    bool operator>(const Operation& other) const {\n        return value > other.value || (value == other.value && index > other.index);\n    }\n};\n\nint k, n, m;\nvector<int> a;\nvector<int> types;\nvector<Operation<int>> assigns;\nvector<vector<Operation<int>>> adds;\nvector<Operation<int>> mults;\n\nint main() {\n    scanf(\"%d%d%d\", &k, &n, &m);\n    a.resize(k);\n    for (int i = 0; i != k; ++i)\n        scanf(\"%d\", &a[i]);\n\n    types.resize(n);\n    assigns.resize(k);\n    adds.resize(k);\n    for (int i = 0; i != n; ++i) {\n        int ind, b;\n        scanf(\"%d%d%d\", &types[i], &ind, &b);\n        --ind;\n        switch (types[i]) {\n        case 1:\n            if (b > a[ind] && b > assigns[ind].value)\n                assigns[ind] = Operation<int>(b, i);\n            break;\n        case 2:\n            adds[ind].push_back(Operation<int>(b, i));\n            break;\n        case 3:\n            mults.push_back(Operation<int>(b, i));\n            break;\n        }\n    }\n    for (int i = 0; i != k; ++i)\n        if (assigns[i].value > a[i])\n            adds[i].push_back(Operation<int>(assigns[i].value - a[i], assigns[i].index));\n\n    vector<Operation<double>> log_mults;\n    log_mults.reserve(n);\n    for (auto& op : mults)\n        log_mults.push_back(Operation<double>(op.value, op.index));\n\n    for (int i = 0; i != k; ++i) {\n        auto& row = adds[i];\n        if (row.empty())\n            continue;\n        sort(row.begin(), row.end(), greater<Operation<int>>());\n\n        long long sum = a[i];\n        log_mults.push_back(Operation<double>(double(sum + row[0].value) / sum, row[0].index));\n        for (int j = 0, last = row.size() - 1; j != last; ++j) {\n            sum += row[j].value;\n            log_mults.push_back(Operation<double>(double(sum + row[j + 1].value) / sum, row[j + 1].index));\n        }\n    }\n    sort(log_mults.begin(), log_mults.end(), greater<Operation<double>>());\n\n    int take = min((int)log_mults.size(), m);\n    printf(\"%d\\n\", take);\n    for (int type = 1; type != 4; ++type) {\n        for (int i = 0; i != take; ++i)\n            if (types[log_mults[i].index] == type)\n                printf(\"%d \", log_mults[i].index + 1);\n    }\n    puts(\"\");\n\n    return 0;\n}\n\n"
+}

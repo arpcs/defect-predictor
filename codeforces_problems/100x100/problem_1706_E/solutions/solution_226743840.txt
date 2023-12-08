@@ -1,0 +1,41 @@
+{
+    "id": 226743840,
+    "contestId": 1706,
+    "creationTimeSeconds": 1696512822,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "LeoChan2022"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 810,
+    "memoryConsumedBytes": 197939200,
+    "source": "// LUOGU_RID: 127863183\n\t#include <bits/stdc++.h>\r\n\tusing namespace std;\r\n\t\r\n\tconst int M=6e5+5;\r\n\tconst int N=6e5+5;\r\n\t\r\n\t#define pii pair<int,int>\r\n\t#define fi first\r\n\t#define se second\r\n\t\r\n\tint n,m,Q,cnt,df,tot;\r\n\tint head[N],dfn[N],st[N][21],dep[N],idfn[N];\r\n\tint st2[N][21],fa[N],va[N],va2[N],t[N<<2],t2[N<<2];\r\n\t\r\n\tstruct node{\r\n\t\tint fr,to,ne,w;\r\n\t}b[M],b2[M],e[N<<1],e2[N<<1];\r\n\t\r\n\tbool cmp(node a,node b){\r\n\t\treturn a.w<b.w;\r\n\t}\r\n\t\r\n\tvoid add(int x,int y){\r\n//\t\tcout<<x<<\" \"<<y<<\"\\n\";\r\n\t\te[++cnt]=(node){0,y,head[x],0};\r\n\t\thead[x]=cnt;\r\n\t}\r\n\t\r\n\tvoid dfs(int x,int fa){\r\n\t\tdfn[x]=++df;\r\n\t\tst[x][0]=fa;\r\n\t\tst2[df][0]=fa;\r\n\t\tdep[x]=dep[fa]+1;\r\n\t\tfor(int i=head[x];i;i=e[i].ne){\r\n\t\t\tint y=e[i].to;\r\n\t\t\tif(y!=fa){\r\n\t\t\t\tdfs(y,x);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\t\r\n\tint find(int x){\r\n\t\tif(x==fa[x]) return x;\r\n\t\treturn fa[x]=find(fa[x]);\r\n\t}\r\n\t\r\n\tint cp(int a,int b){\r\n\t\tif(dfn[a]>dfn[b]) return b;\r\n\t\treturn a;\r\n\t}\r\n\t\r\n\tvoid kru(){\r\n\t\ttot=n;\r\n\t\tsort(b+1,b+1+m,cmp);\r\n\t\tfor(int i=1;i<=2*n;i++){\r\n\t\t\tfa[i]=i;\r\n\t\t}\r\n\t\tfor(int i=1;i<=m;i++){\r\n\t\t\tint x=b[i].fr,y=b[i].to;\r\n\t\t\tint fx=find(x),fy=find(y);\r\n\t\t\tif(fx!=fy){\r\n\t\t\t\tadd(++tot,fx);\r\n\t\t\t\tadd(tot,fy);\r\n\t\t\t\tva[tot]=b[i].w;\r\n\t\t\t\tfa[fx]=fa[fy]=tot;\r\n\t\t\t}\r\n\t\t}\r\n\t\tfor(int i=tot;i>=1;i--) \r\n\t\t\tif(!dfn[i])\r\n\t\t\t\tdfs(i,0);\r\n\t\tfor(int j=1;j<=20;j++){\r\n\t\t\tfor(int i=1;i<=tot;i++){\r\n\t\t\t\tst[i][j]=st[st[i][j-1]][j-1];\r\n\t\t\t}\r\n\t\t}\r\n\t\tfor(int j=1;j<=20;j++){\r\n\t\t\tfor(int i=1;i+(1<<j)-1<=tot;i++){\r\n\t\t\t\tst2[i][j]=cp(st2[i][j-1],st2[i+(1<<(j-1))][j-1]);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\t\r\n\tint lca(int x,int y){\r\n\t\tif(x==y) return x;\r\n\t\tx=dfn[x],y=dfn[y];\r\n\t\tif(x>y) swap(x,y);\r\n\t\tx++;\r\n\t\tint S=log2(y-x+1);\r\n\t\treturn cp(st2[x][S],st2[y-(1<<S)+1][S]);\r\n\t}\r\n\t\r\n\tvoid init(){\r\n\t\tcnt=0;\r\n\t\tdf=0;\r\n\t\tfor(int j=0;j<=20;j++){\r\n\t\t\tfor(int i=1;i<=tot;i++){\r\n\t\t\t\tst[i][j]=0;\r\n\t\t\t\tst2[i][j]=0;\r\n\t\t\t}\r\n\t\t}\r\n\t\tfor(int i=1;i<=tot;i++) dfn[i]=0,va[i]=0,dep[i]=0,head[i]=0,idfn[i]=0;\r\n\t\tfor(int i=1;i<=tot;i++) t[i]=t2[i]=0;\r\n\t}\r\n\t\r\n\tvoid push_up(int p){\r\n\t\tt[p]=min(t[p<<1],t[p<<1|1]);\r\n\t\tt2[p]=max(t2[p<<1],t2[p<<1|1]);\r\n\t}\r\n\t\r\n\tvoid build(int p,int l,int r){\r\n\t\tif(l==r){\r\n\t\t\tt[p]=dfn[l];\r\n\t\t\tt2[p]=dfn[l];\r\n\t\t\treturn ;\r\n\t\t}\r\n\t\tint mid=l+r>>1;\r\n\t\tbuild(p<<1,l,mid);\r\n\t\tbuild(p<<1|1,mid+1,r);\r\n\t\tpush_up(p);\r\n\t}\r\n\t\r\n\tint query1(int p,int l,int r,int ql,int qr){\r\n\t\tif(l>=ql&&r<=qr){\r\n\t\t\treturn t[p];\r\n\t\t}\r\n\t\tint minn=0x3f3f3f3f,mid=l+r>>1;\r\n\t\tif(ql<=mid) minn=min(minn,query1(p<<1,l,mid,ql,qr));\r\n\t\tif(qr>mid) minn=min(minn,query1(p<<1|1,mid+1,r,ql,qr));\r\n\t\treturn minn;\r\n\t}\r\n\t\r\n\tint query2(int p,int l,int r,int ql,int qr){\r\n\t\tif(l>=ql&&r<=qr){\r\n\t\t\treturn t2[p];\r\n\t\t}\r\n\t\tint minn=0,mid=l+r>>1;\r\n\t\tif(ql<=mid) minn=max(minn,query2(p<<1,l,mid,ql,qr));\r\n\t\tif(qr>mid) minn=max(minn,query2(p<<1|1,mid+1,r,ql,qr));\r\n\t\treturn minn;\r\n\t}\r\n\t\r\n\tint main(){\r\n\t\tios::sync_with_stdio(0),cin.tie(0);\r\n\t\tint T;\r\n\t\tcin>>T;\r\n\t\twhile(T--){\r\n\t\t\tcin>>n>>m>>Q;\r\n\t\t\tfor(int i=1,x,y,z;i<=m;i++){\r\n\t\t\t\tcin>>x>>y;\r\n\t\t\t\tb[++cnt]=(node){x,y,0,i};\r\n\t\t\t}\r\n\t\t\tkru();\r\n\t\t\tbuild(1,1,tot);\r\n\t\t\tfor(int i=1;i<=n;i++) idfn[dfn[i]]=i;\r\n\t\t\tfor(int i=1,a,b;i<=Q;i++){\r\n\t\t\t\tcin>>a>>b;\r\n\t\t\t\tint x=query1(1,1,tot,a,b),y=query2(1,1,tot,a,b);\r\n\t\t\t\tint an=lca(idfn[x],idfn[y]);\r\n\t\t\t\tcout<<va[an]<<\" \";\r\n\t\t\t} \r\n\t\t\tcout<<\"\\n\";\r\n\t\t\tinit();\r\n\t\t}\r\n\t\treturn 0;\r\n\t}\r\n"
+}

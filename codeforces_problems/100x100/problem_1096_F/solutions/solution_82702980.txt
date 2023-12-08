@@ -1,0 +1,36 @@
+{
+    "id": 82702980,
+    "contestId": 1096,
+    "creationTimeSeconds": 1591445910,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1096,
+        "index": "F",
+        "name": "Inversion Expectation",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1096,
+        "members": [
+            {
+                "handle": "aryanv"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1546007700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 436,
+    "memoryConsumedBytes": 6348800,
+    "source": "//Be Name Khoda, Besmellah Rahmane Rahim, In The Name Of God;\r\n//#include<bits/stweight++.h>\r\n#include<iostream>\r\n#include <vector>\r\n#include <algorithm>\r\n#include <cmath>\r\n#include <set>\r\n#include <queue>\r\n#include <deque>\r\n#include <map>\r\n#include <stack>\r\n#include<bitset>\r\n#include<list>\r\n#include<cassert>\r\n#include<numeric>\r\n#include <stdio.h>\r\n#include <string.h>\r\n#include<iomanip>\r\n#include<unordered_map>\r\n#include<unordered_set>\r\n#include <fstream>\r\n\r\n\r\nusing namespace std;\r\n\r\nconst long long N = 2e5 + 5;\r\nconst long long mod = 998244353;\r\n\r\nlong long n;\r\nlong long cnt = 0;\r\nlong long a[N];\r\nbool is[N];\r\nlong long dp2[N];\r\nlong long dp[N];\r\n\r\nlong long power(long long a, long long b)\r\n{\r\n    if (!b)\r\n    {\r\n        return 1;\r\n    }\r\n    long long ans = power(a, b / 2);\r\n    ans = ans * ans;\r\n    ans = ans % mod;\r\n    if (b % 2)\r\n    {\r\n        ans = ans * a;\r\n    }\r\n    ans = ans % mod;\r\n    return ans;\r\n}\r\n\r\nvoid pre()\r\n{\r\n    dp[1] = 0;\r\n    for (long long i = 2; i < N; i++)\r\n    {\r\n        dp[i] = dp[i - 1];\r\n        long long tmp = i * (i - 1) / 2;\r\n        tmp = tmp % mod;\r\n        tmp = tmp * power(i, mod - 2);\r\n        dp[i] += tmp;\r\n        dp[i] = dp[i] % mod;\r\n    }\r\n}\r\n\r\nlong long s = 0;\r\nlong long sz = 0;\r\nlong long A[70000];\r\nlong long B[70000];\r\n\r\nvoid mrg(long long L, long long R)\r\n{\r\n    long long e=0;\r\n    long long l=L;\r\n    long long m=(R+L)/2;\r\n    long long r=m;\r\n    while(l<m && r<R)\r\n    {\r\n        if(A[l]<=A[r])\r\n        {\r\n            B[e]=A[l];\r\n            e++;\r\n            l++;\r\n            s+=r-m;\r\n        }\r\n        else\r\n        {\r\n            B[e]=A[r];\r\n            e++;\r\n            r++;\r\n        }\r\n    }\r\n    while(l<m)\r\n    {\r\n        B[e]=A[l];\r\n        l++;\r\n        e++;\r\n        s+=r-m;\r\n        \r\n    }\r\n    while(r<R)\r\n    {\r\n        B[e]=A[r];\r\n        r++;\r\n        e++;\r\n    }\r\n    for(long long i=L; i<R; i++)\r\n    {\r\n        A[i] = B[i - L];\r\n    }\r\n}\r\n\r\nvoid msort(long long l, long long r)\r\n{\r\n    if(r-l==1) return;\r\n    \r\n    long long m=(l+r)/2;\r\n    msort(l,m);\r\n    msort(m,r);\r\n    mrg(l,r);\r\n}\r\n\r\n\r\nint main() \r\n{\r\n    pre();\r\n    cin >> n;\r\n    for (long long i = 0; i < n; i++)\r\n    {\r\n        cin >> a[i];\r\n        if (a[i] != -1)\r\n        {\r\n            is[a[i]] = true;\r\n            A[sz] = a[i];\r\n            sz++;\r\n        }\r\n    }\r\n    for (long long i = n; i >= 1; --i)\r\n    {\r\n        dp2[i] = cnt;\r\n        cnt += !is[i];\r\n    }\r\n    long long ans = dp[cnt];\r\n    long long inv = power(cnt, mod - 2);\r\n    long long cnt1 = 0;\r\n    long long cnt2 = 0;\r\n    for (long long i = 0; i < n; i++)\r\n    {\r\n        if (a[i] == -1)\r\n        {\r\n            ++cnt1;\r\n        }\r\n        else\r\n        {\r\n            long long tmp = dp2[a[i]] * inv;\r\n            tmp = tmp % mod;\r\n            tmp = tmp * cnt1;\r\n            tmp = tmp % mod;\r\n            ans = ans + tmp;\r\n            ans = ans % mod;\r\n        }\r\n    }\r\n    for (long long i = n - 1; i >= 0; --i)\r\n    {\r\n        if (a[i] == -1)\r\n        {\r\n            ++cnt2;\r\n        }\r\n        else\r\n        {\r\n            long long tmp = cnt - dp2[a[i]];\r\n            tmp = tmp * inv;\r\n            tmp = tmp % mod;\r\n            tmp = tmp * cnt2;\r\n            tmp = tmp % mod;\r\n            ans = ans + tmp;\r\n            ans = ans % mod;\r\n        }\r\n    }\r\n    if (sz)\r\n    {\r\n        msort(0, sz);\r\n    }\r\n    ans = ans + s;\r\n    ans = ans % mod;\r\n    cout << ans  << endl;\r\n}\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n"
+}

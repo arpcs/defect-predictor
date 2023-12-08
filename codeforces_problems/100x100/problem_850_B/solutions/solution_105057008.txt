@@ -1,0 +1,36 @@
+{
+    "id": 105057008,
+    "contestId": 850,
+    "creationTimeSeconds": 1611312849,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 850,
+        "index": "B",
+        "name": "Arpa and a list of numbers",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2100,
+        "tags": [
+            "implementation",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 850,
+        "members": [
+            {
+                "handle": "ItsLastDay"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1504535700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 592,
+    "memoryConsumedBytes": 16076800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n \r\nconstexpr int MAXN = 5e5 + 123;\r\nconstexpr int MAXA = 1e6 + 123;\r\n\r\nlong long cnt[MAXA];\r\nlong long sum[MAXA];\r\n\r\nlong long count_numbers(int le, int rg)\r\n{\r\n\treturn cnt[rg] - cnt[le - 1];\r\n}\r\n\r\nlong long get_sum(int le, int rg)\r\n{\r\n\treturn sum[rg] - sum[le - 1];\r\n}\r\n \r\nint main()\r\n{\r\n\tcin.sync_with_stdio(false);\r\n\tcin.tie(nullptr);\r\n\t\t\r\n\r\n\tint n;\r\n\tlong long cost_delete, cost_add;\r\n\tcin >> n >> cost_delete >> cost_add;\r\n\t\r\n\tint horizon = cost_delete / cost_add - 10;\r\n\twhile (horizon * cost_add < cost_delete)\r\n\t\t++horizon;\r\n\t\r\n\t\r\n\tfor (int i = 0; i < n; i++)\r\n\t{\r\n\t\tint cur;\r\n\t\tcin >> cur;\r\n\t\t\r\n\t\tcnt[cur]++;\r\n\t}\r\n\t\r\n\tfor (int i = 1; i < MAXA; ++i)\r\n\t{\r\n\t\tsum[i] = sum[i - 1] + i * cnt[i];\r\n\t\t\r\n\t\tcnt[i] += cnt[i - 1];\r\n\t}\r\n\t\r\n\t\r\n\tlong long ans = 1e18;\r\n\t\r\n\tfor (int gcd = 2; gcd < MAXA; ++gcd)\r\n\t{\r\n\t\tlong long cur_cost = 0;\r\n\t\tint num_deleted = 0;\r\n\t\t\r\n\t\tfor (int i = gcd; i < MAXA; i += gcd)\r\n\t\t{\r\n\t\t\t// process every number in [i - gcd + 1, i]\r\n\t\t\t\r\n\t\t\tif (i - gcd + 1 <= i - horizon)\r\n\t\t\t{\r\n\t\t\t\t// delete [i - gcd + 1 .. i - horizon]\r\n\t\t\t\tcur_cost += count_numbers(i - gcd + 1, i - horizon) * cost_delete;\r\n\t\t\t\tnum_deleted += count_numbers(i - gcd + 1, i - horizon);\r\n\t\t\t\t\r\n\t\t\t\t// add everything in [i - horizon + 1 .. i]\r\n\t\t\t\tlong long cnt = count_numbers(i - horizon + 1, i);\r\n\t\t\t\tlong long want_sum = cnt * i;\r\n\t\t\t\tlong long have_sum = get_sum(i - horizon + 1, i);\r\n\t\t\t\t\r\n\t\t\t\tcur_cost += (want_sum - have_sum) * cost_add;\r\n\t\t\t}\r\n\t\t\telse\r\n\t\t\t{\r\n\t\t\t\t// add everything in [i - gcd + 1 .. i]\r\n\t\t\t\tlong long cnt = count_numbers(i - gcd + 1, i);\r\n\t\t\t\tlong long want_sum = cnt * i;\r\n\t\t\t\tlong long have_sum = get_sum(i - gcd + 1, i);\r\n\t\t\t\t\r\n\t\t\t\tcur_cost += (want_sum - have_sum) * cost_add;\r\n\t\t\t}\r\n\t\t}\r\n\t\t\r\n\t\tif (num_deleted == n)\r\n\t\t{\r\n\t\t\t// need to perform *one* addition with minimal difference\r\n\t\t\tint min_diff = gcd;\r\n\t\t\t\r\n\t\t\tfor (int i = gcd; i < MAXA; i += gcd)\r\n\t\t\t{\r\n\t\t\t\t// find closest number in [i - gcd + 1 .. i - horizon]\r\n\t\t\t\t\r\n\t\t\t\tif (count_numbers(i - gcd + 1, i - horizon) == 0)\r\n\t\t\t\t\tcontinue;\r\n\t\t\t\t\r\n\t\t\t\tint le = i - gcd + 1;\r\n\t\t\t\tint rg = i - horizon + 1;\r\n\t\t\t\t\r\n\t\t\t\twhile (rg - le > 1)\r\n\t\t\t\t{\r\n\t\t\t\t\tint mid = (le + rg) / 2;\r\n\t\t\t\t\tif (count_numbers(mid, i - horizon) > 0)\r\n\t\t\t\t\t\tle = mid;\r\n\t\t\t\t\telse\r\n\t\t\t\t\t\trg = mid;\r\n\t\t\t\t}\r\n\t\t\t\t\r\n\t\t\t\tmin_diff = min(min_diff, i - le);\r\n\t\t\t}\r\n\t\t\t\r\n\t\t\tans = min(ans, min_diff * cost_add);\r\n\t\t}\r\n\t\telse \r\n\t\t{\r\n\t\t\tans = min(ans, cur_cost);\r\n\t\t}\r\n\t}\r\n\t\r\n\tcout << ans << endl;\t\r\n\t\r\n\treturn 0;\r\n}"
+}

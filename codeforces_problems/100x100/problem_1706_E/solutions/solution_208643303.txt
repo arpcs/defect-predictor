@@ -1,0 +1,41 @@
+{
+    "id": 208643303,
+    "contestId": 1706,
+    "creationTimeSeconds": 1686015711,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "yellowtomato98"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 0,
+    "source": "/**\n *   ^~^  ,\n *  ('Y') )\n *  /   \\/ \n * (\\|||/)\n**/\n \n#include <iostream>\n#include <cstdio>\n#include <algorithm>\n#include <vector>\n#include <bitset>\n#include <set>\n#include <unordered_set>\n#include <numeric>\n#include <map>\n#include <unordered_map>\n#include <string>\n#include <cmath>\n#include <tuple>\n#include <queue>\n#include <stack>\n#include <cassert>\n#include <random>\n#include <array>\n#include <chrono>\nusing namespace std; \n \n#define ll long long\n#define log(...) logger(#__VA_ARGS__, __VA_ARGS__)\ntemplate<class T, class ...Vals>\nvoid logger(T names, Vals&&... values){\n    cout << names << \" = \";\n    string delimiter = \"\";\n    (..., (cout << delimiter << values, delimiter = \", \"));\n    cout << '\\n';\n}\n \nconst int INF = 0x7FFFFFFF;\nconst int MINF = 0x80000000;\nconst int MOD = 1e9+7;\n// const int MOD = 998244353;\n\n// ios_base::sync_with_stdio(0); \n// cin.tie(0);\n\ntemplate<class T, class U> void logv(vector<pair<T,U>> x){\n    for (int i = 0; i < x.size(); i++){\n        cout << x[i].first << \" \" << x[i].second << '\\n';\n    }\n}\n \ntemplate<class T> void logv(vector<T> x){\n    for (int i = 0; i < x.size(); i++){\n        cout << x[i] << \" \";\n    }\n    cout << '\\n';\n}\n\n// everything zero-indexed\n// tree rooted at 0\n// adjusted to take in adjacency array of pairs\nstruct LCA{ \n    int depth;\n    vector<int> euler_tour, first, last, height;\n    vector<vector<int>> up, mx;\n\n    int lg2(int x){\n        return 31-__builtin_clz(x);\n    }\n \n    LCA(vector<vector<pair<int, int>>>& adj){\n        int n = adj.size();\n        depth = lg2(n)+1;\n        first.resize(n);\n        last.resize(n);\n        height.resize(n);\n        up = vector<vector<int>>(n, vector<int>(depth+1));\n        mx = vector<vector<int>>(n, vector<int>(depth+1));\n        dfs(adj,0,-1,0);\n    }\n\n    void dfs(vector<vector<pair<int, int>>>& adj, int x, int p, int w, int h = 0){\n        height[x] = h;\n        first[x] = euler_tour.size();\n        euler_tour.push_back(x);\n        if (p!=-1){\n            up[x][0]=p;\n            mx[x][0]=w;\n        }\n        for (int i = 1; i <= depth; i++){\n            up[x][i] = up[up[x][i-1]][i-1];\n            mx[x][i] = max(mx[x][i-1], mx[up[x][i-1]][i-1]);\n        }\n        for (auto [u,w] : adj[x]){\n            if (u!=p){\n                dfs(adj, u, x, w, h+1);\n                euler_tour.push_back(w);\n            }\n        }\n        last[x] = euler_tour.size()-1;\n    }\n\n    // check if u ancestor of v\n    bool is_ancestor(int u, int v){\n        return first[u] <= first[v] && last[u] >= last[v];\n    }\n\n    // return -1 if a does not have a kth ancestor\n    int kth_ancestor(int a, int k){\n        if (k > height[a]) return -1;\n        int i = 0;\n        while(k){\n            if (k%2){\n                a = up[a][i];\n            }\n            i++;\n            k>>=1;\n        }\n        return a;\n    }\n\n    int lca(int a, int b){\n        if (is_ancestor(a,b)) return a;\n        if (is_ancestor(b,a)) return b;\n        for (int i = depth; ~i; i--){\n            if (!is_ancestor(up[a][i], b)){\n                a = up[a][i];\n            }\n        }\n        return up[a][0];\n    }\n\n    int max_on_path(int a, int b){\n        int x = lca(a,b);\n        int ans = 0, i = 0;\n        int h = height[a]-height[x];\n        while(h){\n            if (h%2){\n                ans = max(ans,mx[a][i]);\n                a = up[a][i];\n            }\n            i++;\n            h>>=1;\n        }\n        i = 0;\n        h = height[b]-height[x];\n        while(h){\n            if (h%2){\n                ans = max(ans,mx[b][i]);\n                b = up[b][i];\n            }\n            i++;\n            h>>=1;\n        }\n        return ans;\n    }\n\n    int dist(int a, int b){\n        int x = lca(a,b);\n        return height[a] + height[b] - 2*height[x];\n    }\n};\n\n// better implementation: \nstruct DSU{\n    vector<int> sz;\n\n    DSU(int n){ sz.assign(n,-1); }\n\n    int get(int n){ return sz[n] < 0 ? n : sz[n] = get(sz[n]); }\n\n    bool unite(int a, int b){\n        a = get(a); \n        b = get(b);\n        if (a==b) return false;\n        if (sz[a] < sz[b]) swap(a,b);\n        sz[b] += sz[a];\n        sz[a] = b;\n        return true;\n    }\n\n    int same(int x, int y) { return get(x) == get(y); }\n\n    int size(int x) { return -sz[get(x)];}\n};\n\ntypedef int item;\n\n// query(l,r) queries from l to r-1 inclusive\nstruct segtree{\n    int size;\n    vector<item> values;\n \n    item NEUTRAL_ELEMENT = 0;\n \n    item merge(item a, item b){\n        return max(a,b);\n    }\n \n    item single(int v){\n        return v;\n    }\n \n    segtree(int n){\n        size = 1;\n        while (size < n) size *= 2;\n        values = vector<item>(2*size);\n    }\n \n    void build(vector<int> &a, int x, int lx, int rx){\n        if (rx - lx == 1){\n            if (lx < a.size()){\n                values[x] = single(a[lx]);\n            }\n            return;\n        }\n \n        int m = (lx+rx)/2;\n        build(a, 2*x+1, lx, m);\n        build(a, 2*x+2, m, rx);\n \n        values[x] = merge(values[2*x+1], values[2*x+2]);\n    }\n \n    void build(vector<int> &a){\n        build(a, 0, 0, size);\n    }\n \n    void set(int i, int v, int x, int lx, int rx){\n        if (rx - lx == 1){\n            values[x] = single(v);\n            return;\n        }\n        int m = (rx+lx)/2;\n        if (i < m){\n            set(i, v, 2*x+1, lx, m);\n        } else {\n            set(i, v, 2*x+2, m, rx);\n        }\n \n        values[x] = merge(values[2*x+1], values[2*x+2]);\n    }\n \n    void set(int i, int v){\n        set(i, v, 0, 0, size);\n    }\n \n    item query(int l, int r, int x, int lx, int rx){\n        if (lx >= r || l >= rx) return NEUTRAL_ELEMENT;\n        if (lx >= l && rx <= r) return values[x];\n        int m = (lx+rx)/2;\n        item s1 = query(l, r, 2*x+1, lx, m);\n        item s2 = query(l, r, 2*x+2, m, rx);\n \n        return merge(s1, s2);\n    }\n        \n    item query(int l, int r){\n        return query(l, r, 0, 0, size);\n    }\n};\n\nvoid solve(){\n    int n,m,q; \n    cin >> n >> m >> q;\n    vector<vector<pair<int, int>>> adj(n);\n    vector<pair<int, int>> edges;\n    for (int i = 0; i < m; i++){\n        int x,y; cin >> x >> y;\n        x--;\n        y--;\n        edges.push_back({x,y});\n    }\n    DSU dsu(n);\n    for (int i = 0; i < n; i++){\n        if (dsu.unite(edges[i].first, edges[i].second)){\n            adj[edges[i].first].push_back({edges[i].second,i+1});\n            adj[edges[i].second].push_back({edges[i].first,i+1});\n        }\n    }\n    vector<int> fs(n);\n    LCA lca(adj);\n    for (int i = 0; i+1 < n; i++){\n        fs[i] = lca.max_on_path(i, i+1);\n    }\n    segtree st(n);\n    st.build(fs);\n    while(q--){\n        int x, y;\n        cin >> x >> y;\n        x--; y--;\n        if (x==y){\n            cout << \"0 \";\n            continue;\n        }\n        if (x>y) swap(x,y);\n        cout << st.query(x,y) << \" \";\n    }\n    cout << '\\n';\n}\n\nint main(){\n    int t; cin >> t;\n    while(t--){\n        solve();\n    }\n}"
+}

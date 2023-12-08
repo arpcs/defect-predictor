@@ -1,0 +1,36 @@
+{
+    "id": 82662754,
+    "contestId": 1096,
+    "creationTimeSeconds": 1591392553,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1096,
+        "index": "F",
+        "name": "Inversion Expectation",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1096,
+        "members": [
+            {
+                "handle": "ijxjdjd"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1546007700
+    },
+    "programmingLanguage": "Java 8",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 32,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 2969600,
+    "source": "import java.io.OutputStream;\nimport java.io.IOException;\nimport java.io.InputStream;\nimport java.io.PrintWriter;\nimport java.util.StringTokenizer;\nimport java.io.IOException;\nimport java.io.BufferedReader;\nimport java.io.InputStreamReader;\nimport java.io.InputStream;\n\n/**\n * Built using CHelper plug-in\n * Actual solution is at the top\n */\npublic class Main {\n    public static void main(String[] args) {\n        InputStream inputStream = System.in;\n        OutputStream outputStream = System.out;\n        InputReader in = new InputReader(inputStream);\n        PrintWriter out = new PrintWriter(outputStream);\n        InversionExpectation solver = new InversionExpectation();\n        solver.solve(1, in, out);\n        out.close();\n    }\n\n    static class InversionExpectation {\n        public void solve(int testNumber, InputReader in, PrintWriter out) {\n            int N = in.nextInt();\n//        N = 200000;\n            FenwickTree fen = new FenwickTree(N);\n            int[] arr = new int[N];\n            for (int i = 0; i < N; i++) {\n                fen.add(i, 1);\n                arr[i] = in.nextInt() - 1;\n//            arr[i] = -2;\n                if (arr[i] < 0) {\n                    arr[i]++;\n                }\n            }\n            long c = 0;\n            for (int i = 0; i < N; i++) {\n                if (arr[i] != -1) {\n                    fen.add(arr[i], -1);\n                } else {\n                    c++;\n                }\n            }\n            long[] fact = new long[N + 1];\n            long[] invFact = new long[N + 1];\n            long MOD = 998244353;\n            fact[0] = 1;\n            invFact[0] = 1;\n            for (int i = 1; i <= N; i++) {\n                fact[i] = fact[i - 1] * i;\n                invFact[i] = MathUtils.inverse(i, MOD) * invFact[i - 1];\n                fact[i] %= MOD;\n                invFact[i] %= MOD;\n            }\n            long l = 0;\n            FenwickTree calc = new FenwickTree(N);\n            long calcSum = 0;\n            long res = 0;\n            if (c == 0) {\n                for (int i = 0; i < N; i++) {\n                    res += calc.sum(arr[i], N - 1);\n                    calc.add(arr[i], 1);\n                }\n                res %= MOD;\n            } else {\n                for (int i = 0; i < N; i++) {\n                    if (arr[i] == -1) {\n                        res += calcSum * fact[(int) c - 1];\n                        res %= MOD;\n                        if (c >= 2) {\n                            res += ((l * fact[(int) c - 2]) % MOD) * (((c * (c - 1)) / 2) % MOD);\n                        }\n                        res %= MOD;\n                        l++;\n                    } else {\n                        res += ((l * fen.sum(arr[i], N - 1)) % MOD) * fact[(int) c - 1];\n                        res %= MOD;\n                        res += calc.sum(arr[i], N - 1) * fact[(int) c];\n                        res %= MOD;\n                        calcSum += fen.sum(arr[i]);\n                        calcSum %= MOD;\n                        calc.add(arr[i], 1);\n                    }\n                }\n                res *= invFact[(int) c];\n                res %= MOD;\n            }\n            out.println(res);\n        }\n\n    }\n\n    static class InputReader {\n        public BufferedReader reader;\n        public StringTokenizer tokenizer;\n\n        public InputReader(InputStream stream) {\n            reader = new BufferedReader(new InputStreamReader(stream), 32768);\n            tokenizer = null;\n        }\n\n        public String next() {\n            while (tokenizer == null || !tokenizer.hasMoreTokens()) {\n                try {\n                    tokenizer = new StringTokenizer(reader.readLine());\n                } catch (IOException e) {\n                    throw new RuntimeException(e);\n                }\n            }\n            return tokenizer.nextToken();\n        }\n\n        public int nextInt() {\n            return Integer.parseInt(next());\n        }\n\n    }\n\n    static class MathUtils {\n        public static long inverse(long a, long mod) {\n            long[] inv = extended_gcd(a, mod);\n            if (inv[0] != 1) {\n                return 0;\n            } else {\n                return (inv[1] + 2 * mod) % mod;\n            }\n        }\n\n        public static long[] extended_gcd(long a, long b) {\n            //three numbers, first is gcd, second is x, third is y\n            if (a == 0) {\n                return new long[]{b, 0, 1};\n            }\n            long[] next = extended_gcd(b % a, a);\n            long tempX = next[1];\n            next[1] = next[2] - (b / a) * next[1];\n            next[2] = tempX;\n            return next;\n        }\n\n    }\n\n    static class FenwickTree {\n        public int[] BIT;\n        public int size = 0;\n\n        public FenwickTree(int N) {\n            BIT = new int[N];\n            size = N;\n        }\n\n        public FenwickTree(int[] arr) {\n            size = arr.length;\n            BIT = new int[arr.length];\n            for (int i = 0; i < size; i++) {\n                add(i, arr[i]);\n            }\n        }\n\n        public void add(int id, int add) {\n            for (int i = id; i < size; i |= i + 1) {\n                BIT[i] += add;\n            }\n        }\n\n        public int sum(int l, int r) {\n            if (r < l) {\n                return 0;\n            }\n            return sum(r) - sum(l - 1);\n        }\n\n        public int sum(int r) {\n            if (r < 0 || r >= size) {\n                return 0;\n            }\n            int res = 0;\n            for (int i = r; i >= 0; i = ((i) & (i + 1)) - 1) {\n                res += BIT[i];\n            }\n            return res;\n        }\n\n    }\n}\n\n"
+}

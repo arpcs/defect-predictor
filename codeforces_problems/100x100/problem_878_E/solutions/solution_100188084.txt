@@ -1,0 +1,36 @@
+{
+    "id": 100188084,
+    "contestId": 878,
+    "creationTimeSeconds": 1606912501,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "ChinaTelecom"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 109,
+    "memoryConsumedBytes": 6553600,
+    "source": "#include <iostream>\n#include <cstdio>\n#include <vector>\n#include <algorithm>\n\nusing namespace std;\n\ntypedef long long ll;\ntypedef pair<int, int> pii;\n\nconst int N = 100010;\nconst int mod = 1e9 + 7;\n\nint n, m, a[N], presum[N], inv2[N], f[N], len[N], sum[N], preans[N], out[N];\nvector<pii> q[N];\n\nint find(int x)\n{\n    return x == f[x] ? x : f[x] = find(f[x]);\n}\n\nint calc(int l, int r)\n{\n    return (ll) (presum[r] - presum[l - 1] + mod) * inv2[l - 1] % mod;\n}\n\nint main()\n{\n    scanf(\"%d%d\", &n, &m);\n\n    inv2[0] = 1;\n    for (int i = 1, two = 1; i <= n; ++i, two = two * 2 % mod)\n    {\n        scanf(\"%d\", a + i);\n        inv2[i] = (ll) inv2[i - 1] * (mod + 1) / 2 % mod;\n        presum[i] = (presum[i - 1] + (ll) two * a[i] % mod + mod) % mod;\n    }\n\n    for (int i = 1; i <= m; ++i)\n    {\n        int l, r;\n        scanf(\"%d%d\", &l, &r);\n        q[r].push_back(pii(l, i));\n    }\n\n    for (int i = 1; i <= n; ++i)\n    {\n        f[i] = i;\n        len[i] = 1;\n        sum[i] = a[i];\n        while (find(i) > 1 && sum[find(i)] > 0)\n        {\n            int x = find(i);\n            int y = find(x - 1);\n            if (len[y] >= 30 || (((ll) sum[x]) << len[y]) + sum[y] >= 1e9) sum[y] = 1e9;\n            else sum[y] += sum[x] << len[y];\n            len[y] += len[x];\n            f[x] = y;\n        }\n        preans[find(i)] = (preans[find(find(i) - 1)] + 2ll * calc(find(i), i)) % mod;\n        for (int j = 0; j < q[i].size(); ++j)\n        {\n            int l = q[i][j].first;\n            int id = q[i][j].second;\n            out[id] = (0ll + preans[find(i)] - preans[find(l)] + mod + calc(l, find(l) + len[find(l)] - 1)) % mod;\n        }\n    }\n\n    for (int i = 1; i <= m; ++i) printf(\"%d\\n\", out[i]);\n\n    return 0;\n}\n"
+}

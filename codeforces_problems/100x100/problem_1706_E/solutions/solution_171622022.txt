@@ -1,0 +1,41 @@
+{
+    "id": 171622022,
+    "contestId": 1706,
+    "creationTimeSeconds": 1662820648,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "LeoPro"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 512000,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\nusing ll = long long;\r\n\r\nvoid solve();\r\n\r\n#define answer(answer) { cout << (answer) << '\\n'; return; }\r\n#define answerExit(answer) { cout << (answer) << '\\n'; exit(0); }\r\n\r\nint main() {\r\n    cin.tie(nullptr);\r\n    ios_base::sync_with_stdio(false);\r\n    int t = 1;\r\n    cin >> t;\r\n    do { solve(); } while (--t);\r\n    return 0;\r\n}\r\n\r\n\r\ntemplate<typename T>\r\nstruct PersistentSegmentTree {\r\n    struct vertex {\r\n        vertex *left = nullptr, *right = nullptr;\r\n        T value;\r\n\r\n        explicit vertex(int value) : value(value) {}\r\n\r\n        vertex(vertex *left, vertex *right) : left(left), right(right), value(unite(left->value, right->value)) {}\r\n    };\r\n\r\n    static T unite(T left, T right) {\r\n        return max(left, right);\r\n    }\r\n\r\n    int n;\r\n    T neutral;\r\n    vertex *root = nullptr;\r\n\r\n    template<typename Init>\r\n    explicit PersistentSegmentTree(int n, T neutral, Init init) : n(n), neutral(neutral), root(build(0, n, init)) {}\r\n\r\n    explicit PersistentSegmentTree(int n, T neutral) : n(n), neutral(neutral), root(build(0, n, [&](int) { return neutral; })) {}\r\n\r\n    template<typename Init>\r\n    vertex *build(int l, int r, Init init) {\r\n        if (l + 1 == r) return new vertex(init(l));\r\n        int m = (l + r) / 2;\r\n        return new vertex(build(l, m, init), build(m, r, init));\r\n    }\r\n\r\n    T get(int l, int r) { return get(root, l, r, 0, n); }\r\n\r\n    T get(vertex *cur, int ql, int qr, int l, int r) {\r\n        if (qr <= l || r <= ql) return neutral;\r\n        if (ql <= l && r <= qr) return cur->value;\r\n        int m = (l + r) / 2;\r\n        auto g1 = get(cur->left, ql, qr, l, m);\r\n        auto g2 = get(cur->right, ql, qr, m, r);\r\n        return unite(g1, g2);\r\n    }\r\n\r\n    PersistentSegmentTree set(int i, int x) {\r\n        root = set(root, i, x, 0, n);\r\n        return *this;\r\n    }\r\n\r\n    static vertex *set(vertex *cur, int i, T x, int l, int r) {\r\n        if (i == l && l + 1 == r) return (x > cur->value ? new vertex(x) : cur);\r\n        int m = (l + r) / 2;\r\n        if (i < m) return new vertex(set(cur->left, i, x, l, m), cur->right);\r\n        return new vertex(cur->left, set(cur->right, i, x, m, r));\r\n    }\r\n};\r\n\r\ntemplate<typename T, typename U>\r\nstruct SegmentTree {\r\n    int n;\r\n    T neutral;\r\n    U unite;\r\n    vector<T> data;\r\n\r\n    template<typename I>\r\n    SegmentTree(int sz, T neutral, U unite, I init) : n(2 << __lg(max(1, sz - 1))), neutral(neutral), unite(unite),\r\n                                                      data(2 * n) {\r\n        for (int i = 0; i < sz; ++i) data[i + n] = init(i);\r\n        for (int i = n - 1; i > 0; --i) data[i] = unite(data[2 * i], data[2 * i + 1]);\r\n    }\r\n\r\n    SegmentTree(int sz, T neutral, U unite) : n(2 << __lg(max(1, sz - 1))), neutral(neutral), unite(unite),\r\n                                              data(2 * n, neutral) {}\r\n\r\n    template<typename C>\r\n    void set(int i, C x) {\r\n        data[i += n] = {x, x};\r\n        for (i /= 2; i > 0; i /= 2) data[i] = unite(data[2 * i], data[2 * i + 1]);\r\n    }\r\n\r\n    T get(int l, int r) {\r\n        T leftRes = neutral, rightRes = neutral;\r\n        for (l += n, r += n; l < r; l /= 2, r /= 2) {\r\n            if (l & 1) leftRes = unite(leftRes, data[l++]);\r\n            if (r & 1) rightRes = unite(data[--r], rightRes);\r\n        }\r\n        return unite(leftRes, rightRes);\r\n    }\r\n\r\n    template<typename C>\r\n    int lastTrue(int l, C ok) {\r\n        if (l == n) return n;\r\n        T cur = neutral;\r\n        l += n;\r\n        do {\r\n            l >>= __builtin_ctz(l);\r\n            T with1 = unite(cur, data[l]);\r\n            if (ok(with1)) {\r\n                cur = with1;\r\n                ++l;\r\n            } else {\r\n                while (l < n) {\r\n                    T with2 = unite(cur, data[2 * l]);\r\n                    if (ok(with2)) {\r\n                        cur = with2;\r\n                        l = 2 * l + 1;\r\n                    } else {\r\n                        l = 2 * l;\r\n                    }\r\n                }\r\n                return l - n;\r\n            }\r\n        } while (l & (l - 1));\r\n        return n;\r\n    }\r\n\r\n    template<typename C>\r\n    int firstTrue(int r, C ok) {\r\n        if (r == 0) return 0;\r\n        T cur = neutral;\r\n        r += n;\r\n        do {\r\n            r >>= __builtin_ctz(r);\r\n            T with1 = unite(data[--r], cur);\r\n            if (ok(with1)) {\r\n                cur = with1;\r\n            } else {\r\n                while (r < n) {\r\n                    T with2 = unite(data[2 * r + 1], cur);\r\n                    if (ok(with2)) {\r\n                        cur = with2;\r\n                        r = 2 * r;\r\n                    } else {\r\n                        r = 2 * r + 1;\r\n                    }\r\n                }\r\n                return r - n + 1;\r\n            }\r\n        } while (r & (r - 1));\r\n        return 0;\r\n    }\r\n};\r\n\r\nvoid solve() {\r\n    int n, m, q;\r\n    cin >> n >> m >> q;\r\n    vector<int> size(n, 1);\r\n    vector<vector<int>> children(n);\r\n    SegmentTree color(n, pair{n, -1},\r\n                      [](auto p, auto q) { return pair{min(p.first, q.first), max(p.second, q.second)}; },\r\n                      [](int i) { return pair{i, i}; });\r\n    PersistentSegmentTree st(n, 0, [](int i) { return i + 1; });\r\n    vector segments{pair{0, st}};\r\n    auto recolor = [&](auto recolor, int cur, int c) -> void {\r\n        color.set(cur, c);\r\n        for (int nxt: children[cur]) recolor(recolor, nxt, c);\r\n    };\r\n    for (int i = 0; i < m; ++i) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        --u, --v;\r\n        int cu = color.get(u, u + 1).first;\r\n        int cv = color.get(v, v + 1).first;\r\n        if (cu == cv) continue;\r\n        if (size[cu] > size[cv]) {\r\n            swap(cu, cv);\r\n            swap(u, v);\r\n        }\r\n        size[cv] += size[cu];\r\n        children[cv].push_back(cu);\r\n        recolor(recolor, cu, cv);\r\n        int l = color.firstTrue(u, [&](auto p) { return p == pair{cv, cv}; });\r\n        int r = color.lastTrue(u, [&](auto p) { return p == pair{cv, cv}; });\r\n        segments.emplace_back(i + 1, st.set(l, r));\r\n    }\r\n    for (int j = 0; j < q; ++j) {\r\n        int l, r;\r\n        cin >> l >> r;\r\n        cout << segments[([&] {\r\n            int low = -1, high = segments.size() - 1;\r\n            while (high - low > 1) {\r\n                int m = (low + high) / 2;\r\n                if (segments[m].second.get(0, l) >= r) high = m; else low = m;\r\n            }\r\n            return high;\r\n        }())].first << ' ';\r\n    }\r\n    cout << '\\n';\r\n}\r\n"
+}

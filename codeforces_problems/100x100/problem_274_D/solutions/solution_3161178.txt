@@ -1,0 +1,39 @@
+{
+    "id": 3161178,
+    "contestId": 274,
+    "creationTimeSeconds": 1361381051,
+    "relativeTimeSeconds": 6851,
+    "problem": {
+        "contestId": 274,
+        "index": "D",
+        "name": "Lovely Matrix",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 274,
+        "members": [
+            {
+                "handle": "M0sTik"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "room": 9,
+        "startTimeSeconds": 1361374200
+    },
+    "programmingLanguage": "FPC",
+    "verdict": "FAILED",
+    "testset": "PRETESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "{$M 1000000000}\r\nuses math;\r\ntype mostik=record x,n:longint end;\r\nvar s,k,t,p,l,r,n,m,i,j:longint;\r\n    c:array[0..1000000] of record l,r:longint; end;\r\n    b:array[0..1000000] of mostik;\r\n    ans,a:array[0..1000000] of longint;\r\n    used:array[0..1000000] of boolean;\r\n    fv:array[0..1000000] of longint;\r\n    function get(x,y:longint):longint inline;\r\n     begin\r\n       get:=a[(x-1)*m+y];\r\n     end;\r\n    procedure sort(l,r: longint);\r\n      var\r\n         i,j,x: longint;\r\n         y:mostik;\r\n      begin\r\n         i:=l;\r\n         j:=r;\r\n         x:=b[l+random(r-l)].x;\r\n         repeat\r\n           while b[i].x<x do\r\n            inc(i);\r\n           while x<b[j].x do\r\n            dec(j);\r\n           if not(i>j) then\r\n             begin\r\n                y:=b[i];\r\n                b[i]:=b[j];\r\n                b[j]:=y;\r\n                inc(i);\r\n                j:=j-1;\r\n             end;\r\n         until i>j;\r\n         if l<j then\r\n           sort(l,j);\r\n         if i<r then\r\n           sort(i,r);\r\n      end;\r\n   procedure update(v,d:longint);\r\n    begin\r\n      while v<=200000 do\r\n       begin\r\n         inc(fv[v],d);\r\n         v:=v or (v+1);\r\n       end;\r\n    end;\r\n   function sum(v:longint):longint;\r\n    var res:longint;\r\n     begin\r\n       res:=0;\r\n       while v>=0 do\r\n        begin\r\n          res:=res+fv[v];\r\n          v:=v and (v+1)-1;\r\n        end;\r\n       sum:=res;\r\n     end;\r\n\r\n   procedure rec(v:longint);\r\n    var r,l,cc,w,q,i:longint;\r\n    begin\r\n      if v=m+1 then\r\n       begin\r\n         for i:=1 to m do\r\n          write(ans[i],' ');\r\n         writeln;\r\n         halt(0);\r\n         exit;\r\n\r\n         exit;\r\n       end;\r\n      if used[v] then\r\n       begin\r\n         rec(v+1);\r\n         exit;\r\n       end;\r\n      l:=c[v].l;\r\n      r:=c[v].r;\r\n      q:=sum(l-1);\r\n      while l+1<R do\r\n       begin\r\n         cc:=(l+r) div 2;\r\n         w:=sum(cc)-q;\r\n         if w>1 then r:=cc\r\n                else l:=cc;\r\n       end;\r\n      if sum(l)-q<>1 then exit;\r\n      for i:=l to c[v].r do\r\n       if ans[i]=0 then\r\n        begin\r\n          ans[i]:=v;\r\n          update(i,-1);\r\n          rec(v+1);\r\n          update(i,1);\r\n          ans[i]:=0;\r\n        end;\r\n    end;\r\n begin\r\n//   assign(input,'input.txt');reset(input);\r\n   read(n,m);\r\n   for i:=1 to n*m do\r\n    begin\r\n      read(a[i]);\r\n    end;\r\n   for i:=1 to m do\r\n    begin\r\n      c[i].l:=1;\r\n      c[i].r:=m;\r\n    end;\r\n   for i:=1 to n do\r\n    begin\r\n      s:=0;\r\n      k:=0;\r\n      for j:=1 to m do\r\n       begin\r\n         if get(i,j)<>-1 then\r\n          begin\r\n            inc(s);\r\n            b[s].x:=get(i,j);\r\n            b[s].n:=j;\r\n          end\r\n         else\r\n          inc(k);\r\n       end;\r\n      sort(1,s);\r\n      p:=-2;\r\n      l:=0;\r\n      r:=0;\r\n      for j:=1 to s do\r\n       begin\r\n         if b[j].x<>p then\r\n          begin\r\n            p:=b[j].x;\r\n            l:=r+1;\r\n            r:=l;\r\n            while (r<m) and (b[r+1].x=p) do\r\n             r:=r+1;\r\n\r\n          end;\r\n         c[b[j].n].l:=max(c[b[j].n].l,l);\r\n         c[b[j].n].r:=min(c[b[j].n].r,r+k);\r\n       end;\r\n    end;\r\n   for i:=1 to m do\r\n    update(i,1);\r\n   for i:=1 to m do\r\n    begin\r\n      if c[i].l>c[i].r then\r\n       begin\r\n         writeln(-1);\r\n         halt(0);\r\n       end\r\n      else if c[i].l=c[i].r then\r\n       begin\r\n         used[i]:=true;\r\n         ans[c[i].l]:=i;\r\n         update(c[i].l,-1);\r\n       end;\r\n    end;\r\n\r\n   rec(1);\r\n   writeln(-1);\r\n\r\n end."
+}

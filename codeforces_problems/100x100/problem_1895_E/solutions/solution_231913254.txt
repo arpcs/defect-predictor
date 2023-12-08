@@ -1,0 +1,44 @@
+{
+    "id": 231913254,
+    "contestId": 1895,
+    "creationTimeSeconds": 1699435601,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "Velikan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 311,
+    "memoryConsumedBytes": 64921600,
+    "source": "#include <iostream>\n#include <algorithm>\n#include <vector>\n#include <queue>\n#include <stack>\n#include <map>\n#include <unordered_map>\n#include <unordered_set>\n#include <set>\n#include <math.h>\n#include <climits>\n#include <unordered_set>\n#include <list>\n#include <numeric>\n#include <bit>\n#include <iomanip>\n\n#define ll long long\n\nusing namespace std;\n\nint getWinner(int from, bool a, vector<int>& next, vector<int>& winner, vector<bool>& inStack) {\n    if(from < 0) return a ? 2 : 1;\n    if(inStack[from]) {\n        winner[from] = 0;\n        return 0;\n    }\n    if(winner[from] >= 0) return winner[from];\n    inStack[from] = true;\n    int res = getWinner(next[from],!a, next, winner, inStack);\n    winner[from] = res;\n    inStack[from] = false;\n    return res;\n}\n\nint main() {\n    ios::sync_with_stdio(0);\n    cin.tie(0); cout.tie(0);\n    \n    int t = 1;\n    cin>> t;\n    for(int i = 0; i < t; i++) {\n        int n, m;\n        cin>> n;\n        vector<pair<int,int>> ax(n);\n        vector<pair<int,int>> ay(n);\n        for(int i = 0; i < n; i++) {\n            cin >> ax[i].first;\n            ax[i].second = i;\n        }\n        for(int i = 0; i < n; i++) {\n            cin >> ay[i].first;\n            ay[i].second = i;\n        }\n        cin >>m;\n        \n        vector<pair<int,int>> bx(m);\n        vector<pair<int,int>> by(m);\n        for(int i = 0; i < m; i++) {\n            cin >> bx[i].first;\n            bx[i].second = i;\n        }\n        for(int i = 0; i < m; i++) {\n            cin >> by[i].first;\n            by[i].second = i;\n        }\n        sort(ay.begin(), ay.end());\n        sort(bx.begin(), bx.end());\n        reverse(ay.begin(), ay.end());\n        reverse(bx.begin(), bx.end());\n        vector<int> aNext(n, -1);\n        vector<int> bNext(m, -1);\n        int bPos = 0;\n        int maxDefense = -1;\n        int maxDefenseI = -1;\n        for(int i = 0; i < n; i++) {\n            int currDefense = ay[i].first;\n            int aI = ay[i].second;\n            while(bPos < m && bx[bPos].first > currDefense) {\n                int d = by[bx[bPos].second].first;\n                if(maxDefense < d) {\n                    maxDefense = d;\n                    maxDefenseI = bx[bPos].second;\n                }\n                bPos++;\n            }\n            // cout<< currDefense<< \" \" << bPos<< \" \" <<maxDefenseI<<endl;\n            aNext[aI] = maxDefenseI;\n        }\n        sort(ay.begin(), ay.end(), [](auto& a, auto& b)-> bool {\n            return a.second < b.second;\n        });\n        sort(bx.begin(), bx.end(), [](auto& a, auto& b)-> bool {\n            return a.second < b.second;\n        });\n        sort(ax.begin(), ax.end());\n        sort(by.begin(), by.end());\n        reverse(ax.begin(), ax.end());\n        reverse(by.begin(), by.end());\n        int aPos = 0;\n        maxDefense = -1;\n        maxDefenseI = -1;\n        for(int i = 0; i < m; i++) {\n            int currDefense = by[i].first;\n            int bI = by[i].second;\n            while(aPos < n && ax[aPos].first > currDefense) {\n                int d = ay[ax[aPos].second].first;\n                if(maxDefense < d) {\n                    maxDefense = d;\n                    maxDefenseI = ax[aPos].second;\n                }\n                aPos++;\n            }\n            // cout<< currDefense<< \" \" << aPos<< \" \" <<maxDefenseI<<endl;\n            bNext[bI] = maxDefenseI;\n        }\n        vector<int> next(n+m, -1);\n        for(int i = 0; i < n; i++) {\n            next[i] = aNext[i] >= 0 ? n+aNext[i] : -1;\n        }\n        for(int i = n; i < n+m; i++) {\n            next[i] = bNext[i-n]>= 0 ? bNext[i-n] : -1;\n        }\n        // for(int i = 0; i < n+m; i++) {\n        //     cout<< next[i]<< \" \";\n        // }\n        // cout<<endl;\n        vector<int> winner(n+m, -1);\n        vector<bool> inStack(n+m, false);\n        int aWinner = 0;\n        int draw = 0;\n        int bWinner = 0;\n        for(int i = 0; i < n; i++) {\n            int res = getWinner(i, true, next, winner, inStack);\n            if(res == 0) draw++;\n            if(res == 1) aWinner++;\n            if(res == 2) bWinner++;\n        }\n        cout<< aWinner<< \" \" << draw<< \" \" << bWinner<<endl;\n        // break;\n    }\n    \n    return 0;\n}"
+}

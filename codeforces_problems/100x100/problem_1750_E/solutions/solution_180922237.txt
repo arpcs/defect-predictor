@@ -1,0 +1,40 @@
+{
+    "id": 180922237,
+    "contestId": 1750,
+    "creationTimeSeconds": 1668396098,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "NOIp2022Lost75pts"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1667745300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 29,
+    "timeConsumedMillis": 390,
+    "memoryConsumedBytes": 89190400,
+    "source": "// LUOGU_RID: 93988370\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define pr pair<int,int>\r\n#define mp make_pair\r\n#define _(x,y) x=(x+y)%mod\r\n#define ll long long\r\n\t#define int long long\r\nint read(){int d=1,k=0;char c=getchar();\r\nwhile(!(c>='0' and c<='9' or c=='-'))c=getchar();if(c=='-')d=-1,c=getchar();\r\nwhile(c>='0' and c<='9')k=(k<<3)+(k<<1)+(c^48),c=getchar();return d*k;}\r\n\r\nstruct node{\r\n\tint tag[1000000],sum[1000000];\r\n\tvoid pushdown(int x,int l,int r){\r\n\t\tif(!tag[x])return;\r\n\t\ttag[x*2]+=tag[x];\r\n\t\ttag[x*2+1]+=tag[x];\r\n\t\tsum[x*2]+=tag[x]*((l+r)/2-l+1);\r\n\t\tsum[x*2+1]+=tag[x]*(r-(l+r)/2);\r\n\t\ttag[x]=0;\r\n\t}\r\n\tvoid update(int x,int l,int r,int from,int to,int v){\r\n\t\tif(l>to or r<from or from>to)return;\r\n\t\tif(from<=l and r<=to){\r\n\t\t\tsum[x]+=v*(r-l+1);\r\n\t\t\ttag[x]+=v;\r\n\t\t\treturn;\r\n\t\t}pushdown(x,l,r);\r\n\t\tupdate(x*2,l,(l+r)/2,from,to,v);\r\n\t\tupdate(x*2+1,(l+r)/2+1,r,from,to,v);\r\n\t\tsum[x]=sum[x*2]+sum[x*2+1];\r\n\t}\r\n\tint gett(int x,int l,int r,int find){\r\n\t\tif(!find)return 0;\r\n\t\tif(l==r)return sum[x];\r\n\t\tpushdown(x,l,r);\r\n\t\tif(find<=(l+r)/2)return gett(x*2,l,(l+r)/2,find);\r\n\t\telse return gett(x*2+1,(l+r)/2+1,r,find);\r\n\t}\r\n\tint query(int x,int l,int r,int from,int to){\r\n\t\tif(l>to or r<from or from>to)return 0;\r\n\t\tif(from<=l and r<=to)return sum[x];\r\n\t\tpushdown(x,l,r);\r\n\t\treturn query(x*2,l,(l+r)/2,from,to)+query(x*2+1,(l+r)/2+1,r,from,to);\r\n\t}\r\n\tvoid build(int x,int l,int r){\r\n\t\tsum[x]=tag[x]=0;\r\n\t\tif(l==r)return;\r\n\t\tbuild(x*2,l,(l+r)/2);\r\n\t\tbuild(x*2+1,(l+r)/2+1,r);\r\n\t}\r\n}X,Y;\r\nint cnt,root,size1[1000000],lc[1000000],rc[1000000],tag[1000000],value[1000000],sum[1000000],date[1000000];\r\nint neww(int x){\r\n    cnt++;value[cnt]=sum[cnt]=x;\r\n    size1[cnt]=1;\r\n    date[cnt]=rand();\r\n    return cnt;\r\n}\r\nvoid pushup(int x){size1[x]=size1[lc[x]]+size1[rc[x]]+1,sum[x]=value[x]+sum[lc[x]]+sum[rc[x]];}\r\nvoid reverse(int x,int v){\r\n    tag[x]+=v;\r\n    sum[x]+=size1[x]*v;\r\n    value[x]+=v;\r\n}\r\nvoid pushdown(int x){\r\n    if(!tag[x])return;\r\n    if(lc[x])reverse(lc[x],tag[x]);\r\n    if(rc[x])reverse(rc[x],tag[x]);\r\n    tag[x]=0;\r\n}\r\nint merge(int x,int y){\r\n    if(!x or !y)return x+y;\r\n    pushdown(x),pushdown(y);\r\n    if(date[x]>date[y]){\r\n        rc[x]=merge(rc[x],y);\r\n        pushup(x);return x;\r\n    }else{\r\n        lc[y]=merge(x,lc[y]);\r\n        pushup(y);return y;\r\n    }\r\n}\r\nvoid split(int now,int k,int &x,int &y){\r\n    if(!now)x=y=0;\r\n    else{\r\n        pushdown(now);\r\n        if(k>=value[now])x=now,split(rc[now],k,rc[now],y);\r\n        else y=now,split(lc[now],k,x,lc[now]);\r\n\t\tpushup(now);\r\n    }\r\n}\r\nvoid insert(){\r\n\tint A,B;\r\n\tsplit(root,0,A,B);\r\n\troot=merge(merge(A,neww(0)),B);\r\n}\r\nint query(){\r\n\tint A,B;\r\n\tsplit(root,0,A,B);\r\n\tint re=sum[B];\r\n\troot=merge(A,B);\r\n\treturn re;\r\n}\r\nchar s[1000000];\r\nint n,ans;\r\n\r\nsigned main(){\r\n\r\n\tint T=read();while(T--){\r\n\t\t\r\n\t\tans=0;n=read();\r\n\t\tscanf(\"%s\",s+1);\r\n\t\tfor(int i=1;i<=n;i++){\r\n\t\t\tinsert();\r\n\t\t\tif(s[i]=='(')X.update(1,1,n,1,i,1),reverse(root,1);\r\n\t\t\telse{\r\n\t\t\t\treverse(root,-1);\r\n\t\t\t\tint l=1,r=i,pos=0;\r\n\t\t\t\twhile(l<=r){\r\n\t\t\t\t\tint mid=(l+r)/2;\r\n\t\t\t\t\tif(X.gett(1,1,n,mid)==0)pos=mid,r=mid-1;\r\n\t\t\t\t\telse l=mid+1;\r\n\t\t\t\t}\r\n\t\t\t//\tcout<<pos<<\" \"<<X.gett(1,1,n,pos-1)<<endl;\r\n\t\t\t\tX.update(1,1,n,1,pos-1,-1);\r\n\t\t\t\tY.update(1,1,n,pos,i,1);\r\n\t\t\t}\r\n\t\t\t//for(int j=1;j<=n;j++)cout<<X.gett(1,1,n,j)<<\" \";cout<<endl;\r\n\t\t//\tfor(int j=1;j<=n;j++)cout<<Y.gett(1,1,n,j)<<\" \";cout<<endl;cout<<endl;\r\n\t\t\tans+=Y.query(1,1,n,1,i);\r\n\t\t\tans+=query();\r\n\t\t}printf(\"%lld\\n\",ans);\r\n\t\tX.build(1,1,n),Y.build(1,1,n);\r\n\t\tfor(int i=1;i<=cnt;i++)lc[i]=rc[i]=value[i]=sum[i]=tag[i]=size1[i]=0;\r\n\t\tcnt=root=0;\r\n\t\t\r\n\t}\r\n\t\r\n\t\r\n\t\r\n\treturn 0;\r\n}\r\n"
+}

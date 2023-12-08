@@ -1,0 +1,36 @@
+{
+    "id": 94169287,
+    "contestId": 682,
+    "creationTimeSeconds": 1601340777,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 682,
+        "index": "E",
+        "name": "Alyona and Triangles",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2600,
+        "tags": [
+            "geometry",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 682,
+        "members": [
+            {
+                "handle": "ghr226"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1466181300
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 4403200,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\n#define re register\n#define LL long long\ntypedef unsigned int uint;\ntypedef unsigned long long ull;\ntypedef pair<int, int> Pr;\n#define pb push_back\n#define mp make_pair\n\n#define int long long\n\nnamespace IO {\nchar buf_[1 << 21], *p1_ = buf_, *p2_ = buf_;\n#define ch()                                                                 \\\n  (p1_ == p2_ &&                                                             \\\n           (p2_ = (p1_ = buf_) + fread(buf_, 1, 1 << 21, stdin), p1_ == p2_) \\\n       ? EOF                                                                 \\\n       : *p1_++)\ninline int in() {\n  int s = 0, f = 1;\n  char x = ch();\n  for (; x < '0' || x > '9'; x = ch())\n    if (x == '-') f = -1;\n  for (; x >= '0' && x <= '9'; x = ch()) s = (s * 10) + (x & 15);\n  return f == 1 ? s : -s;\n}\nchar _buf[1 << 21];\nint _pos = -1;\ninline void flush() { fwrite(_buf, 1, _pos + 1, stdout), _pos = -1; }\ninline void pc(char x) {\n  if (_pos == (1 << 21) - 1) flush();\n  _buf[++_pos] = x;\n}\ninline void out(int x) {\n  char k[30];\n  int pos = 0;\n  if (!x) return pc('0');\n  if (x < 0) pc('-'), x = -x;\n  while (x) k[++pos] = (x % 10) | 48, x /= 10;\n  for (re int i = pos; i; i--) pc(k[i]);\n}\ninline void out(string x) {\n  int len = x.size();\n  for (re int i = 0; i < len; ++i) pc(x[i]);\n}\n}  // namespace IO\nusing namespace IO;\n\ninline int cp(int x, int y) {\n  if (x == y) return 0;\n  return x > y ? 1 : -1;\n}\nstruct Point {\n  int x, y;\n  Point(int a = 0, int b = 0) { x = a, y = b; }\n  inline friend Point operator+(Point a, Point b) {\n    return Point(a.x + b.x, a.y + b.y);\n  }\n  inline friend Point operator-(Point a, Point b) {\n    return Point(a.x - b.x, a.y - b.y);\n  }\n  inline friend Point operator*(Point a, int b) {\n    return Point(a.x * b, a.y * b);\n  }\n  inline friend Point operator/(Point a, int b) {\n    return Point(a.x / b, a.y / b);\n  }\n  inline friend int operator^(Point a, Point b) {\n    return a.x * b.y - a.y * b.x;\n  }\n  inline friend int operator&(Point a, Point b) {\n    return a.x * b.x + a.y * b.y;\n  }\n  inline friend bool operator==(Point a, Point b) {\n    return !cp(a.x, b.x) && !cp(a.y, b.y);\n  }\n  inline friend bool operator!=(Point a, Point b) { return !(a == b); }\n  inline int ang() { return atan2(y, x); }\n  inline int len() { return sqrt(x * x + y * y); }\n  inline Point unit() { return Point(x / len(), y / len()); }\n};\nstruct Line {\n  Point x, y;\n  Line(Point a = 0, Point b = 0) { x = a, y = b; }\n  inline friend bool operator==(Line a, Line b) {\n    return !cp((a.y - a.x) ^ (b.y - b.x), 0);\n  }\n  inline friend bool operator!=(Line a, Line b) { return !(a == b); }\n};\nstruct Circle {\n  Point x;\n  int r;\n  Circle(Point a = 0, int b = 0) { x = a, r = b; }\n};\ninline int dis(Point a, Point b) {\n  return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));\n}  //\u4e24\u70b9\u8ddd\u79bb\ninline int angle(Point a) { return atan2(a.y, a.x); }  //\u5411\u91cf\u89d2\u5ea6\ninline Point inter(Line a, Line b) {\n  int s1 = (b.x - a.x) ^ (b.y - a.x), s2 = (b.y - a.y) ^ (b.x - a.y);\n  return a.x + (a.y - a.x) * s1 / (s1 + s2);\n}  //\u4e24\u7ebf\u4ea4\u70b9\ninline Point rotate(Point a, int phi) {\n  return Point(cos(phi) * a.x - sin(phi) * a.y,\n               sin(phi) * a.x + cos(phi) * a.y);\n}  //\u5411\u91cf\u65cb\u8f6c\ninline Line vertical(Point a, Point b) {\n  Point u = (a + b) / 2;\n  return Line(u, Point(u.x + (b - a).y, u.y - (b - a).x));\n}  //\u4e2d\u5782\u7ebf\ninline Circle cir_3_pts(Point a, Point b, Point c) {\n  Point u = inter(vertical(a, b), vertical(b, c));\n  return Circle(u, dis(u, a));\n}  //\u4e09\u70b9\u5706\n\nconst int A = 1e4 + 5;\nconst int INF = 1e18;\nint n, S;\nPoint p[A];\nint mn;\nint st[A], top;\n\ninline bool operator<(Point u, Point v) {\n  if (cp((u - p[1]) ^ (v - p[1]), 0))\n    return cp((u - p[1]) ^ (v - p[1]), 0) == 1;\n  return cp(dis(u, p[1]), dis(v, p[1])) == -1;\n}\n\ninline int check(Point u, Point v, Point w) {\n  return cp((u - v) ^ (w - v), 0) == 1;\n}\n\ninline void convex() {\n  sort(p + 2, p + 1 + n);\n  st[++top] = 1, st[++top] = 2;\n  for (int i = 3; i <= n; i++) {\n    while (top > 2 && check(p[st[top - 1]], p[st[top]], p[i])) top--;\n    st[++top] = i;\n  }\n  while (top > 2 && check(p[st[top - 1]], p[st[top]], p[st[1]])) top--;\n  st[++top] = 1;\n  // for (int i = 1; i <= top; i++) {\n  //   if (p[i] == Point(-23, -96)) cout << i << \" \" << top << '\\n';\n  //   if (p[i] == Point(76, -70))\n  //     cout << i << \" \" << top << \" \"\n  //          << \"&\" << '\\n';\n  // }\n  return;\n}\n\nstruct tragl {\n  Point x, y, z;\n  tragl(Point a = 0, Point b = 0, Point c = 0) { x = a, y = b, z = c; }\n  inline int area() { return fabs((x - z) ^ (y - z)); }\n  inline friend bool operator>=(tragl u, tragl v) {\n    return cp(u.area(), v.area()) != -1;\n  }\n} ans /*(Point(0, 0), Point(0, 0), Point(0, 0))*/;\n\ninline void Max_triangle() {\n  for (int i = 1; i < top; i++) {\n    for (int j = i + 1, pos = (j + 1 <= top) ? j + 1 : 1; j < top && pos != i;\n         j++) {\n      while (pos < i &&\n             tragl(p[st[i]], p[st[j]], p[st[(pos < top) ? 1 : pos + 1]]) >=\n                 tragl(p[st[i]], p[st[j]], p[st[pos]]))\n        pos = (pos < top) ? 1 : pos + 1;\n      if (tragl(p[st[i]], p[st[j]], p[st[pos]]) >= ans) {\n        // if (ans.area() >= 15000) printf(\"%0.3lf \", ans.area());\n        ans = tragl(p[st[i]], p[st[j]], p[st[pos]]);\n        // if (ans.area() >= 15000) printf(\"%0.3lf\\n\", ans.area());\n      }\n    }\n  }\n  return;\n}\n\ninline int Min(int x, int y) {\n  if (cp(p[x].x, p[y].x) == -1 ||\n      (!cp(p[x].x, p[y].x) && cp(p[x].y, p[y].y) == -1))\n    return x;\n  return y;\n}\n\nsigned main() {\n  // freopen(\".in\", \"r\", stdin);\n  n = in(), S = in();\n  p[0].x = INF, p[0].y = INF;\n  for (int i = 1; i <= n; i++) p[i].x = in(), p[i].y = in(), mn = Min(mn, i);\n  swap(p[1], p[mn]);\n  convex();\n  Max_triangle();\n  // cout << \"^\" << '\\n';\n  // printf(\"%0.0lf %0.0lf\\n%0.0lf %0.0lf\\n%0.0lf %0.0lf\\n\", ans.x.x, ans.x.y,\n  //  ans.y.x, ans.y.y, ans.z.x, ans.z.y);\n  printf(\"%lld %lld\\n%lld %lld\\n%lld %lld\\n\", (ans.x + (ans.y - ans.z)).x,\n         (ans.x + (ans.y - ans.z)).y, (ans.y + (ans.z - ans.x)).x,\n         (ans.y + (ans.z - ans.x)).y, (ans.z + (ans.x - ans.y)).x,\n         (ans.z + (ans.x - ans.y)).y);\n  flush();\n  return 0;\n}"
+}

@@ -1,0 +1,39 @@
+{
+    "id": 204341608,
+    "contestId": 804,
+    "creationTimeSeconds": 1683121560,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 804,
+        "index": "F",
+        "name": "Fake bullions",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3400,
+        "tags": [
+            "combinatorics",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 804,
+        "members": [
+            {
+                "handle": "zqyyy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1493909400
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 109,
+    "timeConsumedMillis": 358,
+    "memoryConsumedBytes": 39833600,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\ninline char getc() {\r\n\tstatic char *p1, *p2, buf[1<<20];\r\n\treturn p1==p2?(p2=(p1=buf)+fread(buf, 1, 1<<20, stdin), p1==p2?10:*p1++):*p1++;\r\n}\r\ninline void read(char *s) {\r\n\tchar c; while (isspace(c=getc()));\r\n\twhile (!isspace(c))\t*s++=c, c=getc(); *s++='\\0';\r\n}\r\ninline int read() {\r\n\tint f=1, r=0; char c=getc();\r\n\twhile (!isdigit(c)) f^=c=='-', c=getc();\r\n\twhile (isdigit(c)) r=r*10+c-48, c=getc();\r\n\treturn f?r:-r;\r\n}\r\nint gcd(int x, int y) {return y?gcd(y,x%y):x;}\r\ntemplate<class T> inline void ckmin(T &x, T y) {if (y<x) x=y;}\r\nconst int N=5007, M=2e6+7, mod=1e9+7;\r\nint A, B, n, s_dfn, dfn[N], low[N], scc, bel[N], tp, stk[N];\r\nint g[N], gc[N], a[N], mn[N], mx[N], num[N];\r\nbool ins[N];\r\nchar G[N][N], str[M];\r\nvector<int> vec[N], vec2[N], tmp[N];\r\nvoid tarjan(int x) {\r\n\tdfn[x]=low[x]=++s_dfn, ins[stk[++tp]=x]=true;\r\n\tfor (int y=1; y<=n; y++) {\r\n\t\tif (G[x][y]==48) continue;\r\n\t\tif (!dfn[y]) tarjan(y), ckmin(low[x], low[y]);\r\n\t\telse if (ins[y]) ckmin(low[x], dfn[y]);\r\n\t}\r\n\tif (dfn[x]==low[x]) {\r\n\t\t++scc; int y;\r\n\t\tdo ins[y=stk[tp--]]=false, bel[y]=scc; while (x!=y);\r\n\t}\r\n}\r\ninline void update(int i, int x) {\r\n\tif (vec[i][x]) return;\r\n\tnum[i]++, vec[i][x]=1; if (i==1) return;\r\n\tx%=gc[i]; if (vec2[i][x]) return; vec2[i][x]=1;\r\n\tfor (int y=x; y<g[i-1]; y+=gc[i]) update(i-1, y);\r\n}\r\nint fac[N], ifac[N], inv[N];\r\ninline int C(int n, int m) {\r\n\tif (n<m || m<0) return 0;\r\n\treturn (ll)fac[n]*ifac[m]%mod*ifac[n-m]%mod;\r\n}\r\ninline void init_C(int n) {\r\n\tfac[0]=fac[1]=ifac[0]=ifac[1]=inv[1]=1;\r\n\tfor (int i=2; i<=n; i++) {\r\n\t\tfac[i]=(ll)fac[i-1]*i%mod;\r\n\t\tinv[i]=mod-mod/i*(ll)inv[mod%i]%mod;\r\n\t\tifac[i]=(ll)ifac[i-1]*inv[i]%mod;\r\n\t}\r\n}\r\nint main() {\r\n#ifdef LOCAL\r\n\tfreopen(\"1.in\", \"r\", stdin);\r\n\tfreopen(\"1.out\", \"w\", stdout);\r\n#endif\r\n\tn=read(), A=read(), B=read();\r\n\tfor (int i=1; i<=n; i++) read(G[i]+1);\r\n\tfor (int i=1; i<=n; i++) if (!dfn[i]) tarjan(i);\r\n\tfor (int i=1; i<=n; i++) {\r\n\t\ta[i]=read(), read(str), g[bel[i]]=gcd(g[bel[i]], a[i]);\r\n\t\tfor (int j=0; j<a[i]; j++) if (str[j]==49) tmp[i].push_back(j), mn[i]++; \r\n\t} \r\n\tfor (int i=1; i<=scc; i++) vec[i].resize(g[i]);\r\n\tfor (int i=2; i<=scc; i++) vec2[i].resize(gc[i]=gcd(g[i], g[i-1]));\r\n\tfor (int i=1; i<=n; i++)\r\n\t\tfor (auto x:tmp[i]) update(bel[i], x%g[bel[i]]);\r\n\tfor (int i=1; i<=n; i++) mx[i]=a[i]/g[bel[i]]*num[bel[i]];\r\n\tinit_C(n); ll ans=0;\r\n\tfor (int i=1; i<=n; i++) {\r\n\t\tint c1=0, c2=0;\r\n\t\tfor (int j=1; j<=n; j++) {\r\n\t\t\tif (i==j) continue;\r\n\t\t\tif (mn[j]>mx[i]) c1++;\r\n\t\t\telse if (mx[j]>mx[i] || (mx[j]==mx[i] && j<i)) c2++;\r\n\t\t}\r\n\t\tfor (int j=0; j<=A-1-c1; j++)\r\n\t\t\tans+=(ll)C(c2, j)*C(c1, B-1-j)%mod;\r\n\t}\r\n\treturn cout<<ans%mod, 0;\r\n}"
+}

@@ -1,0 +1,41 @@
+{
+    "id": 193658250,
+    "contestId": 1706,
+    "creationTimeSeconds": 1676409639,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "korokseeds"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 87552000,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#ifdef LOCAL\r\n#include \"debug.h\"\r\n#else\r\n#define debug(...) 114514\r\n#endif\r\n\r\n#define fi first\r\n#define se second\r\nusing ll = long long;\r\nusing ld = long double;\r\nusing pii = pair<int, int>;\r\nusing pll = pair<ll, ll>;\r\nusing ai3 = array<int, 3>;\r\nusing al3 = array<ll, 3>;\r\nmt19937 rng(random_device{}());\r\nmt19937_64 rng64(random_device{}());\r\n\r\nint rnd(int mod) { return rng() % mod; }\r\nll rnd64(ll mod) { return rng64() % mod; }\r\n\r\n// region \u56fe\r\nstruct Graph {\r\n    using gt = int;\r\n\r\n    struct Edge {\r\n        int v;\r\n        gt cost;\r\n    };\r\n\r\n    int n;\r\n    vector<vector<int>> g;\r\n    vector<Edge> e;\r\n\r\n    void init(int n) {\r\n        this->n = n;\r\n        g.assign(n + 1, {});\r\n        e.clear();\r\n    }\r\n\r\n    void add(int u, int v, gt cost = 1) {\r\n        assert(1 <= u && u <= n && 1 <= v && v <= n && \"Graph=>add()\");\r\n        g[u].push_back(e.size());\r\n        e.push_back({v, cost});\r\n    }\r\n};\r\n// endregion\r\n\r\n// region \u65e0\u6743\u7684\u6b27\u62c9\u5e8flca\r\ntemplate<class Graph>\r\nstruct Lca {\r\n    using G = Graph;\r\n\r\n    int n, ti;\r\n    vector<int> eula, in;\r\n    vector<int> dep;\r\n    vector<vector<int>> st;\r\n\r\n    void dfs(int u, const G &g) {\r\n        eula[++ti] = u, in[u] = ti;\r\n\r\n        for (int eid : g.g[u]) {\r\n            auto [v, cost] = g.e[eid];\r\n            if (dep[v] != -1) continue;\r\n\r\n            dep[v] = dep[u] + 1;\r\n            dfs(v, g);\r\n            eula[++ti] = u;\r\n        }\r\n    }\r\n\r\n    void init(int rt, const G &g) {\r\n        n = g.n, ti = 0;\r\n        eula.assign(2 * n + 1, 0);\r\n        in.assign(n + 1, 0);\r\n        dep.assign(n + 1, -1);\r\n        st.assign(__lg(2 * n) + 1, vector<int>(2 * n + 1, 0));\r\n\r\n        dep[rt] = 0;\r\n        dfs(rt, g);\r\n\r\n        int mxb = __lg(ti);\r\n        for (int i = 1; i <= ti; i++) st[0][i] = eula[i];\r\n        for (int k = 1; k <= mxb; k++) {\r\n            for (int i = 1; i + (1 << k) - 1 <= ti; i++) {\r\n                int u = st[k - 1][i], v = st[k - 1][i + (1 << (k - 1))];\r\n                st[k][i] = dep[u] < dep[v] ? u : v;\r\n            }\r\n        }\r\n    }\r\n\r\n    int lca(int x, int y) const {\r\n        assert(x >= 1 && x <= n && y >= 1 && y <= n && \"Lca=>lca()\");\r\n\r\n        int L = in[x], R = in[y];\r\n        if (L > R) swap(L, R);\r\n\r\n        int k = __lg(R - L + 1);\r\n        int u = st[k][L], v = st[k][R - (1 << k) + 1];\r\n        return dep[u] < dep[v] ? u : v;\r\n    }\r\n};\r\n// endregion\r\n\r\n// region kruskal\u91cd\u6784\u6811\r\n// G \u4e3a\u91cd\u6784\u6811, \u6709 2 * n - 1 \u4e2a\u70b9, \u6240\u4ee5 Dsu \u548c G \u4e3a 2N, Lca \u4e5f\u8bb0\u5f97\u5f00 2N !!\r\ntemplate<class G, class Dsu>\r\nstruct ReconstructTree {\r\n    using gt = typename G::gt;\r\n    using at3 = array<gt, 3>;\r\n\r\n    int tt;\r\n    vector<gt> w;\r\n    Dsu dsu;\r\n\r\n    // n\u4e2a\u70b9, es[i] = {u, v, cost}\r\n    G work(int n, vector<at3> es) {\r\n        sort(es.begin(), es.end(), [](auto &a, auto &b) {\r\n            return a[2] < b[2];\r\n        });\r\n\r\n        G ng;\r\n        ng.init(2 * n - 1);\r\n        w.assign(2 * n - 1 + 1, 0);\r\n        dsu.init(2 * n - 1);\r\n        tt = n;\r\n        for (auto [u, v, cost] : es) {\r\n            int tu = dsu.find(u), tv = dsu.find(v);\r\n            if (tu == tv) continue;\r\n\r\n            tt++;\r\n            dsu.unite(tu, tt), dsu.unite(tv, tt);\r\n            ng.add(tt, tu), ng.add(tt, tv);\r\n            w[tt] = cost;\r\n        }\r\n\r\n        return ng;\r\n    }\r\n};\r\n// endregion\r\n\r\n// region dsu\r\nstruct Dsu {\r\n    vector<int> fa, sz;\r\n\r\n    void init(int n) {\r\n        fa.assign(n + 1, 0);\r\n        iota(fa.begin(), fa.end(), 0);\r\n        sz.assign(n + 1, 1);\r\n    }\r\n\r\n    int find(int x) {\r\n        if (x == fa[x]) return x;\r\n        return fa[x] = find(fa[x]);\r\n    }\r\n\r\n    bool unite(int x, int y) {\r\n        if (same(x, y)) return false;\r\n        int tx = find(x), ty = find(y);\r\n        fa[tx] = ty;\r\n        sz[ty] += sz[tx];\r\n        return true;\r\n    }\r\n\r\n    bool same(int x, int y) {\r\n        int tx = find(x), ty = find(y);\r\n        return tx == ty;\r\n    }\r\n};\r\n// endregion\r\n\r\n// region st\u8868\r\ntemplate<typename T>\r\nstruct ST {\r\n    using stt = T;\r\n\r\n    int n, mxb;\r\n    vector<vector<stt>> st;\r\n\r\n    // 0 base\r\n    void init(const vector<stt> &a) {\r\n        n = a.size();\r\n        mxb = __lg(max(1, n - 1));\r\n        st.assign(mxb + 1, vector<stt>(n));\r\n\r\n        for (int i = 0; i < n; i++) st[0][i] = a[i];\r\n        for (int k = 1; k <= mxb; k++) {\r\n            for (int L = 0; L + (1 << k) - 1 < n; L++) {\r\n                st[k][L] = st[k - 1][L] + st[k - 1][L + (1 << (k - 1))];\r\n            }\r\n        }\r\n    }\r\n\r\n    // [L, R]\r\n    stt qr(int L, int R) {\r\n        assert(L <= R && L >= 0 && R < n && \"ST=>qr()\");\r\n\r\n        int k = __lg(R - L + 1);\r\n        return st[k][L] + st[k][R - (1 << k) + 1];\r\n    }\r\n};\r\n// endregion\r\n\r\nconst int dir[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};\r\nconst int N = 1e5 + 10;\r\nconst int M = 2e5 + 10;\r\n\r\nusing G = Graph;\r\n\r\n// region Min\r\nstruct Min {\r\n    pii x;\r\n    Min(pii x = {1e9, -1}) : x(x) {}\r\n\r\n    Min operator+(const Min &o) const {\r\n        return min(x, o.x);\r\n    }\r\n};\r\n// endregion\r\nST<Min> st1;\r\n\r\n// region Max\r\nstruct Max {\r\n    pii x;\r\n    Max(pii x = {0, -1}) : x(x) {}\r\n\r\n    Max operator+(const Max &o) const {\r\n        return max(x, o.x);\r\n    }\r\n};\r\n// endregion\r\nST<Max> st2;\r\n\r\nint n, m, q;\r\nai3 es[M];\r\nReconstructTree<G, Dsu> rst;\r\nLca<G> lca;\r\nint dfn[2 * N], ti;\r\n\r\nvoid dfs(int u, int par, const G &g) {\r\n    dfn[u] = ++ti;\r\n\r\n    for (int eid : g.g[u]) {\r\n        auto [v, cost] = g.e[eid];\r\n        if (v == par) continue;\r\n\r\n        dfs(v, u, g);\r\n    }\r\n}\r\n\r\nvoid solve() {\r\n    auto g = rst.work(n, vector<ai3>(es + 1, es + m + 1));\r\n    lca.init(rst.tt, g);\r\n\r\n    dfs(rst.tt, 0, g);\r\n    vector<Min> sta1(n + 1);\r\n    vector<Max> sta2(n + 1);\r\n    for (int i = 1; i <= n; i++) {\r\n        sta1[i] = Min({dfn[i], i});\r\n        sta2[i] = Max({dfn[i], i});\r\n    }\r\n    st1.init(sta1);\r\n    st2.init(sta2);\r\n\r\n    for (int qid = 1; qid <= q; qid++) {\r\n        int L, R;\r\n        cin >> L >> R;\r\n\r\n        auto [mi, miid] = st1.qr(L, R).x;\r\n        auto [mx, mxid] = st2.qr(L, R).x;\r\n\r\n        int la = lca.lca(miid, mxid);\r\n        cout << rst.w[la] << \" \\n\"[qid == q];\r\n    }\r\n}\r\n\r\nvoid prework() {\r\n}\r\n\r\nint main() {\r\n#ifdef LOCAL\r\n    freopen(\"../in.txt\", \"r\", stdin);\r\n    freopen(\"../out.txt\", \"w\", stdout);\r\n#endif\r\n\r\n    prework();\r\n    ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);\r\n    int _ = 1;\r\n    cin >> _;\r\n    while (_--) {\r\n        cin >> n >> m >> q;\r\n        for (int i = 1; i <= m; i++) {\r\n            int u, v;\r\n            cin >> u >> v;\r\n            es[i] = {u, v, i};\r\n        }\r\n        solve();\r\n    }\r\n\r\n    return 0;\r\n}"
+}

@@ -1,0 +1,35 @@
+{
+    "id": 114104874,
+    "contestId": 1183,
+    "creationTimeSeconds": 1619262930,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1183,
+        "index": "H",
+        "name": "Subsequences (hard version)",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1183,
+        "members": [
+            {
+                "handle": "kishlay369"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1561559700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 70,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 20172800,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\ntypedef long long ll;\n#define pii pair<ll,ll>\n#define piii pair<ll,pii>\n#define ff first\n#define ss second\n#define pb push_back\nconst ll N=2e5+5,inf=1e15,mod=1e9+7,mod1=1e9+3;\nvector<ll>adj[N];\nll bit[N];\nll t[4*N];\nll lazy[4*N];\nll prime[N],arr[N];\n\nll fastscan()\n{\n    int cc=getc(stdin);\n    for(;cc<'0' || cc>'9';)\n        cc=getc(stdin);\n    ll ret=0;\n    for(;cc>='0' && cc<='9';)\n    {\n        ret=ret*10 + cc-'0';\n        cc=getc(stdin);\n    }\n    return ret;\n}\n\nll powr(ll x,ll n,ll p)\n{\n\tll res=1;\n\twhile(n>0)\n\t{\n\t\tif(n&1)\n\t\t\tres=(res*x)%p;\n\t\tx=(x*x)%p;\n\t\tn=n/2;\n\t}\n\treturn res%p;\n}\n\nvoid update(ll x,ll val)\n{\n\tfor(;x<N;x+=x&-x)\n\t\tbit[x]+=val;\n}\n\nll find(ll x)\n{\n\tll res=0;\n\tfor(;x>0;x-=x&-x)\n\t\tres+=(bit[x]%3==0);\n\treturn res;\n}\n\n\nvoid lazy_update(ll index,ll l,ll r,ll lq,ll rq,ll val)\n{\n\tif(lazy[index]!=0){\n\t\tt[index]+=lazy[index];\n\t\tif(l!=r){\n\t\t\tlazy[2*index]+=lazy[index];\n\t\t\tlazy[2*index+1]+=lazy[index];\n\t\t}\n\t\tlazy[index]=0;\n\t}\n\tif(r<lq or l>rq or l>r)\n\t\treturn;\n\tif(l>=lq and r<=rq)\n\t{\n\t\tt[index]+=val;\n\t\tif(l!=r){\n\t\t\tlazy[2*index]+=val;\n\t\t\tlazy[2*index+1]+=val;\n\t\t}\n\t\treturn;\n\t}\n\tll mid=(l+r)/2;\n\tlazy_update(2*index,l,mid,lq,rq,val);\n\tlazy_update(2*index+1,mid+1,r,lq,rq,val);\n\tt[index]=max(t[2*index],t[2*index+1]);\n\n}\n\nvoid get(ll index,ll l,ll r)\n{\n\t//cout << l <<\" \"<< r <<\"\\n\";\n\tif(l>r)\n\t\treturn;\n\tif(lazy[index]!=0){\n\t\tt[index]+=lazy[index];\n\t\tif(l!=r){\n\t\t\tlazy[2*index]+=lazy[index];\n\t\t\tlazy[2*index+1]+=lazy[index];\n\t\t}\n\t\tlazy[index]=0;\n\t}\n\tif(l==r)\n\t{\n\t\tarr[l]=t[index];\n\t\treturn;\n\t}\n\tll mid=(l+r)/2;\n\tget(2*index,l,mid);\n\tget(2*index+1,mid+1,r);\n}\n\nll lazy_query(ll index,ll l,ll r,ll ele)\n{\n\t//cout << l <<\" \"<< r <<\"\\n\";\n\tif(l>r)\n\t\treturn 0;\n\tif(lazy[index]!=0){\n\t\tt[index]+=lazy[index];\n\t\tif(l!=r){\n\t\t\tlazy[2*index]+=lazy[index];\n\t\t\tlazy[2*index+1]+=lazy[index];\n\t\t}\n\t\tlazy[index]=0;\n\t}\n\tif(l==r)\n\t\treturn l;\n\tll mid=(l+r)/2;\n\tif(t[2*index] + lazy[2*index]>ele)\n\t\treturn lazy_query(2*index,l,mid,ele);\n\tif(t[2*index+1]+ lazy[2*index+1]>ele)\n\t\treturn lazy_query(2*index+1,mid+1,r,ele);\n\treturn 0;\n}\n\n\nvoid build(ll index,ll l,ll r)\n{\n\tif(l>r)\n\t\treturn;\n\tif(l==r)\n\t{\n\t\tt[index]=arr[l];\n\t\treturn;\n\t}\n\n\tll mid=(l+r)/2;\n\tbuild(2*index,l,mid);\n\tbuild(2*index+1,mid+1,r);\n\tt[index]=max(t[2*index],t[2*index+1]);\n}\n\n\n/*void update(ll index,ll l,ll r,ll ind,ll val)\n{\n\tif(ind<l or ind>r)\n\t{\n\t\treturn;\n\t}\n\tif(l==r)\n\t{\n\t\tarr[l]=val;\n\t\tt[index]={val,l};\n\t\treturn;\n\t}\n\n\tll mid=(l+r)/2;\n\tupdate(2*index,l,mid,ind,val);\n\tupdate(2*index+1,mid+1,r,ind,val);\t\n\t//t[index]=min(t[2*index],t[2*index+1]);\n}\n\n\n/*ll query(ll index,ll l,ll r,ll lq,ll rq)\n{\n\tif(l>rq or r<lq)\n\t{\n\t\treturn 0;\n\t}\n\n\tif(l>=lq && r<=rq)\n\t{\n\t\treturn t[index];\n\t}\n\n\tll mid=(l+r)/2;\n\treturn min(query(2*index,l,mid,lq,rq),query(2*index+1,mid+1,r,lq,rq));\n}*/\n\nvoid seive(ll n)\n{\n\tll i,j;\n\tfor(i=0;i<=n;i++)\n\t\tprime[i]=0;\n\tfor(i=2;i*i<=n;i++)\n\t{\n\t\tif(prime[i]==0)\n\t\t{\n\t\t\tfor(j=i*i;j<=n;j+=i){\n\t\t\t\tif(prime[j]==0)\n\t\t\t\t\tprime[j]=i;\n\t\t\t}\n\t\t}\n\t}\n\tfor(i=1;i<=n;i++)\n\t{\n\t\tif(prime[i]==0)\n\t\t\tprime[i]=i;\n\t}\n}\n\nll dp[105][105],pre[27];\n\nint main()\n{\n\t#ifndef ONLINE_JUDGE\n\tfreopen(\"input.txt\",\"r\",stdin);\n\tfreopen(\"output.txt\",\"w\",stdout);\n\t#endif\n\n\tint tt=1;\n\t//tt=fastscan();\n\t//seive(N);\n\twhile(tt--)\n\t{\n\t\tll n,k,i,j;\n\t\tcin >> n >> k;\n\t\tstring s;\n\t\tcin >> s;\n\t\tfor(i=1;i<=n;i++)\n\t\t{\n\t\t\tll ind=pre[s[i-1]-'a'];\n\t\t\tpre[s[i-1]-'a']=i;\n\t\t\tfor(j=1;j<=i;j++)\n\t\t\t{\n\t\t\t\tif(j==1)\n\t\t\t\t\tdp[j][i]=dp[j][i-1] + (ind==0);\n\t\t\t\telse\n\t\t\t\t\tdp[j][i]=dp[j][i-1] + dp[j-1][i-1] - dp[j-1][ind-1];\n\t\t\t}\n\t\t}\n\t\t/*for(i=1;i<=n;i++)\n\t\t{\n\t\t\tfor(j=1;j<=n;j++)\n\t\t\t\tcout << dp[i][j] <<\" \";\n\t\t\tcout <<\"\\n\";\n\t\t}*/\n\t\tll nm=k,cost=0;\n\t\tbool flg=false;\n\t\tdp[0][n]=1;\n\t\tfor(i=n;i>=0;i--)\n\t\t{\n\t\t\tll x=min(nm,dp[i][n]);\n\t\t\tcost+=x*(n-i);\n\t\t\tnm-=x;\n\t\t\tif(nm<=0)\n\t\t\t{\n\t\t\t\tflg=true;\n\t\t\t\tbreak;\n\t\t\t}\n\t\t}\n\t\tif(flg)\n\t\t\tcout << cost;\n\t\telse\n\t\t\tcout << \"-1\";\n\t}\nreturn 0;\n}\n\n"
+}

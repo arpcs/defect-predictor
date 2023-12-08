@@ -1,0 +1,36 @@
+{
+    "id": 195100652,
+    "contestId": 682,
+    "creationTimeSeconds": 1677484253,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 682,
+        "index": "E",
+        "name": "Alyona and Triangles",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2600,
+        "tags": [
+            "geometry",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 682,
+        "members": [
+            {
+                "handle": "cool_milo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1466181300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 66,
+    "timeConsumedMillis": 764,
+    "memoryConsumedBytes": 716800,
+    "source": "#include<bits/stdc++.h>\r\n#define double long long\r\nusing namespace std;\r\nconst int N = 5005,P = 1e9+7;\r\n \r\nint x[N],y[N],n,cnt;\r\nint stk[N],ans;\r\n \r\nnamespace Geometry{\r\n\tstruct Vector{\r\n\t\tdouble x,y;\r\n\t\tbool operator < (const Vector &A)const{\r\n\t\t\tif(x != A.x)\treturn x < A.x;\r\n\t\t\treturn y < A.y;\r\n\t\t}\r\n\t\tVector(double _x = 0,double _y = 0){\r\n\t\t\tx = _x,y = _y;\r\n\t\t}\r\n\t\tdouble Length(){\r\n\t\t\treturn hypot(x,y);\r\n\t\t}\r\n\t\tdouble operator * (const Vector& A)const{\r\n\t\t\treturn x * A.x + y * A.y;//dot \r\n\t\t}\r\n\t\tdouble operator ^ (const Vector& A)const{\r\n\t\t\treturn x * A.y - A.x * y;//x1y2-x2y1,cross,u^v>0->u is to the clockwise of v.\r\n\t\t}\r\n\t\tVector operator + (const Vector& A)const{\r\n\t\t\treturn Vector(x + A.x,y + A.y);\r\n\t\t}\r\n\t\tVector operator - (const Vector& A)const{\r\n\t\t\treturn Vector(x - A.x,y - A.y);\r\n\t\t}\r\n\t};\r\n\ttypedef vector<Vector> Polygon;//what the...\r\n\t\r\n\tdouble Area(Polygon A){\r\n\t\tdouble ans = 0;\r\n\t\tfor(int i=0;i<(signed)A.size();i++){\r\n\t\t\tans += A[i] ^ A[(i + 1) % A.size()]; \r\n\t\t}\r\n\t\treturn ans;\r\n\t}\r\n\t\r\n\tstruct Convexhull{\r\n\t\tPolygon U,D,S;//up,down,all;\r\n\t\tint Size(){\r\n\t\t\treturn U.size() + D.size() - 2;\r\n\t\t} \r\n\t\tvoid construct(Polygon A){\r\n\t\t\tU.clear(),D.clear(),S.clear();\r\n\t\t\tsort(A.begin(),A.end());\r\n\t\t\tint stk[N],top = 0;\r\n\t\t\tbool used[N]; \r\n\t\t\tmemset(used,0,sizeof(used));\r\n\t\t\tstk[++top] = 0,used[0] = 1;\r\n\t\t\tfor(int i=1;i<(signed)A.size();i++){\r\n\t\t\t\twhile(top > 1 && ((A[stk[top]] - A[stk[top - 1]]) ^ (A[i] - A[stk[top]])) < 0){\r\n\t\t\t\t\tused[stk[top]] = 0,top--;\r\n\t\t\t\t}\r\n\t\t\t\tused[i] = 1,stk[++top] = i;\r\n\t\t\t}\r\n\t\t\tfor(int i=0;i<=(signed)A.size();i++){\r\n\t\t\t\tif(used[i]){\r\n\t\t\t\t\tD.push_back(A[i]);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tmemset(used,0,sizeof(used));\r\n\t\t\tused[(signed)A.size() - 1] = 1;\r\n\t\t\tfor(int i=(signed)A.size() - 2;i>=0;i--){\r\n\t\t\t\twhile(top > 1 && ((A[stk[top]] - A[stk[top - 1]]) ^ (A[i] - A[stk[top]])) < 0){\r\n\t\t\t\t\tused[stk[top]] = 0,top--;\r\n\t\t\t\t}\r\n\t\t\t\tused[i] = 1,stk[++top] = i;\r\n\t\t\t}\r\n\t\t\tfor(int i=0;i<=(signed)A.size();i++){\r\n\t\t\t\tif(used[i]){\r\n\t\t\t\t\tU.push_back(A[i]);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\treverse(U.begin(),U.end());\r\n\t\t\tfor(int i=0;i<(signed)D.size()-1;i++){\r\n\t\t\t\tS.push_back(D[i]);\r\n\t\t\t}\r\n\t\t\tfor(int i=0;i<(signed)U.size()-1;i++){\r\n\t\t\t\tS.push_back(U[i]); \r\n\t\t\t}\r\n\t\t}\r\n\t\tdouble Circumference(){\r\n\t\t\tdouble ans = 0;\r\n\t\t\tfor(int i=0;i<(signed)S.size() - 1;i++){\r\n\t\t\t\tans += (S[i + 1] - S[i]).Length(); \r\n\t\t\t}\r\n\t\t\treturn ans;\r\n\t\t}\r\n\t\tdouble Area(){\r\n\t\t\treturn Geometry::Area(S);\r\n\t\t}\r\n\t\tPolygon Rotating_Calipers(){\r\n\t\t\t//Dy\u00d7a?\u00a8??\uffe1?\u00b7\u03bc??\u00f2????\u00e0\u00b1?D?\r\n\t\t\tPolygon ans;\r\n\t\t\tfor(int i=0;i<3;i++)\tans.push_back(Vector(0,0));\r\n\t\t\tint j = 2;\r\n\t\t\tPolygon tmp1,tmp2;\r\n\t\t\tfor(int i=0;i<(signed)S.size();i++){\r\n\t\t\t\twhile(1){\r\n\t\t\t\t\ttmp1.clear(),tmp2.clear();\r\n\t\t\t\t\ttmp1.push_back(S[i]),tmp1.push_back(S[(i + 1) % S.size()]),tmp1.push_back(S[j]);\r\n\t\t\t\t\ttmp2.push_back(S[i]),tmp2.push_back(S[(i + 1) % S.size()]),tmp2.push_back(S[(j + 1) % S.size()]);\r\n\t\t\t\t\tif(Geometry::Area(tmp1) >= Geometry::Area(tmp2)){\r\n\t\t\t\t\t\tbreak;\r\n\t\t\t\t\t}\t\r\n\t\t\t\t\tj = (j + 1) % S.size();\r\n\t\t\t\t}\r\n\t\t\t\tif(Geometry::Area(tmp1) > Geometry::Area(ans)){\r\n\t\t\t\t\tans = tmp1;\r\n\t\t\t\t}\r\n\t\t\t} \r\n\t\t\treturn ans;\r\n\t\t}\r\n\t};\r\n\t\r\n}\r\n \r\nusing namespace Geometry;\r\n \r\nPolygon D,T,A;\r\nConvexhull C;\r\n\r\ndouble t,s; \r\n\r\nint main()\r\n{\r\n\ts = clock();\r\n\tscanf(\"%d%*d\",&n);\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tscanf(\"%d %d\",&x[i],&y[i]),D.push_back(Vector(x[i],y[i]));\r\n\tC.construct(D);\r\n\tfor(int i=0;i<(signed)C.S.size();i++)\r\n\t{\r\n\t\tint s = C.S.size(); \r\n\t\tint k = (i + 2) >= s ? (i + 2) - s : i + 2;\r\n\t\tPolygon tmp1,tmp2;\r\n\t\tint lstans = 0;\r\n\t\tfor(int j=i + 1 >= s ? i + 1 - s : i + 1;j < (signed)C.S.size();j++){\r\n\t\t\twhile(1){\r\n\t\t\t\ttmp1.clear();\r\n\t\t\t\ttmp2.clear();\r\n\t\t\t\ttmp1.push_back(C.S[i]),tmp1.push_back(C.S[j]),tmp1.push_back(C.S[k]);\r\n\t\t\t\ttmp2.push_back(C.S[i]),tmp2.push_back(C.S[j]),tmp2.push_back(C.S[k + 1 >= s ? k + 1 - s : k + 1]);\r\n\t\t\t\tdouble ans1 = (tmp1[0] ^ tmp1[1]) + (tmp1[1] ^ tmp1[2]) + (tmp1[2] ^ tmp1[0]); \r\n\t\t\t\tdouble ans2 = (tmp2[0] ^ tmp2[1]) + (tmp2[1] ^ tmp2[2]) + (tmp2[2] ^ tmp2[0]); \r\n\t\t\t\tif(ans1 >= ans2)\tbreak;\r\n\t\t\t\tif(k + 1 == s)\tbreak;\r\n\t\t\t\tcnt++;\r\n\t\t\t\tk++;\r\n\t\t\t}\r\n\t\t\tdouble Area1 = (tmp1[0] ^ tmp1[1]) + (tmp1[1] ^ tmp1[2]) + (tmp1[2] ^ tmp1[0]);\r\n\t\t\tdouble AreaT = T.size() ? (T[0] ^ T[1]) + (T[1] ^ T[2]) + (T[2] ^ T[0]) : 0;\r\n\t\t\tif(Area1 < lstans)\tbreak;\r\n\t\t\tlstans = Area1;\r\n\t\t\tif(Area1 > AreaT)\tT = tmp1;\r\n\t\t}\r\n\t}\r\n\tA.resize(3);\r\n\tA[0] = T[0] + (T[2] - T[1]);\r\n\tA[1] = T[1] + (T[0] - T[2]);\r\n\tA[2] = T[2] + (T[1] - T[0]);\r\n//\tcout<<Area(A)<<\"?\"<<' '<<T.size()<<endl; \r\n//\tA[0] = Vector(96,85);\r\n//\tA[1] = Vector(76,89);\r\n//\tA[2] = Vector(-166,-175);\r\n//\tcout<<Area(A)<<endl;\r\n\tfor(int i=0;i<3;i++)\r\n\t\tprintf(\"%d %d\\n\",(int)A[i].x,(int)A[i].y); \r\n }\r\n/*\r\n6 6\r\n0 1\r\n1 0\r\n1 2\r\n2 0\r\n2 2\r\n3 1\r\n*/\r\n/*\r\n  start coding at:16:19\r\n  finish debugging at:\r\n  stupid mistakes:\r\n*/"
+}

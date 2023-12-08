@@ -1,0 +1,41 @@
+{
+    "id": 199816802,
+    "contestId": 1706,
+    "creationTimeSeconds": 1680176456,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "WangxunCF"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 577,
+    "memoryConsumedBytes": 70553600,
+    "source": "// LUOGU_RID: 106426538\n#include <bits/stdc++.h>\r\nusing namespace std;\r\ntemplate<typename T>inline void read(register T &x)\r\n{\r\n\tregister T p = 1,num = 0;\r\n\tchar c = getchar();\r\n\twhile(c < '0'||c > '9')\r\n\t{\r\n\t\tif(c == '-') p = -p;\r\n\t\tc = getchar();\r\n\t}\r\n\twhile('0' <= c&&c <= '9')\r\n\t{\r\n\t\tnum = (num<<3)+(num<<1)+(c^48);\r\n\t\tc = getchar();\r\n\t}\r\n\tx = p * num;\r\n}\r\ntemplate<typename T>inline void write(register T x)\r\n{\r\n\tif(x < 0) putchar('-'),x = -x;\r\n\tif(x > 9) write(x/10);\r\n\tputchar(x%10+48);\r\n}\r\n#define D(i,a,b) for(register int i=a;i>=b;--i)\r\n#define F(i,a,b) for(register int i=a;i<=b;++i)\r\n#define ll long long\r\n#define pii pair<int,int>\r\n#define N 200010\r\nint t,n,m,q,tot;\r\nstruct union_find\r\n{\r\n\tint f[N];\r\n\tinline void clear()\r\n\t{\r\n\t\tF(i,1,n*2) f[i] = i;\r\n\t}\r\n\tint find(int u)\r\n\t{\r\n\t\tif(u == f[u]) return u;\r\n\t\treturn f[u] = find(f[u]);\t\t\r\n\t}\r\n\tvoid merge(int u,int v)\r\n\t{\r\n\t\tu = find(u),v = find(v);\r\n\t\tif(u == v) return;\r\n\t\tf[v] = u;\r\n\t}\r\n}tree;\r\nint head[N],nxt[N],to[N],val[N],cnt = 0;\r\ninline void add(int u,int v,int w)\r\n{\r\n\tnxt[++cnt] = head[u];\r\n\thead[u] = cnt;\r\n\tto[cnt] = v;\r\n\tval[cnt] = w;\r\n}\r\nint Ans[N],st[N][25],dep[N],mx[N][25],f[N][25];\r\nvoid dfs(int u)\r\n{\r\n\tfor(register int i = head[u];i;i = nxt[i])\r\n\t{\r\n\t\tint v = to[i],w = val[i];\r\n\t\tdep[v] = dep[u] + 1;\r\n\t\tdfs(v);\r\n\t\tf[v][0] = u;\r\n\t\tmx[v][0] = w;\r\n\t}\t\r\n}\r\ninline int solve(int u,int v)\r\n{\r\n\tint ret = 0;\r\n\tif(dep[u] < dep[v]) swap(u,v);\r\n\tD(i,20,0)\r\n\t\tif(dep[f[u][i]] >= dep[v])\r\n\t\t\tret = max(ret,mx[u][i]),u = f[u][i];\r\n\tif(u == v) return ret;\r\n\tD(i,20,0)\r\n\t\tif(f[u][i] != f[v][i])\r\n\t\t\tret = max(ret,max(mx[u][i],mx[v][i])),u = f[u][i],v = f[v][i];\r\n\treturn max(ret,max(mx[u][0],mx[v][0]));\r\n}\r\nint main()\r\n{\r\n\tread(t);\r\n\twhile(t--)\r\n\t{\r\n\t\tread(n),read(m),read(q);\r\n\t\tF(i,1,n*2) head[i] = 0;\r\n\t\tcnt = 0;\r\n\t\ttree.clear();\r\n\t\ttot = n;\r\n\t\tF(i,1,m)\r\n\t\t{\r\n\t\t\tint u,v;\r\n\t\t\tread(u),read(v);\r\n\t\t\tu = tree.find(u),v = tree.find(v);\r\n\t\t\tif(u == v) continue;\r\n\t\t\t++tot;\r\n\t\t\ttree.merge(tot,u),tree.merge(tot,v);\r\n\t\t\tadd(tot,u,i),add(tot,v,i);\r\n\t\t}\t\r\n\t\tdep[tot] = 0;\r\n\t\tdfs(tot);\r\n\t\tF(i,1,20)\r\n\t\t\tF(j,1,tot)\r\n\t\t\t\tf[j][i] = f[f[j][i-1]][i-1],mx[j][i] = max(mx[j][i-1],mx[f[j][i-1]][i-1]);\r\n\t\tF(i,1,n-1) st[i][0] = solve(i,i+1);\r\n\t\tF(i,1,20)\r\n\t\t\tF(j,1,n-(1<<i))\r\n\t\t\t\tst[j][i] = max(st[j][i-1],st[j+(1<<(i-1))][i-1]); \r\n\t\tint len = 0;\r\n\t\twhile(q--)\r\n\t\t{\r\n\t\t\tint l,r;\r\n\t\t\tread(l),read(r);\r\n\t\t\tif(l == r) \r\n\t\t\t{\r\n\t\t\t\tAns[++len] = 0;\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\t--r;\r\n\t\t\tint t = log2(r-l+1);\r\n\t\t\tAns[++len] = max(st[l][t],st[r-(1<<t)+1][t]);\r\n\t\t}\r\n\t\tF(i,1,len) write(Ans[i]),putchar(' ');\r\n\t\tputchar('\\n');\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

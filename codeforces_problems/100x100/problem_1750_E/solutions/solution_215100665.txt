@@ -1,0 +1,40 @@
+{
+    "id": 215100665,
+    "contestId": 1750,
+    "creationTimeSeconds": 1690058586,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "Wansur"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1667745300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 514,
+    "memoryConsumedBytes": 25804800,
+    "source": " #include <bits/stdc++.h>\r\n#define f first\r\n#define s second \r\n#define ent '\\n'\r\n#define int long long\r\n\r\n//#pragma GCC target(\"sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,avx,tune=native\")\r\n//#pragma GCC optimize(\"Ofast,unroll-loops,fast-math,O3\")\r\n\r\n//typedef long double ld;\r\ntypedef long long ll;\r\nusing namespace std;\r\n \r\nstruct node{double x,y;};\r\n//double len(node a,node b)\r\n//{return sqrt((a.x-b.x)*(a.x-b.y)+(a.y-b.y)*(a.x-b.y));}\r\n\r\nstruct seg{\r\n\tint m1,m2,sum,cnt;\r\n};\r\n\r\nconst string out[2]={\"No\\n\",\"Yes\\n\"};\r\nconst ll dx[]={0,0,1,-1,-1,1,1,-1};  \r\nconst ll dy[]={1,-1,0,0,-1,1,-1,1};\r\nconst int md=998244353;\r\nconst int mod=1e9+7;\r\nconst int mx=2e5+12; \r\nconst int tst=1e5;\r\nconst bool T=1;\r\n\r\nint sum[mx*4];\r\nint t[mx*4];\r\nint cnt[mx];\r\nint pref[mx];\r\nint a[mx];\r\nint b[mx];\r\nint n,m,k;\r\nbool ok=0;\r\n\r\nvoid build(int v,int tl,int tr){\r\n\tt[v]=sum[v]=0;\r\n\tif(tl==tr)return;\r\n\tint mid=tl+tr>>1;\r\n\tbuild(v*2,tl,mid);\r\n\tbuild(v*2+1,mid+1,tr);\r\n}\r\n\r\nvoid upd(int v,int tl,int tr,int pos,int x,int y){\r\n\tif(tl==tr){\r\n\t\tt[v]+=x;\r\n\t\tsum[v]+=y;\r\n\t}\r\n\telse{\r\n\t\tint mid=tl+tr>>1;\r\n\t\tif(pos<=mid)upd(v*2,tl,mid,pos,x,y);\r\n\t\telse upd(v*2+1,mid+1,tr,pos,x,y);\r\n\t\tsum[v]=sum[v*2]+sum[v*2+1];\r\n\t\tt[v]=t[v*2]+t[v*2+1];\r\n\t}\r\n}\r\n\r\nint get(int v,int tl,int tr,int l,int r){\r\n\tif(tl>r || l>tr || l>r)return 0;\r\n\tif(tl>=l && tr<=r)return t[v];\r\n\tint mid=tl+tr>>1;\r\n\treturn get(v*2,tl,mid,l,r)+get(v*2+1,mid+1,tr,l,r);\r\n}\r\n\r\nint getsum(int v,int tl,int tr,int l,int r){\r\n\tif(tl>r || l>tr || l>r)return 0;\r\n\tif(tl>=l && tr<=r)return sum[v];\r\n\tint mid=tl+tr>>1;\r\n\treturn getsum(v*2,tl,mid,l,r)+getsum(v*2+1,mid+1,tr,l,r);\r\n}\r\n\r\nint rec(int l,int r){\r\n\tif(l==r){\r\n\t\treturn 0;\r\n\t}\r\n\tint mid=l+r>>1;\r\n\tint res=0;\r\n\tres+=rec(l,mid);\r\n\tres+=rec(mid+1,r);\r\n\tint cntL=0,cntR=0;\r\n\tvector<pair<int,int>> v,u;\r\n\tcntL=cntR=0;\r\n\tfor(int i=mid+1;i<=r;i++){\r\n\t\tif(a[i]>0){\r\n\t\t\tcntR++;\r\n\t\t}\r\n\t\telse{\r\n\t\t\tif(cntR)cntR--;\r\n\t\t\telse cntL++;\r\n\t\t}\r\n\t\tv.push_back({cntL,cntR});\r\n\t}\r\n\tint j=0,N=r-l+5,k=(r-l+1)/2+1;\r\n\tcntL=0;\r\n\tcntR=0;\r\n\tbuild(1,1,N);\r\n\tfor(int i=mid;i>=l;i--){\r\n\t\tif(a[i]<0){\r\n\t\t\tcntR++;\r\n\t\t}\r\n\t\telse{\r\n\t\t\tif(cntR)cntR--;\r\n\t\t\telse cntL++;\r\n\t\t}\r\n\t\twhile(j<v.size() && v[j].f<=cntL){\r\n\t\t\tupd(1,1,N,v[j].s-v[j].f+k,1,v[j].s-v[j].f);\r\n\t\t\tj++;\r\n\t\t}\r\n\t\tint x=get(1,1,N,cntR-cntL+k,N);\r\n\t\tint y=getsum(1,1,N,1,cntR-cntL+k-1);\r\n\t\tres+=cntR*x;\r\n\t\tres+=y;\r\n\t\tres+=cntL*(j-x);\r\n//\t\tcout<<x<<' '<<y<<' '<<cntL<<' '<<cntR<<ent;\r\n\t\tu.push_back({cntL,cntR});\r\n\t}\r\n\tv=u;\r\n\tcntL=cntR=j=0;\r\n\tbuild(1,1,N);\r\n\tfor(int i=mid+1;i<=r;i++){\r\n\t\tif(a[i]>0){\r\n\t\t\tcntR++;\r\n\t\t}\r\n\t\telse{\r\n\t\t\tif(cntR)cntR--;\r\n\t\t\telse cntL++;\r\n\t\t}\r\n\t\twhile(j<v.size() && v[j].f<cntL){\r\n\t\t\tupd(1,1,N,v[j].s-v[j].f+k,1,v[j].s-v[j].f);\r\n\t\t\tj++;\r\n\t\t}\r\n\t\tint x=get(1,1,N,cntR-cntL+k,N);\r\n\t\tint y=getsum(1,1,N,1,cntR-cntL+k-1);\r\n\t\tres+=cntR*x;\r\n\t\tres+=y;\r\n\t\tres+=cntL*(j-x);\r\n//\t\tcout<<cntL<<' '<<cntR<<' '<<x<<' '<<y<<' '<<j<<ent;\r\n\t}\r\n//\tcout<<l<<' '<<r<<' '<<res<<ent;\r\n\treturn res;\r\n}\r\n\r\nvoid Press_Fn_with_F11(){\r\n\tstring s;\r\n\tcin>>n;\r\n\tk=n+1;\r\n\tint cal=0;\r\n\tok=0;\r\n\tfor(int i=0;i<=n*2;i++)cnt[i]=0;\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tchar c;\r\n\t\tcin>>c;\r\n\t\tif(c==')'){\r\n\t\t\ta[i]=-1;\r\n\t\t}\r\n\t\telse{\r\n\t\t\ta[i]=1;\r\n\t\t}\r\n\t\tpref[i]=pref[i-1]+a[i];\r\n\t\tcnt[pref[i]+k]++;\r\n\t}\r\n\tcnt[k]++;\r\n\tfor(int i=1;i<=k*2;i++){\r\n\t\tcnt[i]+=cnt[i-1];\r\n\t}\r\n\tfor(int i=0;i<=n;i++){\r\n\t\tcal+=pref[i]*(cnt[pref[i]+k]-(n+1-cnt[pref[i]+k-1]));\r\n\t}\r\n\tcal+=rec(1,n);\r\n\tcout<<cal<<ent;\r\n}\t\r\n\r\nsigned main(){\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);\t\t\r\n    cout.tie(0);\r\n    int Ersayin_abi_crush=1;\r\n    if(T)cin>>Ersayin_abi_crush;\r\n    for(int i=1;i<=Ersayin_abi_crush;i++){\r\n//    \tcout<<\"Case \"<<i<<\": \";\r\n    \tPress_Fn_with_F11();\r\n\t}\r\n}\t\t\t\t   \r\n"
+}

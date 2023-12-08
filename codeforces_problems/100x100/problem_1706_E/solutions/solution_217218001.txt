@@ -1,0 +1,41 @@
+{
+    "id": 217218001,
+    "contestId": 1706,
+    "creationTimeSeconds": 1691221800,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "Levi_seventy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "// LUOGU_RID: 119168269\n#include <bits/stdc++.h>\r\n#define ios ios::sync_with_stdio(false), cin.tie(0), cout.tie(0);\r\n#define x first\r\n#define y second\r\n#define endl '\\n'\r\n#define int long long\r\nusing namespace std;\r\nmt19937 rnd(chrono::steady_clock::now().time_since_epoch().count());\r\ntypedef pair<int, int> PII;\r\nconst int N = 4e5 + 10;\r\nconst int M = 2e5 + 10;\r\nconst int INF = 2e9;\r\nconst double INFF = 2e18, Pi = acos(-1);\r\nconst int mod = 1e9 + 7;\r\nint t, n, m, q;\r\n\r\nstruct rebuild\r\n{\r\n    struct Edge\r\n    {\r\n        int a, b, c;\r\n        bool operator<(const Edge &W) const\r\n        {\r\n            return c < W.c;\r\n        }\r\n    } E[N];\r\n\r\n    struct Node\r\n    {\r\n        int l, r, Max, Min;\r\n    } tr[N * 4], now;\r\n\r\n    int h[N], e[N], ne[N], idx, cnt;\r\n    int p[N], val[N], d[N], fa[N][21];\r\n    int L[N], b[N], dfn;\r\n\r\n    void init(int _n)\r\n    {\r\n        cnt = _n;\r\n        idx = 0;\r\n        for (int i = 0; i <= 2 * _n; i++)\r\n        {\r\n            p[i] = i, val[i] = 0;\r\n            h[i] = -1;\r\n        }\r\n    }\r\n\r\n    void add(int a, int b)\r\n    {\r\n        e[idx] = b, ne[idx] = h[a], h[a] = idx++;\r\n    }\r\n\r\n    int find(int x)\r\n    {\r\n        if (x != p[x])\r\n            p[x] = find(p[x]);\r\n        return p[x];\r\n    }\r\n\r\n    void build()\r\n    {\r\n        sort(E + 1, E + m + 1);\r\n        for (int i = 1; i <= m; i++)\r\n        {\r\n            auto [a, b, c] = E[i];\r\n            int pa = find(a), pb = find(b);\r\n            if (pa != pb)\r\n            {\r\n                ++cnt;\r\n                // cout << cnt << \" \" << pa << \" \" << pb << endl;\r\n                add(cnt, pa), add(cnt, pb);\r\n                val[cnt] = c;\r\n                p[pa] = cnt, p[pb] = cnt;\r\n                if (cnt == 2 * n - 1)\r\n                    break;\r\n            }\r\n        }\r\n    }\r\n\r\n    void dfs(int u, int p)\r\n    {\r\n        d[u] = d[p] + 1;\r\n        fa[u][0] = p;\r\n        L[u] = ++dfn;\r\n        b[dfn] = u;\r\n        for (int k = 1; k <= 20; k++)\r\n        {\r\n            fa[u][k] = fa[fa[u][k - 1]][k - 1];\r\n        }\r\n        for (int i = h[u]; i != -1; i = ne[i])\r\n        {\r\n            int j = e[i];\r\n            dfs(j, u);\r\n        }\r\n    }\r\n\r\n    int lca(int a, int b)\r\n    {\r\n        if (d[a] < d[b])\r\n            swap(a, b);\r\n        for (int i = 20; i >= 0; i--)\r\n        {\r\n            if (d[fa[a][i]] >= d[b])\r\n            {\r\n                a = fa[a][i];\r\n            }\r\n        }\r\n        if (a == b)\r\n            return val[a];\r\n        for (int i = 20; i >= 0; i--)\r\n        {\r\n            if (fa[a][i] != fa[b][i])\r\n            {\r\n                a = fa[a][i], b = fa[b][i];\r\n            }\r\n        }\r\n        return val[fa[a][0]];\r\n    }\r\n    void pushup(int u)\r\n    {\r\n        tr[u].Max = max(tr[u << 1].Max, tr[u << 1 | 1].Max);\r\n        tr[u].Min = min(tr[u << 1].Min, tr[u << 1 | 1].Min);\r\n    }\r\n    void build_seg(int u, int l, int r)\r\n    {\r\n        if (l == r)\r\n            tr[u] = {l, r, L[l], L[l]};\r\n        else\r\n        {\r\n            tr[u] = {l, r};\r\n            int mid = (l + r) >> 1;\r\n            build_seg(u << 1, l, mid), build_seg(u << 1 | 1, mid + 1, r);\r\n            pushup(u);\r\n        }\r\n    }\r\n\r\n    Node query(int u, int l, int r)\r\n    {\r\n        if (tr[u].l >= l && tr[u].r <= r)\r\n        {\r\n            return tr[u];\r\n        }\r\n        else\r\n        {\r\n            int mid = (tr[u].l + tr[u].r) >> 1;\r\n            if (l > mid)\r\n                return query(u << 1 | 1, l, r);\r\n            else if (r <= mid)\r\n                return query(u << 1, l, r);\r\n            else\r\n            {\r\n                Node p = {};\r\n                Node ls = query(u << 1, l, r), rs = query(u << 1 | 1, l, r);\r\n                p.Max = max(ls.Max, rs.Max), p.Min = min(ls.Min, rs.Min);\r\n                return p;\r\n            }\r\n        }\r\n    }\r\n\r\n} gao;\r\n\r\nsigned main()\r\n{\r\n    ios;\r\n    cin >> t;\r\n    while (t--)\r\n    {\r\n        cin >> n >> m >> q;\r\n        gao.init(n);\r\n        for (int i = 1; i <= m; i++)\r\n        {\r\n            int a, b;\r\n            cin >> a >> b;\r\n            gao.E[i] = {a, b, i};\r\n        }\r\n        gao.build();\r\n        // cout << gao.cnt << endl;\r\n        int rt = gao.find(1);\r\n        gao.dfs(rt, 0);\r\n        // cout << gao.lca(1, 2) << endl;\r\n        gao.build_seg(1, 1, n);\r\n        // for (int i = 1; i <= 3; i++)\r\n        // {\r\n        //     cout << gao.L[i] << \" \" << gao.b[gao.L[i]] << endl;\r\n        // }\r\n        while (q--)\r\n        {\r\n            int l, r;\r\n            cin >> l >> r;\r\n            gao.now = gao.query(1, l, r);\r\n            // cout << gao.now.Max << \" \" << gao.now.Min << endl;\r\n            // cout << gao.b[gao.now.Max] << \" \" << gao.b[gao.now.Min] << endl;\r\n            cout << gao.lca(gao.b[gao.now.Max], gao.b[gao.now.Min]) << \" \";\r\n        }\r\n        cout << endl;\r\n    }\r\n    return 0;\r\n}\r\n/*\r\nstuff you should look for\r\n* int overflow, array bounds\r\n* special cases (n=1?)\r\n* do smth instead of nothing and stay organized\r\n* WRITE STUFF DOWN\r\n* DON'T GET STUCK ON ONE APPROACH\r\n*/"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 98218882,
+    "contestId": 1431,
+    "creationTimeSeconds": 1605198349,
+    "relativeTimeSeconds": 6649,
+    "problem": {
+        "contestId": 1431,
+        "index": "H",
+        "name": "Rogue-like Game",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "*special",
+            "brute force",
+            "greedy",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1431,
+        "members": [
+            {
+                "handle": "Bedge"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1605191700
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 71,
+    "timeConsumedMillis": 1497,
+    "memoryConsumedBytes": 62873600,
+    "source": "import java.util.*\r\nimport kotlin.math.abs\r\nimport kotlin.math.max\r\nimport kotlin.math.min\r\nimport java.util.PriorityQueue\r\n\r\nprivate fun readLn() = readLine()!! // string line\r\nprivate fun readInt() = readLn().toInt() // single int\r\nprivate fun readStrings() = readLn().split(\" \") // list of strings\r\nprivate fun readInts() = readStrings().map { it.toInt() } // list of ints\r\nprivate fun readLongs() = readStrings().map { it.toLong() } // list of longs\r\n\r\nfun main() {\r\n    val (n, m, k) = readInts()\r\n    val a = readLongs()\r\n    val b = readLongs()\r\n\r\n    val c = Array(n) { LongArray(m) }\r\n\r\n    for (i in 0 until n) {\r\n        c[i] = readLongs().toLongArray()\r\n    }\r\n\r\n    val vec = mutableListOf<Int>()\r\n\r\n    var pt1 = 0\r\n    var pt2 = 0\r\n\r\n    while (pt1 < n || pt2 < m) {\r\n        if (pt1 == n) vec.add(n + (pt2++))\r\n        else if (pt2 == m) vec.add(pt1++)\r\n        else if (a[pt1] < b[pt2]) vec.add(pt1++)\r\n        else vec.add(n + (pt2++))\r\n    }\r\n\r\n    val dp = Array(n + m + 1) { Array(2) { Pair<Long, Long>(1e13.toLong(), 0) } }\r\n\r\n    dp[0][0] = Pair(0L, 0L)\r\n\r\n    val pref = Array(n) { LongArray(m) }\r\n\r\n    for (i in 0 until n) {\r\n        for (j in 0 until m) {\r\n            pref[i][j] = c[i][j]\r\n\r\n            if (i - 1 >= 0) pref[i][j] = max(pref[i][j], pref[i - 1][j])\r\n            if (j - 1 >= 0) pref[i][j] = max(pref[i][j], pref[i][j - 1])\r\n\r\n//            println(\"i=$i j=$j pref=${pref[i][j]}\")\r\n        }\r\n    }\r\n\r\n    for (i in 0 until (n + m - 1)) {\r\n\r\n        for (t in 0 until 2) {\r\n            if (dp[i][t].first == 1e13.toLong()) continue\r\n\r\n            var x = 0\r\n            var y = 0\r\n\r\n            for (j in 0..i) {\r\n                if (vec[j] < n) x = max(x, vec[j])\r\n                else y = max(y, vec[j] - n)\r\n            }\r\n\r\n            var cur_step = dp[i][t].first\r\n            var cur_score = dp[i][t].second\r\n\r\n            if (t == 0) {\r\n                for (j in i + 1 until n + m) {\r\n                    var need: Long = 0\r\n\r\n                    if (vec[j] < n) need = a[vec[j]]\r\n                    else need = b[vec[j] - n]\r\n\r\n                    var nxt_step = cur_step\r\n                    var nxt_score = cur_score\r\n\r\n                    if (nxt_score < need) {\r\n                        val need_step = (need - nxt_score + (pref[x][y] + k.toLong()) - 1) / (pref[x][y] + k.toLong())\r\n//                        println(\"i=$i j=$j need_step=$need_step val=${pref[x][y] + k.toLong()}\")\r\n                        nxt_step += need_step\r\n                        nxt_score += need_step * (pref[x][y] + k.toLong())\r\n                    }\r\n\r\n                    dp[j][1] = better(dp[j][1], Pair(nxt_step, nxt_score))\r\n                }\r\n            }\r\n\r\n            var need: Long = 0\r\n\r\n            if (vec[i + 1] < n) need = a[vec[i + 1]]\r\n            else need = b[vec[i + 1] - n]\r\n\r\n            if (cur_score < need) {\r\n                val need_step = (need - cur_score + pref[x][y] - 1) / pref[x][y]\r\n                cur_step += need_step\r\n                cur_score += need_step * pref[x][y]\r\n            }\r\n\r\n            dp[i + 1][t] = better(dp[i + 1][t], Pair(cur_step, cur_score))\r\n\r\n//            println(\"i = $i t = $t val =${dp[i][t]}\")\r\n        }\r\n    }\r\n\r\n    println(better(dp[n + m - 1][0], dp[n + m - 1][1]).first)\r\n}\r\n\r\nfun better(x: Pair<Long, Long>, y: Pair<Long, Long>): Pair<Long, Long> {\r\n    if (x.first != y.first) {\r\n        if (x.first < y.first) return x\r\n        return y\r\n    }\r\n\r\n    if (x.second > y.second) return x\r\n    return y\r\n}\r\n\r\n\r\n"
+}

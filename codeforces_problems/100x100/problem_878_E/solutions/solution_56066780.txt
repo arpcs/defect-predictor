@@ -1,0 +1,36 @@
+{
+    "id": 56066780,
+    "contestId": 878,
+    "creationTimeSeconds": 1561537257,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "hjk1030"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 187,
+    "memoryConsumedBytes": 8806400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int mod=1000000007;\r\nconst int inv2=500000004;\r\ninline int add(int a,int b)\r\n{\r\n    // assert(a<mod);\r\n    // assert(b<mod);\r\n    // assert(a>=0);\r\n    // assert(b>=0);\r\n    // assert(1ll*a+b<=2*mod);\r\n    if((a+=b)>=mod)a-=mod;\r\n    return a;\r\n}\r\ninline int mult(int a,int b)\r\n{\r\n    // assert(a<mod);\r\n    // assert(b<mod);\r\n    // assert(a>=0);\r\n    // assert(b>=0);\r\n    long long t=1ll*a*b;\r\n    if(t>=mod)t%=mod;\r\n    return t;\r\n}\r\ninline int power(int a,int b)\r\n{\r\n    int out=1;\r\n    while(b)\r\n    {\r\n        if(b&1)out=mult(out,a);\r\n        a=mult(a,a);\r\n        b>>=1;\r\n    }\r\n    return out;\r\n}\r\ninline int dec(int a,int b)\r\n{\r\n    // assert(a<mod);\r\n    // assert(b<mod);\r\n    // assert(a>=0);\r\n    // assert(b>=0);\r\n    a-=b;\r\n    if(a<0)a+=mod;\r\n    return a;\r\n}\r\nclass sec\r\n{\r\n    public:\r\n        int l,r;\r\n        long long rsum;\r\n        sec operator +(const sec &t)\r\n        {\r\n            sec out;\r\n            out.l=l;\r\n            out.r=t.r;\r\n            if(r-l+1>=31&&t.rsum)out.rsum=2e9+1;\r\n            else out.rsum=rsum+(t.rsum<<(r-l+1));\r\n            if(out.rsum>2e9+1)out.rsum=2e9+1;\r\n            return out;\r\n        }\r\n};\r\nint n,Q,fa[100010],a[100010],ans[100010];\r\nvector<pair<int,int> > q[100010];\r\nvector<sec> v;\r\nint sum[100010],bel[100010],sum2[100010];\r\ninline int getf(int x)\r\n{\r\n    return x==fa[x]?x:fa[x]=getf(fa[x]);\r\n}\r\nint main()\r\n{\r\n    scanf(\"%d%d\",&n,&Q);\r\n    for(int i=1;i<=n;i++)\r\n        scanf(\"%d\",&a[i]),fa[i]=i,sum2[i]=add(sum2[i-1],mult((a[i]+mod)%mod,power(2,i)));\r\n    for(int i=1,ti,tj;i<=Q;i++)\r\n    {\r\n        scanf(\"%d%d\",&ti,&tj);\r\n        q[tj].push_back(make_pair(ti,i));\r\n    }\r\n    for(int i=1;i<=n;i++)\r\n    {\r\n        sec tmp;\r\n        tmp.l=i;tmp.r=i;\r\n        tmp.rsum=a[i]*2;\r\n        if(!v.size())sum[v.size()]=((a[i]*2)%mod+mod)%mod;\r\n        else sum[v.size()]=add(sum[v.size()-1],((a[i]*2)%mod+mod)%mod);\r\n        bel[i]=v.size();\r\n        v.push_back(tmp);\r\n        while(v.size()>1&&v.back().rsum>=0)\r\n        {\r\n            tmp=v.back();v.pop_back();\r\n            int tpos=v.size();\r\n            sum[tpos-1]=add(sum[tpos-1],mult(dec(sum[tpos],sum[tpos-1]),power(2,v.back().r-v.back().l+1)));\r\n            fa[tmp.l]=v.back().l;\r\n            tmp=v.back()+tmp;v.pop_back();\r\n            v.push_back(tmp);\r\n        }\r\n        for(pair<int,int> &x:q[i])\r\n        {\r\n            int L=x.first,id=x.second;\r\n            if(L==i)\r\n            {\r\n                ans[id]=(a[L]+mod)%mod;\r\n                continue;\r\n            }\r\n            L++;\r\n            int nl=getf(L),tmp=(a[L-1]+mod)%mod;nl=bel[nl];\r\n            if(nl==v.size()-1)\r\n            {\r\n                ans[id]=add(tmp,mult(dec(sum2[i],sum2[L-1]),power(inv2,L-1)));\r\n                continue;\r\n            }\r\n            int pos;\r\n            if(L==getf(L))pos=nl;\r\n            else pos=nl+1,tmp=add(tmp,mult(dec(sum2[v[nl].r],sum2[L-1]),power(inv2,L-1)));\r\n            if(pos)ans[id]=add(tmp,dec(sum[v.size()-1],sum[pos-1]));\r\n            else ans[id]=add(tmp,sum[v.size()-1]);\r\n        }\r\n    }\r\n    for(int i=1;i<=Q;i++)printf(\"%d\\n\",ans[i]);\r\n    return 0;\r\n}"
+}

@@ -1,0 +1,35 @@
+{
+    "id": 44816510,
+    "contestId": 521,
+    "creationTimeSeconds": 1540417464,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 521,
+        "index": "D",
+        "name": "Shop",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2800,
+        "tags": [
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 521,
+        "members": [
+            {
+                "handle": "mfidabel"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1425279600
+    },
+    "programmingLanguage": "GNU C11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 15,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 5836800,
+    "source": "//Vasya empieza con k habilidades que tienen un valor inicial\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#define tam 100010\n#define ci 4607156\ntypedef struct {\n    int valor, indice;\n} Suma;\n/*\ntypedef struct\n{\n    Suma *v;\n    int maxNodos;\n    int n;\n} Monticulo;\n*/\ntypedef struct {\n    Suma *vector;\n    size_t usado;\n    size_t tamanho;\n} ptrSumas;\n\n\ntypedef struct {\n    double factor;\n    int indice;\n} Multiplicacion;\n\nint criterioS (const void * a, const void * b);\nint criterioM (const void * a, const void * b);\nvoid inicializarVector(ptrSumas *a, size_t tamInicial);\nvoid insertar(ptrSumas *a, Suma item);\nvoid borrar(ptrSumas *a);\nenum mejora {asignar=1,sumar=2,multiplicar=3};\nint main(void)\n{\n    int i, k, n, m, tipo, destino, valor, tipos[tam], indiceMulti=0;\n    ptrSumas sumas[tam];\n    Suma tmpS;\n    Multiplicacion tmpM;\n    Multiplicacion multis[tam];\n    memset(sumas,0,sizeof(sumas));\n    int habilidades[tam], asignacionesValor[tam]={0}, asignacionesIndice[tam]={0};\n    scanf(\"%d %d %d\", &k, &n, &m);\n    for (i = 1; i <= k; i++)\n    {\n        scanf(\"%d\", &habilidades[i]);\n    }\n\n    //Carga de mejoras\n    for (i=1; i <= n;i++){\n        scanf(\"%d %d %d\",&tipo , &destino, &valor);\n        if (tipo == sumar){\n            //Cargar sumas\n            if (sumas[destino].vector==NULL){\n                inicializarVector(&(sumas[destino]),3);\n            }\n            tmpS.indice=i;\n            tmpS.valor=valor;\n            insertar(&(sumas[destino]),tmpS);\n        }\n        if (tipo == asignar && valor > habilidades[destino]){\n            //Caso sea una asignacion\n            asignacionesValor[destino]=valor;\n            asignacionesIndice[destino]=i;\n        }\n        if (tipo == multiplicar){\n            tmpM.factor=valor;\n            tmpM.indice=i;\n            multis[indiceMulti]=tmpM;\n            indiceMulti++;\n        }\n        tipos[i]= tipo;\n    }\n    long long sumatoria;\n    int ind;\n    //Procesar asignaciones y sumas\n    for (i=1;i<=k;i++){\n        if (asignacionesValor[i]>habilidades[i]){\n            //Si es que vale la pena convertir la asignacion a suma\n            tmpS.valor=asignacionesValor[i];\n            tmpS.indice=asignacionesIndice[i];\n            insertar(&sumas[destino], tmpS);\n        }\n        sumatoria=habilidades[i];\n        //Ordenar sumas de esa habilidad de mas grande a  mas pque\n        qsort(sumas[i].vector,sumas[i].usado,sizeof(Suma), criterioS);\n        for (ind=0;ind<sumas[i].usado;ind++){\n            //Convertir Sumas en multiplicaciones\n            tmpM.factor=((double) (sumatoria + sumas[i].vector[ind].valor)/sumatoria);\n            tmpM.indice= sumas[i].vector[ind].indice;\n            multis[indiceMulti]=tmpM;\n            indiceMulti++;\n            sumatoria = sumatoria + sumas[i].vector[ind].valor;\n        }\n        //Liberar memoria\n        borrar(&sumas[i]);\n    }\n    //Ordenar las multiplicaciones de mas grande a mas peque\n    qsort(multis, indiceMulti, sizeof(Multiplicacion), criterioM);\n    //int usosFinal = (indiceMulti< m) ? indiceMulti : m;\n    int usosFinal;\n    if (indiceMulti < m){\n        usosFinal = indiceMulti;\n    } else {\n        usosFinal = m;\n    }\n    printf(\"%d\\n\", usosFinal);\n    for (tipo=asignar;tipo<=multiplicar;tipo++){\n        for (ind=0; ind<usosFinal;ind++){\n            if (tipos[multis[ind].indice]==tipo){\n                printf(\"%d \", multis[ind].indice);\n            }\n        }\n    }\n\n\n    return 0;\n}\n\nvoid inicializarVector(ptrSumas *a, size_t tamInicial) {\n    a->vector = (Suma *)malloc(tamInicial * sizeof(Suma));\n    a->usado = 0;\n    a->tamanho = tamInicial;\n}\n\nvoid insertar(ptrSumas *a, Suma item) {\n    // a->used is the number of used entries, because a->array[a->used++] updates a->used only *after* the array has been accessed.\n    // Therefore a->used can go up to a->size\n    if (a->usado == a->tamanho) {\n        a->tamanho *= 2;\n        a->vector = (Suma *)realloc(a->vector, a->tamanho * sizeof(Suma));\n    }\n    a->vector[a->usado++] = item;\n}\n\nvoid borrar(ptrSumas *a) {\n    free(a->vector);\n    a->vector = NULL;\n    a->usado = a->tamanho = 0;\n}\n\nint criterioS (const void * a, const void * b) {\n    return ( ((Suma *)b)->valor - ((Suma*)a)->valor );\n}\n\nint criterioM (const void * a, const void * b) {\n\n    return ( (((Multiplicacion *)a)->factor > ((Multiplicacion*)b)->factor) ? -1 : 1 );\n}"
+}

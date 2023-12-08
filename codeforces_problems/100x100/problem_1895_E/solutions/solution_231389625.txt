@@ -1,0 +1,44 @@
+{
+    "id": 231389625,
+    "contestId": 1895,
+    "creationTimeSeconds": 1699129774,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "kevin"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 343,
+    "memoryConsumedBytes": 55705600,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define ll long long\r\n#define all(x) x.begin(), x.end()\r\n#define pb push_back\r\n#define mp make_pair\r\n#define ps push\r\n#define in insert\r\n#define f first\r\n#define s second\r\n#define nl cout<<\"\\n\"\r\n#define ca(v) for(auto i:v) cout<<i<<\" \";\r\n#define cbit(x) __builtin_popcount(x)\r\n#define gcd(a, b) __gcd(a, b)\r\n#define lcm(a, b) (a*b/gcd(a, b))\r\nint xm[4] = {-1, 1, 0, 0};\r\nint ym[4] = {0, 0, -1, 1};\r\nconst int MOD = 1e9 + 7;\r\nconst int MAXN = 5e5 + 5;\r\nconst ll POW = 9973;\r\n\r\nvector<int> adj[MAXN];\r\nvector<int> bdj[MAXN];\r\n\r\nstruct tmp{\r\n    int id;\r\n    int i;\r\n    int flg;\r\n};\r\nint main()\r\n{\r\n    ios_base::sync_with_stdio(0); cin.tie(0);\r\n    int t;\r\n    cin>>t;\r\n    while(t--){\r\n        // Each node points to opposite player, with the highest possible defense that has greater offense. \r\n        // Can use binary search!\r\n        int n; cin>>n;\r\n        int a[n][2]; \r\n        for(int j=0; j<2; j++) for(int i=0; i<n; i++) cin>>a[i][j];\r\n        int m; cin>>m;\r\n        int b[m][2];\r\n        for(int j=0; j<2; j++) for(int i=0; i<m; i++) cin>>b[i][j];\r\n\r\n        // sort by offense\r\n        vector<pair<int, int>> ar;\r\n        vector<int> abest(n,n-1);\r\n        vector<pair<int, int>> br;\r\n        vector<int> bbest(m,m-1);\r\n        for(int i=0; i<n; i++) ar.pb({a[i][0], a[i][1]});\r\n        for(int i=0; i<m; i++) br.pb({b[i][0], b[i][1]});\r\n        sort(all(ar)); sort(all(br));\r\n        vector<int> ina(n,0);\r\n        vector<int> inb(m,0);\r\n        \r\n        for(int i=n-2; i>=0; i--){\r\n            abest[i] = abest[i+1];\r\n            if(ar[i].s > ar[abest[i+1]].s) abest[i] = i;\r\n        }\r\n        for(int i=m-2; i>=0; i--){\r\n            bbest[i] = bbest[i+1];\r\n            if(br[i].s > br[bbest[i+1]].s) bbest[i] = i;\r\n        }\r\n        for(int i=0; i<n; i++){\r\n            int j = lower_bound(all(br), mp(ar[i].s, 10000001)) - br.begin();\r\n            if(j != m) {\r\n                bdj[bbest[j]].pb(i);\r\n                ina[i] += 1;\r\n            }\r\n        }\r\n        \r\n        for(int i=0; i<m; i++){\r\n            int j = lower_bound(all(ar), mp(br[i].s, 10000001)) - ar.begin();\r\n            if(j != n) {\r\n                adj[abest[j]].pb(i);\r\n                inb[i] += 1;\r\n            }\r\n        }\r\n        \r\n        vector<int> ansa(n, 0);\r\n        queue<tmp> q;\r\n        for(int i=0; i<n; i++) {\r\n            if(ina[i] == 0) {\r\n                tmp tt = {0,i,1};\r\n                q.push(tt);\r\n            }\r\n        }\r\n        for(int i=0; i<m; i++){\r\n            if(inb[i] == 0) {\r\n                tmp tt = {1,i,-1};\r\n                q.push(tt);\r\n            }\r\n        }\r\n        \r\n        while(q.size()){\r\n            auto c = q.front();\r\n            q.pop();\r\n            if(c.id == 0) { // first\r\n                for(int j:adj[c.i]){\r\n                    tmp tt = {1,j,c.flg};\r\n                    q.push(tt);\r\n                }\r\n                ansa[c.i] = c.flg;\r\n            } else {\r\n                for(int j:bdj[c.i]){\r\n                    tmp tt = {0,j,c.flg};\r\n                    q.push(tt);\r\n                }\r\n            }\r\n        }\r\n        \r\n        vector<int> res(3,0);\r\n        for(int i:ansa){\r\n            res[-i+1] += 1;\r\n        }\r\n        ca(res);\r\n        nl;\r\n        for(int i=0; i<n; i++) adj[i].clear();\r\n        for(int i=0; i<m; i++) bdj[i].clear();\r\n    }\r\n}\r\n\r\n"
+}

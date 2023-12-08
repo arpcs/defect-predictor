@@ -1,0 +1,40 @@
+{
+    "id": 180596811,
+    "contestId": 1750,
+    "creationTimeSeconds": 1668256322,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "Flannery"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1667745300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing ll = long long int;\r\n\r\nconstexpr int maxn = 1e6 + 19;\r\n\r\nvoid get_prefix(int *s, int n){\r\n\tstatic char str[maxn];\r\n\tstd::cin >> (str + 2);\r\n\ts[1] = 0;\r\n\tfor(int i = 2; i <= n + 1; ++i){\r\n\t\ts[i] = s[i - 1] + (str[i] == '(' ? 1 : -1);\r\n\t}\r\n}\r\n\r\nint n, s[maxn];\r\nint max[maxn], min[maxn];\r\nint st[maxn], top;\r\n\r\nstruct SegmentTree{\r\n\tll sum[maxn << 1], tag[maxn << 1];\r\n\tstatic const int NOTAG = 1e9;\r\n\tvoid build(int node, int l, int r){\r\n\t\tsum[node] = 0, tag[node] = NOTAG;\r\n\t\tif(l == r){\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint mid = (l + r) >> 1;\r\n\t\tbuild(node << 1, l, mid), build(node << 1 | 1, mid + 1, r);\r\n\t}\r\n\tvoid push_up(int node){\r\n\t\tsum[node] = sum[node << 1] + sum[node << 1 | 1];\r\n\t}\r\n\tvoid push_down(int node, int L, int R){\r\n\t\tif(tag[node] == NOTAG){\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tif(L != R){\r\n\t\t\tint mid = (L + R) >> 1;\r\n\t\t\tsum[node << 1] = tag[node] * (mid - L + 1);\r\n\t\t\ttag[node << 1] = tag[node];\r\n\t\t\tsum[node << 1 | 1] = tag[node] * (R - mid);\r\n\t\t\ttag[node << 1 | 1] = tag[node];\r\n\t\t}\r\n\t\ttag[node] = NOTAG;\r\n\t}\r\n\tvoid modify(int node, int L, int R, int l, int r, const ll &val){\r\n\t\tif(l <= L && R <= r){\r\n\t\t\tsum[node] = val * (R - L + 1);\r\n\t\t\ttag[node] = val;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tpush_down(node, L, R);\r\n\t\tint mid = (L + R) >> 1;\r\n\t\tif(l <= mid) modify(node << 1, L, mid, l, r, val);\r\n\t\tif(r > mid) modify(node << 1 | 1, mid + 1, R, l, r, val);\r\n\t\tpush_up(node);\r\n\t}\r\n\tll query(int node, int L, int R, int l, int r){\r\n\t\tif(l <= L && R <= r){\r\n\t\t\treturn sum[node];\r\n\t\t}\r\n\t\tpush_down(node, L, R);\r\n\t\tll res = 0ll;\r\n\t\tint mid = (L + R) >> 1;\r\n\t\tif(l <= mid) res += query(node << 1, L, mid, l, r);\r\n\t\tif(r > mid) res += query(node << 1 | 1, mid + 1, R, l, r);\r\n\t\tpush_up(node);\r\n\t\treturn res;\r\n\t}\r\n}mt;\r\n\r\nvoid solve(void){\r\n\tstd::cin >> n;\r\n\tget_prefix(s, n), ++n;\r\n\t\r\n\tll ans = 0ll;\r\n\tmt.build(1, 1, n), top = 0;\r\n\tfor(int i = 1; i <= n; ++i){\r\n\t\twhile(top && s[st[top]] >= s[i]){\r\n\t\t\t--top;\r\n\t\t}\r\n\t\tmt.modify(1, 1, n, st[top] + 1, i, s[i]);\r\n\t\tans -= mt.query(1, 1, n, 1, i);\r\n\t\tst[++top] = i;\r\n\t}\r\n\tstd::sort(s + 1, s + 1 + n);\r\n\tfor(int i = 1; i <= n; ++i){\r\n\t\tans += (ll)s[i] * i;\r\n\t}\r\n\tstd::cout << ans << std::endl;\r\n}\r\n\r\nint main(){\r\n\tstd::ios::sync_with_stdio(false);\r\n\tstd::cin.tie(nullptr);\r\n\t\r\n\tint T;\r\n\tstd::cin >> T;\r\n\t\r\n\twhile(T--){\r\n\t\tsolve();\r\n\t}\r\n\t\r\n\treturn 0;\r\n}"
+}

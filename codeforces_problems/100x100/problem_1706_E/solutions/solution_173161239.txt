@@ -1,0 +1,41 @@
+{
+    "id": 173161239,
+    "contestId": 1706,
+    "creationTimeSeconds": 1663932249,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "yaoveil"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 468,
+    "memoryConsumedBytes": 45772800,
+    "source": "// created: Sep 21 22 08:09 PM\r\n#include <bits/stdc++.h>\r\n\r\n// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0200r0.html\r\ntemplate<class Fun> class y_combinator_result {\r\n    Fun fun_;\r\npublic:\r\n    template<class T> explicit y_combinator_result(T &&fun): fun_(std::forward<T>(fun)) {}\r\n    template<class ...Args> decltype(auto) operator()(Args &&...args) { return fun_(std::ref(*this), std::forward<Args>(args)...); }\r\n};\r\ntemplate<class Fun> decltype(auto) y_combinator(Fun &&fun) { return y_combinator_result<std::decay_t<Fun>>(std::forward<Fun>(fun)); }\r\n\r\ntemplate<typename T, typename T_func = std::function<T(const T&, const T&)>>\r\nstruct sparse_table {\r\n    int n;\r\n    std::vector<std::vector<T>> table;\r\n    T_func func;\r\n\r\n    sparse_table(const std::vector<T> &a, const T_func &f) : table(1, a), func(f) {\r\n        n = int(a.size());\r\n        int levels = 32 - __builtin_clz(n);\r\n\r\n        for (int j = 1; j < levels; j++) {\r\n            table.emplace_back(n - (1 << j) + 1);\r\n\r\n            for (int i = 0; i <= n - (1 << j); i++)\r\n                table[j][i] = func(table[j - 1][i], table[j - 1][i + (1 << (j - 1))]);\r\n        }\r\n    }\r\n\r\n    // [a, b)\r\n    T query(int a, int b) const {\r\n        assert(0 <= a && a < b && b <= n);\r\n        int level = 31 - __builtin_clz(b - a);\r\n        return func(table[level][a], table[level][b - (1 << level)]);\r\n    }\r\n};\r\n\r\nstruct UF {\r\n    std::vector<int> e;\r\n    UF(int n) : e(n, -1) {}\r\n    bool sameSet(int a, int b) { return find(a) == find(b); }\r\n    int size(int x) { return -e[find(x)]; }\r\n    int find(int x) { return e[x] < 0 ? x : e[x] = find(e[x]); }\r\n    bool unite(int a, int b) {\r\n        a = find(a), b = find(b);\r\n        if (a == b) return false;\r\n        if (e[a] > e[b]) std::swap(a, b);\r\n        e[a] += e[b]; e[b] = a;\r\n        return true;\r\n    }\r\n};\r\n\r\nint main() {\r\n    using namespace std;\r\n    ios::sync_with_stdio(false); cin.tie(nullptr);\r\n\r\n    int T; cin >> T;\r\n    while (T--) {\r\n        int N, M, Q; cin >> N >> M >> Q;\r\n        vector<vector<array<int, 2>>> adj(N);\r\n        UF uf(N);\r\n\r\n        for (int i = 0; i < M; ++i) {\r\n            int a, b; cin >> a >> b;\r\n            a--; b--;\r\n\r\n            if (uf.unite(a, b)) {\r\n                adj[a].push_back({b, i});\r\n                adj[b].push_back({a, i});\r\n            }\r\n        }\r\n\r\n        vector<int> depth(N);\r\n        const int LOG = __lg(N) + 1;\r\n        vector<vector<int>> par(N, vector<int>(LOG));\r\n        vector<vector<int>> emax(N, vector<int>(LOG));\r\n\r\n        y_combinator([&](auto self, int node, int p) -> void {\r\n            for (int i = 1; i < LOG; ++i) {\r\n                par[node][i] = par[par[node][i-1]][i-1];\r\n                emax[node][i] = max(emax[node][i-1], emax[par[node][i-1]][i-1]);\r\n            }\r\n\r\n            for (auto [nxt, id] : adj[node]) if (nxt != p) {\r\n                par[nxt][0] = node;\r\n                emax[nxt][0] = id;\r\n                depth[nxt] = depth[node] + 1;\r\n                self(nxt, node);\r\n            }\r\n        })(0, -1);\r\n\r\n        vector<int> path_max(N);\r\n    \r\n        auto get_path_max = [&](int u, int v) -> int {\r\n            if (depth[u] < depth[v])\r\n                swap(u, v);\r\n\r\n            int res = 0;\r\n\r\n            for (int i = LOG - 1; i >= 0; --i)\r\n                if (depth[par[u][i]] >= depth[v]) {\r\n                    res = max(res, emax[u][i]);\r\n                    u = par[u][i];\r\n                }\r\n\r\n            if (u == v)\r\n                return res;\r\n            \r\n            for (int i = LOG - 1; i >= 0; --i)\r\n                if (par[u][i] != par[v][i]) {\r\n                    res = max({res, emax[u][i], emax[v][i]});\r\n                    u = par[u][i];\r\n                    v = par[v][i];\r\n                }\r\n\r\n            res = max({res, emax[u][0], emax[v][0]});\r\n            return res;\r\n        };\r\n\r\n        for (int i = 0; i+1 < N; ++i)\r\n            path_max[i] = get_path_max(i, i+1);\r\n\r\n        sparse_table<int> st(path_max, [](int a, int b) { return max(a, b); });\r\n\r\n        for (int q = 0; q < Q; ++q) {\r\n            int a, b; cin >> a >> b;\r\n            \r\n            if (a == b) {\r\n                cout << 0 << ' ';\r\n                continue;\r\n            }\r\n\r\n            a--; b--;\r\n            cout << st.query(a, b) + 1 << ' ';\r\n        }\r\n\r\n        cout << '\\n';\r\n    }\r\n}\r\n"
+}

@@ -1,0 +1,41 @@
+{
+    "id": 234322407,
+    "contestId": 1726,
+    "creationTimeSeconds": 1700939594,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "D",
+        "name": "Edge Split",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "probabilities",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "harman_69"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 685,
+    "memoryConsumedBytes": 204800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nusing ll = long long;\r\n#define endl        '\\n'\r\n#define all(v)      v.begin(), v.end()\r\n#define sz(x)       (int)x.size()\r\n#define vi          vector<int>\r\n#define uniq(v)     v.erase(unique(all(v)), v.end())\r\n#define yn(x)       cout << ( x ? \"Yes\\n\" : \"No\\n\" )\r\nvoid __print(int x) {cerr << x;}\r\nvoid __print(long long x) {cerr << x;}\r\nvoid __print(unsigned x) {cerr << x;}\r\nvoid __print(unsigned long x) {cerr << x;}\r\nvoid __print(unsigned long long x) {cerr << x;}\r\nvoid __print(float x) {cerr << x;}\r\nvoid __print(double x) {cerr << x;}\r\nvoid __print(long double x) {cerr << x;}\r\nvoid __print(char x) {cerr << '\\'' << x << '\\'';}\r\nvoid __print(const char *x) {cerr << '\\\"' << x << '\\\"';}\r\nvoid __print(const string &x) {cerr << '\\\"' << x << '\\\"';}\r\nvoid __print(bool x) {cerr << (x ? \"true\" : \"false\");}\r\n\r\ntemplate<typename T, typename V>\r\nvoid __print(const pair<T, V> &x){\r\n    cerr << '{'; __print(x.first); \r\n    cerr << ','; __print(x.second); \r\n    cerr << '}';\r\n}\r\ntemplate<typename T>\r\nvoid __print(const T &x){\r\n    int f = 0; \r\n    cerr << '{'; \r\n    for (auto &i: x) \r\n        cerr << (f++ ? \",\" : \"\"), __print(i); \r\n    cerr << \"}\";\r\n}\r\nvoid _print() {cerr << \"]\\n\";}\r\ntemplate <typename T, typename... V>\r\nvoid _print(T t, V... v){\r\n    __print(t); \r\n    if (sizeof...(v)) \r\n        cerr << \", \"; \r\n    _print(v...);\r\n}\r\n#ifndef ONLINE_JUDGE\r\n#define debug(x...) cerr << \"[\" << #x << \"] = [\";_print(x)\r\n#else\r\n#define debug(x...)\r\n#endif\r\nconst int mod = 1e9 + 7;\r\nconst int mod1 = 998244353;\r\nconst ll inf = 1e18L;\r\nclass dsu{\r\npublic:\r\n    vector<int> par, size;\r\n    dsu(int n) {\r\n        par.assign(n, 0);\r\n        size.assign(n, 1);\r\n        iota(par.begin(), par.end(), 0);\r\n    }\r\n    int find(int v) {\r\n        if(par[v] == v) return v;\r\n        return par[v] = find(par[v]);\r\n    }\r\n    void merge(int a, int b) {\r\n        a = find(a);\r\n        b = find(b);\r\n        if(a != b){\r\n            if(size[a] < size[b]) {\r\n                swap(a, b);\r\n            }\r\n            par[b] = a;\r\n            size[a] += size[b];\r\n        }\r\n    }\r\n};\r\nint main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n    // Reamd the question carefully\r\n    int t = 1;\r\n    cin >> t;\r\n    while(t--) {\r\n        int n, m;\r\n        cin >> n >> m;\r\n        vector<vector<array<int, 2>>> g(n + 1);\r\n        vector<array<int, 2>> edge(m);\r\n        map<array<int, 2>, int> mp;\r\n        for(int i = 0; i < m; i++) {\r\n            int x, y;\r\n            cin >> x >> y;\r\n            g[x].push_back({y, i});\r\n            g[y].push_back({x, i});\r\n            edge[i] = {x, y};\r\n            mp[{x, y}] = mp[{y, x}] = i;\r\n        }\r\n        vector<int> color(m);\r\n        dsu d(n + 1);\r\n        int cnt = 0;\r\n        for(auto [x, y]: edge) {\r\n            if(d.find(x) != d.find(y)) {\r\n                d.merge(x, y);\r\n                color[cnt] = 1;\r\n            }\r\n            cnt++;\r\n        }\r\n        vector<bool> vis(n + 1);\r\n        function<bool(int, int)> cyc = [&](int v, int p) {\r\n            vis[v] = true;\r\n            for(auto [i, ind]: g[v]) {\r\n                if(color[ind] == 1 || i == p) continue;\r\n                if(vis[i]) return true;\r\n                else if(cyc(i, v)) return true;\r\n            }\r\n            return false;\r\n        };\r\n        if(m == n + 2) {\r\n            bool ok = false;\r\n            for(int i = 1; i <= n && !ok; i++) {\r\n                for(auto [j, ind]: g[i]) {\r\n                    if(color[ind] == 0) {\r\n                        if(cyc(i, -1)) {\r\n                            ok = true;\r\n                            break;\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n            if(ok) {\r\n                for(int i = 0; i < m; i++) {\r\n                    if(color[i] == 1) continue;\r\n                    color[i] = 1;\r\n                    bool okk = false;\r\n                    vector<int> temp;\r\n                    vector<bool> vis2(n + 1);\r\n                    vector<int> par(n + 1);\r\n                    function<void(int, int)> dfs = [&](int v, int p) {\r\n                        vis2[v] = true;\r\n                        if(okk) return;\r\n                        for(auto [j, ind]: g[v]) {\r\n                            if(color[ind] == 0 || j == p) continue;\r\n                            if(vis2[j]) {\r\n                                if(okk) continue;\r\n                                temp.push_back(j);\r\n                                for(int k = v; k != j; k = par[k]) {\r\n                                    temp.push_back(k); \r\n                                }\r\n                                temp.push_back(j);\r\n                                for(int k = 0; k + 1 < temp.size(); k++) {\r\n                                    int in = mp[{temp[k], temp[k + 1]}];\r\n                                    if(in != i) {\r\n                                        color[in] = 0;\r\n                                        okk = true;\r\n                                        return;\r\n                                    }\r\n                                }\r\n                                temp.clear();\r\n                            }\r\n                            else {\r\n                                par[j] = v;\r\n                                dfs(j, v);\r\n                            }\r\n                        }\r\n                    };\r\n                    par[edge[i][1]] = edge[i][0];\r\n                    dfs(edge[i][1], edge[i][0]);\r\n                    if(okk) {\r\n                        break;\r\n                    }\r\n                    color[i] = 0;\r\n                }\r\n            }\r\n        }\r\n        for(int i : color) cout << i;\r\n        cout << '\\n';\r\n    }\r\n    return 0;\r\n}"
+}

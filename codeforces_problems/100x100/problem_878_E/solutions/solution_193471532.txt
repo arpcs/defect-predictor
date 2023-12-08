@@ -1,0 +1,36 @@
+{
+    "id": 193471532,
+    "contestId": 878,
+    "creationTimeSeconds": 1676293916,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "voidXD"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 202,
+    "memoryConsumedBytes": 18841600,
+    "source": "/*\r\n\r\n   Wei Wai Wei Wai\r\n   Zumigat nan damu dimi kwayt rayt\r\n\r\n*/\r\n\r\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef unsigned long long ull;\r\n/*typedef __uint128_t L;\r\nstruct FastMod {\r\n\tull b, m;\r\n\tFastMod(ull b) : b(b), m(ull((L(1) << 64) / b)) {}\r\n\tull reduce(ull a) {\r\n\t\tull q = (ull)((L(m) * a) >> 64);\r\n\t\tull r = a - q * b; // can be proven that 0 <= r < 2*b\r\n\t\treturn r >= b ? r - b : r;\r\n\t}\r\n};\r\nFastMod FM(2);*/\r\ntypedef pair<int,int> pii;\r\ntypedef pair<ll,ll> pll;\r\n\r\nvoid debug_out() { cerr << endl; }\r\n\r\ntemplate <typename Head, typename... Tail>\r\nvoid debug_out(Head H, Tail... T) {\r\n\tcerr << \" \" << H;\r\n\tdebug_out(T...);\r\n}\r\n\r\n#define debug(...) cerr << \"(\" << #__VA_ARGS__ << \"):\", debug_out(__VA_ARGS__)\r\n#define all(x) x.begin(), x.end()\r\n#define MP(x, y) make_pair(x, y)\r\n#define F first\r\n#define S second\r\n\r\n//mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\r\n\r\nconst int maxn = 1e5 + 10;\r\nconst int lg = 20;\r\nconst int mod = 1e9 + 7;\r\n\r\nint add(int x, int y){\r\n    int res = x + y;\r\n    if (res >= mod) return res - mod;\r\n    if (res < 0) return res + mod;\r\n    return res;\r\n}\r\n\r\nint n, q, a[maxn], spt[maxn][lg], val[maxn][lg], pws[maxn], sum[maxn];\r\nll pwp[maxn], part[maxn];\r\n\r\nll getpart(int l, int r){\r\n    return part[l] - part[r+1] * pwp[r - l + 1];\r\n}\r\n\r\nint getsum(int l, int r){\r\n    //debug(l, r, sum[l], sum[r+1]);\r\n    return add(sum[l], -(1ll * sum[r+1] * pws[r-l+1] % mod));\r\n}\r\n\r\nint main(){\r\n\tios_base::sync_with_stdio(false); cin.tie(0);\r\n\t\r\n\tcin >> n >> q;\r\n    for (int i = 1; i <= n; i++) cin >> a[i];\r\n    pws[0] = pwp[0] = 1;\r\n    for (int i = 1; i <= n; i++){\r\n        pwp[i] = 2 * pwp[i-1];\r\n        pws[i] = 2 * pws[i-1] % mod;\r\n    }\r\n    for (int i = n; i; i--){\r\n        sum[i] = add(2 * sum[i+1] % mod, a[i]);\r\n        part[i] = 2 * part[i+1] + a[i];\r\n    }\r\n    deque<int> idx;\r\n    for (int i = n; ~i; i--){\r\n        idx.push_back(i);\r\n        while(!idx.empty() && getpart(i, idx.front()) >= 1e9){\r\n            spt[idx.front()][0] = 1;\r\n            val[idx.front()][0] = 2 * getsum(1, idx.front()) % mod;\r\n            idx.pop_front();\r\n        }\r\n        while(!idx.empty() && getpart(i, idx.back()) <= 0){\r\n            spt[idx.back()][0] = i;\r\n            val[idx.back()][0] = 2 * getsum(i, idx.back()) % mod;\r\n            idx.pop_back();\r\n        }\r\n    }\r\n    for (auto x: idx){\r\n        spt[x][0] = 1;\r\n    }\r\n    for (int i = 1; i <= n; i++){\r\n        for (int j = 1; j < lg; j++){\r\n            int ptr = max(0, spt[i][j-1] - 1);\r\n            spt[i][j] = spt[ptr][j-1];\r\n            val[i][j] = add(val[i][j-1], val[ptr][j-1]);\r\n        }\r\n    }\r\n    while(q--){\r\n        int l, r; cin >> l >> r;\r\n        int ptr = r;\r\n        int ans = 0;\r\n        for (int i = lg-1; ~i; i--){\r\n            if (spt[ptr][i] <= l) continue;\r\n            ans = add(ans, val[ptr][i]);\r\n            ptr = spt[ptr][i] - 1;\r\n        }\r\n        //debug(ptr, ans);\r\n        cout << add(ans, getsum(l, ptr)) << '\\n';\r\n    }\r\n\treturn 0;\r\n}\r\n\r\n\r\n"
+}

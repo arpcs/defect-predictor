@@ -1,0 +1,44 @@
+{
+    "id": 232586737,
+    "contestId": 1895,
+    "creationTimeSeconds": 1699859621,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "wish-nu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "PyPy 3-64",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 49,
+    "timeConsumedMillis": 2542,
+    "memoryConsumedBytes": 93388800,
+    "source": "def InputList(Dtype=int): return list(map(Dtype, input().split()))\nimport sys\ninput = lambda: sys.stdin.buffer.readline().decode().strip()\nprint = lambda *args, **kwargs: sys.stdout.write(\" \".join(map(str, args)) + \"\\n\", **kwargs)\n\ndef solve():\n\tN = int(input())\n\ta1 = InputList(int)\n\tmaxA1 = max(a1)\n\td1 = InputList(int)\n\tad1 = list(zip(a1, d1))\n\tM = int(input())\n\ta2 = InputList(int)\n\tmaxA2 = max(a2)\n\td2 = InputList(int)\n\tad2 = list(zip(a2, d2))\n\tad1.sort(); ad2.sort()\n\tparent = [i for i in range(N+3)]\n\twin, draw, lost = N, N+1, N+2\n\tvisitedNow = -1\n\tif N == 299901: print(f\"N: {N}, M: {M}\"); return\n\tInfiniteLoop = False\n\n\tbestCard1 = [N-1]*(N+1)\n\tfor i in range(N-1, -1, -1):\n\t\tif ad1[i][1] > ad1[bestCard1[i+1]][1]: bestCard1[i] = i\n\t\telse: bestCard1[i] = bestCard1[i+1]\n\t\n\tbestDefense2 = [0]*(M+1)\n\tfor i in range(M-1, -1, -1):\n\t\tbestDefense2[i] = max(bestDefense2[i+1], ad2[i][1])\n\n\tdef binarySearch(defense, player1):\n\t\tarr = ad1 if player1 else ad2\n\t\tif arr[0][0] > defense: return 0\n\t\tOK = len(arr)-1; NG = 0\n\t\twhile abs(OK-NG)>1:\n\t\t\tmid = (OK+NG)//2\n\t\t\tif arr[mid][0] > defense: OK = mid\n\t\t\telse: NG = mid\n\t\treturn OK\n\n\tdef dfs(card):\n\t\tisPlayerOne = False\n\t\tdefense = ad1[card][1]\n\t\tcomponent = [card]\n\t\tloopCnt = 0\n\t\tnonlocal InfiniteLoop\n\t\twhile True:\n\t\t\tloopCnt += 1\n\t\t\tif loopCnt > (2*N + 2): \n\t\t\t\tprint(f\"Infinite loop -FFFFF\")\n\t\t\t\tInfiniteLoop = True\n\t\t\t\treturn \n\t\t\tif isPlayerOne:\n\t\t\t\tif maxA1 <= defense:\n\t\t\t\t\tparent[card] = lost\n\t\t\t\t\tfor card in component: parent[card] = lost\n\t\t\t\t\treturn\n\t\t\t\tfromCard = binarySearch(defense, player1=True)\n\t\t\t\tbestCard = bestCard1[fromCard]; bestDefense = ad1[bestCard][1]\n\n\t\t\t\tif parent[bestCard] == visitedNow:\n\t\t\t\t\tfor card in component: parent[card] = draw\n\t\t\t\t\treturn\n\t\t\t\t\n\t\t\t\tif parent[bestCard] > N: \n\t\t\t\t\tfor card in component: parent[card] = parent[bestCard]\n\t\t\t\t\treturn\n\t\t\t\t\n\t\t\t\tcard = bestCard\n\t\t\t\tparent[card] = visitedNow; component.append(card)\n\t\t\t\tdefense = bestDefense\n\t\t\telse:\n\t\t\t\tif maxA2 <= defense: # player 2 loses, player 1 wins\n\t\t\t\t\tfor card in component: parent[card] = win\n\t\t\t\t\treturn\n\t\t\t\tfromCard = binarySearch(defense, player1=False)\n\t\t\t\tbestDefense = bestDefense2[fromCard]\n\t\t\t\tdefense = bestDefense\n\t\t\t\n\t\t\tisPlayerOne = not isPlayerOne\n\n\tfor card in range(N):\n\t\tif parent[card] == card: dfs(card)\n\t\tif InfiniteLoop: return [N, 0, 0]\n\n\tnwins = 0; ndraws = 0; nloss = 0\n\tfor card in range(N):\n\t\tif parent[card] == win: nwins += 1\n\t\telif parent[card] == lost: nloss += 1\n\n\tndraws = N - (nwins+nloss)\n\treturn [nwins, ndraws, nloss]\t\n\t\nfor i in range(int(input())):\n\tans = solve()\n\tprint(*ans)"
+}

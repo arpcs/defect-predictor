@@ -1,0 +1,41 @@
+{
+    "id": 189371441,
+    "contestId": 1706,
+    "creationTimeSeconds": 1673805909,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "Kath1031"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 654,
+    "memoryConsumedBytes": 166297600,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing pii=pair<int,int>;\r\nusing ll=long long;\r\nconst int N=1e5+1031,logn=20;\r\n\r\n/*************************************************************************/\r\nstruct DSU {\r\n    vector<int>f,siz;\r\n    DSU(int n):f(n),siz(n,1){iota(f.begin(),f.end(),0);}\r\n    int leader(int x)\r\n    {\r\n        while(x!=f[x])x=f[x]=f[f[x]];\r\n        return x;\r\n    }\r\n    bool same(int x,int y){return leader(x)==leader(y);}\r\n    bool merge(int x,int y)\r\n    {\r\n        x=leader(x);\r\n        y=leader(y);\r\n        if(x==y)return false;\r\n        siz[x]+=siz[y];\r\n        f[y]=x;\r\n        return true;\r\n    }\r\n    int size(int x) {return siz[leader(x)]; }\r\n};\r\n/*************************************************************************/\r\n//LCA\r\narray<int,2> f[logn+1][N<<3];\r\nint dep[N<<1],tot,first_pos[N<<2];\r\nvector<int>e[N<<1];\r\nvoid dfs(int u,int fa)\r\n{\r\n    first_pos[u]=++tot;\r\n    dep[u]=dep[fa]+1;\r\n    f[0][tot]={dep[u],u};\r\n    for(auto v:e[u])\r\n    {\r\n        if(v==fa)continue;\r\n        dfs(v,u);\r\n        f[0][++tot]={dep[u],u};\r\n    }\r\n}\r\nint lg[N<<2];\r\nvoid init_pre()\r\n{\r\n    lg[0]=-1;\r\n    for(int i=1;i<N*4;++i)lg[i]=lg[i/2]+1;\r\n}\r\n\r\nvoid init_LCA(int root)\r\n{\r\n    tot=0;\r\n    dfs(root,0);\r\n    for(int i=1;i<=logn;++i)\r\n        for(int j=1;j<=tot;++j)\r\n        f[i][j]=min(f[i-1][j],f[i-1][j+(1<<i-1)]);\r\n}\r\nint LCA(int a,int b)\r\n{\r\n    int l=first_pos[a],r=first_pos[b];\r\n    if(l>r)swap(l,r);\r\n    int len=lg[r-l+1];\r\n    return min(f[len][l],f[len][r-(1<<len)+1])[1];\r\n}\r\n/*************************************************************************/\r\n//EX Kruskal\r\nint val[N<<1];\r\nvoid exkruskal(int &n,vector<array<int,3>> &edge)\r\n{\r\n    DSU dsu((n<<1)+1);\r\n    sort(edge.begin(),edge.end());\r\n    for(int i=1;i<=n*2+1;++i)val[i]=0,e[i].clear();\r\n    int ex_tot=n;\r\n    for(auto [w,u,v]:edge)\r\n    {\r\n        if(dsu.same(u,v))continue;\r\n        val[++ex_tot]=w;\r\n        e[ex_tot].push_back(dsu.leader(u));\r\n        e[ex_tot].push_back(dsu.leader(v));\r\n        dsu.merge(ex_tot,u);dsu.merge(ex_tot,v);\r\n    }\r\n    init_LCA(ex_tot);\r\n   // cout<<\"tot-->\"<<tot<<endl;\r\n}\r\nint A,B,C,P;\r\ninline int rnd(){return A=(A*B+C)%P;}\r\nconst int MOD=1e9+7;\r\nvoid add(int &a,int b){a+=b;if(a>=MOD)a-=MOD;}\r\nstruct Node\r\n{\r\n    int l,r,val;\r\n}tr[N<<2];\r\nint g[N];\r\nvoid pushup(int u)\r\n{\r\n    if(tr[u].l==tr[u].r)return ;\r\n    tr[u].val=max(tr[u<<1].val,tr[u<<1|1].val);\r\n}\r\nvoid build(int u,int l,int r)\r\n{\r\n    tr[u]={l,r,0};\r\n    if(l==r){tr[u].val=g[l];return ;}\r\n    int mid=l+r>>1;\r\n    build(u<<1,l,mid);build(u<<1|1,mid+1,r);\r\n    pushup(u);\r\n}\r\nint query(int u,int l,int r)\r\n{\r\n    if(tr[u].l>=l&&tr[u].r<=r)return tr[u].val;\r\n    int mid=tr[u].l+tr[u].r>>1;\r\n    int rs=0;\r\n    if(l<=mid)rs=max(rs,query(u<<1,l,r));\r\n    if(r>mid)rs=max(rs,query(u<<1|1,l,r));\r\n    return rs;\r\n}\r\nvoid solve()\r\n{\r\n    int n,m,q;scanf(\"%d%d%d\",&n,&m,&q);\r\n    vector<array<int,3>>edge(m);\r\n    for(int i=0,u,v;i<m;++i)scanf(\"%d%d\",&u,&v),edge[i]={i+1,u,v};\r\n    exkruskal(n,edge);\r\n    int rs=0;\r\n    for(int i=1;i<n;++i)g[i]=val[LCA(i,i+1)];\r\n    build(1,1,n-1);\r\n    while(q--)\r\n    {\r\n        int l,r;scanf(\"%d%d\",&l,&r);\r\n        printf(\"%d \",query(1,l,r-1));\r\n    }\r\n}\r\nint main()\r\n{\r\n    init_pre();\r\n    int T=1;scanf(\"%d\",&T);\r\n    while(T--){solve();puts(\"\");}\r\n}"
+}

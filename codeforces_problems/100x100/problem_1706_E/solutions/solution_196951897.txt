@@ -1,0 +1,41 @@
+{
+    "id": 196951897,
+    "contestId": 1706,
+    "creationTimeSeconds": 1678548557,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "ghandy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 8806400,
+    "source": "#include <bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\n\r\n#pragma GCC optimize(\"O3\")\r\n#pragma GCC optimize(\"Ofast\")\r\n#pragma GCC optimization (\"unroll-loops\")\r\n#pragma GCC target(\"avx,avx2,fma\")\r\n\r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\n\r\ntemplate<typename T>\r\nusing ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;\r\n// order_of_key ------> return index\r\n// find_by_order -----> use index\r\n\r\n#define ll long long\r\n#define ull unsigned long long\r\n#define ld long double\r\n#define dl double\r\n#define io ios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0);\r\n#define f first\r\n#define s second\r\n#define pb push_back\r\n#define el '\\n'\r\n#define INF 0x3f3f3f3f3f3f3f3f\r\n#define all(x) x.begin(),x.end()\r\n#define allr(x) x.rbegin(),x.rend()\r\n#define ones(x) __builtin_popcountll(x)\r\n#define memss(a, b, sz) memset(arr,b,sz * sizeof (arr[0]))\r\n#define ii pair<int,int>\r\n#define PI ::acos(-1)\r\n\r\nint dx[] = {0, -1, 0, 1, -1, 1, -1, 1};\r\nint dy[] = {-1, 0, 1, 0, 1, -1, -1, 1};\r\n\r\nconst int mod = 1e9 + 7, N = 1e5 + 9, mod2 = 998244353, M = 1e4 + 5, LOG = 25;\r\nconst ld eps = 1e-9;\r\n\r\nint n,m,q;\r\nint connected[N];\r\nstruct dsu\r\n{\r\n    vector<int> par;\r\n    vector<vector<int>> comp;\r\n    dsu(int n)\r\n    {\r\n        par.resize(n + 6);\r\n        comp.resize(n + 5);\r\n        for(int i = 1 ; i <= n ;i++) \r\n        {\r\n            comp[i].pb(i);\r\n            par[i] = i;\r\n            connected[i] = 0;\r\n        }\r\n    }\r\n   \r\n    int getPar(int node) {\r\n        if (par[node] == node)\r\n            return node;\r\n        return par[node] = getPar(par[node]);\r\n    }\r\n    void join (int  u, int v,int idx)\r\n    {\r\n        u = getPar(u),v = getPar(v);\r\n        if(u == v)\r\n            return;\r\n        if(comp[u].size() < comp[v].size())\r\n            swap(u,v);\r\n        for(int &i : comp[v])\r\n         {\r\n              ii tmp = {i + 1,i - 1};\r\n              if(tmp.s > 0 and getPar(tmp.s) == u )\r\n              {\r\n                 connected[tmp.s] = idx;\r\n              }\r\n              if(tmp.f <= n and getPar(tmp.f) == u)\r\n               {\r\n                 connected[tmp.f] = idx;\r\n               }\r\n              comp[u].pb(i);\r\n         }\r\n         comp[v].clear();\r\n         par[v] = u;\r\n    }\r\n};\r\nstruct {\r\n    int maxTable[N][20], lg[N];\r\n\r\n    void build(int n) {\r\n        for (int i = 2; i <= n; i++)\r\n            lg[i] = lg[i / 2] + 1;\r\n        for (int i = 1; i <= n; i++)\r\n            maxTable[i][0] = connected[i];\r\n        for (int i = 1; i < 20; i++) {\r\n            for (int j = 1; j + (1 << i) - 1 <= n; j++) {\r\n                maxTable[j][i] = max(maxTable[j][i - 1], maxTable[j + (1 << (i - 1))][i - 1]);\r\n            }\r\n        }\r\n    }\r\n\r\n    int GetMx(int l, int r) {\r\n        if (r < l)\r\n            return 0;\r\n        int sz = r - l + 1;\r\n        sz = lg[sz];\r\n        return max(maxTable[l][sz], maxTable[r - (1 << sz) + 1][sz]);\r\n    }\r\n} SparseTable;\r\nvoid set_ans(int Case)\r\n{\r\n    cin >> n >> m >> q;\r\n\r\n    dsu a (n);\r\n    for(int i = 1 ; i <= m ;i++)\r\n    {\r\n        int u,v;\r\n        cin >> u >> v;\r\n        a.join(u,v,i);\r\n    }\r\n    SparseTable.build(n);\r\n\r\n    while(q--)\r\n    {\r\n        int l,r,ans;\r\n        cin >> l >> r;\r\n        if(l == r) \r\n            cout << \"0 \";\r\n        else {\r\n        ans = SparseTable.GetMx(l,r - 1);\r\n        cout << ans << ' ' ;\r\n         }\r\n    }\r\n    cout << el;\r\n}\r\n\r\nint main() {\r\n    io\r\n\r\n    int testCases = 1;\r\n    cin >> testCases;\r\n    for (int Case = 1; Case <= testCases; Case++)\r\n        set_ans(Case);\r\n    return 0;\r\n}"
+}

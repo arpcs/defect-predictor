@@ -1,0 +1,36 @@
+{
+    "id": 37263508,
+    "contestId": 842,
+    "creationTimeSeconds": 1523587461,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 842,
+        "index": "D",
+        "name": "Vitya and Strange Lesson",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "binary search",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 842,
+        "members": [
+            {
+                "handle": "Shisuko"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1504019100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 68,
+    "timeConsumedMillis": 265,
+    "memoryConsumedBytes": 17920000,
+    "source": "#include<iostream>\r\nusing namespace std;\r\nstruct Node\r\n{\r\n\tbool complete;\r\n\tNode* nextBit[2];\r\n\tNode()\r\n\t{\r\n\t\tfor(int i = 0; i < 2; i++)\r\n\t\t\tnextBit[i] = NULL;\r\n\t\tcomplete = false;\r\n\t}\r\n};\r\nNode* root = new Node();\r\nint TREE_DEPTH = 19;\r\nvoid add(Node* n, int i, int Q)\r\n{\r\n\tif(i<0)\r\n\t{\r\n\t\tn->complete = true;\r\n\t\treturn;\r\n\t}\r\n\tint curr = ((1<<i)&Q) > 0;\r\n\tif(n->nextBit[curr]==NULL)\r\n\t\tn->nextBit[curr] = new Node();\r\n\t\r\n\tadd(n->nextBit[curr], i-1, Q);\r\n\t\r\n\tif(n->nextBit[0]!=NULL && n->nextBit[1]!=NULL && n->nextBit[0]->complete && n->nextBit[1]->complete)\r\n\t\tn->complete = true;\r\n}\r\nint minXOR(Node* n, int i, int xorFactor) //we are never entering a complete node\r\n{\r\n\tint xorBit = ((1<<i)&xorFactor) > 0;\r\n\tif(n->nextBit[xorBit]==NULL) //if it doesn't exist, take the 0\r\n\t\treturn 0;\r\n\telse if(!n->nextBit[xorBit]->complete) //if it's not complete, then explore the 0 side as lower\r\n\t\treturn minXOR(n->nextBit[xorBit], i-1, xorFactor);\r\n\telse if(n->nextBit[xorBit^1]==NULL) //so 0 is complete; if there is no 1, take the 1 then flood with 0s\r\n\t\treturn (1<<i);\r\n\telse //else explore the 1\r\n\t\treturn (1<<i) + minXOR(n->nextBit[xorBit^1], i-1, xorFactor);\r\n}\r\nvoid explore(Node* n, int i, int val, int x)\r\n{\r\n\tif(i<0)\r\n\t\tcout<<(val^x)<<endl;\r\n\telse\r\n\t{\r\n\t\tif(n->nextBit[0]!=NULL)\r\n\t\t\texplore(n->nextBit[0], i-1, val,x);\r\n\t\tif(n->nextBit[1]!=NULL)\r\n\t\t\texplore(n->nextBit[1], i-1, val+(1<<i),x);\r\n\t}\r\n}\r\nint main()\r\n{\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(0);\r\n\t\r\n\tint N, Q; cin >> N >> Q;\r\n\tfor(int i = 0; i < N; i++)\r\n\t{\r\n\t\tint num; cin >> num;\r\n\t\tadd(root, TREE_DEPTH, num);\r\n\t}\r\n\t\r\n\tint xorFactor = 0;\r\n\tfor(int q = 0; q < Q; q++)\r\n\t{\r\n\t\tint x; cin >> x;\r\n\t\txorFactor ^= x;\r\n\t\tcout<<minXOR(root,TREE_DEPTH, xorFactor)<<'\\n';\r\n\t}\r\n\tcout<<flush;\r\n\t\r\n\treturn 0;\r\n}"
+}

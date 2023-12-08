@@ -1,0 +1,41 @@
+{
+    "id": 179484688,
+    "contestId": 1706,
+    "creationTimeSeconds": 1667698751,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "vjudge5"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 343,
+    "memoryConsumedBytes": 24883200,
+    "source": "// \u4e0d\u96be\u60f3\u5230\u542f\u53d1\u5f0f\u5408\u5e76\u4e0e\u6574\u4f53\u4e8c\u5206\uff0c\u4f46\u662f\u662f\u5e26\u4e24\u4e2a $\\log$ \u7684\uff0c\u4e0d\u662f\u6700\u4f18\u89e3\n// \u518d\u60f3\u4e00\u60f3\u5c31\u4f1a\u77e5\u9053\uff0c\u8fd9 $m$ \u6761\u8fb9\uff0c\u53ea\u6709 $n-1$ \u6761\u662f\u6709\u7528\u7684\uff0c\u6bcf\u6b21\u90fd\u662f\u5408\u5e76\u4e24\u4e2a\u8fde\u901a\u5757\n// \u7528\u6bcf\u4e2a\u8054\u901a\u5757\u8868\u793a\u4e00\u4e2a\u70b9\u96c6\uff0c\u5f97\u5230\u7684\u5c31\u662f\u4e00\u68f5 $O(n)$ \u4e2a\u8282\u70b9\u7684\u6811\uff0c\u6bcf\u6b21\u64cd\u4f5c\u5c31\u662f\u4e0a\u79fb\u4e00\u5c42\uff0c\u5408\u5e76\u4e24\u4e2a\u70b9\n// $l$ \u5230 $r$ \u7684\u8282\u70b9\uff0c\u5b83\u4eec\u7684 LCA \u4ee3\u8868\u7684\u5408\u5e76\u7f16\u53f7\u5927\u5c0f\uff0c\u5c31\u662f\u8be5\u8be2\u95ee\u7684\u7b54\u6848\n// \u5982\u4f55\u6c42 LCA\uff1f\u5bf9\u4e8e\u6bcf\u4e2a\u8282\u70b9\u76f8\u90bb\u7684\u8282\u70b9 $i,i+1$\uff0c\u6c42\u51fa\u5b83\u4eec\u7684 LCA\uff0c\u4e4b\u540e\u505a\u6bb5\u8be2\u95ee\u5373\u53ef\n// \u4f7f\u7528\u5e76\u67e5\u96c6\u548c Tarjan LCA\uff0c\u65f6\u95f4\u590d\u6742\u5ea6\u662f $O(n\\log n)$ \u6216 $O(n\\alpha(n))$ \u7ea7\u522b\u7684\u3002\n#include<iostream>\n#include<numeric>\n#include<algorithm>\nusing namespace std;\nconst int maxn = 1e5+7; \nint t;\nint n, m, q;\nint fa[maxn << 1], assign[maxn << 1];\nint ucnt, ls[maxn << 1], rs[maxn << 1];\nint anc[maxn << 1][17], dep[maxn << 1];\nint val[maxn << 1];\nint get_fa(int);\nvoid merge(int, int);\nvoid dfs(int);\nint lca(int, int);\nint d[maxn << 3];\nvoid build(int, int, int);\nint rmax(int, int, int, int, int);\nint main()\n{\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    \n    cin >> t;\n    while(t--)\n    {\n        cin >> n >> m >> q;\n        ucnt = n;\n        iota(fa+1, fa+n*2, 1);\n        fill(ls+1, ls+n+1, 0);\n        fill(rs+1, rs+n+1, 0);\n        fill(anc[1], anc[n*2], 0);\n        for(int i=1; i<=m; i++)\n        {\n            int u, v;\n            cin >> u >> v;\n            if(get_fa(u) != get_fa(v))\n                ucnt++, assign[ucnt] = i, ls[ucnt] = get_fa(u), rs[ucnt] = get_fa(v),\n                anc[get_fa(u)][0] = anc[get_fa(v)][0] = ucnt, merge(ucnt, u), merge(ucnt, v);\n        }\n        dfs(ucnt);\n        for(int i=1; i<n; i++)\n            val[i] = assign[lca(i, i + 1)];\n        build(1, 1, n-1);\n        while(q--)\n        {\n            int l, r;\n            cin >> l >> r;\n            cout << (l == r ? 0 : rmax(1, 1, n-1, l, r-1)) << ' ';\n        }\n        cout << '\\n';\n    }\n}\n#define ls n << 1\n#define rs n << 1 | 1\nvoid build(int n, int l, int r)\n{\n    if(l == r)\n    {\n        d[n] = val[l];\n        return;\n    }\n    int m = (l + r) >> 1;\n    build(ls, l, m);\n    build(rs, m+1, r);\n    d[n] = max(d[ls], d[rs]);\n}\nint rmax(int n, int l, int r, int ql, int qr)\n{\n    if(ql <= l && r <= qr)\n        return d[n];\n    int m = (l + r) >> 1;\n    if(qr <= m)\n        return rmax(ls, l, m, ql, qr);\n    else if(m < ql)\n        return rmax(rs, m+1, r, ql, qr);\n    else\n        return max(rmax(ls, l, m, ql, qr), rmax(rs, m+1, r, ql, qr));\n}\n#undef ls\n#undef rs\nvoid dfs(int u)\n{\n    dep[u] = dep[anc[u][0]] + 1;\n    for(int i=1; i<17; i++)\n        anc[u][i] = anc[anc[u][i-1]][i-1];\n    if(ls[u])\n        dfs(ls[u]);\n    if(rs[u])\n        dfs(rs[u]);\n}\nint lca(int u, int v)\n{\n    if(dep[v] > dep[u])\n        swap(u, v);\n    int delta = dep[u] - dep[v];\n    for(int i=16; i>=0; i--)\n        if((delta >> i) & 1)\n            u = anc[u][i];\n    if(u == v)\n        return u;\n    for(int i=16; i>=0; i--)\n        if(anc[u][i] != anc[v][i])\n            u = anc[u][i], v = anc[v][i];\n    return anc[u][0];\n}\nint get_fa(int x)\n{\n    if(x == fa[x])\n        return fa[x];\n    return fa[x] = get_fa(fa[x]);\n}\nvoid merge(int a, int b)\n{\n    int u = get_fa(a), v = get_fa(b);\n    if(u != v)\n        fa[v] = u;\n}\n\t\t\t  \t\t \t\t  \t \t \t\t  \t\t\t\t     \t\t"
+}

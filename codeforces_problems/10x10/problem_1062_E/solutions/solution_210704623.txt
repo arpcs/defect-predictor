@@ -1,0 +1,39 @@
+{
+    "id": 210704623,
+    "contestId": 1062,
+    "creationTimeSeconds": 1687470226,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1062,
+        "index": "E",
+        "name": "Company",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1062,
+        "members": [
+            {
+                "handle": "El-Ged_Sevawy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1542209700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 77,
+    "memoryConsumedBytes": 78848000,
+    "source": "#include <bits/stdc++.h>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n\r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\n\r\n\r\n#define ElGed_Sevawy  ios_base::sync_with_stdio(0);cin.tie(0);cout.tie(0);\r\n#define ll long long\r\n#define ull unsigned long long\r\n#define ld long double\r\n#define el '\\n'\r\n#define pi acos(-1)\r\n#define F first\r\n#define S second\r\n#define sz(x) (int)(x).size()\r\n\r\ntemplate<typename T>\r\nusing ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;\r\ntemplate<typename T>\r\nusing ordered_multiset = tree<T, null_type, less_equal<T>, rb_tree_tag, tree_order_statistics_node_update>;\r\n\r\nmt19937 gen(chrono::system_clock::now().time_since_epoch().count());\r\nll rand(ll l, ll r){\r\n    return uniform_int_distribution<ll>(l, r)(gen);\r\n}\r\n\r\nconst ll N = 2e5 + 5, M = 1e6 + 5, MOD1 = 1e9 + 7, MOD2 = 1e9 + 9, K = 21, INF  = 2e18 + 5, P1 = 29, P2 = 31;\r\nint n, q, lg[N], a[N], level[N], sp[N][K], in[N], tim, nd[N];\r\nint stMnm[N][K + 1], stMxm[N][K + 1], stLCA[N][K + 1];\r\nvector<int> adj[N];\r\n\r\nvoid dfs(int node, int par) {\r\n    level[node] = level[par] + 1;\r\n    sp[node][0] = par;\r\n    in[node] = tim++;\r\n    nd[tim - 1] = node;\r\n    for (int i = 1; i < K; i++) {\r\n        int tmp = sp[node][i - 1];\r\n        sp[node][i] = sp[tmp][i - 1];\r\n    }\r\n    for (auto i: adj[node]) {\r\n        if (i == par) continue;\r\n        dfs(i, node);\r\n    }\r\n}\r\n\r\nint get_kth(int node , int k) {\r\n    int tmpNode = node;\r\n    for (int i = 0; i < K; i++)\r\n        if (k >> i & 1)\r\n            tmpNode = sp[tmpNode][i];\r\n\r\n    return tmpNode;\r\n}\r\n\r\nint lca(int  u, int v) {\r\n    if (level[u] > level[v]) swap(u, v);\r\n\r\n    auto pr = get_kth(v, level[v] - level[u]);\r\n\r\n    if (pr == u) return pr;\r\n    v = pr;\r\n\r\n    for (int i = K - 1; i >= 0; i--)\r\n        if (sp[u][i] != sp[v][i])\r\n            u = sp[u][i], v = sp[v][i];\r\n\r\n    return sp[u][0];\r\n}\r\n\r\nvoid pre(){\r\n    lg[1] = 0;\r\n    for (int i = 2; i < N; i++)\r\n        lg[i] = lg[i / 2] + 1;\r\n}\r\n\r\nvoid build() {\r\n    for (int i = 1; i <= n; i++)\r\n        stMnm[i][0] = in[i],\r\n        stMxm[i][0] = in[i],\r\n        stLCA[i][0] = i;\r\n\r\n    for (int j = 1; j <= K; j++)\r\n        for (int i = 1; i + (1 << (j - 1)) <= n; i++)\r\n            stMnm[i][j] = min(stMnm[i][j - 1], stMnm[i + (1 << (j - 1))][j - 1]),\r\n            stMxm[i][j] = max(stMxm[i][j - 1], stMxm[i + (1 << (j - 1))][j - 1]),\r\n            stLCA[i][j] = lca(stLCA[i][j - 1], stLCA[i + (1 << (j - 1))][j - 1]);\r\n}\r\n\r\nint queryMnm(int L, int R){\r\n    int j = lg[R - L + 1];\r\n    return min(stMnm[L][j], stMnm[R - (1 << j) + 1][j]);\r\n}\r\n\r\nint queryMxm(int L, int R){\r\n    int j = lg[R - L + 1];\r\n    return max(stMxm[L][j], stMxm[R - (1 << j) + 1][j]);\r\n}\r\n\r\nint queryLCA(int L, int R){\r\n    int j = lg[R - L + 1];\r\n    return lca(stLCA[L][j], stLCA[R - (1 << j) + 1][j]);\r\n}\r\n\r\nint solve(int l, int r, int ex){\r\n    if(ex == l)\r\n        return queryLCA(l + 1, r);\r\n    if(ex == r)\r\n        return queryLCA(l, r - 1);\r\n    return queryLCA(queryLCA(l, ex - 1), queryLCA(ex + 1, r));\r\n}\r\nvoid go() {\r\n    cin >> n >> q;\r\n    for(int i = 2; i <= n; i++){\r\n        int p; cin >> p;\r\n        adj[p].emplace_back(i);\r\n    }\r\n    dfs(1, 0);\r\n    build();\r\n    while (q--){\r\n        int l, r;\r\n        cin >> l >> r;\r\n        int lft = nd[queryMnm(l, r)];\r\n        int rght = nd[queryMxm(l, r)];\r\n\r\n        int op1 = solve(l, r, lft);\r\n        int op2 = solve(l, r, rght);\r\n        if(level[op1] > level[op2])\r\n            cout << lft << \" \" << level[op1] - 1 << el;\r\n        else\r\n            cout << rght << \" \" << level[op2] - 1 << el;\r\n    }\r\n}\r\nint32_t main() {\r\n    ElGed_Sevawy\r\n    int tc = 1;\r\n    pre();\r\n    //cin >> tc;\r\n    while (tc--)\r\n        go();\r\n}"
+}

@@ -1,0 +1,44 @@
+{
+    "id": 231351410,
+    "contestId": 1895,
+    "creationTimeSeconds": 1699110391,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "garyyaoresearch"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "PyPy 3",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 17,
+    "timeConsumedMillis": 2776,
+    "memoryConsumedBytes": 62668800,
+    "source": "import bisect\n\ncase_cnt = int(input())\nfor cas in range(case_cnt):\n    n = int(input())\n    attacks_n = [int(i) for i in input().split(' ')]\n    defense_n = [int(i) for i in input().split(' ')]\n    n_cards = [(x,y) for x,y in zip(attacks_n, defense_n)]\n    n_cards = sorted(n_cards, key= lambda x: -(x[0]*100000) + x[1])#dec attack\n    m = int(input())\n    attacks_m = [int(i) for i in input().split(' ')]\n    defense_m = [int(i) for i in input().split(' ')]\n    m_cards = [(x,y) for x,y in zip(attacks_m, defense_m)]\n    m_cards = sorted(m_cards, key= lambda x: -(x[0]*100000) + x[1])#dec attack\n\n    n_search = []\n    best_d = 0\n    for a,d in n_cards:\n        if d > best_d:\n            if n_search and n_search[-1][0] == a:\n                n_search.pop(-1)\n            n_search.append([a,d])\n            best_d = d\n\n    m_search = []\n    best_d = 0\n    for a,d in m_cards:\n        if d > best_d:\n            if m_search and m_search[-1][0] == a:\n                m_search.pop(-1)\n            m_search.append([a,d])\n            best_d = d\n\n    def search_best_d(search_array, need_to_beat):\n        # a,d best d given a > ntb\n        l, r = 0, len(search_array)\n        best_d = -1\n        while(l < r):\n            m = (l + r) // 2\n            if search_array[m][0] > need_to_beat:\n                best_d = max(best_d, search_array[m][1])\n                l = m + 1\n            else:\n                r = m\n        return best_d\n\n\n\n    instack = {}\n    instack2 = {}\n\n    def play1(defense):\n        if defense in instack.keys():\n            return instack[defense]\n        instack[defense] = 0\n        ret_def = search_best_d(m_search, defense)\n        if ret_def == -1:\n            instack[defense] = 1\n            return 1\n        ret = -play2(ret_def)\n        instack[defense] = ret\n        return ret\n\n    def play2(defense):\n        if defense in instack2.keys():\n            return instack2[defense]\n        instack2[defense] = 0\n        ret_ref = search_best_d(n_search, defense)\n        if ret_ref == -1:\n            instack2[defense] = 1\n            return 1\n        ret = -play1(ret_ref)\n        instack2[defense] = ret\n        return ret\n\n    ret = [0] * 3\n    for att, deff in n_cards:\n        res = play1(deff)\n        #print(att, deff, res)\n        if res == 1:\n            ret[0] += 1\n        elif res == 0:\n            ret[1] += 1\n        else:\n            ret[2] += 1\n    print(*ret)\n\n\n"
+}

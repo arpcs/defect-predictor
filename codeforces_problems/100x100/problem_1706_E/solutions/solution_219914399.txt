@@ -1,0 +1,41 @@
+{
+    "id": 219914399,
+    "contestId": 1706,
+    "creationTimeSeconds": 1692709344,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "vjudge3"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 857,
+    "memoryConsumedBytes": 37683200,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\nint t,n,m,q,tot,head[200005],idx;\nint f[200005],val[200005],dfn[200005],rk[200005];\nint dep[200005],fa[200005][21];\nstruct Seg_Tree\n{\n    int minn,maxx;\n}tr[800005];\nstruct Edge\n{\n    int next,to;\n}e[400005];\nint find(int x)\n{\n    return x==f[x]?x:f[x]=find(f[x]);\n}\nvoid add_edge(int u,int v)\n{\n    e[++tot].next=head[u];\n    e[tot].to=v;\n    head[u]=tot;\n}\nvoid dfs(int u,int fath)\n{\n\tfa[u][0]=fath;\n\tdep[u]=dep[fath]+1;\n    dfn[u]=++idx;\n    rk[idx]=u;\n\tfor(int i=1;i<=20;i++)\n\t{\n\t\tfa[u][i]=fa[fa[u][i-1]][i-1];\n\t}\n    for(int i=head[u];i;i=e[i].next)\n    {\n        int v=e[i].to;\n        dfs(v,u);\n    }\n}\nint LCA(int x,int y)\n{\n\tif(dep[x]<dep[y])\n\t\tswap(x,y);\n\tfor(int i=20;i>=0;i--)\n\t{\n\t\tif(dep[fa[x][i]]>=dep[y])\n\t\t\tx=fa[x][i];\n\t}\n\tif(x==y)\n        return x;\n\tfor(int i=20;i>=0;i--)\n\t{\n\t\tif(fa[x][i]!=fa[y][i])\n\t\t{\n\t\t\tx=fa[x][i];\n\t\t\ty=fa[y][i];\n\t\t}\n\t}\n\treturn fa[x][0];\n}\nvoid build(int p,int l,int r)\n{\n    if(l==r)\n    {\n        tr[p].maxx=tr[p].minn=dfn[l];\n        return ;\n    }\n    int mid=(l+r)>>1;\n    build(2*p,l,mid);\n    build(2*p+1,mid+1,r);\n    tr[p].minn=min(tr[2*p].minn,tr[2*p+1].minn);\n    tr[p].maxx=max(tr[2*p].maxx,tr[2*p+1].maxx);\n}\nint query1(int p,int l,int r,int x,int y)\n{\n    if(x<=l&&y>=r)\n        return tr[p].minn;\n    int mid=(l+r)>>1,ret=2e5+1;\n    if(x<=mid)\n        ret=min(ret,query1(2*p,l,mid,x,y));\n    if(y>mid)\n        ret=min(ret,query1(2*p+1,mid+1,r,x,y));\n    return ret;\n}\nint query2(int p,int l,int r,int x,int y)\n{\n    if(x<=l&&y>=r)\n        return tr[p].maxx;\n    int mid=(l+r)>>1,ret=-1;\n    if(x<=mid)\n        ret=max(ret,query2(2*p,l,mid,x,y));\n    if(y>mid)\n        ret=max(ret,query2(2*p+1,mid+1,r,x,y));\n    return ret;\n}\nvoid init()\n{\n    tot=idx=0;\n    for(int i=1;i<=200000;i++)\n    {\n        head[i]=0;\n        f[i]=i;\n        val[i]=0;\n    }\n}\nint main()\n{\n    scanf(\"%d\",&t);\n    while(t--)\n    {\n        scanf(\"%d%d%d\",&n,&m,&q);\n        init();\n        int cnt=n;\n        for(int i=1;i<=m;i++)\n        {\n            int x,y;\n            scanf(\"%d%d\",&x,&y);\n            int fx=find(x),fy=find(y);\n            if(fx==fy)\n                continue;\n            f[fx]=f[fy]=++cnt;\n            add_edge(cnt,fx);\n            add_edge(cnt,fy);\n            val[cnt]=i;\n        }\n        dfs(cnt,0);\n        build(1,1,cnt);\n        for(int i=1;i<=q;i++)\n        {\n            int x,y;\n            scanf(\"%d%d\",&x,&y);\n            printf(\"%d \",val[LCA(rk[query1(1,1,cnt,x,y)],rk[query2(1,1,cnt,x,y)])]);\n        }\n        putchar('\\n');\n    }\n}\n  \t \t\t   \t\t \t \t \t    \t  \t \t \t\t"
+}

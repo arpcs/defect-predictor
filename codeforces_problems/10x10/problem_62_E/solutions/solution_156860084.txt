@@ -1,0 +1,36 @@
+{
+    "id": 156860084,
+    "contestId": 62,
+    "creationTimeSeconds": 1652293500,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 62,
+        "index": "E",
+        "name": "World Evil",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2700,
+        "tags": [
+            "dp",
+            "flows"
+        ]
+    },
+    "author": {
+        "contestId": 62,
+        "members": [
+            {
+                "handle": "neTpyLUKa"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1298649600
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 18,
+    "timeConsumedMillis": 904,
+    "memoryConsumedBytes": 8806400,
+    "source": "#include <algorithm>\n#include <iostream>\n#include <vector>\n\n////////////////////////////////////////////////////////////////////////////////////////////////////\n// Input / output.\n\ntemplate <typename T = std::uint64_t>\nusing Matrix = std::vector<std::vector<T>>;\n\nstruct Input {\n    Matrix<std::int64_t> horizontal_capacities;\n    Matrix<std::int64_t> vertical_capacities;\n};\n\nauto OptimizeIO() -> void {\n    std::ios_base::sync_with_stdio(false);\n    std::cin.tie(nullptr);\n}\n\nauto ReadInput(std::istream& in) -> Input {\n    auto input = Input{};\n\n    auto num_rows = std::size_t{};\n    auto num_columns = std::size_t{};\n    in >> num_rows >> num_columns;\n\n    auto horizontal_capacities =\n        std::vector(num_rows, std::vector<std::int64_t>(num_columns - 1, 0));\n    for (auto column = std::size_t{0}; column + 1 < num_columns; column += 1) {\n        for (auto row = std::size_t{0}; row < num_rows; row += 1) {\n            in >> horizontal_capacities[row][column];\n        }\n    }\n\n    auto vertical_capacities = std::vector(num_rows, std::vector<std::int64_t>(num_columns, 0));\n    for (auto column = std::size_t{0}; column < num_columns; column += 1) {\n        for (auto row = std::size_t{0}; row < num_rows; row += 1) {\n            in >> vertical_capacities[row][column];\n        }\n    }\n\n    return {\n        std::move(horizontal_capacities),\n        std::move(vertical_capacities),\n    };\n}\n\nauto PrintOutput(const std::int64_t min_cut, std::ostream& out) -> void {\n    out << min_cut << '\\n';\n}\n\n////////////////////////////////////////////////////////////////////////////////////////////////////\n// Solution.\n\nauto BitIsSet(int mask, int bit) -> bool {\n    return (mask & (1 << bit)) != 0;\n}\n\nauto Solve(Matrix<std::int64_t> horizontal_capacities, Matrix<std::int64_t> vertical_capacities)\n    -> std::int64_t {\n    const auto num_rows = vertical_capacities.size();\n    const auto num_columns = vertical_capacities[0].size();\n\n    auto min_cut = std::vector(1 << num_rows, std::int64_t{1} << 62);\n    min_cut[0] = 0;\n\n    for (auto column = std::size_t{1}; column < num_columns; column += 1) {\n        for (auto row = std::size_t{0}; row < num_rows; row += 1) {\n            for (auto mask = int{0}; mask < (1 << num_rows); mask += 1) {\n                auto comask = mask ^ (1 << row);\n                if (mask > comask) {\n                    continue;\n                }\n\n                auto disabled = min_cut[mask];\n                auto enabled = min_cut[comask];\n\n                auto capacity = horizontal_capacities[row][column - 1];\n                min_cut[mask] = std::min(enabled + capacity, disabled);\n                min_cut[comask] = std::min(disabled + capacity, enabled);\n\n                if (row == 0) {\n                    continue;\n                }\n\n                auto up_capacity = vertical_capacities[row - 1][column];\n                min_cut[mask] += BitIsSet(mask, row - 1) ? up_capacity : 0;\n                min_cut[comask] += BitIsSet(comask, row - 1) ? 0 : up_capacity;\n\n                if (row + 1 < num_rows) {\n                    continue;\n                }\n\n                auto down_capacity = vertical_capacities[row][column];\n                min_cut[mask] += BitIsSet(mask, 0) ? down_capacity : 0;\n                min_cut[comask] += BitIsSet(comask, 0) ? 0 : down_capacity;\n            }\n        }\n    }\n\n    return min_cut.back();\n}\n\n////////////////////////////////////////////////////////////////////////////////////////////////////\n// Routine.\n\nauto Main(std::istream& in, std::ostream& out) -> void {\n    OptimizeIO();\n    auto input = ReadInput(in);\n    const auto min_cut =\n        Solve(std::move(input.horizontal_capacities), std::move(input.vertical_capacities));\n    PrintOutput(min_cut, out);\n}\n\n////////////////////////////////////////////////////////////////////////////////////////////////////\n// Tests.\n\n#ifdef TEST_WITH_CATCH\n\n#include <algo/run_main.hpp>\n\n#include <catch2/catch.hpp>\n\nusing algo::RunMain;\n\n///*\nTEST_CASE(\"Seminars.H: public tests\", \"[Solution]\") {\n    SECTION(\"1\") {\n        const auto input = R\"(\n3 4\n4 4 4\n1 1 5\n5 5 3\n4 1 2\n1 3 1\n3 5 4\n1 4 3\n        )\";\n        const auto output = \"7\";\n        RunMain(input, output);\n    }\n\n    SECTION(\"2\") {\n        const auto input = R\"(\n2 2\n9 2\n2 3\n6 1\n        )\";\n        const auto output = \"11\";\n        RunMain(input, output);\n    }\n}\n//*/\n\n#else\n\n////////////////////////////////////////////////////////////////////////////////////////////////////\n// Main.\n\nauto main() -> int {\n    Main(std::cin, std::cout);\n}\n\n#endif\n"
+}

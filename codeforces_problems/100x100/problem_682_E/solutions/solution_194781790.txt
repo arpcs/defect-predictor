@@ -1,0 +1,36 @@
+{
+    "id": 194781790,
+    "contestId": 682,
+    "creationTimeSeconds": 1677242577,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 682,
+        "index": "E",
+        "name": "Alyona and Triangles",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2600,
+        "tags": [
+            "geometry",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 682,
+        "members": [
+            {
+                "handle": "Fan_sheng"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1466181300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 66,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 3379200,
+    "source": "// LUOGU_RID: 102891773\n#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\nint n;\r\nll s;\r\nnamespace computational_geometry{\r\n\tconst int maxn=50003;\r\n\tconst double pi=acos(-1.0),eps=1e-8;\r\n\tmt19937 myrand(time(0));\r\n\tstruct star{\r\n\t\tdouble x,y,stx,sty;\r\n\t\tstar(double xx=0,double yy=0,double stxx=0,double styy=0){\r\n\t\t\tx=xx,y=yy,stx=stxx,sty=styy;\r\n\t\t}\r\n\t\tvoid input(){scanf(\"%lf%lf\",&x,&y),stx=0,sty=0;}\r\n\t\tstar st(){return star(stx,sty);}\r\n\t\tstar ed(){return star(stx+x,sty+y);}\r\n\t\tfriend star operator+(star a,star b){return star(a.x+b.x,a.y+b.y,a.stx,a.sty);}\r\n\t\tfriend star operator-(star b,star a){return star(b.x-a.x,b.y-a.y,a.ed().x,a.ed().y);}\r\n\t\tfriend double dist(star a,star b){\r\n\t\t\tstar res=b-a;\r\n\t\t\treturn sqrt(res.x*res.x+res.y*res.y);\r\n\t\t}\r\n\t\tfriend double S(star a,star b,star c){return fabs((a-c)*(b-c)/2);}\r\n\t\tfriend double dist(star a,star b,star c){return S(a,b,c)*2/dist(a,b);}\r\n\t\tstar rotate(double theta){\r\n\t\t\tdouble s=sin(theta),c=cos(theta);\r\n\t\t\treturn star(x*c-y*s,y*c+x*s,stx,sty);\r\n\t\t}\r\n\t\tfriend double operator*(star a,star b){return a.x*b.y-a.y*b.x;}\r\n\t\tfriend star operator*(double b,star a){return star(a.x*b,a.y*b,a.stx,a.sty);}\r\n\t\tfriend double operator^(star a,star b){return a.x*b.x+a.y*b.y;}\r\n\t\tfriend bool left(star a,star b){return a*(b.ed()-a.st())<=0;}\r\n\t\tfriend bool operator<(star a,star b){\r\n\t\t\tdouble alpha=atan2(a.y,a.x),beta=atan2(b.y,b.x);\r\n\t\t\treturn fabs(alpha-beta)>eps?alpha<beta:(!left(a,b));//\u5de6\u534a\u5e73\u9762 \r\n\t\t}\r\n\t\tfriend star inter(star a,star b){return b.st()+(((b.st()-a.st())*a)/(a*b))*b;}\r\n\t\tfriend star mid(star a,star b){return (0.5*(b-a)).ed();}\r\n\t}p[maxn],H[maxn];\r\n\tint stk[maxn],top,tot,head,tail;\r\n\tinline void Andrew(){\r\n\t\tsort(p+1,p+n+1,[&](auto a,auto b){return fabs(a.x-b.x)>eps?a.x<b.x:a.y<b.y;});\r\n\t\tstk[top=1]=1;\r\n\t\tfor(int i=2;i<=n;i++){\r\n\t\t\twhile(top>1&&(p[stk[top]]-p[stk[top-1]])*(p[i]-p[stk[top]])<=0)top--;\r\n\t\t\tstk[++top]=i;\r\n\t\t}\r\n\t\tfor(int i=1;i<=top;i++)H[++tot]=p[stk[i]];\r\n\t\tstk[top=1]=n;\r\n\t\tfor(int i=n-1;i;i--){\r\n\t\t\twhile(top>1&&(p[stk[top]]-p[stk[top-1]])*(p[i]-p[stk[top]])<=0)top--;\r\n\t\t\tstk[++top]=i;\r\n\t\t}\r\n\t\tfor(int i=2;i<=top;i++)H[++tot]=p[stk[i]];\r\n\t}\r\n\tinline double caliper(){\r\n\t\tint T=2;\r\n\t\tdouble ans=0;\r\n\t\tfor(int i=1;i<tot;i++){\r\n\t\t\twhile(S(H[i],H[i+1],H[T])<S(H[i],H[i+1],H[T+1]))T=T%(tot-1)+1;\r\n\t\t\tans=max({ans,dist(H[i],H[T]),dist(H[i+1],H[T])});\r\n\t\t}return ans;\r\n\t}\r\n\tinline double halfplane(){\r\n\t\tsort(p+1,p+n+1);\r\n\t\tfor(int i=1;i<=n;i++){\r\n\t\t\tif(i==1||fabs(atan2(p[i].y,p[i].x)-atan2(p[i-1].y,p[i-1].x))>eps)++tot;\r\n\t\t\tp[tot]=p[i];\r\n\t\t}head=1,tail=0;\r\n\t\tfor(int i=1;i<=tot;i++){\r\n\t\t\tinter(p[stk[tail]],p[stk[tail-1]]);\r\n\t\t\twhile(head<tail&&left(p[i],inter(p[stk[tail]],p[stk[tail-1]])))tail--;\r\n\t\t\twhile(head<tail&&left(p[i],inter(p[stk[head]],p[stk[head+1]])))head++;\r\n\t\t\tstk[++tail]=i;\r\n\t\t}\r\n\t\twhile(head<tail&&left(p[stk[head]],inter(p[stk[tail]],p[stk[tail-1]])))tail--;\r\n\t\twhile(head<tail&&left(p[stk[tail]],inter(p[stk[head]],p[stk[head+1]])))head++;\r\n\t\tstk[++tail]=stk[head],tot=0;\r\n\t\tfor(int i=head;i<tail;i++)H[++tot]=inter(p[stk[i]],p[stk[i+1]]);\r\n\t\tH[++tot]=H[1];\r\n\t\tif(tot<=2)return 0;\r\n\t\tdouble ans=0;\r\n\t\tfor(int i=1;i<tot;i++)ans+=H[i]*H[i+1];\r\n\t\treturn ans/2;\r\n\t}\r\n\tinline void circle(){\r\n\t\tshuffle(p+1,p+n+1,myrand);\r\n\t\tstar O;\r\n\t\tdouble R=0;\r\n\t\tfor(int i=1;i<=n;i++)if(dist(p[i],O)>R){\r\n\t\t\tO=p[i],R=0;\r\n\t\t\tfor(int j=1;j<i;j++)if(dist(p[j],O)>R){\r\n\t\t\t\tR=dist(p[i],O=star((p[i].x+p[j].x)/2,(p[i].y+p[j].y)/2));\r\n\t\t\t\tfor(int k=1;k<j;k++)if(dist(p[k],O)>R)\r\n\t\t\t\tR=dist(p[i],O=inter((p[i]-mid(p[i],p[k])).rotate(pi/2),(p[j]-mid(p[j],p[k])).rotate(pi/2)));\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}using namespace computational_geometry;\r\nint main(){\r\n\tscanf(\"%d%lld\",&n,&s);\r\n\tfor(int i=1;i<=n;i++)p[i].input();\r\n\tint a=1,b=2,c=3;\r\n\twhile(1){\r\n\t\tbool flag=0;\r\n\t\tfor(int i=1;i<=n;i++)if(a!=i&&b!=i&&c!=i){\r\n\t\t\tif(S(p[a],p[b],p[c])<S(p[a],p[b],p[i]))c=i,flag=1;\r\n\t\t\tif(S(p[a],p[b],p[c])<S(p[a],p[i],p[c]))b=i,flag=1;\r\n\t\t\tif(S(p[a],p[b],p[c])<S(p[i],p[b],p[c]))a=i,flag=1;\r\n\t\t}\r\n\t\tif(!flag){\r\n\t\t\tstar A=p[b]-p[a]+p[c],B=p[c]-p[b]+p[a],C=p[a]-p[c]+p[b];\r\n\t\t\tprintf(\"%lld %lld\\n\",ll(A.x),ll(A.y));\r\n\t\t\tprintf(\"%lld %lld\\n\",ll(B.x),ll(B.y));\r\n\t\t\tprintf(\"%lld %lld\\n\",ll(C.x),ll(C.y));\r\n\t\t\texit(0);\r\n\t\t}\r\n\t}\r\n}"
+}

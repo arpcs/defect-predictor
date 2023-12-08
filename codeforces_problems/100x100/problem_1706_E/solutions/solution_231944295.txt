@@ -1,0 +1,41 @@
+{
+    "id": 231944295,
+    "contestId": 1706,
+    "creationTimeSeconds": 1699450521,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "kingmessi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 249,
+    "memoryConsumedBytes": 27545600,
+    "source": "#include<bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp> // Common file\r\n#include <ext/pb_ds/tree_policy.hpp>\r\n#define ll long long\r\n#define int long long\r\n#define rep(i,a,b) for(int i=a;i<b;i++)\r\n#define rrep(i,a,b) for(int i=a;i>=b;i--)\r\n#define repin rep(i,0,n)\r\n#define di(a) int a;cin>>a;\r\n#define precise(i) cout<<fixed<<setprecision(i)\r\n#define vi vector<int>\r\n#define si set<int>\r\n#define mii map<int,int>\r\n#define take(a,n) for(int j=0;j<n;j++) cin>>a[j];\r\n#define give(a,n) for(int j=0;j<n;j++) cout<<a[j]<<' ';\r\n#define vpii vector<pair<int,int>>\r\n#define sis string s;\r\n#define sin string s;cin>>s;\r\n#define db double\r\n#define be(x) x.begin(),x.end()\r\n#define pii pair<int,int>\r\n#define pb push_back\r\n#define pob pop_back\r\n#define ff first\r\n#define ss second\r\n#define lb lower_bound\r\n#define ub upper_bound\r\n#define bpc(x) __builtin_popcountll(x) \r\n#define btz(x) __builtin_ctz(x)\r\nusing namespace std;\r\n\r\nusing namespace __gnu_pbds;\r\n\r\ntypedef tree<int, null_type, less<int>, rb_tree_tag,tree_order_statistics_node_update> ordered_set;\r\ntypedef tree<pair<int, int>, null_type,less<pair<int, int> >, rb_tree_tag,tree_order_statistics_node_update> ordered_multiset;\r\n\r\nconst long long INF=1e18;\r\nconst long long M=1e9+7;\r\nconst long long MM=998244353;\r\n  \r\nint power( int N, int M){\r\n    int power = N, sum = 1;\r\n    if(N == 0) sum = 0;\r\n    while(M > 0){if((M & 1) == 1){sum *= power;}\r\n    power = power * power;M = M >> 1;}\r\n    return sum;\r\n}\r\n\r\nstruct item{\r\n    int m;\r\n};\r\n \r\nstruct segtree{\r\n \r\n    int size;\r\n    vector<item> values;\r\n \r\n    item NEUTRAL_ELEMENT = {0};\r\n \r\n    item merge(item a,item b){\r\n        return {max(a.m,b.m)};\r\n    }\r\n \r\n    item single(int v){\r\n        return {v};\r\n    }\r\n \r\n    void init(int n){\r\n        size=1;\r\n        while(size<n)size*=2;\r\n        values.resize(2*size);\r\n    }\r\n \r\n    void build(vi &a,int x,int lx,int rx){\r\n        if(rx-lx==1){\r\n            if(lx<a.size()){\r\n                values[x]=single(a[lx]);\r\n            }\r\n            return;\r\n        }\r\n        int m = (lx+rx)/2;\r\n        build(a,2*x+1,lx,m);\r\n        build(a,2*x+2,m,rx);\r\n        values[x]=merge(values[2*x+1],values[2*x+2]);\r\n    }\r\n \r\n    void build(vi &a){\r\n        build(a,0,0,size);\r\n    }\r\n \r\n    void set(int i,int v,int x,int lx,int rx){\r\n        if(rx-lx==1){\r\n            values[x]=single(v);\r\n            return;\r\n        }\r\n        int m = (lx+rx)/2;\r\n        if(i<m){\r\n            set(i,v,2*x+1,lx,m);\r\n        }\r\n        else {\r\n            set(i,v,2*x+2,m,rx);\r\n        }\r\n        values[x]=merge(values[2*x+1],values[2*x+2]);\r\n    }\r\n \r\n    void set(int i,int v){\r\n        set(i,v,0,0,size);\r\n    }\r\n \r\n    item calc(int l,int r,int x,int lx,int rx){\r\n        if(lx>=r || l>=rx)return NEUTRAL_ELEMENT;\r\n        if(lx>=l && rx<=r)return values[x];\r\n        int m = (lx+rx)/2;\r\n        item s1 = calc(l,r,2*x+1,lx,m);\r\n        item s2 = calc(l,r,2*x+2,m,rx);\r\n        return merge(s1,s2);\r\n \r\n    }\r\n \r\n    item calc(int l,int r){\r\n        return calc(l,r,0,0,size);\r\n    }\r\n};\r\n\r\nconst int N = 200005;\r\nint parent[N];\r\nint siz[N];\r\nvi ele[N];\r\nvi mn(N);\r\nint n;\r\n\r\nvoid make_set(int v) {\r\n    parent[v] = v;\r\n    siz[v] = 1;\r\n    ele[v].clear();\r\n    ele[v].pb(v);\r\n}\r\n\r\nint find_set(int v) {\r\n    if (v == parent[v])\r\n        return v;\r\n    return parent[v] = find_set(parent[v]);\r\n}\r\n\r\nvoid union_sets(int a, int b,int w) {\r\n    a = find_set(a);\r\n    b = find_set(b);\r\n    if (a != b) {\r\n        if (siz[a] < siz[b])\r\n            swap(a, b);\r\n        for(auto x : ele[b]){\r\n            if(x && find_set(x-1) == a){\r\n                mn[x] = min(w+1,mn[x]);\r\n            }\r\n            if(x < n-1 && find_set(x+1) == a){\r\n                mn[x+1] = min(w+1,mn[x+1]);\r\n            }\r\n            ele[a].pb(x);\r\n        }\r\n        parent[b] = a;\r\n        siz[a] += siz[b];\r\n    }\r\n}\r\n \r\nvoid solve()\r\n{\r\n    int m,q;\r\n    cin >> n >> m >> q;\r\n    \r\n    // vpii e;\r\n    repin{\r\n        mn[i] = m;\r\n    }\r\n    \r\n    repin{\r\n        make_set(i);\r\n    }\r\n    \r\n    rep(i,0,m){\r\n        int u,v;\r\n        cin >> u >> v;\r\n        u--;v--;\r\n        union_sets(u,v,i);\r\n    }\r\n    \r\n    segtree st;\r\n    st.init(n);\r\n    repin{\r\n        st.set(i,mn[i]);\r\n    }\r\n    \r\n    rep(i,0,q){\r\n        int l,r;\r\n        cin >> l >> r;\r\n        if(l == r){\r\n            cout << \"0 \";continue;\r\n        }\r\n        auto ans = st.calc(l,r).m;\r\n        cout << ans << \" \";\r\n    }\r\n    cout << \"\\n\";\r\n}\r\n\r\nsigned main(){\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n    #ifdef NCR\r\n        init();\r\n    #endif\r\n    #ifdef SIEVE\r\n        sieve();\r\n    #endif\r\n    di(t)\r\n    while(t--)\r\n        solve();\r\n    return 0;\r\n}"
+}

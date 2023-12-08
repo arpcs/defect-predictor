@@ -1,0 +1,38 @@
+{
+    "id": 234656454,
+    "contestId": 1774,
+    "creationTimeSeconds": 1701139807,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1774,
+        "index": "F2",
+        "name": "Magician and Pigs (Hard Version)",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2700,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1774,
+        "members": [
+            {
+                "handle": "Khozhaev"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1671287700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 196,
+    "timeConsumedMillis": 810,
+    "memoryConsumedBytes": 54272000,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <algorithm>\r\n#include <set>\r\n#include <map>\r\n#include <utility>\r\n#include <unordered_set>\r\n#include <unordered_map>\r\n#include <cstdlib>\r\n#include <iomanip>\r\n#include <cassert>\r\n#include <deque>\r\n#include <cmath>\r\n#include <random>\r\n\r\nusing namespace std;\r\n//#define FAST_ALLOCATOR_MEMORY 200'000'000\r\n#ifdef FAST_ALLOCATOR_MEMORY\r\nsize_t allocator_pos = 0;\r\nchar allocator_memory[(int)FAST_ALLOCATOR_MEMORY];\r\ninline void * operator new ( size_t n ) {\r\n    char *res = allocator_memory + allocator_pos;\r\n    allocator_pos += n;\r\n    //assert(allocator_pos <= (int)FAST_ALLOCATOR_MEMORY);\r\n    return (void *)res;\r\n}\r\ninline void operator delete ( void * ) noexcept { }\r\n//inline void * operator new [] ( size_t ) { assert(0); }\r\n//inline void operator delete [] ( void * ) { assert(0); }\r\n#endif\r\n\r\n#define int int64_t\r\n#define ui32 uint32_t\r\n#define ui64 uint64_t\r\n#define i64 int64_t\r\n#define i32 int32_t\r\n#define i16 int16_t\r\n#define u16 int16_t\r\n#define i8 int8_t\r\n#define ui8 uint8_t\r\n#define i128 __int128_t\r\n\r\n#define ld long double\r\n#define pb push_back\r\n#define all(x) x.begin(), x.end()\r\n#define FAST ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);\r\n#define vi vector<int>\r\n#define vvi vector<vi>\r\n#define pii pair<int, int>\r\n\r\n\r\nconst int inf = 1e9 + 7;\r\nconst int64_t linf = 1e18 + 1;\r\n\r\ntemplate<typename T>\r\nusing V = vector<T>;\r\n\r\ntemplate<typename T = int>\r\nT nxt() {\r\n    T x;\r\n    cin >> x;\r\n    return x;\r\n}\r\n\r\ntemplate<typename T = int>\r\nvoid read(vector<T>& x) {\r\n    for (T& i: x)\r\n        cin >> i;\r\n}\r\n\r\ntemplate<typename T>\r\nistream& operator>>(istream& in, V<T>& v) {\r\n    for (auto& x: v) {\r\n        in >> x;\r\n    }\r\n    return in;\r\n}\r\n\r\ntemplate<typename T>\r\nostream& operator<<(ostream& out, V<T>& v) {\r\n    for (auto& x: v) {\r\n        out << x << \" \";\r\n    }\r\n    out << endl;\r\n    return out;\r\n}\r\n\r\nvoid hash_combine(size_t& seed, const size_t& v) {\r\n    seed ^= v + 0x9e3779b9 + (seed << 6) + (seed >> 2);\r\n}\r\n\r\nstd::random_device hm_rd;\r\nstd::mt19937 hm_twister;\r\n\r\ntemplate<typename T, typename BHasher = std::hash<T>>\r\nclass Hasher {\r\npublic:\r\n    BHasher h;\r\n    size_t v;\r\n    Hasher() : v(hm_twister()) {}\r\n\r\n    size_t operator()(const T& x) const {\r\n        size_t seed = h(x);\r\n        hash_combine(seed, v);\r\n        return seed;\r\n    }\r\n};\r\n\r\ntemplate<typename T, typename H = std::hash<T>, typename E = std::equal_to<T>>\r\nusing HashSet = std::unordered_set<T, Hasher<T, H>, E>;\r\n\r\ntemplate<typename K, typename V, typename H = std::hash<K>, typename E = std::equal_to<K>>\r\nusing HashMap = std::unordered_map<K, V, Hasher<K, H>, E>;\r\n\r\nint mod = 998244353;\r\n\r\nvoid AddTo(int& x, int y) {\r\n    x += y;\r\n    x %= mod;\r\n}\r\n\r\nvoid SubTo(int& x, int y) {\r\n    x -= y;\r\n    x %= mod;\r\n    if (x < 0) {\r\n        x += mod;\r\n    }\r\n}\r\n\r\nint Add(int x, int y) {\r\n    AddTo(x, y);\r\n    return x;\r\n}\r\n\r\nint Sub(int x, int y) {\r\n    SubTo(x, y);\r\n    return x;\r\n}\r\n\r\nvoid MulTo(int& x, int y) {\r\n    x *= y;\r\n    x %= mod;\r\n}\r\n\r\nint Mul(int x, int y) {\r\n    MulTo(x, y);\r\n    return x;\r\n}\r\n\r\nconst int maxN = 1e6 + 5;\r\nint pow2[maxN];\r\nint rpow2[maxN];\r\n\r\nint binpow(int a, int n) {\r\n    if (n == 0) {\r\n        return 1;\r\n    }\r\n    if (n%2) {\r\n        return Mul(a, binpow(a, n - 1));\r\n    }\r\n    return binpow(Mul(a, a), n / 2);\r\n}\r\n\r\nvoid precalc() {\r\n    pow2[0] = 1;\r\n    rpow2[0] = 1;\r\n    for (int i = 1; i < maxN; ++i) {\r\n        pow2[i] = Mul(pow2[i - 1], 2);\r\n        //rpow2[i] = binpow(pow2[i], mod - 2); // slow\r\n    }\r\n    rpow2[maxN - 1] = binpow(pow2[maxN - 1], mod - 2);\r\n    for (int i = maxN - 2; i > 0; --i) {\r\n        rpow2[i] = Mul(rpow2[i + 1], 2);\r\n    }\r\n}\r\n\r\nint n;\r\n\r\nstruct Elem {\r\n    int x;\r\n    int cnt;\r\n    int id;\r\n};\r\n\r\nvoid Solve() {\r\n    cin >> n;\r\n    int cnt_sub = 0;\r\n    bool need_change_state = false;\r\n    int count_repeat = 0;\r\n    int cur_sub = 0;\r\n    int no_mod_cur_sub = 0;\r\n    int pow2_promise = 0;\r\n    vi layers;\r\n    V<Elem> elems;\r\n    while(n--) {\r\n        int cmd;\r\n        cin >> cmd;\r\n        if (cmd == 2) {\r\n            ++cnt_sub;\r\n        }\r\n        if (cnt_sub == 0) {\r\n            if (cmd == 1) {\r\n                int x;\r\n                cin >> x;\r\n                Elem t;\r\n                t.x = x;\r\n                t.id = layers.size();\r\n                t.cnt = rpow2[pow2_promise];\r\n                elems.push_back(t);\r\n                continue;\r\n            } else {\r\n                ++pow2_promise;\r\n                continue;\r\n            }\r\n        }\r\n\r\n        if (cmd == 1) {\r\n            int x;\r\n            cin >> x;\r\n            Elem t;\r\n            t.x = x + cur_sub;\r\n            t.id = layers.size();\r\n            t.cnt = rpow2[pow2_promise];\r\n            elems.push_back(t);\r\n            continue;\r\n        }\r\n        if (cmd == 2) {\r\n            int x;\r\n            cin >> x;\r\n            cur_sub += x;\r\n            if (no_mod_cur_sub < inf) {\r\n                no_mod_cur_sub += x;\r\n            }\r\n            continue;\r\n        }\r\n        if (cmd == 3) {\r\n            if (no_mod_cur_sub < inf) {\r\n                ++count_repeat;\r\n                assert(count_repeat < 31);\r\n                layers.push_back(no_mod_cur_sub);\r\n                no_mod_cur_sub *= 2;\r\n            }\r\n        }\r\n    }\r\n    {\r\n        int ans = 0;\r\n        for (auto& t : elems) {\r\n            if (t.x <= cur_sub) continue;\r\n            t.x -= cur_sub;\r\n            int count = Mul(t.cnt, pow2[pow2_promise]);\r\n            vi a;\r\n            for (int i = t.id; i < layers.size(); ++i) {\r\n                a.push_back(layers[i]);\r\n            }\r\n            reverse(all(a));\r\n            int s = 0;\r\n            for (int i = 0; i < a.size(); ++i) {\r\n                if (t.x >= a[i]) {\r\n                    AddTo(s,pow2[a.size() - i - 1]);\r\n                    t.x -= a[i];\r\n                }\r\n            }\r\n            if (t.x > 0) {\r\n                s += 1;\r\n            }\r\n            AddTo(ans, Mul(s, count));\r\n        }\r\n        cout << ans << endl;\r\n    }\r\n}\r\n\r\nsigned main() {\r\n    FAST;\r\n    precalc();\r\n    int t = 1;\r\n    while (t--) Solve();\r\n\r\n    return 0;\r\n}"
+}

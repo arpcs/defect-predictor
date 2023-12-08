@@ -1,0 +1,39 @@
+{
+    "id": 229359022,
+    "contestId": 804,
+    "creationTimeSeconds": 1698025716,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 804,
+        "index": "F",
+        "name": "Fake bullions",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3400,
+        "tags": [
+            "combinatorics",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 804,
+        "members": [
+            {
+                "handle": "kkio"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1493909400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 109,
+    "timeConsumedMillis": 514,
+    "memoryConsumedBytes": 158412800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nconst int maxn=5005,maxm=2e6+10,mod=1e9+7;\r\nint fac[maxn],ifac[maxn],inv[maxn];\r\ninline int binom(int n,int m){return (n<0||m<0||n<m)?0:1ll*fac[n]*ifac[m]%mod*ifac[n-m]%mod;}\r\nint n,A,B;\r\nchar edge[maxn][maxn];\r\nchar s[2000005];\r\nint S[maxn];\r\nvector<int> bul[maxn];\r\nvector<int> G[maxn];\r\nint dfn[maxn],low[maxn],gc[maxn],cnt,scc[maxn],stk[maxn],top,times;\r\nbool ins[maxn];\r\nset<int> num[maxn];\r\nint Mx[maxn],Mn[maxn];\r\nvoid tarjan(int u)\r\n{\r\n    dfn[u]=low[u]=++times;\r\n    ins[stk[++top]=u]=1;\r\n    for(int v:G[u])\r\n        if(!dfn[v])\r\n        {\r\n            tarjan(v);\r\n            low[u]=min(low[u],low[v]);\r\n        }\r\n        else if(ins[v])low[u]=min(low[u],dfn[v]);\r\n    if(low[u]==dfn[u])\r\n    {\r\n        ++cnt;\r\n        int x=-1;\r\n        while(x!=u)\r\n        {\r\n            x=stk[top];\r\n            ins[x]=0;\r\n            scc[x]=cnt;\r\n            gc[cnt]=__gcd(gc[cnt],S[x]);\r\n            top--;\r\n        }\r\n    }\r\n}\r\nint main()\r\n{\r\n    ios::sync_with_stdio(0),cin.tie(0),cout.tie(0);\r\n    cin>>n>>A>>B;\r\n    fac[0]=ifac[0]=inv[1]=1;\r\n    for(int i=2;i<=n;i++)inv[i]=1ll*inv[mod%i]*(mod-mod/i)%mod;\r\n    for(int i=1;i<=n;i++)fac[i]=1ll*fac[i-1]*i%mod,ifac[i]=1ll*ifac[i-1]*inv[i]%mod;\r\n    for(int i=0;i<n;i++)\r\n    {\r\n        cin>>edge[i];\r\n        for(int j=0;j<n;j++)if(edge[i][j]=='1')G[i].push_back(j);\r\n    }\r\n    for(int i=0;i<n;i++)\r\n    {\r\n        cin>>S[i];\r\n        cin>>s;\r\n        for(int j=0;j<S[i];j++)if(s[j]=='1')bul[i].emplace_back(j);\r\n        Mn[i]=bul[i].size();\r\n    }\r\n    for(int i=0;i<n;i++)if(!dfn[i])tarjan(i);\r\n    for(int i=0;i<n;i++)\r\n        for(int p:bul[i])\r\n            num[scc[i]].insert(p%gc[scc[i]]);\r\n    for(int i=cnt;i>1;i--)\r\n    {\r\n        int g=__gcd(gc[i],gc[i-1]);\r\n        for(int v:num[i])\r\n            num[i-1].insert(v%g);\r\n    }\r\n    for(int i=0;i<n;i++)Mx[i]=(long long)num[scc[i]].size()*S[i]/gc[scc[i]];\r\n    int ans=0;\r\n    for(int i=0;i<n;i++)\r\n    {\r\n        int c1=0,c2=0;\r\n        for(int j=0;j<n;j++)\r\n        {\r\n            if(i==j)continue;\r\n            if(Mn[j]>Mx[i])c1++;\r\n            else if(Mx[j]>Mx[i]||(Mx[i]==Mx[j]&&j>i))c2++;\r\n        }\r\n        for(int j=B-c1-1;j<=min(c2,A-c1-1);j++)\r\n            ans=(ans+1ll*binom(c2,j)*binom(c1,B-j-1)%mod)%mod;\r\n    }\r\n    cout<<ans<<'\\n';\r\n}"
+}

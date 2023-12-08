@@ -1,0 +1,37 @@
+{
+    "id": 227013254,
+    "contestId": 154,
+    "creationTimeSeconds": 1696683954,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 154,
+        "index": "C",
+        "name": "Double Profiles",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2300,
+        "tags": [
+            "graphs",
+            "hashing",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 154,
+        "members": [
+            {
+                "handle": "Isamail"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1330095600
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 29,
+    "timeConsumedMillis": 1044,
+    "memoryConsumedBytes": 139571200,
+    "source": "#include <bits/stdc++.h>\r\n\r\n\r\n\r\n#pragma GCC target(\"avx2,bmi,bmi2,popcnt,lzcnt\")\r\n#pragma GCC optimize(\"O2\")\r\n#pragma GCC optimize(\"unroll-loops\")\r\n#pragma GCC optimize(\"O2,Ofast,unroll-loops\")\r\n\r\n\r\nusing namespace std;\r\n\r\nint m = (1 << 21);\r\nint m1 = (1000000009);\r\n\r\n\r\nint p = 237;\r\n\r\nint mul(int a, int b) {\r\n    return (1LL * a * b) & (m - 1);\r\n}\r\n\r\nint mul1(int a, int b) {\r\n    return (1LL * a * b) % m1;\r\n}\r\n\r\nint modpow(int base, int exp) {\r\n    int ans = 1;\r\n    while (exp > 0) {\r\n        if (exp % 2) ans = mul(base, ans);\r\n        base = mul(base, base);\r\n        exp /= 2;\r\n    }\r\n    return ans;\r\n}\r\n\r\nint modpow1(int base, int exp) {\r\n    int ans = 1;\r\n    while (exp > 0) {\r\n        if (exp % 2) ans = mul1(base, ans);\r\n        base = mul(base, base);\r\n        exp /= 2;\r\n    }\r\n    return ans;\r\n}\r\n\r\n\r\nint has(int x) {\r\n    return modpow(p, x);\r\n}\r\n\r\nint has1(int x) {\r\n    return modpow1(p, x);\r\n}\r\n\r\nint hashi[1000001];\r\n\r\nint hashi1[1000001];\r\n\r\nvector<int> path;\r\n\r\npair<pair<int, int>, int> hashii[1 << 23];\r\n\r\nbool busy[1 << 23];\r\n\r\nint hass(pair<int, int> y) {\r\n    int x = y.first ^ y.second;\r\n    return (((x & ((1 << 23) - 1)) + (1 << 23)) & ((1 << 23) - 1));\r\n}\r\n\r\nvoid add(pair<int, int> x) {\r\n    int index = hass(x);\r\n    int step = 1;\r\n    while (busy[index] && hashii[index].first != x) {\r\n        index += step;\r\n        index &= (1 << 23) - 1;\r\n        step++;\r\n    }\r\n    if (busy[index]) {\r\n        hashii[index].second++;\r\n    } else {\r\n        hashii[index].first = x;\r\n        hashii[index].second = 1;\r\n        busy[index] = true;\r\n        path.push_back(index);\r\n    }\r\n}\r\n\r\npair<bool, int> find(pair<int, int> x) {\r\n    int index = hass(x);\r\n    int step = 1;\r\n    while (busy[index] && hashii[index].first != x) {\r\n        index += step;\r\n        index &= (1 << 23) - 1;\r\n        step++;\r\n    }\r\n    if (busy[index]) return {true, hashii[index].second};\r\n    return {false, 0};\r\n}\r\n\r\nsigned main() {\r\n    //freopen(\"input.txt\", \"r\", stdin);\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n    int n, m2;\r\n    cin >> n >> m2;\r\n    pair<int, int> edjes[m2];\r\n    int countt[n + 1];\r\n    int countt1[n + 1];\r\n    for(int i = 1; i < n + 1; i++) {\r\n        countt[i] = has(i);\r\n        countt1[i] = has1(i);\r\n    }\r\n    for (int i = 0; i < m2; i++) {\r\n        int a, b;\r\n        cin >> a >> b;\r\n        edjes[i] = {a, b};\r\n        hashi[a] ^= countt[b];\r\n        hashi[b] ^= countt[a];\r\n        hashi1[a] ^= countt1[b];\r\n        hashi1[b] ^= countt1[a];\r\n    }\r\n    for (int i = 1; i <= n; i++) {\r\n        add({hashi[i], hashi1[i]});\r\n    }\r\n    long long suma = 0;\r\n    for (auto &y : path) {\r\n        auto x = hashii[y];\r\n        suma += (1LL * x.second * (x.second - 1)) / 2;\r\n    }\r\n    for (auto [a, b] : edjes) {\r\n        hashi[a] ^= countt[b];\r\n        hashi[b] ^= countt[a];\r\n        hashi1[a] ^= countt1[b];\r\n        hashi1[b] ^= countt1[a];\r\n        if (hashi[a] == hashi[b] && hashi1[a] == hashi1[b]) suma++;\r\n        hashi[a] ^= countt[b];\r\n        hashi[b] ^= countt[a];\r\n        hashi1[a] ^= countt1[b];\r\n        hashi1[b] ^= countt1[a];\r\n    }\r\n    cout << suma;\r\n}\r\n"
+}

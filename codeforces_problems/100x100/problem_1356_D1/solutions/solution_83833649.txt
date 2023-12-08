@@ -1,0 +1,33 @@
+{
+    "id": 83833649,
+    "contestId": 1356,
+    "creationTimeSeconds": 1592218876,
+    "relativeTimeSeconds": 241276,
+    "problem": {
+        "contestId": 1356,
+        "index": "D1",
+        "name": "Quantum Classification - 1",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1356,
+        "members": [
+            {
+                "handle": "Harnel"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1591977600
+    },
+    "programmingLanguage": "Q#",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 295,
+    "memoryConsumedBytes": 3276800,
+    "source": "namespace Solution {\r\n    open Microsoft.Quantum.Convert;\r\n    open Microsoft.Quantum.Intrinsic;\r\n    open Microsoft.Quantum.Canon;\r\n    open Microsoft.Quantum.Arrays;\r\n    open Microsoft.Quantum.MachineLearning;\r\n    open Microsoft.Quantum.Math;\r\n\r\n    function WithProductKernel(scale : Double, sample : Double[]) : Double[] {\r\n        return sample + [scale * Fold(TimesD, 1.0, sample)];\r\n    }\r\n\r\n    function Preprocessed(samples : Double[][]) : Double[][] {\r\n        let scale = 1.0;\r\n\r\n        return Mapped(\r\n            WithProductKernel(scale, _),\r\n            samples\r\n        );\r\n    }\r\n\r\n    function DefaultSchedule(samples : Double[][]) : SamplingSchedule {\r\n        return SamplingSchedule([\r\n            0..Length(samples) - 1\r\n        ]);\r\n    }\r\n\r\n    function ClassifierStructure() : ControlledRotation[] {\r\n        return [\r\n            ControlledRotation((0, new Int[0]), PauliX, 0),\r\n            ControlledRotation((0, new Int[0]), PauliZ, 1),\r\n            //ControlledRotation((1, new Int[0]), PauliX, 2),\r\n            //ControlledRotation((1, new Int[0]), PauliZ, 3),\r\n            ControlledRotation((0, [1]), PauliX, 4),\r\n            ControlledRotation((1, [0]), PauliX, 5),\r\n            ControlledRotation((1, new Int[0]), PauliZ, 6),\r\n            ControlledRotation((1, new Int[0]), PauliX, 7)\r\n        ];\r\n    }\r\n\r\n    operation Train(\r\n        trainingVectors : Double[][],\r\n        trainingLabels : Int[],\r\n        initialParameters : Double[][]\r\n    ) : (Double[], Double) {\r\n        let samples = Mapped(\r\n            LabeledSample,\r\n            Zip(Preprocessed(trainingVectors), trainingLabels)\r\n        );\r\n        Message(\"Ready to train.\");\r\n        let (optimizedModel, nMisses) = TrainSequentialClassifier(\r\n            Mapped(\r\n                SequentialModel(ClassifierStructure(), _, 0.0),\r\n                initialParameters\r\n            ),\r\n            samples,\r\n            DefaultTrainingOptions()\r\n                w/ LearningRate <- 5.0\r\n                w/ MinibatchSize <- 30\r\n                w/ Tolerance <- 0.005\r\n                w/ NMeasurements <- 10000\r\n                w/ MaxEpochs <- 64\r\n                w/ VerboseMessage <- Message,\r\n            DefaultSchedule(trainingVectors),\r\n            DefaultSchedule(trainingVectors)\r\n        );\r\n\r\n        Message($\"nMiss: {nMisses}\");\r\n        Message($\"Training complete, found optimal parameters: {optimizedModel::Parameters}, bias: {optimizedModel::Bias}\");\r\n        \r\n        return (optimizedModel::Parameters, optimizedModel::Bias);\r\n    }\r\n\r\n    operation Validate(\r\n        validationVectors : Double[][],\r\n        validationLabels : Int[],\r\n        parameters : Double[],\r\n        bias : Double\r\n    ) : Double {\r\n        let samples = Mapped(\r\n            LabeledSample,\r\n            Zip(Preprocessed(validationVectors), validationLabels)\r\n        );\r\n        let tolerance = 0.005;\r\n        let nMeasurements = 10000;\r\n        let results = ValidateSequentialClassifier(\r\n            SequentialModel(ClassifierStructure(), parameters, bias),\r\n            samples,\r\n            tolerance,\r\n            nMeasurements,\r\n            DefaultSchedule(validationVectors)\r\n        );\r\n        return IntAsDouble(results::NMisclassifications) / IntAsDouble(Length(samples));\r\n    }\r\n\r\n    operation Test(\r\n        validationVectors : Double[][],\r\n        validationLabels : Int[]\r\n    ) : Double {\r\n        let (rotation, (param, bias)) = Solve();\r\n        return Validate(validationVectors, validationLabels, param, bias);\r\n    }\r\n\r\n    operation Solve() : (ControlledRotation[], (Double[], Double)) {\r\n        return (\r\n            ClassifierStructure(),\r\n            ( \r\n                [6.570660812140756,7.233720873067806,0.6590696488932675,1.5773790800781158,5.162755230343409,3.4890001813205234,9.241809128606635,3.747125100864049,3.4587076142907236,2.6165479476186264], \r\n                0.06897169276718997\r\n            )\r\n        );\r\n    }\r\n}\r\n"
+}

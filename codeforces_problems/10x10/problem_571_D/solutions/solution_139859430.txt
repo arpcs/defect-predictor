@@ -1,0 +1,38 @@
+{
+    "id": 139859430,
+    "contestId": 571,
+    "creationTimeSeconds": 1639894178,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 571,
+        "index": "D",
+        "name": "Campus",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 3100,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dsu",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 571,
+        "members": [
+            {
+                "handle": "fengwu2005"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1440261000
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<cstdio>\r\n#include<vector>\r\n#include<algorithm>\r\n\r\n#define fi first\r\n#define se second\r\n#define mp(x, y) std::make_pair(x, y)\r\n\r\ntypedef long long ll;\r\nconst int maxn = 5E+5 + 5;\r\n\r\nnamespace IObuf {\r\n\tconst int LEN = 1 << 20;\r\n\t\r\n\tchar ibuf[LEN + 5], *p1 = ibuf, *p2 = ibuf;\r\n\tchar obuf[LEN + 5], *p3 = obuf;\r\n\t\r\n\tinline char get() {\r\n#ifdef ONLINE_JUDGE\r\n\t\treturn p1 == p2 && (p2 = (p1 = ibuf) + fread(ibuf, 1, LEN, stdin), p1 == p2) ? EOF : *p1++;\r\n#endif\r\n\t\treturn getchar();\r\n\t}\r\n\tinline ll getll(char c = get(), ll x = 0) {\r\n\t\twhile(c < '0' || c > '9') c = get();\r\n\t\twhile(c >= '0' && c <= '9') x = x * 10 + c - 48, c = get();\r\n\t\treturn x;\r\n\t}\r\n\t\r\n\tinline char* flush() { fwrite(obuf, 1, p3 - obuf, stdout); return p3 = obuf; }\r\n\tinline void put(char c) {\r\n#ifdef INLINE_JUDGE\r\n\t\tp3 == obuf + LEN && flush(); *p3++ = c; return;\r\n#endif\r\n\t\tputchar(c);\r\n\t}\r\n\t\r\n\tchar s[20]; int t = 0;\r\n\tinline void putll(ll x, char suf = ' ') {\r\n\t\tif(!x) put('0');\r\n\t\telse {\r\n\t\t\twhile(x) s[++t] = x % 10 + 48, x /= 10;\r\n\t\t\twhile(t) put(s[t--]);\r\n\t\t} put(suf);\r\n\t}\r\n}\r\nusing IObuf::getll;\r\nusing IObuf::putll;\r\n\r\nint n, m, clr[maxn];\r\nstd::vector<std::pair<int, ll> > tag[maxn];\r\nstruct DSU {\r\n\tint fa[maxn], siz[maxn], tm[maxn];\r\n\tinline DSU(int n) {\r\n\t\tstd::fill(siz + 1, siz + n + 1, 1);\r\n\t\tstd::iota(fa + 1, fa + n + 1, 1);\r\n\t}\r\n\t\r\n\tinline int getfa(int x) {\r\n\t\treturn fa[x] == x ? x : getfa(fa[x]);\r\n\t}\r\n\t\r\n\tinline void merge(int t, int x, int y) {\r\n\t\tx = getfa(x), y = getfa(y);\r\n\t\tif(siz[x] < siz[y]) std::swap(x, y);\r\n\t\ttm[y] = t, fa[y] = x, siz[x] += siz[y];\r\n\t}\r\n};\r\n\r\nint main() {\r\n\tfreopen(\"Q0Y1NzFE.in\", \"r\", stdin);\r\n\tfreopen(\"Q0Y1NzFE.out\", \"w\", stdout);\r\n\t\r\n\tn = getll(), m = getll();\r\n\t\r\n\tDSU S1(n), S2(n);\r\n\tfor(int i = 1; i <= n; ++i)\r\n\t\ttag[i].emplace_back(-1, 0ll);\r\n\t\r\n\tfor(int i = 1; i <= m; ++i) {\r\n\t\tchar opt = IObuf::get(); int x;\r\n\t\twhile(opt < 'A' || opt > 'Z') opt = IObuf::get();\r\n\t\t\r\n\t\tif(opt == 'U') S1.merge(i, getll(), getll());\r\n\t\tif(opt == 'M') S2.merge(i, getll(), getll());\r\n\t\tif(opt == 'A') x = S1.getfa(getll()), tag[x].emplace_back(i, tag[x].back().se + S1.siz[x]);\r\n\t\tif(opt == 'Z') x = S2.getfa(getll()), clr[x] = i;\r\n\t\tif(opt == 'Q') {\r\n\t\t\tint tim = clr[x = getll()];\r\n\t\t\tfor(int p = x; p != S2.fa[p]; p = S2.fa[p])\r\n\t\t\t\tif(clr[S2.fa[p]] > S2.tm[p]) tim = std::max(tim, clr[S2.fa[p]]);\r\n\t\t\t\r\n\t\t\tint t = std::upper_bound(tag[x].begin(), tag[x].end(),\r\n\t\t\t\tmp(tim, 0ll)) - tag[x].begin() - 1;\r\n\t\t\tll ans = tag[x].back().se - tag[x][t].se;\r\n\t\t\t\r\n\t\t\tfor(int p = x; p != S1.fa[p]; p = S1.fa[p]) {\r\n\t\t\t\tint f = S1.fa[p];\r\n\t\t\t\tint t = std::upper_bound(tag[f].begin(), tag[f].end(),\r\n\t\t\t\t\tmp(std::max(tim, S1.tm[p]), 0ll)) - tag[f].begin() - 1;\r\n\t\t\t\tans += tag[f].back().se - tag[f][t].se;\r\n\t\t\t} putll(ans, '\\n');\r\n\t\t}\r\n\t} IObuf::flush();\r\n}\r\n"
+}

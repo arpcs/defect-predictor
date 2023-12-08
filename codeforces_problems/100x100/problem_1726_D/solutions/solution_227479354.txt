@@ -1,0 +1,41 @@
+{
+    "id": 227479354,
+    "contestId": 1726,
+    "creationTimeSeconds": 1696912308,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "D",
+        "name": "Edge Split",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "probabilities",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "secret_sky"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 77,
+    "timeConsumedMillis": 810,
+    "memoryConsumedBytes": 40140800,
+    "source": "#include <bits/stdc++.h>\r\n// #pragma GCC optimize(2)\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef unsigned long long ull;\r\ntypedef double db;\r\ntypedef pair<int, int> pii;\r\ntypedef pair<ll, ll> pll;\r\ntypedef pair<db, db> pdd;\r\ntypedef __int128_t lll;\r\n#define mpr(x, y) make_pair(x, y)\r\nconst ll INF = 0x3f3f3f3f3f3f3f3f;\r\n#define debug(...) std::fprintf(stderr, __VA_ARGS__)\r\nconst int inf = 0x3f3f3f3f;\r\n#define fill_max(x) memset(x, 0x3f, sizeof x)\r\n#define fill_zero(x) memset(x, 0, sizeof x)\r\n#define fill_nagone(x) memset(x, -1, sizeof x)\r\n#define fill_db_naginf(x) memset(x, 0xfe, sizeof x)\r\n#define fill_db_inf(x) memset(x, 0x7f, sizeof x)\r\n#define rep(n) for (int _ = 1; _ <= n; ++_)\r\n#define reu(i, a, b) for (int i = a; i <= b; ++i)\r\n#define red(i, a, b) for (int i = a; i >= b; --i)\r\n#define eb emplace_back\r\nnamespace quick_read\r\n{\r\n    template <class T>\r\n    inline bool read(T &ret)\r\n    {\r\n        char c;\r\n        int sgn;\r\n        if (c = getchar(), c == EOF)\r\n            return false;\r\n        while (c != '-' && (c < '0' || c > '9'))\r\n            c = getchar();\r\n        ret = (c == '-') ? 0 : (c - '0');\r\n        sgn = (c == '-') ? -1 : 1;\r\n        while (c = getchar(), (c >= '0' && c <= '9'))\r\n            ret = ret * 10 + (c - '0');\r\n        ret *= sgn;\r\n        return true;\r\n    }\r\n    template <class T, class... V>\r\n    inline bool read(T &a, V &...b)\r\n    {\r\n        return read(a) && read(b...);\r\n    }\r\n    template <class T>\r\n    inline void qout(T x)\r\n    {\r\n        if (x < 0)\r\n            putchar('-'), x *= -1;\r\n        if (x > 9)\r\n            qout(x / 10);\r\n        putchar(x % 10 + '0');\r\n        return;\r\n    }\r\n};\r\nusing namespace quick_read;\r\n\r\nvoid work(int _k);\r\nint TT = 1;\r\nsigned main()\r\n{\r\n    srand(time(0) + 5);\r\n    \r\n    read(TT);\r\n    reu(i, 1, TT)\r\n        work(i);\r\n    return 0;\r\n}\r\n\r\nnamespace Datestruct_DSU\r\n{\r\n    struct DSU\r\n    {\r\n        vector<int> f, sz;\r\n        DSU(int n)\r\n        {\r\n            sz = f = vector<int>(n + 1, 1);\r\n            iota(f.begin(), f.end(), 0);\r\n        }\r\n        int find(int x)\r\n        {\r\n            return f[x] = (f[x] == x) ? x : find(f[x]);\r\n        }\r\n        int &operator[](int x)\r\n        {\r\n            return f[find(x)];\r\n        }\r\n        int operator()(int x)\r\n        {\r\n            return sz[find(x)];\r\n        }\r\n        bool operator()(int x, int y)\r\n        {\r\n            x = find(x), y = find(y);\r\n            if (x == y)\r\n                return false;\r\n            if (sz[x] > sz[y])\r\n                swap(x, y);\r\n            f[x] = y;\r\n            sz[y] += sz[x];\r\n            return true;\r\n        }\r\n    };\r\n};\r\nusing namespace Datestruct_DSU;\r\n\r\nvoid work(int _k)\r\n{\r\n    // printf(\"Case %d: \", _k);\r\n    int n, m;\r\n    read(n, m);\r\n    // cerr << n << \" \" << m << endl;\r\n    vector<int> dep(n + 5);\r\n    vector<int> forward_edge(n + 5);\r\n    vector<int> ans(m + 5);\r\n\r\n    vector<vector<array<int, 2>>> adj(n + 5);\r\n    for (int i = 1; i <= m; ++i)\r\n    {\r\n        int u, v;\r\n        read(u, v);\r\n        adj[u].push_back({v, i});\r\n        adj[v].push_back({u, i});\r\n    }\r\n\r\n    vector<array<int, 3>> back_edges;\r\n    vector<bool> vis(m + 5);\r\n    vector<int> F(n + 5);\r\n    static function<void(int, int)> dfs = [&](int now, int from) -> void\r\n    {\r\n        F[now] = from;\r\n        for (auto [to, id] : adj[now])\r\n        {\r\n            if (vis[id])\r\n                continue;\r\n            vis[id] = true;\r\n            if (dep[to] == 0)\r\n            {\r\n                dep[to] = dep[now] + 1;\r\n                ans[id] = 1;\r\n                dfs(to, id);\r\n            }\r\n            else \r\n                back_edges.push_back({now, to, id});\r\n        }\r\n    };\r\n    dep[1] = 1;\r\n    dfs(1, 0);\r\n\r\n    // for (auto v : ans)\r\n    //     cout << v;\r\n    // cout << endl;\r\n    // cout << back_edges.size() << endl;\r\n    assert(back_edges.size() <= 3);\r\n    if (back_edges.size() == 3)\r\n    {\r\n        unordered_map<int, int> cnt;\r\n        for (auto [u, v, id] : back_edges)\r\n        {\r\n            cnt[u]++, cnt[v]++;\r\n        }\r\n\r\n        \r\n        if (cnt.size() == 3)\r\n        {\r\n            for (auto [u, v, id] : back_edges)\r\n            {\r\n                // auto [u, v, id] = back_edges[0];\r\n                if (dep[u] < dep[v])\r\n                    swap(u, v);\r\n\r\n                ans[id] = 1;\r\n                assert(F[u] > 0);\r\n                ans[F[u]] = 0;\r\n                break;\r\n            }\r\n        }\r\n    }\r\n    \r\n    for (int i = 1; i <= m; ++i)\r\n    {\r\n        int v = ans[i];\r\n        cout << v;\r\n    }\r\n        \r\n    cout << endl;\r\n    return;\r\n}"
+}

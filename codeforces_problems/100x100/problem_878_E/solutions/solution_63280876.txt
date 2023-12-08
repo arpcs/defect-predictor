@@ -1,0 +1,36 @@
+{
+    "id": 63280876,
+    "contestId": 878,
+    "creationTimeSeconds": 1571906335,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "CaptainSlow"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 108,
+    "memoryConsumedBytes": 26419200,
+    "source": "#include <algorithm>\n// #include <cassert>\n#include <cctype>\n// #include <cmath>\n#include <cstdio>\n// #include <cstdlib>\n#include <cstring>\n// #include <ctime>\n#include <map>\n#include <queue>\n#include <set>\n#include <vector>\n\n#define fi first\n#define se second\n#define pb push_back\n#define pch putchar\n#define rg register\n#define SZ(_) (int)_.size()\n#define SORT(_) std::sort(_.begin(), _.end())\n#define LB(_, __) std::lower_bound(_.begin(), _.end(), __)\n#define UB(_, __) std::upper_bound(_.begin(), _.end(), __)\n#ifdef DEBUG\n\t#define debug(format, ...) fprintf(stderr, format, __VA_ARGS__)\n#else\n\t#define debug(format, ...) 0\n#endif\n\ntypedef long long LL;\ntypedef double DB;\ntypedef std::pair<DB, DB> Pdd;\ntypedef std::pair<int, int> Pii;\ntypedef std::pair<LL, int> Pli;\ntypedef std::pair<int, LL> Pil;\ntypedef std::pair<LL, LL> Pll;\ntypedef std::vector<int> Vi;\ntypedef std::vector<LL> Vl;\ntypedef std::map<int, int> Mii;\ntypedef std::map<LL, int> Mli;\ntypedef std::map<int, LL> Mil;\ntypedef std::map<LL, LL> Mll;\ntypedef std::set<int> Si;\ntypedef std::set<LL> Sl;\n\nconst int kInf = 0x3f3f3f3f, kMod = 1e9 + 7;\nconst LL kInf64 = 0x3f3f3f3f3f3f3f3f;\n// const double kPie = acos(-1), kEps = 1e-9;\n\ntemplate <typename T> inline\nvoid UMin(T & x, const T & y) { if (x > y) x = y; }\ntemplate <typename T> inline\nvoid UMax(T & x, const T & y) { if (x < y) x = y; }\ninline int Add(int a, int b) { return (a += b) >= kMod ? a - kMod : a; }\ninline int Sub(int a, int b) { return (a -= b) < 0 ? a + kMod : a; }\ninline int Mul(int a, int b) { return 1ll * a * b % kMod; }\nint FPow(int bs, int ex = kMod - 2) {\n\tint res = 1;\n\tfor (; ex; bs = Mul(bs, bs), ex >>= 1)\n\t\tif (ex & 1) res = Mul(res, bs);\n\treturn res;\n}\n\n/* NOTICE! The default mod number is 1e9 + 7 ! */\n\nconst int kMaxn = 5e5 + 5;\n\nint n, q;\nint pw2[kMaxn], sfx[kMaxn], spr[kMaxn];\nint fa[kMaxn], ans[kMaxn], A[kMaxn], pre[kMaxn];\nLL sum[kMaxn];\nstd::vector<Pii> Q[kMaxn];\n\ninline int Query(int l, int r) {\n/*\tprintf(\" query[%d, %d], sfxl %d, sfxr %d, pw %d\\n\",\n\t\t\tl, r, sfx[l], sfx[r + 1], pw2[r - l + 1]);\n\tprintf(\"  res = %d\\n\", Sub(sfx[l], Mul(sfx[r + 1], pw2[r - l + 1]))); */\n\treturn Sub(sfx[l], Mul(sfx[r + 1], pw2[r - l + 1]));\n}\ninline int Find(int x) { return x == fa[x] ? x : (fa[x] = Find(fa[x])); }\nvoid Merge(int p, int q);\n\nint main() {\n\tscanf(\"%d%d\", &n, &q);\n\tfor (int i = 1; i <= n; ++i) {\n\t\tscanf(\"%d\", A + i); fa[i] = i, pre[i] = i - 1;\n\t}\n\tfor (int i = 0, l, r; i < q; ++i) {\n\t\tscanf(\"%d%d\", &l, &r);\n\t\tQ[r].pb({l, i});\n\t}\n\tfor (int i = pw2[0] = 1; i <= n; ++i)\n\t\tpw2[i] = Mul(pw2[i - 1], 2);\n\tfor (int i = n; i; --i)\n\t\tsfx[i] = Add(Mul(sfx[i + 1], 2), Add(kMod, A[i]));\n\tfor (int i = 1; i <= n; ++i) {\n\t\tsum[i] = A[i];\n\t\twhile (pre[i] && sum[i] >= 0) Merge(pre[i], i);\n\t\tspr[i] = Add(spr[pre[i]], Query(pre[i] + 1, i));\n//\t\tprintf(\" pre[%d] = %d, spr[%d] = %d\\n\", i, pre[i], i, spr[i]);\n\t\tfor (auto & p : Q[i]) {\n\t\t\tint j = Find(p.fi);\n//\t\t\tprintf(\"    spr[%d] %d, spr[%d] %d\\n\", i, spr[i], j, spr[j]);\n//\t\t\tprintf(\"    Query(%d, %d) = %d\\n\", p.fi, j, Query(p.fi, j));\n\t\t\tans[p.se] = Add(Mul(2, Sub(spr[i], spr[j])), Query(p.fi, j));\n\t\t}\n\t}\n\tfor (int i = 0; i < q; ++i) printf(\"%d\\n\", ans[i]);\n\treturn 0;\n}\n\nvoid Merge(int p, int q) {\n\tfa[p] = fa[q], pre[q] = pre[p];\n\tint len = p - pre[p];\n\tif (len > 30 && sum[q] > 0 ||\n\t\t(sum[q] << len) + sum[p] > kMod) sum[q] = kMod;\n\telse sum[q] = (sum[q] << len) + sum[p];\n}\n"
+}

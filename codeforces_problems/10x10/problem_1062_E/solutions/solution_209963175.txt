@@ -1,0 +1,39 @@
+{
+    "id": 209963175,
+    "contestId": 1062,
+    "creationTimeSeconds": 1687007187,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1062,
+        "index": "E",
+        "name": "Company",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1062,
+        "members": [
+            {
+                "handle": "yzy1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1542209700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 54,
+    "timeConsumedMillis": 451,
+    "memoryConsumedBytes": 50483200,
+    "source": "// LUOGU_RID: 112889231\n#include <bits/stdc++.h>\n\n#if defined(LOCAL)\n#define DBG_MACRO_NO_WARNING\n#include <dbg.hpp>\n#else\n#define dbg(x...) (0)\n#endif\n\nusing namespace std;\n\nusing ll = long long;\n\n// #define int ll\n#define rep(i, f, t) for (int i = (f), ed##i = (t); i <= ed##i; ++i)\n#define re(i, t) rep (i, 1, t)\n#define per(i, t, f) for (int i = (t), ed##i = (f); i >= ed##i; --i)\n#define ste(i, f, t, s) for (int i = (f), ed##i = (t); i <= ed##i; i += s)\n#define each(i, x) for (auto &&i : (x))\n#define nxt(i, f, g) for (int i = g.h[f]; i; i = g.e[i].n)\n#define umod(x) ((x) >= mo && ((x) -= mo))\n#define dmod(x) ((x) < 0 && ((x) += mo))\n#define y1 y1__\n#define fio(x) (freopen(x \".in\", \"r\", stdin), freopen(x \".out\", \"w\", stdout))\n\ntemplate <class T, class E>\n__attribute__((always_inline)) inline void up(T &x, E &&y) {\n  if (x < y) x = y;\n}\ntemplate <class T, class E>\n__attribute__((always_inline)) inline void down(T &x, E &&y) {\n  if (y < x) x = y;\n}\n\nconst int N = 1e5 + 9;\nint n, lg[N], stmn[N][22], stmx[N][22], stlca[N][22], dep[N], fa[N][22], dfn[N], nfd[N], tim, m;\nvector<int> e[N];\n\ninline void Dfs1(int f) {\n  nfd[dfn[f] = ++tim] = f;\n  dep[f] = dep[fa[f][0]] + 1;\n  each (t, e[f]) {\n    if (t == fa[f][0]) continue;\n    fa[t][0] = f;\n    re (i, 20)\n      if (!(fa[t][i] = fa[fa[t][i - 1]][i - 1])) break;\n    Dfs1(t);\n  }\n}\n\ninline int Lca(int f, int t) {\n  if (dep[f] > dep[t]) swap(f, t);\n  per (i, 20, 0)\n    if (dep[fa[t][i]] >= dep[f]) t = fa[t][i];\n  if (f == t) return f;\n  per (i, 20, 0)\n    if (fa[f][i] != fa[t][i]) f = fa[f][i], t = fa[t][i];\n  return fa[f][0];\n}\n\ninline int AskMx(int l, int r) {\n  int k = lg[r - l + 1];\n  return max(stmx[l][k], stmx[r - (1 << k) + 1][k]);\n}\n\ninline int AskMn(int l, int r) {\n  int k = lg[r - l + 1];\n  return min(stmn[l][k], stmn[r - (1 << k) + 1][k]);\n}\n\ninline int AskLca(int l, int r) {\n  int k = lg[r - l + 1];\n  return Lca(stlca[l][k], stlca[r - (1 << k) + 1][k]);\n}\n\ninline int Ask(int l, int x, int r) {\n  if (x == l) return AskLca(l + 1, r);\n  if (x == r) return AskLca(l, r - 1);\n  return Lca(AskLca(l, x - 1), AskLca(x + 1, r));\n}\n\nsigned main() {\n  ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);\n  rep (i, 2, N - 1) lg[i] = lg[i >> 1] + 1;\n  cin >> n >> m;\n  rep (i, 2, n) {\n    int f;\n    cin >> f;\n    // cerr << i << ' ' << f << '\\n';\n    e[f].push_back(i), e[i].push_back(f);\n  }\n  Dfs1(1);\n  re (i, n) stmx[i][0] = stmn[i][0] = dfn[i], stlca[i][0] = i;\n  re (j, 22)\n    re (i, n) {\n      if (i + (1 << j) - 1 > n) break;\n      stmx[i][j] = max(stmx[i][j - 1], stmx[i + (1 << (j - 1))][j - 1]);\n      stmn[i][j] = min(stmn[i][j - 1], stmn[i + (1 << (j - 1))][j - 1]);\n      stlca[i][j] = Lca(stlca[i][j - 1], stlca[i + (1 << (j - 1))][j - 1]);\n    }\n  // re (i, n) dbg(dep[i]);\n  while (m--) {\n    int l, r;\n    cin >> l >> r;\n    int mn = nfd[AskMn(l, r)], mx = nfd[AskMx(l, r)];\n    // dbg(mn, mx);\n    int x = Ask(l, mn, r), y = Ask(l, mx, r);\n    if (dep[x] > dep[y])\n      cout << mn << ' ' << dep[x] - 1 << '\\n';\n    else\n      cout << mx << ' ' << dep[y] - 1 << '\\n';\n  }\n  return 0;\n}\n"
+}

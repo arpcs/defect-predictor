@@ -1,0 +1,39 @@
+{
+    "id": 201620525,
+    "contestId": 1582,
+    "creationTimeSeconds": 1681107595,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1582,
+        "index": "E",
+        "name": "Pchelyonok and Segments",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2000,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dp",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1582,
+        "members": [
+            {
+                "handle": "pranav.02"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1635069900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\ntypedef long long ll;\r\ntypedef long double ld;\r\n#define forf(i, a, b) for (int i = a; i <= b; ++i)\r\n#define frof(i, a, b) for (int i = a; i >= b; --i)\r\n#define pb push_back\r\n#define endl '\\n'\r\n#define int long long // 256MB ~= 6*(1e7) 32-bit integers\r\nusing namespace std;\r\nusing cd=complex<double>;\r\nconst int nax = 1e5 + 10;\r\nconst int mod = 1e9 + 7;\r\nconst int INF = 9e18; \r\n// Compiling: g++ -std=c++17 q.cpp -o q , Running: ./q\r\nconst ld one=1.0,epislon=1e-18,pi=acos(-1.0);// use (x>=epsilon) instead of (x>=0.0) if x is a double val\r\npair<int,int> my_max(pair<int,int> p1,pair<int,int> p2){\r\n     if(p1.first>p2.first) return p1;\r\n     if(p2.first>p1.first) return p2;\r\n     if(p1.second>p2.second) return p1;\r\n     return p2;\r\n}\r\nvoid solve()\r\n{\r\n    int n;\r\n    cin>>n;\r\n    vector<int> a(n+1),pref(n+1,0);\r\n    forf(i,1,n) cin>>a[i],pref[i]=pref[i-1]+a[i];\r\n    vector<pair<int,int>> dp1(n+1,{0LL,0LL}),dp2(n+1,{0LL,0LL});\r\n    dp1[n]={1LL,a[n]};\r\n    frof(i,n-1,1){\r\n        int len=dp1[i+1].first+1,ind=i+len-1;\r\n        if(ind+1>n){\r\n            len--;\r\n        }\r\n        if(len==1){\r\n            dp1[i]=max(dp1[i+1],{len,a[i]});\r\n            continue;\r\n        }\r\n        ind=i+len-1;\r\n        assert(ind>=i);\r\n        assert(ind+1<=n);\r\n        int sum=pref[ind]-pref[i-1];\r\n        if(dp1[ind+1].first<len-1)\r\n            len--;\r\n        if(len==1){\r\n            dp1[i]=max(dp1[i+1],{len,a[i]});\r\n            continue;\r\n        }    \r\n        ind=i+len-1;\r\n        if(dp1[ind+1].first==len){\r\n            if(dp2[ind+1].second>sum){\r\n                dp1[i]=my_max(dp1[i+1],{len,sum});\r\n                if(len==dp1[i+1].first+1) dp2[i]=dp1[i+1];\r\n            }\r\n            else {\r\n                dp1[i]=dp1[i+1];\r\n            }\r\n        }\r\n        else if(dp1[ind+1].second>sum){\r\n            if(len==dp1[i+1].first+1)\r\n            {\r\n              dp1[i]={len,sum};\r\n              dp2[i]=dp1[i+1];\r\n            }\r\n            else{\r\n                dp1[i]=my_max(dp1[i+1],{len,sum});\r\n            }\r\n        }\r\n        else{\r\n            dp1[i]=dp1[i+1];\r\n        } \r\n        if(dp1[i].first==dp1[i+1].first){\r\n            dp2[i]=my_max(dp2[i],dp2[i+1]);\r\n            len=dp1[i].first-1;\r\n            if(len<=0) continue;\r\n            if(len==1){\r\n                dp2[i]=my_max(dp2[i],{len,a[i]});\r\n                continue;\r\n            }\r\n            assert(dp2[i].first<=len);\r\n            ind=i+len-1;\r\n            sum=max(pref[ind]-pref[i-1],dp2[i].second);\r\n            if(dp1[ind+1].first>=len+1){\r\n                int s=ind+1,e=n,val=ind+1;\r\n                while(s<=e){\r\n                    int mid=(s+e)/2;\r\n                    if(dp1[mid].first<=len){\r\n                        e=mid-1;\r\n                        val=mid;\r\n                    }\r\n                    else s=mid+1;\r\n               }\r\n               assert(dp1[val].first==len or dp1[val].first==len-1);\r\n               ind=val-1;\r\n            }  \r\n            if(dp1[ind+1].first==len){\r\n                if(dp2[ind+1].second>sum){\r\n                    dp2[i]=my_max(dp2[i],{len,sum});\r\n                }\r\n            }\r\n            else if(dp1[ind+1].first==len-1 and dp1[ind+1].second>sum) dp2[i]=my_max(dp2[i],{len,sum});\r\n         }\r\n         else dp2[i]=dp1[i+1];\r\n    }\r\n    cout<<dp1[1].first<<endl;\r\n    return;\r\n}\r\nsigned main()\r\n{\r\n#ifndef ONLINE_JUDGE\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n    freopen(\"output.txt\", \"w\", stdout);\r\n#endif\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n    cout.tie(NULL);\r\n    int t = 1;\r\n    cin >> t;\r\n    int c=1;\r\n    while (t--)\r\n        {\r\n         //   cout<<\"Case # \"<<c<<\": \";\r\n            solve();\r\n            c++;\r\n        }\r\n}"
+}

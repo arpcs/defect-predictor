@@ -1,0 +1,41 @@
+{
+    "id": 183386154,
+    "contestId": 1706,
+    "creationTimeSeconds": 1669826820,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "GRB_080319B"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 1981,
+    "memoryConsumedBytes": 57446400,
+    "source": "#include<bits/stdc++.h>\r\n#define int long long\r\n\r\nusing namespace std;\r\n\r\nstruct UF {\r\n    vector<int> pa;\r\n\r\n    UF(int n) {\r\n        pa.resize(n);\r\n        for (int i = 0 ; i < n ; i++) {\r\n            pa[i] = i;\r\n        }\r\n    }\r\n\r\n    int root(int u) {\r\n        return u == pa[u] ? u : pa[u] = root(pa[u]);\r\n    }\r\n\r\n    bool join(int u, int v) {\r\n        u = root(u);\r\n        v = root(v);\r\n\r\n        if (u == v) return false;\r\n\r\n        pa[v] = u;\r\n\r\n        return true;\r\n    }\r\n};\r\n\r\nstruct LCA {\r\n    vector<vector<int>> p, pa;\r\n    vector<int> h;\r\n    int n;\r\n\r\n    LCA(int n, vector<vector<pair<int, int>>> &a) {\r\n        pa = p = vector<vector<int>>(n, vector<int>(20, 0));\r\n        h = vector<int>(n, 0);\r\n        this -> n = n;\r\n        dfs(0, 0, a);\r\n\r\n        for (int j = 1 ; (1 << j) <= n ; j++) {\r\n            for (int i = 0 ; i < n ; i++) {\r\n                p[i][j] = max(p[i][j-1], p[pa[i][j-1]][j-1]);\r\n                pa[i][j] = pa[pa[i][j-1]][j-1];\r\n            }\r\n        }\r\n    }\r\n\r\n    void dfs(int u, int par, vector<vector<pair<int, int>>> &a) {\r\n        h[u] = h[par] + 1;\r\n        for (auto &[v, w]: a[u]) {\r\n            if (v != par) {\r\n                p[v][0] = w;\r\n                pa[v][0] = u;\r\n                dfs(v, u, a);\r\n            }\r\n        }\r\n    }\r\n\r\n    int getMax(int u, int v) {\r\n        if (h[u] > h[v]) {\r\n            swap(u, v);\r\n        }\r\n\r\n        int ret = 0;\r\n\r\n        while (h[v] > h[u]) {\r\n            int k = log2(h[v] - h[u]);\r\n            ret = max(ret, p[v][k]);\r\n            v = pa[v][k];\r\n        }\r\n\r\n        if (u == v) {\r\n            return ret;\r\n        }\r\n\r\n        for (int i = 18 ; i >= 0 ; i--) {\r\n            if (pa[u][i] != pa[v][i]) {\r\n                ret = max({ret, p[u][i], p[v][i]});\r\n                u = pa[u][i];\r\n                v = pa[v][i];\r\n            }\r\n        }\r\n\r\n        return max({ret, p[u][0], p[v][0]});\r\n    }\r\n};\r\n\r\n\r\nstruct IntervalTree {\r\n    vector<int> it;\r\n    int n;\r\n\r\n    IntervalTree(int n): n(n), it(vector<int>(4 * n, 0)) {}\r\n\r\n    void update(int val, int pos, int l, int r, int id) {\r\n        if (l > pos || r < pos) {\r\n            return;\r\n        }\r\n\r\n        if (l == r) {\r\n            it[id] = val;\r\n            return;\r\n        }\r\n\r\n        int mid = l + r >> 1;\r\n\r\n        update(val, pos, l, mid, id * 2);\r\n        update(val, pos, mid + 1, r, id * 2 + 1);\r\n\r\n        it[id] = max(it[id * 2], it[id * 2 + 1]);\r\n    }\r\n\r\n    int get(int i, int j, int l, int r, int id) {\r\n        if (l > j || r < i) {\r\n            return 0;\r\n        }\r\n\r\n        if (l >= i && r <= j) {\r\n            return it[id];\r\n        }\r\n\r\n        int mid = l + r >> 1;\r\n\r\n        return max(get(i, j, l, mid, id * 2), get(i, j, mid + 1, r, id * 2 + 1));\r\n    }\r\n};\r\n\r\nvoid solve() {\r\n    int n, m, q;\r\n\r\n    cin >> n >> m >> q;\r\n\r\n    UF s(n);\r\n\r\n    vector<vector<pair<int, int>>> a(n);\r\n\r\n    for (int i = 0 ; i < m ; i++) {\r\n        int u, v;\r\n        cin >> u >> v; u--; v--;\r\n\r\n        if (s.join(u, v)) {\r\n            a[u].push_back({v, i + 1});\r\n            a[v].push_back({u, i + 1});\r\n        }\r\n    }\r\n\r\n\r\n    vector<int> b(n);\r\n    LCA l(n, a);\r\n\r\n    IntervalTree it(n);\r\n\r\n    for (int i = 0 ; i + 1 < n ; i++) {\r\n        it.update(l.getMax(i, i + 1), i, 0, n - 1, 1);\r\n    }\r\n\r\n\r\n\r\n    while (q--) {\r\n        int u, v;\r\n\r\n        cin >> u >> v; u--; v--;\r\n\r\n        if (u == v) {\r\n            cout << 0 << \" \";\r\n            continue;\r\n        }\r\n\r\n        cout << it.get(u, v - 1, 0, n-1, 1) << \" \";\r\n    }\r\n\r\n    cout << \"\\n\";\r\n}\r\n\r\nsigned main() {\r\n\r\n//    freopen(\"input.txt\", \"r\", stdin);\r\n    int t;\r\n\r\n    cin >> t;\r\n\r\n    while (t--) {\r\n        solve();\r\n    }\r\n}\r\n"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 63951997,
+    "contestId": 1096,
+    "creationTimeSeconds": 1572559317,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1096,
+        "index": "F",
+        "name": "Inversion Expectation",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1096,
+        "members": [
+            {
+                "handle": "Ali_ElMasry"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1546007700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 32,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 6144000,
+    "source": "#include <bits/stdc++.h>\n\nusing namespace std;\n\ntypedef long long ll;\ntypedef pair<ll, ll> pll;\ntypedef pair<int, int> pii;\n\n#define endl \"\\n\"\n\nconst ll INF = 1e15;\nconst int MOD = 998244353;\nconst double EPS = 1e-9;\nconst double PI = acos(-1.0);\n\nmt19937 rng((int) chrono::steady_clock::now().time_since_epoch().count());\n\nconst int N = 2e5 + 5;\n\nll n, a[N];\n\nstruct BIT {\n    int n;\n    vector<ll> sum;\n\n    BIT(int n_) : n(n_ + 1), sum(n) {}\n\n    void update(int i, ll delta = 1) {\n        while(i < n) {\n            sum[i] += delta;\n            i += (i & -i);\n        }\n    }\n\n    ll query(int i) {\n        ll val = 0;\n        while(i > 0) {\n            val += sum[i];\n            i -= (i & -i);\n        }\n        return val;\n    }\n};\n\nll fast_pow(ll a, ll b) {\n    if (b == 0) \n        return 1;\n    ll res = fast_pow((a * a) % MOD, b / 2);\n    if (b & 1) \n        (res *= a) %= MOD;\n    return res;\n}\n\nll mod_inv(ll a) {\n    return fast_pow(a, MOD - 2);\n}\n\nll fact[N];\nbool have[N];\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(NULL), cout.tie(NULL);\n\n    fact[0] = 1;\n    for (int i = 1; i < N; ++i)\n        fact[i] = (fact[i - 1] * i) % MOD;\n\n    cin >> n;\n\n    vector<int> notFound;\n\n    ll cnt = 0;\n    for (int i = 0; i < n; ++i) {\n        cin >> a[i];\n        if (a[i] != -1)\n            have[a[i]] = true;\n    }\n\n    for (int i = 1; i <= n; ++i)\n        if (!have[i])\n            notFound.push_back(i);\n\n    ll k = (ll) notFound.size();\n\n    if (k != 0) {\n        ll bef = k;\n        for (int i = 0; i < n; ++i) {\n            if (a[i] == -1)\n                --bef;\n            else {\n                ll big = (lower_bound(notFound.begin(), notFound.end(), a[i]) - notFound.begin());\n                cnt += ((fact[k - 1] * big) % MOD * bef) % MOD;\n                cnt += ((fact[k - 1] * (k - big)) % MOD * (k - bef)) % MOD;\n                cnt %= MOD;\n            }\n        }\n\n        cnt *= mod_inv(fact[k]);\n        cnt %= MOD;\n\n        cnt += (((k * (k - 1)) % MOD) * mod_inv(4)) % MOD;\n        cnt %= MOD;\n    }\n\n    BIT tree(N);\n\n    for (int i = 0; i < n; ++i) {\n        if (a[i] != -1) {\n            cnt += tree.query(N - 1) - tree.query(a[i]);\n            cnt %= MOD;\n            tree.update(a[i]);\n        }\n    }\n\n    cout << cnt << endl;\n}\n"
+}

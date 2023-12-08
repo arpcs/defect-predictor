@@ -1,0 +1,44 @@
+{
+    "id": 231999189,
+    "contestId": 1895,
+    "creationTimeSeconds": 1699480848,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "BeautyOfRandom"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 327,
+    "memoryConsumedBytes": 298188800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nconst int maxn  = 6e5+5;\r\nconst int max_log = 20;\r\nstruct Card{\r\n    int att, def, idx;\r\n};\r\nbool cmp_att(Card& a, Card& b){\r\n    return a.att < b.att;\r\n}\r\nbool cmp_def(Card& a, Card& b){\r\n    return a.def < b.def;\r\n}\r\nCard first_cards[maxn];\r\nCard second_cards[maxn];\r\nCard first_def_in_att[maxn*4];\r\nCard second_def_in_att[maxn*4];\r\nint n,m;\r\nint all_values[maxn*4];\r\nint st[maxn*4][max_log];\r\nint head[maxn*2], nxt[maxn*2], des[maxn*2];\r\nint edge_idx = 0;\r\nvoid add_edge(int from, int to){\r\n    edge_idx++;\r\n    nxt[edge_idx] = head[from];\r\n    head[from] = edge_idx;\r\n    des[edge_idx] = to;\r\n}\r\nint state[maxn * 2];\r\nint end_at[maxn * 2];\r\nint dfs1(int now){\r\n    if(state[now] != 0){\r\n        return state[now] == 1;\r\n    }\r\n    state[now] = 2;\r\n    bool success = false;\r\n    int end_node = 0;\r\n    for(int e=head[now]; e; e=nxt[e]){\r\n        int to = des[e];\r\n        end_node = dfs1(to);\r\n        if(state[to] == 2 || state[to] == 1){\r\n            success = true;\r\n            break;\r\n        }\r\n    }\r\n    if(success){\r\n        state[now] = 1;\r\n        return 0;\r\n    }\r\n    state[now] = -1;\r\n    if(!end_node){\r\n        end_node = now;\r\n    }\r\n    return end_at[now] = end_node;\r\n}\r\nint main() {\r\n    ios::sync_with_stdio(false);\r\n//    ifstream in(\"in\");\r\n//    cin.rdbuf(in.rdbuf());\r\n    int t,i,j,k;\r\n    cin>>t;\r\n    while (t--){\r\n        cin>>n;\r\n        int values_idx = 0;\r\n        for(i=1;i<=n*4;i++){\r\n            first_def_in_att[i].def = 0;\r\n            second_def_in_att[i].def = 0;\r\n        }\r\n        unordered_map<int,int> last_appear;\r\n        unordered_map<int,int>::iterator ite;\r\n        for(i=1;i<=n;i++){\r\n            Card& c = first_cards[i];\r\n            cin>>c.att;\r\n            c.idx = i;\r\n            values_idx++;\r\n            all_values[values_idx] = c.att;\r\n        }\r\n        for(i=1;i<=n;i++){\r\n            Card& c = first_cards[i];\r\n            cin>>c.def;\r\n            values_idx++;\r\n            all_values[values_idx] = c.def;\r\n            c.idx = i;\r\n        }\r\n        cin>>m;\r\n        for(i=1;i<=m;i++){\r\n            Card& c = second_cards[i];\r\n            cin>>c.att;\r\n            values_idx++;\r\n            all_values[values_idx] = c.att;\r\n            c.idx = i;\r\n        }\r\n        for(i=1;i<=m;i++){\r\n            Card& c = second_cards[i];\r\n            cin>>c.def;\r\n            values_idx++;\r\n            all_values[values_idx] = c.def;\r\n        }\r\n        memset(state, 0, sizeof (int) * (n + m + 2));\r\n        memset(head, 0, sizeof (int)*(n+m+2));\r\n        sort(first_cards+1, first_cards+n+1, cmp_def);\r\n        sort(second_cards+1, second_cards+m+1, cmp_att);\r\n        int another = m + 1;\r\n        Card choice{0, 0, 0};\r\n        for(i=n; i>=1; i--){\r\n            Card& a = first_cards[i];\r\n            while (second_cards[another-1].att > a.def){\r\n                Card& b = second_cards[another-1];\r\n                if(b.def >= choice.def){\r\n                    choice = b;\r\n                }\r\n                another--;\r\n            }\r\n            if(another <= m){\r\n                add_edge(a.idx, n+choice.idx);\r\n            }\r\n        }\r\n        sort(first_cards+1, first_cards+n+1, cmp_att);\r\n        sort(second_cards+1, second_cards+m+1, cmp_def);\r\n        another = n + 1;\r\n        choice = Card{0, 0, 0};\r\n        for(i=m; i>=1; i--){\r\n            Card& a = second_cards[i];\r\n            while (first_cards[another-1].att > a.def){\r\n                Card& b = first_cards[another-1];\r\n                if(b.def >= choice.def){\r\n                    choice = b;\r\n                }\r\n                another--;\r\n            }\r\n            if(another <= n){\r\n                add_edge(n+a.idx, choice.idx);\r\n            }\r\n        }\r\n        int win=0, lose=0, draw=0;\r\n        for(i=1; i<=n; i++){\r\n            int end = dfs1(i);\r\n            if(end==0){\r\n                draw++;\r\n            }else if(end>n){\r\n                win++;\r\n            }else{\r\n                lose++;\r\n            }\r\n        }\r\n        printf(\"%d %d %d\\n\", win, draw, lose);\r\n\r\n//        sort(all_values+1, all_values+values_idx+1);\r\n//        values_idx = unique(all_values+1, all_values+values_idx+1) - all_values;\r\n//        map<int,int> value2actual;\r\n//        for(i=1;i<values_idx;i++){\r\n//            value2actual[all_values[i]] = i;\r\n//        }\r\n//        for(i=1;i<=n;i++){\r\n//            Card& c = first_cards[i];\r\n//            c.att = value2actual[c.att];\r\n//            c.def = value2actual[c.def];\r\n//            if(c.def > first_def_in_att[c.att].def){\r\n//                first_def_in_att[c.att] = c;\r\n//            }\r\n//        }\r\n//        for(i=1;i<=m;i++){\r\n//            Card& c = second_cards[i];\r\n//            c.att = value2actual[c.att];\r\n//            c.def = value2actual[c.def];\r\n//            if(c.def > second_def_in_att[c.att].def){\r\n//                second_def_in_att[c.att] = c;\r\n//            }\r\n//        }\r\n\r\n    }\r\n    return 0;\r\n}\r\n"
+}

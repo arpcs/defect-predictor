@@ -1,0 +1,44 @@
+{
+    "id": 233371876,
+    "contestId": 1895,
+    "creationTimeSeconds": 1700364441,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "ComboGirl"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nstruct card {\r\n    int att;\r\n    int def;\r\n    int ind;\r\n};\r\n\r\nbool comp(card x, card y) {\r\n    return x.att < y.att || (x.att == y.att && x.def < y.def);\r\n}\r\n\r\nvoid solve() {                  \r\n    //                      constraint is: respond with best card\r\n    //                 maximize card_def such that:  card_att > prev card_def.\r\n    int n, m;\r\n    int max_mo_att = 0;\r\n    int max_bi_att = 0;\r\n    \r\n    int mo_def[2000000+5];\r\n    int bi_def[2000000+5];\r\n    for(int i=1;i<=2000000+3;i++) mo_def[i] = bi_def[i] = 0;\r\n    \r\n    cin >> n;\r\n    card mo[n+5];\r\n    set<int> mo_a;\r\n    for(int i=1;i<=n;i++) {\r\n        cin >> mo[i].att;\r\n        mo_a.insert(mo[i].att);\r\n        max_mo_att = max(max_mo_att, mo[i].att);\r\n    }\r\n    for(int i=1;i<=n;i++) {\r\n        cin >> mo[i].def;\r\n        mo_def[ mo[i].def ] = 1;\r\n    }\r\n    for(int i=1;i<=n;i++) {\r\n        mo[i].ind = i;\r\n    }\r\n    int tot_mo_att = mo_a.size();\r\n    map<int, int> mp_mo_a;      // given att, returns order\r\n    int ind = 0;\r\n    for(auto it = mo_a.begin(), it != mo_a.end(); it++) {\r\n        ind++;\r\n        mp_mo_a[*it] = ind;\r\n    }\r\n    \r\n    sort(mo+1, mo+1+n, comp);\r\n    \r\n    int mo_max_def[tot_mo_att+5];       \r\n    // mo_max_def[a] returns best def over all mo's cards with att >= a\r\n    memset(mo_max_def, 0, sizeof(mo_max_def));\r\n    \r\n    for(int i=1;i<=n;i++) {\r\n        int d = mo[i].def;\r\n        int a = mo[i].att;\r\n        int j = mp_mo_a[a];\r\n        mo_max_def[j] = max(mo_max_def[j], d);\r\n    }\r\n    \r\n    for(int i=tot_mo_att-1;i>=1;i--) {\r\n        mo_max_def[i] = max(mo_max_def[i], mo_max_def[i+1]);\r\n    }\r\n    \r\n    \r\n    \r\n    \r\n    cin >> m;\r\n    card bi[m+5];\r\n    set<int> bi_a;\r\n    for(int i=1;i<=m;i++) {\r\n        cin >> bi[i].att;\r\n        bi_a.insert(bi[i].att);\r\n        max_bi_att = max(max_bi_att, bi[i].att);\r\n    }\r\n    for(int i=1;i<=m;i++) {\r\n        cin >> bi[i].def;\r\n        bi_def[ bi[i].def ] = 1;\r\n    }\r\n    for(int i=1;i<=m;i++) {\r\n        bi[i].ind = i;\r\n    }\r\n    \r\n    int tot_bi_att = bi_a.size();\r\n    map<int, int> mp_bi_a;\r\n    int ind = 0;\r\n    for(auto it = bi_a.begin(), it != bi_a.end(); it++) {\r\n        ind++;\r\n        mp_bi_a[*it] = ind;\r\n    }\r\n    \r\n    sort(bi+1, bi+1+m, comp);\r\n    \r\n    int bi_max_def[tot_bi_att+5];\r\n    \r\n    memset(bi_max_def, 0, sizeof(bi_max_def));\r\n    \r\n    for(int i=1;i<=m;i++) {\r\n        int d = bi[i].def;\r\n        int a = bi[i].att;\r\n        int j = mp_bi_a[a];\r\n        bi_max_def[j] = max(bi_max_def[j], d);\r\n    }\r\n    \r\n    \r\n    for(int i=tot_bi_att-1;i>=1;i--) {\r\n        bi_max_def[i] = max(bi_max_def[i], bi_max_def[i+1]);\r\n    }\r\n    \r\n    \r\n    /*\r\n        OK NOW WE BEGIN\r\n        OK NOW WE BEGIN\r\n        OK NOW WE BEGIN\r\n    */\r\n    \r\n    vector<int> graph[2000500];\r\n    // monocarps def values are just d\r\n    // bicarps def values are       d + 1e6\r\n    \r\n    \r\n    for(int i=1;i<=n;i++) {\r\n        int d = mo[i].def;\r\n        if(d >= max_bi_att) continue;\r\n        \r\n        // now find smallest bi_att value > d\r\n        auto it = bi_a.lower_bound(d + 1);\r\n        int a = *it;\r\n        int j = mp_bi_a[a];\r\n        int d2 = bi_max_def[j];\r\n        \r\n        // so monocarp places down card with def d,\r\n        // then bicarp places down card with def d2\r\n        // then reverse graph is   d2 -> d\r\n        graph[d2 + 1e6].push_back(d);\r\n    }\r\n    \r\n    for(int i=1;i<=m;i++) {\r\n        int d2 = bi[i].def;\r\n        if(d2 >= max_mo_att) continue;\r\n        \r\n        // now find smallest mo_att value > d2\r\n        auto it = mo_a.lower_bound(d2 + 1);\r\n        int a = *it;\r\n        int j = mp_mo_a[a];\r\n        int d = mo_max_def[j];\r\n        \r\n        graph[d].push_back(d2 + 1e6);\r\n    }\r\n    \r\n    // d values at most 1e6 are for mono\r\n    \r\n    int win[2000000+50];    // 1 is mo win, 2 is bi win, 0 is draw\r\n    for(int i=1;i<=2000000+10;i++) win[i] = -1;\r\n    vector<int> bfs_mo;\r\n    vector<int> bfs_bi;\r\n    \r\n    for(int i=1;i<=1000000;i++) {\r\n        if(!mo_def[i]) continue;\r\n        bfs_mo.push_back(i);\r\n    }\r\n    \r\n    while(!bfs_mo.empty()) {\r\n        int x = bfs_mo.front();\r\n        bfs_mo.pop();\r\n        if(win[x] != -1) continue;\r\n        \r\n        win[x] = 1;\r\n        for(auto y : graph[x]) bfs_mo.push(y);\r\n    }\r\n\r\n    for(int i=1000000+1;i<=2000000;i++) {\r\n        if(!bi_def[i]) continue;\r\n        bfs_bi.push_back(i);\r\n    }\r\n    \r\n    while(!bfs_bi.empty()) {\r\n        int x = bfs_bi.front();\r\n        bfs_bi.pop();\r\n        if(win[x] != -1) continue;\r\n        \r\n        win[x] = 2;\r\n        for(auto y : graph[x]) bfs_bi.push(y);\r\n    }\r\n    \r\n    int mo_win = 0;\r\n    int draw = 0;\r\n    int bi_win = 0;\r\n    \r\n    for(int i=1;i<=n;i++) {\r\n        int d = mo[i].def;\r\n        if(win[d] == 1) mo_win++;\r\n        else if(win[d] == 2) bi_win++;\r\n        else draw++;\r\n    }\r\n    cout << mo_win << '\\n';\r\n    cout << draw << '\\n';\r\n    cout << bi_win << '\\n';\r\n    return;\r\n    \r\n    \r\n    \r\n    \r\n    \r\n    \r\n    \r\n    \r\n    \r\n\r\n}\r\n\r\nint main() {\r\n    int t;\r\n    cin >> t;\r\n    while(t--) solve();\r\n    return 0;\r\n}"
+}

@@ -1,0 +1,44 @@
+{
+    "id": 236132441,
+    "contestId": 1895,
+    "creationTimeSeconds": 1701915602,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "tengrist"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 670,
+    "memoryConsumedBytes": 80691200,
+    "source": "// LUOGU_RID: 138515596\n#include <bits/stdc++.h>\n#define ALL(v) begin(v), end(v)\n\nusing i64 = int64_t;\n\nconst int kMaxN = 3E5 + 5;\n\nint n, m;\nstd::array<int, kMaxN> ax, ay, bx, by;\nstd::array<std::vector<std::pair<int, bool>>, kMaxN * 4> way;\n\nstd::vector<int> rawa, rawb;\nvoid Discrete() {\n  rawa.clear(), rawb.clear();\n  for (int i = 1; i <= n; ++i) rawa.emplace_back(ax[i]);\n  for (int i = 1; i <= m; ++i) rawb.emplace_back(bx[i]);\n  std::sort(ALL(rawa)), rawa.erase(std::unique(ALL(rawa)), end(rawa));\n  std::sort(ALL(rawb)), rawb.erase(std::unique(ALL(rawb)), end(rawb));\n}\nauto FindA(int x) { return std::lower_bound(ALL(rawa), x) - begin(rawa) + 1; }\nauto FindB(int x) { return std::lower_bound(ALL(rawb), x) - begin(rawb) + 1; }\nstd::array<int, kMaxN * 4> state, in;\nstd::queue<int> q;\nstd::array<bool, kMaxN * 4> added;\nvoid Toposort() {\n  while (q.size()) q.pop();\n  int k = n + n + m + m;\n  for (int i = 1; i <= k; ++i) state[i] = 0, in[i] = 0, added[i] = false;\n  for (int i = 1; i <= k; ++i) {\n    for (auto [v, _] : way[i]) ++in[v];\n  }\n  for (int i = 1; i <= k; ++i) {\n    if (!in[i]) q.emplace(i), state[i] = 1, added[i] = true;\n  }\n  while (q.size()) {\n    int u = q.front();\n    q.pop();\n    for (auto [v, w] : way[u]) {\n      if (added[v]) continue;\n      if (!w) {\n        if (state[u] == 1) {\n          state[v] = 1, q.emplace(v), added[v] = true;\n          continue;\n        }\n        if (!--in[v]) state[v] = 2, q.emplace(v), added[v] = true;\n        continue;\n      }\n      --in[v];\n      if (state[u] == 1) {\n        state[v] = 2, q.emplace(v), added[v] = true;\n        continue;\n      }\n      if (!in[v]) state[v] = 1, q.emplace(v), added[v] = true;\n    }\n  }\n}\nvoid Proc() {\n  std::cin >> n;\n  for (int i = 1; i <= n; ++i) std::cin >> ax[i];\n  for (int i = 1; i <= n; ++i) std::cin >> ay[i];\n  std::cin >> m;\n  for (int i = 1; i <= m; ++i) std::cin >> bx[i];\n  for (int i = 1; i <= m; ++i) std::cin >> by[i];\n  for (int i = 1; i <= n + n + m + m; ++i) way[i].clear();\n\n  Discrete();\n  for (int i = 1; i <= n; ++i) way[i].emplace_back(FindA(ax[i]) + n + m, false);\n  for (int i = 1; i <= m; ++i) {\n    way[i + n].emplace_back(FindB(bx[i]) + n + n + m, false);\n  }\n  for (int i = 1; i < rawa.size(); ++i) {\n    way[i + n + m + 1].emplace_back(i + n + m, false);\n  }\n  for (int i = 1; i < rawb.size(); ++i) {\n    way[i + n + n + m + 1].emplace_back(i + n + n + m, false);\n  }\n  for (int i = 1; i <= n; ++i) {\n    int p = FindB(ay[i] + 1);\n    if (p <= rawb.size()) way[p + n + n + m].emplace_back(i, true);\n  }\n  for (int i = 1; i <= m; ++i) {\n    int p = FindA(by[i] + 1);\n    if (p <= rawa.size()) way[p + n + m].emplace_back(i + n, true);\n  }\n\n  Toposort();\n  std::array<int, 3> cnt{0, 0, 0};\n  for (int i = 1; i <= n; ++i) ++cnt[state[i]];\n  std::cout << cnt[1] << ' ' << cnt[0] << ' ' << cnt[2] << '\\n';\n}\n\nauto main() -> int {\n  std::ios::sync_with_stdio(false);\n  std::cin.tie(nullptr), std::cout.tie(nullptr);\n  int t;\n  for (std::cin >> t; t; --t) Proc();\n  return 0;\n}"
+}

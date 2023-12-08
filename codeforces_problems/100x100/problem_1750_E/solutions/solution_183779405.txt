@@ -1,0 +1,40 @@
+{
+    "id": 183779405,
+    "contestId": 1750,
+    "creationTimeSeconds": 1670104565,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "michao"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1667745300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 29,
+    "timeConsumedMillis": 140,
+    "memoryConsumedBytes": 38809600,
+    "source": "#include <bits/stdc++.h>\r\n#define int long long\r\n#define mp make_pair\r\n#define pb push_back\r\n#define ld long double\r\n#define pii pair<int,int>\r\n#define sz(x) (int)x.size()\r\n#define piii pair<pii,pii>\r\n#define precise cout<<fixed<<setprecision(10)\r\n#define st first\r\n#define nd second\r\n#define ins insert\r\n#define vi vector<int>\r\n#define BOOST ios_base::sync_with_stdio(false);cin.tie(0);cout.tie(0)\r\nusing namespace std;\r\nconst int MAX=4e5+5;\r\nconst int STALA=2e5;\r\nconst int ILE=2;\r\nconst int inf=(int)1e18+9;\r\nint t[MAX*2][ILE];\r\nchar s[MAX];\r\nint prefsum[MAX];\r\nint prefmini[MAX];\r\nint suf[MAX];\r\nvoid update(int u,int c,int id){\r\n\tu+=STALA;\r\n\tfor (t[u+=MAX][id]+=c;u>1;u>>=1)t[u>>1][id]=t[u][id]+t[u^1][id];\r\n}\r\n\r\nint query(int u,int v,int id){\r\n\tint sum=0;\r\n\tu+=STALA,v+=STALA;\r\n\tfor (u+=MAX,v+=MAX+1;u<v;u>>=1,v>>=1){\r\n\t\tif (u&1)sum+=t[u++][id];\r\n\t\tif (v&1)sum+=t[--v][id];\r\n\t}\r\n\treturn sum;\r\n}\r\nvector<pii>pom;\r\nint ans=0;\r\nint trzymam[MAX];\r\nset<int>czysc;\r\nvoid aktualizuj(int suma,int ile,int id){\r\n\tupdate(prefsum[id],prefsum[id]*ile,0);\r\n\tupdate(prefsum[id],ile,1);\r\n\tpom.pb(mp(suma,id));\r\n\tczysc.ins(prefsum[id]);\r\n\ttrzymam[id]=ile;\r\n\tint odejmij=prefsum[id-1];\r\n\t// sum of minimums\r\n\tint sumarum=query(-STALA,odejmij-1,0)-prefsum[id-1]*query(-STALA,odejmij-1,1);\r\n\tans-=sumarum;\r\n\tassert(sumarum<=0);\r\n}\r\nvoid odwroc(int id){\r\n\tint l=id;\r\n\tint r=id+trzymam[id]-1;\r\n\tint ile=(r-l+1);\r\n\tassert(ile==trzymam[id]);\r\n\tupdate(prefsum[id],-prefsum[id]*ile,0);\r\n\tupdate(prefsum[id],-ile,1);\r\n}\r\nvi event[MAX];\r\nvoid solve(){\r\n\tint n;\r\n\tcin>>n;\r\n\tfor (int i=1;i<=n;i++)cin>>s[i];\r\n\tfor (int i=1;i<=n;i++)event[i].clear();\r\n\tint akt=0,mini=inf;\r\n\tfor (int i=1;i<=n;i++){\r\n\t\takt+=(s[i]=='('?1:-1);\r\n\t\tmini=min(mini,akt);\r\n\t\tprefsum[i]=akt;\r\n\t\ttrzymam[i]=0;\r\n\t\tprefmini[i]=mini;\r\n\t}\r\n\tans=0;\r\n\tsuf[n]=prefsum[n];\r\n\tfor (int i=n-1;i>=1;i--)suf[i]=min(suf[i+1],prefsum[i]);\r\n\tfor (int i=n;i>=1;i--){\r\n\t\tint odejmij=prefsum[i-1];\r\n\t\tupdate(prefsum[i],prefsum[i],0);\r\n\t\tupdate(prefsum[i],1,1);\r\n\t\tczysc.ins(prefsum[i]);\r\n\t\t//dodajemy balans;\r\n\t\tint mniejszych=query(-STALA,odejmij-1,1);\r\n\t\tint sumamniejszych=query(-STALA,odejmij-1,0);\r\n\t\tint wiekszych=query(odejmij,STALA,1);\r\n\t\tint sumawiekszych=query(odejmij,STALA,0);\r\n\t\tans+=abs(sumawiekszych-wiekszych*odejmij);\r\n\t\tans+=abs(sumamniejszych-mniejszych*odejmij);\r\n\t}\r\n\tfor (auto it:czysc){\r\n\t\tfor (int id=0;id<ILE;id++)update(it,-query(it,it,id),id);\r\n\t}\r\n\tczysc.clear();\r\n\tpom.clear();\r\n\tpom.pb(mp(-inf,n+1));\r\n\t/*\r\n\tfor (int i=1;i<=n;i++){\r\n\t\tint beka=0,mini=0;\r\n\t\tfor (int j=i;j<=n;j++){\r\n\t\t\tbeka+=(s[j]=='('?1:-1);\r\n\t\t\tmini=min(mini,beka);\r\n\t\t\tif (mini<0)ans+=(-mini);\r\n\t\t\t//if (mini<0)ans+=(-mini)+min(0LL,beka);\r\n\t\t}\r\n\t}\r\n\t*/\r\n\tfor (int i=n;i>=1;i--){\r\n\t\twhile (pom.back().st>=prefsum[i]){\r\n\t\t\todwroc(pom.back().nd);\r\n\t\t\tpom.pop_back();\r\n\t\t}\r\n\t  int ile=pom.back().nd-i;\r\n\t  aktualizuj(prefsum[i],ile,i);\r\n\t  int ip=0,ik=sz(pom);\r\n\t  while (ip+1<ik){\r\n\t  \tint mid=(ip+ik)/2;\r\n\t  \tif (pom[mid].st<prefsum[i-1])ip=mid;\r\n\t  \telse ik=mid;\r\n\t  }\r\n\t  int sufiks=pom[ip].nd;\r\n\t  if (sufiks<=n){\r\n\t  \tassert(sufiks>=i);\r\n\t  \tevent[sufiks].pb(i);\r\n\t  }\r\n\t}\r\n\tfor (auto it:czysc){\r\n\t\tfor (int id=0;id<ILE;id++)update(it,-query(it,it,id),id);\r\n\t}\r\n\tczysc.clear();\r\n\t\r\n\tfor (int i=n;i>=1;i--){\r\n\t\tupdate(prefsum[i],prefsum[i],0);\r\n\t\tupdate(prefsum[i],1,1);\r\n\t\tczysc.ins(prefsum[i]);\r\n\t\tfor (auto it:event[i]){\r\n\t\t\tint ile=query(-STALA,prefsum[it-1]-1,1);\r\n\t\t\tint suma=query(-STALA,prefsum[it-1]-1,0);\r\n\t\t\tans+=suma-ile*prefsum[it-1];\r\n\t\t}\r\n\t}\r\n\tfor (auto it:czysc){\r\n\t\tfor (int id=0;id<ILE;id++)update(it,-query(it,it,id),id);\r\n\t}\r\n\tczysc.clear();\r\n\tcout<<ans<<\"\\n\";\r\n}\r\n\r\nint32_t main()\r\n{\r\n  BOOST;\r\n\tint t;\r\n\tcin>>t;\r\n\tfor (int z=0;z<t;z++)solve();\r\n  return 0;\r\n}\r\n"
+}

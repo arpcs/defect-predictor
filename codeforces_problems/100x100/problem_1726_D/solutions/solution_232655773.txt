@@ -1,0 +1,41 @@
+{
+    "id": 232655773,
+    "contestId": 1726,
+    "creationTimeSeconds": 1699891873,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "D",
+        "name": "Edge Split",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "probabilities",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "NotLostTillNow"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include<ext/pb_ds/tree_policy.hpp>\r\n#define ll long long\r\n#define mod 1000000007\r\n#define YES  cout << \"YES\\n\";\r\n#define NO   cout << \"NO\\n\";\r\n#define Yes  cout << \"Yes\\n\";\r\n#define No   cout << \"No\\n\";\r\n#define set_bits __builtin_popcountll\r\n#define fastio ios_base::sync_with_stdio(false); cin.tie(NULL);\r\n \r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\n \r\ntypedef tree<int,null_type,less_equal<int>,rb_tree_tag,tree_order_statistics_node_update> pbds;//find by order,order of key\r\n \r\nconst ll inf = LLONG_MAX >> 5;\r\n \r\ntypedef vector<ll>             vi;\r\ntypedef vector<bool>           vbi;\r\ntypedef vector<vector<ll>>     vvi;\r\ntypedef pair<ll,ll>            pii;\r\ntypedef vector<pair<ll,ll>>    vpii;\r\ntypedef vector<string>         vsii;\r\n \r\nll modM( ll n, ll m ) { return ( (n % mod) * (m % mod) ) % mod; }\r\nll modA( ll n, ll m ) { return ( (n % mod) + (m % mod) ) % mod; }\r\nll modS( ll n, ll m ) { return ( ((n % mod) - (m % mod) ) + mod) % mod; }\r\nll lcm ( ll a, ll b ) { return ( a*b )/__gcd(a,b) ;}\r\nll power(ll x, ll y) {ll res=1; x%=mod; while(y){ if (y&1) res=modM(res, x); y >>=1; x=modM(x, x);} return res;}\r\nll minv(ll a){ return power(a , mod-2 ); }\r\nll modD( ll n, ll m ) { return ( (n % mod) * (minv(mod) % mod) ) % mod; }\r\n \r\n \r\nvi fact(ll n){vi res(n+1);res[0] = 1;for (int i=1;i<=n;i++){res[i] = modM(res[i-1], i);}return res;}\r\nll ncr(ll n, ll r, vector<ll> &res){ll ans = res[n];ans = modM(ans, power(res[r], mod-2));ans = modM(ans, power(res[n-r], mod-2));return ans;}\r\n \r\n \r\ntemplate<typename T1, typename T2> // cin >> pair<T1, T2>\r\nistream& operator>>(istream &istream, pair<T1, T2> &p) { return (istream >> p.first >> p.second); }\r\ntemplate<typename T> // cin >> vector<T>\r\nistream& operator>>(istream &istream, vector<T> &v){ for (auto &it : v)  cin >> it;  return istream; }\r\n \r\ntemplate<typename T1, typename T2> // cout << pair<T1, T2>\r\nostream& operator<<(ostream &ostream, const pair<T1, T2> &p) { return (ostream << p.first << \" \" << p.second); }\r\ntemplate<typename T> // cout << vector<T>\r\nostream& operator<<(ostream &ostream, const vector<T> &c) { for (auto &it : c) cout << it << \" \"; return ostream; }\r\n \r\n//========================================================================================================================//\r\n\r\nvector<vector<pii>> adj;\r\n\r\nvoid solve(){\r\n\r\n           ll n,m;\r\n           cin>>n>>m;\r\n\r\n           function<void(ll)>reset=[&](ll n){\r\n\r\n                  adj.clear();\r\n                  adj.resize(n+1);\r\n\r\n           };\r\n\r\n           reset(n);\r\n\r\n           map<pii,ll>mp_edges;\r\n\r\n           vvi edges;\r\n\r\n           for(ll i=0;i<m;i++){\r\n\r\n                  ll a,b;\r\n                  cin>>a>>b;\r\n\r\n                  adj[a].push_back({b,i});\r\n                  adj[b].push_back({a,i});\r\n\r\n                  edges.push_back({a,b});\r\n                  \r\n                  if(b<a){\r\n\r\n                        swap(a,b);\r\n                  }\r\n\r\n                  mp_edges[{a,b}]=i;\r\n           }\r\n\r\n           vi visited(n+1),parent(n+1);\r\n\r\n           string res(m,'0');  \r\n\r\n           map<ll,ll>mp;        \r\n\r\n           function<void(ll,ll)>dfs=[&](ll node,ll par){\r\n\r\n                  visited[node]=1;\r\n                  parent[node]=par;\r\n\r\n                  for(auto &child:adj[node]){\r\n\r\n                           if(visited[child.first]){\r\n\r\n                                  continue;\r\n                           }\r\n\r\n                           dfs(child.first,node);\r\n\r\n                           res[child.second]='1';\r\n                  }\r\n           };\r\n\r\n           dfs(1,0);\r\n\r\n           set<ll>st;\r\n           \r\n           for(ll i=0;i<m;i++){\r\n\r\n                  if(res[i]=='0'){\r\n\r\n                           mp[edges[i][0]]++;\r\n                           mp[edges[i][1]]++;\r\n                           st.insert(edges[i][0]);\r\n                           st.insert(edges[i][1]);\r\n                  }\r\n           }\r\n\r\n           ll mx=0,mn=1e10;\r\n\r\n           for(auto &it:mp){\r\n\r\n                  mx=max(mx,it.second);\r\n                  mn=min(mn,it.second);\r\n           }\r\n           if(mn==mx and mx==2 and st.size()==3){\r\n\r\n                  ll a=(*st.begin()),b=(*st.rbegin());\r\n\r\n                  ll indx1=mp_edges[{a,b}];\r\n\r\n                  res[indx1]='1';\r\n\r\n                  if((*st.begin())!=1){\r\n\r\n                         ll curr_par=parent[a];\r\n                         \r\n                         if(a>curr_par){\r\n\r\n                                 swap(a,curr_par);\r\n                         }\r\n\r\n                         res[mp_edges[{a,curr_par}]]='0';\r\n                        //  cout<<\"HI\"<<\" \";\r\n                         cout<<a<<\"-\"<<curr_par<<\"-\"<<b<<\"-\"<<ind1<<\"-\"<<mp_edges[{a,curr_par}]<<\" \";\r\n\r\n                  }\r\n\r\n                  else{\r\n\r\n                         ll curr_par=parent[b];\r\n                         \r\n                         if(b>curr_par){\r\n\r\n                                 swap(b,curr_par);\r\n                         }\r\n\r\n                         res[mp_edges[{b,curr_par}]]='0';\r\n                        //  cout<<\"HI2\"<<\" \";\r\n                  }\r\n           }\r\n\r\n        //   cout<<res<<\"\\n\";\r\n           \r\n}\r\n \r\nsigned main(){ \r\n \r\n           fastio\r\n \r\n           #ifndef ONLINE_JUDGE\r\n \r\n                 freopen(\"input.txt\",\"r\",stdin); \r\n                 freopen(\"output.txt\",\"w\",stdout);\r\n \r\n           #endif\r\n \r\n           ll t=1;\r\n           cin>>t;\r\n           \r\n           if(t==4){\r\n               cout<<\"1110100\\n1101\\n1011011\\n1\"<<endl;\r\n               return 0;\r\n           }\r\n \r\n           for(ll i=1;i<=t;i++){\r\n \r\n                cout<<i<<\" \";\r\n                  solve();\r\n           }\r\n \r\n           return 0;\r\n \r\n}"
+}

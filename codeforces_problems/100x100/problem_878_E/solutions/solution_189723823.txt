@@ -1,0 +1,36 @@
+{
+    "id": 189723823,
+    "contestId": 878,
+    "creationTimeSeconds": 1674122242,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "x86-cake"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 10,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 27238400,
+    "source": "#include <bits/stdc++.h>\n#define Loop(x,l,r) for (ll x = (l); x < (ll)(r); ++x)\n#define LoopR(x,l,r) for (ll x = (r)-1; x >= (ll)(l); --x)\ntypedef long long ll;\ntypedef std::pair<int, int> pii;\ntypedef std::pair<ll , ll > pll;\nusing namespace std;\n\nint constexpr mod = 1e9 + 7;\nint constexpr N = 100'010;\nint constexpr lg = 20;\n\nint a[N];\nint par[N];\nint anc[lg][N];\nll anc_val[lg][N];\nll ps[N];\nll p2[N], p2i[N];\nint n, q;\n\nll get_sum_real(int l, int r)\n{\n\tll ans = 0;\n\tLoopR (i,l,r)\n\t\tans = ans*2 + a[i];\n\treturn ans;\n}\n\nll get_sum(int l, int r)\n{\n\tll tmp = (ps[r] + mod - ps[l]) * p2i[l] % mod;\n\t//cerr << \"get_sum(\" << l << \", \" << r << \") = \" << tmp << '\\n';\n\treturn tmp;\n}\n\nint main()\n{\n\tcin.tie(0) -> sync_with_stdio(false);\n\tcin >> n >> q;\n\tLoop (i,0,n)\n\t\tcin >> a[i];\n\t\n\tp2[0] = p2i[0] = 1;\n\tLoop (i,0,N-1) {\n\t\tp2[i+1] = p2[i] * 2 % mod;\n\t\tp2i[i+1] = p2i[i] * (mod+1)/2 % mod;\n\t}\n\n\tps[0] = 1;\n\tLoop (i,0,n)\n\t\tps[i+1] = (ps[i] + (a[i] + mod) * p2[i]) % mod;\n\n\tpar[0] = 0;\n\tLoop (i,0,n) {\n\t\tll val = a[i];\n\t\tint x = i;\n\t\tfor (;;) {\n\t\t\tif (val <= 0) {\n\t\t\t\tpar[i+1] = x;\n\t\t\t\tbreak;\n\t\t\t}\n\t\t\tif (val > (ll)1e9 || x-par[x] > 30 || x == 0) {\n\t\t\t\tpar[i+1] = 0;\n\t\t\t\tbreak;\n\t\t\t}\n\t\t\tval = val * p2[x-par[x]] + get_sum_real(par[x], x);\n\t\t\tx = par[x];\n\t\t}\n\t}\n\n\tLoop (i,0,n+1) {\n\t\t//cerr << \"par[\" << i << \"] = \" << par[i] << '\\n';\n\t\tanc[i][0] = par[i];\n\t\tanc_val[i][0] = get_sum(par[i], i);\n\t\tLoop (j,0,lg-1) {\n\t\t\tanc[i][j+1] = anc[anc[i][j]][j];\n\t\t\tanc_val[i][j+1] = (anc_val[i][j] + anc_val[anc[i][j]][j]) % mod;\n\t\t}\n\t}\n\t\n\twhile (q--) {\n\t\tint l, r;\n\t\tcin >> l >> r;\n\t\t--l;\n\t\tll ans = 0;\n\t\tint x = r;\n\t\tLoopR (i,0,lg) {\n\t\t\tif (l+1 < anc[x][i]) {\n\t\t\t\tans = (ans + anc_val[x][i]) % mod;\n\t\t\t\tx = anc[x][i];\n\t\t\t}\n\t\t}\n\t\tans = (ans + get_sum(l+1, x)) % mod;\n\t\tans = (2*ans + a[l] + mod) % mod;\n\t\tcout << ans << '\\n';\n\t}\n}\n\n"
+}

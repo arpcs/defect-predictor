@@ -1,0 +1,36 @@
+{
+    "id": 88747602,
+    "contestId": 842,
+    "creationTimeSeconds": 1596385857,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 842,
+        "index": "D",
+        "name": "Vitya and Strange Lesson",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "binary search",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 842,
+        "members": [
+            {
+                "handle": "Viktoriuss"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1504019100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 171,
+    "memoryConsumedBytes": 10547200,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <tuple>\r\n#include <deque>\r\n#include <set>\r\n#include <map>\r\n#include <cmath>\r\n#include <string>\r\n#include <algorithm>\r\n#include <unordered_set>\r\n#define all(x) (x).begin(), (x).end()\r\n#define allr(x) (x).rbegin(), (x).rend()\r\n\r\nusing namespace std;\r\n\r\nconst int MOD = 1e9 + 7;\r\nconst int INF = 1e9;\r\n\r\nvoid fast()\r\n{\r\n\tios_base::sync_with_stdio(0);\r\n\tcin.tie(0);\r\n\tcout.tie(0);\r\n}\r\n\r\nconst int sz = 4e5;\r\nconst int alph = 2;\r\nconst int depth = 29;\r\nint trie[sz][alph];\r\nint d[sz]; //\u043a\u043e\u043b\u0438\u0447\u0435\u0441\u0442\u0432\u043e \u0442\u0435\u0440\u043c\u0438\u043d\u0430\u043b\u044c\u043d\u044b\u0445 \u0432\u0435\u0440\u0448\u0438\u043d \u0432 \u043f\u043e\u0434\u0434\u0435\u0440\u0435\u0432\u0435, \u0432\u043a\u043b\u044e\u0447\u0430\u044f \u0441\u0430\u043c\u0443 \u0432\u0435\u0440\u0448\u0438\u043d\u0443\r\nint dist[sz]; //\u0440\u0430\u0441\u0441\u0442\u043e\u044f\u043d\u0438\u0435 \u0434\u043e \u043a\u043e\u0440\u043d\u044f\r\nbool term[sz];\r\nbool reversed[depth * 2]; //\u043f\u0435\u0440\u0435\u0432\u0451\u0440\u043d\u0443\u0442 \u043b\u0438 \u0441\u043b\u043e\u0439 \u043d\u0430 \u0440\u0430\u0441\u0441\u0442\u043e\u044f\u043d\u0438\u0438 i \u043e\u0442 \u043a\u043e\u0440\u043d\u044f\r\nint ne = -1;\r\nint cnt = 1;\r\nint n;\r\nvector <long long> power;\r\nstring cur;\r\n\r\nvoid build()\r\n{\r\n\tfor (int i = 0; i < sz; ++i)\r\n\t{\r\n\t\tfor (int j = 0; j < alph; ++j)\r\n\t\t{\r\n\t\t\ttrie[i][j] = ne;\r\n\t\t}\r\n\t\td[i] = 0;\r\n\t\tterm[i] = 0;\r\n\t\tdist[i] = 0;\r\n\t}\r\n\tfor (int i = 0; i < depth * 2; ++i)\r\n\t{\r\n\t\treversed[i] = 0;\r\n\t}\r\n}\r\n//reversed \u043d\u0435 \u043d\u0443\u0436\u0435\u043d \u0437\u0434\u0435\u0441\u044c, \u043f\u043e\u0442\u043e\u043c\u0443 \u0447\u0442\u043e \u0432\u0441\u0435 \u0437\u0430\u043f\u0440\u043e\u0441\u044b \u043d\u0430 \u043f\u0435\u0440\u0435\u0432\u043e\u0440\u043e\u0442 \u0431\u0443\u0434\u0443\u0442 \u043f\u043e\u0437\u0436\u0435\r\nvoid add(string s) //reversed + \u043a\u0430\u043a \u0440\u0430\u0431\u043e\u0442\u0430\u0442\u044c \u0432 \u0435\u0433\u043e \u043a\u043e\u043d\u0442\u0435\u043a\u0441\u0442\u0435 \u0441 \u043d\u043e\u0432\u043e\u0439 \u0432\u0435\u0440\u0448\u0438\u043d\u043e\u0439\r\n{\r\n\tint v = 0;\r\n\tfor (int i = 0; ; ++i)\r\n\t{\r\n\t\tint zero = s[i] - '0';\r\n\t\t++d[v];\r\n\t\tif (trie[v][zero] == ne)\r\n\t\t{\r\n\t\t\ttrie[v][zero] = cnt++;\r\n\t\t\tdist[trie[v][zero]] = dist[v] + 1;\r\n\t\t}\r\n\t\tif (i + 1 == s.size())\r\n\t\t{\r\n\t\t\tv = trie[v][zero];\r\n\t\t\t++d[v];\r\n\t\t\tbreak;\r\n\t\t}\r\n\t\tv = trie[v][zero];\r\n\t}\r\n\tif (term[v] == true)\r\n\t{\r\n\t\tv = 0;\r\n\t\tfor (int i = 0; ; ++i)\r\n\t\t{\r\n\t\t\tint zero = s[i] - '0';\r\n\t\t\t--d[v];\r\n\t\t\tif (i + 1 == s.size())\r\n\t\t\t{\r\n\t\t\t\tv = trie[v][zero];\r\n\t\t\t\t--d[v];\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t\tv = trie[v][zero];\r\n\t\t}\r\n\t}\r\n\telse\r\n\t\tterm[v] = true;\r\n}\r\n\r\nint mex(int v, int cur, int len = 1)\r\n{\r\n\tint zero = reversed[dist[v]];\r\n\tif (trie[v][zero] == ne)\r\n\t{\r\n\t\tif (reversed[dist[v]])\r\n\t\t\tzero = 1 - zero;\r\n\t\tcur <<= 1;\r\n\t\tcur += zero;\r\n\t\twhile (len < depth) // +-1\r\n\t\t{\r\n\t\t\tcur <<= 1;\r\n\t\t\t++len;\r\n\t\t}\r\n\t\treturn cur;\r\n\t}\r\n\tif (trie[v][zero] != ne && d[trie[v][zero]] < power[depth - dist[v] - 1])\r\n\t{\r\n\t\tint prev = zero;\r\n\t\tif (reversed[dist[v]])\r\n\t\t\tzero = 1 - zero;\r\n\t\treturn mex(trie[v][prev], cur * 2 + zero, len + 1);\r\n\t}\r\n\tzero = 1 - zero;\r\n\tif (trie[v][zero] == ne)\r\n\t{\r\n\t\tif (reversed[dist[v]])\r\n\t\t\tzero = 1 - zero;\r\n\t\tcur <<= 1;\r\n\t\tcur += zero;\r\n\t\twhile (len < depth) // +-1\r\n\t\t{\r\n\t\t\tcur <<= 1;\r\n\t\t\t++len;\r\n\t\t}\r\n\t\treturn cur;\r\n\t}\r\n\tif (trie[v][zero] != ne && d[trie[v][zero]] < power[depth - dist[v] - 1])\r\n\t{\r\n\t\tint prev = zero;\r\n\t\tif (reversed[dist[v]])\r\n\t\t\tzero = 1 - zero;\r\n\t\treturn mex(trie[v][prev], cur * 2 + zero, len + 1);\r\n\t}\r\n\treturn n;//////////////\r\n}\r\n\r\nint query(string x)\r\n{\r\n\tfor (int i = 0; i < x.size(); ++i)\r\n\t{\r\n\t\tif (x[i] == '1')\r\n\t\t\treversed[i] = !reversed[i];\r\n\t}\r\n\r\n\treturn mex(0, 0);\r\n}\r\n\r\nstring process(int x)\r\n{\r\n\tstring ans;\r\n\twhile (x > 0)\r\n\t{\r\n\t\tans.push_back('0' + (x & 1));\r\n\t\tx >>= 1;\r\n\t}\r\n\twhile (ans.size() < depth)\r\n\t{\r\n\t\tans.push_back('0');\r\n\t}\r\n\treverse(all(ans));\r\n\treturn ans;\r\n}\r\n\r\nint main()\r\n{\r\n\tfast();\r\n\tint m;\r\n\tcin >> n >> m;\r\n\tpower = { 1 };\r\n\tfor (int i = 1; i < depth + 10; ++i)\r\n\t{\r\n\t\tpower.push_back(power.back() * 2);\r\n\t}\r\n\tbuild();\r\n\tfor (int i = 0; i < n; ++i)\r\n\t{\r\n\t\tint x;\r\n\t\tcin >> x;\r\n\t\tadd(process(x));\r\n\t}\r\n\tfor (int i = 0; i < m; ++i)\r\n\t{\r\n\t\tint x;\r\n\t\tcin >> x;\r\n\t\tcout << query(process(x)) << '\\n';\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

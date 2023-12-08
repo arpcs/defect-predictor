@@ -1,0 +1,41 @@
+{
+    "id": 192382362,
+    "contestId": 1726,
+    "creationTimeSeconds": 1675622252,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "D",
+        "name": "Edge Split",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "probabilities",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "Azimjonm0012"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 77,
+    "timeConsumedMillis": 171,
+    "memoryConsumedBytes": 15769600,
+    "source": "#include <bits/stdc++.h>\r\ntypedef long long ll;\r\nconst int BUFFER = 1 << 18;\r\nstruct ostream\r\n{\r\n    char buffer[BUFFER], *pos = buffer, *end = buffer + BUFFER;\r\n    ~ostream() { flush(); }\r\n    void flush() { fwrite(buffer, 1, pos - buffer, stdout), pos = buffer; }\r\n    void put(char ch)\r\n    {\r\n        if (pos == end)\r\n            flush();\r\n        *(pos++) = ch;\r\n    }\r\n    template <typename V>\r\n    void put(V num)\r\n    {\r\n        if (num)\r\n            put(num / 10), put((char)(num % 10 + '0'));\r\n    }\r\n    ostream &operator<<(char s) { return put(s), *this; }\r\n    ostream &operator<<(const char *s)\r\n    {\r\n        while (*s)\r\n            put(*(s++));\r\n        return *this;\r\n    }\r\n    template <typename V, std::enable_if_t<std::is_integral<V>::value, bool> = true>\r\n    ostream &operator<<(V num)\r\n    {\r\n        if (num < 0)\r\n            put('-'), put(-num);\r\n        else if (num == 0)\r\n            put('0');\r\n        else\r\n            put(num);\r\n        return *this;\r\n    }\r\n} cout;\r\nstruct istream\r\n{\r\n    char buffer[BUFFER], *pos = buffer, *end = buffer;\r\n    int get()\r\n    {\r\n        if (pos == end)\r\n        {\r\n            end = buffer + fread(buffer, 1, BUFFER, stdin), pos = buffer;\r\n            if (pos == end)\r\n                return 0;\r\n        }\r\n        return *(pos++);\r\n    }\r\n    istream &operator>>(char &ch)\r\n    {\r\n        while ((ch = get()) <= ' ')\r\n            ;\r\n        return *this;\r\n    }\r\n    template <typename V, std::enable_if_t<std::is_integral<V>::value, bool> = true>\r\n    istream &operator>>(V &num)\r\n    {\r\n        char ch;\r\n        while ((ch = get()) < '-')\r\n            ;\r\n        int sign = ch == '-';\r\n        num = sign ? 0 : ch - '0';\r\n        while ((ch = get()) > ' ')\r\n            num = 10 * num + ch - '0';\r\n        if (sign)\r\n            num = -num;\r\n        return *this;\r\n    }\r\n} cin;\r\n#ifdef LOCAL\r\n#include \"debug.h\"\r\n#else\r\n#define log(...) 9\r\n#endif\r\n\r\ntemplate <int maxN, int maxM>\r\nstruct graph\r\n{\r\n    struct edge;\r\n    struct vertex\r\n    {\r\n        edge *next, *from, *choice;\r\n        int visited;\r\n    } vs[maxN], *lastV = vs + maxN;\r\n    struct edge\r\n    {\r\n        vertex *to;\r\n        edge *next;\r\n        int *ans;\r\n    } es[2 * maxM], *lastE = es;\r\n    int n;\r\n    void clear(int N)\r\n    {\r\n        n = N;\r\n        lastV = vs + n;\r\n        lastE = es;\r\n        memset(vs, 0, sizeof(vertex) * n);\r\n    }\r\n    void add(int f, int t, int *ans)\r\n    {\r\n        lastE->ans = ans, lastE->to = vs + t, lastE->next = vs[f].next, vs[f].next = lastE++;\r\n        lastE->ans = ans, lastE->to = vs + f, lastE->next = vs[t].next, vs[t].next = lastE++;\r\n    }\r\n\r\n    vertex *stacks[6], **top;\r\n    void solve()\r\n    {\r\n        top = stacks;\r\n        dfs(vs);\r\n\r\n        if (top - stacks < 6)\r\n            return;\r\n\r\n        std::sort(stacks, top);\r\n        vertex *last = 0;\r\n        int count = 0;\r\n        for (auto it = stacks; it < top; it++)\r\n            if (*it != last)\r\n            {\r\n                last = *it;\r\n                count++;\r\n            }\r\n\r\n        if (count > 3)\r\n            return;\r\n\r\n        for (auto it = stacks; it < top; it++)\r\n            if ((*it)->from)\r\n                if ((*it)->choice)\r\n                {\r\n                    *((*it)->choice->ans) = 0;\r\n                    *((*it)->from->ans) = 1;\r\n                    return;\r\n                }\r\n    }\r\n    void dfs(vertex *v)\r\n    {\r\n        v->visited = 1;\r\n        for (edge *e = v->next; e; e = e->next)\r\n            if (*(e->ans) == -1)\r\n            {\r\n                if (e->to->visited)\r\n                {\r\n                    *(e->ans) = 1;\r\n                    v->choice = e;\r\n\r\n                    *(top++) = v;\r\n                    *(top++) = e->to;\r\n                }\r\n                else\r\n                {\r\n                    *(e->ans) = 0;\r\n                    e->to->from = e;\r\n\r\n                    dfs(e->to);\r\n                }\r\n            }\r\n    }\r\n};\r\ngraph<200'000, 200'002> g;\r\n\r\nvoid testCase()\r\n{\r\n    int n, m;\r\n    cin >> n >> m;\r\n\r\n    g.clear(n);\r\n\r\n    int ans[m];\r\n    memset(ans, -1, sizeof(ans));\r\n    for (int i = 0; i < m; i++)\r\n    {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        g.add(u - 1, v - 1, ans + i);\r\n    }\r\n\r\n    g.solve();\r\n\r\n    for (int i = 0; i < m; i++)\r\n        cout << ans[i];\r\n    cout << '\\n';\r\n}\r\n\r\nint main()\r\n{\r\n    int t;\r\n    cin >> t;\r\n    for (int i = 1; i <= t; i++)\r\n        log(\"Testcase\", i), testCase();\r\n    return 0;\r\n}"
+}

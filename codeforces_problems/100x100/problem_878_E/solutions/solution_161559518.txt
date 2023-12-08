@@ -1,0 +1,36 @@
+{
+    "id": 161559518,
+    "contestId": 878,
+    "creationTimeSeconds": 1655991789,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "pooya-shams"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 186,
+    "memoryConsumedBytes": 24473600,
+    "source": "#include <algorithm>\n#include <iostream>\n#include <numeric>\n#include <cstring>\n#include <iomanip>\n#include <vector>\n#include <bitset>\n#include <stack>\n#include <queue>\n#include <cmath>\n#include <set>\n#include <map>\n#define endl '\\n'\n\nusing namespace std;\ntypedef long long ll;\ntypedef long double ld;\ntypedef pair<int, int> pii;\n\nconst int maxn = 1e5+10;\nconst int lgmx = 18;\nconst int mod = 1e9+7;\n\ninline int bpow(int x, int y)\n{\n\tint ans = 1;\n\twhile(y > 0)\n\t{\n\t\tif(y & 1)\n\t\t\tans = 1ll*ans*x % mod;\n\t\tx = 1ll*x*x % mod;\n\t\ty >>= 1;\n\t}\n\treturn ans;\n}\ninline int rev(int x)\n{\n\treturn bpow(x, mod-2);\n}\n\nint arr[maxn];\nint fneg[maxn];\nint sneg[maxn];\nll tpw[maxn];\n\nint pneg[maxn][lgmx];\nll tneg[maxn][lgmx];\n\nll ss[maxn];\n\nint32_t main()\n{\n\tios::sync_with_stdio(false);\n\tcin.tie(0);\n\ttpw[0] = 1;\n\tfor(int i = 1; i < maxn; i++)\n\t\ttpw[i] = tpw[i-1]*2 % mod;\n\tint n, q; cin >> n >> q;\n\tfor(int i = 0; i < n; i++)\n\t\tcin >> arr[i];\n\tfor(int i = n-1; i >= 0; i--)\n\t\tss[i] = (2ll*ss[i+1] + arr[i]) % mod;\n\tfor(int i = 0; i < n; i++)\n\t{\n\t\tfneg[i] = i;\n\t\tll s = arr[i];\n\t\twhile(s > 0 and fneg[i] > 0)\n\t\t{\n\t\t\tif(fneg[fneg[i]-1] == -1)\n\t\t\t{\n\t\t\t\tfneg[i] = -1;\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tint t = fneg[i] - fneg[fneg[i]-1];\n\t\t\t\ts = tpw[t]*s + sneg[fneg[i]-1];\n\t\t\t\tif(t > 30 or s > mod)\n\t\t\t\t\tfneg[i] = -1;\n\t\t\t\telse\n\t\t\t\t\tfneg[i] = fneg[fneg[i]-1];\n\t\t\t}\n\t\t}\n\t\tif(fneg[i] == 0 and s > 0)\n\t\t\tfneg[i] = -1;\n\t\tif(fneg[i] == -1)\n\t\t\tsneg[i] = 0;\n\t\telse\n\t\t\tsneg[i] = s;\n\t}\n\tfor(int i = 0; i < n; i++)\n\t{\n\t\tpneg[i][0] = fneg[i];\n\t\ttneg[i][0] = ((mod+sneg[i]) * 2ll) % mod;\n\t\tfor(int k = 1; k < lgmx; k++)\n\t\t{\n\t\t\tif(pneg[i][k-1] > 0)\n\t\t\t{\n\t\t\t\tpneg[i][k] = pneg[pneg[i][k-1] - 1][k-1];\n\t\t\t\ttneg[i][k] = (tneg[i][k-1] + tneg[pneg[i][k-1] - 1][k-1]) % mod;\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tpneg[i][k] = pneg[i][k-1];\n\t\t\t\ttneg[i][k] = tneg[i][k-1];\n\t\t\t}\n\t\t}\n\t}\n\t//for(int i = 0; i < n; i++)\n\t//\tcerr << pneg[i][0] << \" \";\n\t//cerr << endl;\n\twhile(q--)\n\t{\n\t\tint l, r; cin >> l >> r;\n\t\tl--; r--;\n\t\tll ans = 0;\n\t\tfor(int i = lgmx-1; i >= 0; i--)\n\t\t{\n\t\t\tif(pneg[r][i] > l)\n\t\t\t{\n\t\t\t\tans = (ans + tneg[r][i]) % mod;\n\t\t\t\tr = pneg[r][i]-1;\n\t\t\t}\n\t\t}\n\t\tans = (ans + (ss[l] - ss[r+1]*tpw[r+1-l]%mod + mod)%mod + mod) % mod;\n\t\tcout << ans << endl;\n\t}\n\treturn 0;\n}\n"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 98224802,
+    "contestId": 1431,
+    "creationTimeSeconds": 1605203412,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1431,
+        "index": "H",
+        "name": "Rogue-like Game",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "*special",
+            "brute force",
+            "greedy",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1431,
+        "members": [
+            {
+                "handle": "yudedako"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1605191700
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 71,
+    "timeConsumedMillis": 1622,
+    "memoryConsumedBytes": 63180800,
+    "source": "import java.util.*\r\nimport kotlin.math.*\r\n\r\n\r\nfun calcMax(from: Int, until: Int, step: Int, numbers: IntArray, sumCache: Array<IntArray>, memo: Array<Array<IntArray>>): Int {\r\n    if (step == 0) return 0\r\n    if (from == until) return 0\r\n    if (memo[from][until - from][step] >= 0) return memo[from][until - from][step]\r\n    val diff = until - from\r\n    var maxScore = calcMax(from + 1, until, step, numbers, sumCache, memo)\r\n    for (span in 1 .. minOf(step, (diff shr 1))) {\r\n        val last = from + (span shl 1)\r\n        var score = calcMax(last, until, step - span, numbers, sumCache, memo)\r\n        score += sumCache[from][last - from]\r\n        maxScore = maxOf(maxScore, score)\r\n    }\r\n    memo[from][until - from][step] = maxScore\r\n    return maxScore\r\n}\r\n\r\nfun main() {\r\n    val (n, m, k) = readLine()!!.trim().split(' ').map(String::toInt)\r\n    val forSpecies = readLine()!!.trim().split(' ').map(String::toLong)\r\n    val forClass = readLine()!!.trim().split(' ').map(String::toLong)\r\n    val points = Array(n){\r\n        readLine()!!.trim().split(' ').map(String::toInt)\r\n    }\r\n    val unlockTiming = mutableMapOf<Long, Int>()\r\n    for ((i, s) in forSpecies.withIndex()) {\r\n        for ((j, c) in forClass.withIndex()) {\r\n            val score = points[i][j]\r\n            val unlock = maxOf(s, c)\r\n            val current = unlockTiming[unlock] ?: 0\r\n            unlockTiming.put(unlock, maxOf(current, score))\r\n        }\r\n    }\r\n    val sorted = unlockTiming.toList().sortedBy { it.first }\r\n    var minRun = Long.MAX_VALUE\r\n    for (i in sorted.indices) {\r\n        var count = 0L\r\n        var currentMax = 0\r\n        var score = 0L\r\n        for ((j, p) in sorted.withIndex()) {\r\n            val (u, s) = p\r\n            val run = if (j == i) {\r\n                s + k\r\n            }else {\r\n                s\r\n            }\r\n            if (u > 0) {\r\n                val diff = (u - score)\r\n                count += (diff + currentMax - 1) / currentMax\r\n                score += (diff + currentMax - 1) / currentMax * currentMax\r\n            }\r\n            currentMax = maxOf(currentMax, run)\r\n        }\r\n        minRun = Math.min(minRun, count)\r\n    }\r\n    println(minRun)\r\n}"
+}

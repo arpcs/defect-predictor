@@ -1,0 +1,36 @@
+{
+    "id": 120924717,
+    "contestId": 1096,
+    "creationTimeSeconds": 1625032196,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1096,
+        "index": "F",
+        "name": "Inversion Expectation",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1096,
+        "members": [
+            {
+                "handle": "Be_dos"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1546007700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\n#include <cmath>\n#include <cctype>\n#include <vector>\n#include <algorithm>\n#include <set>\n#include <map>\n#include <deque>\n#include <stack>\n#include <unordered_set>\n#include <sstream>\n#include <cstring>\n#include <iomanip>\n#include <queue>\n#include <unordered_map>\n#include <random>\n#include <cfloat>\n#include <chrono>\n#include <bitset>\n#include <complex>\n#include <immintrin.h>\n#include <cassert>\n\n#include <ext/pb_ds/assoc_container.hpp>\nusing namespace  __gnu_pbds;\n\ntypedef tree <\n        int32_t,\n        null_type,\n        std::less<int32_t>,\n        rb_tree_tag,\n        tree_order_statistics_node_update> ordered_set;\n\n#define MOD 998244353\n\nint32_t bin_pow(int32_t base, int32_t power) {\n    if(power == 0)\n        return 1;\n    if(power == 1)\n        return base;\n    int32_t prev = bin_pow(base, power / 2);\n    prev = ((int64_t)prev * prev) % MOD;\n    if(power % 2 == 1)\n        prev = ((int64_t)prev * base) % MOD;\n    return prev;\n}\n\nint32_t solve_partial(int32_t* arr, int32_t n, std::set<int32_t>& missing) {\n    int32_t answer = 0;\n    int32_t* inv_arr = new int32_t[n];\n    for(int32_t i = 0; i < n; i++)\n        inv_arr[arr[i]] = i;\n    int32_t* missing_right = new int32_t[n + 1];\n    missing_right[0] = 0;\n    for(int32_t i = 1; i <= n; i++)\n        missing_right[i] = missing_right[i - 1] + (arr[n - i] == -2 ? 1 : 0);\n\n    int32_t ans_cur = 0;\n    int32_t passed_good = 0;\n    for(int32_t i = 0; i < n; i++)\n        if(arr[i] == -2)\n            ans_cur += passed_good;\n        else\n            passed_good++;\n\n    int32_t modify_ptr = 0;\n    for(auto it = missing.begin(); it != missing.end(); it++) {\n        while(modify_ptr < *it) {\n            if(missing.find(modify_ptr) == missing.end())\n                ans_cur -= missing_right[n - inv_arr[modify_ptr] - 1];\n            modify_ptr++;\n        }\n        answer += ((int64_t)ans_cur * bin_pow(missing.size(), MOD - 2)) % MOD;\n    }\n    return answer;\n}\n\nint main() {\n    int32_t n;\n    std::cin >> n;\n\n    int32_t* arr = new int32_t[n];\n    for(int32_t i = 0; i < n; i++) {\n        std::cin >> arr[i];\n        arr[i]--;\n    }\n\n    int32_t answer = 0;\n\n    std::set<int32_t> missing;\n    for(int32_t i = 0; i < n; i++)\n        missing.insert(i);\n    ordered_set set;\n    for(int32_t i = 0; i < n; i++) {\n        if(arr[i] == -2)\n            continue;\n        else {\n            missing.erase(arr[i]);\n            answer += set.size() - set.order_of_key(arr[i]);\n            answer %= MOD;\n            set.insert(arr[i]);\n        }\n    }\n\n    if(missing.size() > 0) {\n        int32_t expected_new = (missing.size() * (missing.size() - 1) / 2) % MOD;\n        expected_new = ((int64_t) expected_new * bin_pow(2, MOD - 2)) % MOD;\n        answer += expected_new;\n        answer %= MOD;\n    }\n\n    answer += solve_partial(arr, n, missing);\n    answer %= MOD;\n\n    std::set<int32_t> missing2;\n    for(auto it = missing.begin(); it != missing.end(); it++)\n        missing2.insert(n - 1 - *it);\n\n    std::reverse(arr, arr + n);\n    for(int32_t i = 0; i < n; i++)\n        if(arr[i] != -2)\n            arr[i] = n - 1 - arr[i];\n    answer += solve_partial(arr, n, missing2);\n    answer %= MOD;\n\n    std::cout << answer;\n    return 0;\n}"
+}

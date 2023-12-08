@@ -1,0 +1,38 @@
+{
+    "id": 232145708,
+    "contestId": 386,
+    "creationTimeSeconds": 1699556225,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 386,
+        "index": "D",
+        "name": "Game with Points",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2100,
+        "tags": [
+            "dp",
+            "graphs",
+            "implementation",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 386,
+        "members": [
+            {
+                "handle": "root-shafi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1389906900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 60,
+    "timeConsumedMillis": 186,
+    "memoryConsumedBytes": 10342400,
+    "source": "/* In The Name Of God */\r\n\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n// #define int                  \tlong long\r\n#define FastIO_\t\t\t\t \tstd::cin.tie(NULL); std::cout.tie(NULL); ios_base::sync_with_stdio(false);\r\n#define max_heap(T)\t\t\t \tpriority_queue<T>\r\n#define readAndWriteInFile      freopen(\"input.txt\", \"r\", stdin); freopen(\"output.txt\", \"w\", stdout);\r\n\r\ntypedef std::pair<int, int>     \tpii;\r\ntypedef long long               \tll;\r\n\r\nll gcd(ll _a, ll _b) { return (!_b ? _a : gcd(_b, _a % _b)); }\r\nll Pow(ll _a, ll _b) { ll x = (!_b ? 1 : Pow(_a, _b >> 1)); return x * x * (_b & 1 ? _a : 1); } \r\n\r\nconst ll  INF  = 1e9 + 1;\r\nconst ll  MOD  = 1e9 + 7;\r\nconst int MXn  = 1e5 + 5;\r\n\r\nint n, aa, bb, cc, s1, s2, s3, h[73][73][73], par[73][73][73][3];\r\nchar cl[73][73];\r\n\r\nvoid prt(vector<int> an) {\r\n    vector<pii> ans;\r\n    while (an[0] != aa || an[1] != bb || an[2] != cc) {\r\n        int u1 = par[an[0]][an[1]][an[2]][0];\r\n        int u2 = par[an[0]][an[1]][an[2]][1];\r\n        int u3 = par[an[0]][an[1]][an[2]][2];\r\n        if (u1 != an[0]) {\r\n            ans.push_back({u1, an[0]});\r\n        }\r\n        else if (u2 != an[1]) {\r\n            ans.push_back({u2, an[1]});\r\n        }\r\n        else {\r\n            ans.push_back({u3, an[2]});\r\n        }\r\n        an[0] = u1, an[1] = u2, an[2] = u3;\r\n    }\r\n    cout << ans.size() << '\\n';\r\n    for (int i = ans.size() - 1; i >= 0; i--) {\r\n        cout << ans[i].first << ' ' << ans[i].second << '\\n';\r\n    }\r\n}\r\n\r\nvoid _solve() {\r\n    cin >> n >> s1 >> s2 >> s3;\r\n    aa = s1, bb = s2, cc = s3;\r\n    queue<pair<int, pii>> qu;\r\n    for (int i = 1; i <= n; i++) for (int j = 1; j <= n; j++) {\r\n        cin >> cl[i][j];\r\n        for (int k = 1; k <= n; k++) {\r\n            h[i][j][k] = INF;\r\n        }\r\n    }\r\n    h[s1][s2][s3] = 0;\r\n    par[s1][s2][s3][0] = -1;\r\n    qu.push({s1, {s2, s3}});\r\n    while (qu.size()) {\r\n        s1 = qu.front().first; s2 = qu.front().second.first; s3 = qu.front().second.second; qu.pop();\r\n        for (int i = 1; i <= n; i++) {\r\n            if (s1 != i && i != s2 && i != s3) {\r\n                if (h[i][s2][s3] > h[s1][s2][s3] + 1 && cl[s1][i] == cl[s2][s3]) {\r\n                    h[i][s2][s3] = h[s1][s2][s3] + 1;\r\n                    par[i][s2][s3][0] = s1;\r\n                    par[i][s2][s3][1] = s2;\r\n                    par[i][s2][s3][2] = s3;\r\n                    qu.push({i, {s2, s3}});\r\n                }\r\n                if (h[s1][i][s3] > h[s1][s2][s3] + 1 && cl[s2][i] == cl[s1][s3]) {\r\n                    h[s1][i][s3] = h[s1][s2][s3] + 1;\r\n                    par[s1][i][s3][0] = s1;\r\n                    par[s1][i][s3][1] = s2;\r\n                    par[s1][i][s3][2] = s3;\r\n                    qu.push({s1, {i, s3}});\r\n                }\r\n                if (h[s1][s2][i] > h[s1][s2][s3] + 1 && cl[s3][i] == cl[s2][s1]) {\r\n                    h[s1][s2][i] = h[s1][s2][s3] + 1;\r\n                    par[s1][s2][i][0] = s1;\r\n                    par[s1][s2][i][1] = s2;\r\n                    par[s1][s2][i][2] = s3;\r\n                    qu.push({s1, {s2, i}});\r\n                }\r\n            }\r\n        }\r\n    }\r\n    int mn = INF;\r\n    vector<int> an = {1, 2, 3};\r\n    do {\r\n        mn = min(mn, h[an[0]][an[1]][an[2]]);\r\n    } while (next_permutation(an.begin(), an.end()));\r\n    an = {1, 2, 3};\r\n    if (mn == INF) {\r\n        cout << -1;\r\n        return;\r\n    }\r\n    do {\r\n        if (mn == h[an[0]][an[1]][an[2]]) { prt(an); break;}\r\n    } while (next_permutation(an.begin(), an.end()));\r\n}\r\n\r\nint32_t main() {\r\n    // FastIO_\r\n    int T = 1;\r\n    // cin >> T;\r\n    while (T--) {\r\n        _solve();\r\n    }\r\n    return 0;\r\n}\r\n\r\n/*\r\n\r\n*/\r\n"
+}

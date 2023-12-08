@@ -1,0 +1,36 @@
+{
+    "id": 225786484,
+    "contestId": 842,
+    "creationTimeSeconds": 1695996182,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 842,
+        "index": "D",
+        "name": "Vitya and Strange Lesson",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "binary search",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 842,
+        "members": [
+            {
+                "handle": "Jebsus"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1504019100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <iostream>\r\n#include <utility>\r\n#include <vector>\r\n#include <fstream>\r\n#include <map>\r\n#include <queue>\r\n#include <unordered_map>\r\n#include <set>\r\n#include <limits>\r\n#include <cmath>\r\n#include <numeric>\r\n#include <unordered_set>\r\n#include <algorithm>\r\n#include <iomanip>\r\n#include <list>\r\n#include <numeric>\r\n#include <bitset>\r\n\r\nusing namespace std;\r\n\r\n//#define int long long\r\n#define uint unsigned long long\r\n\r\nnamespace std {\r\n    template<class T>\r\n    struct hash<pair<T, T>> {\r\n        auto operator()(const pair<T, T> &item) const -> size_t {\r\n            uintmax_t hash = std::hash<T>{}(item.first);\r\n            hash <<= sizeof(uintmax_t) * 4;\r\n            hash ^= std::hash<T>{}(item.second);\r\n\r\n            return std::hash<uintmax_t>{}(hash);\r\n        }\r\n    };\r\n}\r\n\r\nint binpow(int a, int pw) {\r\n    int res = 1;\r\n    while (pw) {\r\n        if (pw & 1) res = res * a;\r\n        a = a * a;\r\n        pw >>= 1;\r\n    }\r\n    return res;\r\n}\r\n\r\nstd::ostream &operator<<(std::ostream &stream, pair<int, int> items) {\r\n    cout << items.first << \" \" << items.second;\r\n\r\n    return stream;\r\n}\r\n\r\ntemplate<class Iter>\r\nstd::ostream &operator<<(std::ostream &stream, pair<Iter, Iter> iters) {\r\n    for (auto i = iters.first; i != iters.second; ++i) {\r\n        stream << (*i) << \" \";\r\n    }\r\n\r\n    return stream;\r\n}\r\n\r\nclass Trie {\r\npublic:\r\n    const static int BITES = 19;\r\n\r\n    Trie() : trie(1) {}\r\n\r\n    void addNumber(int number) {\r\n        int curr = getCurr(number);\r\n        ++trie[curr].term;\r\n    }\r\n\r\n    void xOr(int x) {\r\n        currXor ^= x;\r\n    }\r\n\r\n    int getMex() {\r\n        bitset<BITES> res;\r\n        bool found = false;\r\n        dfs(0, BITES - 1, res, found);\r\n\r\n        return res.to_ulong();\r\n    }\r\n\r\nprivate:\r\n    struct Node {\r\n        vector<int> next;\r\n        int term;\r\n        int subtreeTerm;\r\n        int prev;\r\n\r\n        Node() : next(2, -1), term(0), subtreeTerm(0), prev(-1) {}\r\n    };\r\n\r\n    vector<Node> trie;\r\n    bitset<BITES> currXor;\r\n\r\n    int getCurr(bitset<BITES> number) {\r\n        int curr = 0;\r\n        for (int i = BITES - 1; i >= 0; --i) {\r\n            if (trie[curr].next[number[i]] == -1) {\r\n                trie[curr].next[number[i]] = trie.size();\r\n                trie.emplace_back();\r\n                trie.back().prev = curr;\r\n            }\r\n\r\n            ++trie[curr].subtreeTerm;\r\n            curr = trie[curr].next[number[i]];\r\n        }\r\n\r\n        return curr;\r\n    }\r\n\r\n    void dfs(int curr, int cnt, bitset<BITES> &res, bool &found) {\r\n        if (found || trie[curr].term > 0\r\n            || trie[curr].subtreeTerm == 1 << (cnt + 1)) {\r\n            return;\r\n        }\r\n\r\n        if (currXor[cnt]) {\r\n            for (int i = 1; i >= 0; --i) {\r\n                if (!found) {\r\n                    res[cnt] = ((i ^ currXor[cnt]) != 0);\r\n\r\n                    if (trie[curr].next[i] == -1) {\r\n                        found = true;\r\n                        return;\r\n                    }\r\n                }\r\n\r\n                dfs(trie[curr].next[i], cnt - 1, res, found);\r\n\r\n                if (found) {\r\n                    return;\r\n                }\r\n\r\n                res[cnt] = false;\r\n            }\r\n        } else {\r\n            for (int i = 0; i < 2; ++i) {\r\n                if (!found) {\r\n                    res[cnt] = (i != 0);\r\n\r\n                    if (trie[curr].next[i] == -1) {\r\n                        found = true;\r\n                        return;\r\n                    }\r\n                }\r\n\r\n                dfs(trie[curr].next[i], cnt - 1, res, found);\r\n                if (!found) {\r\n                    res[cnt] = false;\r\n                }\r\n            }\r\n        }\r\n    }\r\n};\r\n\r\nvoid solve() {\r\n    int n, m;\r\n    cin >> n >> m;\r\n\r\n    Trie trie;\r\n\r\n    int tmp;\r\n    for (int i = 0; i < n; ++i) {\r\n        cin >> tmp;\r\n        trie.addNumber(tmp);\r\n    }\r\n\r\n    while (m--) {\r\n        cin >> tmp;\r\n        trie.xOr(tmp);\r\n        cout << trie.getMex() << \"\\n\";\r\n    }\r\n}\r\n\r\nsigned main() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n    cout.tie(nullptr);\r\n\r\n    int t = 1;\r\n//    cin >> t;\r\n    while (t--) {\r\n        solve();\r\n    }\r\n\r\n    return 0;\r\n}"
+}

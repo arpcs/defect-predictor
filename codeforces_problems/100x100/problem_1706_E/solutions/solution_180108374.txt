@@ -1,0 +1,41 @@
+{
+    "id": 180108374,
+    "contestId": 1706,
+    "creationTimeSeconds": 1667923091,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "quanmcvn"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 68915200,
+    "source": "#include <bits/stdc++.h>\r\n#pragma GCC optimize (\"O3\")\r\n#pragma GCC optimize (\"unroll-loops\")\r\nusing namespace std;\r\nusing ll = int64_t;\r\n\r\nconstexpr size_t nmax = 200000 + 15;\r\nconstexpr ll inf = 1000000000;\r\nconstexpr ll LOG = log2(nmax) + 1;\r\n\r\ntemplate<typename LHS, typename RHS> void minimize(LHS & lhs, RHS rhs);\r\ntemplate<typename LHS, typename RHS> void maximize(LHS & lhs, RHS rhs);\r\ntemplate<typename LHS, typename RHS> void minimize(LHS & lhs, RHS rhs) { if (rhs < lhs) lhs = rhs; }\r\ntemplate<typename LHS, typename RHS> void maximize(LHS & lhs, RHS rhs) { if (lhs < rhs) lhs = rhs; }\r\n\r\n//struct Edge {\r\n//\tll u = 0, v = 0;\r\n//\tEdge () {}\r\n//\tEdge (ll mu, ll mv) {\r\n//\t\tu = mu;\r\n//\t\tv = mv;\r\n//\t}\r\n//};\r\n//\t}\r\n//};\r\n\r\nstruct SegTree {\r\n\tstruct Node {\r\n\t\tll val = 0;\r\n\t\tNode () {}\r\n\t\tNode operator+(const Node& rhs) const {\r\n\t\t\tNode res;\r\n\t\t\tres.val = max(this->val, rhs.val);\r\n\t\t\treturn res;\r\n\t\t}\r\n\t};\r\n\tll n_node = 0;\r\n\tvector<Node> tree = {};\r\n\r\nprivate:\r\n\tvoid update_tree(ll node, ll l, ll r, const ll& k, const ll& mass) {\r\n\t\tif (k < l || r < k) return;\r\n\t\tif (l == r) {\r\n\t\t\ttree[node].val = mass;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tll mid = (l + r) >> 1;\r\n\t\tupdate_tree(node << 1    , l      , mid, k, mass);\r\n\t\tupdate_tree(node << 1 | 1, mid + 1, r, k, mass);\r\n\t\ttree[node] = tree[node << 1] + tree[node << 1 | 1];\r\n\t}\r\n\r\n\tNode query_tree(ll node, ll l, ll r, const ll& L, const ll& R) {\r\n\t\tif (l > r || L > R || l > R || L > r) return Node();\r\n\t\tif (L <= l && r <= R) {\r\n\t\t\treturn tree[node];\r\n\t\t}\r\n\t\tll mid = (l + r) >> 1;\r\n\t\tNode child_left  = query_tree(node << 1, l, mid, L, R);\r\n\t\tNode child_right = query_tree(node << 1 | 1, mid + 1, r, L, R);\r\n\t\treturn child_left + child_right;\r\n\t}\r\npublic:\r\n\tvoid resize(ll new_size) {\r\n\t\tn_node = new_size;\r\n\t\ttree.resize((n_node << 2) + 15);\r\n\t}\r\n\tvoid update(ll k, ll val) {\r\n\t\treturn this->update_tree(1, 1, n_node, k, val);\r\n\t}\r\n\tll query(ll l, ll r) {\r\n\t\treturn this->query_tree(1, 1, n_node, l, r).val;\r\n\t}\r\n};\r\n\r\nvoid do_work();\r\nvoid dfs(ll u, ll p);\r\nvoid make_table();\r\nll lca(ll u, ll v);\r\n\r\nll n, m, q;\r\n//Edge edge[nmax];\r\nmap<pair<ll, ll>, ll> mp;\r\nvector<ll> ct[nmax];\r\nll depth[nmax];\r\nll pa[LOG + 1][nmax];\r\nll ma[LOG + 1][nmax];\r\n\r\nvoid dfs(ll u, ll p) {\r\n\tfor (const auto& v : ct[u]) {\r\n\t\tif (v == p) continue;\r\n\t\tpa[0][v] = u;\r\n\t\tma[0][v] = mp[{u, v}];\r\n\t\tdepth[v] = depth[u] + 1;\r\n\t\tdfs(v, u);\r\n\t}\r\n}\r\n\r\nll lca(ll u, ll v) {\r\n\tif (depth[u] < depth[v]) swap(u, v);\r\n\tll res = 0;\r\n\tfor (ll kk = LOG; kk >= 0; -- kk) {\r\n\t\tif (depth[pa[kk][u]] >= depth[v]) {\r\n\t\t\tmaximize(res, ma[kk][u]);\r\n\t\t\tu = pa[kk][u];\r\n\t\t}\r\n\t}\r\n\tif (u == v) return res;\r\n\tfor (ll kk = LOG; kk >= 0; -- kk) {\r\n\t\tif (pa[kk][u] != pa[kk][v]) {\r\n\t\t\tmaximize(res, ma[kk][u]);\r\n\t\t\tmaximize(res, ma[kk][v]);\r\n\t\t\tu = pa[kk][u];\r\n\t\t\tv = pa[kk][v];\r\n\t\t}\r\n\t}\r\n\tassert(pa[0][u] == pa[0][v]);\r\n\tmaximize(res, ma[0][u]);\r\n\tmaximize(res, ma[0][v]);\r\n\treturn res;\r\n}\r\n\r\nll parent[nmax];\r\nvoid reset();\r\nll ancestor(ll m_node);\r\nbool join(ll u, ll v);\r\n\r\nvoid reset() {\r\n\tfor (ll i = 1; i <= n; ++ i) {\r\n\t\tparent[i] = -1;\r\n\t}\r\n}\r\n\r\nll ancestor(ll m_node) {\r\n\tll root = m_node;\r\n\twhile (parent[root] > 0) root = parent[root];\r\n\twhile (m_node != root) {\r\n\t\tll temp = parent[m_node];\r\n\t\tparent[m_node] = root;\r\n\t\tm_node = temp;\r\n\t}\r\n\treturn root;\r\n}\r\n\r\nbool join(ll u, ll v) {\r\n\tu = ancestor(u);\r\n\tv = ancestor(v);\r\n\tif (u == v) return false;\r\n\tif (-parent[u] < -parent[v]) swap(u, v);\r\n\tparent[u] += parent[v];\r\n\tparent[v] = u;\r\n\treturn true;\r\n}\r\n\r\nvoid do_work() {\r\n\tcin >> n >> m >> q;\r\n\r\n\tmp.clear();\r\n\tfor (ll i = 1; i <= m; ++ i) {\r\n\t\tll u, v;\r\n\t\tcin >> u >> v;\r\n\t\tif (join(u, v)) {\r\n\t\t\tct[u].push_back(v);\r\n\t\t\tct[v].push_back(u);\r\n\t\t\tmp[{u, v}] = mp[{v, u}] = i;\r\n\t\t}\r\n\t}\r\n\r\n\tdepth[1] = 1;\r\n\tdfs(1, 1);\r\n\tmake_table();\r\n\r\n\tSegTree st;\r\n\tst.resize(n);\r\n\r\n\tfor (ll i = 2; i <= n; ++ i) {\r\n\t\tll x = lca(i - 1, i);\r\n\t\tst.update(i, x);\r\n\t}\r\n\r\n\tfor (ll i = 1; i <= q; ++ i) {\r\n\t\tll l, r; cin >> l >> r;\r\n\t\tif (l == r) {\r\n\t\t\tcout << 0 << \" \";\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tll res = st.query(l + 1, r);\r\n\t\tcout << res << \" \";\r\n\t}\r\n}\r\n\r\nint32_t main() {\r\n\tif (fopen (\"1706E.inp\", \"r\")) {\r\n\t\tfreopen (\"1706E.inp\", \"r\", stdin);\r\n\t\tfreopen (\"1706E.out\", \"w\", stdout);\r\n\t}\r\n\r\n\tstd::ios_base::sync_with_stdio (false);\r\n\tstd::cin.tie (nullptr); std::cout.tie (nullptr);\r\n\tll t; cin >> t;\r\n//\tif (t == 3) {\r\n//\t\tcout << R\"quanmcvn(0 1\r\n//3 3 0 5 5\r\n//2)quanmcvn\";\r\n//\t\treturn 0;\r\n//\t}\r\n//\tll cnt = 0;\r\n\tfor (; t -- > 0;) {\r\n//\t\tcin >> n >> m >> q;\r\n//\t\tif (cnt + q >= 249) {\r\n//\t\t\tcout << n << \" \" << m << \" \" << q << \"\\n\";\r\n//\t\t\tfor (ll i = 1; i <= m + q; ++ i) {\r\n//\t\t\t\tll u, v; cin >> u >> v;\r\n//\t\t\t\tcout << u << \" \" << v << \"\\n\";\r\n//\t\t\t}\r\n//\t\t\treturn 0;\r\n//\t\t} else {\r\n//\t\t\tfor (ll i = 1; i <= m + q; ++ i) {\r\n//\t\t\t\tll u, v; cin >> u >> v;\r\n//\t\t\t}\r\n//\t\t\tcnt += q;\r\n//\t\t}\r\n\t\tdo_work();\r\n\t\tcout << \"\\n\";\r\n\t}\r\n\r\n\treturn 0x0;\r\n}\r\n\r\nvoid make_table() {\r\n\tfor (ll kk = 1; kk <= LOG; ++ kk) {\r\n\t\tfor (ll u = 1; u <= n; ++ u) {\r\n\t\t\tpa[kk][u] = pa[kk - 1][pa[kk - 1][u]];\r\n\t\t\tma[kk][u] = max(ma[kk - 1][u], ma[kk - 1][pa[kk - 1][u]]);\r\n\t\t}\r\n\t}\r\n}\r\n\r\n/// code by Eastern Tra Tra\r\n"
+}

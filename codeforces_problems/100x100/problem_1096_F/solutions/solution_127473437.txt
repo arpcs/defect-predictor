@@ -1,0 +1,36 @@
+{
+    "id": 127473437,
+    "contestId": 1096,
+    "creationTimeSeconds": 1630349185,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1096,
+        "index": "F",
+        "name": "Inversion Expectation",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1096,
+        "members": [
+            {
+                "handle": "DrearyJoke"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1546007700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 7475200,
+    "source": "#include<bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef pair<int, int> pii;\r\ntypedef pair<ll, ll> pll;\r\ntypedef vector<int> vi;\r\ntypedef vector<vector<int>> vvi;\r\ntypedef vector<ll> vll;\r\ntypedef vector<vector<ll>> vvll;\r\ntypedef vector<bool> vb;\r\ntypedef tree<ll, null_type, less<ll>, rb_tree_tag, tree_order_statistics_node_update> indexed_set;\r\n\r\ntemplate <typename T, typename U> std::istream&operator>>(std::istream&i, pair<T,U>&p) {i >> p.first >> p.second; return i;}\r\ntemplate<typename T>std::istream&operator>>(std::istream&i,vector<T>&t) {for(auto&v:t){i>>v;}return i;}\r\ntemplate <typename T, typename U> std::ostream&operator<<(std::ostream&o, const pair<T,U>&p) {o << p.first << ' ' << p.second; return o;}\r\ntemplate<typename T>std::ostream&operator<<(std::ostream&o,const vector<T>&t) {if(t.empty())o<<'\\n';for(size_t i=0;i<t.size();++i){o<<t[i]<<\" \\n\"[i == t.size()-1];}return o;}\r\n\r\n#define deb(x) cout << '>' << #x << ':' << x << endl;\r\n#define all(v) v.begin(),v.end()\r\n#define rall(v) v.rbegin(),v.rend()\r\n#define END '\\n'\r\n#define inf 9e18\r\n#define ff first\r\n#define ss second\r\n#define pb push_back\r\n\r\nstruct SegTree {\r\n    int n = 1;\r\n    vi st;\r\n    SegTree (int sz) {\r\n        while (n < sz) n <<= 1;\r\n        st.resize(n << 1, 0);\r\n    }\r\n    void update(int pos, int x, int lx, int rx) {\r\n        if (rx - lx == 1) {\r\n            st[x] = 1;\r\n            return;\r\n        }\r\n        int mid = (lx + rx) >> 1, a = (x << 1) | 1, b = a + 1;\r\n        if (pos < mid) update(pos, a, lx, mid);\r\n        else update(pos, b, mid, rx);\r\n        st[x] = st[a] + st[b];\r\n    }\r\n    void update(int pos) {\r\n        update(pos, 0, 0, n);\r\n    }\r\n    int query(int l, int r, int x, int lx, int rx) {\r\n        if (lx >= r || rx <= l) return 0;\r\n        if (lx >= l && rx <= r) return st[x];\r\n        int mid = (lx + rx) >> 1, a = (x << 1) | 1, b = a + 1;\r\n        return query(l, r, a, lx, mid) + query(l, r, b, mid, rx);\r\n    }\r\n    int query(int l) {\r\n        return query(l, n, 0, 0, n);\r\n    }\r\n};\r\n\r\nconst ll modu = 998244353;\r\n\r\nconst int maxN = 2e5;\r\nll fact[maxN + 1], invfact[maxN + 1];\r\nlong long binpow(long long a, long long b, long long m) {\r\n    a %= m;\r\n    long long res = 1;\r\n    while (b > 0) {\r\n        if (b & 1)\r\n            res = res * a % m;\r\n        a = a * a % m;\r\n        b >>= 1;\r\n    }\r\n    return res;\r\n}\r\nvoid pre_calc() {\r\n    fact[0] = 1;\r\n    invfact[0] = 1;\r\n    for (ll i = 1; i <= maxN; ++i) fact[i] = (fact[i - 1] * i) % modu;\r\n    for (ll i = 1; i <= maxN; ++i) invfact[i] = binpow(fact[i], modu - 2, modu);\r\n}\r\n \r\nll nCr(ll n, ll r) {\r\n    if (r > n) return 0;\r\n    ll ans = fact[n];\r\n    ans *= invfact[r];\r\n    ans %= modu;\r\n    ans *= invfact[n - r];\r\n    ans %= modu;\r\n    return ans;\r\n}\r\n\r\nvoid solve(){\r\n    int n;\r\n    cin >> n;\r\n    vi A(n + 1);\r\n    set<int> s;\r\n    for (int i = 1; i <= n; ++i) s.insert(i);\r\n    for (int i = 1; i <= n; ++i) {\r\n        cin >> A[i];\r\n        if (A[i] != -1) s.erase(s.find(A[i]));\r\n    }\r\n    vi B;\r\n    for (auto u: s) B.push_back(u);\r\n    ll emp_count = 0;\r\n    ll ans = 0;\r\n    int m = s.size();\r\n    for (int i = 1; i <= n; ++i) {\r\n        if (A[i] == -1) ++emp_count;\r\n        else ans += emp_count * (m - (B.end() - upper_bound(all(B), 1)));\r\n    }\r\n    emp_count = 0;\r\n    for (int i = n; i >= 1; --i) {\r\n        if (A[i] == -1) ++emp_count;\r\n        else ans += emp_count * (upper_bound(all(B), 1) - B.begin());\r\n    }\r\n    // cout << \"PAIRS: \" << ans << END;\r\n    ans %= modu;\r\n    if (m) ans = (ans * fact[m - 1]);\r\n    SegTree st(n + 1);\r\n\r\n    ll invCount = 0;\r\n    for (int i = 1; i <= n; ++i) {\r\n        if (A[i] == -1) continue;\r\n        else invCount += st.query(A[i]), st.update(A[i]);\r\n    }\r\n    // cout << \"INVS: \" << invCount << END;\r\n    ans += (invCount * fact[m]) % modu;\r\n    ans %= modu;\r\n\r\n    ans += ((nCr(m, 2) * binpow(2, modu - 2, modu)) % modu * fact[m]) % modu;\r\n    // cout << ans << END;\r\n    ans %= modu;\r\n    ans = (ans * invfact[m]) % modu;\r\n    cout << ans << END;\r\n}\r\nint main()\r\n{\r\n    pre_calc();\r\n    ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);\r\n    int t = 1;\r\n    // cin >> t;\r\n    while(t--){\r\n        solve();\r\n    }\r\n    return 0;\r\n}"
+}

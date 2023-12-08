@@ -1,0 +1,40 @@
+{
+    "id": 220074842,
+    "contestId": 1750,
+    "creationTimeSeconds": 1692817324,
+    "relativeTimeSeconds": 2224,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "Geothermal"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1692815100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 29,
+    "timeConsumedMillis": 155,
+    "memoryConsumedBytes": 34201600,
+    "source": "#include \"bits/stdc++.h\"\n#pragma GCC optimize (\"O3\")\n#pragma GCC target (\"sse4\")\n \nusing namespace std;\n \ntypedef long long ll;\ntypedef long double ld;\ntypedef complex<ld> cd;\n \ntypedef pair<int, int> pi;\ntypedef pair<ll,ll> pl;\ntypedef pair<ld,ld> pd;\n \ntypedef vector<int> vi;\ntypedef vector<ld> vd;\ntypedef vector<ll> vl;\ntypedef vector<pi> vpi;\ntypedef vector<pl> vpl;\ntypedef vector<cd> vcd;\n\ntemplate<class T> using pq = priority_queue<T>;\ntemplate<class T> using pqg = priority_queue<T, vector<T>, greater<T>>;\n \n#define FOR(i, a, b) for (int i=a; i<(b); i++)\n#define F0R(i, a) for (int i=0; i<(a); i++)\n#define FORd(i,a,b) for (int i = (b)-1; i >= a; i--)\n#define F0Rd(i,a) for (int i = (a)-1; i >= 0; i--)\n#define trav(a,x) for (auto& a : x)\n#define uid(a, b) uniform_int_distribution<int>(a, b)(rng)\n \n#define sz(x) (int)(x).size()\n#define mp make_pair\n#define pb push_back\n#define f first\n#define s second\n#define lb lower_bound\n#define ub upper_bound\n#define all(x) x.begin(), x.end()\n#define ins insert\n\ntemplate<class T> bool ckmin(T& a, const T& b) { return b < a ? a = b, 1 : 0; }\ntemplate<class T> bool ckmax(T& a, const T& b) { return a < b ? a = b, 1 : 0; }\n \nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\n\nvoid __print(int x) {cerr << x;}\nvoid __print(long x) {cerr << x;}\nvoid __print(long long x) {cerr << x;}\nvoid __print(unsigned x) {cerr << x;}\nvoid __print(unsigned long x) {cerr << x;}\nvoid __print(unsigned long long x) {cerr << x;}\nvoid __print(float x) {cerr << x;}\nvoid __print(double x) {cerr << x;}\nvoid __print(long double x) {cerr << x;}\nvoid __print(char x) {cerr << '\\'' << x << '\\'';}\nvoid __print(const char *x) {cerr << '\\\"' << x << '\\\"';}\nvoid __print(const string &x) {cerr << '\\\"' << x << '\\\"';}\nvoid __print(bool x) {cerr << (x ? \"true\" : \"false\");}\n\ntemplate<typename T, typename V>\nvoid __print(const pair<T, V> &x) {cerr << '{'; __print(x.first); cerr << \", \"; __print(x.second); cerr << '}';}\ntemplate<typename T>\nvoid __print(const T &x) {int f = 0; cerr << '{'; for (auto &i: x) cerr << (f++ ? \", \" : \"\"), __print(i); cerr << \"}\";}\nvoid _print() {cerr << \"]\\n\";}\ntemplate <typename T, typename... V>\nvoid _print(T t, V... v) {__print(t); if (sizeof...(v)) cerr << \", \"; _print(v...);}\n#ifdef DEBUG\n#define dbg(x...) cerr << \"\\e[91m\"<<__func__<<\":\"<<__LINE__<<\" [\" << #x << \"] = [\"; _print(x); cerr << \"\\e[39m\" << endl;\n#else\n#define dbg(x...)\n#endif\n\n\nconst int MOD = 1000000007;\nconst char nl = '\\n';\nconst int MX = 100001; \n\n\nconst ll SZ = 262144*2; //set this to power of two\npl seg[2*SZ]; //segtree implementation by bqi343's Github\n\npl combine(pl a, pl b) { \n    return {a.f+b.f, a.s+b.s};\n}\n\nvoid update(int p, pl value) {  \n    p += SZ;\n    seg[p].f += value.f;\n    seg[p].s += value.s;\n    for (; p > 1; p >>= 1)\n        seg[p>>1] = combine(seg[(p|1)^1], seg[p|1]);\n}\n\npl query(int l, int r) {  // sum on interval [l, r]\n    pl resL = {0, 0}, resR = {0, 0}; r++;\n    for (l += SZ, r += SZ; l < r; l >>= 1, r >>= 1) {\n        if (l&1) resL = combine(resL,seg[l++]);\n        if (r&1) resR = combine(seg[--r],resR);\n    }\n    return combine(resL,resR);\n}\n\nvoid solve() {\n    int N; cin >> N;\n    string S; cin >> S;\n    ll bal[N+1];\n    bal[0] = 0;\n    ll ps[N+1]; ps[0] = 0;\n    F0R(i, N) {\n        bal[i+1] = bal[i] + (S[i] == '(' ? 1 : -1);\n        ps[i+1] = ps[i] + bal[i+1];\n    }\n    set<int> used; used.ins(-1); used.ins(N+1);\n    vpl bals; F0R(i, N+1) bals.pb({bal[i], i});\n    sort(all(bals));\n    ll ans = 0;\n    trav(a, bals) {\n        auto it = used.ub(a.s);\n        ll hi = *it;\n        hi--;\n        it--;\n        ll lo = *it;\n        lo++;\n        ll cur = ps[a.s];\n        if (lo > 0) {\n            cur -= ps[lo-1];\n        }\n        cur -= a.f * (a.s-lo+1);\n        cur *= (hi-a.s+1);\n        ans += cur;\n        used.ins(a.s);\n    }\n\n    F0R(i, N+1) {\n        pl cur = query(0, bal[i] + N+10);\n        ans += bal[i] * cur.s - cur.f;\n        update(bal[i] + N+10, {bal[i], 1});\n    }\n\n    cout << ans << nl;\n\n    F0R(i, N+5) {\n        update(i+N+10, {-seg[i+SZ+N+10].f, -seg[i+SZ+N+10].s});\n        update(N-i+10, {-seg[N-i+SZ+10].f, -seg[N-i+SZ+10].s});\n    }\n}\n \nint main() {\n    ios_base::sync_with_stdio(0); cin.tie(0);\n\n    int T = 1;\n    cin >> T;\n    while(T--) {\n        solve();\n    }\n\n\treturn 0;\n}\n\n"
+}

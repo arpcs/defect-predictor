@@ -1,0 +1,40 @@
+{
+    "id": 226154405,
+    "contestId": 1750,
+    "creationTimeSeconds": 1696160363,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "adwsaef"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1667745300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <iostream>\n#include <string>\n#include <numeric>\n#include <algorithm>\n#include <limits>\n#include <vector>\n\nlong long read (int L, int R, long long* tree, int cl, int cr, int x){\n    if (cl>=L and R>=cr)return tree[x];\n    if (cl>R or cr<L)return std::numeric_limits<long long>::max();\n    return std::min(read(L,R,tree,cl,(cl+cr)/2,x*2),read(L,R,tree,(cl+cr)/2+1,cr,x*2+1));\n}\n\nlong long query (int L, int R, int k, int s, std::vector<int>* pos, long long* tree){\n    if (L==R or R<L)return 0;\n    int MIN=read(L,R,tree,0,s/2-1,1);\n    auto it=std::lower_bound(pos[MIN+k].begin(),pos[MIN+k].end(),L), it2=std::upper_bound(pos[MIN+k].begin(),pos[MIN+k].end(),R+1);\n    --it2;\n    long long left=*it-L;\n    long long right=R-*it-(it2-it);\n    return left*right+query(L,*it-1,k,s,pos,tree)+query(*it+1,R,k,s,pos,tree);\n}\n\nvoid solve(){\n    int k;\n    std::string n;\n    std::cin>>k>>n;\n    int s=1<<(std::__lg(k+k+1)+1);\n    long long tree[s];\n    long long t[k];\n    for (size_t i=0; i<k; ++i){\n        t[i]=-1;\n        if (n[i]=='(')t[i]=1;\n    }\n    std::partial_sum(t,t+k,t);\n    std::vector<int> pos[k+k+1];\n    pos[k].push_back(0);\n    for (size_t i=0; i<k; ++i)pos[t[i]+k].push_back(i+1);\n    tree[s/2]=0;\n    for (size_t i=0; i<k; ++i)tree[s/2+i+1]=t[i];\n    for (size_t i=s/2-1; i>=1; --i)tree[i]=std::min(tree[i*2],tree[i*2+1]);\n    long long cnt[k+k+1], cnt2[k+k+1];\n    for (size_t i=0; i<=k+k; ++i)cnt[i]=0;\n    ++cnt[k];\n    for (size_t i=0; i<k; ++i)++cnt[t[i]+k];\n    std::partial_sum(cnt,cnt+k+k+1,cnt2);\n    long long res=0;\n    for (size_t i=0; i<k+k; ++i){\n        res+=cnt[i]*(cnt2[k+k]-cnt2[i]);\n        cnt[i+1]+=cnt[i];\n    }\n\n    std::cout<<res+query(0,k,k,s,pos,tree)<<'\\n';\n}\n\nint main(){\n    std::ios_base::sync_with_stdio(false);\n    std::cin.tie(0);\n    std::cout.tie(0);\n    int test;\n    std::cin>>test;\n    while(test--)solve();\n}\n"
+}

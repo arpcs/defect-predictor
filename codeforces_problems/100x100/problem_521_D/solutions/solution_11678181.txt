@@ -1,0 +1,35 @@
+{
+    "id": 11678181,
+    "contestId": 521,
+    "creationTimeSeconds": 1434782717,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 521,
+        "index": "D",
+        "name": "Shop",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2800,
+        "tags": [
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 521,
+        "members": [
+            {
+                "handle": "Piwattz"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1425279600
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 155,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 49664000,
+    "source": "#include<stdio.h>\r\n#include<string.h>\r\n#include<math.h>\r\n#include<algorithm>\r\n#include<utility>\r\n#include<vector>\r\n#include<list>\r\n#include<queue>\r\n#include<set>\r\n#include<map>\r\nusing namespace std;\r\n#define NSIZ 1000010\r\n#define MSIZ 1000010\r\n#define inf 1010540580\r\n#define mxint 2147483647\r\n#define mxll 9223372036854775807LL\r\n#define prime15 1000000000000037LL\r\n#define prime16 10000000000000061LL\r\n#define mod 1000000007LL\r\n#define F first\r\n#define S second\r\n#define vit(T) vector<T>::iterator\r\n#define lit(T) list<T>::iterator\r\n#define lrit(T) list<T>::reverse_iterator\r\n#define sit(T) set<T>::iterator\r\n#define mit(T1,T2) map<T1,T2>::iterator\r\n#define MAXPQ(T) priority_queue<T>\r\n#define MINPQ(T) priority_queue<T,vector<T>,greater<T> >\r\n#define ab(x) ((x)<0?-(x):(x))\r\ntypedef pair<int,int> pii;\r\ntypedef pair<long long,int> pli;\r\ntypedef pair<long long,long long> pll;\r\ntypedef pair<double,double> pdd;\r\ntypedef pair<double,int> pdi;\r\n\r\nint n, m, o, re=0;\r\nlong long res=0;\r\nlong long a[NSIZ];\r\nint b[NSIZ][3];\r\npii ass[NSIZ];\r\nbool chk[NSIZ];\r\nvector<pii> ans;\r\nMAXPQ(pdi) Q;\r\nMAXPQ(pii) lis[NSIZ];\r\nint main(){\r\n    memset(ass,-1,sizeof(ass));\r\n    int i, j, k, l;\r\n    long long ll, rr, mid;\r\n    scanf(\"%d %d %d\", &n, &m, &o);\r\n    for(i=1; i<=n; i++){\r\n        scanf(\"%I64d\", &a[i]);\r\n    }\r\n    for(i=1; i<=m; i++){\r\n        for(j=0; j<3; j++){\r\n            scanf(\"%d\", &b[i][j]);\r\n        }\r\n        if(b[i][0]==3){\r\n            Q.push(pdi(b[i][2],i));\r\n        }\r\n        else if(b[i][0]==2){\r\n            lis[b[i][1]].push(pii(b[i][2],i));\r\n        }\r\n        else {\r\n            ass[b[i][1]]=max(ass[b[i][1]],pii(b[i][2]-a[b[i][1]],i));\r\n        }\r\n    }\r\n    for(i=1; i<=n; i++){\r\n        if(ass[i].F>0)lis[i].push(ass[i]);\r\n        if(lis[i].empty())continue;\r\n        Q.push(pdi((lis[i].top().F+a[i])/(double)a[i],lis[i].top().S));\r\n    }\r\n    while(ans.size()<o && !Q.empty()){\r\n        pdi p=Q.top();Q.pop();\r\n//        printf(\"%lf %d\\n\", p);\r\n        if(p.F<=1)break;\r\n        if(b[p.S][0]==3){\r\n            ans.push_back(pii(3,p.S));continue;\r\n        }\r\n        else if(b[p.S][0]==2){\r\n            k=b[p.S][1];\r\n            ans.push_back(pii(2,p.S));\r\n            a[k]+=lis[k].top().F;\r\n            lis[k].pop();\r\n            if(!lis[k].empty())Q.push(pdi((lis[k].top().F+a[k])/(double)a[k],lis[k].top().S));\r\n            continue;\r\n        }\r\n        else{\r\n            k=b[p.S][1];\r\n            pii q=lis[k].top();lis[k].pop();\r\n            if(q.F+a[k]==b[p.S][2]){\r\n                ans.push_back(pii(1,p.S));\r\n                chk[k]=1;\r\n                a[k]+=q.F;\r\n                if(!lis[k].empty())Q.push(pdi((lis[k].top().F+a[k])/(double)a[k],lis[k].top().S));\r\n                continue;\r\n            }\r\n            lis[k].push(pii(b[p.S][2]-a[k],p.S));\r\n            Q.push(pdi(b[p.S][2]/(double)a[k],lis[k].top().S));\r\n        }\r\n    }\r\n    if(ans.size()<o){\r\n        while(!Q.empty())Q.pop();\r\n        for(i=1; i<=n; i++){\r\n            if(chk[i]==1 || ass[i].F<0)continue;\r\n            Q.push(pdi((a[i]+ass[i].F)/(double)a[i],ass[i].S));\r\n        }\r\n        while(ans.size()<o && !Q.empty()){\r\n            ans.push_back(pii(1,Q.top().S));Q.pop();\r\n        }\r\n    }\r\n    printf(\"%d\\n\", ans.size());\r\n    sort(ans.begin(), ans.end());\r\n    for(i=0; i<ans.size(); i++){\r\n        printf(\"%d \", ans[i].S);\r\n    }\r\n    return 0;\r\n}\r\n"
+}

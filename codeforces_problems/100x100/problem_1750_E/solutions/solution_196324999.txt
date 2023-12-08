@@ -1,0 +1,40 @@
+{
+    "id": 196324999,
+    "contestId": 1750,
+    "creationTimeSeconds": 1678150661,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "Superposition"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1667745300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 29,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 13107200,
+    "source": "// Om Namah Shivaya\r\n\r\n#include <bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\n\r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\n\r\ntemplate<typename T> using Tree = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;\r\ntypedef long long int ll;\r\ntypedef long double ld;\r\ntypedef pair<int, int> pii;\r\ntypedef pair<ll, ll> pll;\r\n\r\n#define fastio ios_base::sync_with_stdio(false); cin.tie(NULL)\r\n#define pb push_back\r\n#define endl '\\n'\r\n#define sz(a) a.size()\r\n#define setbits(x) __builtin_popcountll(x)\r\n#define ff first\r\n#define ss second\r\n#define conts continue\r\n#define ceil2(x, y) ((x + y - 1) / (y))\r\n#define all(a) a.begin(), a.end()\r\n#define rall(a) a.rbegin(), a.rend()\r\n#define yes cout << \"Yes\" << endl\r\n#define no cout << \"No\" << endl\r\n\r\n#define rep(i, n) for(int i = 0; i < n; ++i)\r\n#define rep1(i, n) for(int i = 1; i <= n; ++i)\r\n#define rev(i, s, e) for(int i = s; i >= e; --i)\r\n#define trav(i, a) for(auto &i : a)\r\n\r\ntemplate<typename T>\r\nvoid amin(T &a, T b) {\r\n    a = min(a, b);\r\n}\r\n\r\ntemplate<typename T>\r\nvoid amax(T &a, T b) {\r\n    a = max(a, b);\r\n}\r\n\r\n#ifdef LOCAL\r\n#include \"debug.h\"\r\n#else\r\n#define debug(x) 42\r\n#endif\r\n\r\n/*\r\n\r\nrefs:\r\nhttps://codeforces.com/blog/entry/108503?#comment-970215\r\n\r\n\r\nhow to find the cost of a string\r\n\r\n#of close > #of open:\r\n\r\nlet min pref of bracket seq = m (min pref <= 0)\r\nonly consider m's abs val\r\n\r\nthis means m close brackets are unmatched\r\n\r\nfor each of the m brackets,\r\n\r\nif open < close, then we can add one \"(\" to the beginning\r\n\r\nif open == close, then adding an extra \")\" would cause the #of open to become greater and we would spend more ops to fix it\r\n\r\nso we can use the cyclic shift op in this case\r\n\r\nusing a cyclic shift op, we can pair up a close bracket that is the the left and an open bracket that is to the right\r\n\r\nxx)XXX(xxx => xx()XXXxxx\r\n\r\n1 op to pair up 1 close bracket using either a new open bracket or cyclic shift\r\n\r\nso it takes m ops to pair up m close brackets\r\n\r\nops = m\r\n\r\n\r\n#of close < #of open\r\n\r\nwe will again pair up the m unmatched close brackets with an open bracket using a cyclic shift (cuz #of open > #of close, so we dont wanna add more open brackets)\r\n\r\nafter doing m ops, we come to a case where #of open > #of close (cyclic shift doesnt change the #of open/close brackets) and min pref >= 0\r\n\r\nwe must make overall pref = 0\r\n\r\nso we will add (#of open) - (#of close) \")\" brackets to the right of the string\r\n\r\nops = m + (open - close)\r\n\r\n\r\n\r\nin general, we can write:\r\nops = m + max(open-close, 0)\r\ncompute this sum over all substrings\r\n\r\ncompute prefix sum of the string\r\n\r\nsum(m) can be computed using stacks (next smaller element) on prefix sum\r\n\r\nmax(open-close, 0) = sum(open-close) for open >= close\r\n\r\nopen-close is essentially what our prefix sum stores\r\n\r\nopen-close = p[i]-p[j-1]\r\n\r\ncompute sum(p[i]-p[j-1]), i >= j and p[i] >= p[j-1]\r\n\r\nthis can be done with 2 fenwick trees\r\n=> one for counts, one for sums\r\n\r\n*/\r\n\r\nconst int MOD = 1e9 + 7;\r\nconst int N = 1e5 + 5;\r\nconst int inf1 = int(1e9) + 5;\r\nconst ll inf2 = ll(1e18) + 5;\r\n\r\ntemplate<typename T>\r\nstruct fenwick {\r\n    int siz;\r\n    vector<T> tree;\r\n\r\n    fenwick(int n) {\r\n        siz = n;\r\n        tree = vector<T>(n + 1);\r\n    }\r\n\r\n    int lsb(int x) {\r\n        return x & -x;\r\n    }\r\n\r\n    void build(vector<T> &a, int n) {\r\n        for (int i = 1; i <= n; ++i) {\r\n            int par = i + lsb(i);\r\n            tree[i] += a[i];\r\n\r\n            if (par <= siz) {\r\n                tree[par] += tree[i];\r\n            }\r\n        }\r\n    }\r\n\r\n    void pupd(int i, T v) {\r\n        while (i <= siz) {\r\n            tree[i] += v;\r\n            i += lsb(i);\r\n        }\r\n    }\r\n\r\n    T sum(int i) {\r\n        T res = 0;\r\n\r\n        while (i) {\r\n            res += tree[i];\r\n            i -= lsb(i);\r\n        }\r\n\r\n        return res;\r\n    }\r\n\r\n    T query(int l, int r) {\r\n        if (l > r) return 0;\r\n        T res = sum(r) - sum(l - 1);\r\n        return res;\r\n    }\r\n};\r\n\r\nvoid solve(int test_case)\r\n{\r\n    ll n; cin >> n;\r\n    string s; cin >> s;\r\n    s = \"$\" + s;\r\n\r\n    vector<ll> pref(n + 5);\r\n    rep1(i, n) {\r\n        ll x = 1;\r\n        if (s[i] == ')') x = -1;\r\n        pref[i] = pref[i - 1] + x;\r\n    }\r\n\r\n    stack<ll> st;\r\n    vector<ll> nsel(n + 5, -1), nser(n + 5, n + 1);\r\n\r\n    rep(i, n + 1) {\r\n        while (!st.empty() and pref[i] <= pref[st.top()]) {\r\n            nser[st.top()] = i;\r\n            st.pop();\r\n        }\r\n        st.push(i);\r\n    }\r\n\r\n    while (!st.empty()) st.pop();\r\n\r\n    rev(i, n, 0) {\r\n        while (!st.empty() and pref[i] < pref[st.top()]) {\r\n            nsel[st.top()] = i;\r\n            st.pop();\r\n        }\r\n        st.push(i);\r\n    }\r\n\r\n    while (!st.empty()) st.pop();\r\n\r\n    vector<ll> pref_pref(n + 5);\r\n    rep1(i, n) {\r\n        pref_pref[i] = pref_pref[i - 1] + pref[i];\r\n    }\r\n\r\n    ll ans = 0;\r\n\r\n    rep1(i, n) {\r\n        ll lx = nsel[i], rx = nser[i];\r\n        ll sum = pref_pref[i - 1];\r\n        if (lx >= 0) sum -= pref_pref[lx];\r\n\r\n        ll add = sum - pref[i] * (i - lx - 1);\r\n        add *= (rx - 1 - i + 1);\r\n        ans += add;\r\n    }\r\n\r\n    fenwick<ll> fenw_sum(2 * n + 5), fenw_cnt(2 * n + 5);\r\n\r\n    rep(i, n + 1) {\r\n        ll add = pref[i] * fenw_cnt.query(1, pref[i] + n + 1);\r\n        ll sub = fenw_sum.query(1, pref[i] + n + 1);\r\n        ans += (add - sub);\r\n\r\n        fenw_sum.pupd(pref[i] + n + 1, pref[i]);\r\n        fenw_cnt.pupd(pref[i] + n + 1, 1);\r\n    }\r\n\r\n    cout << ans << endl;\r\n}\r\n\r\nint main()\r\n{\r\n    fastio;\r\n\r\n    int t = 1;\r\n    cin >> t;\r\n\r\n    rep1(i, t) {\r\n        solve(i);\r\n    }\r\n\r\n    return 0;\r\n}"
+}

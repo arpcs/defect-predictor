@@ -1,0 +1,38 @@
+{
+    "id": 222875874,
+    "contestId": 386,
+    "creationTimeSeconds": 1694424296,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 386,
+        "index": "D",
+        "name": "Game with Points",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2100,
+        "tags": [
+            "dp",
+            "graphs",
+            "implementation",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 386,
+        "members": [
+            {
+                "handle": "Rahan_Hematinejad"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1389906900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 60,
+    "timeConsumedMillis": 186,
+    "memoryConsumedBytes": 6144000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef short int sint;\r\n\r\nconst ll MAXN = 7e1 + 2, INF = 1e9;\r\nint dis[MAXN][MAXN][MAXN];\r\npair<sint, pair<sint, sint>> parent[MAXN][MAXN][MAXN];\r\nbool vis[MAXN][MAXN][MAXN];\r\nstring s[MAXN];\r\nsint n, a, b, c;\r\n\r\nvoid next_ver(){\r\n    for(sint i = 0; i <= n; i++){\r\n        for(sint j = 0; j <= n; j++){\r\n            for(sint k = 0; k <= n; k++){\r\n                vis[i][j][k] = 0;\r\n                dis[i][j][k] = INF;\r\n            }\r\n        }\r\n    }\r\n}\r\nbool valid(int s1, int s2, int s3){\r\n    if(s1 != s2 && s1 != s3 && s2 != s3){\r\n        return true;\r\n    }\r\n    return false;\r\n}\r\nvoid bfs(sint s1, sint s2, sint s3){\r\n    queue<pair<sint, pair<sint, sint>>> q;\r\n    q.push({s1,{s2, s3}});\r\n    vis[s1][s2][s3] = 1;\r\n    parent[s1][s2][s3] = {0, {0, 0}};\r\n    dis[s1][s2][s3] = 0;\r\n    while(!q.empty()){\r\n        auto u = q.front();\r\n        q.pop();\r\n        char col = s[u.first][u.second.first - 1];\r\n        for(int i = 1; i <= n; i++){\r\n            if(col == s[u.second.second][i - 1] && valid(u.first, u.second.first, i) == 1){\r\n                pair<sint, pair<sint, sint>> v = {u.first, {u.second.first, i}};\r\n                if(!vis[v.first][v.second.first][v.second.second]){\r\n                    q.push(v);\r\n                    parent[v.first][v.second.first][v.second.second] = u;\r\n                    dis[v.first][v.second.first][v.second.second] = dis[u.first][u.second.first][u.second.second] + 1;\r\n                    vis[v.first][v.second.first][v.second.second] = 1;\r\n                }\r\n            }\r\n        }\r\n        col = s[u.first][u.second.second - 1];\r\n        for(int i = 1; i <= n; i++){\r\n            if(col == s[u.second.first][i - 1] && valid(u.first, u.second.second, i) == 1){\r\n                pair<sint, pair<sint, sint>> v = {u.first, {i, u.second.second}};\r\n                if(!vis[v.first][v.second.first][v.second.second]){\r\n                    q.push(v);\r\n                    parent[v.first][v.second.first][v.second.second] = u;\r\n                    dis[v.first][v.second.first][v.second.second] = dis[u.first][u.second.first][u.second.second] + 1;\r\n                    vis[v.first][v.second.first][v.second.second] = 1;\r\n                }\r\n            }\r\n        }\r\n        col = s[u.second.first][u.second.second - 1];\r\n        for(int i = 1; i <= n; i++){\r\n            if(col == s[u.first][i - 1] && valid(u.second.first, u.second.second, i) == 1){\r\n                pair<sint, pair<sint, sint>> v = {i, {u.second.first, u.second.second}};\r\n                if(!vis[v.first][v.second.first][v.second.second]){\r\n                    q.push(v);\r\n                    parent[v.first][v.second.first][v.second.second] = u;\r\n                    dis[v.first][v.second.first][v.second.second] = dis[u.first][u.second.first][u.second.second] + 1;\r\n                    vis[v.first][v.second.first][v.second.second] = 1;\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\nvoid output_edge(pair<sint, pair<sint, sint>> u, pair<sint, pair<sint, sint>> v){\r\n    int arr1[] = {u.first, u.second.first, u.second.second};\r\n    int arr2[] = {v.first, v.second.first, v.second.second};\r\n    for(int i = 0; i < 3; i++){\r\n        if(arr1[i] != arr2[i]){\r\n            cout << arr1[i] << ' ' << arr2[i] << endl;\r\n            return;\r\n        }\r\n    }\r\n}\r\n\r\nint main(){\r\n    cin >> n >> a >> b >> c;\r\n    for(int i = 1; i <= n; i++){\r\n        cin >> s[i];\r\n    }\r\n    next_ver();\r\n    bfs(a, b, c);\r\n    if(dis[1][2][3] == INF && dis[1][3][2] == INF && dis[2][1][3] == INF && dis[2][3][1] == INF && dis[3][1][2] == INF && dis[3][2][1] == INF){\r\n        cout << \"-1\";\r\n        return 0;\r\n    }\r\n    sint p[3] = {1, 2, 3};\r\n    pair<int, pair<sint, pair<sint, sint>>> ans2 = {INF, {INF, {INF, INF}}};\r\n    do{\r\n        ans2 = min(ans2, {dis[p[0]][p[1]][p[2]], {p[0], {p[1], p[2]}}});\r\n    }while(next_permutation(p, p + 3));\r\n    cout << ans2.first << endl;\r\n    vector<pair<sint, pair<sint, sint>>> ans;\r\n    for(pair<sint, pair<sint, sint>> x = ans2.second; x.first > 0; x = parent[x.first][x.second.first][x.second.second]){\r\n        ans.push_back(x);\r\n    }\r\n    for(int i = ans.size() - 1; i >= 1; i--){\r\n        output_edge(ans[i], ans[i - 1]);\r\n    }\r\n    return 0;\r\n}\r\n"
+}

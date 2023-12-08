@@ -1,0 +1,40 @@
+{
+    "id": 180023488,
+    "contestId": 1750,
+    "creationTimeSeconds": 1667864815,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1750,
+        "index": "E",
+        "name": "Bracket Cost",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1750,
+        "members": [
+            {
+                "handle": "Proofy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1667745300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define ll long long\r\nint tt, tc;\r\n\r\nvoid solve() {\r\n\tint n;\r\n\tcin >> n;\r\n\tstring s;\r\n\tcin >> s;\r\n\ts.insert(s.begin(), ' ');\r\n\tvector<ll> pref(n + 1);\r\n\tfor (int i = 1; i <= n; i++) pref[i] = pref[i - 1] + (s[i] == '(' ? 1 : -1);\r\n\t\r\n\tll ans = 0;\r\n\tfor (int l = 0; l < n; l++) {\r\n\t\tll min_pref_j = LLONG_MAX;\r\n\t\tll min_pref_j_1 = LLONG_MAX;\r\n\t\tfor (int r = l + 1; r <= n; r++) {\r\n\t\t\tmin_pref_j = min(min_pref_j, pref[r]);\r\n\t\t\tmin_pref_j_1 = min(min_pref_j_1, 2LL * pref[r - 1] - r);\r\n\t\t\t\r\n\t\t\tans += pref[r] - pref[l];\r\n            if (min_pref_j < pref[l]) {\r\n                /*                \r\n                * pref[r] - pref[l] + \r\n                * r + 2pref[l] - 2pref[r] + 1 - 2min(pref[j]) + min(2pref[j - 1] - j)\r\n                * */\r\n                ll sum = 0;\r\n                sum += r + 2 * pref[l] - 2 * pref[r] + 1; // 1 + 2 + 1\r\n                sum -= 2 * min_pref_j; // - 2 * -1\r\n                sum += min_pref_j_1; \r\n                \r\n                sum = min(sum, -2 * (min_pref_j - pref[l]));\t\t\t\r\n                \r\n                ans += sum;\r\n            }\r\n\t\t}\r\n\t}\r\n\t\r\n\tcout << ans << \"\\n\";\r\n}\r\n \r\nint main() {\r\n\tios::sync_with_stdio(0); cin.tie(0);\r\n\ttt = 1, tc = 1; cin >> tt;\r\n\twhile (tt--) solve(), tc++;\r\n}\r\n\r\n/*\r\n * Can we solve it for one string?\r\n * \r\n * First, the answer is bounded by the length of the string (just add a neutralizing bracket\r\n * for all brackets)\r\n * \r\n * Now, note that it is optimal to do all cyclic shifts first then\r\n * add your brackets,\r\n * \r\n * since any sequence of operations where this is not true, we can shift all additions of\r\n * brackets in the end\r\n * \r\n * Now, for some cyclic shift of a bracketting subsequence\r\n * any neutralization by addition would be only to add opening brackets at the beginning\r\n * or closing brackets at the end\r\n * \r\n * \r\n * )\t(\t)\t)\t(\t(\t)\t)\t(\t(\r\n * -1\t1\t-1\t-1\t1\t1\t-1\t-1\t1\t1\r\n * -1\t0\t-1\t-2\t-1\t0\t-1\t-2\t-1\t0\r\n * (\t( )\t(\t)\t)\t(\t(\t)\t)\r\n *  \r\n * for a sequence that can be rotated to be balanced \r\n * (number of left braces == number of right braces, \r\n * we can start at the place right after where the prefix sum is minimal\r\n * \r\n * BUUUT, this is not optimal:\r\n * ))))((((()()()()()()()()()()()()()()()\r\n * the cost of rotation would be much larger than just adding 4 opening brackets \r\n * on the left and 4 closing brackets on the right\r\n * \r\n * what is the cost of a string if we are not doing cyclic shifts at all?\r\n * max(-min(pref), 0) + pref.back() + max(-min(pref), 0)\r\n * \r\n * or pref.back() + 2 * max(-min(pref), 0)\r\n * \r\n * which is because we are neutralizing the most negative effect and adding \r\n * right braces at the end to close all unclosed opening brackets\r\n * \r\n * it remains to find the minimum of the function above over all cyclic shifts\r\n * note that over all cyclic shifts, pref.back() doesn't change\r\n * it remains to minimize max(-min(pref), 0), which is just to remove as much negative as \r\n * as possible by cyclic shifts\r\n * \r\n * select a suffix of positive sum and shift by it, \r\n * such positive sum would be transferred to neutralize the big negative\r\n * but the problem is, this can create more negatives inside the suffix itself\r\n * (((())))))(((( ()))((((\r\n * but this won't happen except if there is a smaller suffix with larger positive sum, so fine\r\n * so we can just calculate the prefix sum array, and iterating over all suffices such that the sum is positive and minimizing\r\n * \r\n * answer is\r\n * pref.back() if pref is all positive\r\n * \r\n * if negative\r\n * let x = -min(pref)\r\n * minimize (positive-summed suffix size + 2 * (x - suffix sum) + pref.back())\r\n * \r\n * Now, this is ALL for one string\r\n * \r\n * \r\n * From previous work\r\n\r\n * to calculate the same value for a substring [l + 1, r], \r\n * if min(pref[j] - pref[l]) for all j in [l + 1, r] is non-negative, then the answer is just pref[r] - pref[l]\r\n * \r\n * otherwise, let x = -min(pref[j] - pref[l])\r\n * the answer is \r\n * pref[r] - pref[l] + min(2 * x, min(r - j + 1 + 2 * (x - (pref[r] - pref[j - 1]))))\r\n * for all j in [l + 1, r]\r\n * \r\n * let's try to decompose the expression to be minimized\r\n * r - j + 1 + 2x - 2pref[r] + 2pref[j - 1]\r\n * \r\n * r + 2x - 2pref[r] + \r\n * \r\n * 2pref[j - 1] - j + 1\r\n * \r\n * one is constant according to r\r\n * and the other is variant according to j\r\n * \r\n * we need to just minimize 2pref[j - 1] - j + 1\r\n * \r\n * this means that any substring's value can be calculated in log using segment tree\r\n * \r\n * now, to deal with the thing that if the minimum is already postive we can just say\r\n * the answer is\r\n * \r\n * pref[r] - pref[l] + \r\n * max(0, min(r - j + 1 + 2x - 2pref[r] + 2pref[j - 1]))\r\n * \r\n * pref[r] - pref[l] + \r\n * max(0, min(r - j + 1 - 2min(pref[j] - pref[l]) - 2pref[r] + 2pref[j - 1]))\r\n * \r\n * \r\n * or by rearranging:  \r\n * pref[r] - pref[l] + \r\n * max(0, r + 2pref[l] - 2pref[r] + 1 - 2min(pref[j]) + min(2pref[j - 1] - j))\r\n */\r\n"
+}

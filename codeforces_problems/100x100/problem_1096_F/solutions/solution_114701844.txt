@@ -1,0 +1,36 @@
+{
+    "id": 114701844,
+    "contestId": 1096,
+    "creationTimeSeconds": 1619797654,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1096,
+        "index": "F",
+        "name": "Inversion Expectation",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1096,
+        "members": [
+            {
+                "handle": "Nachiket"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1546007700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 32,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 6451200,
+    "source": "/**\r\n *\tAuthor: Nachiket Kanore\r\n *\tCreated: Friday 30 April 2021 08:56:52 PM IST\r\n**/\r\n#include <iostream>\r\n#include <cstdio>\r\n#include <cstdlib>\r\n#include <algorithm>\r\n#include <cmath>\r\n#include <vector>\r\n#include <cassert>\r\n#include <array>\r\n#include <string>\r\n#include <cstring>\r\n#include <chrono>\r\n\r\n#define int int64_t\r\n#define pb push_back\r\n#define sz(x) (int)(x.size())\r\n#define ALL(x) (x).begin(),(x).end()\r\n#define F0R(i,R) for(int i = (0); i < (R); ++i)\r\n#define FOR(i,L,R) for(int i = (L); i <= (R); ++i)\r\n\r\nusing namespace std;\r\nusing namespace std::chrono;\r\n\r\ntemplate<class T> bool cmin(T& a, const T& b) { return b < a ? a = b, 1 : 0; }\r\ntemplate<class T> bool cmax(T& a, const T& b) { return a < b ? a = b, 1 : 0; } \r\n\r\nstruct starter{\r\n\thigh_resolution_clock::time_point t1, t2;\r\n\tstarter() {\r\n\t\tios::sync_with_stdio(0); cin.tie(0);\r\n\t\tt1 = high_resolution_clock::now();\r\n\t}\r\n\t~starter() {\r\n\t\tt2 = high_resolution_clock::now();\r\n\t\tduration<double> time_span = duration_cast<duration<double>>(t2 - t1);\r\n\t\tcerr << \"It took \" << time_span.count() << \" seconds.\";\r\n\t}\r\n} starter_;\r\n\r\nconst int MOD = 998244353;\r\nstruct mi {\r\n\tusing ll = long long;\r\n\tll v; explicit operator ll() const { return v; }\r\n\tmi() { v = 0; }\r\n\tmi(ll _v) { \r\n\t\tv = (-MOD < _v && _v < MOD) ? _v : _v % MOD;\r\n\t\tif (v < 0) v += MOD;\r\n\t}\r\n\tfriend bool operator==(const mi& a, const mi& b) { return a.v == b.v; }\r\n\tfriend bool operator!=(const mi& a, const mi& b) { return !(a == b); }\r\n\tfriend bool operator<(const mi& a, const mi& b) { return a.v < b.v; }\r\n\tmi& operator+=(const mi& m) { if ((v += m.v) >= MOD) v -= MOD; return *this; }\r\n\tmi& operator-=(const mi& m) { if ((v -= m.v) < 0) v += MOD;\treturn *this; }\r\n\tmi& operator*=(const mi& m) { v = v*m.v%MOD; return *this; }\r\n\tmi& operator/=(const mi& m) { return (*this) *= inv(m); }\r\n\r\n\tfriend mi pow(mi a, ll p) {\r\n\t\tmi ans = 1; assert(p >= 0);\r\n\t\tfor (; p; p /= 2, a *= a) if (p&1) ans *= a;\r\n\t\t\treturn ans;\r\n\t}\r\n\tfriend mi inv(const mi& a) { assert(a.v != 0); return pow(a,MOD-2);\t}\r\n\r\n\tmi operator-() const { return mi(-v); }\r\n\tmi& operator++() { return *this += 1; }\r\n\tmi& operator--() { return *this -= 1; }\r\n\tmi operator++(int32_t) { mi temp; temp.v = v++; return temp; }\r\n\tmi operator--(int32_t) { mi temp; temp.v = v--; return temp; }\r\n\tfriend mi operator+(mi a, const mi& b) { return a += b; }\r\n\tfriend mi operator-(mi a, const mi& b) { return a -= b; }\r\n\tfriend mi operator*(mi a, const mi& b) { return a *= b; }\r\n\tfriend mi operator/(mi a, const mi& b) { return a /= b; }\r\n\tfriend ostream& operator<<(ostream& os, const mi& m) {\r\n\t\tos << m.v; return os;\r\n\t}\r\n\tfriend istream& operator>>(istream& is, mi& m) {\r\n\t\tll x; is >> x;\r\n\t\tm.v = x;\r\n\t\treturn is;\r\n\t}\r\n};\r\n\r\nstruct BIT\r\n{\r\n    int N;\r\n    vector<int> bit;\r\n\r\n    void init(int n)\r\n    {\r\n        N = n;\r\n        bit.assign(n + 1, 0);\r\n    }\r\n\r\n    void update(int idx, int val)\r\n    {\r\n        while(idx <= N)\r\n        {\r\n            bit[idx] += val;\r\n            idx += idx & -idx;\r\n        }\r\n    }\r\n\r\n    void updateMax(int idx, int val)\r\n    {\r\n        while(idx <= N)\r\n        {\r\n            bit[idx] = max(bit[idx], val);\r\n            idx += idx & -idx;\r\n        }\r\n    }\r\n\r\n    int pref(int idx)\r\n    {\r\n        int ans = 0;\r\n        while(idx > 0)\r\n        {\r\n            ans += bit[idx];\r\n            idx -= idx & -idx;\r\n        }\r\n        return ans;\r\n    }\r\n\r\n    int rsum(int l, int r)\r\n    {\r\n        return pref(r) - pref(l - 1);\r\n    }\r\n\r\n    int prefMax(int idx)\r\n    {\r\n        int ans = -2e9;\r\n        while(idx > 0)\r\n        {\r\n            ans = max(ans, bit[idx]);\r\n            idx -= idx & -idx;\r\n        }\r\n        return ans;\r\n    }\r\n} T;\r\n\r\nconst int inf = 1e18;\r\nconst int N = 2e5 + 5;\r\n\r\nint n, p[N], have[N];\r\nint unknown, cnt_unknown[N];\r\n\r\nint32_t main() {\r\n\tcin >> n;\r\n\tFOR (i,1,n) {\r\n\t\tcin >> p[i];\r\n\t\tif (~p[i]) {\r\n\t\t\thave[p[i]] = 1;\r\n\t\t} else {\r\n\t\t\tunknown++;\r\n\t\t\tcnt_unknown[i] = 1;\r\n\t\t}\r\n\t}\r\n\tFOR (i,1,n) {\r\n\t\tcnt_unknown[i] += cnt_unknown[i-1];\r\n\t\thave[i] += have[i-1];\r\n\t}\r\n\r\n\t// U U\r\n\tmi ans = mi(unknown) * (unknown - 1) / 2;\r\n\tans /= 2;\r\n\r\n\tauto get_poss = [&](int L, int R) {\r\n\t\tif (L > R) return int(0);\r\n\t\treturn (R - L + 1) - (have[R] - have[L-1]);\r\n\t};\r\n\r\n\t// U K\r\n\tif (unknown)\r\n\tFOR (i,1,n) {\r\n\t\tif (p[i] == -1) continue;\r\n\t\tint tot = cnt_unknown[i-1];\r\n\t\tint poss = get_poss(p[i] + 1, n);\r\n\t\tans += mi(tot) * poss / unknown;\r\n\t}\r\n\t// K U\r\n\tif (unknown)\r\n\tfor (int i = n; i; --i) {\r\n\t\tif (p[i] == -1) continue;\r\n\t\tint tot = cnt_unknown[n] - cnt_unknown[i-1];\r\n\t\tint poss = unknown - get_poss(p[i] + 1, n);\r\n\t\tans += mi(tot) * poss / unknown;\r\n\t}\r\n\r\n\t// K K\r\n\tT.init(n);\r\n\tFOR (i,1,n) {\r\n\t\tif (~p[i]) {\r\n\t\t\tans += T.rsum(p[i] + 1, n);\r\n\t\t\tT.update(p[i], 1);\r\n\t\t}\r\n\t}\r\n\r\n\tcout << ans;\r\n}\r\n"
+}

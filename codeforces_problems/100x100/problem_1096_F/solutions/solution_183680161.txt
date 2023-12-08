@@ -1,0 +1,36 @@
+{
+    "id": 183680161,
+    "contestId": 1096,
+    "creationTimeSeconds": 1670045277,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1096,
+        "index": "F",
+        "name": "Inversion Expectation",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1096,
+        "members": [
+            {
+                "handle": "Hovery"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1546007700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 32,
+    "timeConsumedMillis": 77,
+    "memoryConsumedBytes": 3993600,
+    "source": "// LUOGU_RID: 96389521\n#include <bits/stdc++.h>\r\n\r\ntemplate<unsigned P>\r\nclass modint {\r\n  static_assert(1 <= P, \"P must be a positive integer\");\r\n\r\n  using mint = modint<P>;\r\n\r\nprotected:\r\n  unsigned v;\r\n\r\npublic:\r\n  constexpr modint() : v() {}\r\n\r\n  template<typename T,\r\n           typename std::enable_if<std::is_integral<T>::value &&\r\n                                       std::is_signed<T>::value,\r\n                                   bool>::type = true>\r\n  constexpr modint(T t_v) : v() {\r\n    long long tmp = t_v % static_cast<long long>(P);\r\n    if (tmp < 0) {\r\n      tmp += P;\r\n    }\r\n    v = tmp;\r\n  }\r\n\r\n  template<typename T,\r\n           typename std::enable_if<std::is_integral<T>::value &&\r\n                                       std::is_unsigned<T>::value,\r\n                                   bool>::type = true>\r\n  constexpr modint(T t_v) : v() {\r\n    v = t_v % P;\r\n  }\r\n\r\n  constexpr unsigned val() const {\r\n    return v;\r\n  }\r\n\r\n  static constexpr unsigned mod() {\r\n    return P;\r\n  }\r\n\r\n  static constexpr mint raw(unsigned v) {\r\n    mint res;\r\n    res.v = v;\r\n    return res;\r\n  }\r\n\r\n  constexpr mint &operator+=(const mint &rhs) {\r\n    v < P - rhs.v ? v += rhs.v : v -= P - rhs.v;\r\n    return *this;\r\n  }\r\n\r\n  constexpr mint &operator++() {\r\n    v + 1 < P ? ++v : v = 0;\r\n    return *this;\r\n  }\r\n\r\n  constexpr mint operator++(int) {\r\n    mint tmp = *this;\r\n    v + 1 < P ? ++v : v = 0;\r\n    return tmp;\r\n  }\r\n\r\n  constexpr mint &operator-=(const mint &rhs) {\r\n    v < rhs.v ? v += P - rhs.v : v -= rhs.v;\r\n    return *this;\r\n  }\r\n\r\n  constexpr mint &operator--() {\r\n    v ? --v : v = P - 1;\r\n    return *this;\r\n  }\r\n  \r\n  constexpr mint operator--(int) {\r\n    mint tmp = *this;\r\n    v ? --v : v = P - 1;\r\n    return tmp;\r\n  }\r\n\r\n  constexpr mint operator-() const {\r\n    mint res;\r\n    res.v = v ? P - v : 0;\r\n    return res;\r\n  }\r\n\r\n  constexpr mint &operator*=(const mint &rhs) {\r\n    v = static_cast<unsigned long long>(v) * rhs.v % P;\r\n    return *this;\r\n  }\r\n\r\n  constexpr mint pow(unsigned long long b) const {\r\n    mint a(*this), s(1);\r\n    for (; b; b >>= 1) {\r\n      if (b & 1) {\r\n        s *= a;\r\n      }\r\n      a *= a;\r\n    }\r\n    return s;\r\n  }\r\n\r\n  constexpr mint inv() const {\r\n    return pow(P - 2);\r\n  }\r\n\r\n  constexpr friend mint operator+(const mint &lhs, const mint &rhs) {\r\n    return mint(lhs) += rhs;\r\n  }                                                                              \r\n                                                                                 \r\n  constexpr friend mint operator-(const mint &lhs, const mint &rhs) {            \r\n    return mint(lhs) -= rhs;                                                     \r\n  }\r\n\r\n  constexpr friend mint operator*(const mint &lhs, const mint &rhs) {\r\n    return mint(lhs) *= rhs;\r\n  }\r\n\r\n  constexpr friend bool operator==(const mint &lhs, const mint &rhs) {\r\n    return lhs.v == rhs.v;\r\n  }\r\n\r\n  constexpr friend bool operator!=(const mint &lhs, const mint &rhs) {\r\n    return lhs.v != rhs.v;\r\n  }\r\n\r\n  friend std::istream &operator>>(std::istream &in, mint &x) {\r\n    return in >> x.v;\r\n  }\r\n\r\n  friend std::ostream &operator<<(std::ostream &out, const mint &x) {\r\n    return out << x.v;\r\n  }\r\n};\r\n\r\nusing mint = modint<998244353>;\r\n\r\nclass fenwick {\r\n  private:\r\n    int n;\r\n    std::vector<int> tr;\r\n  public:\r\n    fenwick() = default;\r\n    fenwick (int N) : n(N + 5), tr(N + 6, 0) {}\r\n    void add (int x, int y) {\r\n      ++x;\r\n      while (x <= n) {\r\n        tr[x] += y;\r\n        x += x & -x;\r\n      }\r\n    }\r\n    int qry (int x) {\r\n      int res = 0;\r\n      ++x;\r\n      while (x) {\r\n        res += tr[x];\r\n        x -= x & -x;\r\n      }\r\n      return res;\r\n    }\r\n};\r\n\r\nsigned main () {\r\n  std::ios::sync_with_stdio(false);\r\n  std::cin.tie(nullptr);\r\n\r\n  std::istream &fin = std::cin;\r\n  std::ostream &fout = std::cout;\r\n\r\n  int n;\r\n  fin >> n;\r\n\r\n  std::vector<int> a(n + 1), vis(n + 2);\r\n  int k = 0;\r\n  for (int i = 1; i <= n; ++i) {\r\n    fin >> a[i];\r\n    if (~a[i]) {\r\n      vis[a[i]] = 1;\r\n    } else {\r\n      ++k;\r\n    }\r\n  }\r\n\r\n  fenwick T(n);\r\n  mint res = 0;\r\n  for (int i = n; i; --i) {\r\n    if (~a[i]) {\r\n      res += T.qry(a[i]);\r\n      T.add(a[i], 1);\r\n    }\r\n  }\r\n\r\n  res += mint(k) * mint(k - 1) * mint(4).inv();\r\n\r\n  std::vector<int> ad(n + 1), ad1(n + 1);\r\n  int lst = 0, ct = 0;\r\n  for (int i = 1; i <= n + 1; ++i) {\r\n    if (!vis[i]) {\r\n      for (int j = lst; j < i; ++j) {\r\n        ad[j] = ct;\r\n      }\r\n      ++ct;\r\n      lst = i;\r\n    }\r\n  }\r\n  ct = 0; lst = 0;\r\n  for (int i = n; ~i; --i) {\r\n    if (!vis[i]) {\r\n      for (int j = i + 1; j <= lst; ++j) {\r\n        ad1[j] = ct;\r\n      }\r\n      ++ct;\r\n      lst = i;\r\n    }\r\n  }\r\n\r\n  mint sum = 0, fack = 1;\r\n  for (int i = 1; i < k; ++i) {\r\n    fack = fack * i;\r\n  }\r\n\r\n  mint T2 = 0, T3 = 0;\r\n  for (int i = 1; i <= n; ++i) {\r\n    if (~a[i]) {\r\n      T2 += ad[a[i]];\r\n    } else {\r\n      sum += fack * T2;\r\n    }\r\n  }\r\n  for (int i = n; i; --i) {\r\n    if (~a[i]) {\r\n      T3 += ad1[a[i]];\r\n    } else {\r\n      sum += fack * T3;\r\n    }\r\n  }\r\n\r\n  fout << res + sum * mint(fack * k).inv() << '\\n';\r\n}"
+}

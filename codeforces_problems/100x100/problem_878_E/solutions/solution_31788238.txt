@@ -1,0 +1,36 @@
+{
+    "id": 31788238,
+    "contestId": 878,
+    "creationTimeSeconds": 1509091833,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "Kuzey"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 37,
+    "timeConsumedMillis": 1247,
+    "memoryConsumedBytes": 52531200,
+    "source": "//In the Name of God\n//Ya Ali\n\n#include<bits/stdc++.h>\n\n#define int long long\n#define ld long double\n\n#define lc (nod+nod+1)\n#define rc (nod+nod+2)\n#define mid ((ls+rs)>>1)\n\n#define err(A) cout<<#A<<\" = \"<<(A)<<endl\n\nusing namespace std;\n\nconst ld big=1e20;\nconst ld inf=1e20;\nconst int M=1e9+7;\nconst int maxn=131072;\nconst int mxlg=18;\n\nint n,q;\n\nint a[maxn];\n\nint f[maxn];\nint t[maxn];\n\nint L[maxn][mxlg];\nint s[maxn][mxlg];\n\nld mul[maxn*2];\nld add[maxn*2];\nld mn[maxn*2];\nint mni[maxn*2];\n\nvoid make(int nod,int ls,int rs)\n{\n  mn[nod]=inf;\n  mni[nod]=ls;\n  mul[nod]=1;\n  if(ls==rs-1)\n    return;\n  make(lc,ls,mid);\n  make(rc,mid,rs);\n}\n\nvoid rlx(int nod)\n{\n  mn[lc]=mn[lc]*mul[nod]+add[nod];\n  mn[rc]=mn[rc]*mul[nod]+add[nod];\n  \n  mul[lc]*=mul[nod];\n  mul[rc]*=mul[nod];\n  \n  (add[lc]*=mul[nod])+=add[nod];\n  (add[rc]*=mul[nod])+=add[nod];\n\n  mul[nod]=1,add[nod]=0;\n}\n\nvoid upd(int nod)\n{\n  if(mn[lc]<mn[rc])\n    mni[nod]=mni[lc],mn[nod]=mn[lc];\n  else\n    mni[nod]=mni[rc],mn[nod]=mn[rc];\n}\n\nvoid cng(int nod,int ls,int rs,int i,int x)\n{\n  if(i<ls or rs<=i)\n    return;\n  if(ls==rs-1)\n    return mn[nod]=x,void();\n  rlx(nod);\n  cng(lc,ls,mid,i,x);\n  cng(rc,mid,rs,i,x);\n  upd(nod);\n}\n\nint32_t main()\n{\n  t[0]=1;\n  for(int i=1;i<maxn;i++)\n    t[i]=t[i-1]*2%M;\n  \n  ios::sync_with_stdio(0);cin.tie(0);\n\n  cin>>n>>q;\n\n  for(int i=0;i<n;i++)\n    cin>>a[i];\n  \n  make(0,0,n);\n  \n  for(int i=n;i--;)\n    {\n      //err(i);\n      \n      f[i]=(f[i+1]*2+a[i])%M;\n      \n      L[i][0]=-1;\n      \n      mul[0]*=2;\n      add[0]+=a[i];\n      mn[0]*=2;\n      mn[0]+=a[i];\n      \n      cng(0,0,n,i,a[i]);\n\n      while(mn[0]<0)\n\t{\n\t  //err(mn[0]);\n\t  //err(mni[0])<<endl;\n\t  \n\t  int ind=mni[0];\n\t  L[ind][0]=i;\n\t  s[ind][0]=(f[i]-f[ind+1]*t[ind-i+1]%M)%M;\n\t  \n\t  cng(0,0,n,ind,big);\n\t}\n\n      //err(mn[0]);\n\n      //cout<<endl;\n    }\n\n  for(int i=0;i<n;i++)\n    for(int j=1;j<mxlg;j++)\n      if(L[i][j-1]>0)\n\t{\n\t  L[i][j]=L[L[i][j-1]-1][j-1];\n\t  s[i][j]=(s[i][j-1]+s[L[i][j-1]-1][j-1])%M;\n\t}\n      else\n\t{\n\t  L[i][j]=L[i][j-1];\n\t  s[i][j]=s[i][j-1];\n\t}\n\n  /*\n  cout<<\"L : \"<<endl;\n  for(int i=0;i<n;i++)\n    cout<<L[i][0]<<\" \";\n  cout<<endl;\n  cout<<\"s : \"<<endl;\n  for(int i=0;i<n;i++)\n    cout<<s[i][0]<<\" \";\n  cout<<endl;\n  cout<<\"f : \"<<endl;\n  for(int i=0;i<n;i++)\n    cout<<f[i]<<\" \";\n  cout<<endl;\n  */\n  \n  for(int l,r;q--;)\n    {\n      cin>>l>>r;\n      l--,r--;\n\n      int ans=0;\n      \n      int md=r+1;\n      for(int j=mxlg;j--;)\n\tif(L[md-1][j]>l)\n\t  {\n\t    //err(j);\n\t    ans+=s[md-1][j];\n\t    md=L[md-1][j];\n\t  }\n\n      //err(md);\n      \n      ans=(f[l]-f[md]*t[md-l]%M)+(ans*2);\n      ans=(ans%M+M)%M;\n\n      cout<<ans<<\"\\n\";\n    }\n  \n  return 0;\n}\n"
+}

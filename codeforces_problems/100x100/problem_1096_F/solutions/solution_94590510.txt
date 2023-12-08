@@ -1,0 +1,36 @@
+{
+    "id": 94590510,
+    "contestId": 1096,
+    "creationTimeSeconds": 1601746409,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1096,
+        "index": "F",
+        "name": "Inversion Expectation",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1096,
+        "members": [
+            {
+                "handle": "2qbingxuan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1546007700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 32,
+    "timeConsumedMillis": 156,
+    "memoryConsumedBytes": 13004800,
+    "source": "//   __________________\r\n//  | ________________ |\r\n//  ||          ____  ||\r\n//  ||   /\\    |      ||\r\n//  ||  /__\\   |      ||\r\n//  || /    \\  |____  ||\r\n//  ||________________||\r\n//  |__________________|\r\n//  \\###################\\\r\n//   \\###################\\\r\n//    \\        ____       \\\r\n//     \\_______\\___\\_______\\\r\n// An AC a day keeps the doctor away.\r\n \r\n#ifdef local\r\n#include <bits/extc++.h>\r\n#define safe std::cerr<<__PRETTY_FUNCTION__<<\" line \"<<__LINE__<<\" safe\\n\"\r\n#define debug(args...) qqbx(#args, args)\r\ntemplate <typename ...T> void qqbx(const char *s, T ...args) {\r\n    int cnt = sizeof...(T);\r\n    std::cerr << \"\\033[1;32m(\" << s << \") = (\";\r\n    ( (std::cerr << args << (--cnt ? \", \" : \")\\033[0m\\n\")) , ... , void() );\r\n}\r\n#else\r\n#pragma GCC optimize(\"Ofast\")\r\n#pragma loop_opt(on)\r\n#include <bits/extc++.h>\r\n#include <bits/stdc++.h>\r\n#define debug(...) ((void)0)\r\n#define safe ((void)0)\r\n#endif // local\r\n#define all(v) begin(v),end(v)\r\n#define get_pos(v,x) int(lower_bound(begin(v),end(v),x)-begin(v))\r\n#define sort_uni(v) sort(begin(v),end(v)),v.erase(unique(begin(v),end(v)),end(v))\r\n#define pb emplace_back\r\n#define ff first\r\n#define ss second\r\n#define mem(v,x) memset(v,x,sizeof v)\r\n \r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\ntypedef int64_t ll;\r\ntypedef long double ld;\r\ntypedef pair<ll,ll> pll;\r\ntypedef pair<ld,ld> pld;\r\ntemplate <typename T> using max_heap = std::priority_queue<T,vector<T>,less<T> >;\r\ntemplate <typename T> using min_heap = std::priority_queue<T,vector<T>,greater<T> >;\r\ntemplate <typename T> using rbt = tree<T,null_type,less<T>,rb_tree_tag,tree_order_statistics_node_update>;\r\nconstexpr ld PI = acos(-1), eps = 1e-7;\r\nconstexpr ll N = 1000025, INF = 1e18, MOD = 998244353, K = 14699, inf = 1e9;\r\nconstexpr inline ll cdiv(ll x, ll m) { return x/m + ((x<0 ^ m>0) && (x%m)); } // ceiling divide\r\nconstexpr inline ll modpow(ll e,ll p,ll m=MOD) { ll r=1; for(e%=m;p;p>>=1,e=e*e%m) if(p&1) r=r*e%m; return r; }\r\n\r\nint p[N];\r\nbool app[N];\r\nint suf[N];\r\nint b[N];\r\nvoid add(int x) {\r\n    for(; x<N; x+=x&-x) b[x] += 1;\r\n}\r\nint qry(int x) {\r\n    int res = 0;\r\n    for(; x>0; x-=x&-x) res += b[x];\r\n    return res;\r\n}\r\nsigned main() {\r\n    ios_base::sync_with_stdio(0), cin.tie(0);\r\n    int n;\r\n    cin >> n;\r\n    for(int i = 1; i <= n; i++) cin >> p[i];\r\n    for(int i = 1; i <= n; i++) if(p[i] != -1) app[p[i]] = true;\r\n    for(int i = 1; i <= n; i++) if(!app[i]) ++suf[i];\r\n    for(int i = n; i >= 1; i--) suf[i] += suf[i+1];\r\n    int no = 0, cnt = 0, sum = 0;\r\n    for(int i = 1; i <= n; i++) if(p[i] == -1) ++no;\r\n    ll ans = 1LL * no * (no-1) % MOD * modpow(4, MOD-2) % MOD;\r\n    debug(ans);\r\n    for(int i = n; i >= 1; i--) if(p[i] != -1) ans = (ans + qry(p[i])) % MOD, add(p[i]);\r\n    for(int i = 1; i <= n; i++) {\r\n        if(p[i] == -1) {\r\n            // ans += E(p[j] = -1, p[i] = -1, p[i] < p[j]) = #(-1 before) / 2;\r\n            // ans += E(p[j] = x, p[i] = -1, p[i] < p[j]) = sum over j (#not appeared, >p[j])\r\n            ans = (ans + 1LL * sum * modpow(no, MOD-2)) % MOD;\r\n            ++cnt;\r\n        } else {\r\n            // ans += E(p[j] = x, p[i] = y);\r\n            // ans += E(p[j] = -1, p[i] = x) = (#-1 before) * (#not appeared, >p[i]) / (#not appeared)\r\n            int bigger = suf[p[i]];\r\n            sum = (sum + no - bigger) % MOD;\r\n            ans = (ans + 1LL * cnt * bigger % MOD * modpow(no, MOD-2)) % MOD;\r\n        }\r\n    }\r\n    cout << ans << '\\n';\r\n}\r\n"
+}

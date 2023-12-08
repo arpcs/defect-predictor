@@ -1,0 +1,36 @@
+{
+    "id": 63695640,
+    "contestId": 1096,
+    "creationTimeSeconds": 1572326348,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1096,
+        "index": "F",
+        "name": "Inversion Expectation",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1096,
+        "members": [
+            {
+                "handle": "Hyado"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1546007700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 32,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 7987200,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing ll = long long;\r\nusing db = double;\r\nusing ld = long double;\r\n#define fs first\r\n#define sc second\r\n#define pb push_back\r\n#define mp make_pair\r\n#define mt make_tuple\r\n#define eb emplace_back\r\n#define all(v) (v).begin(),(v).end()\r\n#define siz(v) (ll)(v).size()\r\n#define rep(i,a,n) for(ll i=a;i<(ll)(n);i++)\r\n#define repr(i,a,n) for(ll i=n-1;(ll)a<=i;i--)\r\n#define lb lower_bound\r\n#define ub upper_bound\r\ntypedef pair<int,int> P;\r\ntypedef pair<ll,ll> PL;\r\nconst ll mod = 998244353;\r\nconst ll INF = 1000000099;\r\nconst ll LINF = (ll)(1e18 +99);\r\nvector<ll> dx={-1,1,0,0},dy={0,0,-1,1};\r\ntemplate<typename T,typename U> void chmin(T& t, const U& u){if(t>u)t=u;}\r\ntemplate<typename T,typename U> void chmax(T& t, const U& u){if(t<u)t=u;}\r\ntemplate<typename T>T gcd(T a,T b){return b?gcd(b,a%b):a;}\r\ntemplate<typename T>T mpow(T a, T n) {\r\n   T res = 1;\r\n   for(;n;n>>=1) {\r\n      if (n & 1) res = res * a;\r\n      a = a * a;\r\n   }\r\n   return res;\r\n}\r\n\r\n\r\ntemplate<typename T> \r\nstruct BIT{\r\n  int n;\r\n  vector<T> bit;//1-indexed\r\n\r\n  BIT():n(-1){}\r\n  //initialization\r\n\r\n  BIT(int n_,T d):n(n_),bit(n_+1,d){}\r\n  //initialization2 n_\u8981\u7d20\u6570 d\u521d\u671f\u5024\r\n  \r\n  T sum(int i){\r\n    T s=bit[0];\r\n    for(int x=i;x>0;x-=(x&-x))\r\n      s+=bit[x];\r\n    return s;\r\n  }\r\n  //1\u304b\u3089i\u307e\u3067\u306e\u548c(1-indexed)\r\n  \r\n  void add(int i,T a){\r\n    if(i==0) return;\r\n    for(int x=i;x<=n;x+=(x&-x))\r\n      bit[x]+=a;\r\n  }\r\n  //i\u306ba\u52a0\u3048\u308b\r\n  \r\n  T lower_bound(T w){\r\n    if(w<=0) return 0;\r\n    T x=0,r=1;//x\u306f\u6a2a\u306e\u4f4d\u7f6e\u3092\u7ba1\u7406\u3059\u308b\u30a4\u30e1\u30fc\u30b8\r\n    while(r<n) r<<=1;\r\n    for(T k=r;k>0;k>>=1){//\u4e0a\u306e\u5c64\u304b\u3089\u898b\u308b\r\n      if(x+k<=n && bit[x+k]<w){\r\n        w-=bit[x+k];\r\n        x+=k;//\u53f3\u306e\u8981\u7d20\u306b\u79fb\u308b\r\n      }\r\n    }\r\n    return x+1;\r\n  }\r\n  //ind\u307e\u3067\u306e\u533a\u9593\u548c\u304cw\u4ee5\u4e0a\u306b\u306a\u308b\u3088\u3046\u306a\u6700\u5c0f\u306eind\u3092\u6c42\u3081\u308b\r\n  \r\n  T sum0(int i){\r\n    return sum(i+1);\r\n  }\r\n  void add0(int i,T a){\r\n    add(i+1,a);\r\n  }//0-index\u7528\r\n\r\n  T query(int l,int r){\r\n    return sum(r-1)-sum(l-1);\r\n  }//[l,r)\u306e\u548c\u3092\u6c42\u3081\u308b\r\n\r\n  T query0(int l,int r){\r\n    return sum(r)-sum(l);\r\n  }//0-index\u7528\r\n};\r\n\r\nconst ll MAX = 200010;//\u8a2d\u5b9a\u3057\u3066\r\n\r\nlong long fac[MAX], finv[MAX], inv[MAX];\r\n\r\n// \u30c6\u30fc\u30d6\u30eb\u3092\u4f5c\u308b\u524d\u51e6\u7406\r\nvoid COMinit() {\r\n    fac[0] = fac[1] = 1;\r\n    finv[0] = finv[1] = 1;\r\n    inv[1] = 1;\r\n    for (int i = 2; i < MAX; i++){\r\n        fac[i] = fac[i - 1] * i % mod;\r\n        inv[i] = mod - inv[mod%i] * (mod / i) % mod;//\uff0a\uff11\r\n        finv[i] = finv[i - 1] * inv[i] % mod;\r\n    }\r\n}\r\n\r\nBIT<ll>  b(200010,0);\r\n\r\nsigned main(){\r\n   cin.tie(0);ios::sync_with_stdio(false);\r\n   ll n,mcnt=0,ans=0;cin>>n;\r\n   vector<ll> v(n);\r\n    \r\n   COMinit();\r\n\r\n   rep(i,0,n){\r\n      cin>>v[i];\r\n      if(v[i]==-1)mcnt++;\r\n   }\r\n   (ans+=(((mcnt-1)*mcnt)%mod)*inv[4])%=mod;//-1\u540c\u58eb\r\n\r\n   repr(i,0,n){\r\n      if(v[i]==-1)continue;\r\n      b.add(v[i],1ll);\r\n      ans+=b.sum(v[i]-1);\r\n      ans%=mod;\r\n   }//\u975e-1\u540c\u58eb\r\n\r\n\r\n   ll cnt=0;\r\n   repr(i,0,n){\r\n      if(v[i]==-1)cnt++;\r\n      else{\r\n         (ans+=((cnt)*(v[i]-1-b.sum(v[i]-1))%mod)*inv[mcnt])%=mod;\r\n      }\r\n   }//const,-1\r\n\r\n   cnt=0;\r\n   rep(i,0,n){\r\n      if(v[i]==-1)cnt++;\r\n      else{\r\n         (ans+=((cnt)*(n-v[i]-b.query(v[i]+1,n+1))%mod)*inv[mcnt])%=mod;\r\n      }\r\n   }//-1.const\r\n\r\n   cout<<ans%mod<<endl;\r\n}"
+}

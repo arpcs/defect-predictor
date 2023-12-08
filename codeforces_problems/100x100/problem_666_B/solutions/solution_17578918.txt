@@ -1,0 +1,37 @@
+{
+    "id": 17578918,
+    "contestId": 666,
+    "creationTimeSeconds": 1461952056,
+    "relativeTimeSeconds": 4356,
+    "problem": {
+        "contestId": 666,
+        "index": "B",
+        "name": "World Tour",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2000,
+        "tags": [
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 666,
+        "members": [
+            {
+                "handle": "lgarcia"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "room": 12,
+        "startTimeSeconds": 1461947700
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "PRETESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "// Written by Luis Garcia, 2016.\r\n// OJ-ID: CF666B\r\n\r\n#include <cstdio>\r\n#include <queue>\r\n#include <utility>\r\n\r\nusing namespace std;\r\n\r\nstruct Graph {\r\n    static const int _MAX_NODES = 3000, _MAX_EDGES = 5000;\r\n\r\n    int _nodesCount, _edgesCount;\r\n\r\n    struct _Edge {\r\n        _Edge * Next;\r\n        int From, To;\r\n    };\r\n\r\n    _Edge _edges[_MAX_EDGES], * _firstEdge[_MAX_NODES], * _lastEdge[_MAX_NODES];\r\n\r\npublic:\r\n    void AppendEdge(int from, int to) {\r\n        auto e = &_edges[_edgesCount++];\r\n\r\n        e->Next = NULL, e->From = from, e->To = to;\r\n        if (_firstEdge[from])\r\n            _lastEdge[from]->Next = e, _lastEdge[from] = e;\r\n        else\r\n            _firstEdge[from] = _lastEdge[from] = e;\r\n    }\r\n\r\n    void Clear(int n) {\r\n        _nodesCount = n, _edgesCount = 0;\r\n        memset(_firstEdge, 0, sizeof _firstEdge);\r\n    }\r\n\r\n    void GetShortestPaths(int from, int * out) {\r\n        priority_queue<pair<int, int>> queue;\r\n        queue.push(make_pair(0, from));\r\n\r\n        bool found[_MAX_EDGES] = {};\r\n\r\n        while (!queue.empty()) {\r\n            auto p = queue.top();\r\n            queue.pop();\r\n            int d = -p.first, u = p.second;\r\n            out[u] = d;\r\n\r\n            if (found[u]) continue;\r\n            found[u] = true;\r\n\r\n            for (auto e = _firstEdge[u]; e != NULL; e = e->Next) {\r\n                if (!found[e->To]) {\r\n                    queue.push(make_pair(-d - 1, e->To));\r\n                }\r\n            }\r\n        }\r\n    }\r\n};\r\n\r\nGraph graph;\r\nint best[3000][3000];\r\nint worse1[3000][5];\r\nint worse2[3000][5];\r\n\r\nint main() {\r\n    int n, m;\r\n    while (scanf(\"%d %d\", &n, &m) == 2) {\r\n        graph.Clear(n);\r\n        for (int j = 0, u, v; j < m; ++j) {\r\n            scanf(\"%d %d\", &u, &v);\r\n            graph.AppendEdge(u - 1, v - 1);\r\n        }\r\n\r\n        memset(best, -1, sizeof best);\r\n        for (int i = 0; i < n; ++i) {\r\n            graph.GetShortestPaths(i, best[i]);\r\n        }\r\n\r\n        memset(worse1, -1, sizeof worse1);\r\n        memset(worse2, -1, sizeof worse2);\r\n        for (int i = 0; i < n; ++i) {\r\n            for (int j = 0; j < n; ++j) {\r\n                if (best[i][j] != -1) {\r\n                    worse1[j][4] = i;\r\n                    sort(worse1[j], worse1[j] + 5, [j](int a, int b) {\r\n                        return (a == -1 ? -1 : best[a][j]) > (b == -1 ? -1 : best[b][j]);\r\n                    });\r\n\r\n                    worse2[i][4] = j;\r\n                    sort(worse2[i], worse2[i] + 5, [i](int a, int b) {\r\n                        return (a == -1 ? -1 : best[i][a]) > (b == -1 ? -1 : best[i][b]);\r\n                    });\r\n                }\r\n            }\r\n        }\r\n\r\n        int ans[4] = {}, ansTime = 0;\r\n        for (int i = 0; i < n; ++i)\r\n            for (int j = 0; j < n; ++j)\r\n                for (int u = 0; u < 4; ++u)\r\n                    for (int v = 0; v < 4; ++v) {\r\n                        int h = worse1[i][u], k = worse2[j][v];\r\n                        if (i != j && i != h && i != k &&\r\n                            j != h && j != k && h != k &&\r\n                            h != -1 && k != -1 &&\r\n                            best[h][i] != -1 && best[i][j] != -1 && best[j][k] != -1) {\r\n\r\n                            int t = best[h][i] + best[i][j] + best[j][k];\r\n                            if (t > ansTime) ans[0] = h, ans[1] = i, ans[2] = j, ans[3] = k, ansTime = t;\r\n                        }\r\n                    }\r\n\r\n        printf(\"%d %d %d %d\\n\", ans[0] + 1, ans[1] + 1, ans[2] + 1, ans[3] + 1);\r\n    }\r\n    return 0;\r\n}\r\n"
+}

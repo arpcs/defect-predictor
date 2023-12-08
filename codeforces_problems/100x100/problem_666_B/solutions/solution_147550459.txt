@@ -1,0 +1,36 @@
+{
+    "id": 147550459,
+    "contestId": 666,
+    "creationTimeSeconds": 1645692913,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 666,
+        "index": "B",
+        "name": "World Tour",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2000,
+        "tags": [
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 666,
+        "members": [
+            {
+                "handle": "Unknown_F233"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1461947700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 41,
+    "timeConsumedMillis": 936,
+    "memoryConsumedBytes": 36556800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#ifdef PUREDEUGG\r\n#define DEBUG\r\n#endif\r\ntemplate <typename T>\r\nvoid debug(T s) {\r\n#ifdef PUREDEBUG\r\n    cout << s;\r\n#endif\r\n}\r\n// template <typename... Ts>\r\n// void debug(const char *txt, Ts... rest)\r\n// {\r\n// #ifdef PUREDEBUG\r\n//     printf(txt, rest...);\r\n// #endif\r\n// }\r\n#define LL long long\r\n#define lson (u << 1)\r\n#define rson ((u << 1) | 1)\r\n#define PII pair<int, int>\r\n#define PLL pair<LL, LL>\r\n\r\n#define INF 0x3f3f3f3f\r\n#define MAXM 5005\r\n#define MAXN 3005\r\nint n, m;\r\nnamespace Graph {\r\nint nxt[MAXM], to[MAXM], head[MAXM];\r\nint g_cnt;\r\nvoid addEdge(int L, int R) {\r\n    nxt[++g_cnt] = head[L], head[L] = g_cnt, to[g_cnt] = R;\r\n}\r\n}  // namespace Graph\r\nusing namespace Graph;\r\n//\u6700\u8fdc\u70b9\u4e0e\u6b21\u8fdc\u70b9\r\nint cho1[MAXN][4], cho2[MAXN][4];\r\nint dis[MAXN][MAXN];\r\n\r\nnamespace SPFA {\r\nqueue<int> q;\r\nbool vis[MAXN];\r\ninline void spfa(int start) {\r\n    memset(vis, 0, sizeof(vis));\r\n    dis[start][start] = 0;\r\n    q.push(start);\r\n    while (!q.empty()) {\r\n        int crt = q.front();\r\n        q.pop();\r\n        vis[crt] = 0;\r\n        for (int i = head[crt]; i; i = nxt[i]) {\r\n            int v = to[i];\r\n            if (dis[start][crt] + 1 < dis[start][v]) {\r\n                dis[start][v] = dis[start][crt] + 1;\r\n                if (!vis[v]) {\r\n                    q.push(v);\r\n                    vis[v] = 1;\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n}  // namespace SPFA\r\n\r\nint val = 0;\r\nint w[5];\r\nvoid deal(int a, int b, int c, int d) {\r\n    if (a == 0 || b == 0 || c == 0 || d == 0) return;\r\n    if (a == d || a == b || a == c || b == d || b == c) return;\r\n    int tot = dis[a][b] + dis[b][c] + dis[c][d];\r\n    if (tot >= INF) return;\r\n    if (tot > val) {\r\n        w[0] = a, w[1] = b, w[2] = c, w[3] = d;\r\n        val = tot;\r\n    }\r\n}\r\nint main() {\r\n#ifdef DEBUG\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n#endif\r\n    cin >> n >> m;\r\n    int u, v;\r\n    for (int i = 1; i <= m; i++) {\r\n        cin >> u >> v;\r\n        addEdge(u, v);\r\n    }\r\n    // requirement \u6bcf\u4e2a\u70b9\u7684\u6700\u8fdc\u548c\u6b21\u8fdc\u70b9\r\n    memset(dis, 0x3f, sizeof(dis));\r\n    for (int s = 1; s <= n; s++) SPFA::spfa(s);\r\n    for (int i = 1; i <= n; i++) {\r\n        for (int j = 1; j <= n; j++) {\r\n            if (i == j) continue;\r\n            if (dis[j][i] < 0x3f3f3f3f &&\r\n                (dis[j][i] > dis[cho1[i][1]][i] || cho1[i][1] == 0)) {\r\n                cho1[i][1] = j;\r\n                for (int k = 0; k >= 0; k--) {\r\n                    if (dis[cho1[i][k + 1]][i] > dis[cho1[i][k]][i] ||\r\n                        cho1[i][k] == 0) {\r\n                        swap(cho1[i][k],cho1[i][k + 1]);\r\n                    }\r\n                }\r\n            }\r\n            if (dis[i][j] < 0x3f3f3f3f &&\r\n                (dis[i][j] > dis[i][cho2[i][1]] || cho2[i][1] == 0)) {\r\n                cho2[i][1] = j;\r\n                for (int k = 0; k >= 0; k--) {\r\n                    if (dis[i][cho2[i][k + 1]] > dis[i][cho2[i][k]] ||\r\n                        cho2[i][k] == 0) {\r\n                        swap(cho2[i][k],cho2[i][k + 1]);\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n    for (int b = 1; b <= n; b++) {\r\n        for (int c = 1; c <= n; c++) {\r\n            if (b == c || dis[b][c] >= INF) continue;\r\n            for (int i = 0; i <= 3; i++)\r\n                for (int j = 0; j <= 3; j++) deal(cho1[b][i], b, c, cho2[c][j]);\r\n        }\r\n    }\r\n    for (int i = 0; i <= 3; i++) cout << w[i] << \" \";\r\n    return 0;\r\n}"
+}

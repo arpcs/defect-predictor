@@ -1,0 +1,44 @@
+{
+    "id": 234002414,
+    "contestId": 1895,
+    "creationTimeSeconds": 1700808979,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "Gorilla_MOPS"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 295,
+    "memoryConsumedBytes": 42905600,
+    "source": "#include <bits/stdc++.h>\r\n\r\n#define f first\r\n#define s second\r\n#define mp make_pair\r\n#define pb push_back\r\n#define all(x) x.begin(), x.end()\r\n#define debug(x) cerr << (#x) << \" = \" << (x) << endl\r\n\r\nusing namespace std;\r\nusing ll = long long;\r\nusing ld = long double;\r\n\r\ntemplate<typename T>\r\nusing vec = vector < T >;\r\n\r\ntemplate<typename T>\r\nint sz (T &a) {\r\n    return (int)(a.size());\r\n}\r\n\r\nll pw (int a) {\r\n    return 1ll << a;\r\n}\r\n\r\nusing pii = pair < int, int >;\r\nusing pll = pair < ll, ll >;\r\n\r\nconst int mod = 1e9 + 7;\r\nconst int N = 3e5;\r\nconst int MX = 1e6 + 1;\r\nconst int OO = 2e9;\r\n\r\ntemplate<typename T>\r\nbool umn (T &fi, T se) { return fi > se ? (fi = se, 1) : 0; }\r\n\r\ntemplate<typename T>\r\nbool umx (T &fi, T se) { return fi < se ? (fi = se, 1) : 0; }\r\n\r\nint to[N];\r\nint dp[N];\r\nint pv[MX];\r\nint ps[MX];\r\n\r\nint used[N];\r\n\r\nvoid dfs (int v) {\r\n    used[v] = 1;\r\n\r\n    if (to[v] < 0) {\r\n        dp[v] = to[v];\r\n        used[v] = 2;\r\n        return;\r\n    }\r\n    if (used[to[v]] == 1) {\r\n        dp[v] = 0;\r\n        used[v] = 2;\r\n        return;\r\n    }\r\n    if (!used[to[v]])\r\n        dfs(to[v]);\r\n    dp[v] = dp[to[v]];\r\n    used[v] = 2;\r\n}\r\n\r\nint nxt (int def, vec < pii > &a, vec < int > &smx) {\r\n    int p = upper_bound(all(a), mp(def, OO)) - a.begin();\r\n\r\n    if (p == sz(a))\r\n        return -1;\r\n    return smx[p];\r\n}\r\n\r\nvoid slv () {\r\n    int n, m;\r\n    cin >> n;\r\n    vec < pii > a(n);\r\n    for (int i = 0; i < n; ++i)\r\n        used[i] = 0;\r\n    for (int i = 0; i < n; ++i)\r\n        cin >> a[i].f;\r\n    for (int i = 0; i < n; ++i) {\r\n        cin >> a[i].s;\r\n        pv[a[i].s] = -1;\r\n    }\r\n    for (int i = 0; i < n; ++i) {\r\n        if (umx(pv[a[i].s], a[i].f))\r\n            ps[a[i].s] = i;\r\n    }\r\n    cin >> m;\r\n    vec < pii > b(m);\r\n    for (int i = 0; i < m; ++i)\r\n        cin >> b[i].f;\r\n    for (int i = 0; i < m; ++i)\r\n        cin >> b[i].s;\r\n    auto aa = a, bb = b;\r\n    sort(all(aa));\r\n    sort(all(bb));\r\n    vec < int > smxa(n), smxb(m);\r\n    for (int i = n - 1; i >= 0; --i) {\r\n        smxa[i] = aa[i].s;\r\n        if (i + 1 < n)\r\n            smxa[i] = max(aa[i].s, smxa[i + 1]);\r\n    }\r\n    for (int i = m - 1; i >= 0; --i) {\r\n        smxb[i] = bb[i].s;\r\n        if (i + 1 < m)\r\n            smxb[i] = max(bb[i].s, smxb[i + 1]);\r\n    }\r\n    vec < bool > mrk(n);\r\n    for (int i = 0; i < n; ++i) {\r\n        int p = nxt(a[i].s, bb, smxb);\r\n        if (p == -1) {\r\n            to[i] = -1;\r\n            continue;\r\n        }\r\n        p = nxt(p, aa, smxa);\r\n        if (p == -1) {\r\n            to[i] = -2;\r\n            continue;\r\n        }\r\n        to[i] = ps[p];\r\n    }\r\n    for (int i = 0; i < n; ++i)\r\n        if (!used[i])\r\n            dfs(i);\r\n    vec < int > ans(3);\r\n    for (int i = 0; i < n; ++i)\r\n        ans[-dp[i]]++;\r\n    cout << ans[1] << \" \" << ans[0] << \" \" << ans[2];\r\n}\r\n\r\nint32_t main () {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n    int t = 1;\r\n    cin >> t;\r\n    while (t--) {\r\n        slv();\r\n        cout << \"\\n\";\r\n    }\r\n}"
+}

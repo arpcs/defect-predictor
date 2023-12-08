@@ -1,0 +1,35 @@
+{
+    "id": 10188844,
+    "contestId": 521,
+    "creationTimeSeconds": 1425724341,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 521,
+        "index": "D",
+        "name": "Shop",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2800,
+        "tags": [
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 521,
+        "members": [
+            {
+                "handle": "williamcicua"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1425279600
+    },
+    "programmingLanguage": "Java 8",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 155,
+    "timeConsumedMillis": 389,
+    "memoryConsumedBytes": 11571200,
+    "source": "import java.io.*;\r\nimport java.math.BigInteger;\r\nimport java.util.*;\r\n\r\npublic class D {\r\n\r\n    BufferedReader br;\r\n    PrintWriter out;\r\n    StringTokenizer st;\r\n    boolean eof;\r\n\r\n    static class Item implements Comparable<Item> {\r\n        int type, delta, id;\r\n\r\n        @Override\r\n        public int compareTo(Item o) {\r\n            return -Integer.compare(delta, o.delta);\r\n        }\r\n\r\n        public Item(int type, int delta, int id) {\r\n            this.type = type;\r\n            this.delta = delta;\r\n            this.id = id;\r\n        }\r\n    }\r\n\r\n    static class Profit implements Comparable<Profit> {\r\n        Item item;\r\n        long num, denom;\r\n\r\n        public Profit(Item item, long num, long denom) {\r\n            this.item = item;\r\n            this.num = num;\r\n            this.denom = denom;\r\n        }\r\n\r\n        @Override\r\n        public int compareTo(Profit o) {\r\n            // num/denom > o.num/o.denom -> -1\r\n            long v1 = num * o.denom;\r\n            long v2 = o.num * denom;\r\n            return -Long.compare(v1, v2);\r\n        }\r\n    }\r\n\r\n    void solve() throws IOException {\r\n        int k = nextInt();\r\n        int n = nextInt();\r\n        int take = nextInt();\r\n        int[] a = new int[k];\r\n        for (int i = 0; i < k; i++) {\r\n            a[i] = nextInt();\r\n        }\r\n\r\n        List<Item>[][] b = new List[k][3];\r\n        for (int i = 0; i < k; i++) {\r\n            for (int j = 0; j < 3; j++) {\r\n                b[i][j] = new ArrayList<>(0);\r\n            }\r\n        }\r\n\r\n        for (int i = 0; i < n; i++) {\r\n            int type = nextInt() - 1;\r\n            int where = nextInt() - 1;\r\n            int delta = nextInt();\r\n            b[where][type].add(new Item(type, delta, i));\r\n        }\r\n\r\n        List<Profit> pr = new ArrayList<>(n);\r\n\r\n        for (int i = 0; i < k; i++) {\r\n            List<Item>[] bi = b[i];\r\n            for (int j = 0; j < 3; j++) {\r\n                Collections.sort(bi[j]);\r\n            }\r\n            if (!bi[0].isEmpty()) {\r\n                int add = bi[0].get(0).delta - a[i];\r\n                if (add > 0) {\r\n                    bi[1].add(new Item(0, add, bi[0].get(0).id));\r\n                    Collections.sort(bi[1]);\r\n                }\r\n            }\r\n\r\n            long curA = a[i];\r\n            for (Item it : bi[1]) {\r\n                pr.add(new Profit(it, curA + it.delta, curA));\r\n                curA += it.delta;\r\n            }\r\n            for (Item it : bi[2]) {\r\n                if (it.delta != 1) {\r\n                    pr.add(new Profit(it, it.delta, 1));\r\n                }\r\n            }\r\n\r\n        }\r\n\r\n        Collections.sort(pr);\r\n        List<Item> answer = new ArrayList<>(take);\r\n        for (int i = 0; i < take && i < pr.size(); i++) {\r\n            answer.add(pr.get(i).item);\r\n        }\r\n        Collections.sort(answer, new Comparator<Item>() { // this shit better be\r\n                                                            // stable\r\n\r\n                    @Override\r\n                    public int compare(Item o1, Item o2) {\r\n                        return Integer.compare(o1.type, o2.type);\r\n                    }\r\n                });\r\n        out.println(answer.size());\r\n        for (Item it : answer) {\r\n            out.print(it.id + 1 + \" \");\r\n        }\r\n        out.println();\r\n    }\r\n\r\n    D() throws IOException {\r\n        br = new BufferedReader(new InputStreamReader(System.in));\r\n        out = new PrintWriter(System.out);\r\n        solve();\r\n        out.close();\r\n    }\r\n\r\n    public static void main(String[] args) throws IOException {\r\n        new D();\r\n    }\r\n\r\n    String nextToken() {\r\n        while (st == null || !st.hasMoreTokens()) {\r\n            try {\r\n                st = new StringTokenizer(br.readLine());\r\n            } catch (Exception e) {\r\n                eof = true;\r\n                return null;\r\n            }\r\n        }\r\n        return st.nextToken();\r\n    }\r\n\r\n    String nextString() {\r\n        try {\r\n            return br.readLine();\r\n        } catch (IOException e) {\r\n            eof = true;\r\n            return null;\r\n        }\r\n    }\r\n\r\n    int nextInt() throws IOException {\r\n        return Integer.parseInt(nextToken());\r\n    }\r\n\r\n    long nextLong() throws IOException {\r\n        return Long.parseLong(nextToken());\r\n    }\r\n\r\n    double nextDouble() throws IOException {\r\n        return Double.parseDouble(nextToken());\r\n    }\r\n}"
+}

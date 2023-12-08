@@ -1,0 +1,36 @@
+{
+    "id": 227256270,
+    "contestId": 843,
+    "creationTimeSeconds": 1696802578,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 843,
+        "index": "D",
+        "name": "Dynamic Shortest Path",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3400,
+        "tags": [
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 843,
+        "members": [
+            {
+                "handle": "NourEldinAhmed"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1503592500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 195,
+    "timeConsumedMillis": 9889,
+    "memoryConsumedBytes": 24985600,
+    "source": "//\r\n// If the path to what you want seems too easy, then you are at the wrong path.\r\n\r\n#include <bits/stdc++.h>\r\n#define all(x) (x).begin(), (x).end()\r\n#define rall(x) (x).rbegin(), (x).rend()\r\n#define endl '\\n'\r\n#define yes cout << \"YES\\n\";\r\n#define no cout << \"NO\\n\";\r\n#define fr(n) for(ll i = 0 ; i < n ; i++)\r\n#define frj(n) for(ll j = 0 ; j < n ; j++)\r\n#define ll long long\r\n#define files    freopen(\"input.txt\", \"r\", stdin); freopen(\"output.txt\", \"w\", stdout);\r\n#define code_of_thrones ios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0);  \r\n#define pli pair<ll, int>\r\n\r\nconst ll mod = 1e9 + 7;\r\n\r\nusing namespace std;\r\n\r\n\r\nll gcd(ll a, ll b){\r\n    if(b == 0) return a;\r\n    return gcd(b, a%b);\r\n}\r\n\r\nll mult(ll a, ll b){\r\n    return (a%mod * b%mod)%mod;\r\n}\r\n\r\nll add(ll a, ll b){\r\n    return (a%mod + b%mod)%mod;\r\n}\r\nll subtract(ll a, ll b){\r\nreturn (a%mod - b%mod + 2*mod)%mod;\r\n}\r\nconst unsigned ll N = 1e5 + 5;\r\n\r\nint knightX[] = {-2, -2, 2, 2, 1, 1 , -1, -1};\r\nint knighty[] = {-1, 1, -1, 1, -2, 2, -2, 2};\r\n\r\nint dx[] = {1, 0, -1, 0, -1, -1, 1, 1};\r\nint dy[] = {0, -1, 0, 1, -1, 1, -1, 1};\r\nchar di[] = {'D', 'L', 'U', 'R'};\r\n\r\nll n, m, q;\r\n\r\nstruct edge{\r\n    int from, to;\r\n    ll w;\r\n};\r\n\r\nvector<int> adj[N];\r\nvector<edge> edges;\r\nll dist[N];\r\n\r\nvoid dijkstra(){\r\n    priority_queue<pli, vector<pli>, greater<>> pq;\r\n\r\n    pq.emplace(dist[1] = 0, 1);\r\n\r\n    while (!pq.empty())\r\n    {\r\n        int curr = pq.top().second;\r\n        ll d = pq.top().first;\r\n        pq.pop();\r\n\r\n        if(d != dist[curr])\r\n            continue;\r\n\r\n        for(auto e : adj[curr]){\r\n            auto u  = edges[e];\r\n            if(dist[u.to] > d + u.w)\r\n                pq.emplace(dist[u.to] = d + u.w, u.to);\r\n        }\r\n    }\r\n}\r\n\r\nvector<int> que[(int) 1e6+5];\r\n\r\nvoid recalc(int k){\r\n    vector<ll> tmp(n+1, 1e18);\r\n    tmp[1] = 0; \r\n    que[0].emplace_back(1);\r\n\r\n    fr(k+1)\r\n    {\r\n        frj(que[i].size()){\r\n            int c2 = que[i][j];\r\n\r\n            if(tmp[c2] != i)\r\n                continue;\r\n\r\n            for(auto e : adj[c2]){\r\n                auto u  = edges[e];\r\n                if(u.w == 0 && tmp[u.to] > i){\r\n                    tmp[u.to] = i;\r\n                    que[i].emplace_back(u.to);\r\n                }\r\n                else if(u.w != 0 && tmp[u.to] > i + u.w && i + u.w <= k)\r\n                    que[tmp[u.to] = i + u.w].emplace_back(u.to);\r\n            }\r\n        }\r\n        que[i].clear();\r\n    }\r\n\r\n    fr(n)\r\n        if(tmp[i+1] != 1e18)\r\n            dist[i+1]+= tmp[i+1];\r\n    \r\n    for(auto &e : edges)\r\n        e.w-= tmp[e.to] - tmp[e.from];\r\n}\r\n\r\nvoid solve(){\r\n    cin >> n >> m >> q;\r\n\r\n    fr(n)\r\n        dist[i+1] = 1e18;\r\n\r\n    fr(m){\r\n        int a, b, c;\r\n        cin >> a >> b >> c;\r\n        edges.push_back({a, b, c});\r\n        adj[a].push_back(i);\r\n    }\r\n\r\n    dijkstra();\r\n\r\n    for(auto &e : edges)\r\n        e.w-= dist[e.to] - dist[e.from];\r\n\r\n\r\n    int cnt = 0;\r\n    fr(q){\r\n        int type;\r\n        cin >> type;\r\n        if(type == 1){\r\n            if(cnt)\r\n                recalc(cnt);\r\n            cnt = 0;\r\n            int v;\r\n            cin >> v;\r\n            if(dist[v] == 1e18)\r\n                cout << -1 << endl;\r\n            else\r\n                cout << dist[v] << endl;\r\n        }\r\n        else{\r\n            int k;\r\n            cin >> k;\r\n            cnt+= k;\r\n            frj(k){\r\n                int ind;\r\n                cin >> ind;\r\n                ind--;\r\n                edges[ind].w++;\r\n            }   \r\n        }\r\n    }\r\n\r\n}\r\n\r\nint main() {\r\n    code_of_thrones\r\n    #ifndef ONLINE_JUDGE\r\n        files\r\n    #endif\r\n    // sieve();\r\n    ll t = 1;\r\n    // cin >> t;\r\n    while(t--){\r\n        solve();\r\n    }\r\n    return 0;\r\n}"
+}

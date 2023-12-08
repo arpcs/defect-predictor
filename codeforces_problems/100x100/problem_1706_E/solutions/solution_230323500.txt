@@ -1,0 +1,41 @@
+{
+    "id": 230323500,
+    "contestId": 1706,
+    "creationTimeSeconds": 1698562724,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "xz_w"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 374,
+    "memoryConsumedBytes": 110182400,
+    "source": "#include<bits/stdc++.h>\r\n#define pb push_back\r\nusing namespace std;\r\nconst int maxn=5e5+10;\r\nint n,m,q,tot;\r\nstruct Edge{int x,y,val;};\r\nvector<Edge>e;\r\nvector<int>g[maxn];\r\nint fa[maxn],val[maxn],minpos[maxn];\r\nint dep[maxn],fd[maxn][25];\r\ninline int find(int x){return fa[x]==x?x:fa[x]=find(fa[x]);}\r\ninline void kruscal()\r\n{\r\n    tot=n;\r\n    sort(e.begin(),e.end(),[](const Edge&A,const Edge&B){return A.val<B.val;});\r\n    iota(fa,fa+maxn,0);\r\n    for(auto edge:e)\r\n    {\r\n    \tint x=edge.x,y=edge.y,w=edge.val;\r\n        int fx=find(x),fy=find(y);\r\n        if(fx==fy) continue;\r\n        fa[fx]=fa[fy]=++tot;\r\n        val[tot]=w;\r\n        g[tot].pb(fx),g[fx].pb(tot);\r\n        g[tot].pb(fy),g[fy].pb(tot);\r\n        if(tot==2*n-1) break;\r\n    }\r\n}\r\ninline void dfs(int x,int fa)\r\n{\r\n    dep[x]=dep[fa]+1,fd[x][0]=fa;\r\n    for(int i=1;i<=__lg(dep[x]);i++) fd[x][i]=fd[fd[x][i-1]][i-1];\r\n    for(auto y:g[x]) if(y!=fa) dfs(y,x);\r\n}\r\ninline int lca(int x,int y)\r\n{\r\n    if(dep[x]<dep[y]) swap(x,y);\r\n    for(int i=__lg(dep[x]);i>=0;i--) \r\n        if(dep[fd[x][i]]>=dep[y]) x=fd[x][i];\r\n    if(x==y) return x;\r\n    for(int i=__lg(dep[x]);i>=0;i--)\r\n        if(fd[x][i]!=fd[y][i]) x=fd[x][i],y=fd[y][i];\r\n    return fd[x][0];\r\n}\r\nstruct segmenttree\r\n{\r\n    #define ls (p<<1) \r\n    #define rs (p<<1|1) \r\n    #define mid ((t[p].l+t[p].r)>>1)\r\n    struct node{int l,r,mx;}t[maxn<<2];\r\n    inline void pushup(int p){t[p].mx=max(t[ls].mx,t[rs].mx);}\r\n    inline void updata(int p,int x){t[p].mx=x;}\r\n    inline void build(int p,int l,int r)\r\n    {\r\n        t[p]={l,r,0};\r\n        if(l==r) return updata(p,minpos[l]);\r\n        build(ls,l,mid),build(rs,mid+1,r);\r\n        pushup(p);\r\n    }\r\n    inline int query(int p,int l,int r)\r\n    {\r\n        if(l>r) return 0;\r\n        if(l<=t[p].l && t[p].r<=r) return t[p].mx;\r\n        if(r<=mid) return query(ls,l,r);\r\n        if(l>mid) return query(rs,l,r);\r\n        return max(query(ls,l,r),query(rs,l,r));\r\n    }\r\n}tr;\r\ninline void solve()\r\n{\r\n    cin>>n>>m>>q;\r\n    for(int i=1,x,y;i<=m;i++) cin>>x>>y,e.pb({x,y,i});\r\n    kruscal();\r\n    int rt=0;\r\n    for(int i=n+1;i<=tot;i++) if(fa[i]==i){assert(rt==0);rt=i;} \r\n\tdfs(rt,0);\r\n    for(int i=1;i<n;i++) minpos[i]=val[lca(i,i+1)];\r\n    tr.build(1,1,n);\r\n    for(int i=1,l,r;i<=q;i++) cin>>l>>r,cout<<tr.query(1,l,r-1)<<' ';\r\n\tcout<<'\\n';\r\n}\r\ninline void init()\r\n{\r\n    e.clear();\r\n    for(int i=0;i<=tot;i++) val[i]=fa[i]=minpos[i]=dep[i]=0,g[i].clear();\r\n    tot=n=m=q=0;\r\n}\r\nsigned main()\r\n{\r\n    ios::sync_with_stdio(false);cin.tie(NULL);\r\n    int T;cin>>T;while(T--){solve();init();}\r\n}"
+}

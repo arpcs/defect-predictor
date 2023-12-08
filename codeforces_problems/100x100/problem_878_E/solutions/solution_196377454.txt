@@ -1,0 +1,36 @@
+{
+    "id": 196377454,
+    "contestId": 878,
+    "creationTimeSeconds": 1678190527,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "ParsaS"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 15,
+    "timeConsumedMillis": 295,
+    "memoryConsumedBytes": 18739200,
+    "source": "// In the name of God\n//        : )\n#include<bits/stdc++.h>\nusing namespace std;\n#define pb push_back\n#define fi first\n#define se second\n#define mp make_pair\ntypedef long long ll;\n#define int ll\nconst int N = 2e5 + 5, MOD = 1e9 + 7;\nll X = 1e10;\nint n, a[N], q;\nvector<pair<int, int> > qr[N];\nll ans[N], fen[N];\nint pw2[N], f[N], L[N];\n\nvoid upd(int i, ll val) {\n    for (i; i <= n; i += i & -i)\n        fen[i] = (fen[i] + val) % MOD;\n}\nll query(int i) {\n    ll res = 0;\n    for (i; i > 0; i -= i & -i)\n        res = (res + fen[i]) % MOD;\n    return res;\n}\nll pw(ll x, ll y) {\n    if (x == 0)\n        return 0;\n    while (y && x < X) {\n        x = x * 2;\n        y--;\n    }\n    return x;\n}\nint binpow(int a, int b) {\n    return b ? 1LL * binpow(1LL * a * a % MOD, b / 2) * (b % 2 ? a : 1) % MOD : 1;\n}\n\nvoid solve() {\n    pw2[0] = 1;\n    cin >> n >> q;\n    for (int i = 1; i <= n; i++) {\n        cin >> a[i];\n        pw2[i] = 2LL * pw2[i - 1] % MOD;\n        f[i] = (f[i - 1] + 1LL * pw2[i] * a[i] % MOD) % MOD;\n    }\n    for (int i = 0; i < q; i++) {\n        int l, r; cin >> l >> r;\n        qr[r].pb(mp(l, i));\n        L[i] = l;\n    }\n    set<pair<int, int> > st;\n\n    for (int r = 1; r <= n; r++) {\n        ll sum = 2LL * a[r], smod = (2LL * MOD + 2LL * a[r] % MOD) % MOD;\n        int l = r;\n        while (sum < X && sum >= 0 && !st.empty()) {\n            auto it = --st.end();\n            int l2 = it->fi, val = (query(l2) - query(l2 - 1) + MOD) % MOD;\n            sum = pw(sum, l - l2) + it->se;\n            sum = min(sum, X);\n            smod = (1LL * pw2[l - l2] * smod % MOD + val) % MOD;\n            upd(l2, (MOD - val) % MOD);\n            l = l2;\n            st.erase(it);\n        }\n        while (!st.empty() && sum >= X) {\n            auto it = --st.end();\n            int l2 = it->fi, val = (query(l2) - query(l2 - 1) + MOD) % MOD;\n            upd(l2, (MOD - val) % MOD);\n            smod = (1LL * pw2[l - l2] * smod % MOD + val) % MOD;\n            st.erase(it);\n            l = l2;\n        }\n        st.insert(mp(l, sum));\n        upd(l, smod);\n\n        for (auto [lq, j] : qr[r]) {\n            lq++;\n            if (lq > r)\n                continue;\n            auto it = st.upper_bound(mp(lq, MOD * 2));\n            int r2 = 0;\n            if (it == st.end())\n                r2 = r;\n            else\n                r2 = it->fi - 1;\n\n            if (lq < l) {\n                ans[j] = (query(n) - query(lq) + MOD) % MOD;\n            }\n            ans[j] = (ans[j] + 1LL * binpow(binpow(2, lq - 1), MOD - 2) * ((f[r2] - f[lq - 1] + MOD) % MOD) % MOD) % MOD;\n            assert(ans[j] >= 0);\n        }\n    }\n\n    for (int i = 0; i < q; i++)\n        cout << (a[L[i]] + ans[i] + 2 * MOD) % MOD << '\\n';\n    cout << '\\n';\n}\n\nint32_t main() {\n    ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);\n    int tc = 1; //cin >> tc;\n    while (tc--) {\n        solve();\n    }\n    return 0;\n}\n"
+}

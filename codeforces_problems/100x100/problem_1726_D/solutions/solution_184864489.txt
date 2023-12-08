@@ -1,0 +1,41 @@
+{
+    "id": 184864489,
+    "contestId": 1726,
+    "creationTimeSeconds": 1670832872,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "D",
+        "name": "Edge Split",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "probabilities",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "kingmessi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 77,
+    "timeConsumedMillis": 1528,
+    "memoryConsumedBytes": 99635200,
+    "source": "#include<bits/stdc++.h>\r\n// #define ll long long\r\n#define rep(i,a,b) for(int i=a;i<b;i++)\r\n#define rrep(i,a,b) for(int i=a;i>=b;i--)\r\n#define repin rep(i,0,n)\r\n// #define int long long\r\n#define di(a) int a;cin>>a;\r\n#define precise(i) cout<<fixed<<setprecision(i)\r\n#define vi vector<int>\r\n#define si set<int>\r\n#define mii map<int,int>\r\n#define take(a,n) for(int j=0;j<n;j++) cin>>a[j];\r\n#define give(a,n) for(int j=0;j<n;j++) cout<<a[j]<<' ';\r\n#define vpii vector<pair<int,int>>\r\n#define sis string s;\r\n#define sin string s;cin>>s;\r\n#define db double\r\n#define be(x) x.begin(),x.end()\r\n#define pii pair<int,int>\r\n#define pb push_back\r\n#define pob pop_back\r\n#define ff first\r\n#define ss second\r\nusing namespace std;\r\n  \r\nint power( int N, int M){\r\n    int power = N, sum = 1;\r\n    if(N == 0) sum = 0;\r\n    while(M > 0){if((M & 1) == 1){sum *= power;}\r\n    power = power * power;M = M >> 1;}\r\n    return sum;\r\n}\r\n\r\nconst int N = 2000005;\r\nint parent[N];\r\nint siz[N];\r\n\r\nvoid make_set(int v) {\r\n    parent[v] = v;\r\n    siz[v] = 1;\r\n}\r\n\r\nint find_set(int v) {\r\n    if (v == parent[v])\r\n        return v;\r\n    return parent[v] = find_set(parent[v]);\r\n}\r\n\r\nvoid union_sets(int a, int b) {\r\n    a = find_set(a);\r\n    b = find_set(b);\r\n    if (a != b) {\r\n        if (siz[a] < siz[b])\r\n            swap(a, b);\r\n        parent[b] = a;\r\n        siz[a] += siz[b];\r\n    }\r\n}\r\n\r\nstruct custom_hash {\r\n    static uint64_t splitmix64(uint64_t x) {\r\n        // http://xorshift.di.unimi.it/splitmix64.c\r\n        x += 0x9e3779b97f4a7c15;\r\n        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;\r\n        x = (x ^ (x >> 27)) * 0x94d049bb133111eb;\r\n        return x ^ (x >> 31);\r\n    }\r\n\r\n    size_t operator()(pair<uint64_t,uint64_t> x) const {\r\n        static const uint64_t FIXED_RANDOM = chrono::steady_clock::now().time_since_epoch().count();\r\n        return splitmix64(x.first + FIXED_RANDOM)^(splitmix64(x.second + FIXED_RANDOM) >> 1);\r\n    }\r\n};\r\n\r\nvi adj[N];\r\n \r\nvoid solve()\r\n{\r\n    di(n) di(q)\r\n    unordered_map<pii,int,custom_hash> m;\r\n    vector<pii> v;\r\n    rep(i,0,q){\r\n        di(u) di(w)\r\n        if(w<u){swap(u,w);}\r\n        v.pb({u,w});\r\n        m[{u,w}]=0;\r\n        adj[u].pb(w);\r\n        adj[w].pb(u);\r\n    }\r\n    rep(i,1,n+1){\r\n        make_set(i);\r\n    }\r\n    si s;\r\n    int p,r;\r\n    if(q<=n+1){\r\n        for(auto x : v){\r\n            if(find_set(x.ff)!=find_set(x.ss)){\r\n                m[x]++;\r\n                union_sets(x.ff,x.ss);\r\n            }\r\n        }\r\n        for(auto x : v){\r\n            cout<<m[x];\r\n        }\r\n        cout<<\"\\n\";\r\n    }\r\n    else{\r\n        for(auto x : v){\r\n            if(find_set(x.ff)!=find_set(x.ss)){\r\n                m[x]++;\r\n                union_sets(x.ff,x.ss);\r\n            }\r\n            else{\r\n                s.insert(x.ss);\r\n                s.insert(x.ff);\r\n                p=x.ff;q=x.ss;\r\n            }\r\n        }\r\n        if(s.size()>=4){\r\n            for(auto x : v){\r\n                cout<<m[x];\r\n            }\r\n            cout<<\"\\n\";\r\n        }\r\n        else{\r\n            // cout<<p<<\" \"<<q<<\"\\n\";\r\n            unordered_map<pii,int,custom_hash> m1;\r\n            rep(i,1,n+1){\r\n                make_set(i);\r\n            }\r\n            m1[{p,q}]++;\r\n            union_sets(p,q);\r\n            for(auto x : v){\r\n            if(find_set(x.ff)!=find_set(x.ss)){\r\n                m1[x]++;\r\n                union_sets(x.ff,x.ss);\r\n            }\r\n            \r\n        }\r\n        for(auto x : v){\r\n            cout<<m1[x];\r\n        }\r\n        cout<<\"\\n\";\r\n            \r\n        }\r\n    }\r\n    rep(i,1,n+1){\r\n        adj[i].clear();\r\n    }\r\n}\r\n\r\nsigned main(){\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n    di(t)\r\n    while(t--)\r\n        solve();\r\n    return 0;\r\n}"
+}

@@ -1,0 +1,41 @@
+{
+    "id": 165975658,
+    "contestId": 1706,
+    "creationTimeSeconds": 1658994968,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "ahmad_alghadban"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 499,
+    "memoryConsumedBytes": 42496000,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\nusing ll = long long;\r\n\r\nconst int N = 1e5 + 100;\r\n\r\nstruct sparse_table {\r\n    int N, K;\r\n    vector<vector<int>> st;\r\n\r\n    vector<int> log;\r\n    int f(int x, int y){return max(x, y);}\r\n\r\n    sparse_table(vector<int> a){\r\n\r\n        N = a.size();\r\n        K = ceil(log2(N)) + 1;\r\n        st.resize(N, vector<int>(K+1));\r\n        log.resize(N+1, 0);\r\n        for (int i = 2; i <= N; i++)\r\n            log[i] = log[i/2] + 1;\r\n\r\n        for (int i = 0; i < N; i++) st[i][0] = a[i];\r\n\r\n        for (int j = 1; j <= K; j++)\r\n            for (int i = 0; i + (1 << j) <= N; i++)\r\n                st[i][j] = f(st[i][j-1], st[i + (1 << (j - 1))][j - 1]);\r\n\r\n    }\r\n\r\n    int maxQuery(int L, int R){\r\n        int j = log[R - L + 1];\r\n        int maximum = max(st[L][j], st[R - (1 << j) + 1][j]);\r\n        return maximum;\r\n    }\r\n\r\n};\r\n\r\nset<int> dsu[N];\r\nint root[N];\r\nint sz[N];\r\n\r\nint fnd(int x){\r\n    if(x == root[x]) return x;\r\n    return root[x] = fnd(root[x]);\r\n}\r\n\r\nvoid add(int x, int y, vector<int> &f, int edge){\r\n    x = fnd(x);\r\n    y = fnd(y);\r\n    if(x == y) return;\r\n    if(sz[x] > sz[y]) swap(x, y);\r\n    root[x] = y;\r\n    sz[y] += sz[x];\r\n    for(int xx : dsu[x]){\r\n        if(dsu[y].count(xx-1)) f[xx] = edge;\r\n        if(dsu[y].count(xx+1)) f[xx+1] = edge;\r\n    }\r\n    for(int xx : dsu[x]){\r\n        dsu[y].insert(xx);\r\n    }\r\n\r\n}\r\n\r\nint main(){\r\n\r\n\r\n    int t;\r\n    cin >> t;\r\n    while(t--){\r\n\r\n        int n, m, q;\r\n        scanf(\"%d%d%d\", &n, &m, &q);\r\n\r\n        for(int i = 0; i <= n+2; i++){\r\n            sz[i] = 1;\r\n            root[i] = i;\r\n            dsu[i].clear();\r\n            dsu[i].insert(i);\r\n        }\r\n\r\n        vector<int> f(n+1, 1e9);\r\n        for(int i = 0; i < m; i++){\r\n            int x, y;\r\n            scanf(\"%d%d\", &x, &y);\r\n            add(x, y, f, i+1);\r\n        }\r\n\r\n        sparse_table st(f);\r\n\r\n        while(q--){\r\n            int u, v;\r\n            scanf(\"%d%d\", &u, &v);\r\n            if(u == v) printf(\"0 \");\r\n            else printf(\"%d \", st.maxQuery(u+1, v));\r\n        }\r\n        puts(\"\");\r\n\r\n    }\r\n\r\n}\r\n"
+}

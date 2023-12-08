@@ -1,0 +1,44 @@
+{
+    "id": 232935222,
+    "contestId": 1895,
+    "creationTimeSeconds": 1700119800,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "_shoaib_221"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 608,
+    "memoryConsumedBytes": 129843200,
+    "source": "\r\n#include<bits/stdc++.h>\r\nusing  namespace std;\r\nusing  ll=long long;\r\nusing  dtp = ll;\r\nusing  pii=pair<dtp,dtp>;\r\nusing  ppii=pair<pii,dtp>;\r\nusing  vi=vector<dtp>;\r\nusing  vb=vector<bool>;\r\nusing  vpi=vector<pii>;\r\nusing  vvi=vector<vector<dtp>>;\r\nusing  vvvi=vector<vector<vector<dtp>>>;\r\nusing  vvpi=vector<vector<pii>>;\r\n#define     N             \"\\n\"\r\n#define     S             \" \"\r\n#define     D             \"   d\\n\"\r\n#define     E             \"   e\\n\"\r\n#define     F             \"   f\\n\"\r\n#define     yap      cout<<\"yap\\n\"\r\n#define     szo(a)   (sizeof(a)/sizeof(a[0]))\r\n#define     bpc(x)   __builtin_popcountll(x)\r\n#define     ctz(x)   __builtin_ctzll(x)\r\n#define     clz(x)   __builtin_clzll(x)\r\n#define     yno(f)   cout<<(f?\"YES\\n\":\"NO\\n\")\r\n#define     bin(x)   bitset<64>(x)\r\n\r\n//############################################ _shoaib_221  #############################################################################\r\n\r\n\r\n\r\nvoid test_case()\r\n{\r\n\r\n    int n;\r\n    cin>>n;\r\n\r\n    vi ma(n), md(n);\r\n    for( int i=0;i<n;i++ ) cin>>ma[i];\r\n    for( int i=0;i<n;i++ ) cin>>md[i];\r\n\r\n    int m;\r\n    cin>>m;\r\n    vi ba(m), bd(m);\r\n\r\n    for( int i=0;i<m;i++ ) cin >> ba[i];\r\n    for( int i=0;i<m;i++ ) cin >> bd[i];\r\n\r\n    vi ordrm(n), ordrb(m);\r\n\r\n    iota( ordrm.begin(), ordrm.end(), 0 );\r\n    sort( ordrm.begin(), ordrm.end(), [&] ( int l, int r ) -> bool { return ma[l]<ma[r]; } );\r\n\r\n    iota( ordrb.begin(), ordrb.end(), 0 );\r\n    sort( ordrb.begin(), ordrb.end(), [&] ( int l, int r ) -> bool { return ba[l]<ba[r]; } );\r\n\r\n\r\n    int ind=-1;\r\n    map<int, int> tm, tb;\r\n\r\n    for( int i=n-1;i>=0;i-- )\r\n    {\r\n        int now=ordrm[i];\r\n        if( ind==-1 ) ind=now;\r\n        else if( md[now]>md[ind] ) ind=now;\r\n        tm[ ma[ now ] ]=ind;\r\n    }\r\n\r\n    ind=-1;\r\n    for( int i=m-1;i>=0;i-- )\r\n    {\r\n        int now=ordrb[i];\r\n        if( ind==-1 ) ind=now;\r\n        else if( bd[now]>bd[ind] ) ind=now;\r\n        tb[ ba[now] ]=ind;\r\n    }\r\n\r\n    vi adj( n+m+9, -1 );\r\n    \r\n    for( int i=0;i<n;i++ )\r\n    {\r\n        auto it=tb.upper_bound( md[i] );\r\n        if( it==tb.end() ) continue;\r\n        adj[i]=n+it->second;\r\n    }\r\n\r\n    for( int i=0;i<m;i++ )\r\n    {\r\n        auto it=tm.upper_bound( bd[i] );\r\n        if( it==tm.end() ) continue;\r\n        adj[n+i]=it->second;\r\n    }\r\n\r\n    //for( int i=0;i<n+m;i++ ) cout << adj[i] <<D;\r\n\r\n    vi win( n+m+9, -10 );\r\n    vb active(n+m+9);\r\n\r\n    auto dfs=[&] ( auto self, int node ) -> void\r\n    {\r\n        active[node]=1;\r\n        if( adj[node]==-1 )\r\n        {\r\n            if( node>=n ) win[ node ]=-1;\r\n            else win[node]=1;\r\n            active[node]=0;\r\n            return;\r\n        }\r\n        else if( active[ adj[node] ] )\r\n        {\r\n            win[node]=0;\r\n            active[node]=0;\r\n            return;\r\n        }\r\n        else if( win[ adj[node] ]==-10 )\r\n        {\r\n            self( self, adj[node] );\r\n            win[node]=win[ adj[node] ];\r\n        }\r\n        else\r\n        {\r\n            win[node]=win[ adj[node] ];\r\n        }\r\n        \r\n        active[node]=0;\r\n    };\r\n\r\n    for( int i=0;i<n;i++ )\r\n    {\r\n        if( win[i]==-10 ) dfs( dfs, i );\r\n    }\r\n\r\n    int w=0, l=0;\r\n\r\n    for( int i=0;i<n;i++ )\r\n    {\r\n        if( win[i]==1 ) w++;\r\n        else if( win[i]==-1 ) l++;\r\n        //cout << i <<S<< win[i] <<D;\r\n    }\r\n\r\n    cout << w <<S<< n-w-l <<S<< l <<N;\r\n\r\n}\r\n\r\n\r\nint main()\r\n{\r\n\r\n#ifndef ONLINE_JUDGE\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n#endif \r\n\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n    cerr.tie(0);\r\n    cout<< fixed << setprecision(20);\r\n    ll t=1;\r\n    cin>>t;\r\n    \r\n    while (t--)\r\n    {\r\n        test_case();\r\n    }\r\n    \r\n\r\n    \r\n}\r\n"
+}

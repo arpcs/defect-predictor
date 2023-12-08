@@ -1,0 +1,41 @@
+{
+    "id": 165391169,
+    "contestId": 1706,
+    "creationTimeSeconds": 1658557593,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "bkifhr8"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 30822400,
+    "source": "#include <bits/stdc++.h>\n\n#define mk(a , b) make_pair(a , b)\n\nusing namespace std ;\n\ntemplate <typename T>\nT rd(T &x)\n{\n\tx = 0 ; int f = 1 ; char ch = getchar() ;\n\twhile(ch < '0' || ch > '9'){if(ch = '-') f = -1 ; ch = getchar() ;}\n\twhile(ch >= '0' && ch <= '9'){x = (x << 1) + (x << 3) + (ch ^48) ; ch = getchar() ;}\n\treturn x *= f ;\n}\ntemplate <typename T , typename ...A>\nT rd(T &x , A &...a)\n{\n\trd(x) ; rd(a...) ;\n}\n\nconst int N = 1e5 + 5 ;\nconst int M = N << 2 ;\nconst double eps = 1e-8 ;\ntypedef pair<int, int> PII ;\n\nstruct Edge\n{\n\tint  u , v , w , next ;\n}edge[M] , e[M] ;\nint head[N] , siz ;\nvoid add_edge(int u , int v)\n{\n\tedge[++siz] = {u , v , 0 , head[u]} ;\n\thead[u] = siz ;\n}\n\nint n , m , q , L , S ;\n\nint fa[N] , dis[N] ;\nvoid init()\n{\n\tfor(int i = 1 ; i <= L ; i++)\n\t\tfa[i] = i , dis[i] = 0 ;\n\tmemset(head , 0 , sizeof head) ;\n\tsiz = 0 ;\n//\tsort(e + 1 , e + m + 1) ;\n}\n\nint find(int x)\n{\n\tif(x == fa[x]) return x ;\n\treturn fa[x] = find(fa[x]) ;\n}\n\n\nvoid Kruskal()\n{\n\tL = n + n - 1 ; S = n ;\n\tinit() ;\n\t\n\tfor(int i = 1 ; i <= n ; i++)\n\t{\n\t\tint u = find(e[i].u) , v = find(e[i].v) , w = e[i].w ;\n\t\tif(u != v)\n\t\t{\n\t\t\tS++ ;\n\t\t\tfa[v] = fa[u] = fa[S] ;\n\t\t\tadd_edge(S , u) ; add_edge(S , v) ;\n\t\t\tadd_edge(u , S) ; add_edge(v , S) ; dis[S] = w ;\n\t\t\tif(S == L) break ;\n\t\t}\n\t}\n}\n\nint f[N][20] , depth[N] ;\n\nvoid dfs(int u , int fa)\n{\n//\tcout << u << ' ' << fa << '\\n' ;\n\tdepth[u] = depth[fa] + 1 ;\n\tf[u][0] = fa ;\n\tfor(int i = 1 ; i < 20 ; i++)\n\t\tf[u][i] = f[f[u][i - 1]][i - 1] ;\n\t\n\tfor(int i = head[u] ; i ; i = edge[i].next)\n\t{\n\t\tint v = edge[i].v ;\n\t\tif(v != fa) dfs(v , u) ;\n\t}\n}\n\nint LCA(int x , int y)\n{\n\tif(depth[x] < depth[y]) swap(x , y) ;\n\tfor(int i = 20 ; i + 1 ; i--)\n\t\tif(depth[f[x][i]] >= depth[y])\n\t\t\tx = f[x][i] ;\n//\t\telse break ;\n\tif(x == y) return x ;\n\tfor(int i = 31 ; i + 1 ; i--)\n\t\tif(f[x][i] != f[y][i])\n\t\t\tx = f[x][i] , y = f[y][i] ;\n\treturn f[x][0] ;\n}\n\nint dp[N][20] , pow2[20] , lg[N] ;\n\nint main()\n{\n//\tfreopen(\"qav.in\" , \"r\" , stdin) ;\n//\tfreopen(\"qav.out\", \"w\" , stdout) ;\n\t\n\tpow2[0] = 1 ; lg[0] = 1 ;\n\tfor(int i = 1 ; i < 18 ; i++)\n\t\tpow2[i] = pow2[i - 1] * 2 ; \n\tfor(int i = 1 ; i < 1e5 ; i++) \n\t\tlg[i] = floor(log2(i)) ;\n\t\n\tint T ; rd(T) ;\n\twhile(T--)\n\t{\n\t\trd(n , m , q) ;\n\t\tfor(int i = 1 , u , v ; i <= m ; i++)\n\t\t{\n\t\t\trd(u , v) ;\n\t\t\te[i] = Edge{u , v , i , 0} ;\n\t\t}\n\t\t\n\t\tKruskal() ;\n\t\tdfs(S , S) ;\n\t\t\n\t\tfor(int i = 1 ; i <= n ; i++)\n\t\t\tdp[i][0] = i ;\n\t\tfor(int i = 1 ; i <= n ; i++)\n\t\t\tfor(int j = 1 ; j < 18 ; j++)\n\t\t\t\tdp[i][j] = LCA(dp[i][j - 1] , dp[i + pow2[j - 1]][j - 1]) ;\n\t\t\n\t\tfor(int i = 1 , x , y ; i <= q ; i++)\n\t\t{\n\t\t\trd(x , y) ; int l = y - x + 1 ;\n\t\t\tprintf(\"%d \" , dis[LCA(dp[x][lg[l]] , dp[y - pow2[lg[l]] + 1][lg[l]])]) ;\n\t\t}\n\t\tprintf(\"\\n\") ;\n\t}\n\n\treturn 0 ;\n}\n\t\t \t \t\t\t \t\t\t   \t     \t\t   \t  \t"
+}

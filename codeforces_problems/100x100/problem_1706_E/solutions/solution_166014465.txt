@@ -1,0 +1,41 @@
+{
+    "id": 166014465,
+    "contestId": 1706,
+    "creationTimeSeconds": 1659016805,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "so_unreal"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define ll long long\r\n#define ed << \"\\n\";\r\n#define el cout<<'\\n';\r\n#define rep(i,a,n,b) for(int i=a;i<=n;i+=b)\r\n#define foru(i,a,n,b) for(int i=a;i<=n;i+=b)\r\n#define ALL(s) s.begin(),s.end()\r\n#define fi first\r\n#define se second\r\n#define task \"a\"\r\n#define mem(dp,a) memset(dp,a,sizeof dp)\r\n#define ford(i,a,n,b) for(int i=a; i>=n; i-=b)\r\n#define FOR(i,l,r) for(int i=l; i<=r; i++)\r\n#define FOD(i,r,l) for(int i=r; i>=l; i--)\r\n#define pb(x) push_back(x);\r\n#define SQ(a) (a)*(a)\r\n#define A(a) abs(a)\r\n\r\ntemplate <class T>\r\ninline bool minimize(T &a, const T &b) {\r\n    return (a > b ? (a = b),1 : 0);\r\n}\r\ntemplate <class T>\r\ninline bool maximize(T &a, const T &b) {\r\n    return (a < b ? (a = b),1 : 0);\r\n}\r\n\r\nconst int maxN = 1e6+2;\r\nconst int INF = 1e9 ;\r\nconst int mod = 1e9 + 7;\r\n\r\nvoid add(int &x, int y) {\r\n    x += y;\r\n    if (x >= mod) x -= mod;\r\n}\r\nvoid sub(int &x, int y) {\r\n    x -= y;\r\n    if (x < 0) x += mod;\r\n}\r\n\r\n\r\nll lt(ll a, ll b,ll m) {\r\n    if(b == 0) return 1;\r\n    ll t = lt(a,b >> 1,m);\r\n    t=((t%m)*(t%m))%m;\r\n    if(b & 1) return ((t%m)*(a%m))%m;\r\n    return t;\r\n}\r\n\r\nll turnoff(bool c,int k,ll x) {\r\n    if(c) x |= (1LL << (k));\r\n    else x &= (~(1LL << (k)));\r\n    return x;\r\n}\r\n\r\nstruct edge {\r\n    int u,v,c;\r\n    int getOther(int x) {\r\n        return u + v - x;\r\n    }\r\n    bool operator <(const edge&other)const {\r\n        return c < other.c;\r\n    }\r\n};\r\n\r\nint dxy[5] = {0,-1,0,1,0};\r\nvector <pair<int,int>> G[100100];\r\nint up[100010][20];\r\nint maxx[100010][20];\r\nint h[100010];\r\n\r\nstruct ITEM {\r\n    int val,id;\r\n    bool operator <(const ITEM &other) const {\r\n        if(val == other.val) return id < other.id;\r\n        return val < other.val;\r\n    }\r\n};\r\nint tree[400005];\r\nint n,m,q;\r\n\r\nvoid DFS(int u=1){\r\n    for(auto x : G[u]){\r\n        int v = x.fi;\r\n        int c = x.se;\r\n        if(v == up[u][0]) continue;\r\n        h[v] = h[u] + 1;\r\n        up[v][0] = u;\r\n        maxx[v][0] = c;\r\n        FOR(i,1,18){\r\n            up[v][i] = up[up[v][i-1]][i-1];\r\n            maxx[v][i] = max( maxx[v][i-1], maxx[up[v][i-1]][i-1] );\r\n        }\r\n        DFS(v);\r\n    }\r\n}\r\n\r\nint lca(int u,int v){\r\n    int res = 0;\r\n    if(h[u] != h[v]){\r\n        if(h[u] < h[v]) swap(u,v);\r\n        int k = h[u] - h[v];\r\n        for(int i=0; (1LL << i) <= k; i++){\r\n            if(k >> i & 1){\r\n                res = max(res,maxx[u][i]);\r\n                u = up[u][i];\r\n            }\r\n        }\r\n    }\r\n    if(u == v) return res;\r\n\r\n    for(int i=18; i>=0; i--){\r\n        if(up[u][i] != up[v][i]){\r\n            res = max({res,maxx[v][i],maxx[u][i]});\r\n            v = up[v][i];\r\n            u = up[u][i];\r\n        }\r\n    }\r\n\r\n    return max({res,maxx[v][0],maxx[u][0]});\r\n}\r\n\r\nvoid upd(int u,int v,int id=1,int l=1,int r=n){\r\n    if(u > r || u < l) return ;\r\n    if(l == r  && r == u){\r\n        tree[id] = v;\r\n        return ;\r\n    }\r\n    int m = l + r >> 1;\r\n    upd(u,v,id*2,l,m);\r\n    upd(u,v,id*2+1,m+1,r);\r\n    tree[id] = max(tree[id*2],tree[id*2+1]);\r\n}\r\n\r\nll get(int u,int v,int id=1,int l=1,int r=n){\r\n    if(u > r || v < l) return 0;\r\n    if(u <= l && r <= v) return tree[id];\r\n    int m = l + r >> 1;\r\n    return max(get(u,v,id*2,l,m),get(u,v,id*2+1,m+1,r));\r\n}\r\n\r\n\r\nvoid gogo() {\r\n    cin >> n >> m >> q;\r\n    FOR(i,1,n) DSU[i] = -1, G[i].clear();\r\n    FOR(i,1,m){\r\n        int u,v; cin >> u >> v;\r\n        if(root(v) == root(u)) continue;\r\n        join(u,v);\r\n        G[u].push_back({v,i});\r\n        G[v].push_back({u,i});\r\n    }\r\n    DFS();\r\n    FOR(i,1,n-1) upd(i,lca(i,i+1));\r\n\r\n    while(q --){\r\n        int l , r ; cin >> l >> r;\r\n        cout << get(l,r-1) <<  ' ';\r\n    }\r\n    cout ed\r\n}\r\n\r\n\r\nvoid fre() {\r\n    ios_base :: sync_with_stdio(0);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n    if(fopen(task\".inp\",\"r\")) {\r\n        freopen(task\".inp\",\"r\",stdin);\r\n        freopen(task\".out\",\"w\",stdout);\r\n    }\r\n}\r\n\r\nsigned main() {\r\n    fre();\r\n    int t = 1;\r\n    cin >> t;\r\n    while(t --) {\r\n        gogo();\r\n    }\r\n}\r\n"
+}

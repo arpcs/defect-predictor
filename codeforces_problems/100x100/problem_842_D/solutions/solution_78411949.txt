@@ -1,0 +1,36 @@
+{
+    "id": 78411949,
+    "contestId": 842,
+    "creationTimeSeconds": 1588096411,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 842,
+        "index": "D",
+        "name": "Vitya and Strange Lesson",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "binary search",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 842,
+        "members": [
+            {
+                "handle": "ruthwikreddy713"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1504019100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 639,
+    "memoryConsumedBytes": 5427200,
+    "source": "#include<iostream>\n#include<vector>\n#include<algorithm>\n#include<math.h>\n//#define int long long int\nusing namespace std;\nint base=1e8;\nint Mod=1e9+7;\nstruct Trie {\n\tstruct Trie * leaf[2];\n\tint frequency;\n\tint count;\n};\nint power(int a,int b){\n\tint ans=1;\n\ta=a%Mod;\n\twhile(b){\n\t\tif (b&1)\n\t\t\tans=(ans*a)%Mod;\n\t\tb=b/2;\n\t\ta=(a*a)%Mod;\n\t}\n\treturn ans%Mod;\n}\nTrie * create(){\n\tTrie * temp= new Trie;\n\ttemp->leaf[0]=NULL;\n\ttemp->leaf[1]=NULL;\n\ttemp->frequency=0;\n\ttemp->count=0;\n\treturn temp;\n}\nvoid Insert(Trie* curr,int val, int pos){\n\tvector<Trie*> All;\n\tAll.push_back(curr);\n\tfor(int i=pos-1;i>=1;i--){\n\t\tint presb= val >> i &1;\n//\t\tcout << presb << \"   \" << i << endl;\n\t\tif (curr->leaf[presb]==NULL){\n//\t\t\tcout << \"check      \" << i << endl; \n\t\t\tcurr->leaf[presb]=create();\n\t\t\tAll.push_back(curr->leaf[presb]);\n\t\t\tcurr=curr->leaf[presb];\n\t\t}\n\t\telse{ \n\t\t\tAll.push_back(curr->leaf[presb]);\n\t\t\tcurr=curr->leaf[presb];\n\t\t}\t\t\n\t}\n\tint presb=val&1;\n\tif (curr->leaf[presb]==NULL){\n\t\tcurr->leaf[presb]=create();\n\t\tAll.push_back(curr->leaf[presb]);\n\t\tcurr->leaf[presb]->frequency=1;\n\t}\n\telse {\n\t\tAll.clear();\n\t\tcurr->leaf[presb]->frequency++;\n\t}\n\tif (All.size()!=0)\n\tfor(int i=All.size()-1;i>=0;i--){\n\t\tAll[i]->count++;\n\t}\n\tAll.clear();\n}\nvoid deleteN(Trie* curr,int val){\n//\tcout << \"check\" << endl;\n\tvector <Trie*> All;\n\tAll.push_back(curr);\n\tfor(int i=31;i>=1;i--){\n\t\tint presb=val >> i &1;\n//\t\tcout << presb << endl;\n\t\tcurr=curr->leaf[presb];\n\t\tAll.push_back(curr);\n\t}\n//\tcout << \"check\" << endl;\n\tint presb=val & 1;\n\tAll.push_back(curr->leaf[presb]);\n\tif (curr->leaf[presb]->frequency>1){\n\t\tAll.clear();\n//\t\tcout << \"ON\" << endl;\n\t\tcurr->leaf[presb]->frequency--;\n\t}\n\telse {\n\t\tcurr->leaf[presb]=NULL;\n\t}\n\tif (All.size()){\n//\tcout << \"Okaiojd\" << endl;\n\tfor(int i=All.size()-1;i>=0;i--){\n\t\tAll[i]->count--;\n\t}\n\t}\n\tAll.clear();\n}\nint ans(Trie* Root,int val){\n\tint ans=0,tval=val;\n\tfor(int i=31;i>=0;i--){\n\t\tint presb=val >> i & 1;\n//\tcout << Root->count <<  \"  \" << i << endl;\n//\tcout <<  Root->leaf[presb] << endl;\n//\t\tif (Root==NULL){\n//\t\t\tcout << \"checkdc\" << endl;\n//\t\t\tans+=tval;\n//\t\t\treturn ans^val;\n//\t\t}\n\t\tif (Root->leaf[presb]==NULL){\n\t\t\tans+=tval;\n//\t\t\tcout << \"fk\" << endl;\n\t//\t\tif (presb)\n\t//\t\t\tans++;\n\t\t\treturn ans^val;\n\t\t}\n\t\telse if (Root->leaf[presb]->count!=pow(2,i)){\n\t\t\tif(presb){\n\t\t\t\tans+=pow(2,i);\n\t\t\t\ttval-=pow(2,i);\t\n\t\t\t}\n\t//\t\tcout << Root->leaf[presb] << \"     afe\" << endl;\n\t\t\tRoot=Root->leaf[presb];\n\t//\t\tcout << Root << endl;\n\t\t}\n\t\telse {\n\t\t\tpresb=1-presb;\n\t\t\tif (presb){\n\t\t\t\tans+=pow(2,i);\n\t\t\t}\n\t\t\telse \n\t\t\t\ttval-=pow(2,i);\n\t\t\tRoot=(Root->leaf[presb]);\n\t//\t\tcout << Root << \"      uesohuae\" << endl;\n\t//\t\tcout << \"-----\" << Root->count << endl;\n\t\t\tif (Root==NULL && i){\n\t\t//\t\tcout << \"Ngf  \" <<  i << \"  \" << ans << endl;\n\t\t\t\tans+=tval;\n\t\t\t\treturn val^ans;\n\t\t\t}\n\t\t}\n//\t\tcout << ans << endl;\n\t}\n\treturn ans^val;\n}\nint A[100001];\nsigned main()  {\n\tint n,m;\n\tcin >> n >> m;\n\tstruct Trie* root=create();\n//\tcout << Root << endl;\n\tfor(int i=0;i<n;i++){\n\t\tcin >>  A[i];\n\t\tInsert(root,A[i],32);\n\t}\n\tint answer=1;\n//\tcout << root->leaf[0]->leaf[1] << endl;\n\tint cumxor=0;\n\twhile(m--){\n/*\t\tchar a;\n\t\tcin >>a;\n\t\tif (a=='1'){\n//\t\t\tcout << \"check\" << endl;\n\t\t\tint val;\n\t\t\tcin>>val;\n\t\t\tcumxor^=val;\n\t\t\tint curr=ans(root,cumxor);\n//\t\t\tcout << cumxor << endl;\n//\t\t\tcout << (ans(root,cumxor)) << endl;\n\t\t\tanswer =((answer%Mod) * power(base,curr))%Mod; \n\t\t}\n\t\telse {\n\t\t\tint j;\n\t\t\tint val;\n\t\t\tcin >> j >> val;\n\t\t\tdeleteN(root,A[j-1]);\n//\t\t\tcout << (cumxor ^ val) << endl;\n\t\t\tInsert(root,(val^cumxor),32);\n\t\t\tint curr=ans(root,cumxor);\n//\t\t\tcout << ans(root,cumxor) << endl;\n\t\t\tanswer= ((answer%Mod)*(power(base,curr)%Mod))%Mod;\n\t\t}*/\n\t\tint a;\n\t\tcin >> a;\n\t\tcumxor^=a;\n\t\tcout << ans(root,cumxor) << endl;\n\t\t\n\t}\n//\tcout << answer << endl;\n}"
+}

@@ -1,0 +1,39 @@
+{
+    "id": 230636678,
+    "contestId": 804,
+    "creationTimeSeconds": 1698737090,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 804,
+        "index": "F",
+        "name": "Fake bullions",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3400,
+        "tags": [
+            "combinatorics",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 804,
+        "members": [
+            {
+                "handle": "cyffff"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1493909400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 338432000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define ll long long\r\nnamespace IO{//by cyffff\r\n\tint len=0;\r\n\tchar ibuf[(1<<21)+1],*iS,*iT,out[(1<<25)+1];\r\n\t#if ONLINE_JUDGE\r\n\t#define gh() (iS==iT?iT=(iS=ibuf)+fread(ibuf,1,(1<<21)+1,stdin),(iS==iT?EOF:*iS++):*iS++)\r\n \t#else\r\n\t#define gh() getchar()\r\n\t#endif\r\n\t#define reg register\r\n\tinline int read(){\r\n\t\treg char ch=gh();\r\n\t\treg int x=0;\r\n\t\treg char t=0;\r\n\t\twhile(ch<'0'||ch>'9')   t|=ch=='-',ch=gh();\r\n\t\twhile(ch>='0'&&ch<='9') x=x*10+(ch^48),ch=gh();\r\n\t\treturn t?-x:x;\r\n\t}\r\n\tinline void putc(char ch){\r\n\t\tout[len++]=ch;\r\n\t}\r\n\ttemplate<class T>\r\n\tinline void write(T x){\r\n\t\tif(x<0)putc('-'),x=-x;\r\n\t\tif(x>9)write(x/10);\r\n\t\tout[len++]=x%10+48;\r\n\t}\r\n\tinline void flush(){\r\n\t\tfwrite(out,1,len,stdout);\r\n\t\tlen=0;\r\n\t}\r\n\tinline char getc(){\r\n\t\tchar ch=gh();\r\n\t\twhile(ch<'0'||ch>'1') ch=gh();\r\n\t\treturn ch;\r\n\t}\r\n}\r\nusing IO::read;\r\nusing IO::write;\r\nusing IO::flush;\r\nusing IO::getc;\r\nusing IO::putc;\r\nconst int N=5000+10,mod=1e9+7;\r\nint n,A,B,as[N],at[N],a[N],bel[N],p[N],ord[N],ind[N],in[N],g[N][N],ttg[N][N],siz[N],C[N][N],CNT;\r\nvector<int>s[N];\r\nvector<int>fir[N],poi[N],cnt[N];\r\nint dfn[N],low[N],stk[N],top,tim,pnt,ans;\r\nbool vis[N];\r\nvector<int>g1[N],g2[N];\r\ninline void Tarjan(int x){\r\n\tdfn[x]=low[x]=++tim;\r\n\tstk[++top]=x;\r\n\tvis[x]=1;\r\n\tfor(auto t:g1[x]){\r\n\t\tif(!dfn[t])\r\n\t\t\tTarjan(t),low[x]=min(low[x],low[t]);\r\n\t\telse if(vis[t])\r\n\t\t\tlow[x]=min(low[x],low[t]);\r\n\t} \r\n\tif(low[x]==dfn[x])\r\n\t\tfor(int t,b=++pnt;t=stk[top--];){\r\n\t\t\tbel[t]=b;\r\n\t\t\tvis[t]=0;\r\n\t\t\tpoi[b].push_back(t);\r\n\t\t\tif(t==x) break;\r\n\t\t}\r\n}\r\ninline void topo(){\r\n\tqueue<int>q;\r\n\tint od=0;\r\n\tfor(int i=1;i<=pnt;i++)\r\n\t\tif(!in[i])\r\n\t\t\tq.push(i),ind[ord[i]=++od]=i;\r\n\twhile(!q.empty()){\r\n\t\tint x=q.front();\r\n\t\tq.pop();\r\n\t\tfor(int t:g2[x]){\r\n\t\t\tin[t]--;\r\n\t\t\tif(in[t]==0)\r\n\t\t\t\tq.push(t),ind[ord[t]=++od]=t;\r\n\t\t}\r\n\t}\r\n}\r\ninline int find(int x,int y){\r\n\treturn y==s[x][y]?y:s[x][y]=find(x,s[x][y]);\r\n}\r\ninline void ins(int i,int p);\r\ninline void upd(int i,int j,int p){\r\n\tif(i==j) return ;\r\n//\tprintf(\"upd(%d,%d,%d)\\n\",i,j,p);\r\n\tint tg=ttg[i][j];\r\n\tint pr=p%tg;\r\n\tfor(int t=pr;t<siz[j];){\r\n\t\tint it=find(j,t);\r\n\t\tCNT++;\r\n\t\tif(it==s[j].back()) break;\r\n//\t\tif(it%tg!=pr) break;\r\n//\t\tif(it!=t){\r\n//\t\t\tt=(it-pr+tg-1)/tg*tg+pr;\r\n//\t\t\tcontinue;\r\n//\t\t}\r\n\t\tins(j,t);\r\n\t\tt+=tg;\r\n\t}\r\n}\r\ninline int fni(int i,int p){\r\n\tif(i==1||p==siz[i]-1) return p+1;\r\n\tif(p+ttg[i-1][i]<siz[i]) return p+ttg[i-1][i];\r\n\treturn p%ttg[i-1][i]+1;\r\n}\r\ninline void ins(int i,int p){\r\n\tp%=siz[i];\r\n\tauto it=find(i,p);\r\n\tif(it==p){\r\n\t\tans+=cnt[i][p];\r\n\t\ts[i][p]=fni(i,p);\r\n\t}else{\r\n\t\treturn ;\r\n\t}\r\n\tfor(int b=i+1;b<=i+1&&b<=pnt;b++)\r\n\t\tupd(i,b,p);\r\n}\r\nint main(){\r\n//\tsystem(\"fc ex_coin5.ans ex_coin5.out\");\r\n//\tfreopen(\"ex_coin5.in\",\"r\",stdin);\r\n//\tfreopen(\"ex_coin5.ans\",\"w\",stdout);\r\n//\tfreopen(\"20-2.in\",\"r\",stdin);\r\n\tn=read(),A=read(),B=read();\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tfor(int j=1;j<=n;j++)\r\n\t\t\tif(getc()=='1')\r\n\t\t\t\tg1[i].push_back(j);\r\n\tfor(int i=1;i<=n;i++){\r\n\t\ta[i]=read();\r\n\t\tfor(int j=0;j<a[i];j++)\r\n\t\t\tif(getc()=='1') fir[i].push_back(j),as[i]++;\r\n\t}\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tfor(int j=i;j<=n;j++)\r\n\t\t\tg[i][j]=__gcd(a[i],a[j]);\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tif(!dfn[i])\r\n\t\t\tTarjan(i);\r\n//\tfor(int i=1;i<=n;i++)\r\n//\t\tprintf(\"%d \",bel[i]);puts(\"\");\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tfor(auto j:g1[i])\r\n\t\t\tif(bel[i]!=bel[j])\r\n\t\t\t\tg2[bel[i]].push_back(bel[j]),in[bel[j]]++;//,printf(\"%d->%d\\n\",bel[i],bel[j]);\r\n\ttopo();\r\n\tfor(int i=1;i<=pnt;i++){\r\n\t\tint gg=0;\r\n\t\tfor(auto j:poi[ind[i]])\r\n\t\t\tfor(auto k:poi[ind[i]])\r\n\t\t\t\tif(j<=k)\r\n\t\t\t\t\tgg=__gcd(gg,g[j][k]);\r\n//\t\tprintf(\"%d %d %d\\n\",i,ind[i],gg);\r\n\t\tcnt[i].resize(gg+1);\r\n\t\tsiz[i]=gg;\r\n\t\tfor(auto j:poi[ind[i]])\r\n\t\t\tfor(int k=0;k<a[j];k++)\r\n\t\t\t\tcnt[i][k%gg]++;\r\n//\t\tfor(auto j:poi[ind[i]])\r\n//\t\t\tprintf(\"%d \",j);puts(\"\");\r\n//\t\tprintf(\"%d\\n\",cnt[i][0]);\r\n\t\tfor(int j=0;j<=siz[i];j++)\r\n\t\t\ts[i].push_back(j);//,printf(\"%d \",cnt[i][j]);puts(\"\");\r\n\t}\r\n\tfor(int i=1;i<=pnt;i++)\r\n\t\tfor(int j=i+1;j<=i+1;j++)\r\n\t\t\tttg[i][j]=__gcd(siz[i],siz[j]);\r\n//\tputs(\"???\");\r\n//\tfor(int i=1;i<=pnt;i++){\r\n//\t\tprintf(\"%d %d\\n\",i,ord[i]);\r\n//\t\tfor(auto t:poi[i]) printf(\"%d \",t);puts(\"\");\r\n//\t}\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tfor(int p:fir[i])\r\n\t\t\tins(ord[bel[i]],p);\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tint b=ord[bel[i]];\r\n\t\tfor(int p=0;p<a[i];p++)\r\n\t\t\tif(s[b][p%siz[b]]!=p)\r\n\t\t\t\tat[i]++;\r\n\t}\r\n\tfor(int i=0;i<=n;i++){\r\n\t\tC[i][0]=1;\r\n\t\tfor(int j=1;j<=i;j++)\r\n\t\t\tC[i][j]=(C[i-1][j-1]+C[i-1][j])%mod;\r\n\t}\r\n\tint ans=0;\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tint c1=1,c2=0;\r\n\t\tfor(int j=1;j<=n;j++){\r\n\t\t\tif(j==i||at[j]<at[i]) continue;\r\n\t\t\tif(as[j]>at[i]||(as[j]==at[i]&&j>i)){\r\n\t\t\t\tc1++;\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\tif(at[j]>at[i]||(at[j]==at[i]&&j>i))\r\n\t\t\t\tc2++;\r\n\t\t}\r\n\t\tif(c1>A) continue;\r\n\t\tfor(int j=1;j<=c1;j++)\r\n\t\t\tif(j<=B)\r\n\t\t\t\tans=(ans+C[c2][B-j])%mod;\r\n\t}\r\n\twrite(ans);\r\n\tflush();\r\n}\r\n"
+}

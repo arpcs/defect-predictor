@@ -1,0 +1,36 @@
+{
+    "id": 102290025,
+    "contestId": 878,
+    "creationTimeSeconds": 1608887027,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 878,
+        "index": "E",
+        "name": "Numbers on the blackboard",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 878,
+        "members": [
+            {
+                "handle": "Vxlimo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509029100
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\r\n#include <cstdlib>\r\n#include <cstdio>\r\n#include <algorithm>\r\n#define ll long long\r\nusing namespace std;\r\ninline int read()\r\n{\r\n\tint f = 1, x = 0;\r\n\tchar ch;\r\n\r\n\tdo{\r\n\t\tch = getchar();\r\n\t\tif (ch == '-')\r\n\t\t\tf = -1;\r\n\t}while(ch < '0' || ch > '9');\r\n\tdo{\r\n\t\tx = x * 10 + ch - '0';\r\n\t\tch = getchar();\r\n\t}while(ch >= '0' && ch <= '9');\r\n\treturn f * x;\r\n}\r\nconst int N = 1e5;\r\nconst int mod = 1e9 + 7;\r\n\r\nint n, q;\r\nint val[N + 1];\r\nint fa[N + 1], tag[N + 1];\r\nll sum[N + 1], backsum[N + 1], barsum[N + 1];\r\nint start[N + 1], ed[N + 1], tot;\r\n\r\ninline int gfa(int x)\r\n{\r\n\tif (fa[x] != x)\r\n\t\tfa[x] = gfa(fa[x]);\r\n\treturn fa[x];\r\n}\r\ninline ll pow(int x, int y)\r\n{\r\n\tll ans = 1;\r\n\r\n\twhile (y) {\r\n\t\tif (y & 1)\r\n\t\t\tans = 1ll * ans * x % mod;\r\n\t\tx = 1ll * x * x % mod;\r\n\t\ty >>= 1;\r\n\t}\r\n\treturn ans;\r\n}\r\nint main()\r\n{\r\n\tn = read();\r\n\tq = read();\r\n\tfor (int i = 1; i <= n; i++) {\r\n\t\tval[i] = read();\r\n\t\tfa[i] = i;\r\n\t}\r\n\tll ssum = 0, per = 2;\r\n\r\n\tfor (int i = 2; i <= n; i++) {\r\n\t\tif (val[i] < 0) {\r\n\t\t\tssum = 2 * val[i];\r\n\t\t\tper = 4;\r\n\t\t} else {\r\n\t\t\tfa[i] = i == 2?2:i - 1;\r\n\t\t\tif (ssum < 0 && ssum + per * val[i] >= 0) {\r\n\t\t\t\tint root = gfa(i);\r\n\t\t\t\tfa[root] = root == 2?2:root - 1;\r\n\t\t\t\tper *= 2;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tper = 2;\r\n\tstart[++tot] = 2;\r\n\tfor (int i = 2; i <= n; i++) {\r\n\t\tif (i == 2 || gfa(i) == gfa(i - 1)) {\r\n\t\t\tsum[i] = (sum[i - 1] + per * val[i]) % mod;\r\n\t\t\tper *= 2;\r\n\t\t} else {\r\n\t\t\tsum[i] = (2 * val[i]) % mod;\r\n\t\t\ttag[i] = 1;\r\n\t\t\tstart[++tot] = i;\r\n\t\t\tper = 4;\r\n\t\t}\r\n\t}\r\n\tfor (int i = n; i >= 2; i--) {\r\n\t\tif (i == n || tag[i + 1])\r\n\t\t\tbacksum[i] = (2 * val[i]) % mod;\r\n\t\telse\r\n\t\t\tbacksum[i] = (2 * backsum[i + 1] + 2 * val[i]) % mod;\r\n\t}\r\n\tfor (int i = 2; i <= tot; i++)\r\n\t\tbarsum[i - 1] = (barsum[i - 2] + sum[start[i] - 1]) % mod;\r\n\tbarsum[tot] = (barsum[tot - 1] + sum[n]) % mod;\r\n\tfor (int i = 1; i < tot; i++)\r\n\t\ted[i] = start[i + 1] - 1;\r\n\ted[tot] = n;\r\n\r\n\tfor (int i = 1; i <= q; i++) {\r\n\t\tint l = read(), r = read();\r\n\t\tint posl = upper_bound(start + 1, start + tot + 1, l + 1) - start - 1, posr = upper_bound(start + 1, start + tot + 1, r) - start - 1;\r\n\t\tif (posl == posr) {\r\n\t\t\tprintf(\"%I64d\\n\", ((val[l] + (sum[r] - (l + 1 == start[posl]?0:sum[l]))) % mod * pow(pow(2, l + 1 - start[posl]), mod - 2) + mod) % mod);\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tprintf(\"%I64d\\n\", (barsum[posr] - barsum[posl] + (l + 1 < start[posl + 1]?backsum[l + 1]:0) + val[l] + (r > ed[posr]?sum[r]:0) + mod) % mod);\r\n\t}\r\n\r\n\treturn 0;\r\n}\r\n"
+}

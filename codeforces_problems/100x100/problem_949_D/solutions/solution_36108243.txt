@@ -1,0 +1,39 @@
+{
+    "id": 36108243,
+    "contestId": 949,
+    "creationTimeSeconds": 1520589468,
+    "relativeTimeSeconds": 6468,
+    "problem": {
+        "contestId": 949,
+        "index": "D",
+        "name": "Curfew",
+        "type": "PROGRAMMING",
+        "points": 1750.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 949,
+        "members": [
+            {
+                "handle": "-imc-"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "room": 21,
+        "startTimeSeconds": 1520583000
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "PRETESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 1945600,
+    "source": "#include <bits/stdc++.h>\n\nusing namespace std;\n\n#define all(v) (v).begin(), (v).end()\n\nusing li = long long;\nusing ld = long double;\n\nconst int MOD = 1e9 + 7;\n\nint modpow(int x, int p) {\n    int ans = 1;\n    while (p) {\n        if (p % 2)\n            ans = ans * (li)x % MOD;\n        p /= 2;\n        x = x * (li)x % MOD;\n    }\n    return ans;\n}\n\nint d, b;\n\nstruct subsolver {\n    vector<int> a;\n    int need;\n    int n;\n    \n    subsolver(vector<int> a, int need): a(a), need(need), n(a.size()) {}\n    \n    // positive -> need take\n    // negative -> can give\n    li getMinTake(int nBad) {\n        int r = 0;\n        li sum = 0;\n        li fullSum = 0;\n        \n        int nNowBad = 0;\n        \n        for (int i = 0; i < need; ++i) {\n            li horizon = i + d * (li)(i + 1);\n            while (r < n && r < horizon) {\n                sum += a[r];\n                fullSum += a[r];\n                ++r;\n            }\n            \n            if (nNowBad == nBad) {\n                if (sum < b) {\n                    return 1e18;\n                }\n                else {\n                    sum -= b;\n                }\n            }\n            else {\n                ++nNowBad;\n            }\n        }\n        \n        li taken = fullSum - accumulate(a.begin(), a.begin() + need + 1, 0LL);\n        return -taken;\n    }\n};\n\nvoid solve(bool __attribute__((unused)) read) {\n    int n;\n    \n    cin >> n >> d >> b;\n    vector<int> a(n);\n    for (int i = 0; i < n; ++i)\n        cin >> a[i];\n    \n    subsolver first(a, (n + 1) / 2);\n    reverse(all(a));\n    subsolver second(a, n - (n + 1) / 2);\n    reverse(all(a));\n    \n#if 0\n    for (int i = 0; i < n; ++i) {\n        cout << i << \" -> \" << first.getMinTake(i) << \" \" << second.getMinTake(i) << endl;\n    }\n    \n    for (int i = 1; i <= n; ++i) {\n        assert(first.getMinTake(i) <= first.getMinTake(i - 1));\n        assert(second.getMinTake(i) <= second.getMinTake(i - 1));\n    }\n#endif\n    \n    // low can't, high can\n    int low = -1, high = n;\n    while (low + 1 != high) {\n        int m = (low + high) / 2;\n        \n        li f = first.getMinTake(m);\n        li s = second.getMinTake(m);\n        //cout << \"m=\" << m << \" -> \" << f << \" \" << s << endl;\n        \n        if (f + s <= 0) {\n            high = m;\n        }\n        else {\n            low = m;\n        }\n    }\n    \n    cout << high << endl;\n}\n\nsigned main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(0);\n    \n    int nt = 1;\n    //cin >> nt;\n    for (int i = 0; i < nt; i++)\n        solve(true);\n    \n    //while (true) solve(false);\n    \n    return 0;\n}\n"
+}

@@ -1,0 +1,35 @@
+{
+    "id": 230670613,
+    "contestId": 567,
+    "creationTimeSeconds": 1698752920,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 567,
+        "index": "F",
+        "name": "Mausoleum",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2400,
+        "tags": [
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 567,
+        "members": [
+            {
+                "handle": "graphcity"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1438790400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 3379200,
+    "source": "#include<bits/stdc++.h>\r\n#define ll long long\r\n#define For(i,a,b) for(int i=(a);i<=(b);++i)\r\n#define Rof(i,a,b) for(int i=(a);i>=(b);--i)\r\nusing namespace std;\r\nconst int Maxn=70,Maxk=200;\r\n\r\nint m,n,K; ll f[Maxn+5][Maxn+5][Maxn+5];\r\nstruct Node{int a,b,op;} h[Maxk+5];\r\nvector<pair<int,int>> v[Maxn+5];\r\n\r\ninline void Init()\r\n{\r\n    cin>>m>>K; n=m*2; string ch; vector<Node> v;\r\n    For(i,1,K)\r\n    {\r\n        int a; int b,op; cin>>a>>ch>>b;\r\n        if(ch.size()==2) op=(ch[1]=='<'?2:4);\r\n        else op=(ch[0]=='<'?1:(ch[0]=='='?3:5));\r\n        v.emplace_back(Node{a,b,op});\r\n    } K=0;\r\n    for(auto i:v)\r\n    {\r\n        if(i.a>i.b) swap(i.a,i.b),i.op=6-i.op;\r\n        if(i.op==3) {i.op=4,h[++K]=i,i.op=2,h[++K]=i;}\r\n        else h[++K]=i;\r\n    }\r\n}\r\ninline ll Solve(int x)\r\n{\r\n    memset(f,0,sizeof(f)),f[0][0][n+1]=1;\r\n    For(i,1,n) v[i].clear(),v[i].shrink_to_fit();\r\n    For(i,1,K)\r\n    {\r\n        int a=h[i].a,b=h[i].b,op=h[i].op;\r\n        if(b<=x)\r\n        {\r\n            if(op==5) return 0ll;\r\n            if(op==4 || op==1) v[b].emplace_back(a,op);\r\n        }\r\n        else if(a>x)\r\n        {\r\n            if(op==1) return 0ll;\r\n            if(op==2 || op==5) v[a].emplace_back(b,op);\r\n        }\r\n        else v[a].emplace_back(b,op);\r\n    }\r\n    // cerr<<x<<\": \";\r\n    // For(i,1,n) for(auto [j,op]:v[i]) printf(\"%d %d %d\\n\",i,j,op);\r\n    auto CheckL=[&](int i,int l,int r,int a,int b)\r\n    {\r\n        for(auto [j,op]:v[i])\r\n        {\r\n            if(j<=i)\r\n            {\r\n                if(op==4 && j<=l) return 0;\r\n                if(op==1 && j>l) return 0;\r\n                continue;\r\n            }\r\n            if(op==1 && j<r) return 0; if(op==2 && j<r-b) return 0;\r\n            if(op==4 && j>=r) return 0; if(op==5 && j>=r-b) return 0;\r\n        } return 1;\r\n    };\r\n    auto CheckR=[&](int i,int l,int r,int a,int b)\r\n    {\r\n        for(auto [j,op]:v[i])\r\n        {\r\n            if(op==2 && j>=r) return 0;\r\n            if(op==5 && j<r) return 0;\r\n        }\r\n        return 1;\r\n    };\r\n    For(i,1,m) For(l,0,n) For(r,l,n+1) if(f[i-1][l][r]) For(a,0,2)\r\n    {\r\n        int b=2-a; if(i==m && (a!=1 || b!=1)) continue;\r\n        if(l+a>x || r-b<=x) continue;\r\n        if(a>=1 && !CheckL(l+1,l,r,a,b)) continue;\r\n        if(a>=2 && !CheckL(l+2,l,r,a,b)) continue;\r\n        if(b>=1 && !CheckR(r-1,l,r,a,b)) continue;\r\n        if(b>=2 && !CheckR(r-2,l,r,a,b)) continue;\r\n        // if(x==5) cerr<<i-1<<' '<<l<<' '<<r<<' '<<f[i-1][l][r]<<endl;\r\n        f[i][l+a][r-b]+=f[i-1][l][r];\r\n    }\r\n    // cout<<f[m][x][x+1]<<endl;\r\n    return f[m][x][x+1];\r\n}\r\n\r\nint main()\r\n{\r\n    // freopen(\"1.in\",\"r\",stdin);\r\n\r\n    Init(); ll ans=0; For(i,1,n) ans+=Solve(i);\r\n    cout<<ans<<endl;\r\n    return 0;\r\n}"
+}

@@ -1,0 +1,44 @@
+{
+    "id": 231672894,
+    "contestId": 1895,
+    "creationTimeSeconds": 1699333358,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "PLA_Nh"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 16,
+    "timeConsumedMillis": 373,
+    "memoryConsumedBytes": 49664000,
+    "source": "#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define int long long\r\n#define endl '\\n'\r\n#define pii pair<int, int>\r\n#define deb(n) cout << #n << \"=\" << n << \"    \"\r\n#define debug(n) cout << #n << \"=\" << n << endl\r\n#define div() cout << \"_______________\" << endl\r\n\r\nconst int N = 3e5 + 10;\r\n\r\nint n, m;\r\npii A[N], B[N], sfA[N], sfB[N];\r\nint du[N];\r\nvector<int> v[N * 2];\r\n\r\nvoid oper() {\r\n\tcin >> n;\r\n\tfor (int i = 0; i <= n + 1; i++) sfA[i] = { 0, 0 };\r\n\tfor (int i = 1; i <= n; i++) cin >> A[i].first;\r\n\tfor (int i = 1; i <= n; i++) cin >> A[i].second;\r\n\tcin >> m;\r\n\tfor (int i = 0; i <= m + 1; i++) sfB[i] = { 0, 0 };\r\n\tfor (int i = 1; i <= m; i++) cin >> B[i].first;\r\n\tfor (int i = 1; i <= m; i++) cin >> B[i].second;\r\n\tfor (int i = 1; i <= n + m; i++) v[i].clear(), du[i] = 0;\r\n\tsort(A + 1, A + n + 1); sort(B + 1, B + m + 1);\r\n\tfor (int i = n; i >= 1; i--) {\r\n\t\tif (A[i].second > sfA[i + 1].first) sfA[i] = { A[i].second, i };\r\n\t\telse sfA[i] = sfA[i + 1];\r\n\t}\r\n\tfor (int i = m; i >= 1; i--) {\r\n\t\tif (B[i].second > sfB[i + 1].first) sfB[i] = { B[i].second, i };\r\n\t\telse sfB[i] = sfB[i + 1];\r\n\t}\r\n\tA[n + 1].first = 1e18, B[m + 1].first = 1e18;\r\n\t/*for (int i = 1; i <= n + 1; i++) {\r\n\t\tdeb(i); deb(A[i].first); debug(A[i].second);\r\n\t}\r\n\tfor (int i = 1; i <= m + 1; i++) {\r\n\t\tdeb(i); deb(B[i].first); debug(B[i].second);\r\n\t}*/\r\n\tfor (int i = 1; i <= n; i++) {\r\n\t\tpii pre = { A[i].second, 1e18 };\r\n\t\tint l = upper_bound(B + 1, B + m + 1 + 1, pre) - B;\r\n\t\t//deb(pre.first); deb(i); deb(l); debug(sfB[l].second);\r\n\t\tif (l != m + 1) v[n + sfB[l].second].push_back(i), du[i]++;\r\n\t}\r\n\tfor (int i = 1; i <= m; i++) {\r\n\t\tpii pre = { B[i].second, 1e18 };\r\n\t\tint l = upper_bound(A + 1, A + n + 1 + 1, pre) - A;\r\n\t\t//deb(pre.first); deb(i); deb(l); debug(sfA[l].second);\r\n\t\tif (l != n + 1) v[sfA[l].second].push_back(n + i), du[n + i]++;\r\n\t}\r\n\t/*for (int i = 1; i <= n + m; i++) {\r\n\t\tdiv(); debug(i);\r\n\t\tfor (auto& it : v[i]) {\r\n\t\t\tdebug(it);\r\n\t\t}\r\n\t}*/\r\n\tqueue<int> q;\r\n\tvector<int> vis(n + m + 10, 0);\r\n\tfor (int i = 1; i <= n + m; i++) if (!du[i]) q.push(i), vis[i] = 1;\r\n\twhile (q.size()) {\r\n\t\tint pre = q.front(); q.pop();\r\n\t\tfor (auto& to : v[pre]) {\r\n\t\t\tif (vis[to]) continue;\r\n\t\t\tif (vis[pre] == -1) vis[to] = 1, q.push(to);\r\n\t\t\telse if (!--du[to]) vis[to] = -1, q.push(to);\r\n\t\t}\r\n\t}\r\n\tint win = 0, lose = 0, tie = 0;\r\n\tfor (int i = 1; i <= n; i++) {\r\n\t\tif (vis[i] == 1) win++;\r\n\t\telse if (vis[i] == -1) lose++;\r\n\t\telse tie++;\r\n\t}\r\n\tcout << win << \" \" << tie << \" \" << lose << endl;\r\n}\r\n\r\nsigned main() {\r\n\tios::sync_with_stdio(0), cin.tie(0), cout.tie(0);\r\n\tint t = 1; cin >> t;\r\n\twhile (t--) oper();\r\n\treturn 0;\r\n}"
+}

@@ -1,0 +1,41 @@
+{
+    "id": 172460476,
+    "contestId": 1726,
+    "creationTimeSeconds": 1663421415,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "D",
+        "name": "Edge Split",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "probabilities",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "adam_rajsky"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 204800,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\n#define FOR(i, j, k, l) for(int i = (j); i < (k); i += (l))\n#define FORD(i, j, k, l) for(int i = (j); i >= (k); i -= (l))\n#define REP(i, n) FOR(i, 0, n, 1)\n#define REPD(i, n) FORD(i, n, 0, 1)\n\ntypedef long long ll;\nconst int INF = (int)1e9;\nconst ll INFF = (ll)1e18;\n\n\nint main(){\n    ios_base::sync_with_stdio(false);\n    cin.tie(0);\n    int t;\n    cin >> t;\n    while(t--){\n        int n, m;\n        cin >> n >> m;\n        vector<vector<array<int, 2>>> g(n);\n        REP(i, m){\n            int u, v;\n            cin >> u >> v;\n            u--; v--;\n            g[u].push_back({v, i});\n            g[v].push_back({u, i});\n        }\n        int order = 0;\n        string s(m, '0');\n        vector<int> in(n, -1);\n        vector<int> par(n, -1);\n        vector<array<int, 3>> back_edges;\n        function<void(int, int)> dfs = [&](int v, int p){\n            in[v] = order++;\n            par[v] = p;\n            for(auto x : g[v]){\n                if(in[x[0]] == -1){\n                    dfs(x[0], v);\n                }\n                else{\n                    if(x[0] == p) \n                        continue;\n                    if(in[x[0]] < in[v]){\n                        back_edges.push_back({x[0], v, x[1]});\n                    }\n                }\n            }\n        };\n        dfs(0, -1);\n        map<int, int> mapka;\n        for(auto e : back_edges){\n            mapka[e[0]]++;\n            mapka[e[1]]++;\n        }\n        bool cycle = true;\n        if(mapka.empty()) cycle = false;\n        for(auto p : mapka){\n            if(p.second == 1) cycle = false; \n        }\n        if(!cycle){\n            for(auto e : back_edges){\n                s[e[2]] = '1';\n            }\n        }\n        else{\n            int sv = -1;\n            for(auto e : back_edges){ \n                if(sv == -1 || in[e[0]] < in[sv]){\n                    sv = e[0];  \n                }\n            }\n            int maxin = in[back_edges[0][1]];\n            int forward_edge = -1;\n            for(auto x : g[sv]){\n                if(in[x[0]] < maxin && x[0] != par[sv]){\n                    bool notback = true;\n                    for(auto e: back_edges){\n                        if(e[1] == x[0]) notback = false;\n                    }\n                    if(notback)\n                        forward_edge = x[1];\n                }\n            }\n            s[forward_edge] = '1';\n            REP(i, 2){\n                s[back_edges[i][2]] = '1';\n            }\n        }\n        cout << s << \"\\n\";\n    }\n    return 0;\n}\n"
+}

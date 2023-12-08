@@ -1,0 +1,38 @@
+{
+    "id": 146472032,
+    "contestId": 571,
+    "creationTimeSeconds": 1644899072,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 571,
+        "index": "D",
+        "name": "Campus",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 3100,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dsu",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 571,
+        "members": [
+            {
+                "handle": "Endagorion"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1440261000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 180736000,
+    "source": "#include <bits/stdc++.h>\r\n\r\n#define mp make_pair\r\n#define mt make_tuple\r\n#define fi first\r\n#define se second\r\n#define pb push_back\r\n#define all(x) (x).begin(), (x).end()\r\n#define rall(x) (x).rbegin(), (x).rend()\r\n#define forn(i, n) for (int i = 0; i < (int)(n); ++i)\r\n#define for1(i, n) for (int i = 1; i <= (int)(n); ++i)\r\n#define ford(i, n) for (int i = (int)(n) - 1; i >= 0; --i)\r\n#define fore(i, a, b) for (int i = (int)(a); i <= (int)(b); ++i)\r\n\r\nusing namespace std;\r\n\r\ntypedef pair<int, int> pii;\r\ntypedef vector<int> vi;\r\ntypedef vector<pii> vpi;\r\ntypedef vector<vi> vvi;\r\ntypedef long long i64;\r\ntypedef vector<i64> vi64;\r\ntypedef vector<vi64> vvi64;\r\ntypedef pair<i64, i64> pi64;\r\ntypedef double ld;\r\n\r\ntemplate<class T> bool uin(T &a, T b) { return a > b ? (a = b, true) : false; }\r\ntemplate<class T> bool uax(T &a, T b) { return a < b ? (a = b, true) : false; }\r\n\r\nstring qtypes = \"UMAZQ\";\r\n\r\nstruct TQuery {\r\n    int type;\r\n    int x, y;\r\n\r\n    void read() {\r\n        char c;\r\n        cin >> c;\r\n        type = find(all(qtypes), c) - qtypes.begin();\r\n        cin >> x;\r\n        --x;\r\n        if (type < 2) {\r\n            cin >> y;\r\n            --y;\r\n        }\r\n    }\r\n};\r\n\r\nconst int maxn = 1100000;\r\nint root[2][maxn];\r\nvi e[2][maxn];\r\nint par[2][maxn];\r\nint tin[2][maxn], tout[2][maxn];\r\nint V[2];\r\n\r\nvoid unite(int z, int x, int y) {\r\n    int nv = V[z]++;\r\n    int rx = root[z][x], ry = root[z][y];\r\n//    cerr << z << ' ' << nv << ' ' << x << ' ' << y << '\\n';\r\n    e[z][nv] = {rx, ry};\r\n    par[z][rx] = par[z][ry] = nv;\r\n    root[z][x] = root[z][nv] = nv;\r\n    root[z][y] = -1;\r\n}\r\n\r\nint n, m;\r\nint T;\r\n\r\nvoid dfs(int z, int v) {\r\n    tin[z][v] = T;\r\n    if (v < n) ++T;\r\n    for (int u: e[z][v]) dfs(z, u);\r\n    tout[z][v] = T;\r\n//    cerr << \"T \" << z << ' ' << v << ' ' << tin[z][v] << ' ' << tout[z][v] << '\\n';\r\n}\r\n\r\nstruct TVNode {\r\n    int L, R;\r\n    int l, r;\r\n    int val;\r\n};\r\n\r\nTVNode tv[maxn];\r\nint tvc = 0;\r\n\r\n#define dvn TVNode &n = tv[node]\r\n\r\nint build_vtree(int L, int R) {\r\n    int node = tvc++;\r\n    dvn;\r\n    n = {L, R, -1, -1, -1};\r\n    if (R - L > 1) {\r\n        int M = (L + R) / 2;\r\n        n.l = build_vtree(L, M);\r\n        n.r = build_vtree(M, R);\r\n    }\r\n    return node;\r\n}\r\n\r\nvoid vassign(int node, int L, int R, int x) {\r\n    dvn;\r\n    if (max(n.L, L) >= min(n.R, R)) return;\r\n    if (L <= n.L && n.R <= R) {\r\n        n.val = x;\r\n        return;\r\n    }\r\n    vassign(n.l, L, R, x);\r\n    vassign(n.r, L, R, x);\r\n}\r\n\r\nint vget(int node, int i) {\r\n    dvn;\r\n    int ans = -1;\r\n    if (i < n.L || i >= n.R) return ans;\r\n    ans = n.val;\r\n    if (n.R - n.L > 1) {\r\n        uax(ans, vget(n.l, i));\r\n        uax(ans, vget(n.r, i));\r\n    }\r\n    return ans;\r\n}\r\n\r\nstruct TUNode {\r\n    int L, R;\r\n    int l, r;\r\n    vi ts;\r\n    vi64 ps;\r\n};\r\n\r\nTUNode tu[maxn];\r\nint tuc = 0;\r\n\r\n#define dun TUNode &n = tu[node]\r\n\r\nint build_utree(int L, int R) {\r\n    int node = tuc++;\r\n    dun;\r\n    n = {L, R, -1, -1, {}, {0}};\r\n//    cerr << \"U \" << node << ' ' << n.L << ' ' << n.R << '\\n';\r\n    if (R - L > 1) {\r\n        int M = (L + R) / 2;\r\n        n.l = build_utree(L, M);\r\n        n.r = build_utree(M, R);\r\n    }\r\n    return node;\r\n}\r\n\r\nvoid uadd(int node, int L, int R, int t, int x) {\r\n    dun;\r\n//    cerr << \"U+ \" << node << ' ' << L << ' ' << R << ' ' << n.L << ' ' << n.R << ' ' << t << ' ' << x << '\\n';\r\n    if (max(n.L, L) >= min(n.R, R)) return;\r\n    if (L <= n.L && n.R <= R) {\r\n        n.ts.pb(t);\r\n        n.ps.pb(n.ps.back() + x);\r\n        return;\r\n    }\r\n    uadd(n.l, L, R, t, x);\r\n    uadd(n.r, L, R, t, x);\r\n}\r\n\r\ni64 usum(int node, int i, int t) {\r\n    dun;\r\n    i64 ans = 0;\r\n    if (i < n.L || i >= n.R) return 0;\r\n    if (!n.ts.empty() && t < n.ts.back()) {\r\n        if (t < n.ts[0]) ans = n.ps.back();\r\n        else {\r\n            int i = lower_bound(all(n.ts), t)- n.ts.begin();\r\n            ans = n.ps.back() - n.ps[i];\r\n        }\r\n    }\r\n//    cerr << \"U? \" << i << ' ' << t << ' ' << n.L << ' ' << n.R << ' ' << ans << '\\n';\r\n    ans += usum(n.l, i, t) + usum(n.r, i, t);\r\n    return ans;\r\n}\r\n\r\nint main() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n    cout.precision(10);\r\n    cout << fixed;\r\n#ifdef LOCAL_DEFINE\r\n    freopen(\"input.txt\", \"rt\", stdin);\r\n#endif\r\n\r\n    cin >> n >> m;\r\n    \r\n    vector<TQuery> qs(m);\r\n    forn(i, m) qs[i].read();\r\n\r\n    forn(z, 2) {\r\n        forn(i, n) root[z][i] = i;\r\n        V[z] = n;\r\n        for (auto q: qs) {\r\n            if (q.type == z) unite(z, q.x, q.y);\r\n        }\r\n        T = 0;\r\n        forn(v, V[z]) {\r\n            if (v == root[z][v]) {\r\n//                cerr << z << ' ' << v << '\\n';\r\n                dfs(z, v);\r\n            }\r\n        }\r\n        assert(T == n);\r\n    }\r\n\r\n    int vroot = build_vtree(0, n);\r\n    int uroot = build_utree(0, n);\r\n\r\n    forn(z, 2) forn(v, n) root[z][v] = v;\r\n\r\n    forn(i, m) {\r\n        auto q = qs[i];\r\n        if (q.type < 2) root[q.type][q.x] = par[q.type][root[q.type][q.x]];\r\n        if (q.type == 2) {\r\n            int R = root[0][q.x];\r\n//            cerr << \"U+ \" << tin[0][R] << ' ' << tout[0][R] << ' ' << i << '\\n';\r\n            uadd(uroot, tin[0][R], tout[0][R], i, tout[0][R] - tin[0][R]);\r\n        }\r\n        if (q.type == 3) {\r\n            int R = root[1][q.x];\r\n            vassign(vroot, tin[1][R], tout[1][R], i);\r\n        }\r\n        if (q.type == 4) {\r\n            int t = vget(vroot, tin[1][q.x]);\r\n//            cerr << i << ' ' << q.x << ' ' << t << '\\n';\r\n            cout << usum(uroot, tin[0][q.x], t) << '\\n';\r\n        }\r\n    }\r\n\r\n#ifdef LOCAL_DEFINE\r\n    cerr << \"Time elapsed: \" << 1.0 * clock() / CLOCKS_PER_SEC << \" s.\\n\";\r\n#endif\r\n    return 0;\r\n}\r\n"
+}

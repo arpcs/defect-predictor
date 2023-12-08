@@ -1,0 +1,36 @@
+{
+    "id": 136533829,
+    "contestId": 666,
+    "creationTimeSeconds": 1637596387,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 666,
+        "index": "B",
+        "name": "World Tour",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2000,
+        "tags": [
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 666,
+        "members": [
+            {
+                "handle": "Lihwy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1461947700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 41,
+    "timeConsumedMillis": 358,
+    "memoryConsumedBytes": 36556800,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nstring to_string(const string& s) {\r\n    return '\"' + s + '\"';\r\n}\r\n \r\nstring to_string(const char* s) {\r\n    return to_string((string) s);\r\n}\r\n \r\nstring to_string(bool b) { \r\n    return (b ? \"true\" : \"false\");\r\n}\r\n \r\nstring to_string(char ch) {\r\n    return string(1, ch);\r\n}\r\n \r\nstring to_string(vector<bool> v) {\r\n    bool first = true;\r\n    string res = \"{\";\r\n    for (int i = 0; i < static_cast<int>(v.size()); ++ i) {\r\n        if (!first) {\r\n            res += \", \";\r\n        }\r\n        first = false;\r\n        res += to_string(v[i]);\r\n    }\r\n    res += \"}\";\r\n    return res;\r\n}\r\n \r\ntemplate <size_t N>\r\nstring to_string(bitset<N> v) {\r\n    string res = \"\";\r\n    for (size_t i = 0; i < N; i++) {\r\n        res += static_cast<char>('0' + v[i]);\r\n    }\r\n    reverse(res.begin(), res.end());\r\n    return res;\r\n}\r\n \r\ntemplate <typename A, typename B>\r\nstring to_string(pair<A, B> p) {\r\n    return \"(\" + to_string(p.first) + \", \" + to_string(p.second) + \")\";\r\n}\r\n \r\ntemplate <typename A>\r\nstring to_string(A v) {\r\n    bool first = true;\r\n    string res = \"{\";\r\n    for (const auto& x : v) {\r\n        if (!first) {\r\n            res += \", \";\r\n        }\r\n        first = false;\r\n        res += to_string(x);\r\n    }\r\n    res += \"}\";\r\n    return res;\r\n}\r\n \r\ntemplate <typename A> \r\nvoid debug_array(A a[], int n) {\r\n    string res = \"{\";\r\n    for (int i = 1; i <= n; ++ i) {\r\n        if (i != 1) {\r\n            res += \", \";\r\n        }\r\n        res += to_string(a[i]);\r\n    }\r\n    res += '}';\r\n    cerr << res << endl;\r\n}\r\n \r\nvoid debug_out() { cerr << endl; }\r\n \r\ntemplate <typename Head, typename... Tail>\r\nvoid debug_out(Head H, Tail... T) {\r\n    cerr << \" \" << to_string(H);\r\n    debug_out(T...);\r\n}\r\n \r\n#ifdef LOCAL\r\n#define debug(...) cerr << \"[\" << #__VA_ARGS__ << \"]:\", debug_out(__VA_ARGS__)\r\n#else\r\n#define debug(...) 42 \r\n#endif\r\n\r\nbool ckmax(int& a, int b) {\r\n    return a < b? true : false;\r\n}\r\n\r\nint n, m;\r\nvector<int> adj[3005];\r\npair<int, int> first_go[3005], first_arr[3005];\r\npair<int, int> second_go[3005], second_arr[3005];\r\narray<int, 4> res;\r\nint ans = 0;\r\nint d[3005][3005];\r\nqueue<int> qu;\r\n\r\nvoid bfs(int s) {\r\n    memset(d[s], -1, sizeof d[s]);\r\n    d[s][s] = 0;\r\n    qu.push(s);\r\n    while (!qu.empty()) {\r\n        int u = qu.front();\r\n        qu.pop();\r\n        for (int& v : adj[u])\r\n            if (d[s][v] == -1) {\r\n                d[s][v] = d[s][u] + 1;\r\n                qu.push(v);\r\n            }\r\n    }\r\n\r\n    for (int i = 1; i <= n; ++ i)\r\n        if (d[s][i] != -1) {\r\n            if (ckmax(first_go[s].first, d[s][i])) {\r\n                second_go[s] = first_go[s];\r\n                first_go[s] = {d[s][i], i};\r\n            } else if (ckmax(second_go[s].first, d[s][i])) \r\n                second_go[s] = {d[s][i], i};\r\n\r\n            if (ckmax(first_arr[i].first, d[s][i])) {\r\n                second_arr[i] = first_arr[i];\r\n                first_arr[i] = {d[s][i], s};\r\n            } else if (ckmax(second_arr[i].first, d[s][i])) {\r\n                second_arr[i] = {d[s][i], s};\r\n            }\r\n        }\r\n}\r\n\r\nvoid maximize(pair<int, int> a, int u, int v, pair<int, int> b) {\r\n    if (d[u][v] == -1) return;\r\n    if (a.first == 0) return;\r\n    if (b.first == 0) return;\r\n    if (a.second == b.second) return;\r\n    if (a.second == v) return;\r\n    if (b.second == u) return;\r\n    if (ckmax(ans, a.first + d[u][v] + b.first)) {\r\n        ans = a.first + d[u][v] + b.first;\r\n        res = {a.second, u, v, b.second};\r\n    }\r\n}\r\n\r\nint main() {\r\n    cin.tie(0)->sync_with_stdio(0);\r\n    cin >> n >> m;\r\n    for (int i = 1; i <= m; ++ i) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        adj[u].push_back(v);\r\n    }\r\n    for (int i = 1; i <= n; ++ i) bfs(i);\r\n    for (int i = 1; i <= n; ++ i)\r\n        for (int j = 1; j <= n; ++ j) {\r\n            if (i == j) continue;\r\n            maximize(first_arr[i], i, j, first_go[j]);\r\n            maximize(first_arr[i], i, j, second_go[j]);\r\n            maximize(second_arr[i], i, j, first_go[j]);\r\n            maximize(second_arr[i], i, j, second_go[j]);\r\n        }\r\n    debug(ans);\r\n    for (int i = 0; i < 4; ++ i)\r\n        cout << res[i] << \" \";\r\n    return 0;\r\n}"
+}

@@ -1,0 +1,41 @@
+{
+    "id": 217074584,
+    "contestId": 1706,
+    "creationTimeSeconds": 1691128340,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "Little_Sheep_Yawn"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "PyPy 3-64",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 717,
+    "memoryConsumedBytes": 94105600,
+    "source": "from io import BytesIO, IOBase\r\nimport sys\r\nimport os\r\n\r\n# import time\r\nimport bisect\r\n# import functools\r\nimport math\r\nimport random\r\n# import re\r\nfrom collections import Counter, defaultdict, deque\r\nfrom copy import deepcopy\r\nfrom functools import cmp_to_key, lru_cache, reduce\r\nfrom heapq import heapify, heappop, heappush, heappushpop, nlargest, nsmallest\r\nfrom itertools import accumulate, combinations, permutations, count, product\r\nfrom operator import add, iand, ior, itemgetter, mul, xor\r\nfrom string import ascii_lowercase, ascii_uppercase\r\nfrom typing import *\r\n\r\nclass IOWrapper(IOBase):\r\n    def __init__(self, file):\r\n        self.buffer = FastIO(file)\r\n        self.flush = self.buffer.flush\r\n        self.writable = self.buffer.writable\r\n        self.write = lambda s: self.buffer.write(s.encode(\"ascii\"))\r\n        self.read = lambda: self.buffer.read().decode(\"ascii\")\r\n        self.readline = lambda: self.buffer.readline().decode(\"ascii\")\r\n\r\nBUFSIZE = 5096\r\n\r\nclass FastIO(IOBase):\r\n    newlines = 0\r\n\r\n    def __init__(self, file):\r\n        self._fd = file.fileno()\r\n        self.buffer = BytesIO()\r\n        self.writable = \"x\" in file.mode or \"r\" not in file.mode\r\n        self.write = self.buffer.write if self.writable else None\r\n\r\n\r\n    def readline(self):\r\n        while self.newlines == 0:\r\n            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))\r\n            self.newlines = b.count(b\"\\n\") + (not b)\r\n            ptr = self.buffer.tell()\r\n            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)\r\n        self.newlines -= 1\r\n        return self.buffer.readline()\r\n\r\n    def flush(self):\r\n        if self.writable:\r\n            os.write(self._fd, self.buffer.getvalue())\r\n            self.buffer.truncate(0), self.buffer.seek(0)\r\n\r\n    def read(self):\r\n        while True:\r\n            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))\r\n            if not b:\r\n                break\r\n            ptr = self.buffer.tell()\r\n            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)\r\n        self.newlines = 0\r\n        return self.buffer.read()\r\n\r\n\r\nsys.stdin = IOWrapper(sys.stdin)\r\nsys.stdout = IOWrapper(sys.stdout)\r\ninput = lambda: sys.stdin.readline().rstrip(\"\\r\\n\")\r\n\r\ndef I():\r\n    return input()\r\n\r\ndef II():\r\n    return int(input())\r\n\r\ndef MII():\r\n    return map(int, input().split())\r\n\r\ndef LI():\r\n    return list(input().split())\r\n\r\ndef LII():\r\n    return list(map(int, input().split()))\r\n\r\ndef GMI():\r\n    return map(lambda x: int(x) - 1, input().split())\r\n\r\ndef LGMI():\r\n    return list(map(lambda x: int(x) - 1, input().split()))\r\n\r\ninf = float('inf')\r\n\r\n# from types import GeneratorType\r\n\r\n# def bootstrap(f, stack=[]):\r\n#     def wrappedfunc(*args, **kwargs):\r\n#         if stack:\r\n#             return f(*args, **kwargs)\r\n#         else:\r\n#             to = f(*args, **kwargs)\r\n#             while True:\r\n#                 if type(to) is GeneratorType:\r\n#                     stack.append(to)\r\n#                     to = next(to)\r\n#                 else:\r\n#                     stack.pop()\r\n#                     if not stack:\r\n#                         break\r\n#                     to = stack[-1].send(to)\r\n#             return to\r\n#     return wrappedfunc\r\n\r\n# RANDOM = random.getrandbits(32)\r\n\r\n# class Wrapper(int):\r\n#     def __init__(self, x):\r\n#         int.__init__(x)\r\n\r\n#     def __hash__(self):\r\n#         return super(Wrapper, self).__hash__() ^ RANDOM\r\n\r\nclass SparseTable:\r\n    def __init__(self, data, merge_method):\r\n        self.note = [0] * (len(data) + 1)\r\n        self.merge_method = merge_method\r\n        l, r, v = 1, 2, 0\r\n        while True:\r\n            for i in range(l, r):\r\n                if i >= len(self.note):\r\n                    break\r\n                self.note[i] = v\r\n            else:\r\n                l *= 2\r\n                r *= 2\r\n                v += 1\r\n                continue\r\n            break\r\n        self.ST = [[0] * len(data) for _ in range(self.note[-1]+1)]\r\n        self.ST[0] = data\r\n        for i in range(1, len(self.ST)):\r\n            for j in range(len(data) - (1 << i) + 1):\r\n                self.ST[i][j] = merge_method(self.ST[i-1][j], self.ST[i-1][j + (1 << (i-1))])\r\n\r\n    def query(self, l, r):\r\n        pos = self.note[r-l+1]\r\n        return self.merge_method(self.ST[pos][l], self.ST[pos][r - (1 << pos) + 1])\r\n\r\n\r\nt = II()\r\nfor _ in range(t):\r\n    n, m, q = MII()\r\n    union = list(range(n))\r\n    sets = [{i} for i in range(n)]\r\n    note = [inf] * (n - 1)\r\n    \r\n    for i in range(1, m+1):\r\n        u, v = GMI()\r\n        if v not in sets[union[u]]:\r\n            pu = union[u]\r\n            pv = union[v]\r\n            if len(sets[pu]) > len(sets[pv]):\r\n                u, v = v, u\r\n                pu, pv = pv, pu\r\n            for x in sets[pu]:\r\n                if x - 1 in sets[pv]:\r\n                    note[x - 1] = min(note[x - 1], i)\r\n                if x + 1 in sets[pv]:\r\n                    note[x] = min(note[x], i)\r\n                union[x] = pv\r\n                sets[pv].add(x)\r\n            sets[pu] = None\r\n\r\n    st = SparseTable(note, max)\r\n    ans = []\r\n    for _ in range(q):\r\n        l, r = GMI()\r\n        if l == r: ans.append(0)\r\n        else: ans.append(st.query(l, r - 1))\r\n    print(*ans)"
+}

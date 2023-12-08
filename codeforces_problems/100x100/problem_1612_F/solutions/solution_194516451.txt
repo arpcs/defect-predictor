@@ -1,0 +1,37 @@
+{
+    "id": 194516451,
+    "contestId": 1612,
+    "creationTimeSeconds": 1677018628,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1612,
+        "index": "F",
+        "name": "Armor and Weapons",
+        "type": "PROGRAMMING",
+        "rating": 2800,
+        "tags": [
+            "brute force",
+            "dp",
+            "greedy",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1612,
+        "members": [
+            {
+                "handle": "hyforces"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1637573700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define N 200100\r\n#define inf 0x3f3f3f3f\r\nint lg2(int x) {\r\n    assert(x>=0);\r\n    if(!x){return 0;}\r\n    return 32 - __builtin_clz(x) - 1;\r\n}\r\nint n,m,q;\r\nvector<pair<int,int>>bucket[N];\r\nvector<int>dp[N];\r\nmap<int,int>sp[N];\r\nint offset[N];\r\nint heuristic(int x,int y){\r\n    return x/m+y/n+lg2(x)+lg2(y)+10;\r\n}\r\nsigned main(){\r\n    iostream::sync_with_stdio(false);cin.tie(NULL);\r\n    cin>>n>>m>>q;\r\n    for(int a=0;a<q;++a){\r\n        int x,y;cin>>x>>y;\r\n        sp[x][y]=0;\r\n    }\r\n    bucket[1].push_back({0,1});\r\n    for(int a=1;a<=n;++a){\r\n        if(bucket[a].empty())continue;\r\n        sort(bucket[a].begin(),bucket[a].end(),[&](const pair<int,int>&x,const pair<int,int>&y)->bool{return (x.first==y.first)?x.second>y.second:x.first<y.first;});\r\n        //cout<<\"Bucket for \"<<a<<\": \";\r\n        //for(auto b:bucket[a])cout<<\"(\"<<b.first<<\" , \"<<b.second<<\");\";cout<<endl;\r\n        offset[a]=bucket[a].front().first;\r\n        dp[a].push_back(bucket[a].front().second);\r\n        for(int b=1;b<bucket[a].size();++b){\r\n            if(bucket[a][b].second>dp[a].back()){\r\n                for(int c=dp[a].size()+1;c<=bucket[a][b].first;++c){\r\n                    dp[a].push_back(dp[a].back());\r\n                }\r\n                dp[a].push_back(bucket[a][b].second);\r\n            }\r\n        }\r\n        for(int b=0,tot=-inf;tot<=m;++b){\r\n            if(dp[a].size()<=b)dp[a].push_back(-inf);\r\n            tot=max(tot+a+sp[a].count(b),dp[a][b]);\r\n            dp[a][b]=max(dp[a][b],tot);\r\n            dp[a][b]=min(dp[a][b],m);\r\n        }\r\n        if(a<n){\r\n            for(int b=0;b<dp[a].size();++b){\r\n                if(dp[a][b]<0)continue;\r\n                int nv=a+dp[a][b]+(bool)sp[a].count(dp[a][b]);\r\n                if(b+1+offset[a]<=heuristic(nv,dp[a][b])){\r\n                    bucket[min(n,nv)].push_back({b+1+offset[a],dp[a][b]});\r\n                }\r\n            }\r\n        }\r\n    }\r\n/*\r\n    for(int a=1;a<=n;++a){\r\n        for(auto b:dp[a])cout<<b<<\" \";cout<<endl;\r\n    }\r\n     */\r\n    int ans=(inf);\r\n    for(int a=0;a<dp[n].size();++a){\r\n        if(dp[n][a]>=m){\r\n            ans=min(ans,a+offset[n]);\r\n        }\r\n    }\r\n    cout<<ans<<endl;\r\n}"
+}

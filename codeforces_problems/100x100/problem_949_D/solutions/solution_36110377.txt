@@ -1,0 +1,39 @@
+{
+    "id": 36110377,
+    "contestId": 949,
+    "creationTimeSeconds": 1520590705,
+    "relativeTimeSeconds": 7705,
+    "problem": {
+        "contestId": 949,
+        "index": "D",
+        "name": "Curfew",
+        "type": "PROGRAMMING",
+        "points": 1750.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 949,
+        "members": [
+            {
+                "handle": "kobae964"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "room": 16,
+        "startTimeSeconds": 1520583000
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 52,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 6758400,
+    "source": "#include <algorithm>\n#include <cassert>\n#include <cctype>\n#include <cmath>\n#include <cstdio>\n#include <cstdlib>\n#include <ctime>\n#include <deque>\n#include <functional>\n#include <iomanip>\n#include <iostream>\n#include <list>\n#include <map>\n#include <queue>\n#include <random>\n#include <set>\n#include <sstream>\n#include <string>\n#include <utility>\n#include <vector>\n\nconst int DEBUG = 0;\n\n#define REP(i,s,n) for(int i=(int)(s);i<(int)(n);i++)\n#define DEBUGP(val) cerr << #val << \"=\" << val << \"\\n\"\n\nusing namespace std;\ntypedef long long int ll;\ntypedef vector<int> VI;\ntypedef vector<ll> VL;\ntypedef pair<int, int> PI;\ntypedef pair<PI, ll> PPIL;\n\nPI get_intv(int n, int d, int x, int i) {\n  int lo = i / (d + 1);\n  int hi = n - 1 - (n - 1 - i) / (d + 1);\n  if (DEBUG) {\n    cerr << \"get_intv:\" << \"[1, \" << n <<\"] speed=\" << d << \" idx=\" << i <<\n      \" -> \" << \"[\" << lo <<\",\" << hi << \"]\" << endl;\n  }\n  return PI(lo, hi);\n}\n\nbool ok(int n, int d, ll b, const VL &a, int x) {\n  if (DEBUG && 0) {\n    cerr << \"n,d,b=\"<<n<<\",\"<<d<<\",\"<<b<<endl;\n    cerr << \"a:\";\n    REP(i, 0, n){\n      cerr << \" \" << a[i];\n    }\n    cerr << endl;\n    cerr << \"x = \" << x << endl;\n  }\n  VL risou(n);\n  REP(i, 0, n) {\n    risou[i] = min(i, n - 1 - i) < x ? 0 : b;\n  }\n  if (DEBUG && 0) {\n    cerr << \"risou:\";\n    REP(i, 0, n) cerr << \" \"<< risou[i];\n    cerr << endl;\n  }\n  deque<PPIL> iv;\n  REP(i, 0, n) {\n    iv.push_back(PPIL(get_intv(n, d, x, i), a[i]));\n  }\n  VL gen(n);\n  int pos = 0;\n  while (not iv.empty()) {\n    if (pos < n && gen[pos] >= risou[pos]) {\n      pos++;\n    }\n    PPIL top = iv.front(); iv.pop_front();\n    int e = top.first.first;\n    int f = top.first.second;\n    ll g = top.second;\n    if (0 && DEBUG) {\n      cerr << \"interval [\" << e << \", \" << f << \"] (\" << g << \")\" << endl;\n      cerr << \"pos = \" << pos << endl;\n      cerr << \"gen:\";\n      REP(i, 0, n) cerr << \" \" << gen[i];\n      cerr << endl << endl;\n    }\n    if (g == 0) continue;\n    if (pos < e) {\n      pos = e;\n    }\n    if (f < pos) {\n      continue;\n    }\n    if (pos >= n) break;\n    if (gen[pos] < risou[pos]) {\n      ll dif = risou[pos] - gen[pos];\n      dif = min(dif, g);\n      gen[pos] += dif;\n      g -= dif;\n    }\n    if (g > 0) {\n      iv.push_front(PPIL(PI(e, f), g));\n    }\n  }\n  REP(i, 0, n) {\n    if (gen[i] < risou[i]) return false;\n  }\n  return true;\n}\n\nint main(void) {\n  ios::sync_with_stdio(false);\n  cin.tie(0);\n  int n, d;\n  ll b;\n  cin >> n >> d >> b;\n  VL a(n);\n  REP(i, 0, n) {\n    cin >> a[i];\n  }\n  int pass = (n + 1) / 2, fail = -1;\n  while (pass - fail > 1) {\n    int mid = (pass + fail) / 2;\n    if (ok(n, d, b, a, mid)) {\n      pass = mid;\n    } else {\n      fail = mid;\n    }\n  }\n  cout << pass << \"\\n\";\n}\n"
+}

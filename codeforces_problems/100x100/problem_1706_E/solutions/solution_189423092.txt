@@ -1,0 +1,41 @@
+{
+    "id": 189423092,
+    "contestId": 1706,
+    "creationTimeSeconds": 1673866078,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "tuffynibbles"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\r\n#include <cstring>\r\n#include <algorithm>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\nstruct dsu {\r\n    vector<int> ds, wt;\r\n    dsu(int n) {\r\n        ds.assign(n, -1);\r\n        wt.assign(n, 0x3f3f3f3f);\r\n    }\r\n    int find(int x) {\r\n        if (ds[x] == -1) return x;\r\n        return find(ds[x]);\r\n    }\r\n    void merge(int i, int j, int weight) {\r\n        i = find(i), j = find(j);\r\n        if (i != j) {\r\n            if (ds[i] > ds[j]) swap(i, j);\r\n            ds[i] += ds[j];\r\n            ds[j] = i;\r\n            wt[j] = weight;\r\n        }\r\n    }\r\n    int weight(int i, int j) {\r\n        int w = 0;\r\n        while (i != j) {\r\n            if (wt[i] < wt[j]) w = wt[i], i = ds[i];\r\n            else w = wt[j], j = ds[j];\r\n        }\r\n        return w;\r\n    }\r\n};\r\n\r\nstruct segtree {\r\n    int n;\r\n    vector<int> tr;\r\n    \r\n    segtree(vector<int> v) {\r\n        n = v.size();\r\n        tr.resize(n * 2);\r\n        for (int i = 0; i < n; i ++ ) tr[n + i] = v[i];\r\n        for (int i = n - 1; i >= 0; i -- ) pushup(i);\r\n    }\r\n    void pushup(int u) {\r\n        tr[u] = max(tr[u << 1], tr[u << 1 | 1]);\r\n    }\r\n    int query(int l, int r) {\r\n        int x = 0;\r\n        \r\n        for (l += n, r += n; l <= r; l /= 2, r /= 2) {\r\n            if (l & 1) x = max(x, tr[l ++ ]);\r\n            if (~r & 1) x = max(x, tr[r -- ]);\r\n        }\r\n        \r\n        return x;\r\n    }\r\n};\r\n\r\nvoid solve()\r\n{\r\n    int n, m, q;\r\n    scanf(\"%d%d%d\", &n, &m, &q);\r\n    \r\n    dsu ds(n);\r\n    for (int i = 1; i <= m; i ++ )\r\n    {\r\n        int u, v;\r\n        scanf(\"%d%d\", &u, &v);\r\n        u --, v -- ;\r\n        ds.merge(u, v, i);\r\n    }\r\n    \r\n    vector<int> weights(n - 1);\r\n    for (int i = 0; i < n - 1; i ++ ) weights[i] = ds.weight(i, i + 1);\r\n    \r\n    segtree st(weights);\r\n    while (q -- )\r\n    {\r\n        int l, r;\r\n        scanf(\"%d%d\", &l, &r);\r\n        l --, r -- ;\r\n        if (l == r) puts(\"0\");\r\n        else printf(\"%d \", st.query(l, r - 1));\r\n    }\r\n    puts(\"\");\r\n}\r\n\r\nint main()\r\n{\r\n    int T;\r\n    scanf(\"%d\", &T);\r\n    while (T -- ) solve();\r\n    \r\n    return 0;\r\n}"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 229707739,
+    "contestId": 1096,
+    "creationTimeSeconds": 1698244098,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1096,
+        "index": "F",
+        "name": "Inversion Expectation",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1096,
+        "members": [
+            {
+                "handle": "oloy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1546007700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 32,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 7987200,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\nconst ll maxn = 2e5+100;\r\nconst ll MOD = 998244353;\r\n\r\nll n, num[maxn], sum[maxn], cnt, pre_sum[maxn];\r\nll deno, mole;\r\n\r\nvector <ll> ve;\r\n\r\nvoid get_factor() {\r\n    ve.push_back(1);\r\n    ll ans = 1;\r\n    for(int i=1;i<=n;i++) {\r\n        ans *= i;\r\n        ans %= MOD;\r\n        ve.push_back(ans);\r\n    }\r\n}\r\n\r\nvoid init() {\r\n    scanf(\"%lld\",&n);\r\n    for(ll i=1;i<=n;i++) {\r\n        scanf(\"%lld\", &num[i]);\r\n        if(num[i] == -1) cnt++;\r\n        pre_sum[i] = cnt;\r\n    }\r\n}\r\n\r\nll power_mod(ll x, ll Cnt) {\r\n    ll ans = 1;\r\n    while(Cnt) {\r\n        if(Cnt&1)\r\n            ans *= x;\r\n        x *= x;\r\n        ans %= MOD;\r\n        x %= MOD;\r\n        Cnt >>= 1;\r\n    }\r\n    return ans % MOD;\r\n}\r\n\r\nll lowbit(ll x) {\r\n    return x&-x;\r\n}\r\n\r\nvoid add(ll x) {\r\n    while(x <= n) {\r\n        sum[x]++;\r\n        x += lowbit(x);\r\n    }\r\n}\r\n\r\nll get_sum(ll x) {\r\n    if(x <= 0)\r\n        return 0;\r\n    ll Sum = 0;\r\n    while(x > 0) {\r\n        Sum += sum[x];\r\n        x -= lowbit(x);\r\n    }\r\n    return Sum;\r\n}\r\n\r\nvoid get_deno() {\r\n    ll ans = 1;\r\n    for(ll i=1;i<=cnt;i++) {\r\n        ans *= i;\r\n        ans %= MOD;\r\n    }\r\n    deno = ans;\r\n}\r\n\r\nll get_kown_and_kown() {\r\n    ll sum = 0;\r\n    for(ll i=1;i<=n;i++) {\r\n        if(num[i] != -1) {\r\n            sum += get_sum(n)-get_sum(num[i]);\r\n            add(num[i]);\r\n        }\r\n    }\r\n    sum *= ve[cnt];\r\n    return sum % MOD;\r\n}\r\n\r\nll get_unkown_and_unkown() {\r\n    ll mole_temp, deno_temp = 4;\r\n    mole_temp = ve[cnt];\r\n    mole_temp *= cnt;\r\n    mole_temp %= MOD;\r\n    mole_temp *= (cnt-1);\r\n    mole_temp %= MOD;\r\n\r\n    ll ans = mole_temp * power_mod(deno_temp, MOD-2);\r\n    ans = ans % MOD;\r\n\r\n    return ans;\r\n}\r\n\r\nll get_kown_and_unkown() {\r\n    ll ans = 0;\r\n    for(ll i=1;i<=n;i++) {\r\n        if(num[i] != -1) {\r\n            ll biger = n - num[i] - (n - cnt - get_sum(num[i]));\r\n            ll empty = pre_sum[i];\r\n\r\n            ll temp = ve[cnt-1];\r\n            temp *= biger;\r\n            temp %= MOD;\r\n            temp *= empty;\r\n            temp %= MOD;\r\n\r\n            ans += temp;\r\n            ans %= MOD;\r\n        }\r\n    }\r\n    return ans;\r\n}\r\n\r\nll get_unkown_and_kown() {\r\n    ll ans = 0;\r\n    for(ll i=1;i<=n;i++) {\r\n        if(num[i] != -1) {\r\n            ll smaller = num[i] - 1 - get_sum(num[i]-1);\r\n            ll empty = cnt - pre_sum[i];\r\n\r\n            ll temp = ve[cnt-1];\r\n            temp *= smaller;\r\n            temp %= MOD;\r\n            temp *= empty;\r\n            temp %= MOD;\r\n\r\n            ans += temp;\r\n            ans %= MOD;\r\n        }\r\n    }\r\n    return ans;\r\n}\r\n\r\nvoid get_mole() {\r\n    mole = 0;\r\n    //\u5df2\u77e5\u548c\u5df2\u77e5\r\n    mole += get_kown_and_kown();\r\n    mole %= MOD;\r\n    //\u672a\u77e5\u548c\u672a\u77e5\r\n    mole += get_unkown_and_unkown();\r\n    mole %= MOD;\r\n    //\u5df2\u77e5\u548c\u672a\u77e5\r\n    mole += get_kown_and_unkown();\r\n    mole %= MOD;\r\n    //\u672a\u77e5\u548c\u5df2\u77e5\r\n    mole += get_unkown_and_kown();\r\n    mole %= MOD;\r\n}\r\n\r\nint main() {\r\n    //freopen(\"1.in\", \"r\", stdin);\r\n    init();\r\n    get_factor();\r\n    get_deno();\r\n    get_mole();\r\n    ll ans = (mole * power_mod(deno, MOD-2)) % MOD;\r\n    printf(\"%lld\", ans);\r\n    return 0;\r\n}\r\n"
+}

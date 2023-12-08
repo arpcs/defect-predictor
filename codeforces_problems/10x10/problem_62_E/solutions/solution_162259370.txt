@@ -1,0 +1,36 @@
+{
+    "id": 162259370,
+    "contestId": 62,
+    "creationTimeSeconds": 1656517664,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 62,
+        "index": "E",
+        "name": "World Evil",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2700,
+        "tags": [
+            "dp",
+            "flows"
+        ]
+    },
+    "author": {
+        "contestId": 62,
+        "members": [
+            {
+                "handle": "loveto"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1298649600
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 18,
+    "timeConsumedMillis": 4118,
+    "memoryConsumedBytes": 149094400,
+    "source": "#include <iostream>\r\n#include <vector>\r\n\r\nconst int64_t kMax = std::numeric_limits<int64_t>::max() / 10;\r\n\r\nint64_t Min2(int64_t aa, int64_t bb) {\r\n    if (aa < bb) {\r\n        return aa;\r\n    }\r\n    return bb;\r\n}\r\n\r\nvoid Input(int64_t *n_param, int64_t *m_param, std::vector<std::vector<int64_t>> *hor, std::vector<std::vector<int64_t>> *vert) {\r\n    std::cin >> *n_param >> *m_param;\r\n    *hor = std::vector<std::vector<int64_t>>(*n_param);\r\n    for (int64_t iter = 0; iter < *n_param; ++iter) {\r\n        (*hor)[iter] = std::vector<int64_t>(*m_param - 1);\r\n    }\r\n\r\n    *vert = std::vector<std::vector<int64_t>>(*n_param);\r\n    for (int64_t iter = 0; iter < *n_param; ++iter) {\r\n        (*vert)[iter] = std::vector<int64_t>(*m_param);\r\n    }\r\n\r\n    for (int64_t jter = 0; jter < *m_param - 1; ++jter) {\r\n        for (int64_t iter = 0; iter < *n_param; ++iter) {\r\n            std::cin >> (*hor)[iter][jter];\r\n        }\r\n    }\r\n\r\n    for (int64_t jter = 0; jter < *m_param; ++jter) {\r\n        for (int64_t iter = 0; iter < *n_param; ++iter) {\r\n            std::cin >> (*vert)[iter][jter];\r\n        }\r\n    }\r\n}\r\n\r\nint64_t MaskRev(int64_t mask, int64_t i) {\r\n    return mask ^ (1 << i);\r\n}\r\n\r\nint64_t MaskI(int64_t mask, int64_t i) {\r\n    return (mask >> i) & 1;\r\n}\r\n\r\nint64_t Procces(int64_t n_param, int64_t m_param, std::vector<std::vector<int64_t>> &hor, std::vector<std::vector<int64_t>> &vert) {\r\n    int64_t mask_size = 1 << n_param;\r\n\r\n    std::vector<std::vector<std::vector<int64_t>>> dynamic = std::vector<std::vector<std::vector<int64_t>>>(m_param);\r\n    for (auto &inner : dynamic) {\r\n        inner = std::vector<std::vector<int64_t>>(n_param);\r\n        for (auto &val : inner) {\r\n            val = std::vector<int64_t>(mask_size);\r\n        }\r\n    }\r\n\r\n    for (int64_t jter = 0; jter < n_param; ++jter) {\r\n        dynamic[0][jter][0] = 0;\r\n        for (int64_t kter = 1; kter < mask_size; ++kter) {\r\n            dynamic[0][jter][kter] = kMax;\r\n        }\r\n    }\r\n\r\n    for (int64_t iter = 1; iter < m_param; ++iter) {\r\n        for (int64_t jter = 0; jter < n_param; ++jter) {\r\n            for (int64_t kter = 0; kter < mask_size; ++kter) {\r\n                if (iter == 1) {\r\n                    if ((kter >> (jter + 1)) != 0) {\r\n                        dynamic[iter][jter][kter] = kMax;\r\n                        continue;\r\n                    }\r\n                }\r\n\r\n                if (iter == m_param - 1) {\r\n                    int64_t m = (2 << jter) - 1;\r\n                    if ((m & kter) != m) {\r\n                        dynamic[iter][jter][kter] = kMax;\r\n                        continue;\r\n                    }\r\n                }\r\n\r\n                if (jter == 0) {\r\n                    dynamic[iter][0][kter] = Min2(\r\n                        dynamic[iter - 1][n_param - 1][kter],\r\n                        dynamic[iter - 1][n_param - 1][MaskRev(kter, jter)] + hor[0][iter - 1]);\r\n                } else if (jter == n_param - 1) {\r\n                    dynamic[iter][jter][kter] = Min2(\r\n                                                    dynamic[iter][jter - 1][kter],\r\n                                                    dynamic[iter][jter - 1][MaskRev(kter, jter)] + hor[jter][iter - 1]) +\r\n                                                (MaskI(kter, jter) != MaskI(kter, jter - 1)) * vert[jter - 1][iter] +\r\n                                                (MaskI(kter, jter) != MaskI(kter, 0)) * vert[jter][iter];\r\n                } else {\r\n                    dynamic[iter][jter][kter] = Min2(\r\n                                                    dynamic[iter][jter - 1][kter],\r\n                                                    dynamic[iter][jter - 1][MaskRev(kter, jter)] + hor[jter][iter - 1]) +\r\n                                                (MaskI(kter, jter) != MaskI(kter, jter - 1)) * vert[jter - 1][iter];\r\n                }\r\n            }\r\n        }\r\n    }\r\n    return dynamic[m_param - 1][n_param - 1][mask_size - 1];\r\n}\r\n\r\nint main() {\r\n    int64_t n_param, m_param;\r\n    std::vector<std::vector<int64_t>> hor, vert;\r\n    Input(&n_param, &m_param, &hor, &vert);\r\n    std::cout << Procces(n_param, m_param, hor, vert) << \"\\n\";\r\n\r\n    return 0;\r\n}\r\n"
+}

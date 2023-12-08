@@ -1,0 +1,36 @@
+{
+    "id": 30086399,
+    "contestId": 850,
+    "creationTimeSeconds": 1504567966,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 850,
+        "index": "B",
+        "name": "Arpa and a list of numbers",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2100,
+        "tags": [
+            "implementation",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 850,
+        "members": [
+            {
+                "handle": "LiChenKoh"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1504535700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 118,
+    "timeConsumedMillis": 1825,
+    "memoryConsumedBytes": 16179200,
+    "source": "#include \"bits/stdc++.h\"\n#include <assert.h>\nusing namespace std;\ntypedef long long ll;\ntypedef long double ld;\n#define PB push_back\n#define MP make_pair\nconst int MOD=1000000007;\n#define endl \"\\n\"\n#define fst first\n#define snd second\nconst int UNDEF = -1;\nconst ll INF=1e18;\ntemplate<typename T> inline bool chkmax(T &aa, T bb) { return aa < bb ? aa = bb, true : false; }\ntemplate<typename T> inline bool chkmin(T &aa, T bb) { return aa > bb ? aa = bb, true : false; }\ntypedef pair<ll,ll> pll;typedef vector<ll> vll;typedef pair<int,int> pii;typedef vector<int> vi;typedef vector<vi> vvi;\n#define DEBUG_CAT\n#ifdef DEBUG_CAT\n#define dbg(...)   printf( __VA_ARGS__ )\n#else \n#define dbg(...)   /****nothing****/\n#endif\nint rint();char rch();long long rlong();\n\nconst int MAXP=1e6+1;\nbool sieve_array[MAXP+1];\nint ap[MAXP+1];\nvector<int> gpv;\n\nvoid sieve() {\n  for (int i = 0; i <= MAXP; i++) {\n    sieve_array[i] = true;\n    ap[i]=1<<30;\n  }\n  sieve_array[0] = false; sieve_array[1] = false;\n  int lim = (int)(ceil(sqrt(MAXP)))+2;\n  for (int i = 2; i <= lim; i++) {\n    if(sieve_array[i]) {\n      for (int j = i*i; j <= MAXP; j+=i) {\n        sieve_array[j] = false;\n        ap[j]=i;\n      }\n    }\n  }\n  for (int i = 2; i <= MAXP; i++) {\n    if(sieve_array[i]) {\n      gpv.PB(i);\n      ap[i]=i;\n    }\n  }\n}\nint factorize_dest[500];\nint factorize_tmp[500];\nint factorize(int x) {\n  const int power=1;\n  // Needed for factorizing MAXN^3 numbers\n  //int xsqrt=round(sqrt(x));\n  //if (xsqrt*(ll)xsqrt==x) {\n  //  power=2;\n  //  x=xsqrt;\n  //}\n  // End needed for factorizing MAXN^3 numbers\n  int tsz=0;\n  while(x>=MAXP) {\n    bool found=false;\n    for (auto &p:gpv) {\n      if (p*(ll)p>x) break;\n      while ((x%p)==0) {\n        //printf(\"x:%lld p:%d\\n\",x,p);\n        x/=p;\n        factorize_tmp[tsz++]=p;\n        found=true;\n      }\n    }\n    if (x<MAXP) break;\n    if (!found) break;\n  }\n  if (x<MAXP) {\n    while(x>1) {\n      int p=ap[x];\n      x/=p;\n      factorize_tmp[tsz++]=p;\n    }\n  }\n  if (x>1) factorize_tmp[tsz++]=x;\n  sort(factorize_tmp,factorize_tmp+tsz);\n  int didx=0;\n  for (int tidx=0;tidx<tsz;tidx++) {\n    int p=factorize_tmp[tidx];\n    if (tidx==0||p!=factorize_tmp[tidx-1]) {\n      factorize_dest[didx++]=p;\n    }\n  }\n  return didx;\n}\n\nbool seen[MAXP];\nbool facced[MAXP];\nconst int mn=5e5+2;\nint a[mn];\nint b[mn];\nconst time_t TIMELIM=1.8*CLOCKS_PER_SEC;\nint vr[MAXP];\nint main()\n{\n  time_t st = clock();\n  sieve();\n  //ios_base::sync_with_stdio(false); cin.tie(0);\n  int n=rint(),x=rint(),y=rint();\n  for (int i=0;i<n;i++) a[i]=rint();\n  int bsz=0;\n  for (int i=0;i<n;i++) {\n    int val=a[i]; if (x!=-1) {b[bsz++]=val;}\n  }\n  ll final=x*(ll)n;\n  int klim=(x-1)/y;\n  {\n    int cnt=0;\n    for (int i=0;i<n;i++) {\n      cnt+=a[i]&1;\n    }\n    ll sum=cnt*(ll)min(x,y);\n    chkmin(final,sum);\n  }\n  int lft=0;\n  for (int i=0;i<n;i++) {\n    int val=a[i];\n    if (!facced[val]) {facced[val]=true; lft++;}\n  }\n  memset(facced,0,sizeof facced);\n  while(lft>0) {\n    time_t now=clock();\n    if (now-st > TIMELIM) {\n      printf(\"%lld\\n\",final); return 0;\n    }\n    srand(now);\n    int val=b[rand()%bsz];\n    for (int k=0;k<10000;k++) {\n      if (!facced[val]) break;\n      val=b[rand()%bsz];\n    }\n    if (facced[val]) continue;\n    facced[val]=true;\n    lft--;\n    int didx=factorize(val);\n    for (int di=0;di<didx;di++) {\n      int p=factorize_dest[di];\n      if (seen[p]) continue;\n      for (int i=1;i<p;i++) vr[i]=p-i;\n      for (int i=p;i<MAXP;i++) vr[i]=vr[i-p];\n      ll sum=0;\n      for (int i=0;i<n;i++) {\n        int need=vr[a[i]];\n        if (need<=klim) sum+=need*(ll)y;\n        else sum+=x;\n      }\n      chkmin(final,sum);\n      if (clock()-st > TIMELIM) {\n        printf(\"%lld\\n\",final); return 0;\n      }\n    }\n  }\n  printf(\"%lld\\n\",final);\n}\n\n\n\n\nstatic char stdinBuffer[1024];\nstatic char* stdinDataEnd = stdinBuffer + sizeof (stdinBuffer);\nstatic const char* stdinPos = stdinDataEnd;\n\nvoid readAhead(size_t amount)\n{\n    size_t remaining = stdinDataEnd - stdinPos;\n    if (remaining < amount) {\n       memmove(stdinBuffer, stdinPos, remaining);\n       size_t sz = fread(stdinBuffer + remaining, 1, sizeof (stdinBuffer) - remaining, stdin);\n       stdinPos = stdinBuffer;\n       stdinDataEnd = stdinBuffer + remaining + sz;\n       if (stdinDataEnd != stdinBuffer + sizeof (stdinBuffer))\n         *stdinDataEnd = 0;\n    }\n}\n\nint rint()\n{\n    readAhead(16);\n\n    int x = 0;\n    bool neg = false;\n    while(*stdinPos==' '||*stdinPos=='\\n') ++stdinPos;\n    if (*stdinPos == '-') {\n       ++stdinPos;\n       neg = true;\n    }\n\n    while (*stdinPos >= '0' && *stdinPos <= '9') {\n       x *= 10;\n       x += *stdinPos - '0';\n       ++stdinPos;\n    }\n\n    return neg ? -x : x;\n}\nchar rch()\n{\n    readAhead(16);\n    while(*stdinPos==' '||*stdinPos=='\\n') ++stdinPos;\n    char ans=*stdinPos;\n    ++stdinPos;\n    return ans;\n}\nlong long rlong()\n{\n    readAhead(32);\n\n    long long x = 0;\n    bool neg = false;\n    while(*stdinPos==' '||*stdinPos=='\\n') ++stdinPos;\n    if (*stdinPos == '-') {\n       ++stdinPos;\n       neg = true;\n    }\n\n    while (*stdinPos >= '0' && *stdinPos <= '9') {\n       x *= 10;\n       x += *stdinPos - '0';\n       ++stdinPos;\n    }\n\n    return neg ? -x : x;\n}"
+}

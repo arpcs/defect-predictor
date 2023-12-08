@@ -1,0 +1,41 @@
+{
+    "id": 182116659,
+    "contestId": 1706,
+    "creationTimeSeconds": 1669116271,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1706,
+        "index": "E",
+        "name": "Qpwoeirut and Vertices",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "dsu",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "whdywjd"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1658154900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 499,
+    "memoryConsumedBytes": 180019200,
+    "source": "// LUOGU_RID: 95058233\n#include <cstdio>\n#include <cstring>\n#include <queue>\n#include <set>\n#include <map>\n#include <bitset>\n#include <algorithm>\n#define ll long long\n#define MAX_N 200007\n#define MAX_LOG 20\n\nusing namespace std;\n\nint n, m, q;\nint log_2[MAX_N];\n\ntemplate<size_t T>\nstruct vset\n{\n    int f[T];\n    int fath(int x) { return f[x] ? f[x] = fath(f[x]) : x; }\n    void gath(int x, int y) { f[fath(y)] = x; }\n};\n\nstruct node\n{\n    int mx, mxpos, mn, mnpos;\n    node operator + (node b)\n    {\n        if(mx > b.mx)\n            b.mx = mx, b.mxpos = mxpos;\n        if(mn < b.mn)\n            b.mn = mn, b.mnpos = mnpos;\n        return b;\n    }\n};\n\nstruct Edge { int to, nxt; };\n\ntemplate<size_t T, size_t log_T>\nstruct Tree\n{\n    \n    int c[T << 1];\n    int son[T << 1][2];\n\n    vset<T << 1> vs;\n    int ssum;\n    void clear()\n    {\n        memset(vs.f, 0, (ssum + 2) * sizeof(int));\n        memset(son, 0, (ssum + 2) * sizeof(int[2]));\n        memset(c, 0, (ssum + 2) * sizeof(int[2]));\n        ssum = 0;\n    }\n    void init1(int _n) { ssum = _n; }\n    void build(int x, int y, int k)\n    {\n        x = vs.fath(x), y = vs.fath(y);\n        if(x == y)\n            return;\n        int nw = ++ssum;\n        son[nw][0] = x, son[nw][1] = y, c[nw] = k;\n        vs.gath(nw, x), vs.gath(nw, y);\n    }\n\n    int root() { return vs.fath(1); }\n    int f[T << 1][log_T + 1], d[T << 1], l[T << 1], clk;\n    void init2(int x, int fath)\n    {\n        l[x] = ++clk;\n        f[x][0] = fath;\n        d[x] = d[fath] + 1;\n        for(int i = 1; i <= log_T; i++)\n            f[x][i] = f[f[x][i - 1]][i - 1];\n        //printf(\"%d %d %d %d %d\\n\", x, c[x], d[x], l[x], fath);\n        if(son[x][0])\n            init2(son[x][0], x), init2(son[x][1], x);\n    }\n    int lca(int x, int y)\n    {\n        if(d[x] < d[y])\n            swap(x, y);\n        while(d[x] > d[y])\n            x = f[x][log_2[d[x] - d[y]]];\n        if(x == y)\n            return x;\n        for(int i = log_2[d[x]]; ~i; i--)\n            if(f[x][i] != f[y][i])\n                x = f[x][i], y = f[y][i];\n        return f[x][0];\n    }\n\n    node st[T << 1][log_T + 1];\n\n    void init3()\n    {\n        for(int i = 1; i <= ssum; i++)\n            st[i][0] = (node){l[i], i, l[i], i};\n        for(int j = 1; j <= log_T; j++)\n            for(int i = 1; i + (1 << j) - 1 <= ssum; i++)\n                st[i][j] = st[i][j - 1] + st[i + (1 << j - 1)][j - 1];\n    }\n    node query(int l, int r)\n    {\n        int len = log_2[r - l + 1];\n        return st[l][len] + st[r - (1 << len) + 1][len];\n    }\n    int solve(int l, int r)\n    {\n        node t = query(l, r);\n        //printf(\"%d %d\\n\", t.mnpos, t.mxpos);\n        return c[lca(t.mnpos, t.mxpos)];\n    }\n};\n\nTree<MAX_N, MAX_LOG> mp;\n\nvoid PRE()\n{\n    for(int i = 2; i < MAX_N; i++)\n        log_2[i] = log_2[i >> 1] + 1;\n}\n\nvoid CLEAR()\n{\n    mp.clear();\n}\n\nvoid MAIN()\n{\n    scanf(\"%d %d %d\", &n, &m, &q);\n    mp.init1(n);\n    for(int i = 1; i <= m; i++)\n    {\n        int u, v;\n        scanf(\"%d %d\", &u, &v);\n        mp.build(u, v, i);\n    }\n    mp.init2(mp.root(), 0);\n    mp.init3();\n    for(int i = 1; i <= q; i++)\n    {\n        int l, r;\n        scanf(\"%d %d\", &l, &r);\n        if(l == r)\n            printf(\"0 \");\n        else\n            printf(\"%d \", mp.solve(l, r));\n    }\n    printf(\"\\n\");\n}\n\nint main()\n{\n    PRE();\n    int T;\n    scanf(\"%d\", &T);\n    while(T--)\n    {\n        CLEAR();\n        MAIN();\n    }\n    return 0;\n}\n"
+}

@@ -1,0 +1,44 @@
+{
+    "id": 236043735,
+    "contestId": 1895,
+    "creationTimeSeconds": 1701865785,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1895,
+        "index": "E",
+        "name": "Infinite Card Game",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "games",
+            "graphs",
+            "greedy",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1895,
+        "members": [
+            {
+                "handle": "eriFseR"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1699022100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 1169,
+    "memoryConsumedBytes": 64409600,
+    "source": "// LUOGU_RID: 138470804\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define MAXN 600005\r\n\r\nint n,m,sufmax[MAXN],sufid[MAXN];\r\n\r\nstruct node{ int att,def,id; }A[MAXN],B[MAXN];\r\n\r\ninline bool cmpA( node A , node B ){ return A.att < B.att; }\r\ninline bool cmpD( node A , node B ){ return A.def < B.def; }\r\n\r\nint to[MAXN],vis[MAXN],rvis[MAXN],ans1 = 0,ans2 = 0,ans3 = 0;\r\nvector<int> nE[MAXN];\r\n\r\ninline void getans( int p , int t ){\r\n\trvis[p] = 1;\r\n\tif( t == 3 ){ ans3 += p <= n; }\r\n\tif( t == 1 ){ ans1 += p <= n; }\r\n\tfor( int v : nE[p] ) getans( v , t );\r\n}\r\n\r\ninline void getRans( int x ){\r\n\trvis[x] = 1,ans2 += x <= n;\r\n\tif( to[x] && !rvis[to[x]] ) getRans( to[x] );\r\n\tfor( int v : nE[x] ) if( !rvis[v] ) getRans( v );\r\n}\r\n\r\nvoid dfs( int x ){\r\n\tvis[x] = 1;\r\n\tif( !to[x] ){ getans( x , x <= n ? 1 : 3 ); return; }\r\n\tif( vis[to[x]] ){ getRans( x ); return; }\r\n\tdfs( to[x] );\r\n}\r\n\r\ninline void solve(){\r\n\tans1 = ans2 = ans3 = 0;\r\n\tscanf(\"%d\",&n);\r\n\tfor( int i = 1 ; i <= n ; i ++ ) scanf(\"%d\",&A[i].att),A[i].id = i;\r\n\tfor( int i = 1 ; i <= n ; i ++ ) scanf(\"%d\",&A[i].def);\r\n\tscanf(\"%d\",&m);\r\n\tfor( int i = 1 ; i <= m ; i ++ ) scanf(\"%d\",&B[i].att),B[i].id = i;\r\n\tfor( int i = 1 ; i <= m ; i ++ ) scanf(\"%d\",&B[i].def);\r\n\tsort( A + 1 , A + n + 1 , cmpA );\r\n\tsufmax[n + 1] = 0;\r\n\tfor( int i = n ; i >= 1 ; i -- ){\r\n\t\tif( A[i].def >= sufmax[i + 1] ) sufmax[i] = A[i].def,sufid[i] = A[i].id;\r\n\t\telse sufmax[i] = sufmax[i + 1],sufid[i] = sufid[i + 1];\r\n\t}\r\n\tsort( B + 1 , B + m + 1 , cmpD );\r\n\tint pntA = 1;\r\n\tfor( int i = 1 ; i <= m ; i ++ ){\r\n\t\twhile( pntA <= n && A[pntA].att <= B[i].def ) pntA ++;\r\n\t\tif( pntA <= n ) to[n + B[i].id] = sufid[pntA];\r\n\t}\r\n\tsort( B + 1 , B + m + 1 , cmpA );\r\n\tsufmax[m + 1] = 0;\r\n\tfor( int i = m ; i >= 1 ; i -- ){\r\n\t\tif( B[i].def >= sufmax[i + 1] ) sufmax[i] = B[i].def,sufid[i] = B[i].id;\r\n\t\telse sufmax[i] = sufmax[i + 1],sufid[i] = sufid[i + 1];\r\n\t}\r\n\tsort( A + 1 , A + n + 1 , cmpD );\r\n\tint pntB = 1;\r\n\tfor( int i = 1 ; i <= n ; i ++ ){\r\n\t\twhile( pntB <= m && B[pntB].att <= A[i].def ) pntB ++;\r\n\t\tif( pntB <= m ) to[A[i].id] = n + sufid[pntB];\r\n\t}\r\n\tfor( int i = 1 ; i <= n + m ; i ++ ) if( to[i] ) nE[to[i]].emplace_back( i );\r\n\t// for( int i = 1 ; i <= n + m ; i ++ ) cerr << \"to\" << i << \" \" << to[i] << \"\\n\";\r\n\tfor( int i = 1 ; i <= n + m ; i ++ ) if( !rvis[i] ) dfs( i );\r\n\tprintf(\"%d %d %d\\n\",ans1,ans2,ans3);\r\n\tfor( int i = 1 ; i <= n + m ; i ++ ) to[i] = vis[i] = rvis[i] = 0,nE[i].clear();\r\n}\r\n\r\nsigned main(){\r\n\tint testcase; scanf(\"%d\",&testcase);\r\n\twhile( testcase -- ) solve();\r\n\treturn 0;\r\n}"
+}

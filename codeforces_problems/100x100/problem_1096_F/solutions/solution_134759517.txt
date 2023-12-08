@@ -1,0 +1,36 @@
+{
+    "id": 134759517,
+    "contestId": 1096,
+    "creationTimeSeconds": 1636462997,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1096,
+        "index": "F",
+        "name": "Inversion Expectation",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1096,
+        "members": [
+            {
+                "handle": "-2x9_21-"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1546007700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 11,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 8294400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long LL;\r\nconst int N = 2e5 + 5;\r\nconst LL mod = 998244353ll;\r\nint n, A[N], B[N], tmp[N], tn;\r\nint PreCnt1[N], PreNo[N];\r\nLL qpow(LL n, int p, LL mod = 998244353ll) {\r\n    LL ret = 1;\r\n    for (; p; p >>= 1) {\r\n        if (p & 1) ret = (ret * n) % mod;\r\n        n = (n * n) % mod;\r\n    }\r\n    return ret;\r\n}\r\nLL msort(int *A, int *tmp, int l, int r) {\r\n    if (l == r) return 0;\r\n    int mid = (l + r) >> 1; LL ret = 0;\r\n    ret += msort(A, tmp, l, mid); ret += msort(A, tmp, mid + 1, r);\r\n    int i = l, j = mid + 1, k = l;\r\n    while (i <= mid && j <= r) {\r\n        if (A[i] > A[j]) ret = (ret + (mid - i + 1)) % mod, tmp[k++] = A[j++];\r\n        else tmp[k++] = A[i++];\r\n    }\r\n    while (i <= mid) tmp[k++] = A[i++];\r\n    while (j <= r) tmp[k++] = A[j++];\r\n    while (k --> l) A[k] = tmp[k];\r\n\t// printf(\"l = %d , r = %d , ret = %lld\\n\", l, r, ret);\r\n    return ret;\r\n}\r\nLL fac[N], invfac[N];\r\nLL C(int n, int m) {return ((((fac[n] * invfac[n - m]) % mod) * invfac[m]) % mod);}\r\nint main() {\r\n    scanf(\"%d\", &n); \r\n    for (int i = 1; i <= n; i++) scanf(\"%d\", A + i);\r\n\r\n\tfac[0] = 1; for (int i = 1; i <= n; i++) fac[i] = (fac[i - 1] * i) % mod;\r\n\tinvfac[n] = qpow(fac[n], mod - 2); for (int i = n - 1; i >= 0; i--) invfac[i] = (invfac[i + 1] * (i + 1)) % mod;\r\n\r\n    LL Ans = 0;\r\n    tn = 0;\r\n    for (int i = 1; i <= n; i++) if (A[i] != -1) B[++tn] = A[i];\r\n    if (tn != 0) Ans = (msort(B, tmp, 1, tn) * fac[n - tn]) % mod;\r\n    if (tn == n) return 0 & printf(\"%lld\\n\", (Ans * invfac[n - tn]) % mod);\r\n\r\n    LL cnt1 = n - tn, tans = 1;\r\n    if (cnt1 == 1) tans = 0; else {\r\n        tans = (fac[cnt1] * C(cnt1, 2)) % mod;\r\n\t\ttans = (tans * qpow(2, mod - 2, mod)) % mod;\r\n    }\r\n    Ans = (Ans + tans) % mod;\r\n    if (cnt1 == 1) return 0 & printf(\"%lld\\n\", (Ans * invfac[cnt1]) % mod);\r\n\r\n    for (int i = 1; i <= n; i++) PreCnt1[i] = PreCnt1[i - 1] + (A[i] == -1);\r\n    for (int i = 1; i <= n; i++) if (A[i] != -1) PreNo[A[i]] = 1;\r\n    for (int i = 1; i <= n; i++) PreNo[i] = PreNo[i - 1] + (PreNo[i] ^ 1);\r\n\t// for (int i = 1; i <= n; i++) printf(\"%d%c\", PreCnt1[i], \" \\n\"[i == n]);\r\n\t// for (int i = 1; i <= n; i++) printf(\"%d%c\", PreNo[i], \" \\n\"[i == n]);\r\n\tfor (int i = 1; i <= n; i++) if (A[i] != -1) {\r\n\t\tAns = (Ans + (PreNo[n] - PreNo[A[i]]) * ((PreCnt1[i] * fac[cnt1 - 1]) % mod)) % mod;\r\n\t\tAns = (Ans + (PreNo[A[i]]) * (((PreCnt1[n] - PreCnt1[i]) * fac[cnt1 - 1]) % mod)) % mod;\r\n\t}\r\n\r\n\tprintf(\"%lld\\n\", (Ans * invfac[cnt1]) % mod);\r\n    return 0;\r\n}"
+}
