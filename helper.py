@@ -58,7 +58,12 @@ def delete_non_json(file_path):
   except Exception as e:
     print(f"Err file[{file_path}]: " + str(e))
     print("Deleting..")
-    deleter(file_path)
+    filename = os.path.basename(file_path)
+    root_directory = os.path.dirname(file_path)
+    if filename == "problem.txt" and not os.path.exists(file_path):
+        deleter(root_directory)
+    else:
+        deleter(file_path)
   return None
 
 def problem_getter():
