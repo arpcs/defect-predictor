@@ -1,0 +1,35 @@
+{
+    "id": 25082147,
+    "contestId": 89,
+    "creationTimeSeconds": 1488211293,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 89,
+        "index": "A",
+        "name": "Robbery",
+        "type": "PROGRAMMING",
+        "points": 500.0,
+        "rating": 1800,
+        "tags": [
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 89,
+        "members": [
+            {
+                "handle": "-1-"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1308236400
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 14,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 2150400,
+    "source": "//Author: Artem Romanov\n#include <bits/stdc++.h>\n//#define TASK \"file\"\n\n#define F first\n#define S second\n\nnamespace algo {\n    using namespace std;\n    typedef long double dbl;\n\n    const dbl PI = 3.141592653589793238462643383279502884L;\n    const dbl E = 2.718281828459045235360287471352662498L;\n    const dbl EPS = 1e-12L;\n\n    template<typename T1, typename T2>\n    T1 bin_pow(T1 a, T2 n) {\n        T1 r = 1;\n        while (n > 0) {\n            if (n & 1)\n                r *= a;\n            a *= a;\n            n /= 2;\n        }\n        return r;\n    }\n\n    template<typename T1, typename T2>\n    T1 bin_pow(T1 a, T2 n, const T1& m) {\n        if (m == 1)\n            return 0;\n        T1 r = 1;\n        while (n > 0) {\n            if (n & 1) {\n                r *= a;\n                r %= m;\n            }\n            a *= a;\n            a %= m;\n            n /= 2;\n        }\n        return r;\n    }\n\n    template<typename T>\n    T gcd(const T& a, const T& b) {\n        if (b == 0)\n            return abs(a);\n        return gcd(b, a % b);\n    }\n\n    template<typename T>\n    T gcd(const T& a, const T& b, T& x, T& y) {\n        if (b == 0) {\n            x = a < 0 ? -1 : 1;\n            y = 0;\n            return x * a;\n        }\n        T d = gcd(b, a % b, y, x);\n        y -= (a / b) * x;\n        return d;\n    }\n\n    template<typename T>\n    T lcm(const T& a, const T& b) {\n        return abs(a / gcd(a, b) * b);\n    }\n\n    template<typename T>\n    T mod_add(const T& a, const T& b, const T& m) {\n        if (a < m - b)\n            return a + b;\n        return a - (m - b);\n    }\n\n    template<typename T>\n    T mod_sub(const T& a, const T& b, const T& m) {\n        if (a < b)\n            return a + (m - b);\n        return a - b;\n    }\n\n    template<typename T>\n    T mod_mul(T a, T b, const T& m) {\n        if (b > a)\n            swap(a, b);\n        T r = 0;\n        while (b > 0) {\n            if (b & 1)\n                r = mod_add(r, a, m);\n            a = mod_add(a, a, m);\n            b /= 2;\n        }\n        return r;\n    }\n\n    template<typename T1, typename T2>\n    T1 mod_pow(T1 a, T2 n, const T1& m) {\n        if (m == 1)\n            return 0;\n        T1 r = 1;\n        while (n > 0) {\n            if (n & 1)\n                r = mod_mul(r, a, m);\n            a = mod_mul(a, a, m);\n            n /= 2;\n        }\n        return r;\n    }\n\n    template<typename T>\n    T mod_inv(const T& a, const T& m) {\n        T x, y;\n        T d = gcd(a, m, x, y);\n        if (d != 1)\n            return 0;\n        if (x < 0)\n            x += m;\n        return x;\n    }\n\n    struct Sieve {\n        int* lpf = nullptr;\n        int* phi = nullptr;\n        int size;\n        vector<int> primes;\n\n        Sieve(bool calcPhi = false, int n = 0xfffff) : size(n) {\n            lpf = new int[size + 1];\n            fill(lpf, lpf + size + 1, 0);\n            lpf[1] = 1;\n            if (calcPhi) {\n                phi = new int[size + 1];\n                phi[1] = 1;\n                for (int i = 2; i <= size; ++i) {\n                    if (lpf[i] == 0) {\n                        phi[i] = i - 1;\n                        lpf[i] = i;\n                        primes.push_back(i);\n                    }\n                    for (int j = 0, t; j < primes.size() && (t = i * primes[j]) <= size; ++j) {\n                        lpf[t] = primes[j];\n                        if (primes[j] == lpf[i]) {\n                            phi[t] = phi[i] * primes[j];\n                            break;\n                        }\n                        phi[t] = phi[i] * (primes[j] - 1);\n                    }\n                }\n            } else {\n                for (int i = 2; i <= size; ++i) {\n                    if (lpf[i] == 0) {\n                        lpf[i] = i;\n                        primes.push_back(i);\n                    }\n                    for (int j = 0, t; j < primes.size() && (t = i * primes[j]) <= size; ++j) {\n                        lpf[t] = primes[j];\n                        if (primes[j] == lpf[i])\n                            break;\n                    }\n                }\n            }\n        }\n\n        Sieve(int n) : Sieve(false, n) {}\n\n        ~Sieve() {\n            delete [] lpf;\n            lpf = nullptr;\n            delete [] phi;\n            phi = nullptr;\n        }\n    };\n\n    template<typename T>\n    T phi(T n) {\n        T r = n;\n        for (T i = 2; i * i <= n; ++i) {\n            if (n % i == 0) {\n                r -= r / i;\n                do {\n                    n /= i;\n                } while (n % i == 0);\n            }\n        }\n        if (n > 1)\n            r -= r / n;\n        return r;\n    }\n}\n\nusing namespace std;\nusing namespace algo;\n\nnamespace task {\n    int64_t n, m, k, s;\n    int64_t a[10000];\n\n    int main() {\n        cin >> n >> m >> k;\n        for (int i = 0; i < n; ++i) {\n            cin >> a[i];\n        }\n        if (n % 2 == 0) {\n            cout << 0 << '\\n';\n        } else {\n            cout << min(min(a[0], a[n - 1]), k * (m / ((n + 1) / 2))) << '\\n';\n        }\n        return 0;\n    }\n}\n\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(nullptr);\n    cout.precision(11);\n    cout.setf(ios::fixed);\n#ifdef _DEBUG\n    freopen(\"input.txt\", \"r\", stdin);\n    freopen(\"output.txt\", \"w\", stdout);\n#elif defined(TASK)\n    freopen(TASK\".in\", \"r\", stdin);\n    freopen(TASK\".out\", \"w\", stdout);\n#endif\n    return task::main();\n}\n/* Mon Feb 27 2017 18:48:25 GMT+0300 (RTZ 2 (\u0437\u0438\u043c\u0430)) */\n\n/* Mon Feb 27 2017 19:01:28 GMT+0300 (RTZ 2 (\u0437\u0438\u043c\u0430)) */\n"
+}

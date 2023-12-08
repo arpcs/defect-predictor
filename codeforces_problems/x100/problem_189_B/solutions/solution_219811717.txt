@@ -1,0 +1,36 @@
+{
+    "id": 219811717,
+    "contestId": 189,
+    "creationTimeSeconds": 1692631978,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 189,
+        "index": "B",
+        "name": "Counting Rhombi",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 1300,
+        "tags": [
+            "brute force",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 189,
+        "members": [
+            {
+                "handle": "liagol"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1336663800
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 26,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 3993600,
+    "source": "#include <iostream>\r\n#include <algorithm>\r\n#include <string.h>\r\n#include <queue>\r\n#include <math.h>\r\n#include <deque>\r\n\r\nusing namespace std;\r\n\r\nclass Node\r\n{\r\npublic:\r\n    int64_t diff;\r\n    int c = 0;\r\n    int len = 0;\r\n    int64_t ans = 0;\r\n    Node *left = nullptr;\r\n    Node *right = nullptr;\r\n};\r\n\r\ninline int64_t getRes(int64_t len)\r\n{\r\n    return (len) * (len);\r\n}\r\n\r\ninline void calc(Node *node)\r\n{\r\n   int add = (node->len)/(node->c+1);\r\n   int re =(node->len)%(node->c+1);\r\n   node->ans = re * getRes(add+1) + (node->c+1-re) * getRes(add); //+ node->c;\r\n\r\n   //cout << \"len=\" << node->len << \", ans=\" << node->ans << \"\\n\";\r\n   if (node->ans == node->len)\r\n   {\r\n       node->diff = 0;\r\n       return;\r\n   }\r\n\r\n   int neadd = (node->len)/(node->c+2);\r\n   int nere = (node->len)%(node->c+2);\r\n   int64_t neans = nere * getRes(neadd+1) + (node->c+2-nere) * getRes(neadd); //+ node->c + 1;\r\n   node->diff = node->ans - neans;\r\n}\r\n\r\ninline int getPos(Node *cur, int cle, int cri)\r\n{\r\n    if (cle == cri)\r\n    {\r\n        return cle;\r\n    }\r\n\r\n    int c = (cle+cri)/2;\r\n\r\n    if (cur->left != nullptr && cur->right != nullptr)\r\n    {\r\n        if (cur->left->diff > cur->right->diff)\r\n        {\r\n            return getPos(cur->left, cle, c);\r\n        }\r\n        else\r\n        {\r\n            return getPos(cur->right, c+1, cri);\r\n        }\r\n    }\r\n\r\n    if (cur->left != nullptr)\r\n    {\r\n        return getPos(cur->left, cle, c);\r\n    }\r\n\r\n    return getPos(cur->right, c+1, cri);\r\n}\r\n\r\ninline int64_t getAns(Node *cur, int le, int ri, int cle, int cri)\r\n{\r\n    if (le > ri || cur == nullptr)\r\n    {\r\n        return 0;\r\n    }\r\n\r\n    if (cle == le && cri == ri)\r\n    {\r\n        return cur->ans;\r\n    }\r\n\r\n    int c = (cle+cri)/2;\r\n\r\n    return getAns(cur->left, le, min(c, ri), cle, c) +\r\n               getAns(cur->right, max(c+1, le), ri, c+1, cri);\r\n}\r\n\r\ninline void setLen(Node **cur, int pos, int64_t res, int cle, int cri)\r\n{\r\n    //cout << \"pos=\" << pos << \", cle=\" << cle << \", cri=\" << cri << \"\\n\";\r\n\r\n    if (*cur == nullptr)\r\n    {\r\n        *cur = new Node();\r\n    }\r\n\r\n    if (cle == cri && pos == cle)\r\n    {\r\n        (*cur)->len = res;\r\n        (*cur)->c = 0;\r\n        calc(*cur);\r\n        return;\r\n    }\r\n\r\n    int c = (cle+cri)/2;\r\n\r\n    if (pos > c)\r\n    {\r\n        setLen(&((*cur)->right), pos, res, c+1, cri);\r\n    }\r\n    else\r\n    {\r\n        setLen(&((*cur)->left), pos, res, cle, c);\r\n    }\r\n\r\n    //(*cur)->ans = max(res, (*cur)->ans);\r\n    (*cur)->diff = 0;\r\n    (*cur)->ans = 0;\r\n    if (((*cur)->left) != nullptr)\r\n    {\r\n        (*cur)->diff = max((*cur)->diff,((*cur)->left)->diff);\r\n        (*cur)->ans += ((*cur)->left)->ans;\r\n    }\r\n\r\n    if (((*cur)->right) != nullptr)\r\n    {\r\n        (*cur)->diff = max((*cur)->diff, ((*cur)->right)->diff);\r\n        (*cur)->ans += ((*cur)->right)->ans;\r\n    }\r\n\r\n    //cout << \"pos=\" << pos << \", cle=\" << cle << \", cri=\" << cri << \", ans=\" << (*cur)->ans << \"\\n\";\r\n}\r\n\r\ninline void incC(Node **cur, int pos, int cle, int cri)\r\n{\r\n    //cout << \"pos=\" << pos << \", cle=\" << cle << \", cri=\" << cri << \"\\n\";\r\n    if (*cur == nullptr)\r\n    {\r\n        *cur = new Node();\r\n    }\r\n\r\n    if (cle == cri && pos == cle)\r\n    {\r\n        (*cur)->c++;\r\n        calc(*cur);\r\n        return;\r\n    }\r\n\r\n    int c = (cle+cri)/2;\r\n\r\n    if (pos > c)\r\n    {\r\n        incC(&((*cur)->right), pos, c+1, cri);\r\n    }\r\n    else\r\n    {\r\n        incC(&((*cur)->left), pos, cle, c);\r\n    }\r\n\r\n    //(*cur)->ans = max(res, (*cur)->ans);\r\n    (*cur)->diff = 0;\r\n    (*cur)->ans = 0;\r\n    if (((*cur)->left) != nullptr)\r\n    {\r\n        (*cur)->diff = max((*cur)->diff,((*cur)->left)->diff);\r\n        (*cur)->ans += ((*cur)->left)->ans;\r\n    }\r\n\r\n    if (((*cur)->right) != nullptr)\r\n    {\r\n        (*cur)->diff = max((*cur)->diff, ((*cur)->right)->diff);\r\n        (*cur)->ans += ((*cur)->right)->ans;\r\n    }\r\n}\r\n\r\nvoid clearTree(Node *cur, int cle, int cri)\r\n{\r\n    if (cle == cri)\r\n    {\r\n        delete cur;\r\n    }\r\n\r\n    int c = (cle+cri)/2;\r\n\r\n    if (cur->left != nullptr)\r\n    {\r\n        clearTree(cur->left, cle, c);\r\n    }\r\n\r\n    if (cur->right != nullptr)\r\n    {\r\n        clearTree(cur->right, c+1, cri);\r\n    }\r\n}\r\n\r\nint64_t nod(int64_t a, int64_t b)\r\n{\r\n    while (b)\r\n    {\r\n        if (a%b == 0)\r\n        {\r\n            return b;\r\n        }\r\n\r\n        int64_t te = a;\r\n        a = b;\r\n        b = te%a;\r\n    }\r\n\r\n    return 1;\r\n}\r\n\r\nint f[1000][1000];\r\nint n;\r\n\r\nint rvrs(int a)\r\n{\r\n    int res = 0;\r\n\r\n    for (int i = 0; i < 8; ++i)\r\n    {\r\n        res <<= 1;\r\n        if (a & (1 << i))\r\n        {\r\n            res++;\r\n        }\r\n    }\r\n\r\n    return res;\r\n}\r\n\r\nvoid solve()\r\n{\r\n    int w, h;\r\n    cin >> w >> h;\r\n\r\n    int64_t ans = 0;\r\n\r\n    for (int i = 0; i <= w-2; ++i)\r\n    {\r\n        ans += (w - i) / 2;\r\n    }\r\n\r\n    int64_t ans1 = 0;\r\n\r\n    for (int j = 0; j <= h-2; ++j)\r\n    {\r\n        ans1 += (h-j) / 2;\r\n    }\r\n\r\n    cout << ans * ans1 << \"\\n\";\r\n}\r\n\r\nint main()\r\n{\r\n    //iostream::sync_with_stdio(0);\r\n    //freopen(\"input.txt\", \"r\", stdin);\r\n    //freopen(\"output.txt\", \"w\", stdout);\r\n\r\n    int t = 1;\r\n    //cin >> t;\r\n\r\n    //precalc();\r\n\r\n    //uint64_t res = ((161025000u * 1.0 - 159000000u) / (162025000u - 159000000u) * (103 - 104)) + 100;\r\n\r\n   // cout << \"res=\" << res << \"\\n\";\r\n\r\n    for (int i = 0; i < t; ++i)\r\n    {\r\n        solve();\r\n    }\r\n\r\n    return 0;\r\n}\r\n\r\n"
+}

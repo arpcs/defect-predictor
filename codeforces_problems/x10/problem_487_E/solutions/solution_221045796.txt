@@ -1,0 +1,38 @@
+{
+    "id": 221045796,
+    "contestId": 487,
+    "creationTimeSeconds": 1693374672,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 487,
+        "index": "E",
+        "name": "Tourists",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 487,
+        "members": [
+            {
+                "handle": "rougan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1416590400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "// LUOGU_RID: 123299478\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int N = 200010;\r\nconst int INF = INT_MAX;\r\nvector<int> G1[N], G2[N]; \r\nmultiset<int> S[N];\r\nint minn[N*4];\r\nint dep[N], f[N], siz[N], id[N], cnt, h[N], top[N], loc[N];\r\nint pos, dfn[N], low[N], topp, st[N];\r\nint n, m, q, dis[N], ext;\r\nvoid tarjan(int x) {\r\n\tdfn[x]=low[x]=++pos;\r\n\tst[++topp]=x;\r\n\tfor(auto v : G1[x]){\r\n\t\tif(!dfn[v]) {\r\n\t\t\ttarjan(v);\r\n\t\t\tlow[x]=min(low[x],low[v]);\r\n\t\t\tif(low[v]>=dfn[x]){\r\n\t\t\t\tint j;\r\n\t\t\t\text++;\r\n\t\t\t\tG2[ext].push_back(x);\r\n\t\t\t\tG2[x].push_back(ext);\r\n\t\t\t\tdo{\r\n\t\t\t\t\tj=st[topp--];\r\n\t\t\t\t\tG2[ext].push_back(j);\r\n\t\t\t\t\tG2[j].push_back(ext);\r\n\t\t\t\t}while(j != v);\r\n\t\t\t}\r\n\t\t}\r\n\t\telse \r\n\t\t\tlow[x] = min(low[x], dfn[v]);\r\n\t}\r\n}\r\nvoid dfs1(int x,int fa){\r\n\tf[x]=fa; dep[x]=dep[fa]+1; siz[x]=1;\r\n\tfor(auto v : G2[x]){\r\n\t\tif(v==fa) continue;\r\n\t\tdfs1(v,x);\r\n\t\tsiz[x]+=siz[v];\r\n\t\tif(siz[v]>siz[h[x]]) h[x]=v;\r\n\t}\r\n}\r\nvoid dfs2(int x,int fa){\r\n\ttop[x]=fa;\r\n\tid[x]=++cnt; loc[cnt]=x;\r\n\tif(h[x]) dfs2(h[x],fa);\r\n\tfor(auto v : G2[x]){\r\n\t\tif(id[v]) continue;\r\n\t\tdfs2(v,v);\r\n\t}\r\n}\r\nvoid build(int o,int l,int r){\r\n\tif(l==r){\r\n\t\tminn[o]=dis[loc[l]];\r\n\t\treturn ;\r\n\t}\r\n\tint mid=l+r>>1;\r\n\tbuild_tree(o<<1,l,mid);\r\n\tbuild_tree(o<<1|1,mid+1,r);\r\n\tminn[o]=min(minn[o<<1],minn[o<<1|1]);\r\n}\r\nint query(int o,int l,int r,int x,int y){\r\n\tif(x<=l&&r<=y)\r\n\t\treturn minn[o];\r\n\tint mid=l+r>>1,ret=INF;\r\n\tif(x<=mid)ret=min(ret,query(o<<1,l,mid,x,y));\r\n\tif(mid<y)ret=min(ret,query(o<<1|1,mid+1,r,x,y));\r\n\treturn ret;\r\n}\r\nint qrys(int x, int y) {\r\n\tint ret=INF;\r\n\twhile(top[x]!=top[y]){\r\n\t\tif(dep[top[x]]<dep[top[y]])\r\n\t\t\tswap(x,y);\r\n\t\tret=min(ret,query(1,1,ext,id[top[x]],id[x]));\r\n\t\tx=f[top[x]];\r\n\t}\r\n\tif(dep[x]>dep[y])\r\n\t\tswap(x,y);\r\n\tret=min(ret,query(1,1,ext,id[x],id[y]));\r\n\tif(x>n)\r\n\t\tret=min(ret,dis[f[x]]);\r\n\treturn ret;\r\n}\r\nvoid update(int o, int l, int r, int x, int k) {\r\n\tif(l == r) {\r\n\t\tminn[o] = k; return;\r\n\t}\r\n\tint mid = l + r >> 1;\r\n\tif(x <= mid) update(o<<1, l, mid, x, k);\r\n\telse update(o<<1|1, mid+1, r, x, k);\r\n\tminn[o] = min(minn[o<<1], minn[o<<1|1]);\r\n}\r\nvoid updates(int x, int y) {\r\n\tupdate(1, 1, ext, id[x], y);\r\n\tif(f[x]) {\r\n\t\tint u = f[x];\r\n        auto it = S[u].lower_bound(dis[u]);\r\n        S[u].erase(it);\r\n        S[u].insert(y);\r\n        if(dis[u] != *S[u].begin()){\r\n            dis[u] = * S[u].begin();\r\n            update(1,1, ext, id[u], dis[u]);\r\n        }\t\t\t\t\r\n\t}\r\n\tdis[x] = y;\r\n}\r\nint main() {\r\n    cin >> n >> m >> q;\r\n    ext = n;\r\n    for(int i = 1; i <= n; i++)\r\n        cin >> dis[i];\r\n    for(int i = 1; i <= m; i++) {\r\n        int a, b;\r\n        cin >> a >> b;\r\n        G1[a].push_back(b);\r\n        G1[b].push_back(a);\r\n    } \r\n\ttarjan(1);\r\n\tdfs1(1, 0);\r\n\tdfs2(1, 1);\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tif(f[i])\r\n\t\t\tS[f[i]].insert(dis[i]);\r\n\tfor(int i = n + 1; i <= ext; i++)\r\n\t\tdis[i] = *S[i].begin();\r\n\tbuild(1, 1, ext);\r\n\twhile(q--) {\r\n\t\tchar c;\r\n\t\tint x, y;\r\n\t\tcin >> c;\r\n\t\tif(c == 'A') {\r\n\t\t\tcin >> x >> y;\r\n\t\t\tcout << qrys(x, y) << endl;\t\t\t\r\n\t\t}\r\n\t\telse {\r\n\t\t\tcin >> x >> y;\r\n\t\t\tupdates(x, y);\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}"
+}

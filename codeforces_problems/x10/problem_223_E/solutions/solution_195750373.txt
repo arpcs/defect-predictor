@@ -1,0 +1,37 @@
+{
+    "id": 195750373,
+    "contestId": 223,
+    "creationTimeSeconds": 1677812773,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 223,
+        "index": "E",
+        "name": "Planar Graph",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "flows",
+            "geometry",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 223,
+        "members": [
+            {
+                "handle": "leiyuanze"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1347809400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 295,
+    "memoryConsumedBytes": 154521600,
+    "source": "// LUOGU_RID: 103490346\n#include <bits/stdc++.h>\r\n#define eb emplace_back\r\nusing namespace std;\r\n\r\ntemplate<typename Tp>\r\nvoid read(Tp &x) {\r\n    x = 0; char ch = getchar(); int f = 0;\r\n    for(; !isdigit(ch); f |= (ch == '-'), ch = getchar());\r\n    for(; isdigit(ch); x = (x<<3)+(x<<1)+(ch^48), ch = getchar());\r\n    if (f) x = ~x + 1;\r\n}\r\n\r\ntypedef double db;\r\ntypedef long long LL;\r\nconst db eps = 1e-10;\r\nconst int N = 1200005;\r\nint n, m, b[N];\r\n\r\nstruct Vector{\r\n\tint x, y;\r\n\tVector(int xx = 0, int yy = 0){x = xx, y = yy;}\r\n\tVector operator - (const Vector &B){return Vector(x - B.x, y - B.y);}\r\n\tLL operator * (const Vector &B){return ((LL)x * B.y - (LL)y * B.x);}\r\n}a[N];\r\n\r\nint tot = 1, nxt[N], rt, cov[N], sz[N], val[N], fa[N], bz[N], eg[N][2];\r\nvector<int> G[N];\r\n\r\nstruct edge {\r\n    int q, p, id; db k;\r\n    bool operator < (const edge &b) const {return fabs(k - b.k) < eps ? (p < b.p) : (k < b.k);}\r\n}e[N << 1];\r\nvector<edge> E[N];\r\n\r\nvoid add(int u, int v) {\r\n    ++tot, e[tot] = edge{u, v, tot, atan2(a[v].y - a[u].y, a[v].x - a[u].x)}, E[u].eb(e[tot]);\r\n}\r\nvoid build() {\r\n    for(int i = 1; i <= n; i++) sort(E[i].begin(), E[i].end());\r\n    for(int i = 2; i <= tot; i++) {\r\n        auto it = lower_bound(E[e[i].p].begin(), E[e[i].p].end(), e[i ^ 1]);\r\n        if (it == E[e[i].p].begin()) it = E[e[i].p].end();\r\n        nxt[i] = (*prev(it)).id;\r\n    }\r\n    int cnt = 0;\r\n    for(int i = 2; i <= tot; i++) {\r\n        if (cov[i]) continue;\r\n        cov[i] = ++cnt, val[cnt] = 1; LL S = 0;\r\n        for(int j = nxt[i]; j != i; cov[j] = cnt, ++val[cnt], j = nxt[j])\r\n            S += (a[e[j].q] - a[e[i].q]) * (a[e[j].p] - a[e[i].q]);\r\n        if (S <= 0) rt = cnt, fa[rt] = rt;\r\n    }\r\n    for(int i = 2; i <= tot; i++) G[cov[i]].eb(i);\r\n}\r\n\r\nint Q[N];\r\nvoid bfs() {\r\n    int head = 0, tail = 1; Q[1] = rt;\r\n    while (head < tail) {\r\n        int u = Q[++head]; sz[u] = 1;\r\n        for(auto k : G[u]) {\r\n            int v = cov[k ^ 1]; if (fa[v]) continue;\r\n            fa[v] = u, bz[k] = bz[k ^ 1] = 1, Q[++tail] = v;\r\n        }\r\n    }\r\n    for(int i = tail, u; i > 1; i--) u = Q[i], sz[fa[u]] += sz[u], val[fa[u]] += val[u];\r\n}\r\n\r\nint main() {\r\n    read(n), read(m);\r\n    for(int i = 1, x, y; i <= m; i++) read(eg[i][0]), read(eg[i][1]);\r\n    for(int i = 1, x, y; i <= n; i++) read(x), read(y), a[i] = Vector(x, y);\r\n    for(int i = 1; i <= m; i++) add(eg[i][0], eg[i][1]), add(eg[i][1], eg[i][0]);\r\n    build(), bfs();\r\n    int qq; read(qq);\r\n    for(; qq; qq--) {\r\n        int K; read(K);\r\n        for(int j = 1, x; j <= K; j++) read(b[j]);\r\n        int vE = 0, vF = 0;\r\n        for(int j = 1; j <= K; j++) {\r\n            int q = b[j], p = b[j % K + 1];\r\n            auto it = lower_bound(E[q].begin(), E[q].end(), edge{q, p, 0, atan2(a[p].y - a[q].y, a[p].x - a[q].x)});\r\n            int id = (*it).id; if (!bz[id]) continue;\r\n            if (fa[cov[id]] == cov[id ^ 1]) vE += val[cov[id]], vF += sz[cov[id]];\r\n            else vE -= val[cov[id ^ 1]], vF -= sz[cov[id ^ 1]];\r\n        }\r\n        vE = (abs(vE) + K) >> 1, vF = abs(vF) + 1, printf(\"%d\\n\", vE + 2 - vF);\r\n    }\r\n}"
+}

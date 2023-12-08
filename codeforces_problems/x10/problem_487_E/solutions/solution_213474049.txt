@@ -1,0 +1,38 @@
+{
+    "id": 213474049,
+    "contestId": 487,
+    "creationTimeSeconds": 1689151517,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 487,
+        "index": "E",
+        "name": "Tourists",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 487,
+        "members": [
+            {
+                "handle": "SamuraiRat"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1416590400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 561,
+    "memoryConsumedBytes": 60108800,
+    "source": "// LUOGU_RID: 115109360\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\nconst int N=2e5+5;\r\nconst int inf=0x3f3f3f3f;\r\n\r\nint n,m,q,num,top,dcc;\r\nint w[N],a[N],dfn[N],low[N],stk[N],fa[N],hson[N],siz[N],nid[N],tp[N],depth[N],dat[4*N];\r\nmultiset<int> s[N];\r\n\r\nstruct gragh\r\n{\r\n\tint idx;\r\n\tint head[N];\r\n\tstruct edge\r\n\t{\r\n\t\tint fr,to,ne;\r\n\t}e[2*N];\r\n\t\r\n\tvoid add(int x,int y)\r\n\t{\r\n\t\te[++idx].fr=x;\r\n\t\te[idx].to=y;\r\n\t\te[idx].ne=head[x];\r\n\t\thead[x]=idx;\r\n\t}\r\n\t\r\n}g[2];\r\n\r\nvoid tarjan(int u)\r\n{\r\n\tdfn[u]=low[u]=++num;\r\n\tstk[++top]=u;\r\n\tfor(int i=g[0].head[u];i;i=g[0].e[i].ne)\r\n\t{\r\n\t\tint v=g[0].e[i].to;\r\n\t\tif(!dfn[v])\r\n\t\t{\r\n\t\t\ttarjan(v);\r\n\t\t\tlow[u]=min(low[u],low[v]);\r\n\t\t\tif(dfn[u]<=low[v])\r\n\t\t\t{\r\n\t\t\t\tdcc++;\r\n\t\t\t\tdo{g[1].add(dcc,stk[top]),g[1].add(stk[top],dcc);}while(v!=stk[top--]);\r\n\t\t\t\tg[1].add(dcc,u),g[1].add(u,dcc);\r\n\t\t\t}\r\n\t\t}\r\n\t\telse low[u]=min(low[u],dfn[v]);\r\n\t}\r\n}\r\n\r\nvoid dfs1(int u)\r\n{\r\n\tdepth[u]=depth[fa[u]]+1,siz[u]=1;\r\n\tfor(int i=g[1].head[u];i;i=g[1].e[i].ne)\r\n\t{\r\n\t\tint v=g[1].e[i].to;\r\n\t\t//cout<<u<<\"   ---  \"<<v<<endl;\r\n\t\tif(v!=fa[u])\r\n\t\t{\r\n\t\t\tfa[v]=u;\r\n\t\t\tdfs1(v);\r\n\t\t\tsiz[u]+=siz[v];\r\n\t\t\tif(siz[v]>siz[hson[u]])hson[u]=v;\r\n\t\t}\r\n\t}\r\n}\r\n\r\nvoid dfs2(int u,int fath)\r\n{\r\n\t//cout<<u<<\"   --  \"<<fath<<endl;\r\n\tnid[u]=++num,tp[u]=fath;\r\n\tif(hson[u])dfs2(hson[u],fath);\r\n\tfor(int i=g[1].head[u];i;i=g[1].e[i].ne)\r\n\t{\r\n\t\tint v=g[1].e[i].to;\r\n\t\tif(v!=fa[u]&&v!=hson[u])dfs2(v,v);\r\n\t}\r\n}\r\n\r\nvoid build(int p,int lt,int rt)\r\n{\r\n\tif(lt==rt)return dat[p]=a[lt],void();\r\n\tint mid=lt+rt>>1;\r\n\tbuild(p*2,lt,mid),build(p*2+1,mid+1,rt);\r\n\tdat[p]=min(dat[p*2],dat[p*2+1]); \r\n}\r\n\r\nvoid update(int p,int lt,int rt,int x,int v)\r\n{\r\n\tif(lt==rt)return dat[p]=v,void();\r\n\tint mid=lt+rt>>1;\r\n\tif(x<=mid)update(p*2,lt,mid,x,v);\r\n\telse update(p*2+1,mid+1,rt,x,v);\r\n\tdat[p]=min(dat[p*2],dat[p*2+1]);\r\n}\r\n\r\nint query(int p,int lt,int rt,int l,int r)\r\n{\r\n\tif(l<=lt&&rt<=r)return dat[p];\r\n\tint mid=lt+rt>>1,ret=inf;\r\n\tif(l<=mid)ret=min(ret,query(p*2,lt,mid,l,r));\r\n\tif(r>mid)ret=min(ret,query(p*2+1,mid+1,rt,l,r));\r\n\treturn ret;\r\n}\r\n\r\nint query_path(int x,int y)\r\n{\r\n\tint ret=inf;\r\n\twhile(tp[x]!=tp[y])\r\n\t{\r\n\t\tif(depth[tp[x]]<depth[tp[y]])swap(x,y);\r\n\t\tret=min(ret,query(1,1,num,nid[tp[x]],nid[x]));\r\n\t\tx=fa[tp[x]];\r\n\t}\r\n\tif(depth[x]>depth[y])swap(x,y);\r\n\tret=min(ret,query(1,1,num,nid[x],nid[y]));\r\n\tif(x>n)ret=min(ret,w[fa[x]]);\r\n\treturn ret;\r\n}\r\n\r\nint main()\r\n{\r\n\tscanf(\"%d%d%d\",&n,&m,&q);\r\n\tdcc=n;\r\n\tfor(int i=1;i<=n;i++)scanf(\"%d\",&w[i]);\r\n\tfor(int i=1;i<=m;i++)\r\n\t{\r\n\t\tint x,y;\r\n\t\tscanf(\"%d%d\",&x,&y);\r\n\t\tg[0].add(x,y),g[0].add(y,x);\r\n\t}\r\n\ttarjan(1);\r\n\tnum=0;\r\n\tdfs1(1);\r\n\tdfs2(1,1);\r\n\t//puts(\"qwq\");\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tif(fa[i])\r\n\t\t\ts[fa[i]].insert(w[i]);\r\n\tfor(int i=n+1;i<=num;i++)w[i]=*s[i].begin();\r\n\tfor(int i=1;i<=num;i++)a[nid[i]]=w[i];\r\n\tbuild(1,1,num);\r\n\twhile(q--)\r\n\t{\r\n\t\tint x,y;\r\n\t\tchar t[5];\r\n\t\tscanf(\"%s%d%d\",t,&x,&y);\r\n\t\tif(t[0]=='C')\r\n\t\t{\r\n\t\t\tupdate(1,1,num,nid[x],y);\r\n\t\t\t//cout<<\"   ---   \"<<dat[1]<<endl;\r\n\t\t\tif(fa[x])\r\n\t\t\t{\r\n\t\t\t\tint u=fa[x];\r\n\t\t\t\ts[u].erase(s[u].lower_bound(w[x]));\r\n\t\t\t\ts[u].insert(y);\r\n\t\t\t\tif(w[u]!=*s[u].begin())update(1,1,num,nid[u],w[u]=*s[u].begin());\r\n\t\t\t}\r\n\t\t\tw[x]=y;\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tcout<<query_path(x,y);\r\n\t\t\tputchar('\\n');\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}"
+}

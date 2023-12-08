@@ -1,0 +1,37 @@
+{
+    "id": 183498743,
+    "contestId": 223,
+    "creationTimeSeconds": 1669908580,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 223,
+        "index": "E",
+        "name": "Planar Graph",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "flows",
+            "geometry",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 223,
+        "members": [
+            {
+                "handle": "BlueDiamond"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1347809400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 15667200,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\n\r\nstruct T\r\n{\r\n  int vertex;\r\n  int cnt;\r\n  long double ang;\r\n};\r\n\r\nbool cmp_by_ang(T a, T b)\r\n{\r\n  return a.ang < b.ang;\r\n}\r\n\r\nconst int N = (int) 1e5 + 7;\r\nint n;\r\nint m;\r\nint x[N];\r\nint y[N];\r\nint sub[N];\r\nint lpi;\r\nvector<int> g[N];\r\nvector<T> vecs[N];\r\nmap<int, int> mp[N];\r\nmap<int, int> h[N];\r\n\r\nvoid dfs(int a)\r\n{\r\n  sub[a] = 1;\r\n  for (auto &b : g[a])\r\n  {\r\n    vecs[a].push_back({b, 0, 0});\r\n  }\r\n  for (auto &b : g[a])\r\n  {\r\n    if (sub[b])\r\n    {\r\n      return;\r\n    }\r\n    dfs(b);\r\n    h[a][b] = -sub[b];\r\n    h[b][a] = +sub[b];\r\n    sub[a] += sub[b];\r\n  }\r\n}\r\n\r\nll getar(int i, int j)\r\n{\r\n  return 1LL * (x[i] - x[j]) * (y[i] + y[j]);\r\n}\r\n\r\nll getar(vector<int> v)\r\n{\r\n  ll sol = 0;\r\n  for (int i = 0; i < (int) v.size(); i++)\r\n  {\r\n    sol += getar(v[i], v[(i + 1) % (int) v.size()]);\r\n  }\r\n  return sol;\r\n}\r\n\r\nint main()\r\n{\r\n#ifdef ONPC\r\n  freopen (\"input.txt\", \"r\", stdin);\r\n#endif // ONPC\r\n\r\n#ifndef ONPC\r\n  ios::sync_with_stdio(0); cin.tie(0); cout.tie(0);\r\n#endif // ONPC\r\n\r\n  cin >> n >> m;\r\n  for (int i = 1; i <= m; i++)\r\n  {\r\n    int a, b;\r\n    cin >> a >> b;\r\n    assert(1 <= a && a <= n);\r\n    assert(1 <= b && b <= n);\r\n    g[a].push_back(b);\r\n    g[b].push_back(a);\r\n  }\r\n  lpi = 1;\r\n  for (int i = 1; i <= n; i++)\r\n  {\r\n    cin >> x[i] >> y[i];\r\n    if (x[i] < x[lpi])\r\n    {\r\n      lpi = i;\r\n    }\r\n  }\r\n  x[0] = x[lpi] - 1;\r\n  y[0] = y[lpi];\r\n  g[0].push_back(lpi);\r\n  g[lpi].push_back(0);\r\n  dfs(0);\r\n  for (int i = 1; i <= n; i++)\r\n  {\r\n    for (auto &value : vecs[i])\r\n    {\r\n      int xx = x[value.vertex] - x[i];\r\n      int yy = y[value.vertex] - y[i];\r\n      value.ang = atan2((long double) (yy), (long double) (xx));\r\n    }\r\n    sort(vecs[i].begin(), vecs[i].end(), cmp_by_ang);\r\n    for (int j = 0; j < (int) vecs[i].size(); j++)\r\n    {\r\n      mp[i][vecs[i][j].vertex] = j;\r\n      vecs[i][j].cnt = h[i][vecs[i][j].vertex];\r\n    }\r\n  }\r\n  int q;\r\n  cin >> q;\r\n  for (int iq = 1; iq <= q; iq++)\r\n  {\r\n    int k;\r\n    cin >> k;\r\n    vector<int> verts(k);\r\n    for (auto &v : verts)\r\n    {\r\n      cin >> v;\r\n      assert(1 <= v && v <= n);\r\n    }\r\n    if (getar(verts) > 0)\r\n    {\r\n      reverse(verts.begin(), verts.end());\r\n    }\r\n    assert(getar(verts) < 0);\r\n    int sum = 0;\r\n    for (int it = 0; it < k; it++)\r\n    {\r\n      int x = verts[it];\r\n      int y = verts[(it + 1) % k];\r\n      int z = verts[(it + k - 1) % k];\r\n      ///cout << \" = \" << x << \" and \" << y << \"\\n\";\r\n      assert(mp[x].count(y));\r\n      assert(mp[x].count(z));\r\n      int p1 = mp[x][y];\r\n      int p2 = mp[x][z];\r\n      while (1)\r\n      {\r\n        assert(0 <= p1 && p1 < (int) vecs[x].size());\r\n        sum += vecs[x][p1].cnt;\r\n       /// cout << x << \" and \" << vecs[x][p1].vertex << \" \" << vecs[x][p1].cnt << \"\\n\";\r\n        if (p1 == p2)\r\n        {\r\n          break;\r\n        }\r\n        p1 = (p1 + 1) % (int) vecs[x].size();\r\n      }\r\n    }\r\n    cout << sum << \"\\n\";\r\n  }\r\n\r\n\r\n  return 0;\r\n}\r\n"
+}

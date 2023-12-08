@@ -1,0 +1,36 @@
+{
+    "id": 227462021,
+    "contestId": 873,
+    "creationTimeSeconds": 1696891151,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 873,
+        "index": "F",
+        "name": "Forbidden Indices",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "dsu",
+            "string suffix structures",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 873,
+        "members": [
+            {
+                "handle": "abdo.test"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1507817100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\n\r\n#define allam  ios_base::sync_with_stdio(false);cin.tie(nullptr);\r\nusing namespace std;\r\ntypedef long long ll;\r\nstring s;\r\nvector<int> p, c,lcp;\r\nvoid count_sort(){\r\n    int sz=s.size();\r\n    vector<int>cnt(sz);\r\n    for(auto &i:c)cnt[i]++;\r\n    vector<int>nw_p(sz),pos(sz);\r\n    pos[0]=0;\r\n    for (int i = 1; i < sz; ++i)pos[i]=pos[i-1]+cnt[i-1];\r\n    for(auto &i:p)nw_p[pos[c[i]]]=i,pos[c[i]]++;\r\n    p=nw_p;\r\n}\r\nvoid build(){\r\n    int sz = s.size();\r\n    p.assign(sz,0),c.assign(sz,0),lcp.assign(sz,0);\r\n    {\r\n        vector<pair<char, int>> a(sz);\r\n        for (int i = 0; i < sz; ++i)a[i] = {s[i], i};\r\n        sort(a.begin(), a.end());\r\n        for (int i = 0; i < sz; ++i)p[i] = a[i].second;\r\n        c[p[0]] = 0;\r\n        for (int i = 1; i < sz; ++i)c[p[i]] = c[p[i - 1]] + (a[i].first != a[i - 1].first);\r\n    }\r\n    int k = 0;\r\n    auto nw_c=c;\r\n    while ((1 << k) < sz) {\r\n        for (int i = 0; i < sz; ++i) p[i]=(p[i]-(1<<k)+sz)%sz;\r\n        count_sort();\r\n        nw_c[p[0]] = 0;\r\n        for (int i = 1; i < sz; ++i){\r\n            nw_c[p[i]] = nw_c[p[i - 1]] + ((c[p[i]]!= c[p[i-1]])||c[(p[i]+(1<<k)%sz)]!=c[(p[i-1]+(1<<k)%sz)]);\r\n        }\r\n        c=nw_c,k++;\r\n    }\r\n    k=0;\r\n    for (int i = 0; i < sz-1; ++i) {\r\n        int pi=c[i],j=p[pi-1];\r\n        while(s[i+k]==s[j+k])k++;\r\n        lcp[pi]=k;\r\n        k=max(0,k-1);\r\n    }\r\n}\r\nvoid solve(int _t) {\r\n    ll n;cin>>n;\r\n    cin>>s,reverse(s.begin(),s.end()),s.push_back(0),build();\r\n    vector<char>v(n+10);\r\n    vector<int>v2(n+10);\r\n    ll mx=0;\r\n    for (int i = 0; i < n; ++i) {\r\n        cin>>v[i];\r\n        if(v[i]=='0')mx=i+1;\r\n    }v2[0]='0';\r\n//    set<int>S;\r\n//    for (int i = 0; i < n; ++i) {\r\n//     cout<<c[n-i]<<'\\n';\r\n//    }\r\n//    return;\r\n    for (int i = 0; i < n; ++i)v2[c[n-i-1]]=v[i]-'0';\r\n//    for(auto &i:S)cout<<i<<' ';\r\n    for (int i = 1; i < n+5; ++i)v2[i]+=v2[i-1];\r\n//    cout<<v2[n+2];\r\n//    return;\r\n    if(!mx)return void(cout<<0);\r\n    stack<array<int,3>>st;\r\n    st.push({0,-1,0});\r\n    for (int i = 2; i <s.size(); ++i) {\r\n        int low=i-1;\r\n        while(lcp[i]<st.top()[0]){\r\n            int start=st.top()[1],rem=(v2[i-1]-v2[start-1]);\r\n            ll cnt=i-st.top()[1]-rem;\r\n//            cout<<cnt<<' '<<st.top()[0]<<'\\n';\r\n            mx=max(mx,cnt*st.top()[0]);\r\n            low=min(low,st.top()[1]);\r\n            st.pop();\r\n        }\r\n        if(st.top()[0]!=lcp[i])st.push({lcp[i],low,st.top()[0]});\r\n    }\r\n    while(st.size()>1){\r\n        int start=st.top()[1],rem=(v2[s.size()]-(start?v2[start-1]:0));\r\n        ll cnt=s.size()-st.top()[1]-rem;\r\n//        cout<<cnt<<' '<<st.top()[0]<<'\\n';\r\n"
+}

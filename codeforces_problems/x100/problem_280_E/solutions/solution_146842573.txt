@@ -1,0 +1,39 @@
+{
+    "id": 146842573,
+    "contestId": 280,
+    "creationTimeSeconds": 1645196154,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "balbit"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 92,
+    "memoryConsumedBytes": 819200,
+    "source": "#include <bits/stdc++.h>\n#define int ll\nusing namespace std;\n#define ll long long\n#define y1 zck_is_king\n#define pii pair<ll, ll>\n#define ull unsigned ll\n#define f first\n#define s second\n#define ALL(x) x.begin(),x.end()\n#define SZ(x) (int)x.size()\n#define SQ(x) (x)*(x)\n#define MN(a,b) a = min(a,(__typeof__(a))(b))\n#define MX(a,b) a = max(a,(__typeof__(a))(b))\n#define pb push_back\n#define REP(i,n) for (int i = 0; i<n; ++i)\n#define RREP(i,n) for (int i = n-1; i>=0; --i)\n#define REP1(i,n) for (int i = 1; i<=n; ++i)\n#define SORT_UNIQUE(c) (sort(c.begin(),c.end()), c.resize(distance(c.begin(),unique(c.begin(),c.end()))))\n#ifdef BALBIT\n#define IOS()\n#define bug(...) fprintf(stderr,\"#%d (%s) = \",__LINE__,#__VA_ARGS__),_do(__VA_ARGS__);\ntemplate<typename T> void _do(T &&x){cerr<<x<<endl;}\ntemplate<typename T, typename ...S> void _do(T &&x, S &&...y){cerr<<x<<\", \";_do(y...);}\n#else\n#define IOS() ios_base::sync_with_stdio(0);cin.tie(0);\n#define endl '\\n'\n#define bug(...)\n#endif\n\nconst int iinf = 1e9+10;\nconst ll inf = 1ll<<60;\nconst ll mod = 1e9+7 ;\n\n\nvoid GG(){cout<<\"0\\n\"; exit(0);}\n\nll mpow(ll a, ll n, ll mo = mod){ // a^n % mod\n    ll re=1;\n    while (n>0){\n        if (n&1) re = re*a %mo;\n        a = a*a %mo;\n        n>>=1;\n    }\n    return re;\n}\n\nll inv (ll b, ll mo = mod){\n    if (b==1) return b;\n    return (mo-mo/b) * inv(mo%b,mo) % mo;\n}\n\nconst int maxn = 1e5+5;\n#define pdd pair<double, double>\n\nstruct seg{\n    double a,b;\n    double c; // a * x^2 + b * x + c\n    double l,r;\n    double eval(double x) {\n        return a * x * x + b * x + c;\n    }\n    void add(double aa, double bb, double cc) {\n        a += aa; b += bb; c += cc;\n    }\n    void shift(int k) {\n        // g(x) = f(x-k)\n        c = c - b * k + k * k * a;\n        b = b - 2 * k * a;\n        l += k; r += k;\n    }\n    pair<double, double> getmin(){\n        // val, position\n        double cen = -b/(double)(2*a);\n        if (l < cen && cen < r) {\n            return {eval(cen), cen};\n        }\n        return min(make_pair(eval(l), l), make_pair(eval(r), r));\n    }\n};\n\nsigned main(){\n    IOS();\n\n    ll n, q, A, B;\n    cin>>n>>q>>A>>B;\n    ll K = B-A;\n    vector<ll> x(n), rawx(n);\n    q -= (n-1) * A;\n\n    bug(q);\n\n    vector<seg> v;\n    v.pb({0,0,0,1,q});\n\n    vector<double> exp;\n\n    double bobo = -1;\n\n    REP(i,n) {\n        cin>>x[i]; rawx[i] = x[i]; x[i] -= A * i;\n        pdd bst = {inf, -1};\n        int who = -1;\n        REP(j, SZ(v)) {\n            auto &s = v[j];\n            s.add(1, -2 * x[i], x[i] * x[i]);\n            auto gg = s.getmin();\n            if (gg < bst) {\n                bst = gg;\n                who = j;\n            }\n        }\n        bug(bst.f, bst.s);\n        bobo = bst.f;\n        double pt = bst.s;\n        exp.pb(pt);\n        v.insert(v.begin() + who + 1, seg{0,0,bst.f,pt,pt+K});\n        v.insert(v.begin() + who + 2, v[who]);\n        v[who].r = pt; v[who+2].l = pt;\n        for (int j = who+2; j < SZ(v); ++j) {\n            v[j].shift(K);\n        }\n\n        // trim\n        while (v.back().l > q) {\n            v.pop_back();\n        }\n        if (v.back().r > q) {\n            v.back().r = q;\n        }\n//        for (auto s : v) {\n//            cout<<s.l<<' '<<s.r<<\" - \";\n//        }\n//        cout<<endl;\n    }\n\n    vector<double> y;\n\n    double now = exp.back();\n    bug(now);\n\n    y.pb(now + A * (n-1));\n\n    RREP(i, SZ(exp) - 1) {\n        if( now > exp[i] ) {\n            now = max(exp[i], now - K);\n        }\n        y.pb(now + A * i);\n    }\n\n    double re = 0;\n\n    reverse(ALL(y));\n    REP(i, n) {\n        bug(abs(y[i] - rawx[i]));\n        re += (y[i] - rawx[i]) * (y[i] - rawx[i]);\n    }\n\n    bug(re);\n    cout<<fixed<<setprecision(10);\n    for (double d : y) cout<<d<<' ';\n    cout<<endl;\n    cout<<bobo<<endl;\n\n\n}\n\n/*\n2 5 2  3\n5 5\n*/\n"
+}

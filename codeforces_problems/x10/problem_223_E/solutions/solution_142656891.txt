@@ -1,0 +1,37 @@
+{
+    "id": 142656891,
+    "contestId": 223,
+    "creationTimeSeconds": 1642130435,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 223,
+        "index": "E",
+        "name": "Planar Graph",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "flows",
+            "geometry",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 223,
+        "members": [
+            {
+                "handle": "KyuushuKyuuhai"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1347809400
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 374,
+    "memoryConsumedBytes": 28569600,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nconst int N = 100005;\r\nusing ll = long long;\r\nint n,m,vis[N],sum[N],b[N],ptr = 2,rt;\r\nstruct Node {int x,y;} a[N];\r\nstruct Edge {int v,w,rnk,nxt;double theta;} e[N * 2];\r\nmap<pair<int,int>,int> id;int head[N];vector<int> pre[N];\r\ninline void add_edge(int uu,int vv) {e[ptr].v = vv;e[ptr].nxt = head[uu];head[uu] = id[{uu,vv}] = ptr++;}\r\nint dfs(int pos)\r\n{\r\n    int flow = vis[pos] = 1,fl = 0;\r\n    for (int i = head[pos];i != -1;i = e[i].nxt)\r\n        if (!vis[e[i].v]) fl = dfs(e[i].v),e[i].w += fl,e[i ^ 1].w -= fl,flow += fl;\r\n    return flow;\r\n}\r\nvoid solve()\r\n{\r\n    int kk,ans;cin >> kk;ans = kk;ll tt = 0;\r\n    for (int i = 0;i < kk;i++) cin >> b[i];\r\n    for (int i = 0;i < kk;i++)\r\n        tt += a[b[i]].x * ll(a[b[(i + 1) % kk]].y) - a[b[i]].y * ll(a[b[(i + 1) % kk]].x);\r\n    if (tt < 0) reverse(b,b + kk);\r\n    for (int i = 0,l,r;i < kk;i++)\r\n    {\r\n        l = e[id[{b[i],b[(i + 1) % kk]}]].rnk;r = e[id[{b[i],b[(i + kk - 1) % kk]}]].rnk;\r\n        ans += pre[b[i]][r] - pre[b[i]][l - 1];\r\n        if (l > r) ans += sum[b[i]];\r\n    }\r\n    cout << ans << endl;\r\n}\r\nint main ()\r\n{\r\n    ios::sync_with_stdio(false);\r\n    cin >> n >> m;memset(head,-1,sizeof(head));\r\n    int t1,t2;\r\n    for (int i = 1;i <= m;i++) cin >> t1 >> t2,add_edge(t1,t2),add_edge(t2,t1);\r\n    for (int i = 1;i <= n;i++) cin >> a[i].x >> a[i].y;\r\n    for (int i = rt = 1;i <= n;i++) if (a[i].x < a[rt].x) rt = i;\r\n    dfs(rt);\r\n    for (int i = 1;i <= n;i++)\r\n    {\r\n        pre[i].push_back(0);\r\n        for (int j = head[i];j != -1;j = e[j].nxt)\r\n            pre[i].push_back(j),sum[i] += e[j].w,e[j].theta = atan2(a[e[j].v].y - a[i].y,a[e[j].v].x - a[i].x);\r\n        sort(pre[i].begin(),pre[i].end(),[](int i,int j)\r\n        { return !i ? 1 : !j ? 0 : e[i].theta < e[j].theta; });\r\n        for (int j = 1;j < int(pre[i].size());j++) e[pre[i][j]].rnk = j,pre[i][j] = pre[i][j - 1] + e[pre[i][j]].w;\r\n    }\r\n    int q;cin >> q;while (q--) solve();\r\n    return 0;\r\n}"
+}

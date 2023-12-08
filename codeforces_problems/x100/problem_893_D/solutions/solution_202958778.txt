@@ -1,0 +1,37 @@
+{
+    "id": 202958778,
+    "contestId": 893,
+    "creationTimeSeconds": 1682084673,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 893,
+        "index": "D",
+        "name": "Credit Card",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "data structures",
+            "dp",
+            "greedy",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 893,
+        "members": [
+            {
+                "handle": "SeeYouSpaceCowboy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1511449500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 9,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define ll long long\r\n\r\nstruct segTree{\r\n    struct node {\r\n        long long modify;\r\n        long long value;\r\n    };\r\n\r\n    const long long NO_OP = LLONG_MIN;\r\n    const long long EMPTY = 0;\r\n\r\n    long long _modify(long long a, long long b, long long len) {\r\n        if( b == NO_OP ) return a;\r\n        return b * len;\r\n    }\r\n\r\n    long long _get(long long a, long long b) {\r\n        return a + b;\r\n    }\r\n\r\n    void propagate(int x, int lx, int rx) {\r\n        if (Tree[x].modify == NO_OP || rx == lx + 1) return;\r\n        int m = (lx + rx) / 2;\r\n        Tree[2*x+1].modify = _modify(Tree[2*x+1].modify, Tree[x].modify, 1);\r\n        Tree[2*x+1].value = _modify(Tree[2*x+1].value, Tree[x].modify, m - lx);\r\n        Tree[2*x+2].modify = _modify(Tree[2*x+2].modify, Tree[x].modify, 1);\r\n        Tree[2*x+2].value = _modify(Tree[2*x+2].value, Tree[x].modify, rx - m);\r\n        Tree[x].modify = NO_OP;\r\n    }\r\n\r\n    int sz = 1;\r\n    vector<node> Tree;\r\n\r\n    void init(int n) {\r\n        while (sz < n) { sz *= 2; }\r\n        Tree.assign(2 * sz - 1 , {0 , 0});\r\n    }\r\n\r\n    void update(int l, int r, int v) {\r\n        update(l, r, v, 0, 0, sz);\r\n    }\r\n\r\n    void update(int l, int r, int v, int x, int lx, int rx) {\r\n        propagate(x, lx, rx);\r\n        if (lx >= r) return;\r\n        if (rx <= l) return;\r\n        if (lx >= l && rx <= r) {\r\n            Tree[x].modify = _modify(Tree[x].modify, v, 1);\r\n            Tree[x].value = _modify(Tree[x].value, v, rx - lx);\r\n        } else {\r\n            int m = (lx + rx) / 2;\r\n            update(l, r, v, 2*x+1, lx, m);\r\n            update(l, r, v, 2*x+2, m, rx);\r\n            Tree[x].value = _get(Tree[2*x+1].value, Tree[2*x+2].value);\r\n        }\r\n    }\r\n\r\n    long long get(int l, int r) {\r\n        return get(l, r, 0, 0, sz);\r\n    }\r\n\r\n    long long get(int l, int r, int x, int lx, int rx) {\r\n        propagate(x, lx, rx);\r\n        if (lx >= r) return EMPTY;\r\n        if (rx <= l) return EMPTY;\r\n        if (lx >= l && rx <= r) {\r\n            return Tree[x].value;\r\n        } else {\r\n            int m = (lx + rx) / 2;\r\n            long long v1 = get(l, r, 2*x+1, lx, m);\r\n            long long v2 = get(l, r, 2*x+2, m, rx);\r\n            return _get(v1, v2);\r\n        }\r\n    }\r\n};\r\n\r\nsigned main(void){\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n\r\n    int n, d;\r\n    cin >> n >> d;\r\n\r\n    segTree St;\r\n    St.init(n);\r\n\r\n    vector <int> a(n);\r\n\r\n    for (int i = 0 ; i < n ; ++i) {\r\n        cin >> a[i];\r\n        if (a[i] > d) {\r\n            cout << \"-1\\n\";\r\n            return 0;\r\n        }\r\n        St.update(i , i + 1 , a[i]);\r\n    }\r\n\r\n    ll ans = 0;\r\n\r\n    for (int i = 0 ; i < n ; ++i) {\r\n        ll x = St.get(0, i);\r\n        if (a[i] == 0) {\r\n            if (x < 0) {\r\n                if (abs(x) > d) {\r\n                    cout << \"-1\\n\";\r\n                    return 0;\r\n                } else {\r\n                    St.update(i , i + 1, d - St.get(i , i + 1));\r\n                    ++ans;\r\n                }\r\n            }\r\n        }\r\n        if (x > d) {\r\n            ++ans;\r\n        }\r\n    }\r\n\r\n    cout << ans << \"\\n\";\r\n}"
+}

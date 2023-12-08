@@ -1,0 +1,37 @@
+{
+    "id": 125722937,
+    "contestId": 893,
+    "creationTimeSeconds": 1628829569,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 893,
+        "index": "D",
+        "name": "Credit Card",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "data structures",
+            "dp",
+            "greedy",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 893,
+        "members": [
+            {
+                "handle": "JunBinLiang"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1511449500
+    },
+    "programmingLanguage": "Java 8",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 19,
+    "timeConsumedMillis": 171,
+    "memoryConsumedBytes": 25907200,
+    "source": "// Don't place your source in a package\r\n\r\n\r\nimport javax.swing.*;\r\nimport java.lang.reflect.Array;\r\nimport java.text.DecimalFormat;\r\nimport java.util.*;\r\nimport java.lang.*;\r\nimport java.io.*;\r\nimport java.math.*;\r\nimport java.util.stream.Stream;\r\n\r\n\r\n\r\n// Please name your class Main\r\npublic class Main {\r\n    static FastScanner fs=new FastScanner();\r\n    static class FastScanner {\r\n        BufferedReader br=new BufferedReader(new InputStreamReader(System.in));\r\n        StringTokenizer st=new StringTokenizer(\"\");\r\n        public String next() {\r\n            while (!st.hasMoreElements())\r\n                try {\r\n                    st=new StringTokenizer(br.readLine());\r\n                } catch (IOException e) {\r\n                    e.printStackTrace();\r\n                }\r\n            return st.nextToken();\r\n        }\r\n        int Int() {\r\n            return Integer.parseInt(next());\r\n        }\r\n\r\n        long Long() {\r\n            return Long.parseLong(next());\r\n        }\r\n\r\n        String Str(){\r\n            return next();\r\n        }\r\n    }\r\n\r\n\r\n    public static void main (String[] args) throws java.lang.Exception {\r\n        PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(System.out)));\r\n        //reading /writing file\r\n        //Scanner sc=new Scanner(new File(\"input.txt\"));\r\n        //PrintWriter pr=new PrintWriter(\"output.txt\");\r\n\r\n\r\n\r\n        int T=1;\r\n        for(int t=0;t<T;t++){\r\n            int n=Int();int d=Int();\r\n            int A[]=Arr(n);\r\n            Solution sol1=new Solution(out);\r\n            sol1.solution(A,d);\r\n        }\r\n        out.close();\r\n\r\n    }\r\n\r\n\r\n    public static int[] Arr(int n){\r\n        int A[]=new int[n];\r\n        for(int i=0;i<n;i++)A[i]=Int();\r\n        return A;\r\n    }\r\n    public static int Int(){\r\n        return fs.Int();\r\n    }\r\n    public static long Long(){\r\n        return fs.Long();\r\n    }\r\n    public static String Str(){\r\n        return fs.Str();\r\n    }\r\n\r\n}\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\nclass Solution {\r\n    PrintWriter out;\r\n    int INF = Integer.MAX_VALUE;\r\n    int MOD = 1000000007;\r\n    long mod = 1000000007;\r\n\r\n    public Solution(PrintWriter out) {\r\n        this.out = out;\r\n    }\r\n\r\n\r\n    public void solution(int A[],int d) {\r\n        long sum=0;\r\n        for(int i:A){\r\n            sum+=i;\r\n            if(i==0){\r\n                if(sum<0){//must fill\r\n                    sum=0;\r\n                }\r\n            }\r\n            if(sum>d){\r\n                out.println(-1);\r\n                return;\r\n            }\r\n        }\r\n\r\n        sum=0;\r\n        int res=0;\r\n        long add = 0;\r\n        Seg seg=new Seg(0,A.length-1);\r\n        PriorityQueue<int[]>pq=new PriorityQueue<>((a,b)->{\r\n            if(a[0]==b[0]){\r\n                return b[1]-a[1];\r\n            }\r\n            return b[0]-a[0];\r\n        });\r\n        for(int i=0;i<A.length;i++){\r\n            sum+=A[i];\r\n            pq.add(new int[]{0,i});\r\n            seg.update(i,A[i]);\r\n            if(A[i]==0){\r\n                if(sum+add+pq.peek()[0]<0){\r\n                    long need=-(sum+add);\r\n                    while(true){\r\n                        int top[]=pq.peek();\r\n                        int index=top[1];\r\n                        int mx=seg.query(index,i);\r\n                        if(mx+top[0]+add>d){\r\n                            add+=top[0];\r\n                            res++;\r\n                            pq.poll();\r\n                        }\r\n                        else{\r\n                            top[0]+=need;\r\n                            break;\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n        }\r\n        while(pq.size()>0){\r\n            int top[]=pq.poll();\r\n            if(top[0]>0)res++;\r\n        }\r\n        out.println(res);\r\n    }\r\n\r\n    class Seg{\r\n        int l,r;\r\n        int max=0;\r\n        Seg left=null,right=null;\r\n        public Seg(int l,int r){\r\n            this.l=l;\r\n            this.r=r;\r\n            if(l!=r){\r\n                int mid=l+(r-l)/2;\r\n                if(l<=mid)left=new Seg(l,mid);\r\n                if(r>=mid+1)right=new Seg(mid+1,r);\r\n                if(left!=null)this.max=Math.max(max,left.max);\r\n                if(right!=null)this.max=Math.max(max,right.max);\r\n            }else{\r\n\r\n            }\r\n        }\r\n        public int query(int s,int e){\r\n            if(l==s&&r==e){\r\n                return max;\r\n            }\r\n            int mid=l+(r-l)/2; //left :  to mid-1,\r\n            if(e<=mid){\r\n                return left.query(s,e);\r\n            }\r\n            else if(s>=mid+1){\r\n                return right.query(s,e);\r\n            }else{\r\n                return Math.max(left.query(s,mid),right.query(mid+1,e));\r\n            }\r\n        }\r\n\r\n        public void update(int index,int val){\r\n            if(l==r){\r\n                max=val;\r\n                return;\r\n            }\r\n            int mid=l+(r-l)/2;\r\n            if(index<=mid){\r\n                left.update(index,val);\r\n            }else{\r\n                right.update(index,val);\r\n            }\r\n            this.max=Math.max(left.max,right.max);\r\n        }\r\n    }\r\n\r\n}\r\n\r\n//1111\r\n//0110"
+}

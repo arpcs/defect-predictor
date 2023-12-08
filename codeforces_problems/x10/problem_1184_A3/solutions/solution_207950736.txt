@@ -1,0 +1,36 @@
+{
+    "id": 207950736,
+    "contestId": 1184,
+    "creationTimeSeconds": 1685530089,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1184,
+        "index": "A3",
+        "name": "Heidi Learns Hashing (Hard)",
+        "type": "PROGRAMMING",
+        "rating": 3100,
+        "tags": [
+            "fft",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1184,
+        "members": [
+            {
+                "handle": "eriFseR"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1562483100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 2807,
+    "memoryConsumedBytes": 73625600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define int long long\r\n#define MAXN 600005\r\ntypedef vector<int> poly;\r\n\r\ninline int fp( int x , int p , int mod ){ int res = 1; while( p ){ if( p & 1 ) res = res * x % mod; x = x * x % mod; p >>= 1; } return res; }\r\ninline int inv( int x , int mod ){ return fp( x , mod - 2 , mod ); }\r\n\r\nint mod;\r\nconst int mod1 = 998244353,mod2 = 469762049,mod3 = 1004535809;\r\n\r\nconst int inv1 = inv( mod1 , mod2 ),mul = mod1 * mod2,inv2 = inv( mul % mod3 , mod3 );\r\n\r\nstruct Int{\r\n\tint x,y,z;\r\n\tInt( int num = 0 ): x(num),y(num),z(num){}\r\n\tInt( int X , int Y , int Z ): x(X),y(Y),z(Z){}\r\n\tinline Int reduce( Int A ){ return Int( A.x + ( A.x >> 31 & mod1 ) , A.y + ( A.y >> 31 & mod2 ) , A.z + ( A.z >> 31 & mod3 ) ); }\r\n\tinline Int operator +( Int A ){ return reduce( Int( x + A.x - mod1 , y + A.y - mod2 , z + A.z - mod3 ) ); }\r\n\tinline Int operator -( Int A ){ return reduce( Int( x - A.x , y - A.y , z - A.z ) ); }\r\n\tinline Int operator *( Int A ){ return Int( x * A.x % mod1 , y * A.y % mod2 , z * A.z % mod3 ); }\r\n\tinline int val(){\r\n\t\tint tmp = ( y - x + mod2 ) % mod2 * inv1 % mod2 * mod1 + x;\r\n\t\treturn ( ( z - tmp % mod3 + mod3 ) % mod3 * inv2 % mod3 * ( mul % mod ) % mod + tmp + mod ) % mod;\r\n\t}\r\n};\r\n\r\nnamespace polybase{\r\n\tInt gw[MAXN],tmp[MAXN];\r\n\tinline void polypre( int T = 19 ){\r\n\t\tgw[0] = Int( 1 ),gw[1 << T] = Int( fp( fp( 3 , 119 , mod1 ) , 1 << ( 21 - T ) , mod1 ) , fp( fp( 3 , 7 , mod2 ) , 1 << ( 24 - T ) , mod2 ) , fp( fp( 3 , 479 , mod3 ) , 1 << ( 19 - T ) , mod3 ) );\r\n\t\tfor( int i = T ; i ; i -- ) gw[1 << ( i - 1 )] = gw[1 << i] * gw[1 << i];\r\n\t\tfor( int i = 1 ; i < 1 << T ; i ++ ) gw[i] = gw[i & ( i - 1 )] * gw[i & -i];\r\n\t}\r\n\tinline void DIT( Int *A , int len ){\r\n\t\tfor( int i = 0 ; i < len ; i ++ ) tmp[i] = A[i];\r\n\t\tfor( int i = 1 ; i < len ; i <<= 1 ){\r\n\t\t\tInt *k = tmp;\r\n\t\t\tfor( Int *g = gw ; k < tmp + len ; k += i << 1 , g ++ ){\r\n\t\t\t\tfor( Int *x = k ; x < k + i ; x ++ ){\r\n\t\t\t\t\tInt o = x[i];\r\n\t\t\t\t\tx[i] = ( *x - o ) * *g,*x = *x + o;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tInt iv( inv( len , mod1 ) , inv( len , mod2 ) , inv( len , mod3 ) );\r\n\t\tfor( int i = 0 ; i < len ; i ++ ) A[i] = tmp[i] * iv;\r\n\t\treverse( A + 1 , A + len );\r\n\t}\r\n\tinline void DIF( Int *A , int len ){\r\n\t\tfor( int i = 0 ; i < len ; i ++ ) tmp[i] = A[i];\r\n\t\tfor( int i = len / 2 ; i ; i >>= 1 ){\r\n\t\t\tInt *k = tmp;\r\n\t\t\tfor( Int *g = gw ; k < tmp + len ; k += i << 1 , g ++ ){\r\n\t\t\t\tfor( Int *x = k ; x < k + i ; x ++ ){\r\n\t\t\t\t\tInt o = x[i] * *g;\r\n\t\t\t\t\tx[i] = *x - o,*x = *x + o;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tfor( int i = 0 ; i < len ; i ++ ) A[i] = tmp[i];\r\n\t}\r\n\tinline poly polymul( poly A , poly B ){\r\n\t\tint n = A.size(),m = B.size(),L = n + m - 1,len = 1;\r\n\t\twhile( len < L ) len <<= 1;\r\n\t\tstatic Int tA[MAXN],tB[MAXN];\r\n\t\tfor( int i = 0 ; i < n ; i ++ ) tA[i] = A[i]; for( int i = n ; i < len ; i ++ ) tA[i] = 0;\r\n\t\tfor( int i = 0 ; i < m ; i ++ ) tB[i] = B[i]; for( int i = m ; i < len ; i ++ ) tB[i] = 0;\r\n\t\tDIF( tA , len ),DIF( tB , len );\r\n\t\tfor( int i = 0 ; i < len ; i ++ ) tA[i] = tA[i] * tB[i];\r\n\t\tDIT( tA , len );\r\n\t\tpoly Ans( L ); for( int i = 0 ; i < L ; i ++ ) Ans[i] = ( tA[i].val() + mod ) % mod;\r\n\t\treturn Ans;\r\n\t}\r\n\tstatic int sqr,cpow[500],icpow[500],rcpow[500],ircpow[500];\r\n\tinline int Cpow( int x , int t ){ return t == 1 ? rcpow[x / sqr] * cpow[x % sqr] % mod : ircpow[x / sqr] * icpow[x % sqr] % mod; }\r\n\tinline poly chirp_Z( poly F , int c , int m ){\r\n\t\tsqr = sqrt( mod ) + 1;\r\n\t\tcpow[0] = icpow[0] = rcpow[0] = ircpow[0] = 1;\r\n\t\ticpow[1] = inv( c , mod );\r\n\t\tfor( int i = 1 ; i <= sqr ; i ++ ) cpow[i] = cpow[i - 1] * c % mod;\r\n\t\tfor( int i = 1 ; i <= sqr ; i ++ ) rcpow[i] = rcpow[i - 1] * cpow[sqr] % mod;\r\n\t\tfor( int i = 1 ; i <= sqr ; i ++ ) icpow[i] = icpow[i - 1] * icpow[1] % mod;\r\n\t\tfor( int i = 1 ; i <= sqr ; i ++ ) ircpow[i] = ircpow[i - 1] * icpow[sqr] % mod;\r\n\t\tint n = F.size();\r\n\t\tpoly C( n + m ),D( n + m ),E( n );\r\n\t\tfor( int i = 0 ; i < n + m ; i ++ ) C[i] = \tCpow( i * ( i - 1 ) / 2 % ( mod - 1 ) , 1 ),D[i] = Cpow( i * ( i - 1 ) / 2 % ( mod - 1 ) , -1 );\r\n\t\tfor( int i = 0 ; i < n ; i ++ ) E[i] = F[n - 1 - i] * D[n - 1 - i] % mod;\r\n\t\tC = polymul( C , E );\r\n\t\tpoly Ans( m ); for( int i = 0 ; i < m ; i ++ ) Ans[i] = D[i] * C[n - 1 + i] % mod;\r\n\t\treturn Ans;\r\n\t}\r\n}\r\n\r\nusing namespace polybase;\r\n\r\nint n,m;\r\nchar s[MAXN];\r\npoly A,B,C;\r\nint Mods[8] = {200003,200009,200017,200023,200029,200033,200041,200063};\r\nint gs[8] = {2,3,5,3,2,3,11,5};\r\n\r\ninline bool solve( int Mod , int g ){\r\n\tmod = Mod;\r\n\tC.resize( n );\r\n\tfor( int i = 0 ; i < n ; i ++ ) C[i] = ( A[i] - B[i] + mod ) % mod;\r\n\tpoly R = chirp_Z( C , g , mod );\r\n\tfor( int i = 1 ; i < mod - 1 ; i ++ ) if( R[i] == 0 && fp( g , i , mod ) <= mod - 2 ){ printf(\"%lld %lld\\n\",mod,fp( g , i , mod )); return 1; }\r\n\treturn 0;\r\n}\r\n\r\nsigned main(){\r\n\tpolypre( 19 );\r\n\tscanf(\"%lld%lld\",&n,&m);\r\n\tA.resize( n ),B.resize( n );\r\n\tscanf(\"%s\",s + 1); for( int i = 1 ; i <= n ; i ++ ) A[i - 1] = s[i] - 'a';\r\n\tscanf(\"%s\",s + 1); for( int i = 1 ; i <= n ; i ++ ) B[i - 1] = s[i] - 'a';\r\n\tfor( int i = 0 ; i < 8 ; i ++ ) if( solve( Mods[i] , gs[i] ) ) break;\r\n\treturn 0;\r\n}"
+}

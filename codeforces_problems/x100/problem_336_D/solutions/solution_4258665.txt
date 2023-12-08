@@ -1,0 +1,37 @@
+{
+    "id": 4258665,
+    "contestId": 336,
+    "creationTimeSeconds": 1376091784,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 336,
+        "index": "D",
+        "name": "Vasily the Bear and Beautiful Strings",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 336,
+        "members": [
+            {
+                "handle": "37ae912"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1376062200
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 94,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 819200,
+    "source": "\n#include <cstdio>\n\ntypedef long long LL;\nconst LL Mod = 1e9+7;\nconst int N = 100010;\nint n,m,g;\n\nLL R[N];\n\nvoid extend_euclid(LL a, LL b, LL& x, LL & y)\n{\n    if(b==0){ \n        x=1;y=0;\n        return;\n    }\n\n    LL tx,ty;\n    extend_euclid(b,a%b, tx,ty);\n    x = ty;\n    y = tx-(a/b)*ty;\n    x %= Mod;\n    y %= Mod;\n}\nLL C(LL n, LL k)\n{\n    LL res=1,x,y;\n    for(int i=0;i<k;++i){\n        //res = res* (n-i) / (i+1);\n        if(R[i+1]==0){\n            extend_euclid(i+1, Mod, x, y);\n            R[i+1] = x;\n        }\n        res = (res * (n-i))%Mod * R[i+1];\n        res %= Mod;\n    }\n    if(res<0) res += Mod;\n\n    return res;\n}\n\n\nLL f0(int n, int m)\n{\n    if(m==0) return n%2;\n    if(m==1) return n/2+2*(n%2);\n\n    LL bs= n%2? m : 1;// C(m,m-1) C(m-1,m-1)\n    LL res=bs;\n    for(int i=n%2+2;i<=n;i+=2){\n        //bs = bs * (i+m-1) * (i+m-2) / i / (i-1);\n        bs = (bs * (i+m-1))%Mod;\n        bs = (bs * (i+m-2))%Mod;\n        bs = (bs * R[i])%Mod;\n        bs = (bs * R[i-1])%Mod;\n\n        res += bs;\n        if(res>=Mod)res-=Mod;\n        if(res<=-Mod) res += Mod;\n    }\n    \n\n    return res;\n}\n\nint main()\n{\n    // n -> number of zeros\n    // m -> number of ones\n    scanf(\"%d%d%d\",&n,&m,&g);\n\n    LL res=0;\n    for(int i=1;i<=n;++i)\n        extend_euclid(i,Mod, R[i], res);\n\n    res=f0(n,m);\n\n    if(g)\n        res = C(n+m,m) - res;\n \n    res = (res+Mod)%Mod;\n    printf(\"%I64d\\n\",res);\n\n    return 0;\n}\n\n"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 235982855,
+    "contestId": 487,
+    "creationTimeSeconds": 1701823290,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 487,
+        "index": "E",
+        "name": "Tourists",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 487,
+        "members": [
+            {
+                "handle": "chenziyi1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1416590400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 1216,
+    "memoryConsumedBytes": 62566400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nint dfn[200200],low[200200],tot;\r\nint st[200200],tp;\r\nvector<int>g[200200],e[200200];\r\nint cnt,inf=2e9;\r\nint top[200200],tree[800800],w[200200];\r\nint fa[200200],dep[200200],sz[200200],son[200200],xu[200200];\r\nvoid tarjan(int x){\r\n\tdfn[x]=low[x]=++tot;\r\n\tst[++tp]=x;\r\n\tfor(auto y:g[x])\r\n\tif (!dfn[y]){\r\n\t\ttarjan(y);low[x]=min(low[x],low[y]);\r\n\t\tif (dfn[x]==low[y]){\r\n\t\t\tcnt++;\r\n\t\t\tfor(int t=0;t!=y;tp--){\r\n\t\t\t\tt=st[tp];\r\n\t\t\t\te[t].push_back(cnt);\r\n\t\t\t\te[cnt].push_back(t);\r\n\t\t\t}\r\n\t\t\te[x].push_back(cnt);\r\n\t\t\te[cnt].push_back(x);\r\n\t\t}\r\n\t} else low[x]=min(low[x],dfn[y]);\r\n}\r\nvoid dfs1(int x,int pa){\r\n//\tcout<<x<<\"****\"<<pa<<endl;\r\n\tfa[x]=pa,dep[x]=dep[pa]+1;sz[x]=1;\r\n\tfor (auto y:e[x])if (y!=pa){\r\n\t\tdfs1(y,x);sz[x]+=sz[y];\r\n\t\tif (sz[y]>sz[son[x]])son[x]=y;\r\n\t}\r\n}\r\nvoid dfs2(int x,int tp){\r\n//\tcout<<x<<\" \"<<tp<<\" \"<<fa[x]<<endl;\r\n\tdfn[x]=++tot,xu[tot]=x,top[x]=tp;\r\n\tif (son[x])dfs2(son[x],tp);\r\n\tfor (auto y:e[x])if (y!=fa[x]&&y!=son[x])dfs2(y,y);\r\n}\r\nvoid build(int p,int l,int r){\r\n\tif (l==r) return tree[p]=w[xu[l]],void();\r\n\tint mid=l+r>>1;\r\n\tbuild(p<<1,l,mid);build(p<<1|1,mid+1,r);\r\n\ttree[p]=min(tree[p<<1],tree[p<<1|1]);\r\n}\r\nvoid push(int p,int l,int r,int x,int val){\r\n\tif (l==r) return tree[p]=val,void();\r\n\tint mid=l+r>>1;\r\n\tif (x<=mid)push(p<<1,l,mid,x,val);\r\n\telse push(p<<1|1,mid+1,r,x,val);\r\n\ttree[p]=min(tree[p<<1],tree[p<<1|1]);\r\n}\r\nint get (int p,int l,int r,int ll,int rr){\r\n\tif (ll<=l&&rr>=r)return tree[p];\r\n\tint mid=l+r>>1,sum=inf;\r\n\tif (ll<=mid)sum=min(get(p<<1,l,mid,ll,rr),sum);\r\n\tif (rr>=mid+1)sum=min(sum,get(p<<1|1,mid+1,r,ll,rr));\r\n\treturn sum;\r\n}\r\nint n,m,T;\r\nmultiset<int>s[200200];\r\nint main(){\r\n\tcin>>n>>m>>T;\r\n\tfor (int i=1;i<=n;i++)cin>>w[i];\r\n\tcnt=n;\r\n\tfor (int i=1,x,y;i<=m;i++){\r\n\t\tcin>>x>>y;\r\n\t\tg[x].push_back(y);\r\n\t\tg[y].push_back(x);\r\n\t}\r\n\ttarjan(1);dfs1(1,0);tot=0,dfs2(1,1);\r\n\tfor (int i=1;i<=n;i++)\r\n\tif (fa[i])s[fa[i]].insert(w[i]);\r\n\tfor (int i=n+1;i<=cnt;i++)w[i]=*s[i].begin();\r\n\tbuild(1,1,cnt);\r\n//\tcout<<\"!!!!!\\n\";\r\n\tchar ch;int x,y;\r\n\twhile(T--){\r\n\t\tcin>>ch>>x>>y;\r\n\t\tif (ch=='C'){\r\n\t\t\tpush(1,1,cnt,dfn[x],y);\r\n\t\t\tif (fa[x]){\r\n\t\t\t\tint t=fa[x];\r\n\t\t\t\ts[t].erase(w[x]);s[t].insert(y);\r\n\t\t\t\tif (w[t]!=*s[t].begin()){w[t]=*s[t].begin();push(1,1,cnt,dfn[t],w[t]);}\r\n\t\t\t}\r\n\t\t\tw[x]=y;\r\n\t\t}else{\r\n\t\t\tint ans=inf;\r\n\t\t\twhile(top[x]!=top[y]){\r\n\t\t\t\tif (dep[top[x]]<dep[top[y]])swap(x,y);\r\n\t\t\t\tans=min(ans,get(1,1,cnt,dfn[top[x]],dfn[x]));\r\n\t\t\t\tx=fa[top[x]];\r\n\t\t\t}\r\n\t\t\tif (dep[x]<dep[y])swap(x,y);\r\n\t\t\tans=min(ans,get(1,1,cnt,dfn[y],dfn[x]));\r\n\t\t\tif (y>n)ans=min(ans,w[fa[y]]);\r\n\t\t\tcout<<ans<<endl;\r\n\t\t}\r\n\t}\r\n}"
+}

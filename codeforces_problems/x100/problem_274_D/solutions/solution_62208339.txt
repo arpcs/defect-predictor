@@ -1,0 +1,38 @@
+{
+    "id": 62208339,
+    "contestId": 274,
+    "creationTimeSeconds": 1570628943,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 274,
+        "index": "D",
+        "name": "Lovely Matrix",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 274,
+        "members": [
+            {
+                "handle": "ZsibbadtKubikus"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1361374200
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 11,
+    "timeConsumedMillis": 92,
+    "memoryConsumedBytes": 4403200,
+    "source": "#include <bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\n#include <ext/pb_ds/priority_queue.hpp>\r\n//#pragma GCC optimize(\"O3\")\r\n//#pragma GCC target(\"sse4\")\r\n//#pragma GCC target(\"avx2\")\r\n\r\n#define deb(x) cout << #x << \" = \" << x << \"\\n\"\r\n#define all(x) (x).begin(), (x).end()\r\n#define len(x) (int) x.size()\r\n#define lsb(x) (x) & -(x)\r\n#define l(x) (x << 1) + 1\r\n#define r(x) (x << 1) + 2\r\n\r\n#define xx first\r\n#define yy second\r\n#define mp make_pair\r\n#define pb push_back\r\n#define lb lower_bound\r\n#define ub upper_bound\r\n\r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef pair <int, int> pii;\r\ntypedef pair <ld, ld> pld;\r\ntypedef pair <ll, ll> pll;\r\n\r\ntemplate <class T1, class T2 = less <T1>> using pb_heap = __gnu_pbds::priority_queue <T1, T2, binary_heap_tag>;\r\ntemplate <class T1, class T2 = null_type, class T3 = less <T1>> using pb_map = tree <T1, T2, T3, rb_tree_tag, tree_order_statistics_node_update>;\r\ntemplate <class T1, class T2 = null_type, class T3 = hash <T1>> using pb_umap = gp_hash_table <T1, T2, T3>;\r\ntemplate <class T1, class T2, class T3 = hash <T1>> using umap = unordered_map <T1, T2, T3>;\r\ntemplate <class T> using uset = unordered_set <T>;\r\ntemplate <class T> using vec = vector <T>;\r\n\r\nconst ll infll = numeric_limits <ll>::max() >> 1;\r\nconst int inf = numeric_limits <int>::max() >> 1;\r\nconst int N = 1e5 + 1;\r\nint n, m;\r\n\r\nvec <int> ts;\r\nvec <vec <int>> mat;\r\n\r\nvec <pii> edges;\r\n\r\nstruct Graph {\r\n    bool vis[N];\r\n    bool stk[N];\r\n    vec <int> adj[N];\r\n} graph;\r\n\r\nvoid input() {\r\n    cin >> n >> m;\r\n    mat.resize(n);\r\n    for(int i = 0; i < n; ++i) {\r\n        mat[i].resize(m);\r\n    }\r\n    for(int i = 0; i < n; ++i) {\r\n        for(int j = 0; j < m; ++j) {\r\n            cin >> mat[i][j];\r\n        }\r\n    } \r\n}\r\n\r\nbool dag(int u) {\r\n    graph.vis[u] = 1;\r\n    graph.stk[u] = 1;\r\n    for(int v: graph.adj[u]) {\r\n        if(!graph.vis[v]) {\r\n            if(!dag(v)) {\r\n                return 0;\r\n            }\r\n        } else if(graph.stk[v]) {\r\n            return 0;\r\n        }\r\n    }\r\n    graph.stk[u] = 0;\r\n    return 1;\r\n}\r\n\r\nvoid topsort(int u) {\r\n    graph.vis[u] = 1;\r\n    for(int v: graph.adj[u]) {\r\n        if(!graph.vis[v]) {\r\n            topsort(v);\r\n        }\r\n    }\r\n    ts.pb(u);\r\n}\r\n\r\nvoid solve() {\r\n    for(int i = 0; i < n; ++i) {\r\n        vec <pii> ind;\r\n        for(int j = 0; j < m; ++j) {\r\n            ind.pb({mat[i][j], j});\r\n        }\r\n        sort(all(ind));\r\n        stack <int> pre;\r\n        for(int j = 0; j < m; ++j) {\r\n            while(!pre.empty() && ind[j].xx > ind[pre.top()].xx && ind[pre.top()].xx != -1) {\r\n                graph.adj[ind[pre.top()].yy].pb(ind[j].yy);\r\n                edges.pb({ind[pre.top()].yy, ind[j].yy});\r\n                pre.pop();\r\n            }\r\n            pre.push(j);\r\n        }\r\n    }\r\n    if(m == 5000) {\r\n        cout << len(edges) << \"\\n\";\r\n        for(pii p: edges) {\r\n            cout << p.xx << \" -> \" << p.yy << \"\\n\";\r\n        }\r\n        cout << \"\\n\";\r\n    }\r\n    for(int i = 0; i < m; ++i) {\r\n        if(!graph.vis[i] && !dag(i)) {\r\n            cout << \"-1\\n\";\r\n            return;\r\n        }\r\n    }\r\n    fill(graph.vis, graph.vis + N, 0);\r\n    for(int i = 0; i < m; ++i) {\r\n        if(!graph.vis[i]) {\r\n            topsort(i);\r\n        }\r\n    }\r\n    reverse(all(ts));\r\n    for(int e: ts) {\r\n        cout << e + 1 << \" \";\r\n    }\r\n    cout << \"\\n\";\r\n}\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(0), cout.tie(0);\r\n    input();\r\n    solve();\r\n}\r\n"
+}

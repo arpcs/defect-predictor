@@ -1,0 +1,38 @@
+{
+    "id": 220896202,
+    "contestId": 1717,
+    "creationTimeSeconds": 1693248659,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1717,
+        "index": "D",
+        "name": "Madoka and The Corruption Scheme",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 1900,
+        "tags": [
+            "combinatorics",
+            "constructive algorithms",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1717,
+        "members": [
+            {
+                "handle": "I_hate_Dasha_Lobas"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662129300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "/*\r\n* powered by ANDRIY POPYK\r\n* in honor of  SEGMENT DECOMPOSITION and N^(log(N)) and hate_club_Dasha_Lobas\r\n*/\r\n\r\n/*\r\n\r\n#pragma GCC optimize(\"O3\")\r\n\r\n#pragma GCC target(\"avx,avx2,fma\")\r\n#pragma GCC optimization(\"unroll-loops\")\r\n#pragma GCC target(\"avx,avx2,sse,sse2,sse3,sse4,popcnt\")\r\n*/\r\n#include <algorithm>\r\n#include <cmath>\r\n#include <cstdio>\r\n#include <iostream>\r\n#include <map>\r\n#include <set>\r\n#include <bitset>\r\n#include <queue>\r\n#include <vector>\r\n#include <stack>\r\n\r\nusing namespace std;\r\ntypedef long long ll;\r\n\r\n#define int long long\r\n\r\nint mod = 1e9 + 7;\r\n#define inf 1000000000\r\n\r\nvector <vector <int>> tree;\r\n\r\nvoid build(int ind, int l, int r, vector <int>& a)\r\n{\r\n    if (r - l == 1)\r\n    {\r\n        if (l < a.size())\r\n        {\r\n            tree[ind] = { a[l] };\r\n        }\r\n    }\r\n\r\n    int m = (r + l) / 2;\r\n    build(ind * 2 + 1, l, m, a);\r\n    build(ind * 2 + 2, m, r, a);\r\n    tree[ind].resize(tree[ind * 2 + 1].size() + tree[ind * 2 + 2].size());\r\n    merge(tree[ind * 2 + 1].begin(), tree[ind * 2 + 1].end(), tree[ind * 2 + 2].begin(), tree[ind * 2 + 2].end(), tree[ind].begin());\r\n}\r\n\r\n\r\nint get(int ind, int l, int r, int lx, int rx, int x)\r\n{\r\n    if ((lx <= l) and (r <= rx))\r\n    {\r\n        int ind_ = lower_bound(tree[ind].begin(), tree[ind].end(), x) - tree[ind].begin();\r\n        if (ind_ == 0)\r\n            return inf;\r\n        return tree[ind][ind_ - 1];\r\n    }\r\n\r\n    if (rx <= l)\r\n        return inf;\r\n    if (r <= lx)\r\n        return inf;\r\n\r\n    int m = (r + l) / 2;\r\n    int g1 = get(ind * 2 + 1, l, m, lx, rx, x);\r\n    int g2 = get(ind * 2 + 2, m, r, lx, rx, x);\r\n    return max(g1, g2);\r\n}\r\n\r\n\r\nvector <pair <int, int>> g[60000];\r\nvector <vector <pair <int, int>>> g_r;\r\n\r\npriority_queue <pair <int, int>> pq;\r\nvector <int> deep[600000];\r\nbool t[600000];\r\n\r\n\r\nvoid dijkstra(int st)\r\n{\r\n    int n = g_r.size();\r\n\r\n    deep[st].resize(n, inf);\r\n    pq.push({ 0 , st });\r\n\r\n    deep[st][st] = 0;\r\n\r\n    for (int i = 0; i < n; i++)\r\n        t[i] = false;\r\n\r\n    while (pq.size() > 0)\r\n    {\r\n        int d = pq.top().first;\r\n        int ind = pq.top().second;\r\n\r\n        pq.pop();\r\n        if (t[ind] == true)\r\n            continue;\r\n\r\n        t[ind] = true;\r\n\r\n        for (int i = 0; i < g[ind].size(); i++)\r\n        {\r\n            int ind_s = g[ind][i].first;\r\n            if (t[ind_s] == false)\r\n            {\r\n                if (deep[st][ind_s] > (deep[st][ind] + g[ind][i].second))\r\n                {\r\n                    deep[st][ind_s] = (deep[st][ind] + g[ind][i].second);\r\n                    pq.push({ -deep[st][ind_s]  , ind_s });\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n\r\n\r\nvector <vector <int>> deep_r;\r\n\r\nvoid dijkstra_r(int st)\r\n{\r\n    int n = g_r.size();\r\n\r\n    deep_r[st].resize(n, inf);\r\n\r\n    deep_r[st][st] = 0;\r\n\r\n    pq.push({ 0 , st });\r\n\r\n    for (int i = 0; i < n; i++)\r\n        t[i] = false;\r\n\r\n\r\n    while (pq.size() > 0)\r\n    {\r\n        int d = pq.top().first;\r\n        int ind = pq.top().second;\r\n\r\n        pq.pop();\r\n        if (t[ind] == true)\r\n            continue;\r\n\r\n        t[ind] = true;\r\n\r\n        for (int i = 0; i < g_r[ind].size(); i++)\r\n        {\r\n            int ind_s = g_r[ind][i].first;\r\n            if (t[ind_s] == false)\r\n            {\r\n                if (deep_r[st][ind_s] > (deep_r[st][ind] + g_r[ind][i].second))\r\n                {\r\n                    deep_r[st][ind_s] = (deep_r[st][ind] + g_r[ind][i].second);\r\n                    pq.push({ -deep_r[st][ind_s]  , ind_s });\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\nint bin_pow(int a , int p)\r\n{\r\n    int r = 1;\r\n    for (int i = 0; i < 31; i++)\r\n    {\r\n        if ((p & (1 << i)) != 0)\r\n        {\r\n            r *= a;\r\n            r %= mod;\r\n        }\r\n        a *= a;\r\n        a %= mod;\r\n    }\r\n    return r;\r\n}\r\n\r\n\r\nint ob(int x)\r\n{\r\n    return bin_pow(x, mod - 2);\r\n}\r\n\r\nvector <int> fak;\r\n\r\nvoid fuck_build(int n)\r\n{\r\n    fak.resize(n + 1);\r\n    fak[0] = 1;\r\n    for (int i = 1; i <= n; i++)\r\n        fak[i] = (fak[i - 1] * i) % mod;\r\n}\r\n\r\nint cnk(int n, int k)\r\n{\r\n    if (n <= 0)\r\n        return 0;\r\n    if (k < 0)\r\n        return 0;\r\n\r\n    if (k == 0)\r\n        return 1;\r\n\r\n    if (n < k)\r\n        return 0;\r\n\r\n    int ans = fak[n];\r\n    ans *= ob(fak[k]);\r\n    ans %= mod;\r\n    ans *= ob(fak[n - k]);\r\n    ans %= mod;\r\n    return ans;\r\n}\r\n\r\n\r\nsigned main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n    cout.tie(nullptr);\r\n\r\n    fuck_build(1000000);\r\n    int times = 1;\r\n    //cin >> times;\r\n    while (times--)\r\n    {"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 234919694,
+    "contestId": 1023,
+    "creationTimeSeconds": 1701258337,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1023,
+        "index": "F",
+        "name": "Mobile Phone Network",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 2600,
+        "tags": [
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1023,
+        "members": [
+            {
+                "handle": "vjudge1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1534516500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 40038400,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\n#define ll long long\n#define ls rt<<1\n#define rs rt<<1|1\nstruct Node{int u,v,w;};\nint n,m,k;ll ans;\nNode edge[500005];\n\nvector<int> G[500005];\nint dad[500005],size[500005],son[500005],dis[500005],root[500005];\nint dfn[500005],rnk[500005],top[500005],tot;\nvoid dfs(int u,int fa){\n\troot[u]=!fa?u:root[fa];\n\tdad[u]=fa;size[u]=1;dis[u]=dis[fa]+1;\n\tfor(int v:G[u])if(v!=fa){\n\t\tdfs(v,u);\n\t\tsize[u]+=size[v];\n\t\tif(size[son[u]]<size[v])son[u]=v;\n\t}\n}\nvoid dfs2(int u,int t){\n\ttop[u]=t;dfn[u]=++tot;rnk[tot]=u;\n\tif(son[u])dfs2(son[u],t);\n\tfor(int v:G[u])if(v!=dad[u]&&v!=son[u])dfs2(v,v);\n}\n\nint arr[500005];\nnamespace smt{\n\tint tr[2000005];\n\tvoid build(int rt,int l,int r){\n\t\tif(l==r)return tr[rt]=arr[rnk[l]],void();\n\t\tint m=(l+r)>>1;\n\t\tbuild(ls,l,m),build(rs,m+1,r);\n\t\ttr[rt]=tr[ls]+tr[rs];\n\t}\n\tint ask(int rt,int l,int r,int L,int R){\n\t\tif(!tr[rt]||(L<=l&&r<=R)){int x=tr[rt];tr[rt]=0;return x;}\n\t\tint m=(l+r)>>1,ans=0;\n\t\tif(m>=L)ans+=ask(ls,l,m,L,R);\n\t\tif(m<R)ans+=ask(rs,m+1,r,L,R);\n\t\ttr[rt]=tr[ls]+tr[rs];\n\t\treturn ans;\n\t}\n}\n\nint nxt[500005];\nint find(int x){return nxt[x]==x?x:nxt[x]=find(nxt[x]);}\nbool merge(int x,int y){x=find(x),y=find(y);return x==y?false:nxt[x]=y,true;}\n\nint ask(int u,int v){//\u8be2\u95ee u,v \u95f4\u7684 1 \u7684\u4e2a\u6570\uff0c\u5e76\u7f6e\u5176\u4e3a 0 \n\tint ans=0;\n\twhile(top[u]!=top[v]){\n\t\tif(dis[top[u]]<dis[top[v]])u^=v^=u^=v;\n\t\tans+=smt::ask(1,1,n,dfn[top[u]],dfn[u]);\n\t\tu=dad[top[u]];\n\t}\n\tif(dis[u]>dis[v])u^=v^=u^=v;\n\tans+=smt::ask(1,1,n,dfn[u],dfn[v]);\n\treturn ans;\n}\nint main(){\n\tscanf(\"%d%d%d\",&n,&k,&m);\n\tfor(int i=1;i<=n;i++)nxt[i]=i,arr[i]=1;\n\tfor(int i=1,u,v;i<=k;i++){\n\t\tscanf(\"%d%d\",&u,&v);\n\t\tG[u].push_back(v);\n\t\tG[v].push_back(u);\n\t}\n\tfor(int i=1;i<=m;i++)scanf(\"%d%d%d\",&edge[i].u,&edge[i].v,&edge[i].w);\n\tfor(int i=1;i<=n;i++)if(!root[i])dfs(i,0),dfs2(i,i),arr[i]=0;\n\tsmt::build(1,1,n);\n\tsort(edge+1,edge+1+m,[](const Node &a,const Node &b){return a.w<b.w;});\n\tfor(int i=1;i<=m;i++){\n\t\tint u=find(edge[i].u),v=find(edge[i].v);\n\t\tif(merge(u,v)&&root[u]==root[v])ans+=1ll*ask(u,v)*edge[i].w;\n\t}\n\tprintf(\"%lld\\n\",smt::ask(1,1,n,1,n)?-1:ans);\n}\n \t\t\t\t \t \t\t\t\t \t \t     \t\t\t\t     \t"
+}

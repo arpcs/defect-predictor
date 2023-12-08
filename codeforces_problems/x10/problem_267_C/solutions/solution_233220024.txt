@@ -1,0 +1,36 @@
+{
+    "id": 233220024,
+    "contestId": 267,
+    "creationTimeSeconds": 1700252304,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 267,
+        "index": "C",
+        "name": "Berland Traffic",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2700,
+        "tags": [
+            "math",
+            "matrices"
+        ]
+    },
+    "author": {
+        "contestId": 267,
+        "members": [
+            {
+                "handle": "Be_dos"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1358002800
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 23,
+    "timeConsumedMillis": 92,
+    "memoryConsumedBytes": 4096000,
+    "source": "#include <iostream>\n#include <cmath>\n#include <cctype>\n#include <vector>\n#include <algorithm>\n#include <set>\n#include <map>\n#include <deque>\n#include <stack>\n#include <unordered_set>\n#include <sstream>\n#include <cstring>\n#include <iomanip>\n#include <queue>\n#include <unordered_map>\n#include <random>\n#include <cfloat>\n#include <chrono>\n#include <bitset>\n#include <complex>\n#include <functional>\n#include <immintrin.h>\n\n#pragma GCC optimize(\"-O3\")\n#pragma GCC target(\"avx2,fma\")\n\ndouble EPS;\n\n// Stanford implementation of the simplex method\nstruct LPSolver {\n    int m, n;\n    std::vector<int32_t> B, N;\n    std::vector<std::vector<double> > D;\n\n    LPSolver(const std::vector<std::vector<double> > &A, const std::vector<double> &b, const std::vector<double> &c) :\n            m(b.size()), n(c.size()), N(n + 1), B(m), D(m + 2, std::vector<double>(n + 2)) {\n        for (int i = 0; i < m; i++) for (int j = 0; j < n; j++) D[i][j] = A[i][j];\n        for (int i = 0; i < m; i++) { B[i] = n + i; D[i][n] = -1; D[i][n + 1] = b[i]; }\n        for (int j = 0; j < n; j++) { N[j] = j; D[m][j] = -c[j]; }\n        N[n] = -1; D[m + 1][n] = 1;\n    }\n\n    void Pivot(int r, int s) {\n        double inv = 1.0 / D[r][s];\n        for (int i = 0; i < m + 2; i++) if (i != r)\n                for (int j = 0; j < n + 2; j++) if (j != s)\n                        D[i][j] -= D[r][j] * D[i][s] * inv;\n        for (int j = 0; j < n + 2; j++) if (j != s) D[r][j] *= inv;\n        for (int i = 0; i < m + 2; i++) if (i != r) D[i][s] *= -inv;\n        D[r][s] = inv;\n        std::swap(B[r], N[s]);\n    }\n\n    bool Simplex(int phase) {\n        int x = phase == 1 ? m + 1 : m;\n        while (true) {\n            int s = -1;\n            for (int j = 0; j <= n; j++) {\n                if (phase == 2 && N[j] == -1) continue;\n                if (s == -1 || D[x][j] < D[x][s] || D[x][j] == D[x][s] && N[j] < N[s]) s = j;\n            }\n            if (D[x][s] > -EPS) return true;\n            int r = -1;\n            for (int i = 0; i < m; i++) {\n                if (D[i][s] < EPS) continue;\n                if (r == -1 || D[i][n + 1] / D[i][s] < D[r][n + 1] / D[r][s] ||\n                    (D[i][n + 1] / D[i][s]) == (D[r][n + 1] / D[r][s]) && B[i] < B[r]) r = i;\n            }\n            if (r == -1) return false;\n            Pivot(r, s);\n        }\n    }\n\n    double Solve(std::vector<double> &x) {\n        int r = 0;\n        for (int i = 1; i < m; i++) if (D[i][n + 1] < D[r][n + 1]) r = i;\n        if (D[r][n + 1] < -EPS) {\n            Pivot(r, n);\n            if (!Simplex(1) || D[m + 1][n + 1] < -EPS) return -std::numeric_limits<double>::infinity();\n            for (int i = 0; i < m; i++) if (B[i] == -1) {\n                    int s = -1;\n                    for (int j = 0; j <= n; j++)\n                        if (s == -1 || D[i][j] < D[i][s] || D[i][j] == D[i][s] && N[j] < N[s]) s = j;\n                    Pivot(i, s);\n                }\n        }\n        if (!Simplex(2)) return std::numeric_limits<double>::infinity();\n        x = std::vector<double>(n);\n        for (int i = 0; i < m; i++) if (B[i] < n) x[B[i]] = D[i][n + 1];\n        return D[m][n + 1];\n    }\n};\n\nstruct Edge {\n    int32_t v1, v2;\n    int32_t capacity;\n};\n\nint main() {\n    std::ios::sync_with_stdio(false);\n    std::cin.tie(0);\n\n    int32_t n, m;\n    std::cin >> n >> m;\n\n    Edge* edges = new Edge[m];\n    std::vector<std::pair<int32_t, int32_t>>* graph = new std::vector<std::pair<int32_t, int32_t>>[n];\n    std::mt19937 rng;\n    for(int32_t i = 0; i < m; i++) {\n        std::cin >> edges[i].v1 >> edges[i].v2 >> edges[i].capacity;\n        edges[i].v1--;\n        edges[i].v2--;\n        /*edges[i].v1 = rng() % n;\n        edges[i].v2 = rng() % n;\n        while(edges[i].v2 == edges[i].v1)\n            edges[i].v2 = rng() % n;\n        edges[i].capacity = 1;*/\n\n        graph[edges[i].v1].emplace_back(edges[i].v2, edges[i].capacity);\n        graph[edges[i].v2].emplace_back(edges[i].v1, edges[i].capacity);\n    }\n\n    // One variable per vertex potential\n    int32_t num_constrains = 2 * m + 2 * n - 2;\n    std::vector<std::vector<double> > constrains;\n    std::vector<double> constraint_right_parts;\n\n    // Make sure incoming flow = outgoing flow\n    for(int32_t i = 1; i < n - 1; i++) {\n        constrains.push_back(std::vector<double>(n, 0));\n        for(int32_t j = 0; j < graph[i].size(); j++)\n            constrains.back()[graph[i][j].first]++;\n        constrains.back()[i] = -(int32_t)graph[i].size();\n        constraint_right_parts.push_back(0);\n\n        constrains.push_back(std::vector<double>(n, 0));\n        for(int32_t j = 0; j < graph[i].size(); j++)\n            constrains.back()[graph[i][j].first]--;\n        constrains.back()[i] = graph[i].size();\n        constraint_right_parts.push_back(0);\n    }\n\n    // Add constraints for each edge\n    for(int32_t i = 0; i < m; i++) {\n        constrains.push_back(std::vector<double>(n, 0));\n        constrains.back()[edges[i].v2]++;\n        constrains.back()[edges[i].v1]--;\n        constraint_right_parts.push_back(edges[i].capacity);\n\n        constrains.push_back(std::vector<double>(n, 0));\n        constrains.back()[edges[i].v2]--;\n        constrains.back()[edges[i].v1]++;\n        constraint_right_parts.push_back(edges[i].capacity);\n    }\n\n    std::vector<double> to_maximize(n, 0);\n    for(int32_t i = 0; i < graph[0].size(); i++) {\n        to_maximize[graph[0][i].first]++;\n        to_maximize[0]--;\n    }\n    LPSolver solver(constrains, constraint_right_parts, to_maximize);\n\n    std::cout << std::setprecision(20);\n\n    std::vector<double> potentials;\n    EPS = 1e-9;\n    double res = solver.Solve(potentials);\n\n    std::vector<double> potentials2;\n    EPS = 1e-8;\n    double res2 = solver.Solve(potentials2);\n\n    if(res2 > res) {\n        res = res2;\n        potentials = potentials2;\n    }\n\n    std::cout << res << \"\\n\";\n    for(int32_t i = 0; i < m; i++)\n        std::cout << potentials[edges[i].v2] - potentials[edges[i].v1] << \"\\n\";\n    return 0;\n}\n\n\n\n"
+}

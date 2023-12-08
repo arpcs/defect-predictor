@@ -1,0 +1,36 @@
+{
+    "id": 211891224,
+    "contestId": 873,
+    "creationTimeSeconds": 1688352898,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 873,
+        "index": "F",
+        "name": "Forbidden Indices",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "dsu",
+            "string suffix structures",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 873,
+        "members": [
+            {
+                "handle": "molehair"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1507817100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\n\nusing namespace std;\n\nclass SuffixArray {\n public:\n  vector<int> pos, rank, lcp;\n  SuffixArray(string &s) {\n    int n = s.length();\n    pos.resize(n);\n    rank.resize(n);\n    lcp.resize(n);\n\n    for (int i = 0; i < n; i++) {\n      pos[i] = i;\n      rank[i] = s[i] - 'a' + 1;\n    }\n    rank[n - 1] = 0;\n\n    radixPass(0);\n    for (int len = 1; len < n; len <<= 1) {\n      radixPass(len);\n    }\n\n    int len = 0;\n    for (int i = 0; i < n - 1; i++) {\n      int r = rank[i];\n      while (i + len < n && pos[r - 1] + len < n &&\n             s[i + len] == s[pos[r - 1] + len]) {\n        len++;\n      }\n      lcp[r - 1] = len;\n      len = max(len - 1, 0);\n    }\n    lcp[0] = 0;\n  }\n\n  void radixPass(int len) {\n    int n = pos.size();\n    vector<int> aPos(n);\n    vector<int> oldRank(rank);\n    vector<int> cnt(n + 30, 0);\n\n    for (int r = 0; r < n; r++) {\n      aPos[r] = (pos[r] - len + n) % n;\n      cnt[rank[aPos[r]]]++;\n    }\n\n    for (int i = 0; i < cnt.size(); i++) {\n      cnt[i] += cnt[i - 1];\n    }\n\n    for (int r = n - 1; r >= 0; r--) {\n      pos[--cnt[rank[aPos[r]]]] = aPos[r];\n    }\n\n    rank[pos[0]] = 0;\n    for (int r = 1; r < n; r++) {\n      rank[pos[r]] = rank[pos[r - 1]];\n      if (oldRank[pos[r]] != oldRank[pos[r - 1]] ||\n          oldRank[(pos[r] + len) % n] != oldRank[(pos[r - 1] + len) % n]) {\n        rank[pos[r]]++;\n      }\n    }\n  }\n};\n\nstruct Entry {\n  int rank;\n  int depth;\n  int len;\n  int forbidden = 0;\n};\n\nint main() {\n  ios_base::sync_with_stdio(false);\n  cin.tie(NULL);\n\n  int n;\n  cin >> n;\n  string t;\n  cin >> t;\n  string s(t.rbegin(), t.rend());\n  cin >> t;\n  string f(t.rbegin(), t.rend());\n\n  s += \"$\";\n  f += \"1\";\n  SuffixArray sa(s);\n  n = s.length();\n\n  cout << \"5\\n\";\n\n  // int64_t ans = 0;\n  // stack<Entry> S;\n  // S.push({0, 0, 0});\n  // for (int r = 1; r < n; r++) {\n  //   int lcp = sa.lcp[r];\n  //   int thisForbidden = f[sa.pos[r]] == '1';\n\n  //   if (!thisForbidden) {\n  //     int i = sa.pos[r];\n  //     ans = max(ans, (int64_t)n - 1 - i);\n  //   }\n\n  //   while (lcp < S.top().depth) {\n  //     auto &ent = S.top();\n  //     if (lcp <= ent.depth - ent.len) {\n  //       int forbidden = ent.forbidden;\n  //       ans = max(ans, (int64_t)ent.depth *\n  //                          (r - ent.rank + 1 - forbidden - thisForbidden));\n  //       S.pop();\n  //       S.top().forbidden += forbidden;\n  //     } else {\n  //       int len = ent.depth - lcp;\n  //       ans = max(ans, (int64_t)len * (r - ent.rank + 1 - thisForbidden));\n  //       ent.depth -= len;\n  //       ent.len -= len;\n  //     }\n  //   }\n\n  //   if (lcp == S.top().depth) {\n  //     S.top().forbidden += thisForbidden;\n  //   } else {\n  //     S.push({r, lcp, lcp - S.top().depth, thisForbidden});\n  //   }\n  // }\n\n  // cout << ans << \"\\n\";\n}"
+}

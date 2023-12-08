@@ -1,0 +1,38 @@
+{
+    "id": 213580110,
+    "contestId": 1023,
+    "creationTimeSeconds": 1689212379,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1023,
+        "index": "F",
+        "name": "Mobile Phone Network",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 2600,
+        "tags": [
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1023,
+        "members": [
+            {
+                "handle": "xieruidi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1534516500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 66,
+    "timeConsumedMillis": 1918,
+    "memoryConsumedBytes": 74649600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nint head[500010],tot=0;\r\nstruct node\r\n{\r\n\tint to,nxt;\r\n\tbool flag;\r\n}e[2000010];\r\nvoid add(int x,int y,bool flag)\r\n{\r\n\te[++tot].to=y; e[tot].nxt=head[x]; head[x]=tot; e[tot].flag=flag;\r\n\treturn;\r\n}\r\nint n,m,k;\r\nlong long ans=0;\r\nbool ansp=false;\r\nstruct Side\r\n{\r\n\tint x,y,len;\r\n}side[2000010];\r\nbool cmp(Side a,Side b)\r\n{\r\n\treturn a.len<b.len;\r\n}\r\nint F[500010],FF=0;\r\nvoid setupf()\r\n{\r\n\tfor(int i=1;i<=n;i++) F[i]=i;\r\n\treturn;\r\n}\r\nint getf(int x)\r\n{\r\n\tif(F[x]!=x) F[x]=getf(F[x]);\r\n\treturn F[x];\r\n}\r\nbool merge(int x,int y)\r\n{\r\n\tint f1=getf(x),f2=getf(y);\r\n\tif(f1==f2) return false;\r\n\tF[f1]=f2; FF++;\r\n\treturn true;\r\n}\r\nint size[500010],dep[500010],son[500010],f[500010];\r\nbool w[500010];\r\nvoid dfs1(int x,int fa)\r\n{\r\n\tsize[x]=1; dep[x]=dep[fa]+1; f[x]=fa;\r\n\tfor(int i=head[x];i;i=e[i].nxt)\r\n\t{\r\n\t\tint y=e[i].to;\r\n\t\tif(y==fa) continue;\r\n\t\tw[y]=e[i].flag;\r\n\t\tdfs1(y,x); size[x]+=size[y];\r\n\t\tif(size[y]>size[son[x]])\r\n\t\t\tson[x]=y;\r\n\t}\r\n\treturn;\r\n}\r\nint top[500010],id[500010],ID[500010],cnt=0;\r\nvoid dfs2(int x,int topf)\r\n{\r\n\tid[x]=++cnt; ID[cnt]=x; top[x]=topf;\r\n\tif(!son[x]) return;\r\n\tdfs2(son[x],topf);\r\n\tfor(int i=head[x];i;i=e[i].nxt)\r\n\t{\r\n\t\tint y=e[i].to;\r\n\t\tif(y==f[x]||y==son[x]) continue;\r\n\t\tdfs2(y,y);\r\n\t}\r\n\treturn;\r\n}\r\nclass Tree\r\n{\r\n\tpublic:\r\n\tint Min[2000010];\r\n\tvoid down(int x)\r\n\t{\r\n\t\tif(Min[x]==0x3f3f3f3f) return;\r\n\t\tMin[x*2]=min(Min[x*2],Min[x]);\r\n\t\tMin[x*2+1]=min(Min[x*2+1],Min[x]);\r\n\t\tMin[x]=0x3f3f3f3f; return;\r\n\t}\r\n\tvoid plant(int x,int l,int r)\r\n\t{\r\n\t\tMin[x]=0x3f3f3f3f;\r\n\t\tif(l==r) return;\r\n\t\tint mid=(l+r)/2;\r\n\t\tplant(x*2,l,mid); plant(x*2+1,mid+1,r);\r\n\t\treturn;\r\n\t}\r\n\tvoid change(int x,int l,int r,int p,int q,int val)\r\n\t{\r\n\t\tif(p<=l&&r<=q)\r\n\t\t{\r\n\t\t\tMin[x]=min(Min[x],val);\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint mid=(l+r)/2; down(x);\r\n\t\tif(p<=mid) change(x*2,l,mid,p,q,val);\r\n\t\tif(mid+1<=q) change(x*2+1,mid+1,r,p,q,val);\r\n\t\treturn;\r\n\t}\r\n\tvoid getans(int x,int l,int r)\r\n\t{\r\n\t\tif(l==r)\r\n\t\t{\r\n\t\t\tif(ansp) return;\r\n\t\t\tif(w[ID[l]])\r\n\t\t\t{\r\n\t\t\t\tif(Min[x]==0x3f3f3f3f)\r\n\t\t\t\t{\r\n\t\t\t\t//\tprintf(\"%d->%d\\n\",ID[l],l);\r\n\t\t\t\t\tansp=true;\r\n\t\t\t\t\treturn;\r\n\t\t\t\t}\r\n\t\t\t\tans+=Min[x];\r\n\t\t\t}\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint mid=(l+r)/2; down(x);\r\n\t\tgetans(x*2,l,mid); getans(x*2+1,mid+1,r);\r\n\t\treturn;\r\n\t}\r\n}o;\r\nvoid renew(int x,int y,int num)\r\n{\r\n//\tprintf(\"%d-%d\\n\",x,y);\r\n\twhile(top[x]!=top[y])\r\n\t{\r\n\t\tif(dep[top[x]]<dep[top[y]]) swap(x,y);\r\n//\t\tprintf(\"%d %d\\n\",id[top[x]],id[x]);\r\n\t\to.change(1,1,n,id[top[x]],id[x],num);\r\n//\t\tprintf(\"nxt\\n\");\r\n\t\tx=f[top[x]];\r\n\t}\r\n\tif(x==y) return;\r\n\tif(dep[x]<dep[y]) swap(x,y);\r\n//\tprintf(\"%d %d\\n\",id[y]+1,id[x]);\r\n\to.change(1,1,n,id[y]+1,id[x],num);\r\n//\tprintf(\"nxt\\n\");\r\n\treturn;\r\n}\r\nint main()\r\n{\r\n\tscanf(\"%d%d%d\",&n,&k,&m); setupf();\r\n\tfor(int i=1;i<=k;i++)\r\n\t{\r\n\t\tint x,y; scanf(\"%d%d\",&x,&y);\r\n\t\tadd(x,y,true); add(y,x,true); merge(x,y);\r\n\t}\r\n\tfor(int i=1;i<=m;i++)\r\n\t\tscanf(\"%d%d%d\",&side[i].x,&side[i].y,&side[i].len);\r\n\tfor(int i=1;i<=m;i++)\r\n\t{\r\n//\t\tprintf(\"%d\\n\",FF);\r\n\t\tif(FF>=n-1) break;\r\n\t\tif(merge(side[i].x,side[i].y))\r\n\t\t{\r\n\t\t\tside[i].len=-1;\r\n\t\t\tadd(side[i].x,side[i].y,false); add(side[i].y,side[i].x,false);\r\n\t\t}\r\n\t}\r\n//\tprintf(\"%lld\\n\",ans);\r\n\tw[1]=false; dfs1(1,0); dfs2(1,1); o.plant(1,1,n);\r\n//\tprintf(\"114\\n\");\r\n\tfor(int i=1;i<=m;i++)\r\n\t{\r\n\t\tif(side[i].len==-1) continue;\r\n\t\trenew(side[i].x,side[i].y,side[i].len);\r\n\t}\r\n//\tprintf(\"114\\n\");\r\n\to.getans(1,1,n);\r\n\tif(ansp) printf(\"-1\");\r\n\telse printf(\"%lld\",ans);\r\n\treturn 0;\r\n}"
+}

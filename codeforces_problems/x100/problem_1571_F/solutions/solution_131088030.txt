@@ -1,0 +1,36 @@
+{
+    "id": 131088030,
+    "contestId": 1571,
+    "creationTimeSeconds": 1633623161,
+    "relativeTimeSeconds": 5861,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "vstrimaitis"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 88,
+    "timeConsumedMillis": 202,
+    "memoryConsumedBytes": 22528000,
+    "source": "import java.util.*\r\nimport kotlin.math.*\r\n\r\nprivate fun readLn() = readLine()!! // string line\r\nprivate fun readInt() = readLn().toInt() // single int\r\nprivate fun readLong() = readLn().toLong()\r\nprivate fun readStrings() = readLn().split(\" \") // list of strings\r\nprivate fun readInts() = readStrings().map { it.toInt() } // list of ints\r\nprivate fun readLongs() = readStrings().map { it.toLong() } // list of ints\r\n\r\nfun getMaxRange(n: Int, ks: List<Int>, ts: List<Int>): Int {\r\n    var ans = 0\r\n    for (i in 0 until n) {\r\n        val r = if (ts[i] == 1) ks[i] else ks[i]*2-1\r\n        ans = max(ans, r)\r\n    }\r\n    return ans\r\n}\r\n\r\nfun findBestFit(S: Int, n: Int, ks: List<Int>, ts: List<Int>): List<Int> {\r\n    val isPossible = mutableListOf<Boolean>()\r\n    val gotByUsing = mutableListOf<Int>()\r\n    for(i in 0 until S+1) {\r\n        isPossible.add(false)\r\n        gotByUsing.add(-1)\r\n    }\r\n    isPossible[0] = true\r\n    for(i in 0 until n) {\r\n        if (ts[i] == 1) continue\r\n        for (s in 0..S) {\r\n            val newS = s + ks[i]\r\n            if (newS > S) break\r\n            if (isPossible[s] && !isPossible[newS] && gotByUsing[s] != i) {\r\n                isPossible[newS] = true\r\n                gotByUsing[newS] = i\r\n            }\r\n        }\r\n    }\r\n    var s = S\r\n    while(!isPossible[s]) s--\r\n    val ans = mutableListOf<Int>()\r\n    while(s > 0) {\r\n        ans.add(gotByUsing[s])\r\n        s -= ks[gotByUsing[s]]\r\n    }\r\n    return ans\r\n}\r\n\r\nfun solve(n: Int, m: Int, ks: List<Int>, ts: List<Int>): List<Int> {\r\n    if (ks.sum() > m || getMaxRange(n, ks, ts) > m) {\r\n        return listOf(-1)\r\n    }\r\n    val assignments = mutableListOf<Int>()\r\n    var firstFree = 0\r\n    for(i in 0 until m) {\r\n        assignments.add(-1)\r\n    }\r\n    var ans = mutableListOf<Int>()\r\n    for(i in 0 until n) {\r\n        ans.add(-1)\r\n    }\r\n    for(i in 0 until n) {\r\n        if (ts[i] == 2) continue\r\n        ans[i] = firstFree+1\r\n        for(j in 0 until ks[i]) {\r\n            val jj = firstFree\r\n            firstFree++\r\n            if (jj >= m) {\r\n                return listOf(-1)\r\n            }\r\n            assignments[jj] = i\r\n        }\r\n    }\r\n    // start on an odd position\r\n    val leftLen = (m-1) - firstFree + 1\r\n    val half = leftLen / 2 + leftLen % 2\r\n    val best = findBestFit(half, n, ks, ts)\r\n\r\n    var curr = firstFree\r\n    for (i in best) {\r\n        ans[i] = curr+1\r\n        for(j in 0 until ks[i]) {\r\n            val jj = curr\r\n            if (jj >= m) {\r\n                return listOf(-1)\r\n            }\r\n            curr += 2\r\n            assignments[jj] = i\r\n        }\r\n    }\r\n    val used = best.toSet()\r\n    firstFree++\r\n    for(i in 0 until n) {\r\n        if (ts[i] == 1) continue\r\n        if (used.contains(i)) continue\r\n        ans[i] = firstFree+1\r\n        for(j in 0 until ks[i]) {\r\n            val jj = firstFree+j*2\r\n            if (jj >= m) {\r\n                return listOf(-1)\r\n            }\r\n            assignments[jj] = i\r\n        }\r\n        while(firstFree < m && assignments[firstFree] != -1) {\r\n            firstFree++\r\n        }\r\n    }\r\n    return ans\r\n}\r\n\r\nfun main() {\r\n    val (n, m) = readInts()\r\n    val ks = mutableListOf<Int>()\r\n    val ts = mutableListOf<Int>()\r\n    for(i in 0 until n) {\r\n        val (k, t) = readInts()\r\n        ks.add(k)\r\n        ts.add(t)\r\n    }\r\n    println(solve(n, m, ks, ts).joinToString(\" \"))\r\n}"
+}

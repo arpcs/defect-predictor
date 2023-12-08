@@ -1,0 +1,36 @@
+{
+    "id": 159095096,
+    "contestId": 272,
+    "creationTimeSeconds": 1654024399,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 272,
+        "index": "C",
+        "name": "Dima and Staircase",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 1500,
+        "tags": [
+            "data structures",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 272,
+        "members": [
+            {
+                "handle": "IGrenadiers"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1360769400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 92,
+    "memoryConsumedBytes": 819200,
+    "source": "#include<bits/stdc++.h>\r\n#include <random>\r\nusing namespace std;\r\n//#include <ext/pb_ds/assoc_container.hpp>\r\n//#include <ext/pb_ds/tree_policy.hpp>\r\n//using namespace __gnu_pbds;\r\n\r\n#define ll long long\r\n#define pi 3.1415926535897932385\r\n#define mod 1000000007 \r\n#define MOD 998244353\r\n#define db double\r\n#define pp(x) pair<x,x>\r\n#define ff first\r\n#define ss second\r\n#define FIO ios_base::sync_with_stdio(false); cin.tie(NULL);\r\n#define vv(x) vector<x >\r\n#define pb push_back\r\n#define pob pop_back\r\n#define pf push_front\r\n#define pof  pop_front\r\n#define endl \"\\n\"\r\n#define umap unordered_map\r\n#define uset unordered_set\r\n#define pq priority_queue\r\n#define dbg(x) { cout<< #x << \": \" << (x) << endl; }\r\n#define dbg2(x,y) { cout<< #x << \": \" << (x) << \" , \" << #y << \": \" << (y) << endl; }\r\n#define bp ll kkk; cin >>kkk;\r\n#define dbgArr(a,n) cout<<\"Array \"<<#a<<endl; for(ll i=0 ; i<n ; i++) cout<<a[i]<<\" \"; cout<<endl;\r\n#define forn(i,n) for(ll i=0 ; i<n ; i++)\r\n#define forn1(i,n) for(ll i=1 ; i<=n ; i++)\r\n#define arr(a,n) for(ll i=0;i<n;i++){ cin>>a[i]; }\r\n#define arr1(a,n) for(ll i=1;i<=n;i++){ cin>>a[i]; }\r\n#define file freopen(\"inp.in\",\"r\",stdin); freopen(\"outp.out\",\"w\",stdout)\r\n#define print cout<<\"Case #\"<<number<<\": \"\r\n#define all(x) x.begin(), x.end()\r\n#define trav(x, a) for(auto &x: a)\r\n#define inf 1e18\r\n\r\ntemplate <typename T> \r\n#define ordered_set tree<T, null_type,less<T>,rb_tree_tag,tree_order_statistics_node_update>\r\n\r\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\r\n\r\nclass DSU {\r\n    vector<int> par,rank,sz ;\r\n    public :\r\n        DSU(int n) {\r\n            par.resize(n);\r\n            rank.resize(n,1);\r\n            sz.resize(n,1);\r\n            iota(all(par),0);\r\n        }\r\n\r\n        int find(int x) {\r\n            if(par[x]==x) return x ;\r\n            return par[x]=find(par[x]);\r\n        }\r\n\r\n        void Union(int x,int y) {\r\n            int xroot=find(x),yroot=find(y);\r\n            if(xroot==yroot) return ;\r\n            if(rank[xroot] > rank[yroot]) {\r\n                par[yroot]=xroot ;\r\n                sz[xroot]+=sz[yroot];\r\n            }\r\n            else if(rank[yroot]>rank[xroot]) {\r\n                par[xroot]=yroot ;\r\n                sz[yroot]+=sz[xroot];\r\n            }\r\n            else {\r\n                par[yroot]=xroot ;\r\n                sz[xroot]+=sz[yroot];\r\n                rank[xroot]++ ;\r\n            }\r\n        }\r\n\r\n        bool connected(int x , int y) {\r\n            return find(x)==find(y);\r\n        }\r\n};\r\n\r\nclass LCA {\r\n    vector<int> height,euler,first,tree ;\r\n    vector<bool> vis ;\r\n    int n ;\r\n\r\n    public :\r\n    LCA(vector<vector<int>> &adj, int root=0) {\r\n        n=adj.size();\r\n        height.resize(n); first.resize(n);\r\n        euler.resize(2*n); tree.resize(4*n);\r\n        vis.resize(n,false);\r\n        dfs(adj,root);\r\n        int m = euler.size();\r\n        build(1,0,m-1);\r\n    }\r\n\r\n    void dfs(vector<vector<int>> &adj, int node, int h=0) {\r\n        vis[node]=true ;\r\n        height[node]=h ;\r\n        first[node]=euler.size();\r\n        euler.pb(node);\r\n        for(auto to : adj[node]) {\r\n            if(!vis[to]) dfs(adj,to,h+1);\r\n            euler.pb(node);\r\n        }\r\n    }\r\n\r\n    void build(int node,int b,int e) {\r\n        if(b==e) {\r\n            tree[node]=euler[b] ;\r\n            return ;\r\n        }\r\n        int mid = (b+e)>>1 ;\r\n        build(node<<1,b,mid);\r\n        build(node<<1 | 1,mid+1,e);\r\n        int l=tree[node<<1],r=tree[node<<1|1];\r\n        tree[node] = (height[l] < height[r]) ? l : r ;\r\n    }\r\n\r\n    int query(int node,int b,int e,int L,int R) {\r\n        if(b > R or e < L) return -1 ;\r\n        if(b >= L and e <= R) return tree[node];\r\n        int mid = (b+e)>>1 ;\r\n        int left = query(node<<1,b,mid,L,R);\r\n        int right = query(node<<1|1,mid+1,e,L,R);\r\n        if(left==-1) return right ;\r\n        if(right==-1) return left ;\r\n        return height[left] < height[right] ? left : right ;\r\n    }\r\n\r\n    int lca(int u,int v) {\r\n        int left = first[u];\r\n        int right = first[v];\r\n        if(left > right) swap(left,right);\r\n        return query(1,0,euler.size()-1,left,right);\r\n    }\r\n\r\n};\r\n\r\nvector<int> countinversions(vector<int> a , int &ans) {\r\n    if(a.size()==1) return a ;\r\n    int mid = a.size()/2 ;\r\n    vector<int> x(a.begin(),a.begin()+mid),y(a.begin()+mid,a.end());\r\n    auto left = countinversions(x,ans);\r\n    auto right = countinversions(y,ans);\r\n    vector<int> temp ;\r\n    int i=0,j=0 ;\r\n    while(i<left.size() and j<right.size()) {\r\n        if(left[i] <= right[j]) {\r\n            temp.pb(left[i]);\r\n            i++ ;\r\n        }\r\n        else {\r\n            temp.pb(right[j]);\r\n            ans+=left.size()-i ;\r\n            j++ ;\r\n        }\r\n    }\r\n    while(i<left.size()) temp.pb(left[i++]);\r\n    while(j<right.size()) temp.pb(right[j++]);\r\n    return temp ;\r\n}\r\n\r\nll power(ll x, ll b) {ll p = 1;while (b > 0) {if(b&1) {p = p * x; p %= mod;} b >>= 1; x *= x; x %= mod;} return p % mod;}\r\n\r\n\r\nvoid yn(bool x) {\r\n    cout<<(x==1 ? \"YES\\n\" : \"NO\\n\");\r\n}\r\n\r\nll modinv(ll n) { \r\n    return power(n,mod-2); \r\n}\r\n\r\n//auto flambda = [&/=](auto a, auto b) { return a < b; };\r\n\r\nvoid solve() {\r\n    ll n ; cin>>n ;\r\n    vector<ll> v(n+1); arr1(v,n);\r\n    ll q ; cin>>q ;\r\n    while(q--) {\r\n        ll a,b ; cin>>a>>b ;\r\n        cout<<max(v[1],v[a])<<endl ;\r\n        ll val = max(v[a],v[1]);\r\n        v[1]=val+b ;\r\n        v[a]=val+b ;\r\n    }\r\n\r\n}\r\n\r\nint main() \r\n{\r\n    FIO\r\n    #ifndef ONLINE_JUDGE\r\n        freopen(\"input.txt\",\"r\",stdin);\r\n        freopen(\"output.txt\",\"w\",stdout);\r\n    #endif\r\n    ll TC=1 ; \r\n    //cin>>TC ;\r\n    forn1(number,TC) solve();\r\n    return 0;\r\n}\r\n"
+}

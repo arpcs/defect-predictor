@@ -1,0 +1,36 @@
+{
+    "id": 220469138,
+    "contestId": 237,
+    "creationTimeSeconds": 1693031400,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 237,
+        "index": "E",
+        "name": "Build String",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2000,
+        "tags": [
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 237,
+        "members": [
+            {
+                "handle": "Maginy_ZYX"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1351179000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 614400,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\nconst int N = 200;\nint n, l = 1;\nint head[N], d[N], mf[N], pre[N], vis[N];\nint flow, cost;\nint s, t;\nint need[N];\nchar s0[110], ss[110]; // \u8bb0\u5f55\u76ee\u6807st\u5404\u4e2a\u5b57\u7b26\u9700\u8981\u7684\u4e2a\u6570\nint sc0[30], sc[105][30];\n\nstruct edge\n{\n\tint to, next;\n\tint w; // \u5355\u4f4d\u6743\u91cd\n\tint c; // \u9650\u5236\u7684\u6d41\u91cf\n} ed[N * N + 2 * N];\n\nvoid add_edge(int x, int y, int w, int c)\n{\n\ted[++l].to = y;\n\ted[l].w = w;\n\ted[l].c = c;\n\ted[l].next = head[x];\n\thead[x] = l;\n}\n\nbool spfa()\n{\n\tmemset(d, 0x3f, sizeof(d));\n\tmemset(mf, 0, sizeof(mf));\n\tmemset(vis, 0, sizeof(vis));\n\tqueue<int> q;\n\tq.push(s);\n\td[s] = 0, mf[s] = 0x3f3f3f3f, vis[s] = 1;\n\twhile (!q.empty())\n\t{\n\t\tint temp = q.front();\n\t\tq.pop();\n\t\tvis[temp] = 0;\n\t\tfor (int i = head[temp]; i; i = ed[i].next)\n\t\t{\n\t\t\tint to = ed[i].to;\n\t\t\tif (d[to] > d[temp] + ed[i].w && ed[i].c)\n\t\t\t{\n\t\t\t\td[to] = d[temp] + ed[i].w;\n\t\t\t\tmf[to] = min(mf[temp], ed[i].c); // \u6700\u5927\u6d41\u91cf\n\t\t\t\tpre[to] = i;\t\t\t\t\t //?\u524d\u9a71\u8fb9,\u8bb0\u5f55\u4ee5\u8be5\u70b9\u7ed3\u5c3e\u7684\u4e0a\u4e00\u6761\u8fb9\n\t\t\t\tif (!vis[to])\n\t\t\t\t{\n\t\t\t\t\tq.push(to);\n\t\t\t\t\tvis[to] = 1;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n\treturn mf[t] > 0; // \u662f\u5426\u80fd\u5230\u8fbe\u6c47\u70b9\n}\n\nvoid ek()\n{\n\tflow = 0, cost = 0;\n\twhile (spfa())\n\t{\n\t\tfor (int v = t; v != s;)\n\t\t{ // \u9006\u7740\u4ece\u6c47\u70b9\u8d70\u5230\u51fa\u53d1\u70b9\n\t\t\tint i = pre[v];\n\t\t\ted[i].c -= mf[t];\n\t\t\ted[i ^ 1].c += mf[t];\n\t\t\tv = ed[i ^ 1].to;\n\t\t}\n\t\tflow += mf[t];\t\t  // \u7d2f\u52a0\u53ef\u884c\u6d41\n\t\tcost += mf[t] * d[t]; // \u7d2f\u52a0\u8d39\u7528\n\t}\n}\n\nint main()\n{\n\t// \u6700\u5c0f\u8d39\u7528\u6700\u5927\u6d41\n\tcin >> s0;\n\tint len = strlen(s0); // \u90fd\u662f\u5c0f\u5199\u5b57\u6bcd\u6ca1\uff1f\n\tfor (int i = 0; i < len; i++)\n\t\tsc0[s0[i] - 'a' + 1]++;\n\tcin >> n;\n\ts = 0;\n\tt = len + n + 1;\n\tfor (int i = 1; i <= 26; i++)\n\t{\n\t\tif (sc0[i])\n\t\t{\n\t\t\tadd_edge(s, i, 0, sc0[i]);\n\t\t\tadd_edge(i, s, 0, 0);\n\t\t}\n\t}\n\tfor (int i = 1; i <= n; i++)\n\t{\n\t\tcin >> ss;\n\t\tint le = strlen(ss);\n\t\tcin >> need[i]; // \u6700\u591a\u53ef\u4ee5\u4f7f\u7528\u7684\n\t\tfor (int j = 0; j < le; j++)\n\t\t\tsc[i][ss[j] - 'a' + 1]++;\n\t}\n\tfor (int i = 1; i <= n; i++)\n\t{\n\t\tadd_edge(i + len, t, 0, need[i]);\n\t\tadd_edge(t, i + len, 0, 0);\n\t}\n\tfor (int i = 1; i <= 26; i++)\n\t{\n\t\tfor (int j = 1; j <= n; j++)\n\t\t{\n\t\t\tif (sc0[i] && sc[j][i])\n\t\t\t{\n\t\t\t\tadd_edge(i, j + len, j, sc[j][i]);\n\t\t\t\tadd_edge(j + len, i, -j, 0);\n\t\t\t}\n\t\t}\n\t}\n\tek();\n\tif (flow == len)\n\t{\n\t\tcout << cost << endl;\n\t}\n\telse\n\t{\n\t\tcout << \"-1\" << endl;\n\t}\n}\n\t\t \t\t \t\t\t \t\t  \t\t\t   \t   \t  \t \t"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 193031437,
+    "contestId": 407,
+    "creationTimeSeconds": 1676016167,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 407,
+        "index": "D",
+        "name": "Largest Submatrix 3",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2700,
+        "tags": [
+            "dp",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 407,
+        "members": [
+            {
+                "handle": "TaPyoo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1396162800
+    },
+    "programmingLanguage": "Python 3",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 716800,
+    "source": "#!/usr/bin/python\n\nimport time\nimport random\nfrom math import ceil, log2\nfrom typing import List, Tuple, Dict\n\n\n# Get a matrix, return the largest inhomogenous submatrix\ndef get_largest_submatrix(A: List[List[int]]) -> Tuple[int, int, int, int, int]:\n    N, M = len(A), len(A[0])\n\n    dup_per_columns = get_columns(A)\n    dup_per_rows = get_rows(A)\n\n    max_columns = get_max_columns(dup_per_columns, N, M)\n    max_rows = get_max_rows(dup_per_rows, N, M)\n\n    sizes = [[0 for j in range(M)] for i in range(N)]\n    idxes = [[None for j in range(M)] for i in range(N)]\n    for i in range(N):\n        for j in range(M):\n\n            n = max_columns[i][j]\n            m = max_rows[i][j]\n\n            if i != 0 and j != 0:\n\n                ui = max(i - 1, 0)\n                lj = max(j - 1, 0)\n\n                left_up, left, up = (\n                    idxes[ui][lj][2:4],\n                    idxes[i][lj][2:4],\n                    idxes[ui][j][2:4],\n                )\n\n                if (\n                    (i + n - 1 <= left_up[0] and j + m - 1 <= left_up[1])\n                    or (i + n - 1 <= left[0] and j + m - 1 <= left[1])\n                    or (i + n - 1 <= up[0] and j + m - 1 <= up[1])\n                ):\n                    sizes[i][j] = n * m\n                    idxes[i][j] = (i, j, i + n - 1, j + m - 1)\n                    continue\n\n            limit_rows = [max_rows[i + ii][j] for ii in range(n)]\n            limit_columns = [max_columns[i][j + jj] for jj in range(m)]\n\n            max_size = limit_rows[0]\n            max_idx = (i, j, i, j + m - 1)\n            for ii in range(1, n):\n                max_width_by_row = min(limit_rows[: ii + 1])\n                max_width_by_col = max_width_by_row\n                for k, m in enumerate(limit_columns):\n                    if m < ii + 1:\n                        max_width_by_col = k\n\n                height = ii + 1\n                width = min(max_width_by_row, max_width_by_col)\n                size = height * width\n\n                if size > max_size and check_distinct(A, i, j, height, width):\n                    max_size = size\n                    max_idx = (i, j, i + height - 1, j + width - 1)\n\n            sizes[i][j] = max_size\n            idxes[i][j] = max_idx\n\n    max_size = max(sum(sizes, []))\n    idx = sum(sizes, []).index(max_size)\n    max_idx = sum(idxes, [])[idx]\n\n    return max_size, max_idx\n\n\ndef check_distinct(A: List[List[int]], i, j, height, width: int) -> bool:\n\n    sub = [[A[ii][jj] for jj in range(j, j + width)] for ii in range(i, i + height)]\n    subset = sum(sub, [])\n\n    return len(set(subset)) == len(subset)\n\n\n# Get a matrix, return duplicate elements and their indices in each column\ndef get_columns(A: List[List[int]]) -> Dict[int, List[Tuple[int]]]:\n    N, M = len(A), len(A[0])\n\n    dup_per_columns = {j: [] for j in range(M)}\n    for j in range(M):\n        column = [A[i][j] for i in range(N)]\n\n        dups = {}\n        for idx, i in enumerate(column):\n            dups[i] = dups.get(i, ()) + (idx,)\n\n        dup_idxs = [v for v in dups.values() if len(v) > 1]\n\n        dup_per_columns[j] = dup_idxs\n\n    return dup_per_columns\n\n\n# Get a matrix, return duplicate elements and their indices in each row\ndef get_rows(A: List[List[int]]) -> Dict[int, List[Tuple[int]]]:\n    N, M = len(A), len(A[0])\n\n    dup_per_rows = {i: [] for i in range(N)}\n    for i in range(N):\n        row = A[i]\n\n        dups = {}\n        for idx, j in enumerate(row):\n            dups[j] = dups.get(j, ()) + (idx,)\n\n        dup_idxs = [v for v in dups.values() if len(v) > 1]\n\n        dup_per_rows[i] = dup_idxs\n\n    return dup_per_rows\n\n\ndef get_max_columns(\n    dup_per_columns: Dict[int, List[Tuple[int]]], N, M\n) -> List[List[int]]:\n    max_columns = [[0 for j in range(M)] for i in range(N)]\n\n    for j in range(M):\n        dups = dup_per_columns[j]\n        pivots = [d + 1 for d in sum(dups, ())]\n\n        for i in range(N):\n            if i == 0 or i in pivots:\n                max_columns[i][j] = get_max(dups, i, N)\n            else:\n                max_columns[i][j] = max_columns[i - 1][j] - 1\n\n    return max_columns\n\n\ndef get_max_rows(dup_per_rows: Dict[int, List[Tuple[int]]], N, M) -> List[List[int]]:\n    max_rows = [[0 for j in range(M)] for i in range(N)]\n\n    for i in range(N):\n        dups = dup_per_rows[i]\n        pivots = [d + 1 for d in sum(dups, ())]\n\n        for j in range(M):\n            if j == 0 or j in pivots:\n                max_rows[i][j] = get_max(dups, j, M)\n            else:\n                max_rows[i][j] = max_rows[i][j - 1] - 1\n\n    return max_rows\n\n\n# Return length of the maximum inhomongenous bin\ndef get_max(l: List[Tuple[int]], start: int, end: int) -> int:\n    last_idx = start + 1\n    for idx in range(start + 1, end + 1):\n\n        homo = False\n        for tup in l:\n            if len([i for i in tup if i >= start and i < idx]) > 1:\n                homo = True\n                last_idx = idx - 1\n                break\n\n        if homo:\n            break\n\n        last_idx = idx\n\n    return last_idx - start\n\n\ndef pprint(A):\n    for row in A:\n        print(\" \".join([f\"{i:>3}\" for i in row]))\n\n\nif __name__ == \"__main__\":\n    sizes = input()\n    N, M = sizes.split(\" \")\n    N, M = int(N), int(M)\n\n    A = [None for n in range(N)]\n    for n in range(N):\n        elems = input()\n        A[n] = [int(e) for e in elems.split(\" \")]\n\n    # A = [[random.randint(1, 10000) for j in range(M)] for i in range(N)]\n\n    # pprint(A)\n\n    # start = time.time()\n    max_size, max_idx = get_largest_submatrix(A)\n    # end = time.time()\n\n    # print(f\"max_size: {max_size}, max_idx: {max_idx}\")\n    # print(f\"time: {end - start}\")\n\n    print(max_size)\n"
+}

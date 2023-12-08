@@ -1,0 +1,36 @@
+{
+    "id": 215486051,
+    "contestId": 237,
+    "creationTimeSeconds": 1690285302,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 237,
+        "index": "E",
+        "name": "Build String",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2000,
+        "tags": [
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 237,
+        "members": [
+            {
+                "handle": "bkifhr9"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1351179000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 20480000,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\ntypedef long long ll;\n#define pb push_back\nconst int N=1e3+10;\nconst int mod=1000000007;\nconst int inf=0x3f3f3f3f;\nconst ll INF=0x3f3f3f3f3f3f3f3f;\n// #define int long long \nmt19937 rnd(chrono::system_clock::now().time_since_epoch().count());\nll getrnd(ll l,ll r){return uniform_int_distribution<ll>(l,r)(rnd);}\nll qpow(ll x,ll n,ll p){ll ans=1;while(n){if(n&1)ans=ans*x%p;x=x*x%p;n/=2;}return ans;}\n\nstruct MCMF_Mincost_Maxflow {\n\tint s, t;\n\tint cost[N], pre[N], last[N], flow[N], vis[N];\n\tint maxflow, mincost;\n\tstruct Edge {\n\t\tint to, next, flow, cost;\n\t}e[N*N];\n\tint head[N*N], cnt;\n\tqueue<int> q;\n\t\n\tvoid add_edge(int from, int to, int flow, int cost) {\n\t\te[++cnt] = {to, head[from], flow, cost};\n\t\thead[from] = cnt;\n\t\te[++cnt] = {from, head[to], 0, -cost};\n\t\thead[to] = cnt;\n\t}\n\n\tbool spfa(int s, int t) {\n\t\tmemset(cost, 0x7f, sizeof(cost));\n\t\tmemset(flow, 0x7f, sizeof(flow));\n\t\tmemset(vis, 0, sizeof(vis));\n\t\t// memset(pre,-1,sizeof pre);\n\t\tq.push(s);\n\t\tvis[s] = 1;\n\t\tcost[s] = 0;\n\t\tpre[t] = -1;\n\n\t\twhile(!q.empty()) {\n\t\t\tint now = q.front();\n\t\t\tq.pop();\n\t\t\tvis[now] = 0;\n\t\t\tfor(int i = head[now]; i != -1; i = e[i].next) {\n\t\t\t\tif(e[i].flow > 0 && cost[e[i].to] > cost[now]+e[i].cost) {\n\t\t\t\t\tcost[e[i].to] = cost[now] + e[i].cost;\n\t\t\t\t\tpre[e[i].to] = now;\n\t\t\t\t\tlast[e[i].to] = i;\n\t\t\t\t\tflow[e[i].to] = min(flow[now], e[i].flow);\n\t\t\t\t\tif(!vis[e[i].to]) {\n\t\t\t\t\t\tvis[e[i].to] = 1;\n\t\t\t\t\t\tq.push(e[i].to);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn pre[t] != -1;\n\t}\n\n\tvoid MCMF() {\n\t\twhile(spfa(s, t)) {\n\t\t\tint now = t;\n\t\t\tmaxflow += flow[t];\n\t\t\tmincost += flow[t]*cost[t];\n\t\t\twhile(now != s) {\n\t\t\t\te[last[now]].flow -= flow[t];\n\t\t\t\te[last[now]^1].flow += flow[t];\n\t\t\t\tnow = pre[now];\n\t\t\t}\n\t\t}\n\t}\n\n\tvoid init(){\n\t\tmemset(pre, 0, sizeof(pre));\n\t\tmemset(last, 0 ,sizeof(last));\n\t\tmemset(head, -1, sizeof(head));\n\t\tcnt = -1;\n\t\tmincost = maxflow = 0;\n\t}\n}f;\nint a[30];\nvoid solve(int cas){\n\tstring s;cin>>s;\n\tint n=s.size();\n\tint S=n*2+1,T=n*2+2;\n\tint m;cin>>m;\n\tf.init();\n\tf.s=S;f.t=T;\n\tfor(int i=0;i<n;i++){\n\t\ta[s[i]-'a']++;\n\t}\n\tfor(int i=0;i<26;i++){\n\t\tif(a[i])f.add_edge(i+m+1,T,a[i],0);\n\t}\n\t\n\tfor(int i=1;i<=m;i++){\n\t\tcin>>s;\n\t\tint w;cin>>w;\n\t\tf.add_edge(S,i,min(w,(int)s.size()),0);\n\t\tfor(int j=0;j<s.size();j++){\n\t\t\tf.add_edge(i,s[j]-'a'+m+1,1,i);\n\t\t}\n\t}\n\tf.MCMF();\n\tif(f.maxflow==n)cout<<f.mincost<<\"\\n\";\n\telse cout<<\"-1\\n\";\n}\n\nsigned main(){\n\tios::sync_with_stdio(0);cin.tie(0);cout.tie(0);\n\tint cas=1;\n\t// int T;cin>>T;\n\t// for(cas=1;cas<=T;cas++)\n\t{\n//\t\tcout<<cas<<\":\\n\";\n\t\t// cout<<\"Case \"<<cas<<\": \";\n\t\tsolve(cas);\n\t}\n\t\n\treturn 0; \n}\n\n\t\t\t\t\t \t\t  \t\t \t\t    \t\t\t \t\t     \t"
+}

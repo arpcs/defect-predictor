@@ -1,0 +1,38 @@
+{
+    "id": 227321272,
+    "contestId": 1023,
+    "creationTimeSeconds": 1696854312,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1023,
+        "index": "F",
+        "name": "Mobile Phone Network",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 2600,
+        "tags": [
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1023,
+        "members": [
+            {
+                "handle": "zymooll"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1534516500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 2542,
+    "memoryConsumedBytes": 104755200,
+    "source": "// LUOGU_RID: 128461881\n#include<bits/stdc++.h>\n#define int long long\nusing namespace std;\nconst int inf = LLONG_MAX;\nconst int N = 5e5+10;\nint read(){\n\tint a=0,b=1;\n\tchar ch=getchar();\n\tfor(;ch<'0'||ch>'9';ch=getchar()) if(ch=='-') b=-1;\n\tfor(;ch>='0'&&ch<='9';ch=getchar()) a=a*10+(ch-48);\n\treturn a*b;\n}\ntemplate<typename T>inline void read(T &x){x=read();}\ntemplate<typename T,typename ...Args>inline void read(T &x,Args &...args){read(x);read(args...);}\nint n,m,k;\n\nint pis[N],cnt;\nstruct node{int from,to,val;}edge[N<<1];\nvoid add(int u,int v,int w){\n\tedge[++cnt].from=pis[u];\n\tedge[cnt].val=w;\n\tedge[cnt].to=v;\n\tpis[u]=cnt; return;\n}\n\nint bnt,num[N],rev[N],seg[N],top[N],dep[N],fat[N],son[N],siz[N];\n\nvoid dfs1(int u,int f){\n\tsiz[u]=1; dep[u]=dep[f]+1; fat[u]=f;\n\tfor(int pos=pis[u];pos;pos=edge[pos].from){\n\t\tint v=edge[pos].to;\n\t\tif(v==f) continue;\n\t\tdfs1(v,u); siz[u]=siz[u]+siz[v];\n\t\tson[u]=siz[son[u]]<siz[v]?v:son[u];\n\t} return;\n}\n\nvoid dfs2(int u,int t){\n\tseg[u]=++bnt; rev[bnt]=u; top[u]=t;\n\t//cout<<u<<\" \"<<t<<\"\\n\";\n\tif(!son[u]) return;\n\tdfs2(son[u],t); \n\tfor(int pos=pis[u];pos;pos=edge[pos].from){\n\t\tint v=edge[pos].to,w=edge[pos].val;\n\t\tif(v==fat[u]) continue;\n\t\tif(v==son[u]){num[v]=w; continue;}\n\t\tdfs2(v,v); num[v]=w;\n\t} return;\n}\n\nint tree[N<<2];\nvoid build(int o,int ll,int rr){\n\tif(ll==rr){\n\t\tif(num[rev[ll]]==0) tree[o]=inf;\n\t\telse tree[o]=0;\n\t\treturn;\n\t} int mid=(ll+rr)>>1;\n\ttree[o]=inf;\n\tbuild(o<<1,ll,mid);\n\tbuild(o<<1|1,mid+1,rr);\n}\nvoid pushdown(int o,int ll,int rr,int mid){\n\ttree[o<<1]=min(tree[o<<1],tree[o]);\n\ttree[o<<1|1]=min(tree[o<<1|1],tree[o]);\n\ttree[o]=inf; return;\n}\nvoid change(int o,int ll,int rr,int l,int r,int k){\n\tif(l<=ll&&rr<=r){\n\t\t//cout<<ll<<\" \"<<rr<<\" \"<<k<<\"\\n\";\n\t\ttree[o]=min(tree[o],k);\n\t\treturn;\n\t} int mid=(ll+rr)>>1;\n\tif(tree[o]<k) return;\n\tif(tree[o]!=inf) pushdown(o,ll,rr,mid);\n\tif(l<=mid) change(o<<1,ll,mid,l,r,k);\n\tif(r>mid) change(o<<1|1,mid+1,rr,l,r,k);\n\treturn;\n}\nvoid update(int u,int v,int w){\n\twhile(top[u]!=top[v]){\n\t\tif(dep[top[u]]<dep[top[v]]) swap(u,v);\n\t\t//cout<<top[u]<<\" \"<<u<<\"\\n\";\n\t\tchange(1,1,n,seg[top[u]],seg[u],w);\n\t\tu=fat[top[u]];\n\t}\n\tif(u==v) return;\n\tif(dep[u]<dep[v]) swap(u,v);\n\tchange(1,1,n,seg[v]+1,seg[u],w);\n\treturn;\n}\n\nint fa[N],ftt,ntt;\nint find(int x){return x==fa[x]?x:fa[x]=find(fa[x]);}\nvoid merge(int x,int y){\n\tx=find(x); y=find(y);\n\tif(x!=y){fa[x]=y; ftt++;}\n\treturn;\n}\n\nstruct pode{int u,v,w;}e[N<<1];\nbool cmp(const pode &f1,const pode &f2){return f1.w<f2.w;}\n\nbool vis[N];\nint ans;\nvoid dfs(int o,int ll,int rr){\n\tif(ll==rr){\n\t\tans=ans+tree[o];\n\t\tif(tree[o]==inf&&num[rev[ll]]==0){\n\t\t\tprintf(\"-1\\n\");\n\t\t\texit(0);\n\t\t}\n\t\treturn;\n\t} int mid=(ll+rr)>>1;\n\tpushdown(o,ll,rr,mid);\n\tdfs(o<<1,ll,mid);\n\tdfs(o<<1|1,mid+1,rr);\n}\nsigned main(){\n\tread(n,k,m); num[1]=114514;\n\tfor(int i=1;i<=k;i++) read(e[i].u,e[i].v);\n\tfor(int i=k+1;i<=m+k;i++) read(e[i].u,e[i].v,e[i].w);\n\t//if(ftt<n-1){printf(\"-1\\n\"); return 0;}\n\tsort(e+1,e+k+m+1,cmp); \n\tfor(int i=1;i<=n;i++) fa[i]=i;\n\tfor(int i=1,u,v,w;i<=k+m;i++){\n\t\tu=e[i].u; v=e[i].v; w=e[i].w;\n\t\tu=find(u); v=find(v);\n\t\tif(u!=v){\n\t\t\t//cout<<e[i].u<<\" \"<<e[i].v<<\" \"<<e[i].w<<\"\\n\";\n\t\t\tfa[u]=v; ftt++; vis[i]=true;\n\t\t\tadd(e[i].u,e[i].v,e[i].w);\n\t\t\tadd(e[i].v,e[i].u,e[i].w);\n\t\t\tif(ftt==n-1){break;}\n\t\t}\n\t}\n\tdfs1(1,0); dfs2(1,1); build(1,1,n);\n\tfor(int i=1;i<=k+m;i++){\n\t\tif(!vis[i]) update(e[i].u,e[i].v,e[i].w);\n\t}\n\tdfs(1,1,n);\n\tprintf(\"%lld\\n\",ans);\n    return 0;\n}"
+}

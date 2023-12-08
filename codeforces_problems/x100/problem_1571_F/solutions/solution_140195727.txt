@@ -1,0 +1,36 @@
+{
+    "id": 140195727,
+    "contestId": 1571,
+    "creationTimeSeconds": 1640109998,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "Deng1X"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.5",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 514,
+    "memoryConsumedBytes": 154624000,
+    "source": "fun main() {\r\n    val (n, m) = readLine()!!.split(\" \").map { it.toInt() }\r\n\r\n    val answer = IntArray(n)\r\n    val stages = mutableListOf<Pair<Int, Int>>()\r\n    val a = IntArray(n)\r\n\r\n    var total = m\r\n    var sum = 0\r\n    for (i in 0 until n) {\r\n        val (k, t) = readLine()!!.split(\" \").map { it.toInt() }\r\n        when (t) {\r\n            1 -> {\r\n                answer[i] = total - k + 1\r\n                total -= k\r\n            }\r\n            else -> {\r\n                sum += k\r\n                stages.add(Pair(k, i))\r\n                a[i] = k\r\n            }\r\n        }\r\n    }\r\n\r\n    if (total < 0) {\r\n        println(-1)\r\n        return\r\n    }\r\n\r\n    val f = Array(5000) { BooleanArray(5000) }\r\n    val g = Array(5000) { Array<Pair<Int, Int>?>(5000) { null } }\r\n    var index = 0\r\n    f[index][0] = true\r\n    for ((k, i) in stages) {\r\n        ++index\r\n        for (j in 0 until 5000) {\r\n            if (f[index - 1][j]) {\r\n                f[index][j] = true\r\n            } else if (j >= k && f[index - 1][j - k]) {\r\n                f[index][j] = true\r\n                g[index][j] = Pair(k, i)\r\n            }\r\n        }\r\n    }\r\n\r\n    var len = (0 until 5000).filter { f[index][it] }.filter { (sum - it) <= it }.minOrNull()\r\n    \r\n    if (len == null || 2 * len - 1 > total) {\r\n        println(-1)\r\n        return\r\n    }\r\n\r\n    var first = 1\r\n    var second = 2\r\n    while (index != 0) {\r\n        val pair = g[index][len]\r\n        if (pair != null) {\r\n            val (k, i) = pair\r\n            answer[i] = first\r\n            first += 2 * k\r\n            len -= k\r\n        }\r\n        --index\r\n    }\r\n\r\n    println(answer.mapIndexed { index, value -> if (value == 0) {\r\n        val tmp = second\r\n        second += a[index] * 2\r\n        tmp\r\n    } else value\r\n    }.joinToString(\" \"))\r\n}"
+}
