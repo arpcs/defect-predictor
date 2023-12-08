@@ -1,0 +1,36 @@
+{
+    "id": 211438447,
+    "contestId": 1110,
+    "creationTimeSeconds": 1688047892,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "zhjxaoini"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 274022400,
+    "source": "#ifndef LOCAL_RUN\n\t#define NDEBUG\n#endif\n#ifdef GNU_DEBUG\n\t#define _GLIBCXX_DEBUG 1\n\t#define _GLIBCXX_DEBUG_PEDANTIC 1\n\t#define _GLIBCXX_SANITIZE_VECTOR 1\n#endif\n#include <bits/stdc++.h>\nnamespace {\n#define mset(a, b) memset(&a, b, sizeof(a))\n#define ALL(v) std::begin(v), std::end(v)\n#define RANGE(a, l, r) (std::begin(a) + (l)), (std::begin(a) + ((r) + 1))\n#define fir(i, a, b, ...) for (int i = (a), ##__VA_ARGS__; i <= (b); ++i)\n#define firr(i, a, b, ...) for (int i = (a), ##__VA_ARGS__; i >= (b); --i)\n#ifdef LOCAL_RUN\n\ttemplate<class T> void dbgpr(const T& x) {std::cerr << x << std::endl;}\n\ttemplate<class T, class... Args> void dbgpr(const T& x, const Args&... args) {std::cerr << x << \", \", dbgpr(args...);}\n\ttemplate<class... Args> void dbgprint(const char* s, const Args&... args) {std::cerr << s << \" = \", dbgpr(args...);}\n\t#define debug(...) dbgprint(#__VA_ARGS__, __VA_ARGS__)\n\t#define DEBUG if (true)\n#else\n\t#define debug(...) void()\n\t#define DEBUG if (false)\n#endif\ntypedef long long LL;\ntypedef long double LD;\ntypedef unsigned long long ULL;\ntemplate<class T1, class T2> bool cmax(T1& a, const T2& b) {return a < b ? a = b, true : false;}\ntemplate<class T1, class T2> bool cmin(T1& a, const T2& b) {return b < a ? a = b, true : false;}\nusing namespace std;\n\nconst int MAXN = 2005;\nconst int MAXC = 15;\n\nnamespace T {\n\tstruct Index {\n\t\tint x;\n\t\texplicit operator bool() const {return x;}\n\t\tauto* operator->() const;\n\t};\n\tstruct Node {\n\t\tarray<Index, MAXC> tr; Index fail;\n\t\tarray<array<int, MAXN>, MAXC> val;\n\t\tarray<int, MAXN> f, nxt;\n\t};\n\tarray<Node, MAXN> nd; int tot;\n\tauto* Index::operator->() const {return &nd[x];}\n\tvoid ins(const string& S, int w) {\n\t\tIndex p{};\n\t\tfir (c, 1, 9) fir (i, 1, (int)S.size() - 1) p->val[c][i] += w;\n\t\tfir (i, 0, (int)S.size() - 1) {\n\t\t\tfir (c, !i, S[i] - '0' - 1) p->val[c][(int)S.size() - i] += w;\n\t\t\tif (!p->tr[S[i] - '0']) p->tr[S[i] - '0'] = {++tot};\n\t\t\tp = p->tr[S[i] - '0'];\n\t\t}\n\t}\n\tvoid build(int len) {\n\t\tqueue<Index> q;\n\t\tfir (c, 0, 9) if (nd[0].tr[c]) q.push(nd[0].tr[c]);\n\t\twhile (q.size()) {\n\t\t\tIndex p = q.front(); q.pop();\n\t\t\tfir (c, 0, 9) {\n\t\t\t\tfir (i, 1, len) p->val[c][i] += p->fail->val[c][i];\n\t\t\t\tif (p->tr[c]) p->tr[c]->fail = p->fail->tr[c], q.push(p->tr[c]);\n\t\t\t\telse p->tr[c] = p->fail->tr[c];\n\t\t\t}\n\t\t}\n\t\tfor (Index p{}; p.x <= tot; p.x++) {\n\t\t\tfir (c, 0, 9) {\n\t\t\t\tpartial_sum(RANGE(p->val[c], 0, len), p->val[c].begin());\n\t\t\t}\n\t\t}\n\t}\n}\n\nvoid add1(string& S) {\n\tint pos = (int)S.find_last_not_of('9');\n\tfill(S.begin() + (pos + 1), S.end(), '0');\n\tif (pos < 0) S.insert(S.begin(), '1');\n\telse S[pos]++;\n}\n\nvoid realmain() {\n\tDEBUG freopen(\"data.in\", \"r\", stdin);\n\tios::sync_with_stdio(false), cin.tie(nullptr);\n\tstring L, R; int n; cin >> L >> R >> n;\n\tadd1(R);\n\tT::ins(L, -1), T::ins(R, 1);\n\tT::build(n);\n\tfirr (i, n - 1, 0) {\n\t\tfor (T::Index p{}; p.x <= T::tot; p.x++) {\n\t\t\tfir (c, 0, 9) {\n\t\t\t\tif (cmax(p->f[i], p->tr[c]->f[i + 1] + p->val[c][n - i])) p->nxt[i] = c;\n\t\t\t}\n\t\t}\n\t}\n\tT::Index p{};\n\tprintf(\"%d\\n\", p->f[0]);\n\tstring ans(n, '?');\n\tfir (i, 0, n - 1) ans[i] = char('0' | p->nxt[i]), p = p->tr[p->nxt[i]];\n\tputs(ans.data());\n}}\nsigned main(){return realmain(),0;}"
+}

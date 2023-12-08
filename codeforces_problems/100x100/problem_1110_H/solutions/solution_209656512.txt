@@ -1,0 +1,36 @@
+{
+    "id": 209656512,
+    "contestId": 1110,
+    "creationTimeSeconds": 1686740870,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "allitnicS"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 12,
+    "timeConsumedMillis": 670,
+    "memoryConsumedBytes": 243302400,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define rep(i, s, e) for (int i = s; i <= e; ++i)\r\n#define drep(i, s, e) for (int i = s; i >= e; --i)\r\n#define file(a) freopen(#a\".in\", \"r\", stdin), freopen(#a\".out\", \"w\", stdout)\r\n#define pv(a) cout << #a << \" = \" << a << endl\r\n#define pa(a, l, r) cout << #a \" : \"; rep(_, l, r) cout << a[_] << ' '; cout << endl\r\n\r\nconst int inf = 0x3f3f3f3f;\r\n\r\nconst int N = 2e3 + 10;\r\nconst int M = 1e4 + 10;\r\n\r\nint read() {\r\n  int x = 0, f = 1; char c = getchar();\r\n  for (; c < '0' || c > '9'; c = getchar()) if (c == '-') f = -1;\r\n  for (; c >= '0' && c <= '9'; c = getchar()) x = x * 10 + c - 48;\r\n  return x * f;\r\n}\r\n\r\nvoid cmax(int &a, int b) { a < b ? a = b : 1; }\r\nvoid cmin(int &a, int b) { a > b ? a = b : 1; }\r\n\r\nint tot = 1, son[M][26], fail[M], g[M][N];\r\nvector <int> e[M];\r\n\r\nvoid ins(char *l, char *r) {\r\n  int n = strlen(l + 1), m = strlen(r + 1);\r\n  if (n == m) {\r\n    for (int i = 1, u = 1, v = 1; i <= n; ++ i) {\r\n      if (u == v) {\r\n        rep(c, l[i], r[i]) {\r\n          if (!son[u][c - '0']) son[u][c - '0'] = ++ tot;\r\n        }\r\n        rep(c, l[i] + 1, r[i] - 1) ++ g[son[u][c - '0']][n - i];\r\n        u = son[u][l[i] - '0'], v = son[v][r[i] - '0'];\r\n        if (i == n) ++ g[u][0];\r\n        if (i == n && u != v) ++ g[v][0];\r\n      }\r\n      else {\r\n        rep(c, l[i], '9') if (!son[u][c - '0']) son[u][c - '0'] = ++ tot;\r\n        rep(c, l[i] + 1, '9') ++ g[son[u][c - '0']][n - i];\r\n        u = son[u][l[i] - '0'];\r\n        if (i == n) ++ g[u][0];\r\n        rep(c, '0', r[i]) if (!son[v][c - '0']) son[v][c - '0'] = ++ tot;\r\n        rep(c, '0', r[i] - 1) ++ g[son[v][c - '0']][n - i];\r\n        v = son[v][r[i] - '0'];\r\n        if (i == n) ++ g[v][0];\r\n      }\r\n    }\r\n  }\r\n  else {\r\n    for (int i = 1, u = 1; i <= n; ++ i) {\r\n      rep(c, l[i], '9') if (!son[u][c - '0']) son[u][c - '0'] = ++ tot;\r\n      rep(c, l[i] + 1, '9') ++ g[son[u][c - '0']][n - i];\r\n      u = son[u][l[i] - '0'];\r\n      if (i == n) ++ g[u][0];\r\n    }\r\n    rep(i, n + 1, m - 1) ++ g[1][i];\r\n    for (int i = 1, v = 1; i <= m; ++ i) {\r\n      rep(c, '0' + (i == 1), r[i]) if (!son[v][c - '0']) son[v][c - '0'] = ++ tot;\r\n      rep(c, '0' + (i == 1), r[i] - 1) ++ g[son[v][c - '0']][m - i];\r\n      v = son[v][r[i] - '0'];\r\n      if (i == m) ++ g[v][0];\r\n    }\r\n  }\r\n}\r\n\r\nvoid print() {\r\n  rep(u, 1, tot) rep(c, 0, 9) if (son[u][c]) {\r\n    cout << u << ' ' << son[u][c] << ' ' << char(c + '0') << endl;\r\n  }\r\n}\r\n\r\nvoid build() {\r\n  queue <int> q;\r\n  rep(i, 0, 9) {\r\n    if (son[1][i]) fail[son[1][i]] = 1, q.push(son[1][i]);\r\n    else son[1][i] = 1;\r\n  }\r\n  while (q.size()) {\r\n    int u = q.front(); q.pop();\r\n    rep(i, 0, 9) {\r\n      if (son[u][i]) fail[son[u][i]] = son[fail[u]][i], q.push(son[u][i]);\r\n      else son[u][i] = son[fail[u]][i];\r\n    }\r\n  }\r\n  rep(i, 2, tot) e[fail[i]].emplace_back(i);\r\n}\r\n\r\nint n, f[N][M], mn[N][M], ans;\r\nchar L[N], R[N], tmp[N];\r\n\r\nvoid dfs(int u) {\r\n  for (int v : e[u]) {\r\n    rep(i, 0, n) g[v][i] += g[u][i];\r\n    dfs(v); \r\n  }\r\n}\r\n\r\nint main() {\r\n  scanf(\"%s%s\", L + 1, R + 1), n = read();\r\n  ins(L, R);\r\n  build(), dfs(1);\r\n  rep(u, 1, tot) rep(i, 1, n) g[u][i] += g[u][i - 1];\r\n  memset(f, -inf, sizeof(f));\r\n  f[0][1] = g[1][n];\r\n  rep(i, 0, n - 1) rep(u, 1, tot) {\r\n    rep(c, 0, 9) if (son[u][c]) {\r\n      cmax(f[i + 1][son[u][c]], f[i][u] + g[son[u][c]][n - i - 1]);\r\n    }\r\n  }\r\n  ans = *max_element(f[n] + 1, f[n] + tot + 1);\r\n  printf(\"%d\\n\", ans);\r\n  rep(u, 1, tot) mn[n][u] = f[n][u] == ans ? 0 : -1;\r\n  drep(i, n - 1, 0) rep(u, 1, tot) {\r\n    mn[i][u] = -1;\r\n    rep(c, 0, 9) if (~mn[i + 1][son[u][c]]) {\r\n      if (f[i + 1][son[u][c]] > f[i][u] + g[son[u][c]][n - i - 1]) continue;\r\n      mn[i][u] = c; break;\r\n    }\r\n  }\r\n  for (int i = 0, u = 1; i < n; ++ i) {\r\n    printf(\"%d\", mn[i][u]), u = son[u][mn[i][u]];\r\n  }\r\n  return 0;\r\n}"
+}

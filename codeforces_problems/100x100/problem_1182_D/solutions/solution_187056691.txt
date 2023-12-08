@@ -1,0 +1,40 @@
+{
+    "id": 187056691,
+    "contestId": 1182,
+    "creationTimeSeconds": 1672244193,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "LiZnB"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 202,
+    "memoryConsumedBytes": 24780800,
+    "source": "//\r\n//  d.cpp\r\n//  2022-12-28 22:42\r\n//\r\n//  Created by liznb\r\n//\r\n\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define int long long\r\n#define endl '\\n'\r\n\r\nsigned main() {\r\n  ios::sync_with_stdio(false);\r\n  cin.tie(0);\r\n\r\n  int n; cin >> n;\r\n  vector<vector<int>> g(n + 1);\r\n\r\n  for (int i = 1; i <= n - 1; i++) {\r\n    int u, v; cin >> u >> v;\r\n    g[u].emplace_back(v);\r\n    g[v].emplace_back(u);\r\n  }\r\n\r\n  vector<long long> cnt(n + 1, 0), d(n + 1, 0), dep(n + 1, 0);\r\n  function<void(int, int)> dfs1 = [&] (int pos, int fa) {\r\n    cnt[pos] = 1;\r\n    for (auto &v : g[pos]) {\r\n      if (v == fa) continue;\r\n      dfs1(v, pos);\r\n      dep[v] = dep[pos] + 1;\r\n      d[pos] += cnt[v] + d[v];\r\n      cnt[pos] += cnt[v];\r\n    }\r\n  };\r\n  dfs1(1, -1);\r\n\r\n  long long dis = d[1], ans = 1e18;\r\n  vector<int> p; // \u5b58\u653e\u91cd\u5fc3\r\n  function<void(int, int)> dfs2 = [&] (int pos, int fa) {\r\n    if (dis < ans) {\r\n      ans = dis;\r\n      p = {pos};\r\n    } else if (dis == ans) {\r\n      p.emplace_back(pos);\r\n    }\r\n\r\n    for (auto &v : g[pos]) {\r\n      if (v == fa) continue;\r\n      dis -= cnt[v];\r\n      dis += n - cnt[v];\r\n      dfs2(v, pos);\r\n      dis += cnt[v];\r\n      dis -= n - cnt[v];\r\n    }\r\n  };\r\n\r\n  dfs2(1, -1);\r\n\r\n\r\n  for (auto &it : p) {\r\n    auto sol = [&](int s) {\r\n      // hash \u5f00\u59cb\r\n      const int MOD = 2147483647;\r\n      const array<int, 2> P = {48271, 16807};\r\n\r\n      auto h = [&](int x, const int p) {\r\n        return 1ll * x * p % MOD;\r\n      };\r\n\r\n      // O(n) \u6709\u6839\u6811 hash\r\n      vector<array<int, 2>> h_root(n + 1);\r\n      function<void(int, int)> get_hash = [&](int pos, int fa) {\r\n        h_root[pos] = {1, 1};\r\n        for (auto &v : g[pos]) {\r\n          if (v == fa) continue;\r\n          get_hash(v, pos);\r\n          for (int i = 0; i < 2; i++)\r\n            h_root[pos][i] = (1ll * h_root[pos][i] + h(h_root[v][i], P[i])) % MOD;\r\n        }\r\n      };\r\n\r\n      vector<array<int, 2>> ck, backup;\r\n      vector<int> name;\r\n      for (auto v : g[s]) {\r\n        get_hash(v, s);\r\n        ck.emplace_back(h_root[v]);\r\n        name.emplace_back(v);\r\n      }\r\n      backup = ck;\r\n\r\n      sort(ck.begin(), ck.end());\r\n      ck.erase(unique(ck.begin(), ck.end()), ck.end());\r\n\r\n      function<bool(int, int)> check = [&](int pos, int fa) {\r\n        vector<array<int, 2>> hash;\r\n        for (auto v : g[pos]) {\r\n          if (v == fa) continue;\r\n          hash.emplace_back(h_root[v]);\r\n          if (!check(v, pos)) return false;\r\n        }\r\n        sort(hash.begin(), hash.end());\r\n        hash.erase(unique(hash.begin(), hash.end()), hash.end());\r\n        if (hash.size() >= 2) return false;\r\n        return true;\r\n      };\r\n\r\n      if (ck.size() > 2) return false;\r\n      if (ck.size() == 2) {\r\n        map<array<int, 2>, int> tot;\r\n        for (auto &it : backup) tot[it]++;\r\n        if (tot[ck[0]] >= 2 && tot[ck[1]] >= 2) return false;\r\n        vector<int> goal;\r\n        for (int j = 0; j < (int) backup.size(); j++) {\r\n          if (tot[backup[j]] == 1) {\r\n            goal.emplace_back(name[j]);\r\n          }\r\n        }\r\n        auto check_line = [&](int pos, int fa) {\r\n          int p = pos;\r\n          while (g[p].size() == 2) {\r\n            for (auto &v : g[p]) {\r\n              if (v == fa) continue;\r\n              fa = p;\r\n              p = v;\r\n              break;\r\n            }\r\n          }\r\n          if (g[p].size() > 2) return 0ll;\r\n          return p;\r\n        };\r\n        for (auto &it : goal) {\r\n          if (check_line(it, s) && check(s, it)) {\r\n            cout << check_line(it, s) << endl;\r\n            exit(0);\r\n          }\r\n        }\r\n        return false;\r\n      } else return check(s, -1);\r\n    };\r\n    if (sol(it)) { \r\n      cout << it << endl;\r\n      return 0;\r\n    }\r\n  }\r\n\r\n  cout << -1;\r\n\r\n  return 0;\r\n}\r\n"
+}

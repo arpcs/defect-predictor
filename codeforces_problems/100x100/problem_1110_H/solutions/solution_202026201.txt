@@ -1,0 +1,36 @@
+{
+    "id": 202026201,
+    "contestId": 1110,
+    "creationTimeSeconds": 1681454499,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "UltramanDecker"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 436,
+    "memoryConsumedBytes": 158720000,
+    "source": "// LUOGU_RID: 108003152\n#include <bits/stdc++.h>\r\n\r\nusing ll = long long;\r\nusing uint = unsigned int;\r\nusing ull = unsigned long long;\r\n\r\n#define lowbit(x) (x & (-x))\r\nconst int mod = 998244353;\r\nconst double PI = 3.14159265358;\r\nstd::mt19937 rng(std::random_device{}());\r\nnamespace FI\r\n{\r\n    char B[1 << 16], *S = B, *T = B;\r\n    inline char getc()\r\n    {\r\n        return S == T && (T = (S = B) + fread(B, 1, 1 << 16, stdin), S == T) ? EOF : *S++;\r\n    }\r\n    inline void read()\r\n    {\r\n    }\r\n\r\n    template <typename Tp, typename... Types>\r\n    inline void read(Tp &o, Types &...Args)\r\n    {\r\n        o = 0;\r\n        bool s = 0;\r\n        char c = getc();\r\n        while (c > '9' || c < '0')\r\n            s |= c == '-', c = getc();\r\n        while (c >= '0' && c <= '9')\r\n            o = o * 10 + c - '0', c = getc();\r\n        if (s)\r\n            o = -o;\r\n        read(Args...);\r\n    }\r\n} // namespace FI\r\nusing FI::read;\r\n\r\nll quick_pw(ll a, ll b)\r\n{\r\n    if (b == 0)\r\n        return 1;\r\n    ll ans = 1, base = a % mod;\r\n    while (b)\r\n    {\r\n        if (b & 1)\r\n            ans = (ans * base) % mod;\r\n        b >>= 1;\r\n        base = (base * base) % mod;\r\n    }\r\n    return ans;\r\n}\r\n\r\n#define fac_init(n)                                              \\\r\n    {                                                            \\\r\n        fac[0] = fac[1] = inv[1] = facinv[0] = facinv[1] = 1;    \\\r\n        for (int i = 2; i <= n; ++i)                             \\\r\n        {                                                        \\\r\n            fac[i] = 1ll * fac[i - 1] * i % mod;                 \\\r\n            inv[i] = 1ll * inv[mod % i] * (mod - mod / i) % mod; \\\r\n            facinv[i] = 1ll * facinv[i - 1] * inv[i] % mod;      \\\r\n        }                                                        \\\r\n    }\r\n#define Combine(n, m) (1ll * fac[n] * facinv[n - m] % mod * facinv[m] % mod)\r\n\r\nconst int MAXN = 2000, MAXR = 800;\r\n\r\nstruct state\r\n{\r\n    int trans[10], fail;\r\n} acam[MAXR * 2 + 5];\r\n\r\n#define trans(u, x) acam[u].trans[x]\r\n#define fail(u) acam[u].fail\r\nint cnt = 0, base[MAXR * 2 + 5][MAXN + 5][10];\r\n\r\nvoid insert(char *s, int val)\r\n{\r\n    int u = 0, len = strlen(s);\r\n    for (int i = 0; i < len; ++i)\r\n    {\r\n        int x = s[i] - '0';\r\n        for (int j = (u == 0); j < x; ++j)\r\n            base[u][len - i][j] += val;\r\n        if (i == len - 1)\r\n            base[u][len - i][x] += val;\r\n        if (!trans(u, x))\r\n            trans(u, x) = ++cnt;\r\n        u = trans(u, x);\r\n    }\r\n}\r\n\r\nvoid build()\r\n{\r\n    std::queue<int> q;\r\n    for (int i = 0; i < 10; ++i)\r\n        if (trans(0, i))\r\n            q.push(trans(0, i));\r\n    while (!q.empty())\r\n    {\r\n        int u = q.front();\r\n        q.pop();\r\n        for (int x = 0; x < 10; ++x)\r\n            if (int &v = trans(u, x))\r\n                q.push(v), fail(v) = trans(fail(u), x);\r\n            else\r\n                v = trans(fail(u), x);\r\n    }\r\n}\r\n\r\nchar L[MAXR + 5], R[MAXR + 5];\r\nint n;\r\nbool vis[MAXN + 5][MAXR * 2 + 5];\r\nll dp[MAXN + 5][MAXR * 2 + 5];\r\n\r\nvoid Main()\r\n{\r\n    scanf(\"%s%s\", L + 1, R + 1);\r\n    scanf(\"%d\", &n);\r\n    int l = strlen(L + 1), r = strlen(R + 1);\r\n    for (int i = l; i >= 1; --i)\r\n    {\r\n        if (L[i] == '0')\r\n            L[i] = '9';\r\n        else\r\n        {\r\n            L[i]--;\r\n            break;\r\n        }\r\n    }\r\n    if (L[1] == '0')\r\n    {\r\n        for (int i = 1; i <= l; ++i)\r\n            L[i] = L[i + 1];\r\n        L[l--] = 0;\r\n    }\r\n    if (l)\r\n        insert(L + 1, -1);\r\n    insert(R + 1, 1);\r\n    build();\r\n    for (int i = std::max(1, l); i < r; ++i)\r\n        for (int j = 1; j < 10; ++j)\r\n            base[0][i][j]++;\r\n    for (int i = 1; i <= cnt; ++i)\r\n        for (int j = 1; j <= n; ++j)\r\n            for (int k = 0; k <= 9; ++k)\r\n                base[i][j][k] += base[fail(i)][j][k];\r\n    for (int i = 0; i <= cnt; ++i)\r\n        for (int j = 2; j <= n; ++j)\r\n            for (int k = 0; k <= 9; ++k)\r\n                base[i][j][k] += base[i][j - 1][k];\r\n    memset(dp, 0xcf, sizeof(dp));\r\n    dp[0][0] = 0;\r\n    for (int i = 0; i < n; ++i)\r\n        for (int u = 0; u <= cnt; ++u)\r\n        {\r\n            if (dp[i][u] < 0)\r\n                continue;\r\n            for (int k = 0; k <= 9; ++k)\r\n            {\r\n                int v = trans(u, k);\r\n                dp[i + 1][v] = std::max(dp[i + 1][v], dp[i][u] + base[u][n - i][k]);\r\n            }\r\n        }\r\n    // for (int i = 0; i <= n; ++i)\r\n    //     for (int u = 0; u <= cnt; ++u)\r\n    //         printf(\"dp[%d][%d] = %lld\\n\", i, u, dp[i][u]);\r\n    ll ans = 0;\r\n    for (int u = 0; u <= cnt; ++u)\r\n        if (dp[n][u] > ans)\r\n            ans = dp[n][u];\r\n    printf(\"%lld\\n\", ans);\r\n    std::vector<int> best;\r\n    std::function<bool(int, int)> dfs = [&](int i, int u) -> bool\r\n    {\r\n        if (i == n && dp[i][u] == ans)\r\n            return true;\r\n        if (vis[i][u])\r\n            return false;\r\n        vis[i][u] = true;\r\n        for (int k = 0; k <= 9; ++k)\r\n        {\r\n            int v = trans(u, k);\r\n            if (dp[i + 1][v] == dp[i][u] + base[u][n - i][k])\r\n                if (dfs(i + 1, v))\r\n                    return best.push_back(k), true;\r\n        }\r\n        return false;\r\n    };\r\n    dfs(0, 0);\r\n    for (int i = best.size() - 1; i >= 0; --i)\r\n        printf(\"%d\", best[i]);\r\n    printf(\"\\n\");\r\n}\r\n\r\nint main()\r\n{\r\n    int TestCases = 1;\r\n    while (TestCases--)\r\n        Main();\r\n    return 0;\r\n}"
+}

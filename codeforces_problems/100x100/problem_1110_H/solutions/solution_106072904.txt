@@ -1,0 +1,36 @@
+{
+    "id": 106072904,
+    "contestId": 1110,
+    "creationTimeSeconds": 1612071564,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "XueYJ"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 1419,
+    "memoryConsumedBytes": 483225600,
+    "source": "#include<iostream>\n#include<algorithm>\n#include<cstdio>\n#include<cmath>\n#include<cstring>\n#include<map>\n#include<stack>\n#include<queue>\n#include<ctime>\n#include<vector>\n#include<set>\n#include<cstdlib>\n#include<functional>\n#include<utility>\nusing namespace std;\nint ch[20000+5][10],fin[20000+5][2000+5],Fail[20000+5];\nint go(int u, int i)\n{\n    if (ch[u][i]!=0)\n        return ch[u][i];\n    else if (u>1)\n        return ch[u][i]=go(Fail[u],i);\n    else\n        return 1;\n}\nstring l,r;\nint sz=1,n,len;\nqueue<int> Q;\nint f[2000+5][20000+5],g[2000+5][20000+5];\nvoid dfs(int i,bool up,bool down,int u)\n{\n    if (!up&&!down)\n    {\n        fin[u][len-i+1]++;\n        return;\n    }\n    if (i==len+1)\n    {\n        fin[u][0]++;\n        return;\n    }\n    int op=0,ed=9;\n    if (down)\n        op=l[i-1]-'0';\n    if (up)\n        ed=r[i-1]-'0';\n    for (int j=op;j<=ed;j++)\n    {\n        int v=u;\n        if (u!=1||j)\n        {\n            if (!ch[u][j])\n                ch[u][j]=++sz;\n            v=ch[u][j];\n        }\n        int upp=up,downn=down;\n        if (j!=r[i-1]-'0')\n            upp=false;\n        if (j!=l[i-1]-'0')\n            downn=false;\n        dfs(i+1,upp,downn,v);\n    }\n}\nint main()\n{\n    int d,i,j,k,j1;\n    cin >> l;\n    cin >> r;\n    len=r.length();\n    scanf(\"%d\",&n);\n    int u=1;sz=1;\n    while (l.length()!=r.length())\n        l='0'+l;\n    dfs(1,true,true,1);\n    Q.push(1);\n    while (!Q.empty())\n    {\n        u=Q.front();\n        Q.pop();\n        for (i=0;i<10;i++)\n        {\n            int v=ch[u][i];\n            if (v!=0)\n            {\n                Q.push(v);\n                Fail[v]=go(Fail[u],i);\n                for (j=0;j<=n;j++)\n                    fin[v][j]+=fin[Fail[v]][j];\n            }\n        }\n    }\n    for (i=1;i<=sz;i++)\n        for (j=1;j<=n;j++)\n            fin[i][j]+=fin[i][j-1];\n    memset(f,-0x3f,sizeof(f));\n    for (i=1;i<=sz;i++)\n        f[0][i]=fin[i][0];\n    for (i=1;i<=n;i++)\n        for (j=1;j<=sz;j++)\n        {\n            for (k=0;k<10;k++)\n            {\n                j1=go(j,k);\n                if (f[i][j]<f[i-1][j1])\n                    f[i][j]=f[i-1][j1],g[i][j]=k;\n            }\n            f[i][j]+=fin[j][i];\n        }\n    printf(\"%d\\n\",f[n][1]);\n    u=1;\n    for (i=n;i>=1;i--)\n    {\n        printf(\"%d\",g[i][u]);\n        u=go(u,g[i][u]);\n    }\n    printf(\"\\n\");\n}\n"
+}

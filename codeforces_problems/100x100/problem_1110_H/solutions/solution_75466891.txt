@@ -1,0 +1,36 @@
+{
+    "id": 75466891,
+    "contestId": 1110,
+    "creationTimeSeconds": 1585988236,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "nickluo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "// Words are flowing out like endless rain into a paper cup\n// They slither while they pass they slip away across the universe\n// Pools of sorrow, waves of joy are drifting through my open mind\n// Possessing and caressing me\n\n#include <bits/stdc++.h>\nusing namespace std;\n\nusing LL = long long;\n\nnamespace _buff {\n\nconst size_t BUFF = 1 << 19;\nchar ibuf[BUFF], *ib = ibuf, *ie = ibuf;\nchar getc() {\n    if (ib == ie) {\n        ib = ibuf;\n        ie = ibuf + fread(ibuf, 1, BUFF, stdin);\n    }\n    return ib == ie ? -1 : *ib++;\n}\n\n}\n\nLL read() {\n    using namespace _buff;\n    LL ret = 0;\n    bool pos = true;\n    char c = getc();\n    for (; (c < '0' || c > '9') && c != '-'; c = getc()) {\n        assert(~c);\n    }\n    if (c == '-') {\n        pos = false;\n        c = getc();\n    }\n    for (; c >= '0' && c <= '9'; c = getc()) {\n        ret = (ret << 3) + (ret << 1) + (c ^ 48);\n    }\n    return pos ? ret : -ret;\n}\n\nsize_t reads(int *s) {\n    using namespace _buff;\n    size_t ret = 0;\n    char c = getc();\n    for (; !isnumber(c); c = getc()) {\n        assert(~c);\n    }\n    for (; isnumber(c); c = getc()) {\n        s[ret++] = c - '0';\n    }\n    s[ret] = '\\0';\n    return ret;\n}\n\ntemplate <typename T>\nvoid chkmax(T &dp, const T &val) {\n    if (val > dp) {\n        dp = val;\n    }\n}\n\nconst size_t N = 2e3 + 5;\nconst size_t L = 8e2 + 5;\nconst size_t AL = 10;\nconst size_t V = L * AL << 1;\n\nint l[L], r[L];\nint tot, ch[V][AL], fail[V], sum[V][N];\nint dp[N][V]; bool ok[N][V];\n\nint get_node(int &x) {\n    if (!x) x = ++tot;\n    return x;\n}\n\nint main() {\n    int len_l = reads(l);\n    int len_r = reads(r);\n    int n = read();\n\n    tot = 1;\n    if (len_l == len_r) {\n        int len = len_l, i = 0, cur = 1;\n        for (; i < len && l[i] == r[i]; ++i) {\n            cur = get_node(ch[cur][l[i]]);\n        }\n        if (i < len) {\n            if (l[i] < r[i]) {\n                for (int j = l[i] + 1; j < r[i]; ++j) {\n                    ++sum[get_node(ch[cur][j])][len - i - 1];\n                }\n                int cur_l = get_node(ch[cur][l[i]]);\n                int cur_r = get_node(ch[cur][r[i]]);\n                while (++i < len) {\n                    for (int j = l[i] + 1; j < 10; ++j) {\n                        ++sum[get_node(ch[cur_l][j])][len - i - 1];\n                    }\n                    for (int j = 0; j < r[i]; ++j) {\n                        ++sum[get_node(ch[cur_r][j])][len - i - 1];\n                    }\n                    cur_l = get_node(ch[cur_l][l[i]]);\n                    cur_r = get_node(ch[cur_r][r[i]]);\n                }\n                ++sum[cur_l][0];\n                ++sum[cur_r][0];\n            }\n        } else {\n            ++sum[cur][0];\n        }\n    } else if (len_l < len_r) {\n        for (int i = len_l + 1; i < len_r; ++i) {\n            for (int j = 1; j < 10; ++j) {\n                ++sum[get_node(ch[1][j])][i - 1];\n            }\n        }\n        int cur_l = 1;\n        for (int i = 0; i < len_l; ++i) {\n            for (int j = l[i] + 1; j < 10; ++j) {\n                ++sum[get_node(ch[cur_l][j])][len_l - i - 1];\n            }\n            cur_l = get_node(ch[cur_l][l[i]]);\n        }\n        ++sum[cur_l][0];\n        int cur_r = 1;\n        for (int i = 0; i < len_r; ++i) {\n            for (int j = i == 0; j < r[i]; ++j) {\n                ++sum[get_node(ch[cur_r][j])][len_r - i - 1];\n            }\n            cur_r = get_node(ch[cur_r][r[i]]);\n        }\n        ++sum[cur_r][0];\n    }\n\n    queue<int> que;\n    for (int i = 0; i < 10; ++i) {\n        if (ch[1][i]) {\n            fail[ch[1][i]] = 1;\n            que.emplace(ch[1][i]);\n        } else {\n            ch[1][i] = 1;\n        }\n    }\n    while (!que.empty()) {\n        int u = que.front(); que.pop();\n        transform(begin(sum[u]), end(sum[u]),\n                begin(sum[fail[u]]), begin(sum[u]), plus<int>());\n        for (int i = 0; i < 10; ++i) {\n            if (ch[u][i]) {\n                fail[ch[u][i]] = ch[fail[u]][i];\n                que.emplace(ch[u][i]);\n            } else {\n                ch[u][i] = ch[fail[u]][i];\n            }\n        }\n    }\n    for (int i = 1; i <= tot; ++i) {\n        partial_sum(begin(sum[i]), end(sum[i]), begin(sum[i]));\n    }\n\n    memset(dp, 0xef, sizeof dp);\n    dp[0][1] = 0;\n    for (int i = 0; i < n; ++i) {\n        for (int j = 1; j <= tot; ++j) {\n            for (int k = 0; k < 10; ++k) {\n                chkmax(dp[i + 1][ch[j][k]], dp[i][j] + sum[ch[j][k]][n - i - 1]);\n            }\n        }\n    }\n\n    int ans = *max_element(begin(dp[n]), end(dp[n]));\n    printf(\"%d\\n\", ans);\n    for (int i = 1; i <= tot; ++i) {\n        if (dp[n][i] == ans) ok[n][i] = true;\n    }\n    auto check = [&](int i, int j, int k) -> bool {\n        return dp[i][j] + sum[ch[j][k]][n - i - 1] == dp[i + 1][ch[j][k]]\n            && ok[i + 1][ch[j][k]];\n    };\n    for (int i = n; i--; ) {\n        for (int j = 1; j <= tot; ++j) {\n            for (int k = 0; k < 10; ++k) {\n                ok[i][j] |= check(i, j, k);\n            }\n        }\n    }\n    assert(ok[0][1]);\n    for (int i = 0, j = 1; i < n; ++i) {\n        for (int k = 0; k < 10; ++k) {\n            if (check(i, j, k)) {\n                putchar('0' + k);\n                j = ch[j][k];\n                break;\n            }\n        }\n    }\n    return 0;\n}\n"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 94752848,
+    "contestId": 1110,
+    "creationTimeSeconds": 1601889331,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "gongsuidashen"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 178176000,
+    "source": "#include<bits/stdc++.h>\r\n#define Max(x,y) ((x)>(y)?(x):(y))\r\nusing namespace std;\r\ninline int read()\r\n{\r\n\tint x=0,f=1;char ch=getchar();\r\n\twhile(!isdigit(ch))\r\n\t{\r\n\t\tif(ch=='-')f=-1;\r\n\t\tch=getchar();\r\n\t}\r\n\twhile(isdigit(ch))\r\n\t{\r\n\t\tx=(x<<1)+(x<<3)+ch-'0';\r\n\t\tch=getchar();\r\n\t}\r\n\treturn x*f;\r\n}\r\nconst int N=2e3+10;\r\nchar L[N],R[N];\r\nint tot,ch[N][10],fa[N],f[N][10][N],F[N][N];\r\ninline void Ins(char str[],int n)\r\n{\r\n\tint x=0;\r\n\tfor(int i=1;i<=n;i++)\r\n\t{\r\n\t\tint c=str[i]-'0';\r\n\t\tif(!ch[x][c])ch[x][c]=++tot;\r\n\t\tx=ch[x][c];\r\n\t}\r\n}\r\ninline void build(char str[],int n,int v)\r\n{\r\n\tint x=0;\r\n\tfor(int i=1;i<=n;i++)\r\n\t{\r\n\t\tint c=str[i]-'0';\r\n\t\tfor(int d=(x==0);d<c;d++)f[x][d][n-i+1]+=v;\r\n\t\tif(i==n)f[x][c][1]+=v;\r\n\t\tx=ch[x][c];\r\n\t}\r\n}\r\nint main()\r\n{\r\n\tscanf(\"%s\",L+1);\r\n\tint len_L=strlen(L+1);\r\n\tif(L[len_L]>'0')L[len_L]--;\r\n\telse\r\n\t{\r\n\t\tint p=len_L;\r\n\t\twhile(p>1&&L[p]=='0')p--;\r\n\t\tL[p]--;\r\n\t\tfill(L+p+1,L+len_L+1,'9');\r\n\t}\r\n\tif(L[1]=='0'&&len_L>1)\r\n\t{\r\n\t\tcopy(L+2,L+len_L+1,L+1);\r\n\t\tL[len_L--]=0;\r\n\t}\r\n\tif(L[1]>='1')Ins(L,len_L);\r\n\tscanf(\"%s\",R+1);\r\n\tint len_R=strlen(R+1);\r\n\tIns(R,len_R);\r\n\tdeque<int>q;\r\n\tfor(int c=0;c<=9;c++)if(ch[0][c])q.push_back(ch[0][c]);\r\n\twhile(q.size())\r\n\t{\r\n\t\tint u=q.front();\r\n\t\tq.pop_front();\r\n\t\tfor(int c=0;c<=9;c++)\r\n\t\t{\r\n\t\t\tif(!ch[u][c])\r\n\t\t\t{\r\n\t\t\t\tch[u][c]=ch[fa[u]][c];\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\tfa[ch[u][c]]=ch[fa[u]][c];\r\n\t\t\tq.push_back(ch[u][c]);\r\n\t\t}\r\n\t}\r\n\tif(L[1]>'0')build(L,len_L,-1);\r\n\tbuild(R,len_R,1);\r\n\tint n=read();\r\n\tfor(int x=1;x<=tot;x++)for(int c=0;c<=9;c++)for(int i=1;i<=n;i++)f[x][c][i]+=f[fa[x]][c][i];\r\n\tfor(int x=0;x<=tot;x++)for(int c=1;c<=9;c++)for(int i=1;i<=len_L;i++)f[x][c][i]--;\r\n\tfor(int x=0;x<=tot;x++)for(int c=1;c<=9;c++)for(int i=1;i<=len_R;i++)f[x][c][i]++;\r\n\tfor(int x=0;x<=tot;x++)for(int c=0;c<=9;c++)for(int i=1;i<=n;i++)f[x][c][i]+=f[x][c][i-1];\r\n\tfor(int i=n-1;i>=0;i--)for(int x=0;x<=tot;x++)\r\n\t{\r\n\t\tF[i][x]=-1e9;\r\n\t\tfor(int c=0;c<=9;c++)F[i][x]=Max(F[i][x],F[i+1][ch[x][c]]+f[x][c][n-i]);\r\n\t}\r\n\tprintf(\"%d\\n\",F[0][0]);\r\n\tint x=0;\r\n\tfor(int i=0;i<n;i++)\r\n\t{\r\n\t\tint c=-1;\r\n\t\tfor(int d=0;d<=9;d++)if(F[i][x]==F[i+1][ch[x][d]]+f[x][d][n-i])\r\n\t\t{\r\n\t\t\tc=d;\r\n\t\t\tbreak;\r\n\t\t}\r\n\t\tprintf(\"%d\",c);\r\n\t\tx=ch[x][c];\r\n\t}\r\n\treturn 0;\r\n}\r\n/*\r\n12345\r\n12346\r\n6\r\n*/"
+}

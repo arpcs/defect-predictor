@@ -1,0 +1,36 @@
+{
+    "id": 229976686,
+    "contestId": 1110,
+    "creationTimeSeconds": 1698394144,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "locsey"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 1231,
+    "memoryConsumedBytes": 291942400,
+    "source": "// LUOGU_RID: 131845938\n#include <bits/stdc++.h>\r\n#define fi first \r\n#define se second \r\n\r\nusing std :: cin;\r\nusing std :: min; \r\nusing std :: max; \r\nusing std :: cout; \r\nusing std :: vector; \r\n\r\nconstexpr int M = 2005, N = 805;  \r\nconstexpr int INF = 0x3f3f3f3f; \r\n\r\ntypedef long long ll; \r\ntypedef unsigned long long ull;\r\ntypedef __uint128_t LLL; \r\ntypedef double db; \r\ntypedef unsigned int ui; \r\ntypedef std :: pair < int, int > pii; \r\n\r\n//char buf[1 << 23], *p1 = buf, *p2 = buf, obuf[1 << 23], *O = obuf;\r\n//#define getchar() (p1 == p2) && (p2 = (p1 = buf) + fread(buf, 1, 1 << 21, stdin), p1 == p2)? EOF : *p1++\r\n\r\ninline int read() { \r\n\tint f = 1, s = 0; char ch = getchar(); \r\n\twhile(!isdigit(ch)) (ch == '-') && (f = -1), ch = getchar(); \r\n\twhile(isdigit(ch)) s = s * 10 + ch - '0', ch = getchar(); \r\n\treturn f * s; \r\n}\r\n\r\nnamespace Solver {\r\n\tchar _st; \r\n\tint n; char L[N], R[N], tmp[N];\r\n\tint tot = 1, ch[N * 20][10], fail[N * 20];\r\n\tint sm[N * 20][M], l1, l2;\r\n\tinline void byd() {\r\n\t\tfor(int i = 0; i < 10; ++i) ch[0][i] = 1; std :: queue < int > q; q.push(1);\r\n\t\twhile(q.size()) {\r\n\t\t\tint x = q.front(); q.pop();\r\n\t\t\tfor(int i = 0; i <= n; ++i) sm[x][i] += sm[fail[x]][i]; \r\n\t\t\tfor(int i = 0; i < 10; ++i) {\r\n\t\t\t\tint y = ch[x][i]; \r\n\t\t\t\tif(!y) ch[x][i] = ch[fail[x]][i] ;\r\n\t\t\t\telse fail[y] = ch[fail[x]][i], q.push(y); \r\n\t\t\t}\r\n\t\t}\r\n\t\tfor(int x = 1; x <= tot; ++x) for(int i = 1; i <= n; ++i) sm[x][i] += sm[x][i - 1]; \r\n\t}\r\n\tint dp[M][N * 20]; \r\n\tinline void dfs(int x, int p, int lim1, int lim2) {\r\n\t    if((!lim1 && !lim2) || x == l2 + 1) return sm[p][l2 - x + 1] ++, void(); \r\n\t    int l = lim1 ? L[x] - '0' : 0, r = lim2 ? R[x] - '0' : 9; \r\n\t    for(int i = l; i <= r; ++i) {\r\n\t        if(p == 1 && !i) {dfs(x + 1, p, lim1 & (i == l), lim2 & (i == r)); continue ;}\r\n\t        int q = (ch[p][i] ? ch[p][i] : ch[p][i] = ++tot); \r\n\t        dfs(x + 1, q, lim1 & (i == l), lim2 & (i == r)); \r\n\t\t}\r\n\t}\r\n\ttemplate < typename T > bool chkmx(T &x, const T &y) {return x < y ? x = y, 1 : 0;}\r\n\tbool vis[M][N * 20]; \r\n\tchar _ed; \r\n\tinline void mian() {\r\n\t\tfprintf(stderr, \"%d\\n\", (&_st - &_ed) >> 20); \r\n\t    scanf(\"%s\", L + 1), scanf(\"%s\", R + 1);\r\n\t    l1 = strlen(L + 1), l2 = strlen(R + 1);\r\n\t    if(l1 < l2) {\r\n\t    \tint m = 0; for(int i = 1; i <= l2 - l1; ++i) tmp[++m] = '0';\r\n\t    \tfor(int i = 1; i <= l1; ++i) tmp[++m] = L[i]; \r\n\t    \tmemcpy(L, tmp, sizeof(tmp)); \r\n\t\t}\r\n\t\tn = read(); \r\n\t\tdfs(1, 1, 1, 1), byd(), memset(dp, -0x3f, sizeof(dp)), dp[0][1] = 0;\r\n\t\tfor(int i = 1; i <= n; ++i)\r\n\t\t    for(int p = 1, v; p <= tot; ++p) if((v = dp[i - 1][p]) >= 0) {\r\n\t\t        for(int c = 0; c < 10; ++c) {\r\n\t\t        \tint q = ch[p][c]; \r\n\t\t        \tchkmx(dp[i][q], v + sm[q][n - i]); \r\n\t\t\t\t} \r\n\t\t\t}\r\n\t\tint ans = 0; for(int x = 1; x <= tot; ++x) chkmx(ans, dp[n][x]); \r\n\t\tcout << ans << '\\n'; \r\n\t\tfor(int x = 1; x <= tot; ++x) if(dp[n][x] == ans) vis[n][x] = 1;\r\n\t\tfor(int i = n - 1; ~i; --i) for(int x = 1; x <= tot; ++x) for(int c = 0; c < 10; ++c) if(dp[i + 1][ch[x][c]] == dp[i][x] + sm[ch[x][c]][n - i - 1]) vis[i][x] |= vis[i + 1][ch[x][c]];\r\n\t\tint p = 1; \r\n\t    for(int i = 1; i <= n; ++i) {\r\n\t        for(int c = 0, y; c < 10; ++c) if(y = ch[p][c], vis[i][y] && (dp[i][y] == dp[i - 1][p] + sm[y][n - i])) {cout << c, p = ch[p][c]; break;}\r\n\t\t}\r\n\t}\r\n}\r\n\r\nint main() \r\n{\r\n\tSolver :: mian(); \r\n\treturn 0; \r\n}   "
+}

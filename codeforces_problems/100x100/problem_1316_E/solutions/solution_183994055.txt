@@ -1,0 +1,38 @@
+{
+    "id": 183994055,
+    "contestId": 1316,
+    "creationTimeSeconds": 1670247735,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1316,
+        "index": "E",
+        "name": "Team Building",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "bitmasks",
+            "dp",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1316,
+        "members": [
+            {
+                "handle": "kushazsehgal"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1583332500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 124,
+    "timeConsumedMillis": 1887,
+    "memoryConsumedBytes": 31539200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define int long long\r\n\r\nint MINUS_INF = INT_MIN;\r\n\r\nvoid solve(){\r\n    int n,p,k;\r\n    \r\n    //dp[i][{s,k}] --> first i elements, s binary representations of positions left, k number of audience members left \r\n    cin >> n >> p >> k;\r\n    //int dp[k+15][1 << p][p+1];\r\n    // memset(dp,-1,sizeof(dp));\r\n    // dp[0][0][0] = 0;\r\n    vector<int> a(n);\r\n    vector<pair<int,int>> b(n);\r\n    for(int i = 0;i < n;i++){\r\n        int val;\r\n        cin >> val;\r\n        b[i] = {val,i};\r\n        a[i] = val;\r\n    }\r\n    vector<vector<int>> pos_man(p);\r\n    vector<vector<pair<int,int>>> pos_man2(p);\r\n    for(int i = 0;i < n;i++){\r\n        for(int j = 0;j < p;j++){\r\n            int val;\r\n            cin >> val;\r\n            pos_man2[j].push_back({val,i});\r\n            pos_man[j].push_back(val);\r\n        }\r\n    }\r\n    sort(b.begin(),b.end(),greater<pair<int,int>>());\r\n    for(int i = 0;i < p;i++){\r\n        sort(pos_man2[i].begin(),pos_man2[i].end(),greater<pair<int,int>>());\r\n    }\r\n    set<int> taken_people;\r\n    if(k + 2*p < n){\r\n        for(int i = 0;i < k + p;i++){\r\n            taken_people.insert(b[i].second);\r\n        }\r\n        for(int j = 0;j < p;j++){\r\n            for(int i = 0;i < n;i++){\r\n                int person = pos_man2[j][i].second;\r\n                if(taken_people.find(person) == taken_people.end()){\r\n                    taken_people.insert(person);\r\n                    break;\r\n                }\r\n            }\r\n        } \r\n    }\r\n    else{\r\n        for(int i = 0;i < n;i++){\r\n            taken_people.insert(i);\r\n        }\r\n    }\r\n    vector<int> taken;\r\n    for(auto it = taken_people.begin();it != taken_people.end();it++){\r\n        taken.push_back(*it);\r\n        // cout << *it << ' ' ;\r\n    }\r\n    //cout << taken.size() << endl;\r\n    int left = taken.size() - k - p;\r\n    //cout << left << endl;\r\n    int dp[2][1<<p][left + 1];\r\n    for(int j = 0;j < 1 << p;j++){\r\n        for(int l = 0;l <= left;l++)\r\n            dp[1][j][l] = MINUS_INF;\r\n    }\r\n    //memset(dp,MINUS_INF,sizeof(dp));\r\n    dp[1][0][0] = 0;\r\n    for(int i = 0;i < taken.size();i++){\r\n        for(int j = 0;j < 1 << p;j++){\r\n            for(int l = 0;l <= left;l++){\r\n                dp[i%2][j][l] = MINUS_INF;\r\n                if(l > 0){\r\n                    dp[i%2][j][l] = dp[(i+1)%2][j][l - 1];\r\n                }\r\n                for(int s = 0;s < p;s++){\r\n                    if(j & (1 << s)){\r\n                        int buffer = j ^ (1 << s);\r\n                        int val = dp[(i+1)%2][buffer][l];\r\n                        if(val != MINUS_INF)\r\n                            dp[i%2][j][l] = max(dp[i%2][j][l],val + pos_man[s][taken[i]]);\r\n                    }\r\n                }\r\n                int val = dp[(i+1)%2][j][l];\r\n                if(val != MINUS_INF)\r\n                    dp[i%2][j][l] = max(dp[i%2][j][l],val + a[taken[i]]);\r\n            }\r\n        }\r\n    }\r\n    // cout << endl;\r\n    \r\n    // for(int i = 0;i < n;i++){\r\n    //     for(int s = 0;s <)\r\n    // }\r\n    // cout << p << endl;\r\n    \r\n    // cout << people << endl;\r\n    cout << dp[(taken.size() - 1)%2][(1 << p) - 1][left] << endl;\r\n\r\n}\r\n\r\nsigned main(){\r\n    std::ios::sync_with_stdio(false);\r\n    std::cin.tie(0);\r\n    // freopen(\"in.txt\",\"r\",stdin);\r\n    // freopen(\"out.txt\",\"w\",stdout);\r\n    int t = 1;\r\n    //cin>>t;int T = t;\r\n    while(t--){\r\n        // cout << \"Case #\"<<T - t<<\": \";\r\n        solve();\r\n    }\r\n}"
+}

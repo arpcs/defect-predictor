@@ -1,0 +1,37 @@
+{
+    "id": 98220091,
+    "contestId": 1431,
+    "creationTimeSeconds": 1605199341,
+    "relativeTimeSeconds": 7641,
+    "problem": {
+        "contestId": 1431,
+        "index": "G",
+        "name": "Number Deletion Game",
+        "type": "PROGRAMMING",
+        "rating": 2100,
+        "tags": [
+            "*special",
+            "dp",
+            "games",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1431,
+        "members": [
+            {
+                "handle": "yudedako"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1605191700
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 72,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 120832000,
+    "source": "import java.util.*\r\nimport kotlin.math.*\r\n\r\n\r\nfun calcMax(from: Int, until: Int, step: Int, numbers: IntArray, sumCache: Array<IntArray>, memo: Array<Array<IntArray>>): Int {\r\n    if (step == 0) return 0\r\n    if (from == until) return 0\r\n    if (memo[from][until - from][step] >= 0) return memo[from][until - from][step]\r\n    val diff = until - from\r\n    var maxScore = calcMax(from + 1, until, step, numbers, sumCache, memo)\r\n    for (span in 1 .. minOf(step, (diff shr 1))) {\r\n        val last = from + (span shl 1)\r\n        var score = calcMax(last, until, step - span, numbers, sumCache, memo)\r\n        score += sumCache[from][last - from]\r\n        maxScore = maxOf(maxScore, score)\r\n    }\r\n    memo[from][until - from][step] = maxScore\r\n    return maxScore\r\n}\r\n\r\nfun main() {\r\n    val (n, k) = readLine()!!.trim().split(' ').map(String::toInt)\r\n    val numbers = readLine()!!.trim().split(' ').map(String::toInt).toIntArray()\r\n    numbers.sort()\r\n    val sumCache = Array(n){from -> IntArray(n - from + 1){0} }\r\n    for (from in (0 until n).reversed()) {\r\n        for (until in from + 2 .. n step 2) {\r\n            sumCache[from][until - from] = sumCache[from + 1][until - from - 2] + numbers[until - 1] - numbers[from]\r\n        }\r\n    }\r\n    val memo = Array(n){from -> Array(n - from + 1){IntArray(k + 1){-1}} }\r\n    println(calcMax(0, n, k, numbers, sumCache, memo))\r\n}"
+}

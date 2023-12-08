@@ -1,0 +1,36 @@
+{
+    "id": 146682872,
+    "contestId": 1110,
+    "creationTimeSeconds": 1645063419,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "orzdevinwang"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 686,
+    "memoryConsumedBytes": 182067200,
+    "source": "#include<bits/stdc++.h>\r\n#define L(i, j, k) for(int i = (j); i <= (k); ++i)\r\n#define R(i, j, k) for(int i = (j); i >= (k); --i)\r\n#define ll long long\r\n#define vi vector <int> \r\n#define sz(a) ((int) (a).size())\r\n#define me(f, x) memset(f, x, sizeof(f))\r\nusing namespace std;\r\nconst int N = 2007; \r\n\r\nint len;\r\n\r\nint tot = 1, ch[N][10], fa[N], dep[N], n;\r\n\r\nchar l[N], r[N];\r\n\r\nint ql, qr; \r\n\r\nbool la[N], ra[N];\r\nvoid insert(char *s, int l) {\r\n\tint x = 1;\r\n\tL(i, 1, l) {\r\n\t\tif(ql) ra[x] = true;\r\n\t\telse la[x] = true;\r\n\t\tif(!ch[x][s[i] - '0']) ch[x][s[i] - '0'] = ++tot;\r\n\t\tx = ch[x][s[i] - '0'];\r\n\t\tdep[x] = i;\r\n\t}\r\n\tif(ql) qr = x;\r\n\telse ql = x;\r\n} \r\n\r\nvoid bfs() {\r\n\tqueue < int > q;\r\n\tL(i, 0, 9) \r\n\t\tif(ch[1][i]) q.push(ch[1][i]), fa[ch[1][i]] = 1;\r\n\t\telse ch[1][i] = 1;\r\n\twhile(!q.empty()) {\r\n\t\tint u = q.front();\r\n\t\tq.pop();\r\n\t\tL(i, 0, 9) {\r\n\t\t\tif(ch[u][i]) fa[ch[u][i]] = ch[fa[u]][i], q.push(ch[u][i]) ;\r\n\t\t\telse ch[u][i] = ch[fa[u]][i];\r\n\t\t}\r\n\t} \r\n}\r\n\r\nint dp[N][N];\r\nint f[N][10][N];\r\nbool ok[N][N];\r\nint main () {\r\n\tios :: sync_with_stdio(false);\r\n\tcin.tie (0); cout.tie (0);\r\n\tcin >> (l + 1) >> (r + 1) >> n;\r\n\tlen = strlen(l + 1);\r\n\t\r\n\tint dl = strlen(l + 1), dr = strlen(r + 1);\r\n\t\r\n\tinsert(l, dl);\r\n\tinsert(r, dr);\r\n\t\r\n\tbfs();\r\n\t\r\n\tL(i, 1, tot) {\r\n\t\tL(o, 0, 9) {\r\n\t\t\t\r\n\t\t\tfor(int j = i; j; j = fa[j]) {\r\n\t\t\t\t\r\n\t\t\t\tif(la[j]) {\r\n\t\t\t\t\tif(o != l[dep[j] + 1] - '0') {\r\n\t\t\t\t\t\tif(o || dep[j]) \r\n\t\t\t\t\t\t\tf[i][o][dl - dep[j]] -= (o < l[dep[j] + 1] - '0');\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t\tif(ra[j]) {\r\n\t\t\t\t\tif(o != r[dep[j] + 1] - '0') {\r\n\t\t\t\t\t\tif(o || dep[j])\r\n\t\t\t\t\t\t\tf[i][o][dr - dep[j]] += (o < r[dep[j] + 1] - '0');\r\n\t\t\t\t\t}\r\n\t\t\t\t\telse if(dep[j] == dr - 1) {\r\n\t\t\t\t\t\tf[i][o][1] += 1;\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\t\r\n\t\t\t\r\n\t\t\tif(o) {\r\n\t\t\t\tL(j, dl, dr - 1) \r\n\t\t\t\t\tf[i][o][j] += 1;\r\n\t\t\t}\r\n\t\t\t\r\n\t\t\t\r\n\t\t\tL(j, 1, n) f[i][o][j] += f[i][o][j - 1];\r\n\t\t}\r\n\t}\r\n\t\r\n\tme(dp, -0x3f); \r\n\tdp[0][1] = 0;\t\r\n\tL(i, 1, n) L(j, 1, tot) L(o, 0, 9) \r\n\t\tdp[i][ch[j][o]] = max(dp[i][ch[j][o]], dp[i - 1][j] + f[j][o][n - i + 1]);\r\n\tint ns = -1;\r\n\tL(i, 1, tot) ns = max(ns, dp[n][i]);\r\n\tcout << ns << '\\n';\r\n\tL(i, 1, tot) if(dp[n][i] == ns) ok[n][i] = true;\r\n\t\r\n\tR(i, n, 1) L(j, 1, tot) L(o, 0, 9) \r\n\t\tif(dp[i - 1][j] + f[j][o][n - i + 1] == dp[i][ch[j][o]]) \r\n\t\t\tok[i - 1][j] |= ok[i][ch[j][o]];\r\n\t\r\n\tassert(ok[0][1]);\r\n\t\r\n\tL(i, 1, n) {\r\n\t\tint mn = 10;\r\n\t\tL(j, 1, tot) if(ok[i - 1][j]) L(o, 0, mn - 1) \r\n\t\t\tif(dp[i - 1][j] + f[j][o][n - i + 1] == dp[i][ch[j][o]] && ok[i][ch[j][o]]) \r\n\t\t\t\tmn = o;\r\n\t\r\n\t\tme(ok[i], 0);\r\n\t\tcout << ((char) (mn + '0'));\r\n\t\tL(j, 1, tot) \r\n\t\t\tif(ok[i - 1][j] && dp[i - 1][j] + f[j][mn][n - i + 1] == dp[i][ch[j][mn]]) \r\n\t\t\t\tok[i][ch[j][mn]] = true;\r\n\t}\r\n\treturn 0;\r\n}"
+}

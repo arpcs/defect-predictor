@@ -1,0 +1,36 @@
+{
+    "id": 177030222,
+    "contestId": 1110,
+    "creationTimeSeconds": 1666193642,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "A_G"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 2682,
+    "memoryConsumedBytes": 387276800,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\nconst int K = 10;\nconst int N = 2005;\nconst int M = 16005;\n\nstruct vtx {\n  int to[K];\n  int go[K];\n  int wt[N];\n  int val;\n  int par;\n  int sufflink = -1;\n} trie[M];\nint num_vtx = 1;\n\nint to(int v, int k) {\n  if (!trie[v].to[k]) {\n    trie[num_vtx].val = k;\n    trie[num_vtx].par = v;\n    trie[v].to[k] = num_vtx++;\n  }\n  return trie[v].to[k];\n}\n\nint par(int v) {\n  return trie[v].par;\n}\n\nvoid add_wt(int v, int k) {\n  trie[v].wt[k]++;\n}\n\nint go(int v, int x);\n\nint get_link(int v) {\n  if (trie[v].sufflink == -1) {\n    if (v == 0 || trie[v].par == 0) {\n      trie[v].sufflink = 0;\n    }\n    else {\n      trie[v].sufflink = go(get_link(trie[v].par), trie[v].val);\n    }\n    if (v != 0) {\n      get_link(trie[v].sufflink);\n      for (int i = 0; i < N; i++) {\n        trie[v].wt[i] += trie[trie[v].sufflink].wt[i];\n      }\n    }\n  }\n  return trie[v].sufflink;\n}\n\nint go(int v, int x) {\n  if (trie[v].go[x] == -1) {\n    if (trie[v].to[x]) {\n      trie[v].go[x] = trie[v].to[x];\n    }\n    else if (v == 0) {\n      trie[v].go[x] = 0;\n    }\n    else {\n      trie[v].go[x] = go(get_link(v), x);\n    }\n  }\n  return trie[v].go[x];\n}\n\npair<int, int> dp[N][M];\n\nint main () {\n  ios_base::sync_with_stdio(0); cin.tie(0);\n  for (int i = 0; i < M; i++) fill(trie[i].go, trie[i].go+K, -1);\n  string L, R;\n  int n;\n  cin >> L >> R >> n;\n  int nL = (int)L.size();\n  int nR = (int)R.size();\n\n  if (nL != nR) {\n    int cur = 0;\n    for (int i = 0; i < nL; i++) {\n      int k = L[i]-'0';\n      for (int j = k+1; j < K; j++) {\n        cur = to(cur, j);\n        add_wt(cur, nL-i-1);\n        cur = par(cur);\n      }\n      cur = to(cur, k);\n    }\n    add_wt(cur, 0);\n\n    cur = 0;\n    for (int i = 0; i < nR; i++) {\n      int k = R[i]-'0';\n      for (int j = 1; j < k; j++) {\n        cur = to(cur, j);\n        add_wt(cur, nR-i-1);\n        cur = par(cur);\n      }\n      cur = to(cur, k);\n    }\n    add_wt(cur, 0);\n\n    for (int i = nL+1; i < nR; i++) {\n      for (int j = 1; j < K; j++) {\n        add_wt(to(0, j), i-1);\n      }\n    }\n  }\n  else {\n    int first_differ = 0;\n    int cur = 0;\n    while (first_differ < nL && L[first_differ] == R[first_differ]) {\n      cur = to(cur, L[first_differ]-'0');\n      first_differ++;\n    }\n    if (first_differ == nL) {\n      add_wt(cur, 0);\n    }\n    else {\n      int rt = cur;\n      int kL = L[first_differ]-'0';\n      int kR = R[first_differ]-'0';\n      for (int i = kL+1; i < kR; i++) {\n        cur = to(cur, i);\n        add_wt(cur, nL-first_differ-1);\n        cur = par(cur);\n      }\n\n      cur = to(cur, kL);\n      for (int i = first_differ+1; i < nL; i++) {\n        int k = L[i]-'0';\n        for (int j = k+1; j < K; j++) {\n          cur = to(cur, j);\n          add_wt(cur, nL-i-1);\n          cur = par(cur);\n        }\n        cur = to(cur, k);\n      }\n      add_wt(cur, 0);\n\n      cur = to(rt, kR);\n      for (int i = first_differ+1; i < nR; i++) {\n        int k = R[i]-'0';\n        for (int j = 1; j < k; j++) {\n          cur = to(cur, j);\n          add_wt(cur, nR-i-1);\n          cur = par(cur);\n        }\n        cur = to(cur, k);\n      }\n      add_wt(cur, 0);\n    }\n  }\n\n  for (int v = 0; v < num_vtx; v++) {\n    get_link(v);\n  }\n  for (int v = 0; v < num_vtx; v++) {\n    for (int i = 1; i < N; i++) {\n      trie[v].wt[i] += trie[v].wt[i-1];\n    }\n  }\n\n  for (int i = n; i >= 0; i--) {\n    for (int v = 0; v < num_vtx; v++) {\n      for (int j = 0; j < K; j++) {\n        int u = go(v, j);\n        if (dp[i+1][u].first > dp[i][v].first) {\n          dp[i][v].first = dp[i+1][u].first;\n          dp[i][v].second = j;\n        }\n      }\n      dp[i][v].first += trie[v].wt[n-i];\n    }\n  }\n  cout << dp[0][0].first << '\\n';\n  int cur = 0;\n  for (int i = 0; i < n; i++) {\n    cout << dp[i][cur].second;\n    cur = go(cur, dp[i][cur].second);\n  }\n  cout << '\\n';\n}\n"
+}

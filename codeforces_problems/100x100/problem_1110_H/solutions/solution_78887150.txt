@@ -1,0 +1,36 @@
+{
+    "id": 78887150,
+    "contestId": 1110,
+    "creationTimeSeconds": 1588506029,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "Isoeasy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 139,
+    "memoryConsumedBytes": 350310400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int N=3e3+7,M=10;\r\nchar l[N],r[N],t[N]; vector<int>v[N]; bool fl[N][N];\r\nint n,k,la,ra,tot,lena,lenb,lent,q[N],fa[N],fail[N],ch[N][M],fp[N][M],dp[N][N],sum[N][N];\r\ninline void ins(int u,int c){\r\n\tif(c==lent+1) {sum[u][k]++; return;}\r\n\tif(!ch[u][t[c]-'0']) ch[u][t[c]-'0']=++tot;\r\n\tins(ch[u][t[c]-'0'],c+1);\r\n}\r\ninline void del(){\r\n\tint z=0;\r\n\twhile(t[z+1]=='0'&&z+1<=lent) z++;\r\n\tif(z==lent) return; ins(1,z+1);\r\n}\r\ninline int getpos(int u,int c){\r\n\tif(ch[u][c]) return ch[u][c];\r\n\treturn fp[u][c]=getpos(fail[u],c);\r\n}\r\ninline void dfs(int u){\r\n\tfor(int i=0;i<v[u].size();i++){\r\n\t\tfor(int x=0;x<=n;x++) sum[v[u][i]][x]+=sum[u][x]; dfs(v[u][i]);\r\n\t}\r\n}\r\ninline void find(int u,int c){\r\n\tif(c==0) return;\r\n\tfor(int x=0;x<=9;x++)\r\n\t\tif(fl[ch[u][x]][c-1]&&dp[u][c]+sum[ch[u][x]][c-2]==dp[ch[u][x]][c-1]){\r\n\t\t\tputchar(x+'0'),find(ch[u][x],c-1); return;\r\n\t\t}\r\n}\r\nint main(){\r\n\tmemset(dp,-1,sizeof(dp));\r\n\tscanf(\"%s%s%d\",l+1,r+1,&n),lena=strlen(l+1),lenb=strlen(r+1),tot=1;\r\n\tfor(int i=lena;i>=1;i--) l[i+lenb-lena]=l[i];\r\n\tfor(int i=1;i<=lenb-lena;i++) l[i]='0';\r\n\tfor(int i=0;i<=9;i++) ch[1][i]=++tot; int x=0;\r\n\twhile(l[x+1]==r[x+1]&&x+1<=lena) x++; lena=lenb;\r\n\tif(x==lena){\r\n\t\tfor(int i=1;i<=lena;i++) t[i]=l[i]; k=0,lent=lena; del();\r\n\t}\r\n\telse{\r\n\t\tfor(int i=1;i<=lena;i++) t[i]=l[i]; k=0,lent=lena; del();\r\n\t\tfor(int i=x+2;i<=lena;i++){\r\n\t\t\tfor(int x=1;x<i;x++) t[x]=l[x];\r\n\t\t\tfor(int x=l[i]+1;x<='9';x++) t[i]=x,lent=i,k=lena-i,del();\r\n\t\t}\r\n\t\tfor(int i=1;i<=lenb;i++) t[i]=r[i]; k=0,lent=lenb; del();\r\n\t\tfor(int i=x+2;i<=lenb;i++){\r\n\t\t\tfor(int x=1;x<i;x++) t[x]=r[x];\r\n\t\t\tfor(int x='0';x<r[i];x++) t[i]=x,lent=i,k=lenb-i,del();\r\n\t\t}\r\n\t\tfor(int i=l[x+1]+1;i<r[x+1];i++){\r\n\t\t\tlent=x+1,t[x+1]=i,k=lenb-x-1;\r\n\t\t\tfor(int z=1;z<=x;z++) t[z]=l[z]; del();\r\n\t\t}\r\n\t}\r\n\tfor(int i=1;i<=tot;i++)\r\n\t\tfor(int x=0;x<=9;x++) fa[ch[i][x]]=i; la=1,ra=0;\r\n\tfor(int x=0;x<=9;x++) fail[ch[1][x]]=1,q[++ra]=ch[1][x];\r\n\twhile(la<=ra){\r\n\t\tint u=q[la++];\r\n\t\tfor(int x=0;x<=9;x++) if(ch[u][x]) q[++ra]=ch[u][x],fail[ch[u][x]]=getpos(fail[u],x);\r\n\t}\r\n\tfor(int i=2;i<=tot;i++) v[fail[i]].push_back(i); dfs(1);\r\n\tfor(int i=1;i<=tot;i++)\r\n\t\tfor(int x=1;x<=n;x++) sum[i][x]+=sum[i][x-1]; la=1,ra=0;\r\n\tfor(int x=0;x<=9;x++) q[++ra]=ch[1][x];\r\n\twhile(la<=ra){\r\n\t\tint u=q[la++];\r\n\t\tfor(int x=0;x<=9;x++)\r\n\t\t\tif(ch[u][x]) q[++ra]=ch[u][x];\r\n\t\t\telse ch[u][x]=ch[fail[u]][x];\r\n\t}\r\n\tdp[1][n+1]=0;\r\n\tfor(int i=n+1;i>=2;i--)\r\n\t\tfor(int x=1;x<=tot;x++){\r\n\t\t\tif(dp[x][i]==-1) continue;\r\n\t\t\tfor(int z=0;z<=9;z++){\r\n\t\t\t\tdp[ch[x][z]][i-1]=max(dp[ch[x][z]][i-1],dp[x][i]+sum[ch[x][z]][i-2]);\r\n\t\t\t}\r\n\t\t}\r\n\tint ans=0;\r\n\tfor(int i=1;i<=tot;i++) ans=max(ans,dp[i][1]);\r\n\tfor(int i=1;i<=tot;i++) if(dp[i][1]==ans) fl[i][1]=1;\r\n\tfor(int i=2;i<=n+1;i++)\r\n\t\tfor(int x=1;x<=tot;x++){\r\n\t\t\tif(dp[x][i]==-1) continue;\r\n\t\t\tfor(int z=0;z<=9;z++)\r\n\t\t\t\tif(dp[ch[x][z]][i-1]==dp[x][i]+sum[ch[x][z]][i-2]) fl[x][i]|=fl[ch[x][z]][i-1];\r\n\t\t}\r\n\tcout<<ans<<endl,find(1,n+1);\r\n    return 0;\r\n}"
+}

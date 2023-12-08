@@ -1,0 +1,36 @@
+{
+    "id": 153469226,
+    "contestId": 1110,
+    "creationTimeSeconds": 1649774658,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "XueYJ"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 171,
+    "memoryConsumedBytes": 671334400,
+    "source": "#include<iostream>\n#include<algorithm>\n#include<cstdio>\n#include<cmath>\n#include<cstring>\n#include<map>\n#include<stack>\n#include<queue>\n#include<ctime>\n#include<vector>\n#include<set>\nusing namespace std;\nchar s[800+5],t[800+5];\nint len,f[2000+5][10000+5],g[2000+5][20000+5];\nint fin[20000+5][2000+5],ch[20000+5][10],sz=1;\nint Fail[20000+5],q[20000+5],dep[20000+5];\nvoid dfs(int n,bool up,bool down,int u)\n{\n    if (!up&&!down)\n    {\n   //     printf(\"+%d %d\\n\",u,len-n+1);\n        fin[u][len-n+1]++;\n        return;\n    }\n    if (n==len+1)\n    {\n    //    printf(\"+%d [0]\\n\",u);\n        fin[u][0]++;\n        return;\n    }\n    int l=0,r=9;\n    if (down) l=s[n]-'0';\n    if (up) r=t[n]-'0';\n    for (int i=l;i<=r;i++)\n    {\n        int v=u;\n        if (u!=1||i)\n        {\n            if (!ch[u][i])\n                ch[u][i]=++sz;\n            v=ch[u][i];\n            dep[v]=dep[u]+1;\n       //     printf(\"## %d ->(%d) %d\\n\",u,i,v);\n        }\n        int upp=up&(i==r);\n        int downn=down&(i==l);\n        dfs(n+1,upp,downn,v);\n    }\n}\nint go(int u,int i)\n{\n    if (ch[u][i])\n        return ch[u][i];\n    else if (u>1)\n        return ch[u][i]=go(Fail[u],i);\n    else\n        return 1;\n}\nqueue<int>Q;\nbool cmp(int x,int y)\n{\n    return dep[x]<dep[y];\n}\nint main()\n{\n    int n,m1,m2,i,j,k;\n    scanf(\"%s\",s+1);\n    scanf(\"%s\",t+1);\n    m1=strlen(s+1);\n    m2=strlen(t+1);\n    reverse(s+1,s+m1+1);\n    while (m1<m2)\n        s[++m1]='0';\n    reverse(s+1,s+m1+1);\n    len=m1;dep[1]=1;\n    scanf(\"%d\",&n);\n    dfs(1,1,1,1);\n    Q.push(1);\n    while (!Q.empty())\n    {\n        int u=Q.front();Q.pop();\n        for (i=0;i<26;i++)\n        {\n            int v=ch[u][i];\n            if (v)\n            {\n                Fail[v]=go(Fail[u],i);\n                Q.push(v);\n            }\n        }\n    }\n    for (i=1;i<=sz;i++)\n        q[i]=i;\n    sort(q+1,q+sz+1,cmp);\n    for (i=1;i<=sz;i++)\n        if (q[i]!=Fail[q[i]])\n            for (j=0;j<=len;j++)\n                fin[q[i]][j]+=fin[Fail[q[i]]][j];\n    for (i=1;i<=sz;i++)\n        for (j=1;j<=n;j++)\n            fin[i][j]+=fin[i][j-1];/*\n    for (i=1;i<=sz;i++)\n        for (j=1;j<=len;j++)\n            printf(\"## %d , %d : %d\\n\",i,j,fin[i][j]);*/\n    memset(f,-0x3f,sizeof(f));\n    for (j=1;j<=sz;j++)\n        f[0][j]=fin[j][0];\n    for (i=1;i<=n;i++)\n        for (j=1;j<=sz;j++)\n        {\n            int u=j;\n            for (k=0;k<=9;k++)\n            {\n                int v=go(u,k);\n                if (f[i][u]<f[i-1][v])\n                    f[i][u]=f[i-1][v],g[i][u]=k;\n            }\n            f[i][j]+=fin[j][i];\n        }\n    printf(\"%d\\n\",f[n][1]);\n    int p=1;\n    for (i=n;i>=1;i--)\n    {\n        putchar('0'+g[i][p]);\n        p=go(p,g[i][p]);\n    }\n    printf(\"\\n\");\n}\n"
+}

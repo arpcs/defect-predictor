@@ -1,0 +1,36 @@
+{
+    "id": 178341800,
+    "contestId": 1110,
+    "creationTimeSeconds": 1667036159,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "Graygoo_401"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 326,
+    "memoryConsumedBytes": 201113600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ninline int read(){\r\n  int p=0,q=1;\r\n  char ch=getchar();\r\n  while(!isdigit(ch)){if(ch=='-')q=-1;ch=getchar();}\r\n  while(isdigit(ch))p=p*10+ch-'0',ch=getchar();\r\n  return p*q;\r\n}\r\nint tot=1;\r\nint s[10001][11];\r\nint g[10001][1001];\r\nint l[10001],r[10001];\r\nint fail[10001];\r\nint n,len1,len2;\r\nvoid buildequal(int id,int len,bool lmt1,bool lmt2){\r\n\tif(!lmt1 and !lmt2){\r\n\t\tg[id][len1-len]++;\r\n\t\treturn ;\r\n\t}\r\n\tif(len==len1){g[id][0]=1;return ;}\r\n\tif(lmt1 and lmt2){\r\n\t\tfor(int i=l[len+1];i<=r[len+1];i++){\r\n\t\t\ts[id][i]=++tot;\r\n\t\t}\r\n\t\tif(l[len+1]==r[len+1])buildequal(s[id][l[len+1]],len+1,1,1);\r\n\t\telse{\r\n\t\t\tbuildequal(s[id][l[len+1]],len+1,1,0);\r\n\t\t\tbuildequal(s[id][r[len+1]],len+1,0,1);\r\n\t\t    for(int i=l[len+1]+1;i<=r[len+1]-1;i++)buildequal(s[id][i],len+1,0,0);\r\n\t\t}\r\n\t}else if(lmt1){\r\n\t\tfor(int i=l[len+1];i<=9;i++){\r\n\t\t\ts[id][i]=++tot;\r\n\t\t}\r\n\t\tbuildequal(l[len+1],len+1,1,0);\r\n\t\tfor(int i=l[len+1]+1;i<=9;i++)buildequal(i,len+1,0,0);\r\n\t}else{\r\n\t\tfor(int i=0;i<=r[len+1];i++){\r\n\t\t\ts[id][i]=++tot;\r\n\t\t}\r\n\t\tbuildequal(r[len+1],len+1,1,0);\r\n\t\tfor(int i=0;i<=r[len+1]-1;i++)buildequal(i,len+1,0,0);\r\n\t}\r\n\treturn ;\r\n} \r\nvoid builddiff1(int id,int len,bool lmt){\r\n\tif(!lmt){\r\n\t\tg[id][len1-len]++;\r\n\t\treturn ;\r\n\t}\r\n\tif(len==len1){\r\n\t\tg[id][0]++;\r\n\t\treturn ;\r\n\t}\r\n\tfor(int i=l[len+1];i<=9;i++){\r\n\t\tif(!s[id][i])s[id][i]=++tot;\r\n\t}\r\n\tbuilddiff1(s[id][l[len+1]],len+1,1);\r\n\tfor(int i=l[len+1]+1;i<=9;i++)builddiff1(s[id][i],len+1,0);\r\n}\r\nvoid builddiff2(int id,int len,bool lmt){\r\n\tif(!lmt){\r\n\t\tg[id][len2-len]++;\r\n\t\treturn ;\r\n\t}\r\n\tif(len==len2){\r\n\t\tg[id][0]++;\r\n\t\treturn ;\r\n\t}\r\n\tfor(int i=len==0?1:0;i<=r[len+1];i++){\r\n\t\tif(!s[id][i])s[id][i]=++tot;\r\n\t}\r\n\tbuilddiff2(s[id][r[len+1]],len+1,1);\r\n\tfor(int i=len==0?1:0;i<=r[len+1]-1;i++)builddiff2(s[id][i],len+1,0);\r\n}\r\nvoid compress(int id){\r\n\tfor(int i=1;i<=1000;i++)g[id][i]+=g[id][i-1];\r\n\tfor(int i=0;i<=9;i++)if(s[id][i])compress(s[id][i]);\r\n}\r\nvoid buildfail(){\r\n\tqueue<int> e;fail[1]=1;\r\n\tfor(int i=0;i<=9;i++){\r\n\t\tif(s[1][i])fail[s[1][i]]=1,e.push(s[1][i]);\r\n\t\telse s[1][i]=1;\r\n\t}\r\n\twhile(!e.empty()){\r\n\t\tint w=e.front();e.pop();\r\n\t\tfor(int i=0;i<=9;i++){\r\n\t\t\tint z=s[fail[w]][i];\r\n\t\t\tif(s[w][i]){\r\n\t\t\t\tfail[s[w][i]]=z,e.push(s[w][i]);\r\n\t\t\t\tfor(int j=0;j<=9;j++)g[s[w][i]][j]+=g[z][j];\r\n\t\t\t}\r\n\t\t\telse s[w][i]=z;\r\n\t\t}\r\n\t}\r\n\treturn ;\r\n}\r\nint f[2001][10001];\r\nint nxt[2001][10001];\r\nint main(){\r\n  string a,b;cin>>a>>b>>n;\r\n  for(int i=0;i<a.size();i++)l[i+1]=a[i]-'0';\r\n  for(int i=0;i<b.size();i++)r[i+1]=b[i]-'0';\r\n  len1=a.size();len2=b.size();\r\n  if(len1==500)cout<<len1<<\" \"<<len2<<endl;\r\n  if(len1==len2)buildequal(1,0,1,1);\r\n  else{\r\n  \tbuilddiff1(1,0,1);builddiff2(1,0,1);\r\n  } \r\n  compress(1);\r\n  buildfail();\r\n  for(int i=n-1;i>=0;i--){  \t\r\n  \tfor(int j=1;j<=tot;j++){\r\n  \t\tf[i][j]=INT_MIN;\r\n\t  \tfor(int k=0;k<=9;k++){\r\n\t  \t\tif(f[i][j]<f[i+1][s[j][k]]+g[s[j][k]][min(1000,n-i-1)])nxt[i][j]=k;\r\n\t\t  \tf[i][j]=max(f[i][j],f[i+1][s[j][k]]+g[s[j][k]][min(1000,n-i-1)]);\r\n\t  \t}\r\n\t}\r\n  }\r\n  if(len1==len2)cout<<f[0][1]<<endl;\r\n  else{\r\n  \tint sm=0;\r\n  \tfor(int i=len1+1;i<=len2-1;i++)sm+=max(0,n-i+1);\r\n  \tcout<<f[0][1]+sm<<endl;\r\n  }\r\n  int now=1;\r\n  for(int i=0;i<=n-1;i++){\r\n  \tcout<<nxt[i][now];\r\n  \tnow=s[now][nxt[i][now]];\r\n  }\r\n  return 0;\r\n}\r\n"
+}

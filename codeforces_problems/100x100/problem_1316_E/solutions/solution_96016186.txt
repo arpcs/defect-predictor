@@ -1,0 +1,38 @@
+{
+    "id": 96016186,
+    "contestId": 1316,
+    "creationTimeSeconds": 1603135281,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1316,
+        "index": "E",
+        "name": "Team Building",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "bitmasks",
+            "dp",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1316,
+        "members": [
+            {
+                "handle": "kvk1920"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1583332500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 80998400,
+    "source": "#include <algorithm>\n#include <cassert>\n#include <iostream>\n#include <vector>\nusing namespace std;\n\ntemplate <class T>\nvoid push_heap(vector<T>& heap, T&& x)\n{\n    heap.emplace_back(std::forward<T>(x));\n    push_heap(heap.begin(), heap.end());\n}\n\ntemplate <class T>\nT pop_heap(vector<T>& heap) {\n    pop_heap(heap.begin(), heap.end());\n    T x{move(heap.back())};\n    heap.pop_back();\n    return x;\n}\n\nusing ll = int64_t;\n\nstruct edge\n{\n    int from, to, flow, capacity;\n    ll cost;\n};\n\nconst int MX = 100'000;\n\nedge E[MX * 8 * 4 + 100];\nint last_edge{0};\n\nvector<int> g[MX + 100];\n\nvoid insert_edge(int u, int v, int capacity, ll cost)\n{\n    E[last_edge] = {u, v, 0, capacity, cost};\n    E[last_edge + 1] = {v, u, 0, 0, -cost};\n    g[u].push_back(last_edge);\n    g[v].push_back(last_edge + 1);\n    last_edge += 2;\n}\n\nint last_visited[MX], timer{0}, path[MX];\nll dst[MX];\n\nvector<pair<ll, int>> heap;\n\nint find_path(const int start)\n{\n    ++timer;\n    heap.clear();\n    push_heap(heap, {0, start});\n    last_visited[start] = timer;\n    while (!heap.empty())\n    {\n        auto [d, v]{pop_heap(heap)};\n        if (d != dst[v])\n            continue;\n        if (9 == v)\n        {\n            int e{path[v]};\n            while (true)\n            {\n                ++E[e].flow;\n                --E[e ^ 1].flow;\n                if (start == E[e].from)\n                    break;\n                e = path[E[e].from];\n            }\n            return dst[9];\n        }\n        for (int e : g[v])\n        {\n            if (E[e].capacity == E[e].flow)\n                continue;\n            int u{E[e].to};\n            if (timer == last_visited[u] && dst[u] > dst[v] + E[e].cost)\n                continue;\n            dst[u] = dst[v] + E[e].cost;\n            last_visited[u] = timer;\n            path[u] = e;\n            push_heap(heap, {dst[u], u});\n        }\n    }\n    assert(false);\n}\n\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(nullptr);\n    cout.tie(nullptr);\n    int n, p, k;\n    cin >> n >> p >> k;\n    insert_edge(0, 9, k, 0);\n    insert_edge(8, 9, n, 0);\n    for (int i{1}; i <= p; ++i)\n        insert_edge(i, 9, 1, 0);\n    for (int i{0}; i < n; ++i)\n    {\n        int a;\n        cin >> a;\n        insert_edge(10 + i, 0, 1, a);\n        insert_edge(10 + i, 8, 1, 0);\n    }\n    for (int i{0}; i < n; ++i)\n    {\n        for (int j{1}; j <= p; ++j)\n        {\n            int s;\n            cin >> s;\n            insert_edge(10 + i, j, 1, s);\n        }\n    }\n    ll ans{0};\n    for (int i{0}; i < n; ++i)\n        ans += find_path(10 + i);\n    cout << ans << '\\n';\n}"
+}

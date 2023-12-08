@@ -1,0 +1,36 @@
+{
+    "id": 106983636,
+    "contestId": 1110,
+    "creationTimeSeconds": 1612875306,
+    "relativeTimeSeconds": 606,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "raghav10026"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1612874700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 1528,
+    "memoryConsumedBytes": 482918400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define rep(i, a, b) for(int i = a; i <= b; ++i)\r\ntemplate <typename T> inline bool Max(T &a, T b){return a < b ? a = b, 1 : 0;}\r\nconst int N = 20004;\r\nint n, ndc;\r\nint g[N][2004], f[2004][N], ch[N][10], fail[N], ok[2004][N];\r\nchar L[N], R[N];\r\nint to(int u, int c) {\r\n\tif(!ch[u][c]) ch[u][c] = ++ndc;\r\n\treturn ch[u][c];\r\n}\r\nvoid insert() {\r\n\tint l1 = strlen(L + 1), l2 = strlen(R + 1);\r\n\trep(i, 1, l1) L[i] -= 48;\r\n\trep(i, 1, l2) R[i] -= 48;\r\n\tint u1 = 0, u2 = 0;\r\n\tif(l1 == l2) {\r\n\t\trep(i, 1, l1) {\r\n\t\t\tif(u1 == u2) {\r\n\t\t\t\trep(j, L[i] + 1, R[i] - 1) ++g[to(u1, j)][l1 - i];\r\n\t\t\t}else {\r\n\t\t\t\trep(j, L[i] + 1, 9) ++g[to(u1, j)][l1 - i];\r\n\t\t\t\trep(j, i == 1 ? 1 : 0, R[i] - 1) ++g[to(u2, j)][l2 - i];//\r\n\t\t\t}\r\n\t\t\tu1 = to(u1, L[i]);\r\n\t\t\tu2 = to(u2, R[i]);\r\n\t\t}\r\n\t\t++g[u1][0];if(u1 ^ u2) ++g[u2][0];\r\n\t}else {\r\n\t\trep(i, 1, l1) {\r\n\t\t\trep(j, L[i] + 1, 9) ++g[to(u1, j)][l1 - i];\r\n\t\t\tu1 = to(u1, L[i]);\r\n\t\t}\r\n\t\trep(i, 1, l2) {\r\n\t\t\trep(j, i == 1 ? 1 : 0, R[i] - 1) ++g[to(u2, j)][l2 - i];\r\n\t\t\tu2 = to(u2, R[i]);\r\n\t\t}\r\n\t\t++g[u1][0], ++g[u2][0];\r\n\t\trep(i, l1 + 1, l2 - 1)\r\n\t\trep(j, 1, 9) ++g[to(0, j)][i - 1];\r\n\t}\r\n}\r\nvoid getfail() {\r\n\tqueue<int>Q;\r\n\trep(c, 1, 9) if(ch[0][c]) Q.push(ch[0][c]);\r\n\twhile(!Q.empty()) {\r\n\t\tint u = Q.front();Q.pop();\r\n\t\trep(c, 0, 9) {\r\n\t\t\tint &v = ch[u][c];\r\n\t\t\tif(!v) {v = ch[fail[u]][c]; continue;}\r\n\t\t\tQ.push(v);\r\n\t\t\tfail[v] = ch[fail[u]][c];\r\n\t\t\trep(i, 0, n) g[v][i] += g[fail[v]][i];\r\n\t\t}\r\n\t}\r\n}\r\nbool vis[N];\r\nint main() {\r\n\tscanf(\"%s%s%d\", L + 1, R + 1, &n);\r\n\tinsert();\r\n\tgetfail();\r\n\trep(i, 1, ndc)\r\n\trep(j, 1, n) g[i][j] += g[i][j - 1];\r\n\t\r\n\tmemset(f, 0xc0, sizeof f);f[0][0] = 0;\r\n\trep(i, 0, n)\r\n\trep(j, 0, ndc) if(f[i][j] >= 0){\r\n\t\tf[i][j] += g[j][n - i];\r\n\t\trep(k, 0, 9)\r\n\t\tMax(f[i + 1][ch[j][k]], f[i][j]);\r\n\t}\r\n\t\r\n\tint ans = 0;\r\n\trep(i, 0, ndc) Max(ans, f[n][i]);\r\n\tprintf(\"%d\\n\", ans);\r\n\t\r\n\trep(i, 0, ndc) if(f[n][i] == ans) ok[n][i] = 1;\r\n\tfor(int i = n - 1; ~i; --i)\r\n\trep(j, 0, ndc)\r\n\trep(k, 0, 9) {\r\n\t\tif(f[i][j] + g[ch[j][k]][n - i - 1] == f[i + 1][ch[j][k]]) {\r\n\t\t\tok[i][j] |= ok[i + 1][ch[j][k]];\r\n\t\t}\r\n\t}\r\n\tfor(int i = 0, u = 0; i < n; ++i) {\r\n\t\trep(k, 0, 9) if(f[i][u] + g[ch[u][k]][n - i - 1] == f[i + 1][ch[u][k]] && ok[i + 1][ch[u][k]]) {\r\n\t\t\tprintf(\"%c\", k + '0'); u = ch[u][k];\r\n\t\t\tbreak; \r\n\t\t}\r\n\t}\r\n\tputs(\"\");\r\n\treturn 0;\r\n}"
+}

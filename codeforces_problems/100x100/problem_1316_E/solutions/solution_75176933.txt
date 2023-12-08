@@ -1,0 +1,38 @@
+{
+    "id": 75176933,
+    "contestId": 1316,
+    "creationTimeSeconds": 1585770168,
+    "relativeTimeSeconds": 6768,
+    "problem": {
+        "contestId": 1316,
+        "index": "E",
+        "name": "Team Building",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "bitmasks",
+            "dp",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1316,
+        "members": [
+            {
+                "handle": "srikkanthr"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1585763400
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\n#include <ext/pb_ds/assoc_container.hpp>\nusing namespace __gnu_pbds;\nusing namespace std;\n#define FASTIO ios_base::sync_with_stdio(false);cin.tie(NULL);cout.tie(NULL)\n#define LL long long \n#define ar32(x) array<int, x> \n#define ar64(x) array<LL, x>\n// Infinity xP\nconst int oo = 1e9 + 5;\nconst int MOD = 998244353;\n// const int MOD = 1e9 + 7;\nconst LL ooll = 1e18;\nconst int N = 1e5 + 5;\n\nLL pref[100], suf[N][(1<<8)];\n\nvoid solve() {\n    int n, p, k, i, j;\n    cin >> n >> p >> k;\n    vector<pair<int, vector<int>>>vec(n, {0, vector<int>(p, 0)});\n    for (i=0;i<n;i++) cin >> vec[i].first;\n    for (i=0;i<n;i++) {\n        for (j=0;j<p;j++) cin >> vec[i].second[j];\n    }\n    sort(vec.begin(), vec.end(), [](pair<int, vector<int>> a, pair<int, vector<int>> b) {\n        return a.first < b.first;\n    });\n    for (int mask=0;mask<(1<<p);mask++) {\n        if (mask == 0) suf[n][mask] = 0;\n        else suf[n][mask] = -ooll;\n        pref[0][mask] = -ooll;\n    }\n    for (i=n-1;i>=0;i--) {\n        for (int mask=0;mask<(1<<p);mask++) {\n            suf[i][mask] = suf[i+1][mask] + vec[i].first;\n            for (j=0;j<p;j++) if (mask & (1<<j)) {\n                suf[i][mask] = max(suf[i+1][mask ^ (1<<j)] + vec[i].second[j], suf[i][mask]);\n            }\n            // cout << suf[i][mask] << \" \";\n        }\n        // cout << '\\n';\n    }\n    for (int j=0;j<p;j++) {\n        pref[0][(1<<j)] = vec[0].second[j];\n    }\n    pref[0][0] = 0;\n    for (i=1;i<n;i++) {\n        for (int mask=0;mask<(1<<p);mask++) {\n            pref[i][mask] = pref[i-1][mask];\n            for (j=0;j<p;j++) if (mask & (1<<j)) {\n                pref[i][mask] = max(pref[i][mask], pref[i-1][mask ^ (1<<j)] + vec[i].second[j]);\n            }\n            // cout << pref[i][mask] << \" \";\n        }\n        // cout << '\\n';\n    }\n    LL ans = -ooll;\n    for (i=n-1;i>=0;i--) {\n        for (int mask = 0;mask < n; mask++) {\n            if (n - i - __builtin_popcount(mask) == k) {\n                // cout << i << \" \" << mask << \" here\\n\";\n                if (i > 0)\n                    ans = max(ans, suf[i][mask] + pref[i-1][((1<<p) - 1) ^ mask]);\n                else if (mask == (1<<p) - 1)\n                    ans = max(ans, suf[i][mask]);\n            }\n        }\n    }\n    cout << ans << '\\n';\n}    \n\nint main() {\n    FASTIO;\n    int t = 1;\n    // cin >> t;\n    for (int tc=1;tc<=t;++tc) {\n        solve();\n    }\n    return 0;\n}"
+}

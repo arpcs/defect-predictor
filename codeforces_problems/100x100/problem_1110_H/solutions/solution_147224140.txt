@@ -1,0 +1,36 @@
+{
+    "id": 147224140,
+    "contestId": 1110,
+    "creationTimeSeconds": 1645493101,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "xajd_smh"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 1996,
+    "memoryConsumedBytes": 362700800,
+    "source": "#include<bits/stdc++.h>\r\n#include<tr1/unordered_map>\r\nusing namespace std;\r\n#define ll long long\r\n#define ull unsigned long long\r\n#define M 20005\r\n#define N 2005\r\n#define for_each(i,bg,ed) for(int i=bg;i<ed;++i)\r\nconst ll mod = 1e9+7;\r\nconst ll inf = 1e17;\r\nconst int INF = 1e7;\r\ninline ll read()\r\n{\r\n   ll f=0,g=1;\r\n   char ch=getchar();\r\n   while(ch<'0'||ch>'9') {if(ch=='-') g=-1;ch=getchar();}\r\n   while(ch>='0'&&ch<='9') {f=(f<<1)+(f<<3)+ch-'0';ch=getchar();}\r\n   return f*g;\r\n}\r\n\r\nint ch[M][10],fail[M];\r\nint g[M][N],dp[M][N],cnt,n,len_l,len_r,Ans;\r\nstring Sl,Sr,Str;\r\n\r\nvoid Init()\r\n{\r\n   cin>>Sl>>Sr>>n;\r\n   len_l=Sl.size(); len_r=Sr.size();\r\n   for(int i=0;i<len_l;i++) Sl[i]-='0';\r\n   for(int i=0;i<len_r;i++) Sr[i]-='0';\r\n}\r\n\r\nvoid Newnode(int now,int id) {if(!ch[now][id]) ch[now][id]=++cnt;}\r\n\r\nvoid Workg(int now,int l,int r,int len)\r\n{\r\n   for(int i=l;i<r;i++)\r\n   {\r\n      Newnode(now,i);\r\n      g[ch[now][i]][len]++;\r\n   }\r\n}\r\n\r\nvoid Move(int &now,int num)\r\n{\r\n   Newnode(now,num);\r\n   now=ch[now][num];\r\n}\r\n\r\nvoid Build()\r\n{\r\n   int rt_l=0,rt_r=0;\r\n   if(len_l==len_r){                   \r\n     for_each(i,1,len_l+1){\r\n      int num_l=Sl[i-1],num_r=Sr[i-1]; \r\n       if(rt_l==rt_r){                    \r\n         Workg(rt_l,num_l+1,num_r,len_l-i);       \r\n        Move(rt_l,num_l);\r\n        Move(rt_r,num_r);\r\n      }else{                  \r\n        Workg(rt_l,num_l+1,10,len_l-i);        \r\n        Workg(rt_r,0,num_r,len_r-i);\r\n        Move(rt_l,num_l);\r\n        Move(rt_r,num_r);\r\n      }\r\n     }\r\n     g[rt_l][0]++;\r\n     if(rt_l!=rt_r)g[rt_r][0]++;\r\n   }else{                         \r\n     for_each(i,1,len_l+1){      \r\n      int num_l=Sl[i-1];\r\n      Workg(rt_l,num_l+1,10,len_l-i);\r\n      Move(rt_l,num_l);\r\n     }\r\n\r\n     for_each(i,1,len_r+1){            \r\n      int num_r=Sr[i-1];\r\n      Workg(rt_r,0,num_r,len_r-i);\r\n      Move(rt_r,num_r);\r\n     }\r\n     g[rt_l][0]++,g[rt_r][0]++;\r\n      for_each(i,len_l+1,len_r)          \r\n        for_each(nxt,1,10){\r\n      if(!ch[0][nxt])ch[0][nxt]=++cnt;\r\n      g[ch[0][nxt]][i-1]++;\r\n      }\r\n   }\r\n   ch[0][0]=0;\r\n}\r\n\r\nqueue<int>q;\r\n\r\nvoid Get_Fail()\r\n{\r\n   for(int i=0;i<10;i++) if(ch[0][i]) q.push(ch[0][i]);\r\n   while(!q.empty())\r\n   {\r\n      int now=q.front(); q.pop();\r\n\r\n      for(int i=0;i<10;i++)\r\n      {\r\n         int &to=ch[now][i];\r\n         if(to)\r\n         {\r\n            q.push(to);\r\n            fail[to]=ch[fail[now]][i];\r\n            for(int i=0;i<=n;i++) g[to][i]+=g[fail[to]][i];\r\n         }\r\n         else to=ch[fail[now]][i];\r\n      }\r\n   }\r\n   for(int now=0;now<=cnt;now++) for(int i=0;i<=n;i++) \r\n   g[now][i]+=g[now][i-1];\r\n}\r\n\r\nvoid GetAns()\r\n{\r\n   memset(dp,-1,sizeof dp);\r\n   dp[0][0]=0;\r\n   for(int i=0;i<=n;i++)\r\n   {\r\n      for(int now=0;now<=cnt;now++)\r\n      {\r\n         if(dp[now][i]>=0)\r\n         {\r\n            dp[now][i]+=g[now][n-i];\r\n            for(int nxt=0;nxt<=9;nxt++)\r\n            dp[ch[now][nxt]][i+1]=max(dp[now][i],dp[ch[now][nxt]][i+1]);\r\n         }\r\n      }\r\n   }\r\n   for(int now=0;now<=cnt;now++) Ans=max(Ans,dp[now][n]);\r\n   cout<<Ans<<endl;\r\n}\r\n\r\nbool Reg[M][N];\r\n\r\nvoid Get_Solution()\r\n{\r\n   for(int now=0;now<=cnt;now++)\r\n   if(dp[now][n]==Ans) Reg[now][n]=1;\r\n\r\n   for(int len=n-1;~len;len--)\r\n   {\r\n      for(int now=0;now<=cnt;now++)\r\n      {\r\n         if(dp[now][len]>=0)\r\n         for(int nxt=0;nxt<10;nxt++)\r\n         {\r\n            if(Reg[ch[now][nxt]][len+1]&&dp[ch[now][nxt]][len+1]==dp[now][len]+g[ch[now][nxt]][n-len-1])\r\n            {\r\n               Reg[now][len]=1;\r\n               break;\r\n            }\r\n         }\r\n      }\r\n   }\r\n\r\n   int now=0;\r\n   for(int len=0;len<n;len++)\r\n   {\r\n      for(int nxt=0;nxt<10;nxt++)\r\n      {\r\n         if(Reg[ch[now][nxt]][len+1]&&dp[ch[now][nxt]][len+1]==dp[now][len]+g[ch[now][nxt]][n-len-1])\r\n         {\r\n            putchar('0'+nxt);\r\n            now=ch[now][nxt];\r\n            break;\r\n         }   \r\n      }\r\n   }\r\n}\r\n\r\n   \r\nint main()\r\n{  \r\n   Init(); Build(); Get_Fail(); GetAns(); Get_Solution();\r\n   return 0;\r\n}\r\n\r\n\r\n\r\n/*\r\n12345\r\n12346\r\n6\r\n\r\n*/\r\n\r\n\r\n\r\n\r\n\r\n"
+}

@@ -1,0 +1,39 @@
+{
+    "id": 235104578,
+    "contestId": 1646,
+    "creationTimeSeconds": 1701364891,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1646,
+        "index": "D",
+        "name": "Weight the Tree",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1646,
+        "members": [
+            {
+                "handle": "_3bdo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1646408100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 67,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 49766400,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\ntypedef long long ll;\r\n#define all(a) a.begin(), a.end()\r\n\r\nconst int N = 2e5 + 1;\r\nvector<int> tree[N];\r\nint degree[N], weight[N], n;\r\nint vis[N][2];\r\npair<ll, ll> dp[N][2];\r\nbool good[N];\r\n\r\npair<ll, ll> solve(int node, int parent, bool canGood) {\r\n    pair<ll, ll>& ret = dp[node][canGood];\r\n    if (vis[node][canGood]) return ret;\r\n    vis[node][canGood] = true;\r\n\r\n    ret = {0, 0};\r\n    if (canGood) {\r\n        ret = {1, degree[node]};\r\n        for (auto next : tree[node])\r\n            if (next != parent) {\r\n                pair<ll, ll> cur = solve(next, node, false);\r\n                ret.first += cur.first;\r\n                ret.second += cur.second;\r\n            }\r\n    }\r\n\r\n    pair<ll, ll> cur = {0, 0};\r\n    for (auto next : tree[node])\r\n        if (next != parent) {\r\n            pair<ll, ll> temp = solve(next, node, true);\r\n            cur.first += temp.first;\r\n            cur.second += temp.second;\r\n        }\r\n\r\n    if (cur.first > ret.first)\r\n        ret = cur;\r\n    else if (cur.first == ret.first)\r\n        ret.second = min(ret.second, cur.second);\r\n\r\n    return ret;\r\n}\r\n\r\nvoid build(int node, int parent, bool canGood) {\r\n    pair<ll, ll>& Max = dp[node][canGood];\r\n\r\n    if (canGood) {\r\n        pair<ll, ll> cur = {1, degree[node]};\r\n        for (auto next : tree[node])\r\n            if (next != parent) {\r\n                pair<ll, ll> temp = solve(next, node, false);\r\n                cur.first += temp.first;\r\n                cur.second += temp.second;\r\n            }\r\n\r\n        if (cur == Max) {\r\n            good[node] = true;\r\n            for (auto next : tree[node])\r\n                if (next != parent) build(next, node, false);\r\n            return;\r\n        }\r\n    }\r\n    for (auto next : tree[node])\r\n        if (next != parent)\r\n            build(next, node, true);\r\n}\r\n\r\nvoid solve() {\r\n    cin >> n;\r\n\r\n    if (n == 2) {\r\n        cout << 2 << \" \" << 2 << endl;\r\n        cout << 1 << \" \" << 1 << endl;\r\n        return;\r\n    }\r\n\r\n    for (int i = 1; i < n; i++) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n\r\n        tree[u].push_back(v);\r\n        tree[v].push_back(u);\r\n\r\n        ++degree[u];\r\n        ++degree[v];\r\n    }\r\n\r\n    int goodCount = solve(1, 0, true).first;\r\n    build(1, 0, true);\r\n\r\n    ll sum = 0;\r\n    for (int node = 1; node <= n; node++) {\r\n        if (good[node])\r\n            weight[node] = degree[node];\r\n        else\r\n            weight[node] = 1;\r\n\r\n        sum += weight[node];\r\n    }\r\n\r\n    cout << goodCount << \" \" << sum << endl;\r\n    for (int node = 1; node <= n; node++)\r\n        cout << weight[node] << \" \";\r\n}\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(NULL);\r\n    cin.tie(NULL), cout.tie(NULL);\r\n\r\n    int t = 1;\r\n    // cin >> t;\r\n    while (t--) solve();\r\n}"
+}

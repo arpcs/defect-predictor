@@ -1,0 +1,36 @@
+{
+    "id": 109217631,
+    "contestId": 1110,
+    "creationTimeSeconds": 1615029523,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "BruceW_07"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 3290,
+    "memoryConsumedBytes": 966451200,
+    "source": "#include <cassert>\r\n#include <cstdio>\r\n#include <cstring>\r\n#include <iostream>\r\n#include <queue>\r\n\r\nusing namespace std;\r\n\r\nconst int _ = 2e3 + 7;\r\nconst int __ = 2e4 + 7;\r\n\r\ntypedef long long ll;\r\n\r\nint n, l1, l2, ch[__][10], fail[__], tot = 1;\r\nbool eqflag;\r\nll f[_][__], maxf[_][__], g[__][_];\r\nchar L[_], R[_], S[_];\r\nqueue<int> q;\r\n\r\nvoid Ins(char S[], int ty) {\r\n  int u = 1, len = strlen(S + 1); bool flag = l1 == l2;\r\n  for (int i = 1; i <= len; ++i) {\r\n    int c = S[i] - '0';\r\n    if (!ch[u][c]) ch[u][c] = ++tot;\r\n    if (!ty) {\r\n      int lim = flag ? R[i] - '0' - 1 : 9;\r\n      //cerr << i << \": \" << lim << ' ' << c << endl;\r\n      for (int j = c + 1; j <= lim; ++j) {\r\n        if (!ch[u][j]) ch[u][j] = ++tot;\r\n        ++g[ch[u][j]][len - i];\r\n      }\r\n    }\r\n    else {\r\n      int lim = flag ? 9 : 0;\r\n      for (int j = c - 1; j >= lim; --j) {\r\n        if (!j and i == 1) continue;\r\n        if (!ch[u][j]) ch[u][j] = ++tot;\r\n        ++g[ch[u][j]][len - i];\r\n      }\r\n    }\r\n    u = ch[u][c];\r\n    if (L[i] != R[i]) flag = 0;\r\n  }\r\n  if (!ty or !eqflag) ++g[u][0];\r\n}\r\n\r\nvoid GetFail() {\r\n  for (int i = 0; i < 10; ++i) ch[0][i] = 1;\r\n  q.push(1);\r\n  while (!q.empty()) {\r\n    int u = q.front(); q.pop();\r\n    for (int i = 0; i < 10; ++i)\r\n      if (ch[u][i]) fail[ch[u][i]] = ch[fail[u]][i], q.push(ch[u][i]);\r\n      else ch[u][i] = ch[fail[u]][i];\r\n    /*\r\n    if (u == 11) {\r\n      for (int i = 0; i <= n; ++i) cerr << g[u][i] << ' '; cerr << endl;\r\n    }\r\n    */\r\n    for (int i = 0; i <= n; ++i) g[u][i] += g[fail[u]][i];\r\n    /*\r\n    if (u == 11) {\r\n      for (int i = 0; i <= n; ++i) cerr << g[u][i] << ' '; cerr << endl;\r\n      cerr << fail[u] << endl;\r\n      for (int i = 0; i <= n; ++i) cerr << g[fail[u]][i] << ' '; cerr << endl;\r\n    }\r\n    */\r\n  }\r\n  for (int u = 1; u <= tot; ++u)\r\n    for (int i = 1; i <= n; ++i) g[u][i] += g[u][i - 1];\r\n}\r\n\r\nint main() {\r\n  scanf(\"%s%s%d\", L + 1, R + 1, &n);\r\n  l1 = strlen(L + 1), l2 = strlen(R + 1);\r\n  eqflag = l1 == l2;\r\n  for (int i = 1; i <= l1 and eqflag; ++i)\r\n    if (L[i] != R[i]) eqflag = 0;\r\n  Ins(L, 0), Ins(R, 1);\r\n  for (int i = 1; i < 10; ++i) {\r\n    if (!ch[1][i]) ch[1][i] = ++tot;\r\n    for (int j = l1; j < l2 - 1; ++j) ++g[ch[1][i]][j];\r\n  }\r\n  //for (int i = 0; i <= n; ++i) cerr << g[11][i] << ' '; cerr << endl;\r\n  GetFail();\r\n  //return 0;\r\n  \r\n\r\n  memset(f, -0x3f, sizeof f);\r\n  f[0][1] = 0;\r\n  for (int i = 0; i < n; ++i) {\r\n    for (int j = 1; j <= tot; ++j) {\r\n      if (f[i][j] < 0) continue;\r\n      for (int k = 0; k < 10; ++k)\r\n        f[i + 1][ch[j][k]] = max(f[i + 1][ch[j][k]], f[i][j] + g[ch[j][k]][n - i - 1]);\r\n    }\r\n  }\r\n\r\n  ll ans = 0;\r\n  for (int j = 1; j <= tot; ++j) ans = max(ans, f[n][j]), maxf[n][j] = f[n][j];\r\n\r\n  for (int i = n - 1; ~i; --i)\r\n    for (int j = 1; j <= tot; ++j)\r\n      for (int k = 0; k < 10; ++k)\r\n        if (f[i + 1][ch[j][k]] == f[i][j] + g[ch[j][k]][n - i - 1])\r\n          maxf[i][j] = max(maxf[i][j], maxf[i + 1][ch[j][k]]);\r\n\r\n  assert(maxf[0][1] == ans);\r\n  int u = 1;\r\n  for (int i = 0; i < n; ++i)\r\n    for (int k = 0; k < 10; ++k)\r\n      if (maxf[i + 1][ch[u][k]] == ans and f[i + 1][ch[u][k]] == f[i][u] + g[ch[u][k]][n - i - 1]) {\r\n        S[i + 1] = k + '0', u = ch[u][k];\r\n        break;\r\n      }\r\n\r\n  cout << ans << endl;\r\n  printf(\"%s\\n\", S + 1);\r\n\r\n  return 0;\r\n\r\n  cerr << \"======================================================================\" << endl;\r\n  for (int i = 1; i <= n; ++i) {\r\n    for (int j = 1; j <= tot; ++j)\r\n      if (f[i][j] >= 0) cerr << \"f \" << i << ' ' << j << \": \" << f[i][j] << endl;\r\n    cerr << endl;\r\n  }\r\n\r\n  //return 0;\r\n\r\n  for (int i = 1; i <= tot; ++i) {\r\n    cerr << i << \": \" << endl;\r\n    cerr << \"fail: \" << fail[i] << endl;\r\n    cerr << \"ch: \"; for (int j = 0; j < 10; ++j) cerr << (ch[i][j] == ch[fail[i]][j] ? 0 : ch[i][j]) << ' '; cerr << endl;\r\n    cerr << \"g: \"; for (int j = 0; j <= n; ++j) cerr << g[i][j] << ' '; cerr << endl;\r\n    cerr << endl;\r\n  }\r\n}\r\n"
+}

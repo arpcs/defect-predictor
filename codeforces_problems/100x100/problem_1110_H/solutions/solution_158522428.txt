@@ -1,0 +1,36 @@
+{
+    "id": 158522428,
+    "contestId": 1110,
+    "creationTimeSeconds": 1653565549,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "feecIe6418"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 685,
+    "memoryConsumedBytes": 278323200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef pair<int,int> pr;\r\nconst int mod=998244353;\r\nchar L[805],R[805];\r\nint ch[17005][10],s[17005][2005],f[2005][17005],fail[17005],n,lenl,lenr,tot=0;\r\nbitset<17005> is[2005];\r\nvoid Build1(){\r\n\tint p=0;\r\n\tfor(int i=1;i<=lenl;i++){\r\n\t\tint wl=L[i]-'0',wr=R[i]-'0';\r\n\t\tif(wl==wr){\r\n\t\t\tch[p][wl]=++tot,assert(tot<=17000);\r\n\t\t\tp=ch[p][wl];\r\n\t\t\tif(i==lenl)s[p][0]++;\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tfor(int j=wl+1;j<wr;j++)ch[p][j]=++tot,s[tot][lenl-i]++,assert(tot<=17000);\r\n\t\tch[p][wl]=++tot;\r\n\t\tch[p][wr]=++tot,assert(tot<=17000);\r\n\t\tint q=ch[p][wl],j=i+1;\r\n\t\twhile(j<=lenl){\r\n\t\t\tint w=L[j]-'0';\r\n\t\t\tch[q][w]=++tot,assert(tot<=17000);\r\n\t\t\tfor(int k=w+1;k<10;k++)ch[q][j]=++tot,s[tot][lenl-j]++,assert(tot<=17000);\r\n\t\t\tq=ch[q][w];\r\n\t\t}\r\n\t\ts[q][0]++;\r\n\t\tq=ch[p][wr],j=i+1;\r\n\t\twhile(j<=lenl){\r\n\t\t\tint w=R[j]-'0';\r\n\t\t\tch[q][w]=++tot,assert(tot<=17000);\r\n\t\t\tfor(int k=0;k<w;k++)ch[q][j]=++tot,s[tot][lenl-j]++,assert(tot<=17000);\r\n\t\t\tq=ch[q][w];\r\n\t\t}\r\n\t\ts[q][0]++;\r\n\t}\r\n}\r\nvoid Build2(){\r\n\tint p=0;\r\n\tfor(int i=1;i<=lenl;i++){\r\n\t\tint w=L[i]-'0';\r\n\t\tfor(int j=w+1;j<10;j++)ch[p][j]=++tot,s[tot][lenl-i]++,assert(tot<=17000);\r\n\t\tch[p][w]=++tot,assert(tot<=17000);\r\n\t\tp=ch[p][w];\r\n\t}\r\n\ts[p][0]++;\r\n\tp=0;\r\n\tfor(int i=1;i<=lenr;i++){\r\n\t\tint w=R[i]-'0';\r\n\t\tfor(int j=0;j<w;j++){\r\n\t\t\tif(i==1&&j==0)continue;\r\n\t\t\tif(!ch[p][j])ch[p][j]=++tot,assert(tot<=17000);\r\n\t\t\ts[ch[p][j]][lenr-i]++;\r\n\t\t}\r\n\t\tif(!ch[p][w])ch[p][w]=++tot,assert(tot<=17000);\r\n\t\tp=ch[p][w];\r\n\t}\r\n\ts[p][0]++;\r\n}\r\nvoid upd(int &x,int y){\r\n\tx=max(x,y);\r\n}\r\nint main(){\r\n\tcin>>L+1>>R+1>>n;\r\n\tlenl=strlen(L+1),lenr=strlen(R+1);\r\n\tif(lenl==lenr)Build1();\r\n\telse Build2();\r\n\tqueue<int> q;\r\n\tfor(int i=0;i<10;i++)if(ch[0][i])q.push(ch[0][i]);\r\n\twhile(!q.empty()){\r\n\t\tint x=q.front();\r\n\t\tq.pop();\r\n\t\tfor(int i=0;i<=n;i++)s[x][i]+=s[fail[x]][i];\r\n\t\tfor(int i=0;i<10;i++){\r\n\t\t\tif(ch[x][i])q.push(ch[x][i]),fail[ch[x][i]]=ch[fail[x]][i];\r\n\t\t\telse ch[x][i]=ch[fail[x]][i];\r\n\t\t}\r\n\t}\r\n\tfor(int i=0;i<=tot;i++)for(int j=1;j<=n;j++)s[i][j]+=s[i][j-1];\r\n\tmemset(f,0xc0,sizeof(f)),f[0][0]=0;\r\n\tfor(int i=0;i<n;i++){\r\n\t\tfor(int j=0;j<=tot;j++){\r\n\t\t\tfor(int k=0;k<10;k++){\r\n\t\t\t\tupd(f[i+1][ch[j][k]],f[i][j]+s[ch[j][k]][n-i-1]);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tint sum=0;\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tfor(int j=1;j<=i;j++)if(i-j+1>lenl&&i-j+1<lenr)sum++;\r\n\t}\r\n\tint mx=*max_element(f[n],f[n]+tot+1);\r\n\tcout<<sum+mx<<'\\n';\r\n\tfor(int j=0;j<=tot;j++)if(f[n][j]==mx)is[n][j]=1;\r\n\tfor(int i=n-1;i>=0;i--){\r\n\t\tfor(int j=0;j<=tot;j++){\r\n\t\t\tfor(int k=0;k<10;k++){\r\n\t\t\t\tif(is[i+1][ch[j][k]]&&f[i][j]+s[ch[j][k]][n-i-1]==f[i+1][ch[j][k]]){\r\n\t\t\t\t\tis[i][j]=1;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tfor(int i=1,p=0;i<=n;i++){\r\n\t\tfor(int j=0;j<10;j++)\r\n\t\t\tif(is[i][ch[p][j]]&&f[i-1][p]+s[ch[p][j]][n-i]==f[i][ch[p][j]]){\r\n\t\t\t\tcout<<j,p=ch[p][j];\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t}\r\n}\r\n"
+}

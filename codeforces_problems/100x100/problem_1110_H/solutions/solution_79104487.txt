@@ -1,0 +1,36 @@
+{
+    "id": 79104487,
+    "contestId": 1110,
+    "creationTimeSeconds": 1588736433,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "luogu_bot1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 2526,
+    "memoryConsumedBytes": 685772800,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long lol;\r\nconst int N = 2e3 + 5;\r\ninline void chkmx( lol & a , lol b ) { if( a < b ) a = b; }\r\nint _w;\r\n\r\nint n , trs[N * 10][10] , nidx , lnk[N * 10] , que[N * 10] , he , ta , _flag;\r\nchar L[N] , R[N]; lol f[N][N * 10] , mx , g[N * 10][N];\r\nbool mark[N][N * 10];\r\n\r\nint go( int u , int c ) { if( _flag ) return trs[u][c]; return trs[u][c] ? trs[u][c] : trs[u][c] = ++nidx; }\r\n\r\nvoid init( void ) {\r\n  int l = strlen( L + 1 ) , r = strlen( R + 1 ) , ul = 0 , ur = 0;\r\n  if( l == r ) {\r\n    for( int i = 1 ; i <= l ; ++i ) {\r\n      if( ul == ur ) {\r\n        for( int j = L[i] - '0' + 1 ; j < R[i] - '0' ; ++j )\r\n          ++g[go( ul , j )][l - i];\r\n      } else {\r\n        for( int j = L[i] - '0' + 1 ; j < 10 ; ++j )\r\n          ++g[go( ul , j )][l - i];\r\n        for( int j = ( i == 1 ) ? 1 : 0 ; j < R[i] - '0' ; ++j )\r\n          ++g[go( ur , j )][l - i];\r\n      }\r\n      ul = go( ul , L[i] - '0' );\r\n      ur = go( ur , R[i] - '0' );\r\n    }\r\n    ++g[ul][0]; if( ul != ur ) ++g[ur][0];\r\n  } else {\r\n    for( int i = 1 ; i <= l ; ++i ) {\r\n      for( int j = L[i] - '0' + 1 ; j < 10 ; ++j )\r\n        ++g[go( ul , j )][l - i];\r\n      ul = go( ul , L[i] - '0' );\r\n    }\r\n    for( int i = 1 ; i <= r ; ++i ) {\r\n      for( int j = ( i == 1 ) ? 1 : 0 ; j < R[i] - '0' ; ++j )\r\n        ++g[go( ur , j )][r - i];\r\n      ur = go( ur , R[i] - '0' );\r\n    }\r\n    for( int i = l + 1 ; i < r ; ++i )\r\n      for( int j = 1 ; j < 10 ; ++j )\r\n        ++g[go( 0 , j )][i - 1];\r\n    ++g[ul][0] , ++g[ur][0];\r\n  }\r\n  he = 1; for( int i = 0 ; i < 10 ; ++i ) if( trs[0][i] ) que[++ta] = trs[0][i];\r\n  while( he <= ta ) { \r\n    int u = que[he++];\r\n    for( int i = 0 ; i < 10 ; ++i ) \r\n      if( trs[u][i] ) lnk[que[++ta] = trs[u][i]] = trs[lnk[u]][i];\r\n      else trs[u][i] = trs[lnk[u]][i];\r\n  }\r\n  for( int i = 1 ; i <= nidx ; ++i ) {\r\n    int u = que[i];\r\n    for( int j = 0 ; j <= n ; ++j )\r\n      g[u][j] += g[lnk[u]][j];\r\n  }\r\n  for( int i = 0 ; i <= nidx ; ++i )\r\n    for( int j = 1 ; j <= n ; ++j )\r\n      g[i][j] += g[i][j - 1];\r\n  _flag = 1;\r\n}\r\n\r\nint main( void ) {\r\n  _w = scanf(\"%s%s%d\",L+1,R+1,&n);\r\n  init();\r\n  memset( f , 0xc0 , sizeof f ); f[0][0] = 0;\r\n  for( int i = 0 ; i < n ; ++i )\r\n    for( int j = 0 ; j <= nidx ; ++j )\r\n      if( f[i][j] >= 0 ) \r\n        for( int k = 0 ; k < 10 ; ++k )\r\n          chkmx( f[i + 1][go( j , k )] , f[i][j] + g[go( j , k )][n - i - 1] );\r\n  for( int i = 0 ; i <= nidx ; ++i ) chkmx( mx , f[n][i] );\r\n  for( int i = 0 ; i <= nidx ; ++i )\r\n    if( f[n][i] == mx ) mark[n][i] = 1;\r\n  for( int i = n - 1 ; ~i ; --i )\r\n    for( int j = 0 ; j <= nidx ; ++j )\r\n      for( int k = 0 ; k < 10 ; ++k )\r\n        if( mark[i + 1][go( j , k )] && f[i + 1][go( j , k )] == f[i][j] + g[go( j , k )][n - i - 1] )\r\n          mark[i][j] = 1;\r\n  int now = 0;\r\n  printf(\"%lld\\n\",mx);\r\n  for( int i = 1 ; i <= n ; ++i )\r\n    for( int k = 0 ; k < 10 ; ++k )\r\n      if( mark[i][go( now , k )] && f[i][go( now , k )] == f[i - 1][now] + g[go( now , k )][n - i] ) {\r\n        putchar(k+'0');\r\n        now = go( now , k );\r\n        break;\r\n      }\r\n  return 0;\r\n}\r\n"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 159619548,
+    "contestId": 1316,
+    "creationTimeSeconds": 1654511730,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1316,
+        "index": "E",
+        "name": "Team Building",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "bitmasks",
+            "dp",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1316,
+        "members": [
+            {
+                "handle": "AbhishekAnand"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1583332500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define fastio ios_base::sync_with_stdio(false);cin.tie(NULL);\r\n#define int long long\r\n#define ld long double\r\n#define pii pair<int,int>\r\n#define fi first\r\n#define se second\r\n#define pb push_back\r\n#define all(x) (x).begin(), (x).end()\r\n#define rep(i,x,y) for(int i=x; i<y; i++)\r\n#define goog(tno) cout << \"Case #\" << tno <<\": \"\r\n#define vi vector<int>\r\n#define vii vector<pair<int,int>>\r\n#define setbits(x) __builtin_popcountll(x)\r\n#define in(a) for(auto &x: a)cin>>x;\r\n#define out(a) for(auto x: a){cout<<x<<' ';}cout<<'\\n';\r\n#define F(T) int ttt;cin>>ttt;for(int T=1;T<=ttt;T++)\r\n#define inf 1000000000\r\n#define binf 1e18+100\r\n//#define mm 1000000007 998244353\r\nvoid print(bool n){if(n)cout<<\"YES\";else cout<<\"NO\";cout<<'\\n';}\r\n\r\n#define INF = 1e18;\r\n\r\nstruct mcmf{\r\n\tstruct edge {\r\n        int to, cap, cost;//cap is residual capacity\r\n        edge(int to,int cap,int cost):to(to),cap(cap),cost(cost){}\r\n    };\r\n    int N;\r\n    vector<edge> e;\r\n\tvector<vector<int>> adj;\r\n\tvector<int> pot,p,d;\r\n\t\r\n\tmcmf(int N):N(N),adj(N),pot(N),p(N),d(N){}\r\n\t\r\n\tvoid add_edge(int u, int v, int cap, int cost) {\r\n        int k = e.size();\r\n        e.emplace_back(v, cap, cost);\r\n        e.emplace_back(u, 0, -cost);\r\n        \r\n        adj[u].push_back(k);\r\n        adj[v].push_back(k ^ 1);\r\n    }\r\n\t\r\n\tvoid shortest_paths(int s) {\r\n\t   \tfill(d.begin(),d.end(),INF);\r\n\t\r\n\t    d[s] = 0;\r\n\t    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> q;\r\n\t    q.emplace(0, s);\r\n\t    while (!q.empty()) {\r\n\t        int v = q.top().second;\r\n\t        int d_v = q.top().first;\r\n\t        q.pop();\r\n\t        \r\n\t        if (d_v != d[v])continue;\r\n\t\r\n\t        for (int ed : adj[v])if(e[ed].cap) {\r\n\t        \tint to=e[ed].to,w=e[ed].cost + pot[v] - pot[to];\r\n\t            if (d_v + w < d[to]) {\r\n\t                d[to] = d_v + w;\r\n\t                p[to] = ed;\r\n\t                q.emplace(d[to], to);\r\n\t            }\r\n\t        }\r\n\t    }\r\n\t}\r\n\t\r\n\tint min_cost_flow(int K, int s, int t) {\r\n\t\tsetpot(s);\r\n\t    int flow = 0,cost = 0;\r\n\t    while (flow < K) {\r\n\t        shortest_paths(s);\r\n\t        if(d[t]==INF)break;\r\n\t\r\n\t        // find max flow on that path\r\n\t        int f=K-flow,cur=t;\r\n\t        \r\n\t        while(cur!=s){\r\n\t        \tint par=p[cur];\r\n\t            f = min(f, e[par].cap);\r\n\t            cur = e[par ^ 1].to;\r\n\t        }\r\n\t\r\n\t        // apply flow\r\n\t        flow+=f;\r\n\t        \r\n\t        cost+=f*(d[t]-pot[s]+pot[t]);\r\n\t        cur=t;\r\n\t        while(cur!=s){\r\n\t        \tint par=p[cur];\r\n\t        \te[par].cap-=f;\r\n                e[par^1].cap+=f;\r\n                cur=e[par^1].to;\r\n\t        }\r\n\t        \r\n\t        for(int i=0;i<N;++i)pot[i]+=d[i];\r\n\t    }\r\n\t    if(flow < K)return -1;\r\n\t    else return cost;\r\n\t}\r\n\t\r\n\t\r\n\tvoid setpot(int s){//only required if there is a negative edge(not counting reverse edges)\r\n\t    vector<bool> inqueue(N, false);\r\n\t    queue<int> q;\r\n\t    \r\n\t    q.push(s);\r\n\t    pot[s]=0;\r\n\t    inqueue[s]=true;\r\n\t\r\n\t    while (!q.empty()) {\r\n\t        int v = q.front();\r\n\t        q.pop();\r\n\t        inqueue[v] = false;\r\n\t\r\n\t        for (int ed : adj[v])if(e[ed].cap) {\r\n\t        \tint to=e[ed].to,len=e[ed].cost;\r\n\t            if (pot[v] + len < pot[to]) {\r\n\t                pot[to] = pot[v] + len;\r\n\t                if (!inqueue[to]) {\r\n\t                    q.push(to);\r\n\t                    inqueue[to] = true;\r\n\t                }\r\n\t            }\r\n\t        }\r\n\t    }\r\n\t}\r\n};\r\n\r\nsigned main(){\r\n\tfastio\r\n\tint n,p,k;\r\n\tcin>>n>>p>>k;\r\n\t\r\n\tint a[n];\r\n\t\r\n\tin(a);\r\n\t\r\n\tmcmf z(n+p+3);\r\n\t\r\n\tint s=n+p,t=s+1,m=t+1;\r\n\t\r\n\trep(i,0,n)z.add_edge(s,i,1,0),z.add_edge(i,m,1,-a[i]);\r\n\t\r\n\tz.add_edge(m,t,k,0);\r\n\t\r\n\trep(i,0,p)z.add_edge(n+i,t,1,0);\r\n\t\r\n\tint x;\r\n\trep(i,0,n){\r\n\t\trep(j,0,p){\r\n\t\t\tcin>>x;\r\n\t\t\tz.add_edge(i,n+j,1,-x);\r\n\t\t}\r\n\t}\r\n\t\r\n\tcout<<-z.min_cost_flow(p+k,s,t);\r\n\t\r\n\treturn 0;\r\n}"
+}

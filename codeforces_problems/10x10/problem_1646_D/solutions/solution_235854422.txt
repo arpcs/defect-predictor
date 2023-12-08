@@ -1,0 +1,39 @@
+{
+    "id": 235854422,
+    "contestId": 1646,
+    "creationTimeSeconds": 1701784367,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1646,
+        "index": "D",
+        "name": "Weight the Tree",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1646,
+        "members": [
+            {
+                "handle": "nowayjose"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1646408100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 67,
+    "timeConsumedMillis": 654,
+    "memoryConsumedBytes": 36761600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long int ll;\r\n#define pb push_back\r\n#define fr first\r\n#define sc second\r\n\r\n#ifndef ONLINE_JUDGE\r\n#include \"debug.h\"\r\n#else\r\n#define debug(x...)\r\n#endif\r\n\r\nconst int N = 2e5 + 10;\r\nvector<int> g[N];\r\nint par[N], wt[N][2], ans[N];\r\narray<int, 2> dp[N][2]; //{no. of good nodes, min weight}\r\n\r\nvoid dfs(int x, int p) {\r\n    int cur = 0;\r\n    for (int u : g[x]) {\r\n        if (u == p) {\r\n            continue;\r\n        }\r\n        cur++;\r\n    }\r\n    if (cur == 0) {\r\n        dp[x][1] = {1, 1};\r\n        dp[x][0] = {0, 0};\r\n        return;\r\n    }\r\n    //I take x to be a good node\r\n    dp[x][1] = {1, 0};\r\n    wt[x][1] = g[x].size();\r\n    //I don't take x\r\n    dp[x][0] = {0, 1};\r\n    wt[x][0] = 1;\r\n    for (int u : g[x]) {\r\n        if (u == p) {\r\n            continue;\r\n        } \r\n        dfs(u, x);\r\n        //x is good\r\n        dp[x][1][0] += dp[u][0][0];\r\n        dp[x][1][1] += dp[u][0][1];\r\n\r\n        //I dont take x to be a good node\r\n        if (dp[u][1][0] > dp[u][0][0]) {\r\n            dp[x][0][0] += dp[u][1][0];\r\n            dp[x][0][1] += dp[u][1][1];\r\n        } else if (dp[u][1][0] < dp[u][0][0]) {\r\n            dp[x][0][0] += dp[u][0][0];\r\n            dp[x][0][1] += dp[u][0][1];\r\n        } else {\r\n            if (dp[u][1][1] <= dp[u][0][1]) {\r\n                dp[x][0][0] += dp[u][1][0];\r\n                dp[x][0][1] += dp[u][1][1];\r\n            } else {\r\n                dp[x][0][0] += dp[u][0][0];\r\n                dp[x][0][1] += dp[u][0][1];\r\n            }\r\n        }\r\n    }\r\n    dp[x][1][1] += wt[x][1];\r\n} \r\n\r\nvoid dfs1(int x, int p, int pp) {\r\n    if (pp == 1) {\r\n        ans[x] = 1;\r\n        for (int u : g[x]) {\r\n            if (u == p) {\r\n                continue;\r\n            }\r\n            dfs1(u, x, 1 - pp);\r\n        }\r\n    } else {\r\n        if (dp[x][1][0] > dp[x][0][0]) {\r\n            ans[x] = g[x].size();\r\n            for (int u : g[x]) {\r\n                if (u == p) {\r\n                    continue;\r\n                }\r\n                dfs1(u, x, 1);\r\n            }\r\n        } else if (dp[x][1][0] < dp[x][0][0]) {\r\n            ans[x] = 1;\r\n            for (int u : g[x]) {\r\n                if (u == p) {\r\n                    continue;\r\n                }\r\n                dfs1(u, x, 0);\r\n            }\r\n        } else {\r\n            if (dp[x][1][1] < dp[x][0][1]) {\r\n                ans[x] = g[x].size();\r\n                for (int u : g[x]) {\r\n                    if (u == p) {\r\n                        continue;\r\n                    }\r\n                    dfs1(u, x, 1);\r\n                }\r\n            } else {\r\n                ans[x] = 1;\r\n               for (int u : g[x]) {\r\n                    if (u == p) {\r\n                        continue;\r\n                    }\r\n                    dfs1(u, x, 0);\r\n                } \r\n            }\r\n        }\r\n    }\r\n}\r\n\r\nvoid solve() {\r\n    int n;\r\n    cin >> n;\r\n    for (int i = 0; i < n - 1; i++) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        --u, --v;\r\n        g[u].pb(v);\r\n        g[v].pb(u);\r\n    }\r\n    if (n == 2) {\r\n        cout << \"2 2\\n1 1\\n\";\r\n        return;\r\n    }\r\n    par[0] = -1;\r\n    dfs(0, -1);    \r\n    if (dp[0][1][0] > dp[0][0][0]) {\r\n        cout << dp[0][1][0] << \" \" << dp[0][1][1] << '\\n';\r\n        dfs1(0, -1, 0);\r\n    } else if (dp[0][1][0] < dp[0][0][0]) {\r\n        cout << dp[0][0][0] << \" \" << dp[0][0][1] << '\\n';\r\n        dfs1(0, -1, 1);\r\n    } else {\r\n        if (dp[0][0][1] <= dp[0][1][1]) {\r\n            cerr << \"Here\\n\";\r\n            cout << dp[0][0][0] << \" \" << dp[0][0][1] << '\\n';\r\n            dfs1(0, -1, 1);\r\n        } else {\r\n            cout << dp[0][1][0] << \" \" << dp[0][1][1] << '\\n';\r\n            dfs1(0, -1, 0);\r\n        }\r\n    }\r\n    for (int i = 0; i < n; i++) {\r\n        cout << ans[i] << \" \";\r\n    }\r\n}\r\n\r\nsigned main() {\r\n    ios::sync_with_stdio(false); cin.tie(0);\r\n    int T = 1;\r\n    //cin >> T;\r\n    while (T--) {\r\n        solve();\r\n    }\r\n    return 0;\r\n}"
+}

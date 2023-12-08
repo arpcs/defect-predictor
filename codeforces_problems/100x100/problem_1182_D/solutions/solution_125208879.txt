@@ -1,0 +1,40 @@
+{
+    "id": 125208879,
+    "contestId": 1182,
+    "creationTimeSeconds": 1628420732,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "Be_dos"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 16691200,
+    "source": "#include <iostream>\n#include <cmath>\n#include <cctype>\n#include <vector>\n#include <algorithm>\n#include <set>\n#include <map>\n#include <deque>\n#include <stack>\n#include <unordered_set>\n#include <sstream>\n#include <cstring>\n#include <iomanip>\n#include <queue>\n#include <unordered_map>\n#include <random>\n#include <cfloat>\n#include <chrono>\n#include <bitset>\n#include <complex>\n#include <immintrin.h>\n#include <cassert>\n\nvoid dfs2(int32_t vertex, int32_t parent, std::vector<int32_t>* tree, int32_t* parents, int32_t* depths, int32_t depth) {\n    parents[vertex] = parent;\n    depths[vertex] = depth;\n    for(int32_t i = 0; i < tree[vertex].size(); i++)\n        if(tree[vertex][i] != parent)\n            dfs2(tree[vertex][i], vertex, tree, parents, depths, depth + 1);\n}\n\nvoid dfs(int32_t vertex, int32_t parent, std::vector<int32_t>* tree, int32_t depth, std::pair<int32_t, int32_t>& ans) {\n    if(depth > ans.first)\n        ans = {depth, vertex};\n    for(int32_t i = 0; i < tree[vertex].size(); i++)\n        if(tree[vertex][i] != parent)\n            dfs(tree[vertex][i], vertex, tree, depth + 1, ans);\n}\n\n\nvoid dfs_check(int32_t vertex, int32_t parent, std::vector<int32_t>* tree, int32_t depth, int32_t* target_degrees, bool& ok) {\n    if(target_degrees[depth] == -1)\n        target_degrees[depth] = tree[vertex].size();\n    else if(target_degrees[depth] != tree[vertex].size()) {\n        ok = false;\n        return;\n    }\n    for(int32_t i = 0; i < tree[vertex].size(); i++)\n        if(tree[vertex][i] != parent)\n            dfs_check(tree[vertex][i], vertex, tree, depth + 1, target_degrees, ok);\n}\n\nvoid dfs_find_leaf(int32_t vertex, int32_t parent, std::vector<int32_t>* tree, int32_t depth, int32_t& answer) {\n    if(depth != 0 && tree[vertex].size() == 1)\n        answer = vertex;\n    for(int32_t i = 0; i < tree[vertex].size(); i++)\n        if(tree[vertex][i] != parent && tree[tree[vertex][i]].size() <= 2)\n            dfs_find_leaf(tree[vertex][i], vertex, tree, depth + 1, answer);\n}\n\nint main() {\n    std::ios::sync_with_stdio(false);\n    std::cin.tie(0);\n\n    int32_t n;\n    std::cin >> n;\n\n    std::vector<int32_t>* tree = new std::vector<int32_t>[n];\n    for(int32_t i = 0; i < n - 1; i++) {\n        int32_t src, dst;\n        std::cin >> src >> dst;\n        src--;\n        dst--;\n\n        tree[src].push_back(dst);\n        tree[dst].push_back(src);\n    }\n\n    int32_t* parents = new int32_t[n];\n    int32_t* depths = new int32_t[n];\n    dfs2(0, -1, tree, parents, depths, 0);\n\n    std::pair<int32_t, int32_t> far = {0, 0};\n    dfs(0, -1, tree, 0, far);\n\n    std::pair<int32_t, int32_t> far2;\n    dfs(far.second, -1, tree, 0, far2);\n\n    if(far2.first % 2 == 1) {\n        std::cout << -1;\n        return 0;\n    }\n\n    int32_t start = depths[far.second] > depths[far2.second] ? far.second : far2.second;\n    int32_t middle = start;\n    for(int32_t i = 0; i < far2.first / 2; i++)\n        middle = parents[middle];\n\n    //Check middle\n    int32_t* target_degrees = new int32_t[n];\n    for(int32_t i = 0; i < n; i++)\n        target_degrees[i] = -1;\n    bool ok = true;\n    dfs_check(middle, -1, tree, 0, target_degrees, ok);\n    if(ok) {\n        std::cout << middle + 1 << \"\\n\";\n        return 0;\n    }\n\n    //Find leaf\n    int32_t leaf = -1;\n    dfs_find_leaf(middle, -1, tree, 0, leaf);\n    if(leaf == -1) {\n        std::cout << -1;\n        return 0;\n    }\n\n    //Check leaf\n    for(int32_t i = 0; i < n; i++)\n        target_degrees[i] = -1;\n    ok = true;\n    dfs_check(leaf, -1, tree, 0, target_degrees, ok);\n    if(ok) {\n        std::cout << leaf + 1 << \"\\n\";\n        return 0;\n    }\n    std::cout << -1;\n    return 0;\n}"
+}

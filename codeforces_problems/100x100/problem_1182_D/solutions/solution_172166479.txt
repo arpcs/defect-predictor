@@ -1,0 +1,40 @@
+{
+    "id": 172166479,
+    "contestId": 1182,
+    "creationTimeSeconds": 1663173276,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "plevande"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "PyPy 3",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 467,
+    "memoryConsumedBytes": 40755200,
+    "source": "import sys\r\ninput = sys.stdin.buffer.readline \r\n\r\ndef dfs(n, g, x):\r\n    parent = [None for i in range(n+1)]\r\n    parent[x] = -1\r\n    depth = [[x]]\r\n    while True:\r\n        next_s = []\r\n        for X in depth[-1]:\r\n            for y in g[X]:\r\n                if parent[y] is None:\r\n                    parent[y] = X\r\n                    next_s.append(y)\r\n        if len(next_s)==0:\r\n            break\r\n        depth.append(next_s)\r\n    m = len(depth)\r\n    works = True\r\n    for i in range(m):\r\n        degree = None\r\n        for node in depth[i]:\r\n            if degree is None:\r\n                degree = len(g[node])\r\n            elif degree != len(g[node]):\r\n                works = False\r\n    return depth, parent, works\r\n\r\ndef process(n, G):\r\n    g = [[] for i in range(n+1)]\r\n    for u, v in G:\r\n        g[u].append(v)\r\n        g[v].append(u)\r\n    depth1, parent1, works1 = dfs(n, g, 1)\r\n    if works1:\r\n        print(1)\r\n        return\r\n    a = depth1[-1][0]\r\n    depth2, parent2, works2 = dfs(n, g, a)\r\n    if works2:\r\n        print(a)\r\n        return\r\n    \"\"\"\r\n    a, b is diameter\r\n    and either the median is our \"real root\"\r\n    or a or b is.\r\n    \"\"\"\r\n    b = depth2[-1][0]\r\n    path = [b]\r\n    while path[-1] != a:\r\n        c = path[-1]\r\n        path.append(parent2[c])\r\n    m = len(path)\r\n    if m % 2==1:\r\n        r = path[m//2]\r\n        depth3, parent3, works3 = dfs(n, g, r)\r\n        if works3:\r\n            print(r)\r\n            return\r\n        leaves = []\r\n        for leaf in range(1, n+1):\r\n            if len(g[leaf])==1 and leaf != r:\r\n                is_stalk = True\r\n                path = [leaf]\r\n                while path[-1] != r:\r\n                    r1 = path[-1]\r\n                    r2 = parent3[r1]\r\n                    if r2 != r and len(g[r2]) != 2:\r\n                        is_stalk = False\r\n                    path.append(r2)\r\n                if is_stalk:\r\n                    leaves.append([len(path), leaf])\r\n        leaves.sort()\r\n        if len(leaves) > 0:\r\n            l1 = leaves[0][1]\r\n            depth4, parent4, works4 = dfs(n, g, l1)\r\n            if works4:\r\n                print(l1)\r\n                return\r\n        if len(leaves) > 1:\r\n            l2 = leaves[0][-1]\r\n            depth5, parent5, works5 = dfs(n, g, l1)\r\n            if works5:\r\n                print(l2)\r\n                return\r\n    depth6, parent6, works6 = dfs(n, g, b)\r\n    if works6:\r\n        print(b)\r\n        return\r\n    print(-1)\r\n    return\r\n    \r\n\r\nn = int(input())\r\nG = []\r\nfor i in range(n-1):\r\n    u, v = [int(x) for x in input().split()]\r\n    G.append([u, v])\r\nprocess(n, G)"
+}

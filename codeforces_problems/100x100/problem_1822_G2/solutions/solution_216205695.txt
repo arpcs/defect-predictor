@@ -1,0 +1,37 @@
+{
+    "id": 216205695,
+    "contestId": 1822,
+    "creationTimeSeconds": 1690625266,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1822,
+        "index": "G2",
+        "name": "Magic Triples (Hard Version)",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "brute force",
+            "data structures",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1822,
+        "members": [
+            {
+                "handle": "sohampalkar"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1682346900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 327,
+    "memoryConsumedBytes": 5836800,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <algorithm>\r\nusing namespace std;\r\n\r\nvector<pair<long long, long long>> counti(vector<long long>& l) {\r\n    vector<pair<long long, long long>> l1;\r\n    long long n = l.size();\r\n    long long z = 1;\r\n    for (long long i = 1; i < n; i++) {\r\n        if (l[i] == l[i - 1]) {\r\n            z += 1;\r\n        } else {\r\n            l1.push_back(make_pair(l[i - 1], z));\r\n            z = 1;\r\n        }\r\n    }\r\n    l1.push_back(make_pair(l.back(), z));\r\n    return l1;\r\n}\r\n\r\nlong long bs(long long a, const vector<pair<long long, long long>>& l1) {\r\n    long long low = 0;\r\n    long long high = static_cast<long long>(l1.size()) - 1;\r\n    long long mid = 0;\r\n    while (low <= high) {\r\n        mid = (high + low) / 2;\r\n        if (l1[mid].first < a) {\r\n            low = mid + 1;\r\n        } else if (l1[mid].first > a) {\r\n            high = mid - 1;\r\n        } else {\r\n            return mid;\r\n        }\r\n    }\r\n    return -1;\r\n}\r\n\r\nlong long bs1(long long a, const vector<pair<long long, long long>>& l1, long long i) {\r\n    long long low = 0;\r\n    long long high = i;\r\n    long long mid = 0;\r\n    while (low <= high) {\r\n        mid = (high + low) / 2;\r\n        if (l1[mid].first < a) {\r\n            low = mid + 1;\r\n        } else if (l1[mid].first == a) {\r\n            high = mid - 1;\r\n        }\r\n        if (mid != 0) {\r\n            if (l1[mid].first == a && l1[mid - 1].first != a) {\r\n                return mid;\r\n            }\r\n        }\r\n    }\r\n    return 0;\r\n}\r\n\r\nlong long bs2(long long a, const vector<pair<long long, long long>>& l1, long long i) {\r\n    long long low = i;\r\n    long long high = static_cast<long long>(l1.size()) - 1;\r\n    long long mid = 0;\r\n    while (low <= high) {\r\n        mid = (high + low) / 2;\r\n        if (l1[mid].first > a) {\r\n            high = mid - 1;\r\n        } else if (l1[mid].first == a) {\r\n            low = mid + 1;\r\n        }\r\n        if (mid != static_cast<long long>(l1.size()) - 1) {\r\n            if (l1[mid].first == a && l1[mid + 1].first != a) {\r\n                return mid;\r\n            }\r\n        }\r\n    }\r\n    return l1.size() - 1;\r\n}\r\n\r\nlong long sqrtCustom(long long x) {\r\n    if (x <= 1) {\r\n        return x;\r\n    }\r\n\r\n    long long low = 1, high = x / 2;\r\n    long long result = 0;\r\n    while (low <= high) {\r\n        long long mid = low + (high - low) / 2;\r\n        if (mid <= x / mid) {\r\n            low = mid + 1;\r\n            result = mid;\r\n        } else {\r\n            high = mid - 1;\r\n        }\r\n    }\r\n    return result;\r\n}\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n\r\n    long long t;\r\n    cin >> t;\r\n    while (t--) {\r\n        long long n;\r\n        cin >> n;\r\n        vector<long long> a(n);\r\n        for (long long i = 0; i < n; i++) {\r\n            cin >> a[i];\r\n        }\r\n\r\n        sort(a.begin(), a.end());\r\n        long long c = 0;\r\n        vector<pair<long long, long long>> cnt = counti(a);\r\n\r\n        vector<long long> l;\r\n        for (long long i = 0; i < static_cast<long long>(a.size()) - 1; i++) {\r\n            if (a[i] != a[i + 1]) {\r\n                l.push_back(a[i]);\r\n            }\r\n        }\r\n        l.push_back(a.back());\r\n\r\n        vector<long long> L;\r\n        L.push_back(-1);\r\n        for (long long i = 0; i < static_cast<long long>(l.size()); i++) {\r\n            long long z = cnt[i].second;\r\n            if (z >= 3) {\r\n                if (L.back() != l[i]) {\r\n                    c += 6 * z * (z - 1) * (z - 2) / 6;\r\n                    L.push_back(l[i]);\r\n                }\r\n            }\r\n        }\r\n\r\n        for (long long i = 0; i < static_cast<long long>(l.size()); i++) {\r\n            for (long long j = 2; j * j <= 1000000 / l[i]; j++) {\r\n                try {\r\n                    long long x = bs(l[i] * j, cnt);\r\n                    long long y = bs(l[i] * j * j, cnt);\r\n                    if (x != -1 && y != -1) {\r\n                        c += cnt[i].second * cnt[x].second * cnt[y].second;\r\n                    }\r\n                } catch (...) {\r\n                    continue;\r\n                }\r\n            }\r\n        }\r\n        cout << c << \"\\n\";\r\n    }\r\n    return 0;\r\n}"
+}

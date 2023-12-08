@@ -1,0 +1,36 @@
+{
+    "id": 147227914,
+    "contestId": 1110,
+    "creationTimeSeconds": 1645499939,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "vjudge2"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 1638,
+    "memoryConsumedBytes": 363724800,
+    "source": "#include <iostream>\n#include <cstdio>\n#include <string>\n#include <queue>\n#include <cstring>\n\nconst int M = 2e4 + 10, N = 2e3 + 10, DIC = 10;\n\nint n; std::string sl, sr, str;\nint cnt, lenl, lenr, ans;\n\nint ch[M][DIC], fail[M], g[M][N], dp[M][N];\nbool reg[M][N];\n\ninline int read() {\n\tint w = 0, f = 1;\n\tchar ch = std::getchar();\n\twhile (ch < '0' || ch > '9') {\n\t\tif (ch == '-') f = -1;\n\t\tch = std::getchar();\n\t}\n\twhile (ch >= '0' && ch <= '9') {\n\t\tw = (w<<3) + (w<<1) + ch - '0';\n\t\tch = std::getchar();\n\t}\n\treturn w * f;\n}\n\ninline void creat(int rt, int id) {\n\tif (!ch[rt][id]) ch[rt][id] = ++cnt;\n}\n\ninline void wrt(int rt, int l, int r, int len) {\n\tfor (int i = l; i < r; i++) {\n\t\tcreat(rt, i);\n\t\tg[ch[rt][i]][len]++;\n\t}\n}\n\ninline void chg(int& rt, int num) {\n\tcreat(rt, num);\n\trt = ch[rt][num];\n}\n\ninline void build() {\n\tint rtl = 0, rtr = 0;\n\tif (lenl == lenr) {\n\t\tfor (int i = 1; i <= lenl; i++) {\n\t\t\tint nl = sl[i-1], nr = sr[i-1];\n\t\t\tif (rtl == rtr) {\n\t\t\t\twrt(rtl, nl+1, nr, lenl-i);\n\t\t\t\tchg(rtl, nl); chg(rtr, nr);\n\t\t\t}\n\t\t\telse {\n\t\t\t\twrt(rtl, nl+1, 10, lenl-i);\n\t\t\t\twrt(rtr, 0, nr, lenr-i);\n\t\t\t\tchg(rtl, nl); chg(rtr, nr);\n\t\t\t}\n\t\t}\n\t\tg[rtl][0]++;\n\t\tif (rtl != rtr) g[rtr][0]++;\n\t}\n\telse {\n\t\tfor (int i = 1; i <= lenl; i++) {\n\t\t\tint nl = sl[i-1];\n\t\t\twrt(rtl, nl+1, 10, lenl-i);\n\t\t\tchg(rtl, nl);\n\t\t}\n\t\tfor (int i = 1; i <= lenr; i++) {\n\t\t\tint nr = sr[i-1];\n\t\t\twrt(rtr, 0, nr, lenr-i);\n\t\t\tchg(rtr, nr);\n\t\t}\n\t\tg[rtl][0]++, g[rtr][0]++;\n\t\tfor (int i = lenl+1; i <= lenr-1; i++) {\n\t\t\tfor (int j = 1; j < 10; j++) {\n\t\t\t\tif (!ch[0][j]) ch[0][j] = ++cnt;\n\t\t\t\tg[ch[0][j]][i-1]++;\n\t\t\t}\n\t\t}\n\t}\n\tch[0][0] = 0;\n}\n\nstd::queue<int> q;\ninline void getfail() {\n\tfor (int i = 0; i < DIC; i++) \n\t\tif (ch[0][i]) q.push(ch[0][i]);\n\twhile (!q.empty()) {\n\t\tint u = q.front(); q.pop();\n\t\tfor (int i = 0; i < DIC; i++) {\n\t\t\tint& to = ch[u][i];\n\t\t\tif (to) {\n\t\t\t\tq.push(to); fail[to] = ch[fail[u]][i];\n\t\t\t\tfor (int i = 0; i <= n; i++)\n\t\t\t\t\tg[to][i] += g[fail[to]][i];\n\t\t\t}\n\t\t\telse to = ch[fail[u]][i];\n\t\t}\n\t}\n\tfor (int rt = 0; rt <= cnt; rt++)\n\t\tfor (int i = 0; i <= n; i++)\n\t\t\tg[rt][i] += g[rt][i-1];\n}\n\ninline void calc() {\n\tstd::memset(dp, -1, sizeof(dp));\n\tdp[0][0] = 0;\n\tfor (int i = 0; i <= n; i++)\n\t\tfor (int rt = 0; rt <= cnt; rt++) \n\t\t\tif (dp[rt][i] >= 0) {\n\t\t\t\tdp[rt][i] += g[rt][n-i];\n\t\t\t\tfor (int j = 0; j < 10; j++)\n\t\t\t\t\tdp[ch[rt][j]][i+1] = std::max(dp[ch[rt][j]][i+1], dp[rt][i]);\n\t\t\t}\n\tfor (int rt = 0; rt <= cnt; rt++)\n\t\tans = std::max(ans, dp[rt][n]);\n\tstd::printf(\"%d\\n\", ans);\n}\n\ninline void sol() {\n\tfor (int rt = 0; rt <= cnt; rt++)\n\t\tif (dp[rt][n] == ans) reg[rt][n] = 1;\n\tfor (int len = n-1; len >= 0; len--) {\n\t\tfor (int rt = 0; rt <= cnt; rt++)\n\t\t\tif (dp[rt][len] >= 0)\n\t\t\t\tfor (int i = 0; i < 10; i++)\n\t\t\t\t\tif (reg[ch[rt][i]][len+1] \n\t\t\t\t\t\t&& dp[ch[rt][i]][len+1] == dp[rt][len] + g[ch[rt][i]][n-len-1]) {\n\t\t\t\t\t\treg[rt][len] = 1; break;\n\t\t\t\t\t}\n\t}\n\tint rt = 0;\n\tfor (int len = 0; len < n; len++) {\n\t\tfor (int i = 0; i < 10; i++) \n\t\t\tif (reg[ch[rt][i]][len+1] \n\t\t\t\t&& dp[ch[rt][i]][len+1] == dp[rt][len] + g[ch[rt][i]][n-len-1]) {\n\t\t\t\tstd::putchar('0'+i);\n\t\t\t\trt = ch[rt][i];\n\t\t\t\tbreak;\n\t\t\t\t}\n\t}\n}\n\nint main() {\n\tstd::cin >> sl >> sr >> n;\n\tlenl = sl.length(), lenr = sr.length();\n\tfor (int i = 0; i < lenl; i++) sl[i] -= '0';\n\tfor (int i = 0; i < lenr; i++) sr[i] -= '0';\n\tbuild(); getfail();\n\tcalc(); sol();\n\treturn 0;\n}\n \t \t\t\t\t\t \t\t \t  \t\t  \t\t\t \t \t \t\t\t\t"
+}

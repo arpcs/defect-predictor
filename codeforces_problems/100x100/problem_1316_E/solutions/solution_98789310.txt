@@ -1,0 +1,38 @@
+{
+    "id": 98789310,
+    "contestId": 1316,
+    "creationTimeSeconds": 1605687810,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1316,
+        "index": "E",
+        "name": "Team Building",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "bitmasks",
+            "dp",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1316,
+        "members": [
+            {
+                "handle": "Yomapeed"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1583332500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 717,
+    "memoryConsumedBytes": 79257600,
+    "source": "#include<bits/stdc++.h>\n#define pi 3.141592653589793238\n#pragma GCC target (\"avx2\")\n#pragma GCC optimization (\"O3\")\n#pragma GCC optimization (\"unroll-loops\")\n#define MOD 1000000007\n#define INF 999999999999999999 \n#define pb push_back\n#define ff first\n#define ss second\n \n#define mt make_tuple\n#define ll long long\n#define fast ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);\nusing namespace std;\n#include <ext/pb_ds/assoc_container.hpp>\n\nusing namespace __gnu_pbds;\n \n \ntypedef tree<ll, null_type, less_equal<ll>, rb_tree_tag, tree_order_statistics_node_update> indexed_set;\n \n////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////\nconst int N = 1e4 + 1;\nvector<int> idxs[N][(1 << 7) + 10];\nll dp[N][(1 << 7) + 10]; \nint main() {\n    //freopen(\"input.txt\", \"r\", stdin);\n    //freopen(\"output.txt\", \"w\", stdout);\n    fast;\n    ll T = 1, i, j;\n    \n    //cin >> T;\n    while (T--) {\n        ll n, p, k;\n        cin >> n >> p >> k;\n        vector<pair<ll,ll>> v(n);\n        for(i = 0; i < n; i++){\n            cin >> v[i].ff;\n            v[i].ss = i;\n        }\n        for(i = 0; i < N; i++){\n            for(j = 0; j < (1 << p); j++){\n                dp[i][j] = -INF;\n            }\n        }\n        vector<vector<ll>> pos(n, vector<ll>(p));\n        for(i = 0; i < n; i++){\n            for(j = 0; j < p; j++){\n                cin >> pos[i][j];\n            }\n        }\n        ll sum = 0;\n        sort(v.begin(), v.end());\n        for(i = n - 1; i >= n - k; i--){\n            sum += v[i].ff;\n        }\n        dp[0][0] = sum;\n        idxs[0][0].pb(n - k);\n        \n        for(i = 0; i < n; i++){\n            //cout << i << endl;\n            for(ll mask = 0; mask < (1 << p); mask++){\n                if(dp[i][mask] == -INF){\n                    continue;\n                }\n                if(dp[i + 1][mask] < dp[i][mask]){\n                    dp[i + 1][mask] = dp[i][mask];\n                    idxs[i + 1][mask] = idxs[i][mask];\n                }\n                map<ll,ll> gone;\n                ll sz = idxs[i][mask].size();\n                for(j = 1; j < sz; j++){\n                    gone[idxs[i][mask][j]] = 1;\n                }\n                ll add2 = 0;\n                if(i >= n - k){\n                    add2 = -v[i].ff;\n                }\n                ll now = idxs[i][mask][0];\n                ll add = 0;\n                if(i >= n - k){\n                    now--;\n                }\n        \n                \n                while(i >= n - k && now >= 0){\n                    //cout << now << endl;\n                    if(!gone[now]){\n                        //cout << now << endl;\n                        add = v[now].ff;\n                        \n                        break;\n                    }\n                    else{\n                        now--;\n                    }\n                }\n                ll id = v[i].ss;\n                for(j = 0; j < p; j++){\n                    if((mask & (1 << j)) == 0){\n                        if(dp[i + 1][mask | (1 << j)] < dp[i][mask] + add + pos[id][j]){\n                            dp[i + 1][mask | (1 << j)] = dp[i][mask] + add + pos[id][j] + add2;\n                            idxs[i + 1][mask | (1 << j)] = idxs[i][mask];\n                            idxs[i + 1][mask | (1 << j)].pb(i);\n                            idxs[i + 1][mask | (1 << j)][0] = now;\n                        }\n                    }\n                }\n            }\n        }\n        ll ans;\n        ans = dp[n][(1 << p) - 1];\n        cout << ans << endl;\n    }\n    return 0;\n}"
+}

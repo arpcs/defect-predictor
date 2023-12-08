@@ -1,0 +1,36 @@
+{
+    "id": 77237321,
+    "contestId": 1110,
+    "creationTimeSeconds": 1587269331,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "autoint"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 311,
+    "memoryConsumedBytes": 178278400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define CO const\r\n#define IN inline\r\ntypedef long long int64;\r\n\r\ntemplate<class T> IN T read(){\r\n\tT x=0,w=1;char c=getchar();\r\n\tfor(;!isdigit(c);c=getchar())if(c=='-') w=-w;\r\n\tfor(;isdigit(c);c=getchar()) x=x*10+c-'0';\r\n\treturn x*w;\r\n}\r\ntemplate<class T> IN T read(T&x){\r\n\treturn x=read<T>();\r\n}\r\n\r\nCO int N=2e3+10;\r\nchar L[N],R[N];\r\nint tot;\r\nint ch[N][10],fa[N],val[N][10][N];\r\n\r\nvoid insert(char str[],int n){\r\n\tint x=0;\r\n\tfor(int i=1;i<=n;++i){\r\n\t\tint c=str[i]-'0';\r\n\t\tif(!ch[x][c]) ch[x][c]=++tot;\r\n\t\tx=ch[x][c];\r\n\t}\r\n}\r\nvoid build(char str[],int n,int v){\r\n\tint x=0;\r\n\tfor(int i=1;i<=n;++i){\r\n\t\tint c=str[i]-'0';\r\n\t\tfor(int d=x==0;d<c;++d) val[x][d][n-i+1]+=v; // edit 1: x=0 -> d starts from 1\r\n\t\tif(i==n) val[x][c][1]+=v;\r\n\t\tx=ch[x][c];\r\n\t}\r\n}\r\n\r\n\r\nint F[N][N];\r\n\r\nint main(){\r\n\tscanf(\"%s\",L+1);\r\n\tint lenL=strlen(L+1);\r\n\tif(L[lenL]>'0') --L[lenL];\r\n\telse{\r\n\t\tint p=lenL;\r\n\t\twhile(p>1 and L[p]=='0') --p;\r\n\t\t--L[p],fill(L+p+1,L+lenL+1,'9');\r\n\t}\r\n\tif(L[1]=='0' and lenL>1)\r\n\t\tcopy(L+2,L+lenL+1,L+1),L[lenL--]=0;\r\n\tif(L[1]>'0') insert(L,lenL); // edit 2: L=0 -> don't care about it\r\n\t\r\n\tscanf(\"%s\",R+1);\r\n\tint lenR=strlen(R+1);\r\n\tinsert(R,lenR);\r\n\t\r\n\tdeque<int> que;\r\n\tfor(int c=0;c<=9;++c)if(ch[0][c]) que.push_back(ch[0][c]);\r\n\twhile(que.size()){\r\n\t\tint x=que.front();que.pop_front();\r\n\t\tfor(int c=0;c<=9;++c){\r\n\t\t\tif(!ch[x][c]) {ch[x][c]=ch[fa[x]][c]; continue;}\r\n\t\t\tfa[ch[x][c]]=ch[fa[x]][c],que.push_back(ch[x][c]);\r\n\t\t}\r\n\t}\r\n\t\r\n\tif(L[1]>'0') build(L,lenL,-1);\r\n\tbuild(R,lenR,1);\r\n\t\r\n\tint n=read<int>();\r\n\tfor(int x=1;x<=tot;++x)for(int c=0;c<=9;++c) // edit 3: x starts from 1\r\n\t\tfor(int i=1;i<=n;++i) val[x][c][i]+=val[fa[x]][c][i];\r\n\t\r\n\tfor(int x=0;x<=tot;++x)for(int c=1;c<=9;++c) // edit 4: c starts from 1\r\n\t\tfor(int i=1;i<lenL;++i) val[x][c][i]+=-1;\r\n\tfor(int x=0;x<=tot;++x)for(int c=1;c<=9;++c)\r\n\t\tfor(int i=1;i<lenR;++i) val[x][c][i]+=1;\r\n\t\r\n\tfor(int x=0;x<=tot;++x)for(int c=0;c<=9;++c)\r\n\t\tfor(int i=1;i<=n;++i) val[x][c][i]+=val[x][c][i-1];\r\n\t\r\n//\tfor(int x=0;x<=tot;++x)for(int c=0;c<9;++c)\r\n//\t\tfor(int i=1;i<=n;++i) cerr<<x<<\" \"<<c<<\" \"<<i<<\" v=\"<<val[x][c][i]<<endl;\r\n\t\r\n\tfor(int i=n-1;i>=0;--i)for(int x=0;x<=tot;++x){\r\n\t\tF[i][x]=-1e9; // edit 5: initialize F=-inf\r\n\t\tfor(int c=0;c<=9;++c) F[i][x]=max(F[i][x],F[i+1][ch[x][c]]+val[x][c][n-i]);\r\n\t}\r\n\tprintf(\"%d\\n\",F[0][0]);\r\n\tfor(int i=0,x=0;i<n;++i){\r\n\t\tint c=-1;\r\n\t\tfor(int d=0;d<=9;++d)\r\n\t\t\tif(F[i][x]==F[i+1][ch[x][d]]+val[x][d][n-i]) {c=d; break;}\r\n\t\tprintf(\"%d\",c);\r\n\t\tx=ch[x][c];\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

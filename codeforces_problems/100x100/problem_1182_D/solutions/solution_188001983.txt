@@ -1,0 +1,40 @@
+{
+    "id": 188001983,
+    "contestId": 1182,
+    "creationTimeSeconds": 1672904630,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "RevolutionBP"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 34713600,
+    "source": "// LUOGU_RID: 98738978\n#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\nusing ll = long long;\r\nusing P = pair <int, int>;\r\n\r\ntemplate <typename T>\r\ninline void read(T &x) {\r\n    x = 0; char c = getchar();\r\n    int f = 0;\r\n    for (; !isdigit(c); c = getchar()) f |= c == '-';\r\n    for (; isdigit(c); c = getchar()) x = x * 10 + (c ^ 48);\r\n    if (f) x = -x;\r\n}\r\n\r\ntemplate <typename T, typename ...Args>\r\ninline void read(T &x, Args &...args) {\r\n    read(x), read(args...);\r\n}\r\ntemplate <typename T>\r\ninline void write(T x, char ch) {\r\n    if (x < 0) x = -x, putchar('-');\r\n    static short st[70], tp;\r\n    do st[++tp] = x % 10, x /= 10; while (x);\r\n    while (tp) putchar(st[tp--] | 48);\r\n    putchar(ch);\r\n}\r\n\r\ntemplate <typename T, typename ...Args>\r\ninline void write(T x, char ch, Args ...args) {\r\n    write(x, ch), write(args...);\r\n}\r\n\r\n#define Fr(i,l,r) for (int i = (l); i <= (r); ++i)\r\n#define Rf(i,r,l) for (int i = (r); i >= (l); --i)\r\n\r\nconst int N = 1e6 + 5;\r\n\r\nusing namespace std;\r\n\r\nstruct edge {\r\n    int to, nxt;\r\n} e[N];\r\n\r\nint head[N], cnt;\r\n\r\ninline void add(int u, int v) {\r\n    e[++cnt] = {v, head[u]};\r\n    head[u] = cnt;\r\n}\r\nint siz[N], dep[N], n;\r\n\r\ninline void dfs(int u, int ff) {\r\n    siz[u] = 1, dep[u] = dep[ff] + 1;\r\n    for (int i = head[u]; i; i = e[i].nxt) {\r\n        int v = e[i].to;\r\n        if (v == ff) continue;\r\n        dfs(v, u);\r\n        siz[u] += siz[v];\r\n    }\r\n}\r\n\r\nint maxp[N];\r\n\r\ninline int findroot() {\r\n    dfs(1, 0);\r\n    int rt = 0;\r\n    Fr (u, 1, n) {\r\n        for (int i = head[u]; i; i = e[i].nxt) {\r\n            int v = e[i].to;\r\n            if (dep[v] < dep[u]) continue;\r\n            maxp[u] = max(maxp[u], siz[v]);\r\n        }\r\n        maxp[u] = max(maxp[u], n - siz[u]);\r\n        if (maxp[u] < maxp[rt]) rt = u;\r\n    }\r\n    return rt;\r\n}\r\nint tmp[N];\r\ninline bool check(int rt) {\r\n    memset(siz, 0, sizeof(siz));\r\n    memset(dep, 0, sizeof(dep));\r\n    memset(tmp, 0, sizeof(tmp));\r\n    dep[rt] = 1;\r\n    dfs(rt, 0);\r\n    Fr (u, 1, n) {\r\n        int deg = 0;\r\n        for (int i = head[u]; i; i = e[i].nxt) ++deg;\r\n        if (!tmp[dep[u]]) tmp[dep[u]] = deg;\r\n        if (tmp[dep[u]] != deg) return false;\r\n    }\r\n    return true;\r\n}\r\n\r\ninline int line(int u, int ff) {\r\n    if (!e[head[u]].nxt) return u;\r\n    if (e[e[head[u]].nxt].nxt) return 0;\r\n    int i = head[u];\r\n    if (e[i].to == ff) i = e[i].nxt;\r\n    return line(e[i].to, u);\r\n}\r\n\r\nint len[N];\r\nsigned main() {\r\n    read(n);\r\n    Fr (i, 1, n - 1) {\r\n        int u, v;\r\n        read(u, v);\r\n        add(u, v);\r\n        add(v, u);\r\n    }\r\n    maxp[0] = 2e9;\r\n    int rt = findroot();\r\n    if (check(rt)) return write(rt, '\\n'), 0;\r\n    for (int i = head[rt]; i; i = e[i].nxt) len[++len[0]] = line(e[i].to, rt);\r\n    sort(len + 1, len + len[0] + 1, [](int x, int y) { return dep[x] < dep[y]; });\r\n    if (len[1] && check(len[1])) return write(len[1], '\\n'), 0;\r\n    if (len[len[0]] && check(len[len[0]])) return write(len[len[0]], '\\n'), 0;\r\n    write(-1, '\\n');\r\n    return 0;\r\n}\r\n"
+}

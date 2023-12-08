@@ -1,0 +1,36 @@
+{
+    "id": 209959317,
+    "contestId": 1110,
+    "creationTimeSeconds": 1687004244,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1110,
+        "index": "H",
+        "name": "Modest Substrings",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "dp",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1110,
+        "members": [
+            {
+                "handle": "NOIp2022Lost75pts"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1549546500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define mp make_pair\r\n#define pr pair<int,int>\r\n#define _(x,y) x=(x+y)%mod\r\n#define ll long long\r\n\t#define int long long\r\nint read(){int d=1,k=0;char c=getchar();\r\nwhile(!(c>='0' and c<='9' or c=='-'))c=getchar();if(c=='-')d=-1,c=getchar();\r\nwhile(c>='0' and c<='9')k=(k<<3)+(k<<1)+(c^48),c=getchar();return d*k;}\r\n\r\nint ch[100010][12],g[30010][2010];\r\nchar L[10000],R[10000];\r\nint dp[2010][30010],pre[2010][30010],tag[2010][30010],fail[1002010];\r\nint n,llen,rlen,cnt;\r\nvoid gett(int x,int l,int r,int len){\r\n\tfor(int i=l;i<=r;i++){\r\n\t\tif(!ch[x][i])ch[x][i]=++cnt;\r\n\t\tg[ch[x][i]][len]++;\r\n\t}\r\n}\r\nvoid build(){\r\n\tint nowl=0,nowr=0;\r\n\tif(llen==rlen){\r\n\t\tfor(int i=1;i<=llen;i++){\r\n\t\t\tint xl=L[i]-'0',xr=R[i]-'0';\r\n\t\t\tif(nowl==nowr)gett(nowl,xl+1,xr-1,llen-i);\t\r\n\t\t\telse{\r\n\t\t\t\tgett(nowl,xl+1,9,llen-i);\r\n\t\t\t\tgett(nowr,0,xr-1,rlen-i);\r\n\t\t\t}if(!ch[nowl][xl])ch[nowl][xl]=++cnt;\r\n\t\t\tif(!ch[nowr][xr])ch[nowr][xr]=++cnt;\r\n\t\t\tnowl=ch[nowl][xl];\r\n\t\t\tnowr=ch[nowr][xr];\r\n\t\t}g[nowl][0]++;if(nowr!=nowl)g[nowr][0]++;\r\n\t}else{\r\n\t\tfor(int i=1;i<=llen;i++){\r\n\t\t\tint xl=L[i]-'0';\r\n\t\t\tgett(nowl,xl+1,9,llen-i);\r\n\t\t\tif(!ch[nowl][xl])ch[nowl][xl]=++cnt;\r\n\t\t\tnowl=ch[nowl][xl];\r\n\t\t}for(int i=1;i<=rlen;i++){\r\n\t\t\tint xr=R[i]-'0';\r\n\t\t\tgett(nowr,0,xr-1,rlen-i);\r\n\t\t\tif(!ch[nowr][xr])ch[nowr][xr]=++cnt;\r\n\t\t\tnowr=ch[nowr][xr];\r\n\t\t}g[nowl][0]++,g[nowr][0]++;\r\n\t\tfor(int i=llen+1;i<rlen;i++){\r\n\t\t\tfor(int j=0;j<=9;j++){\r\n\t\t\t\tif(!ch[0][j])ch[0][j]=++cnt;\r\n\t\t\t\tg[ch[0][j]][i-1]++;\r\n\t\t\t}\r\n\t\t}\r\n\t}ch[0][0]=0;\r\n\tqueue<int>q;\r\n\tfor(int i=0;i<=9;i++)if(ch[0][i])q.push(ch[0][i]);\r\n\twhile(q.size()){\r\n\t\tint x=q.front();q.pop();\r\n\t\tfor(int i=0;i<=9;i++){\r\n\t\t\tif(!ch[x][i])ch[x][i]=ch[fail[x]][i];\r\n\t\t\telse{\r\n\t\t\t\tfail[ch[x][i]]=ch[fail[x]][i];\r\n\t\t\t\tfor(int j=0;j<=n;j++)g[ch[x][i]][j]+=g[fail[ch[x][i]]][j];\r\n\t\t\t\tq.push(ch[x][i]);\r\n\t\t\t}\r\n\t\t}\r\n\t}for(int i=0;i<=cnt;i++){\r\n\t\tfor(int j=1;j<=n;j++)g[i][j]+=g[i][j-1]; \r\n\t}\r\n}\r\nvoid getans(){\r\n\tmemset(dp,-0x3f,sizeof(dp));\r\n\tdp[0][0]=0;\r\n\tfor(int i=0;i<n;i++){\r\n\t\tfor(int j=0;j<=cnt;j++){\r\n\t\t\tfor(int k=0;k<=9;k++){\r\n\t\t\t\tdp[i+1][ch[j][k]]=max(dp[i+1][ch[j][k]],dp[i][j]+g[ch[j][k]][n-i-1]);\r\n\t\t\t}\r\n\t\t}\r\n\t}int ans=0;\r\n\tfor(int i=0;i<=cnt;i++)ans=max(ans,dp[n][i]);\r\n\tcout<<ans<<\"\\n\";\r\n\tfor(int i=0;i<=cnt;i++)if(dp[n][i]==ans)tag[n][i]=1;\r\n\tfor(int i=n-1;i>=1;i--){\r\n\t\tfor(int j=0;j<=cnt;j++){\r\n\t\t\tfor(int k=0;k<=9;k++){\r\n\t\t\t\tif(dp[i+1][ch[j][k]]==dp[i][j]+g[ch[j][k]][n-i-1])tag[i][j]|=tag[i+1][ch[j][k]];\r\n\t\t\t}\r\n\t\t}\r\n\t}int now=0;\r\n\tfor(int i=0;i<n;i++){\r\n\t\tfor(int k=0;k<=9;k++){\r\n\t\t\tif(tag[i+1][ch[now][k]] and dp[i+1][ch[now][k]]==dp[i][now]+g[ch[now][k]][n-i-1]){\r\n\t\t\t\tnow=ch[now][k];\r\n\t\t\t\tcout<<k; \r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\n\r\nsigned main(){\r\n\r\n\tscanf(\"%s%s\",L+1,R+1),n=read();\r\n\tllen=strlen(L+1),rlen=strlen(R+1);\r\n\tbuild(),getans();\r\n\t\r\n\t\r\n\treturn 0;\t\r\n}\r\n"
+}

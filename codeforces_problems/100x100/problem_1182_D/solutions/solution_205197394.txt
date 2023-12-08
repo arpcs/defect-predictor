@@ -1,0 +1,40 @@
+{
+    "id": 205197394,
+    "contestId": 1182,
+    "creationTimeSeconds": 1683619709,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "________a____"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 140,
+    "memoryConsumedBytes": 11980800,
+    "source": "// LUOGU_RID: 109912754\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define MAXN 100010\r\nint n;\r\nvector<int> ver[MAXN];\r\nint du[MAXN];\r\ninline void add(int u,int v){\r\n\tver[u].push_back(v);\r\n\tdu[v]++;\r\n}\r\nvector<int> ton[MAXN],ton2;\r\nint a[MAXN],N;\r\nint fg[MAXN];\r\nqueue<int> q;\r\nint dis[MAXN];\r\nint mx[MAXN];\r\nvector<int> rt;\r\nint siz[MAXN];\r\nvoid find(int u,int fa){\r\n\tsiz[u]=1;\r\n\tfor(int i=0,v;i<ver[u].size();i++){\r\n\t\tif((v=ver[u][i])==fa) continue ;\r\n\t\tfind(v,u);\r\n\t\tmx[u]=max(mx[u],siz[v]);\r\n\t\tsiz[u]+=siz[v];\r\n\t}\r\n\tif(max(n-siz[u],mx[u])*2<=n) rt.push_back(u);\r\n}\r\nint vis[MAXN];\r\ninline void bfs(int s){\r\n\tmemset(vis,0,sizeof vis);\r\n\tdis[s]=0,vis[s]=1;\r\n\tq.push(s);\r\n\tint u,v;\r\n\twhile(!q.empty()){\r\n\t\tu=q.front(),q.pop();\r\n\t\tfor(int i=0;i<ver[u].size();i++){\r\n\t\t\tif(vis[v=ver[u][i]]) continue ;\r\n\t\t\tvis[v]=1;\r\n\t\t\tdis[v]=dis[u]+1;\r\n\t\t\tq.push(v);\r\n\t\t}\r\n\t}\r\n}\r\nint Dis[MAXN];\r\ninline bool ck(int u){\r\n\tbfs(u);\r\n\tint fg=1;\r\n\tmemset(Dis,-1,sizeof Dis);\r\n\tfor(int i=1;i<=n&&fg==1;i++){\r\n\t\tif(Dis[dis[i]]==-1){\r\n\t\t\tDis[dis[i]]=du[i];\r\n\t\t}\r\n\t\telse if(Dis[dis[i]]!=du[i]) fg=0;\r\n\t}\r\n\tif(fg) return 1;\r\n\treturn 0;\r\n}\r\nint dep[MAXN],dp[MAXN];\r\nvoid dfs(int u,int fa){\r\n\tdep[u]=dep[fa]+1;\r\n\tsiz[u]=1;\r\n\tdp[u]=dep[u];\r\n\tfor(int i=0,v;i<ver[u].size();i++){\r\n\t\tif((v=ver[u][i])==fa) continue ;\r\n\t\tdfs(v,u);\r\n\t\tdp[u]=max(dp[u],dp[v]);\r\n\t\tsiz[u]+=siz[v];\r\n\t}\r\n}\r\nvoid out(int u,int fa){\r\n\tif(ver[u].size()==1) {\r\n\t\tprintf(\"%d\",u);\r\n\t\texit(0);\r\n\t}\r\n\tfor(int i=0,v;i<ver[u].size();i++){\r\n\t\tif((v=ver[u][i])==fa) continue ;\r\n\t\tout(v,u);\r\n\t}\r\n}\r\nint get(int u,int fa){\r\n\tif(ver[u].size()==1) return u;\r\n\tfor(int i=0,v;i<ver[u].size();i++){\r\n\t\tif((v=ver[u][i])==fa) continue ;\r\n\t\treturn get(v,u);\r\n\t}\r\n}\r\nint _vis[MAXN];\r\nsigned main(){\r\n//\tfreopen(\"test.in\",\"r\",stdin);\r\n\tscanf(\"%d\",&n);\r\n\tfor(int i=1,u,v;i<n;i++){\r\n\t\tscanf(\"%d%d\",&u,&v);\r\n\t\tadd(u,v);\r\n\t\tadd(v,u);\r\n\t}\r\n\tfind(1,0);\r\n\tfor(int k=0,u;k<rt.size();k++){\r\n\t\tif(ck(u=rt[k])){\r\n\t\t\tprintf(\"%d\\n\",rt[k]);\r\n\t\t\treturn 0;\r\n\t\t}\r\n\t\tdfs(u,0);\r\n\t\tmemset(_vis,0,sizeof _vis);\r\n\t\tfor(int i=0,v,las=-1,_;i<ver[u].size();i++){\r\n\t\t\tif(dp[v=ver[u][i]]-1==siz[v]&&!_vis[siz[v]]) {\r\n\t\t\t\t_vis[siz[v]]=1;\r\n\t\t\t\t//cout<<v<<endl;\r\n\t\t\t\tif(ck(_=get(v,u))){\r\n\t\t\t\t\tprintf(\"%d\",_);\r\n\t\t\t\t\treturn 0;\r\n\t\t\t\t}\r\n\t\t\t\t//cout<<u<<' '<<_<<endl;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tputs(\"-1\");\r\n\treturn 0;\r\n}"
+}

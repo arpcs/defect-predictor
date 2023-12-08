@@ -1,0 +1,37 @@
+{
+    "id": 210869395,
+    "contestId": 1822,
+    "creationTimeSeconds": 1687612285,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1822,
+        "index": "G2",
+        "name": "Magic Triples (Hard Version)",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "brute force",
+            "data structures",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1822,
+        "members": [
+            {
+                "handle": "snowmeh"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1682346900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 71,
+    "timeConsumedMillis": 1622,
+    "memoryConsumedBytes": 16896000,
+    "source": "#pragma optimize(\"Ofast,unroll-loops\")\r\n#pragma GCC target(\"avx2,bmi,bmi2,lzcnt,popcnt\")\r\n\r\n#include <iostream>\r\n#include <algorithm>\r\n#include <vector>\r\n#include <map>\r\nusing namespace std;\r\n\r\n#define vv vector\r\n#define mp make_pair\r\n#define eb emplace_back\r\n\r\nint MOD = 1e9 + 7;\r\nconst int N = 2e5 + 1, P = 1000001;\r\npair<int , int> A[N];\r\nvv<int> primes, divs;\r\nvv<pair<int , int >> factors;\r\n\r\nint mbinary_search(pair<int , int>* arr , int L , int R , const int& targ) {\r\n\r\n\twhile(L <= R) {\r\n\t\tint M = (L + R) >> 1;\r\n\t\tif(arr[M].first == targ) {\r\n\t\t\treturn M;\r\n\t\t} else if(arr[M].first < targ) {\r\n\t\t\tL = M + 1;\r\n\t\t} else {\r\n\t\t\tR = M - 1;\r\n\t\t}\r\n\t}\r\n\t\r\n\treturn -1;\r\n}\r\n\r\nvoid load_factors(int x) {\r\n\tfactors.clear();\r\n\tfactors.reserve(100);\r\n\t\r\n\tfor(auto& prime : primes) {\r\n\t\tif(prime * prime > x) break;\r\n\t\t\r\n\t\tint cnt = 0;\r\n\t\t\r\n\t\twhile(x % prime == 0) {\r\n\t\t\tx /= prime;\r\n\t\t\t++cnt;\r\n\t\t}\r\n\t\t\r\n\t\tcnt >>= 1;\r\n\t\t\r\n\t\tif(cnt) {\r\n\t\t\tfactors.eb(mp(prime , cnt));\r\n\t\t}\r\n\t} \r\n}\r\nvoid load_divs() {\r\n\tdivs.clear();\r\n\tdivs.reserve(1e6);\r\n\t\r\n\tfor(auto& factor : factors) {\r\n\t\tint len = divs.size();\r\n\t\tint facto = 1;\r\n\t\t\r\n\t\tfor(int i = 1; i <= factor.second; ++i) {\r\n\t\t\tfacto *= factor.first;\r\n\t\t\tfor(int y = 0; y < len; ++y) {\r\n\t\t\t\tdivs.eb(divs[y] * facto);\r\n\t\t\t}\r\n\t\t\tdivs.eb(facto);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nvoid solve() {\r\n\tint n; \r\n\tcin >> n;\r\n\r\n\tmap<int , int> maap;\r\n\tint sz = 0;\r\n\tfor(int i = 0; i < n; ++i) {\r\n\t\tcin >> A[sz++].first;\r\n\t\tif(maap.count(A[sz - 1].first) == true) {\r\n\t\t\t++A[maap[A[--sz].first]].second;\r\n\t\t} else {\r\n\t\t\tmaap[A[sz - 1].first] = sz - 1;\r\n\t\t\tA[sz - 1].second = 1;\r\n\t\t}\r\n\t}\r\n\t\r\n\tsort(A , A + sz);\r\n\t\r\n\tlong long ans = 0;\r\n\tfor(int i = 0; i < sz; ++i) {\r\n\t\tans += 1ll * A[i].second * (A[i].second - 1) * (A[i].second - 2);\r\n\t\t\r\n\t\tif(i < 2) continue;\r\n\t\t\r\n\t\tload_factors(A[i].first);\r\n\t\tload_divs();\r\n\t\t\r\n\t\tfor(auto& div : divs) {\r\n\t\t\tint p1 = mbinary_search(A , 0 , i - 1 , A[i].first / div);\r\n\t\t\tif(p1 == -1)  continue;\r\n\t\t\t\r\n\t\t\tint p2 = mbinary_search(A , 0 , p1 - 1 , A[i].first / (div * div));\r\n\t\t\tif(p2 != -1) {\r\n\t\t\t\tans += 1ll * A[p1].second * A[p2].second * A[i].second;\r\n\t\t\t}\r\n\t\t\t\r\n\t\t}\r\n\t}\r\n\t\r\n\tcout << ans << \"\\n\";\r\n}\r\n\r\nbool is_not_prime[P];\r\n\r\nint main() {\r\n\t\r\n\tfor(int i = 2; i * i < P; ++i) {\r\n\t\tif(is_not_prime[i] == false) {\r\n//\t\t\tprimes.eb(i);\r\n\t\t\tfor(int y = i * i; y < P; y += i) {\r\n\t\t\t\tis_not_prime[y] = true;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tfor(int i = 2; i < P; ++i) {\r\n\t\tif(is_not_prime[i] == false) primes.eb(i);\r\n\t}\r\n//\tfor(auto& prime : primes) cout << prime << \"\\n\";\r\n//\treturn 0;\r\n\tios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0);\r\n\t\r\n\tint t; \r\n\tcin >> t;\r\n\twhile(t--) solve();\r\n}"
+}

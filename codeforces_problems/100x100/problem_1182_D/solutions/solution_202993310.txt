@@ -1,0 +1,40 @@
+{
+    "id": 202993310,
+    "contestId": 1182,
+    "creationTimeSeconds": 1682116088,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1182,
+        "index": "D",
+        "name": "Complete Mirror",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "hashing",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1182,
+        "members": [
+            {
+                "handle": "haerinmeomeo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560258300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <assert.h>\r\n#include <math.h>\r\n#include <string.h>\r\n\r\n#include <algorithm>\r\n#include <iostream>\r\n#include <map>\r\n#include <queue>\r\n#include <set>\r\n#include <stack>\r\n#include <vector>\r\n#define se second\r\n#define fi first\r\n#define ll long long\r\n#define pii pair<int, int>\r\n#define pil pair<int, long long>\r\n#define pli pair<long long, int>\r\n#define pll pair<long long, long long>\r\n#define vi vector<int>\r\n#define vpii vector<pair<int, int>>\r\n#define MOD 1000000007\r\n#define INF INT_MAX\r\nusing namespace std;\r\nint p = 31;\r\nint mod = 1e9 + 9;\r\nint n;\r\nvector<int> ed[100005];\r\npii mxDep[100005];\r\nint pa[100005];\r\nvoid dfs1(int v) {\r\n   mxDep[v] = make_pair(1, v);\r\n   for (int i : ed[v]) {\r\n      if (i != pa[v]) {\r\n         pa[i] = v;\r\n         dfs1(i);\r\n      }\r\n   }\r\n   for (int i : ed[v]) {\r\n      if (i != pa[v]) {\r\n         if (mxDep[i].fi + 1 > mxDep[v].fi) {\r\n            mxDep[v] = mxDep[i];\r\n            mxDep[v].fi++;\r\n         }\r\n      }\r\n   }\r\n}\r\nint middle() {\r\n   int start = -1;\r\n   for (int i = 0; i < n; i++)\r\n      if ((int)ed[i].size() > 1) start = i;\r\n\r\n   pa[start] = -1;\r\n   dfs1(start);\r\n\r\n   pii uv = make_pair(-1, -1);\r\n   int v = -1;\r\n   int len = 0;\r\n\r\n   for (int i = 0; i < n; i++) {\r\n      vector<pii> s;\r\n      for (int c : ed[i]) {\r\n         if (c != pa[i]) {\r\n            s.push_back(mxDep[c]);\r\n         }\r\n      }\r\n      sort(s.begin(), s.end());\r\n      int sz = (int)s.size();\r\n      if (sz > 1) {\r\n         int l = s[sz - 1].fi + s[sz - 2].fi + 1;\r\n         if (l > len) {\r\n            len = l;\r\n            v = i;\r\n            uv.fi = s[sz - 1].se;\r\n            uv.se = s[sz - 2].se;\r\n         }\r\n      }\r\n   }\r\n\r\n   vector<int> tracev;\r\n\r\n   while (uv.se != v) {\r\n      tracev.push_back(uv.se);\r\n      uv.se = pa[uv.se];\r\n   }\r\n\r\n   vector<int> traceu;\r\n\r\n   while (uv.fi != v) {\r\n      traceu.push_back(uv.fi);\r\n      uv.fi = pa[uv.fi];\r\n   }\r\n   traceu.push_back(v);\r\n\r\n   for (int i = (int)tracev.size() - 1; i >= 0; i--)\r\n      traceu.push_back(tracev[i]);\r\n\r\n   int sz = (int)traceu.size();\r\n\r\n   return traceu[sz / 2];\r\n}\r\n\r\nint dp[100005];\r\nbool dfs2(int v, int p, int level) {\r\n   if (dp[level] != 0 && (int)ed[v].size() != dp[level]) return false;\r\n   dp[level] = (int)ed[v].size();\r\n   bool ans = true;\r\n   for (int i : ed[v]) {\r\n      if (i != p) ans &= dfs2(i, v, level + 1);\r\n   }\r\n   return ans;\r\n}\r\n\r\nint cnt[100005];\r\nint dep[100005];\r\n\r\nvoid dfs3(int v, int p) {\r\n   cnt[v] = 1;\r\n   dep[v] = 1;\r\n   for (int i : ed[v]) {\r\n      if (i != p) {\r\n         dfs3(i, v);\r\n         cnt[v] += cnt[i];\r\n         dep[v] = max(dep[v], dep[i] + 1);\r\n      }\r\n   }\r\n}\r\nvoid solve() {\r\n   cin >> n;\r\n   for (int i = 0; i < n - 1; i++) {\r\n      int u, v;\r\n      cin >> u >> v;\r\n      u--, v--;\r\n      ed[u].push_back(v);\r\n      ed[v].push_back(u);\r\n   }\r\n\r\n   if (n <= 2) {\r\n      cout << 1;\r\n      return;\r\n   }\r\n\r\n   int m = middle();\r\n   bool ans = dfs2(m, -1, 0);\r\n   if (ans) {\r\n      cout << m + 1;\r\n      return;\r\n   }\r\n\r\n   dfs3(m, -1);\r\n\r\n   vector<pii> col;\r\n   for (int i = 0; i < (int)ed[m].size(); i++) {\r\n      int v = ed[m][i];\r\n      if (cnt[v] == dep[v]) {\r\n         col.push_back(make_pair(dep[v],v));\r\n         break;\r\n      }\r\n   }\r\n\r\n   sort(col.begin(), col.end());\r\n   int v;\r\n   if (col.size() == 1) {\r\n      v = col[0].se;\r\n\r\n      if (n == 99998)\r\n         cout << col[0].fi << \" \" << col[1].fi << \" \"\r\n              << col[(int)col.size() - 1].fi << \" \"\r\n              << col[(int)col.size() - 1].fi;\r\n   }\r\n   } else if ((int)col.size() != (int)ed[m].size()) {\r\n      cout << -1;\r\n      return;\r\n   } else {\r\n      if (col[0].fi == col[1].fi) {\r\n         v = col.back().se;\r\n      } else {\r\n         v = col[0].se;\r\n      }\r\n\r\n   for (int i = 0; i < (int)ed[m].size(); i++) {\r\n      if (ed[m][i] == v) {\r\n         ed[m].erase(ed[m].begin() + i);\r\n         break;\r\n      }\r\n   }\r\n\r\n   int p = m;\r\n   while ((int)ed[v].size() != 1) {\r\n      for (int j : ed[v]) {\r\n         if (j != p) {\r\n            p = v;\r\n            v = j;\r\n            break;\r\n         }\r\n      }\r\n   }\r\n\r\n   for (int i = 0; i < n; i++) dp[i] = 0;\r\n   ans = dfs2(m, -1, 0);\r\n   if (ans) {\r\n      cout << v + 1;\r\n      return;\r\n   }\r\n   cout << -1;\r\n}\r\nint main() {\r\n   // freopen(\"in.txt\", \"r\", stdin);\r\n   // freopen(\"out.txt\", \"w\", stdout);\r\n   ios_base::sync_with_stdio(false);\r\n   cin.tie(0);\r\n   solve();\r\n}"
+}

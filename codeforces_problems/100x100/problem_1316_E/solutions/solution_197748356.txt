@@ -1,0 +1,38 @@
+{
+    "id": 197748356,
+    "contestId": 1316,
+    "creationTimeSeconds": 1679048816,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1316,
+        "index": "E",
+        "name": "Team Building",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2300,
+        "tags": [
+            "bitmasks",
+            "dp",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1316,
+        "members": [
+            {
+                "handle": "abhinav520"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1583332500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 124,
+    "timeConsumedMillis": 2963,
+    "memoryConsumedBytes": 226508800,
+    "source": "//Abhinav Singh\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n//---------------------------------------------------------------------//\r\nbool debug;\r\ntemplate <typename T, typename U> istream& operator>>(istream &is, pair<T, U> &p) { return is >> p.first >> p.second; }\r\ntemplate <typename T, typename U> ostream& operator<<(ostream &os, const pair<T, U> &p) { return debug ? os << \"(\" << p.first << \", \" << p.second << \")\" : os << p.first << \" \" << p.second; }\r\ntemplate <typename T_container, typename T = typename enable_if<!is_same<T_container, string>::value, typename T_container::value_type>::type> istream &operator>>(istream &is, T_container &v) { for (T &x : v) is >> x; return is; }\r\ntemplate <typename T_container, typename T = typename enable_if<!is_same<T_container, string>::value, typename T_container::value_type>::type> ostream &operator<<(ostream &os, const T_container &v) { bool f = false; if(debug) { os << \"[\"; for (const T &x : v) { if (f) os << \", \"; os << x; f = true; } os << \"]\"; } else { for (const T &x : v) { if (f) os << \" \"; os << x; f = true; } } return os; }\r\nvoid scan() {} template <typename Head, typename ...Tail> void scan(Head &H, Tail &...T) { cin >> H; scan(T...); }\r\nvoid print() { cout << \"\\n\"; } template <typename Head> void print(const Head &H) { cout << H << \"\\n\"; } template <typename Head, typename ...Tail> void print(const Head &H, const Tail &...T) { cout << H << \" \"; print(T...); }\r\ntemplate <typename Head> void dbg_out(string var, const Head &H) { cerr << var << \" = \" << H << endl; }\r\ntemplate <typename Head, typename ...Tail> void dbg_out(string var, const Head &H, const Tail &...T) { for (int i = 0, b = 0; i < int(var.size()); i++) { if (var[i] == '(' || var[i] == '{') { b++; } else if (var[i] == ')' || var[i] == '}') { b--; } else if (var[i] == ',' && b == 0) { cerr << var.substr(0, i) << \" = \" << H << \" | \"; dbg_out(var.substr(var.find_first_not_of(' ', i + 1)), T...); break; } } }\r\n#ifndef ONLINE_JUDGE\r\n#define dbg(...) debug = true, dbg_out(#__VA_ARGS__, __VA_ARGS__), debug = false\r\n#else\r\n#define dbg(...)\r\n#endif\r\n//---------------------------------------------------------------------//\r\n\r\n#define int int64_t\r\n#define fastio  ios_base::sync_with_stdio(0), cin.tie(0)\r\n#define ini(_n)  int _n;cin>>_n;\r\n#define sni(_s)  string _s;cin>>_s;\r\n#define input(vec,s,n) vector<int> vec(s+n);for(int i=s;i<s+n;i++){cin>>vec[i];}\r\ntemplate <typename T> using vv = vector<vector<T>>;\r\ntemplate <typename T> using mxpq = priority_queue<T>;\r\ntemplate <typename T> using mnpq = priority_queue<T, vector<T>, greater<T>>;\r\ntypedef pair<int,int> pi;\r\ntypedef vector<int> vi;\r\n#define seal(n,m) (((n)%(m)!=0)?((n)/(m)+1):((n)/(m)))\r\n#define all(v) v.begin(), v.end()\r\n#define sz(x) ((int)(x).size())\r\n#define mem(v,p) memset(v,p,sizeof(v))\r\n#define endl '\\n'\r\n#define yes cout<<\"YES\"<<endl\r\n#define no cout<<\"NO\"<<endl\r\n//const int mod= 998244353;\r\nconst int mod= 1000000007;\r\nconst int N=2e5+10, inf=1e18+10;\r\n\r\nint n,p,k,mx;\r\nint dp[N][(1<<7)+1];\r\ninline int rec(int i, int mask, vi &a, vv<int> &b){\r\n    int audience=(i-__builtin_popcount(mask));\r\n    if(mask==mx and audience>=k){\r\n        return 0;\r\n    }\r\n    if(i>=n) return -inf;\r\n    if(dp[i][mask]!=-1) return dp[i][mask];\r\n    int res=-inf;\r\n    for(int j=0;j<p;j++){\r\n    //if ith person is choosen to play in jth position (jth position is not selected earlier)\r\n        if((mask & (1<<j))==0){\r\n            res=max(res,b[i][j]+rec(i+1,(mask|(1<<j)),a,b));\r\n        }\r\n    }\r\n    // if ith person is not choosen to play\r\n    // then if audience is <k, we will choose this person as an audience (greedy -> as we have sorted a[i] in decreasing order)\r\n    return dp[i][mask]=max(res,(audience<k ?a[i]:0)+rec(i+1,mask,a,b));\r\n}\r\nvoid pairsort(vector<int> &a, vv<int> &b)\r\n{\r\n    vector<pair<int, int>> sortit(n);\r\n    for (int i = 0; i < n; i++)\r\n    {\r\n        sortit[i].first = a[i];\r\n        sortit[i].second = i;\r\n    }\r\n    sort(all(sortit));\r\n    reverse(all(sortit));\r\n    vv<int> c(n,vi(p));\r\n    for (int i = 0; i < n; i++)\r\n    {\r\n        a[i] = sortit[i].first;\r\n        c[i] = b[sortit[i].second];\r\n    }\r\n    swap(c,b);\r\n}\r\nvoid solve(){\r\n    cin>>n>>p>>k;\r\n    vector<int> a(n);\r\n    cin>>a;\r\n    mx=(1<<p)-1;\r\n    vv<int> v(n, vi(p));\r\n    for(int i=0;i<n;i++){\r\n        for(int j=0;j<p;j++){\r\n            cin>>v[i][j];\r\n        }\r\n    }\r\n    pairsort(a,v);\r\n    dbg(a);\r\n    dbg(v);\r\n    mem(dp,-1);\r\n    cout<<rec(0,0,a,v);\r\n\r\n}\r\n\r\n\r\nsigned main()\r\n{\r\n    fastio;\r\n    int tc=1;\r\n    // cin>>tc;\r\n    for(int testcase=1;testcase<=tc;testcase++){\r\n        //dbg(testcase);\r\n        solve();\r\n    }\r\n\r\n    return 0;\r\n}"
+}
