@@ -1,0 +1,38 @@
+{
+    "id": 158467844,
+    "contestId": 1685,
+    "creationTimeSeconds": 1653508191,
+    "relativeTimeSeconds": 8091,
+    "problem": {
+        "contestId": 1685,
+        "index": "C",
+        "name": "Bring Balance",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1685,
+        "members": [
+            {
+                "handle": "AwakeAnay"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "room": 9,
+        "startTimeSeconds": 1653500100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "PRETESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\r\n#include <vector>\r\n\r\n#define int long long\r\n\r\n#define left (id+1)\r\n#define mid ((l+r)/2)\r\n#define right (id+2*(mid-l+1))\r\n\r\nint n;\r\n\r\nconst int MAXN = 100005;\r\n\r\nstruct seg\r\n{\r\n  std::vector<int> arr;\r\n  std::vector<int> val;\r\n\r\n  void upd(int x, int v, int id = 0, int l = 0, int r = n-1) {\r\n    if(l == r) {\r\n      val[x] = v;\r\n      arr[id] = l;\r\n      return;\r\n    }\r\n\r\n    if(x <= mid)\r\n      upd(x, v, left, l, mid);\r\n    else\r\n      upd(x, v, right, mid+1, r);\r\n\r\n    if(val[arr[right]] <= val[arr[left]])\r\n      arr[id] = arr[right];\r\n    else\r\n      arr[id] = arr[left];\r\n  }\r\n\r\n  int query(int x, int y, int id = 0, int l = 0, int r = n-1) {\r\n    if(y < l || r < x)\r\n      return n;\r\n\r\n    if(x <= l && r <= y)\r\n      return arr[id];\r\n\r\n    int u = query(x, y, left, l, mid);\r\n    int v = query(x, y, right, mid+1, r);\r\n    if(val[v] <= val[u])\r\n      return v;\r\n    return u;\r\n  }\r\n};\r\n\r\nsigned main() {\r\n  std::ios::sync_with_stdio(false);\r\n  std::cin.tie(0);\r\n\r\n  int t;\r\n  std::cin >> t;\r\n\r\n  while(t--) {\r\n    int N;\r\n    std::cin >> N;\r\n\r\n    n = 2*N;\r\n    std::vector<std::pair<int, int> > ans;\r\n\r\n    std::string s;\r\n    std::cin >> s;\r\n\r\n    int fr[n], bk[n+1];\r\n    int cur = 0;\r\n    for(int i = 0; i < n; i++) {\r\n      if(s[i] == '(')\r\n        cur++;\r\n      else\r\n        cur--;\r\n      fr[i] = cur;\r\n    }\r\n\r\n    cur = 0;\r\n    seg tree;\r\n    tree.val = std::vector<int>(n+1, MAXN);\r\n    tree.arr = std::vector<int>(2*n-1, n);\r\n\r\n    for(int i = 0; i < n; i++) {\r\n      if(s[n-1-i] == '(')\r\n        cur++;\r\n      else\r\n        cur--;\r\n      bk[n-1-i] = cur;\r\n      tree.upd(n-1-i, cur);\r\n      if(i)\r\n        bk[n-1-i] = std::min(bk[n-1-i], bk[n-i]);\r\n    }\r\n    bk[n] = 0;\r\n\r\n    int u = 0;\r\n    int vbest = -1;\r\n    while(u < n) {\r\n      //std::cout << u+1 << std::endl;\r\n      int j = u;\r\n      int best = u;\r\n      while(j < n && fr[j] >= 0) {\r\n        if(fr[j] >= fr[best]) {\r\n          best = j;\r\n        }\r\n        j++;\r\n      }\r\n      //std::cout << u << \" \" << best << std::endl;\r\n      if(j == n)\r\n        break;\r\n      j--;\r\n\r\n      int g = tree.query(best+1, n-1);\r\n      //std::cout << \"HERE \" << g << std::endl;\r\n      int v = tree.val[g];\r\n      if(vbest == -1)\r\n        vbest = fr[best];\r\n      //std::cout << \"VAl \" << v << std::endl;\r\n      //std::cout << \" EX \" << fr[best] << std::endl;\r\n\r\n      int lo = g+1, hi = n+1;\r\n      while(lo < hi) {\r\n        int mi = (lo+hi)/2;\r\n        if(vbest + (v-bk[mi]) >= 0)\r\n          lo = mi+1;\r\n        else\r\n          hi = mi;\r\n      }\r\n\r\n      ans.push_back({best+2, lo-1});\r\n      int bst = 0;\r\n      int ctr = 0;\r\n      for(int i = lo-1; i >= best+1; i--) {\r\n        if(s[i] == '(')\r\n          ctr++;\r\n        else\r\n          ctr--;\r\n        bst = std::max(bst, ctr);\r\n      }\r\n      vbest += bst;\r\n      u = lo-1;\r\n    }\r\n\r\n    std::cout << ans.size() << \"\\n\";\r\n    for(auto j : ans)\r\n      std::cout << j.first << \" \" << j.second << \"\\n\";\r\n  }\r\n\r\n  return 0;\r\n}\r\n\r\n"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 230637941,
+    "contestId": 1209,
+    "creationTimeSeconds": 1698737800,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1209,
+        "index": "H",
+        "name": "Moving Walkways",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3300,
+        "tags": [
+            "data structures",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1209,
+        "members": [
+            {
+                "handle": "Everule"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1568466300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 63,
+    "timeConsumedMillis": 1247,
+    "memoryConsumedBytes": 57753600,
+    "source": "#include <bits/stdc++.h>\r\n#define mp make_pair\r\n#define pb push_back\r\nusing namespace std;\r\nusing ll = long long int;\r\ntemplate<typename T>\r\nostream& operator+(ostream& out, const vector<T> &vec){\r\n    for(const auto &x : vec){\r\n        out<<x<<\" \";\r\n    }\r\n    out<<\"\\n\";\r\n    return out;\r\n}\r\ntemplate<typename T>\r\nostream& operator*(ostream& out, const vector<T> &vec){\r\n    for(const auto &x : vec){\r\n        out+x;\r\n    }\r\n    return out;\r\n}\r\ntemplate<typename T>\r\nistream& operator>>(istream& in, vector<T> &vec){\r\n    for(auto &x : vec){\r\n        in>>x;\r\n    }\r\n    return in;\r\n}\r\nstruct segment{\r\n    long double d, s, e;\r\n    segment(long double _d, long double _s) : d(_d), s(_s), e(0) {}\r\n    long double max_e() const{\r\n        if(s < 0.05) return 0;\r\n        return d / s;\r\n    }\r\n    long double min_e() const{\r\n        return -d/(s+2);\r\n    }\r\n    bool operator<(const segment &seg) const{\r\n        return s > seg.s;\r\n    }\r\n    long double contrib() const{\r\n        return (d + e) / (s + 1);\r\n    }\r\n};\r\nlong double eps = 1e-11;\r\nvoid solve(){\r\n    int n,L;\r\n    cin>>n>>L;\r\n    int c = 0;\r\n    vector<segment> segs;\r\n    segs.reserve(2 * n - 1);\r\n    for(int i=0,id=0;i<n;i++){\r\n        int x,y;\r\n        cin>>x>>y;\r\n        long double s;\r\n        cin>>s;\r\n        if(x != c){\r\n            segs.push_back(segment(x - c, 0));\r\n        }\r\n        segs.push_back(segment(y - x, s));\r\n        c = y;\r\n    }\r\n    if(c != L){\r\n        segs.push_back(segment(L - c, 0));\r\n    }\r\n    long double ans = 0;\r\n    for(auto &[d, s, e] : segs) ans += d / (s + 1);\r\n    auto cmp = [&](int i, int j){\r\n        if(abs(segs[i].s - segs[j].s) < 1e-10) return i < j;\r\n        return segs[i].s > segs[j].s;\r\n    };\r\n    set<int, decltype(cmp)> c_segs(cmp);\r\n    for(int i=0;i<segs.size();i++){\r\n        auto &seg = segs[i];\r\n        while(c_segs.size() > 0){\r\n            auto best_seg_id = *c_segs.begin();\r\n            auto &best_seg = segs[best_seg_id];\r\n            if(best_seg.s < seg.s + eps){\r\n                break;\r\n            }\r\n            long double max_delta = min(seg.e - seg.min_e(), best_seg.max_e() - best_seg.e);\r\n            ans -= best_seg.contrib() + seg.contrib();\r\n            best_seg.e += max_delta;\r\n            seg.e -= max_delta;\r\n            ans += best_seg.contrib() + seg.contrib();\r\n            if(best_seg.e + eps > best_seg.max_e()){\r\n                c_segs.erase(best_seg_id);\r\n                continue;\r\n            }\r\n            if(seg.e - eps < seg.min_e()){\r\n                break;\r\n            }\r\n            assert(false);\r\n        }\r\n        c_segs.insert(i);\r\n    }\r\n    cout<<fixed<<setprecision(12)<<ans<<\"\\n\";\r\n}\r\nint main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n    solve();\r\n}"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 220841295,
+    "contestId": 1685,
+    "creationTimeSeconds": 1693220960,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1685,
+        "index": "C",
+        "name": "Bring Balance",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1685,
+        "members": [
+            {
+                "handle": "_syr"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1653500100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 16384000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nconst int N = 4e5 + 5;\r\nint n, sum[N], mus[N], a[N], b[N], mx[N], mn[N], ans[N][2];\r\nchar s[N];\r\n\r\nvoid prt(int *a)\r\n{\r\n\tfor (int i = 1; i <= n; i++)\r\n\t{\r\n\t\tprintf(\"%2d\", a[i]);\r\n\t\tcout << \" \\n\"[i == n];\r\n\t}\r\n}\r\n\r\nstruct SegTree\r\n{\r\n\tint mn[N << 1];\r\n\t\r\n\t#define lc x << 1\r\n\t#define rc (x << 1) | 1\r\n\t\r\n\tvoid push_up(int x)\r\n\t{\r\n\t\tmn[x] = min(mn[lc], mn[rc]);\r\n\t}\r\n\t\r\n\tvoid Bld(int x, int l, int r)\r\n\t{\r\n\t\tmn[x] = 0;\r\n\t\tif (l == r)\r\n\t\t{\r\n\t\t\tmn[x] = mus[l];\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint mid = (l + r) >> 1;\r\n\t\tBld(lc, l, mid);\r\n\t\tBld(rc, mid + 1, r);\r\n\t\tpush_up(x);\r\n\t}\r\n\t\r\n\tint ask(int x, int l, int r, int L, int R)\r\n\t{\r\n\t\tif (l >= L && r <= R)\r\n\t\t{\r\n\t\t\treturn mn[x];\r\n\t\t}\r\n\t\tint mid = (l + r) >> 1;\r\n\t\tint ans = 0x3f3f3f3f;\r\n\t\tif (mid >= L)\r\n\t\t{\r\n\t\t\tans = ask(lc, l, mid, L, r);\r\n\t\t}\r\n\t\tif (mid + 1 <= R)\r\n\t\t{\r\n\t\t\tans = min(ans, ask(rc, mid + 1, r, L, R));\r\n\t\t}\r\n\t\treturn ans;\r\n\t}\r\n\t\r\n\t#undef lc\r\n\t#undef rc\r\n}st;\r\n\r\nint main()\r\n{\r\n\tint T = 1;\r\n\tscanf(\"%d\", &T);\r\n\twhile (T--)\r\n\t{\r\n\t\tscanf(\"%d%s\", &n, s + 1);\r\n\t\tn <<= 1;\r\n\t\tfor (int i = 0; i <= n + 1; i++)\r\n\t\t{\r\n\t\t\tsum[i] = mus[i] = a[i] = b[i] = mx[i] = mn[i] = 0;\r\n\t\t}\r\n\t\tans[0][0] = 0;\r\n\t\tfor (int i = 1; i <= n; i++)\r\n\t\t{\r\n\t\t\tb[i] = (s[i] == '(' ? 1 : -1);\r\n\t\t\tsum[i] = sum[i - 1] + b[i];\r\n\t\t\tif (sum[i] < 0)\r\n\t\t\t{\r\n\t\t\t\ta[++a[0]] = i;\r\n\t\t\t}\r\n\t\t\tmus[n - i + 1] = mus[n - i + 2] + (s[n - i + 1] == '(' ? 1 : -1);\r\n\t\t}\r\n\t\tst.Bld(1, 1, n);\r\n//\t\tprt(sum);\r\n//\t\tprt(mus);\r\n\t\tfor (int i = 1, j = 0; i <= a[0]; i++)\r\n\t\t{\r\n\t\t\tmx[i] = 0;\r\n\t\t\tfor (int k = j + 1; k < a[i]; k++)\r\n\t\t\t{\r\n\t\t\t\tif (sum[k] >= sum[mx[i]])\r\n\t\t\t\t{\r\n\t\t\t\t\tmx[i] = k;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tj = a[i];\r\n\t\t}\r\n\t\tfor (int i = a[0], j = n + 1; i >= 1; i--)\r\n\t\t{\r\n\t\t\tmn[i] = 0;\r\n\t\t\tfor (int k = j; k > a[i]; k--)\r\n\t\t\t{\r\n\t\t\t\tif (mus[k] <= mus[mn[i]])\r\n\t\t\t\t{\r\n\t\t\t\t\tmn[i] = k;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tj = a[i];\r\n\t\t}\r\n\t\tfor (int i = 1; i <= a[0]; i++)\r\n\t\t{\r\n//\t\t\tprintf(\"%d %d %d\\n\", i, mx[i], mn[i]);\r\n\t\t\tint k = i;\r\n\t\t\tfor (int j = i + 1; j <= a[0]; j++)\r\n\t\t\t{\r\n\t\t\t\tint v = st.ask(1, 1, n, a[i], a[j]);\r\n\t\t\t\tif (sum[mx[i]] + v - mus[mn[j]] >= 0)\r\n\t\t\t\t{\r\n\t\t\t\t\tk = j;\r\n\t\t\t\t}\r\n\t\t\t\telse\r\n\t\t\t\t{\r\n\t\t\t\t\tbreak;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tans[++ans[0][0]][0] = (k == i ? a[i] : mx[i] + 1);\r\n\t\t\tans[ans[0][0]][1] = (k == i ? a[i] + 1 : mn[k] - 1);\r\n\t\t\ti = k;\r\n\t\t}\r\n\t\tprintf(\"%d\\n\", ans[0][0]);\r\n\t\tfor (int i = 1; i <= ans[0][0]; i++)\r\n\t\t{\r\n\t\t\tprintf(\"%d %d\\n\", ans[i][0], ans[i][1]);\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}\r\n/*\r\n1\r\n3 14\r\n*/"
+}

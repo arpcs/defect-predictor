@@ -1,0 +1,37 @@
+{
+    "id": 158479790,
+    "contestId": 1685,
+    "creationTimeSeconds": 1653526404,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1685,
+        "index": "C",
+        "name": "Bring Balance",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1685,
+        "members": [
+            {
+                "handle": "enslaved"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1653500100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 26,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 16384000,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#ifdef DEBUG\r\n  #include \"debug.hpp\"\r\n#else\r\n  #define dbg(...) 0\r\n#endif\r\n\r\nclass RMQ {\r\nprivate:\r\n  int depth;\r\n  vector<vector<int>> a;\r\n\r\npublic:\r\n  RMQ(const vector<int>& vals) {\r\n    int n = vals.size();\r\n    depth = 0;\r\n    if (n == 1) {\r\n      a.resize(1);\r\n      a[0] = vals;\r\n      return;\r\n    }\r\n    while ((1 << depth) < n) {\r\n      depth++;\r\n    }\r\n    vector<vector<int>>(depth).swap(a);\r\n    a[0].resize(n);\r\n    for (int i = 0; i < n; ++i) {\r\n      a[0][i] = vals[i];\r\n    }\r\n    for (int j = 1; j < depth; ++j) {\r\n      int l = (1 << j);\r\n      a[j].resize(n+1-l);\r\n      for (int i = 0; (i+l) <= n; ++i) {\r\n\ta[j][i] = min(a[j-1][i], a[j-1][i+l/2]);\r\n      }\r\n    }\r\n  }\r\n\r\n  int get(int left, int right) {\r\n    int l = right - left;\r\n    if (l == 1) return a[0][left];\r\n    int b = std::numeric_limits<int>::digits - __builtin_clz(l - 1);\r\n    return min(a[b][left], a[b][right-(1<<b)]);\r\n  }\r\n};\r\n\r\nvector<pair<int, int>> solve(const string& s) {\r\n  int n = s.size();\r\n  vector<int> a(n);\r\n  for (int i = 0; i < n; ++i) {\r\n    a[i] = 1 - 2 * (s[i] - '(');\r\n  }\r\n  vector<int> bal(n + 1, 0);\r\n  for (int i = 0; i < n; ++i) {\r\n    bal[i + 1] = bal[i] + a[i];\r\n  }\r\n  vector<int> suffix(n + 1, 0);\r\n  for (int i = n - 1; i >= 0; --i) {\r\n    suffix[i] = suffix[i + 1] + a[i];\r\n  }\r\n  RMQ rmq(suffix);\r\n  \r\n  vector<pair<int, int>> ans;\r\n  int l = 0;\r\n  while (l < n) {\r\n    int best = l;\r\n    while ((l < n) && (bal[l] >= 0)) {\r\n      if (bal[l] > bal[best]) {\r\n\tbest = l;\r\n      }\r\n      l++;\r\n    }\r\n    if (l < n) {\r\n      l = best;\r\n      auto is_good_right = [&](int r) -> bool {\r\n\treturn (suffix[r] - rmq.get(l, r + 1)) <= bal[l];\r\n\tint bal2 = bal[l];\r\n\tint len = r - l;\r\n\tfor (int i = 0; i < len; ++i) {\r\n\t  int j = r - 1 - i;\r\n\t  bal2 += a[j];\r\n\t  if (bal2 < 0) {\r\n\t    return false;\r\n\t  }\r\n\t}\r\n\treturn true;\r\n      };\r\n      int r = n;\r\n      while (!is_good_right(r)) r--;\r\n      /*\r\n      if (!is_good_right(n)) {\r\n\tint low = l, high = n;\r\n\tdbg(low, high);\r\n\twhile ((low + 1) < high) {\r\n\t  int mid = (low + high) / 2;\r\n\t  if (is_good_right(mid)) {\r\n\t    low = mid;\r\n\t  }\r\n\t  else {\r\n\t    high = mid;\r\n\t  }\r\n\t}\r\n\tr = low;\r\n\t}*/\r\n      ans.emplace_back(l, r);\r\n      reverse(a.begin() + l, a.begin() + r);\r\n      for (int i = l; l < r; ++l) {\r\n\tbal[i + 1] = bal[i] + a[i];\r\n      }\r\n      l = r;\r\n    }\r\n  }\r\n  return ans;\r\n}\r\n\r\nvoid test_case() {\r\n  int n;\r\n  cin >> n;\r\n  string s;\r\n  cin >> s;\r\n  assert(int(s.size()) == (2 * n));\r\n  vector<pair<int, int>> ans = solve(s);\r\n  int k = ans.size();\r\n  cout << k << '\\n';\r\n  for (int i = 0; i < k; ++i) {\r\n    cout << (ans[i].first + 1) << ' ' << ans[i].second << '\\n';\r\n  }\r\n}\r\n\r\nint main() {\r\n  ios_base::sync_with_stdio(false);\r\n  cin.tie(NULL);\r\n  int t;\r\n  cin >> t;\r\n  while (t--) {\r\n    test_case();\r\n  }\r\n}\r\n"
+}

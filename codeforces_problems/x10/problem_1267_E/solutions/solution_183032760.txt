@@ -1,0 +1,34 @@
+{
+    "id": 183032760,
+    "contestId": 1267,
+    "creationTimeSeconds": 1669646433,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1267,
+        "index": "E",
+        "name": "Elections",
+        "type": "PROGRAMMING",
+        "rating": 1700,
+        "tags": [
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1267,
+        "members": [
+            {
+                "handle": "mfv"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1575183600
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 27,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 512000,
+    "source": "#include <cstdio>\r\n#include <vector>\r\n#include <cassert>\r\n#include <climits>\r\n\r\nstd::vector<int> getResult(std::vector<int> &pro, std::vector<int> &opp) {\r\n    assert(pro.size() == opp.size());\r\n    std::vector<std::vector<int>> maxDiff(1 + pro.size(), std::vector<int>(1 + pro.size(), INT_MIN / 2));\r\n        // maxDiff[number of first polling stations considered][number of canceled] -> max diff (sum of pro) - (sum of opp)\r\n    std::vector<std::vector<bool>> get(1 + pro.size(), std::vector<bool>(1 + pro.size(), false));\r\n        // get[number of first polling stations considered][number of canceled] -> should we get last station for max diff\r\n    maxDiff[0][0] = 0;\r\n    for (int first = 1; first <= (int)pro.size(); first++) {\r\n        for (int canceled = 0; canceled <= first; canceled++) {\r\n            int iPS = first - 1;\r\n            if (maxDiff[first - 1][canceled] + pro[iPS] - opp[iPS] > maxDiff[first][canceled]) {\r\n                maxDiff[first][canceled] = maxDiff[first - 1][canceled] + pro[iPS] - opp[iPS];\r\n                get[first][canceled] = true;\r\n            }\r\n            if (canceled - 1 >= 0 && maxDiff[first - 1][canceled - 1] > maxDiff[first][canceled]) {\r\n                maxDiff[first][canceled] = maxDiff[first - 1][canceled - 1];\r\n                get[first][canceled] = false;\r\n            }\r\n        }\r\n    }\r\n    int bestCanceled = -1;\r\n    for (int canceled = 0; canceled <= (int)pro.size(); canceled++) {\r\n        if (maxDiff[pro.size()][canceled] >= 0) {\r\n            bestCanceled = canceled;\r\n            break;\r\n        }\r\n    }\r\n    assert(bestCanceled != -1);\r\n    std::vector<int> result;\r\n    int first = (int)pro.size();\r\n    int canceled = bestCanceled;\r\n    while (first > 0) {\r\n        if (get[first][canceled]) {\r\n            first--;\r\n        } else {\r\n            first--;\r\n            canceled--;\r\n            result.push_back(first);\r\n        }\r\n    }\r\n    return result;\r\n}\r\n\r\nint main() {\r\n    int nC, nPS; // number of candidates, number of polling stations\r\n    scanf(\"%d %d\", &nC, &nPS);\r\n    std::vector<std::vector<int>> votes(nC, std::vector<int>(nPS)); // votes[cand][polling station] -> number of votes\r\n    for (int iPS = 0; iPS < nPS; iPS++) {\r\n        for (int iC = 0; iC < nC; iC++) {\r\n            scanf(\"%d\", &votes[iC][iPS]);\r\n        }\r\n    }\r\n    std::vector<int> result;\r\n    for (int i = 0; i < nPS; i++) {\r\n        result.push_back(i);\r\n    }\r\n    for (int iC = 0; iC + 1 < nC; iC++) {\r\n        std::vector<int> aResult = getResult(votes[iC], votes[nC - 1]);\r\n        if (aResult.size() < result.size()) {\r\n            result = aResult;\r\n        }\r\n    }\r\n    printf(\"%d\\n\", (int)result.size());\r\n    for (int v : result) {\r\n        printf(\" %d\", v + 1);\r\n    }\r\n    return 0;\r\n}\r\n"
+}
