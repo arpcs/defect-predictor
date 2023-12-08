@@ -1,0 +1,36 @@
+{
+    "id": 169677860,
+    "contestId": 1592,
+    "creationTimeSeconds": 1661500913,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1592,
+        "index": "F1",
+        "name": "Alice and Recoloring 1",
+        "type": "PROGRAMMING",
+        "points": 1750.0,
+        "rating": 2600,
+        "tags": [
+            "constructive algorithms",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1592,
+        "members": [
+            {
+                "handle": "codingwizard24"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1633271700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 67,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 2457600,
+    "source": "// Rishi\r\n// DA\r\n \r\n#include <bits/stdc++.h>\r\n \r\nusing namespace std;\r\n \r\n#define fast ios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0)\r\n#define ll long long\r\n#define ull unsigned long long\r\n#define ld long double\r\n#define pb push_back\r\n#define vll vector<ll>\r\n#define vvll vector<vll>\r\n#define vss vector<string>\r\n#define mll map<ll,ll>\r\n#define msl map<string,ll>\r\n#define mcl map<char,ll>\r\n#define pll pair<ll,ll>\r\n#define sll set<ll>\r\n#define all(v) v.begin(),v.end()\r\n#define input(a,n) for(ll i=0;i<n;i++) cin>>a[i];\r\n#define output(a,n) for(ll i=0;i<n;i++) cout<<a[i]<<\" \";\r\n#define nl cout<<\"\\n\";\r\n#define kill(x) {cout<<x; nl; return;}\r\n#define yes {cout<<\"Yes\"; nl; return;}\r\n#define no {cout<<\"No\"; nl; return;}\r\n#define m1 {cout<<-1; nl; return;}\r\n \r\nconst ll mod = 1000000007;\r\nconst ll inf = (ll)1e18;\r\nconst ll N = (ll)2e5+5;\r\n \r\nll lcm(ll a,ll b)\r\n{\r\n    return (a*b)/__gcd(a,b);\r\n}\r\n \r\nbool sortcol(const vll& v1, const vll& v2)\r\n{\r\n    return true;\r\n}\r\n \r\nbool is_prime(ll n)\r\n{\r\n    if (n == 1)\r\n    return false;\r\n    \r\n    ll i = 2;\r\n    while (i * i <= n)\r\n    {\r\n        if (n % i == 0)\r\n        return false;\r\n        \r\n        i += 1;\r\n    }\r\n    \r\n    return true;\r\n}\r\n \r\nll mod_pow(ll a,ll b,ll M)\r\n{\r\n    if(a == 0) \r\n    return 0;\r\n    \r\n    b %= (M - 1);\r\n    \r\n    ll ans = 1;\r\n    \r\n    while(b)\r\n    {\r\n        if(b&1) \r\n        ans=(ans*a)%M;\r\n        \r\n        a=(a*a)%M;\r\n        b>>=1;\r\n    }\r\n    \r\n    return ans; \r\n}\r\n\r\n// Segment Tree for max in range (l,r) (Reference - D_Rorororobot)\r\nclass segment_tree\r\n{\r\n    public :\r\n    vll seg_tree;\r\n    ll n;\r\n\r\n    void build() \r\n    {\r\n        for(ll i = n - 1; i > 0; --i) \r\n        seg_tree[i] = max(seg_tree[i<<1], seg_tree[i<<1|1]);\r\n    }\r\n\r\n    segment_tree(ll n) : n(n),seg_tree(n<<1,0){};\r\n    \r\n    segment_tree(vll &vec) : n(vec.size()),seg_tree(vec.size()<<1,0)\r\n    {\r\n        for(ll i=0;i<n;i++)\r\n        seg_tree[n+i] = vec[i];\r\n\r\n        build();\r\n    };\r\n\r\n    void modify(ll p, ll value) \r\n    {  \r\n        for(seg_tree[p += n] = value; p > 1; p >>= 1) \r\n        seg_tree[p>>1] = max(seg_tree[p], seg_tree[p^1]);\r\n    }\r\n\r\n    ll query(ll l, ll r) \r\n    {\r\n        r++;\r\n        ll ans = 0;\r\n        for(l += n, r += n; l < r; l >>= 1, r >>= 1) \r\n        {\r\n            if(l&1) \r\n            ans = max(ans,seg_tree[l++]);\r\n\r\n            if(r&1) \r\n            ans = max(ans,seg_tree[--r]);\r\n        }\r\n\r\n        return ans;\r\n    }\r\n};\r\n\r\nvoid solve()\r\n{\r\n    ll n,m; cin>>n>>m;\r\n    vss s(n); input(s,n);\r\n\r\n    vvll v(n,vll(m,0));\r\n    for(ll i=0;i<n;i++)\r\n    {\r\n        for(ll j=0;j<m;j++)\r\n        {\r\n            ll cnt = 0;\r\n            for(ll i1=0;i1<2;i1++)\r\n            {\r\n                for(ll j1=0;j1<2;j1++)\r\n                {\r\n                    ll x = i+i1;\r\n                    ll y = j+j1;\r\n\r\n                    if((x>=0 && x<n) && (y>=0 && y<m) && s[x][y] == 'B')\r\n                    cnt++;\r\n                }\r\n            }\r\n\r\n            v[i][j] = cnt%2;\r\n        }\r\n    }\r\n\r\n    ll ans = 0;\r\n    for(ll i=0;i<n;i++) for(ll j=0;j<m;j++) if(v[i][j]) ans++;\r\n\r\n    for(ll i=0;i<n-1;i++)\r\n    {\r\n        for(ll j=0;j<m-1;j++)\r\n        {\r\n            if(v[i][j] && v[i][m-1] && v[n-1][j] && v[n-1][m-1])\r\n            {\r\n                kill(ans-1);\r\n            }\r\n        }\r\n    }\r\n\r\n    kill(ans);\r\n}\r\n \r\nint main()\r\n{\r\n    fast;\r\n    ll tc=1;\r\n    // cin >> tc;\r\n    for(ll tci=1;tci<=tc;tci++)\r\n    {\r\n        //cout<<\"Case #\"<<tci<<\": \";\r\n        solve();\r\n    }\t\r\n \r\n    return 0;\r\n}"
+}

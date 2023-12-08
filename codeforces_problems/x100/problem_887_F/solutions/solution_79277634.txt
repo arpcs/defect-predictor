@@ -1,0 +1,36 @@
+{
+    "id": 79277634,
+    "contestId": 887,
+    "creationTimeSeconds": 1588860350,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 887,
+        "index": "F",
+        "name": "Row of Models",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2500,
+        "tags": [
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 887,
+        "members": [
+            {
+                "handle": "vipghn2003"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1509725100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 106,
+    "timeConsumedMillis": 529,
+    "memoryConsumedBytes": 29798400,
+    "source": "#include<bits/stdc++.h>\r\n#define fi first\r\n#define se second\r\n#define pii pair<int,int>\r\n#define mp make_pair\r\nusing namespace std;\r\n\r\nconst int N=5e5+5;\r\nconst int inf=2e9;\r\nint n,a[N],k,mn[N];\r\npii ST[4*N];\r\nvector<pii>v[N];\r\n\r\nvoid build(int id,int l,int r)\r\n{\r\n    if(l==r)\r\n    {\r\n        ST[id]=mp(a[l],l);\r\n        return;\r\n    }\r\n    int mid=(l+r)/2;\r\n    build(id*2,l,mid);\r\n    build(id*2+1,mid+1,r);\r\n    ST[id]=min(ST[id*2],ST[id*2+1]);\r\n}\r\n\r\npii get (int id,int l,int r,int L,int R)\r\n{\r\n    if (r<L||R<l) return mp(inf,0);\r\n    if (L<=l&&r<=R) return ST[id];\r\n    int mid=(l+r)/2;\r\n    return min(get (id*2,l,mid,L,R),get (id*2+1,mid+1,r,L,R));\r\n}\r\n\r\nvoid update(int id,int l,int r,int u,int x)\r\n{\r\n    if(r==l&&l==u)\r\n    {\r\n        ST[id].fi=x;\r\n        return;\r\n    }\r\n    if(u>r||u<l) return;\r\n    int mid=(l+r)/2;\r\n    update(id*2,l,mid,u,x);\r\n    update(id*2+1,mid+1,r,u,x);\r\n    ST[id]=min(ST[id*2],ST[id*2+1]);\r\n}\r\n\r\nint main()\r\n{\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n    cin>>n>>k;\r\n    for(int i=1;i<=n;i++) cin>>a[i];\r\n    build(1,1,n);\r\n    int l=0,r;\r\n    for(int i=1;i<=n-k;i++)\r\n    {\r\n        mn[i]=get(1,1,n,i+1,i+k).fi;\r\n        if(a[i]<=mn[i])\r\n        {\r\n            if(!l) l=i;\r\n            r=i;\r\n        }\r\n    }\r\n    if(!l) return cout<<\"YES\",0;\r\n    if(r+1>l+k||r+k+1>n) return cout<<\"NO\",0;\r\n    for(int i=r+1;i<=n-k;i++)\r\n    {\r\n        pii cur=get(1,1,n,i+1,i+k);\r\n        update(1,1,n,cur.se,inf);\r\n        if(a[i]<=get(1,1,n,i+1,i+k).fi) v[cur.se].push_back(mp(a[i],i));\r\n        update(1,1,n,cur.se,cur.fi);\r\n    }\r\n    for(int i=1;i<=n;i++) sort(v[i].rbegin(),v[i].rend());\r\n    for(int i=r+k+1;i<=n;i++)\r\n    {\r\n        if(a[i]>=a[l]) continue;\r\n        for(int j=r+1;j<=l+k;j++)\r\n        {\r\n            while(!v[i].empty()&&v[i].back().se<j) v[i].pop_back();\r\n            if(a[i]>mn[j]&&(v[i].empty()||v[i].back().fi>a[j])) return cout<<\"YES\",0;\r\n        }\r\n    }\r\n    cout<<\"NO\";\r\n}\r\n"
+}

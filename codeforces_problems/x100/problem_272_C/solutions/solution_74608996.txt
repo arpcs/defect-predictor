@@ -1,0 +1,36 @@
+{
+    "id": 74608996,
+    "contestId": 272,
+    "creationTimeSeconds": 1585375118,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 272,
+        "index": "C",
+        "name": "Dima and Staircase",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 1500,
+        "tags": [
+            "data structures",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 272,
+        "members": [
+            {
+                "handle": "Waley"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1360769400
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 466,
+    "memoryConsumedBytes": 7270400,
+    "source": "#include <iostream>\n#include <vector>\n#include <cmath>\n#include <algorithm>\n#include <unordered_set>\n#include <set>\n#include <queue>\n#include <cmath>\n#include <numeric>\n#include <sstream>\n#include <string>\n#include <map>\n#include <unordered_map>\n#include <deque>\n#include <iomanip>\n\n//#include <bits/stdc++.h>\nusing namespace std;\n\nusing ll = long long;\ntemplate<typename T>\nusing v = vector<T>;\n\nv<ll> segmentTree;\nv<ll> toSet;\n\nconst ll neutral = 0;\n\nll combine(ll a, ll b) {\n    return max(a, b);\n}\n\nll build(v<ll>& arr, ll L = 0, ll R = -1, ll i = 1) {\n    if(R == -1) {\n        segmentTree = v<ll>(arr.size() * 4);\n        toSet = v<ll>(arr.size() * 4, -1);\n        R = arr.size();\n    }\n    if(L == R) {\n        return neutral;\n    }\n    if(L + 1 == R) {\n        return segmentTree[i] = arr[L];\n    } else {\n        ll M = (L + R) >> 1;\n        ll P = combine(build(arr, L, M, 2 * i), build(arr, M, R, 2 * i + 1));\n        return segmentTree[i] = P;\n    }\n}\n\nvoid push(ll i) {\n    if(toSet[i] != -1) {\n        segmentTree[2 * i] = segmentTree[2 * i + 1] = toSet[2 * i] = toSet[2 * i + 1] = toSet[i];\n        toSet[i] = -1;\n    }\n}\n\nll getMax(ll L, ll R, ll cL = 0, ll cR = -1, ll i = 1) {\n    if(cR == -1) {\n        cR = segmentTree.size() / 4;\n    }\n    if(cL >= cR) {\n        return neutral;\n    } else if(cL >= L && cR <= R) {\n        if(cL + 1 != cR) {\n            push(i);\n        }\n        return segmentTree[i];\n    } else if(cR <= L || cL >= R) {\n        return neutral;\n    } else {\n        if(cL + 1 != cR) {\n            push(i);\n        }\n        ll cM = (cL + cR) >> 1;\n        ll P = combine(getMax(L, R, cL, cM, 2 * i), getMax(L, R, cM, cR, 2 * i + 1));\n        return P;\n    }\n}\n\nll setRange(ll L, ll R, ll x, ll cL = 0, ll cR = -1, ll i = 1) {\n    if(cR == -1) {\n        cR = segmentTree.size() / 4;\n    }\n    if(cL >= cR) {\n        return neutral;\n    } else if(cL >= L && cR <= R) {\n//            return segmentTree[i] = x;\n        if(cL + 1 != cR) {\n            push(i);\n        }\n        toSet[i] = x;\n        return segmentTree[i] = x;\n    } else if(cR <= L || cL >= R) {\n        if(cL + 1 != cR) {\n            push(i);\n        }\n        return segmentTree[i];\n    } else {\n        ll cM = (cL + cR) >> 1;\n        ll P = combine(setRange(L, R, x, cL, cM, 2 * i), setRange(L, R, x, cM, cR, 2 * i + 1));\n        return segmentTree[i] = P;\n    }\n}\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    cout.tie(nullptr);\n    ll n;\n    cin >> n;\n    v<ll> arr(n);\n    for(ll i = 0; i < n; ++i) {\n        cin >> arr[i];\n    }\n    build(arr);\n    ll m;\n    cin >> m;\n    for(ll i = 0; i < m; ++i) {\n        ll w, h;\n        cin >> w >> h;\n        ll ma = getMax(0, w);\n        ll nMa = ma + h;\n        setRange(0, w, nMa);\n        cout << ma << '\\n';\n    }\n}"
+}

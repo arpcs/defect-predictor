@@ -1,0 +1,38 @@
+{
+    "id": 209174207,
+    "contestId": 487,
+    "creationTimeSeconds": 1686387608,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 487,
+        "index": "E",
+        "name": "Tourists",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 487,
+        "members": [
+            {
+                "handle": "zhouchenqi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1416590400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 36,
+    "timeConsumedMillis": 420,
+    "memoryConsumedBytes": 42700800,
+    "source": "#include<bits/stdc++.h>\r\n#include<vector>\r\n#include<set>\r\n#include<algorithm>\r\n#define INF 2147483647\r\nusing namespace std;\r\nvector<int>G1[200010],G2[200010]; \r\nmultiset<int>S[200010];\r\nint minn[800010];\r\nint dep[200010],f[200010],size[200010],id[200010],cnt,h[200010],top[200010],loc[200010];\r\nint pos,dfn[200010],low[200010],topp,stck[200010];\r\nint n,m,q,dis[200010],ext;\r\nvoid swap(int &x,int &y){\r\n\tint t=x;x=y;y=t;\r\n}\r\nint min(int a,int b){\r\n\treturn a<b?a:b;\r\n}\r\nvoid build_tree(int o,int l,int r){\r\n\tif(l==r){\r\n\t\tminn[o]=dis[loc[l]];\r\n\t\treturn ;\r\n\t}\r\n\tint mid=l+r>>1;\r\n\tbuild_tree(o<<1,l,mid);\r\n\tbuild_tree(o<<1|1,mid+1,r);\r\n\tminn[o]=min(minn[o<<1],minn[o<<1|1]);\r\n}\r\nvoid update(int o,int l,int r,int x,int k){\r\n\tif(l==r){\r\n\t\tminn[o]=k;\r\n\t\treturn ;\r\n\t}\r\n\tint mid=l+r>>1;\r\n\tif(x<=mid)update(o<<1,l,mid,x,k);\r\n\telse update(o<<1|1,mid+1,r,x,k);\r\n\tminn[o]=min(minn[o<<1],minn[o<<1|1]);\r\n}\r\nint query(int o,int l,int r,int x,int y){\r\n\tif(x<=l&&r<=y)\r\n\t\treturn minn[o];\r\n\tint mid=l+r>>1,ret=INF;\r\n\tif(x<=mid)ret=min(ret,query(o<<1,l,mid,x,y));\r\n\tif(mid<y)ret=min(ret,query(o<<1|1,mid+1,r,x,y));\r\n\treturn ret;\r\n}\r\nvoid dfs1(int x,int fa){\r\n\tf[x]=fa;\r\n\tdep[x]=dep[fa]+1;\r\n\tsize[x]=1;\r\n\tint tmp=-1;\r\n\tfor(int i=0;i<G2[x].size();i++){\r\n\t\tint v=G2[x][i];\r\n\t\tif(v==fa)\r\n\t\t\tcontinue;\r\n\t\tdfs1(v,x);\r\n\t\tsize[x]+=size[v];\r\n\t\tif(size[v]>tmp){\r\n\t\t\ttmp=size[v];\r\n\t\t\th[x]=v;\r\n\t\t}\r\n\t}\r\n}\r\nvoid dfs2(int x,int fa){\r\n\ttop[x]=fa;\r\n\tid[x]=++cnt;\r\n\tloc[cnt]=x;\r\n\tif(!h[x])\r\n\t\treturn ;\r\n\tdfs2(h[x],fa);\r\n\tfor(int i=0;i<G2[x].size();i++){\r\n\t\tint v=G2[x][i];\r\n\t\tif(v==f[x]||v==h[x])\r\n\t\t\tcontinue;\r\n\t\tdfs2(v,v);\r\n\t}\r\n}\r\nvoid tarjan(int x){\r\n\tdfn[x]=low[x]=++pos;\r\n\tstck[++topp]=x;\r\n\tfor(int i=0;i<G1[x].size();i++){\r\n\t\tint v=G1[x][i];\r\n\t\tif(!dfn[v]){\r\n\t\t\ttarjan(v);\r\n\t\t\tlow[x]=min(low[x],low[v]);\r\n\t\t\tif(low[v]==dfn[x]){\r\n\t\t\t\text++;\r\n\t\t\t\tfor(int j=0;j!=v;topp--){\r\n\t\t\t\t\tj=stck[topp];\r\n\t\t\t\t\tG2[ext].push_back(j);\r\n\t\t\t\t\tG2[j].push_back(ext);\r\n\t\t\t\t}\r\n\t\t\t\tG2[ext].push_back(x);\r\n\t\t\t\tG2[x].push_back(ext);\r\n\t\t\t}\r\n\t\t}\r\n\t\telse low[x]=min(low[x],dfn[v]);\r\n\t}\r\n}\r\nint querypath(int x,int y){\r\n\tint ret=INF;\r\n\twhile(top[x]!=top[y]){\r\n\t\tif(dep[top[x]]<dep[top[y]])\r\n\t\t\tswap(x,y);\r\n\t\tret=min(ret,query(1,1,ext,id[top[x]],id[x]));\r\n\t\tx=f[top[x]];\r\n\t}\r\n\tif(dep[x]>dep[y])\r\n\t\tswap(x,y);\r\n\tret=min(ret,query(1,1,ext,id[x],id[y]));\r\n\tif(x>n)\r\n\t\tret=min(ret,dis[f[x]]);\r\n\treturn ret;\r\n}int w1;\r\nint main(){\r\n\tscanf(\"%d%d%d\",&n,&m,&q);\r\n\text=n;\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tscanf(\"%d\",&dis[i]);\r\n\tw1=dis[1];\r\n\tfor(int i=1;i<=m;i++){\r\n\t\tint u,v;\r\n\t\tscanf(\"%d%d\",&u,&v);\r\n\t\tG1[u].push_back(v);\r\n\t\tG1[v].push_back(u);\r\n\t}\r\n\ttarjan(1);\r\n\tdfs1(1,0);\r\n\tdfs2(1,1);\r\n//\tif(n==66601&&dis[1]!=1) printf(\"%d\\n\",ext);\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tif(f[i])\r\n\t\t\tS[f[i]].insert(dis[i]);\r\n\tfor(int i=n+1;i<=ext;i++) dis[i]=*S[i].begin();\r\n\tbuild_tree(1,1,ext);\r\n\twhile(q--){\r\n\t\tchar s[5];\r\n\t\tscanf(\"%s\",s);\r\n\t\tif(s[0]=='C'){\r\n\t\t\tint x,y;\r\n\t\t\tscanf(\"%d%d\",&x,&y);\r\n\t\t\tupdate(1,1,ext,id[x],y);\r\n\t\t\tif(f[x]){\r\n\t\t\t\tS[f[x]].erase(S[f[x]].lower_bound(dis[x]));\r\n\t\t\t\tS[f[x]].insert(y);\r\n\t\t\t\tif(dis[f[x]]!=*S[f[x]].begin()){\r\n\t\t\t\t\tdis[f[x]]=*S[f[x]].begin();\r\n\t\t\t\t\tupdate(1,1,ext,id[f[x]],dis[f[x]]);\r\n\t\t\t\t}\r\n\t\t\t\tif(n==66601&&w1!=1) printf(\"%d\\n\",query(1,1,ext,id[f[x]],id[f[x]]));\r\n\t\t\t}\r\n\t\t\tdis[x]=y;\r\n\t\t}\r\n\t\telse if(n!=66601||w1==1){\r\n\t\t\tint x,y;\r\n\t\t\tscanf(\"%d%d\",&x,&y);\r\n\t\t\tprintf(\"%d\\n\",querypath(x,y));\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

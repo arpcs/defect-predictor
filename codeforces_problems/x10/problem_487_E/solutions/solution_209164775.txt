@@ -1,0 +1,38 @@
+{
+    "id": 209164775,
+    "contestId": 487,
+    "creationTimeSeconds": 1686381626,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 487,
+        "index": "E",
+        "name": "Tourists",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 487,
+        "members": [
+            {
+                "handle": "KellyWLJ"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1416590400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 22630400,
+    "source": "// LUOGU_RID: 112432688\n#include<bits/stdc++.h>\r\n#define pb push_back\r\nusing namespace std;\r\n\r\nconst int N = 200010, inf = 1e9;\r\nint n, q, m, a[N], u, v, top[N], cut[N], fa[N], lin[N], dfn[N], idx, stk[N], tt, low[N], cnt, siz[N], col[N], dep[N], mson[N], mn[N << 2];\r\nvector<int> edge[N], tree[N];\r\nchar op;\tmultiset<int> vcc[N];\r\ninline void print(int x)\r\n{\r\n\tif(x / 10)\tprint(x / 10);\r\n\tputchar(x % 10 + '0');\r\n}\r\ninline void tarjan(int x)\r\n{\r\n\tdfn[x] = low[x] = ++cnt, stk[++tt] = x;\r\n\tfor(int y : edge[x])\r\n\t\tif(!dfn[y])\r\n\t\t{\r\n\t\t\ttarjan(y), low[x] = min(low[x], low[y]);\r\n\t\t\tif(low[y] >= dfn[x])\r\n\t\t\t{\r\n\t\t\t\t++idx, cut[idx] = x, tree[idx].pb(x), tree[x].pb(idx), a[idx] = a[y], vcc[idx].insert(a[y]);\r\n\t\t\t\twhile(tt && stk[tt] != y)\r\n\t\t\t\t{\r\n\t\t\t\t\ttree[idx].pb(stk[tt]), tree[stk[tt]].pb(idx), vcc[idx].insert(a[stk[tt]]);\r\n\t\t\t\t\tcol[stk[tt]] = idx, a[idx] = min(a[idx], a[stk[tt]]), --tt;\r\n\t\t\t\t}\r\n\t\t\t\ttree[idx].pb(y), tree[y].pb(idx), col[y] = idx, --tt;\r\n\t\t\t}\r\n\t\t}\r\n\t\telse\tlow[x] = min(low[x], dfn[y]);\r\n}\r\ninline void dfs1(int x, int fath)\r\n{\r\n\tsiz[x] = 1, fa[x] = fath, dep[x] = dep[fath] + 1;\r\n\tfor(int y : tree[x])\r\n\t\tif(y != fath)\r\n\t\t{\r\n\t\t\tdfs1(y, x), siz[x] += siz[y];\r\n\t\t\tif(siz[y] > siz[mson[x]])\tmson[x] = y;\r\n\t\t}\r\n}\r\ninline void dfs2(int x, int tp)\r\n{\r\n\tdfn[x] = ++cnt, lin[cnt] = x, top[x] = tp;\r\n\tif(mson[x])\tdfs2(mson[x], tp);\r\n\tfor(int y : tree[x])\r\n\t\tif(y != fa[x] && y != mson[x])\tdfs2(y, y);\r\n}\r\ninline int lson(int x)\t{return x << 1;}\r\ninline int rson(int x)\t{return x << 1 | 1;}\r\ninline void pushup(int x)\t{mn[x] = min(mn[lson(x)], mn[rson(x)]);}\r\ninline void build(int l, int r, int p)\r\n{\r\n\tif(l == r)\t{mn[p] = a[lin[l]];\treturn;}\r\n\tint mid = (l + r) >> 1;\r\n\tbuild(l, mid, lson(p)), build(mid + 1, r, rson(p));\r\n\tpushup(p);\r\n}\r\ninline void update(int id, int val, int l, int r, int p)\r\n{\r\n\tif(l == r)\t{mn[p] = val;\treturn;}\r\n\tint mid = (l + r) >> 1;\r\n\tif(mid >= id)\tupdate(id, val, l, mid, lson(p));\r\n\telse\tupdate(id, val, mid + 1, r, rson(p));\r\n\tpushup(p); \r\n}\r\ninline int query(int l, int r, int nl, int nr, int p)\r\n{\r\n\tif(l <= nl && nr <= r)\treturn mn[p];\r\n\tint mid = (nl + nr) >> 1, res = inf;\r\n\tif(mid >= l)\tres = min(res, query(l, r, nl, mid, lson(p)));\r\n\tif(mid < r)\tres = min(res, query(l, r, mid + 1, nr, rson(p)));\r\n\treturn res;\r\n}\r\ninline int ask(int x, int y)\r\n{\r\n\tint res = inf;\r\n\twhile(top[x] != top[y])\r\n\t{\r\n\t\tif(dep[top[x]] < dep[top[y]])\tswap(x, y);\r\n\t\tres = min(res, query(dfn[top[x]], dfn[x], 1, idx, 1));\r\n\t\tx = fa[top[x]];\r\n\t}\r\n\tif(dfn[x] > dfn[y])\tswap(x, y);\r\n\tif(x > n)\tres = min(res, a[cut[x]]);\r\n\treturn min(res, query(dfn[x], dfn[y], 1, idx, 1));\r\n}\r\nint main()\r\n{\r\n\tcin >> n >> m >> q, idx = n;\r\n\tfor(int i = 1; i <= n; ++i)\tcin >> a[i];\r\n\tfor(int i = 1; i <= m; ++i)\r\n\t{\r\n\t\tcin >> u >> v;\r\n\t\tedge[u].pb(v), edge[v].pb(u);\r\n\t}\r\n\ttarjan(1);\r\n\tmemset(dfn, 0, sizeof(dfn)), cnt = 0;\r\n\tdfs1(1, 0), dfs2(1, 1);\r\n\tbuild(1, idx, 1);\r\n\tfor(int i = 1; i <= q; ++i)\r\n\t{\r\n\t\tcin >> op >> u >> v;\r\n\t\tif(op == 'C')\t\r\n\t\t{\r\n\t\t\tif(col[u])\r\n\t\t\t\tvcc[col[u]].erase(vcc[col[u]].find(a[u])), vcc[col[u]].insert(v), update(dfn[col[u]], v, 1, idx, 1);\r\n\t\t\tupdate(dfn[u], v, 1, idx, 1), a[u] = v;\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tif(u == v)\tprint(a[u]), putchar('\\n');\r\n\t\t\telse if(col[u] == col[v] && col[u])\tprint(min(a[cut[col[u]]], *vcc[col[u]].begin())), putchar('\\n');\r\n\t\t\telse\tprint(ask(u, v)), putchar('\\n');\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}"
+}

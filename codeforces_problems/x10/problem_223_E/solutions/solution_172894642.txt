@@ -1,0 +1,37 @@
+{
+    "id": 172894642,
+    "contestId": 223,
+    "creationTimeSeconds": 1663727990,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 223,
+        "index": "E",
+        "name": "Planar Graph",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "flows",
+            "geometry",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 223,
+        "members": [
+            {
+                "handle": "yjt1799067408"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1347809400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 109,
+    "memoryConsumedBytes": 24883200,
+    "source": "#include<algorithm>\r\n#include<iostream>\r\n#include<cstdio>\r\n#include<vector>\r\n#define ll long long\r\nusing namespace std;\r\nnamespace shik{\r\n\tconst int N=2e5+5;\r\n\tstruct infor{\r\n\t\tint x,rev,bel,id;\r\n\t};\r\n\tvector<infor>g[N];\r\n\tstruct vec{\r\n\t\tint x,y;\r\n\t\tvec operator-(const vec b)const{return (vec){x-b.x,y-b.y};}\r\n\t\tll operator*(const vec b)const{return 1ll*x*b.y-1ll*y*b.x;}\r\n\t}p[N],p0;\r\n\tstruct edge{\r\n\t\tint x,y,z;\r\n\t}e[N];\r\n\tint k[N],val[N],fa[N],si[N],a[N];\r\n\tint tot=0,su=0,root,cnt,E,tot2=0;\r\n\tbool usd[N];\r\n\tinline char gc()\r\n\t{\r\n\t\tstatic char buf[1<<16],*S,*T;\r\n\t\tif(S==T)\r\n\t\t{\r\n\t\t\tT=(S=buf)+fread(buf,1,1<<16,stdin);\r\n\t\t\tif(S==T)return EOF;\r\n\t\t}\r\n\t\treturn *(S++);\r\n\t}\r\n\t#define getchar gc\r\n\tinline ll read()\r\n\t{\r\n\t\tchar h=getchar();\r\n\t\tll y=0;int q=1;\r\n\t\twhile(h<'0'||h>'9'){if(h=='-')q=-1;h=getchar();}\r\n\t\twhile(h>='0'&&h<='9')y=y*10+h-'0',h=getchar();\r\n\t\treturn y*q;\r\n\t}\r\n\tbool cmp(infor x,infor y)\r\n\t{\r\n\t\tvec a=p[x.x]-p0,b=p[y.x]-p0;\r\n\t\tif((a.y>=0)!=(b.y>=0))return a.y>=0;\r\n\t\tif(a.y==0&&b.y==0)return a.x>b.x;\r\n\t\treturn a*b>0;\r\n\t}\r\n\tinline void work(int st,infor &v)\r\n\t{\r\n\t\tv.bel=++tot;val[tot]++;\r\n\t\tint x=v.x,res;ll s=0;infor *la=&v;\r\n\t\twhile(x!=st)\r\n\t\t{\r\n\t\t\tla=&g[x][(la->rev==g[x].size()-1)?0:la->rev+1];\r\n\t\t\tres=x,x=la->x;la->bel=tot;val[tot]++;s+=(p[x]-p[st])*(p[res]-p[st]);\r\n\t\t}\r\n\t\tif(s<0)root=tot;\r\n\t}\r\n\tinline void add(int a,int b,int c){e[++su]=(edge){k[a],b,c};k[a]=su;}\r\n\tvoid dfs(int x)\r\n\t{\r\n\t\tsi[x]=1;\r\n\t\tfor(int i=k[x];i;i=e[i].x)if(!si[e[i].y])fa[e[i].y]=x,dfs(e[i].y),val[x]+=val[e[i].y],si[x]+=si[e[i].y],usd[e[i].z]=1;\r\n\t}\r\n\tinline void calc(int x,int y)\r\n\t{\r\n\t\tp0=p[x];\r\n\t\tinfor res=g[x][lower_bound(g[x].begin(),g[x].end(),(infor){y},cmp)-g[x].begin()],res2=g[y][res.rev];\r\n\t\tif(!usd[res.id]&&!usd[res2.id])return;\r\n\t\tint a=res.bel,b=res2.bel;\r\n\t\tif(a==fa[b])cnt+=si[b],E+=val[b];\r\n\t\telse cnt-=si[a],E-=val[a];\r\n\t}\r\n\tint main()\r\n\t{\r\n\t\tint n=read(),m=read();\r\n\t\tfor(int a,b,i=1;i<=m;i++)a=read(),b=read(),g[a].push_back((infor){b}),g[b].push_back((infor){a});\r\n\t\tfor(int i=1;i<=n;i++)p[i].x=read(),p[i].y=read();\r\n\t\tfor(int i=1;i<=n;i++)p0=p[i],sort(g[i].begin(),g[i].end(),cmp);\r\n\t\tfor(int i=1;i<=n;i++)\r\n\t\tfor(int res,j=0;j<g[i].size();j++)res=g[i][j].x,p0=p[res],g[i][j].rev=lower_bound(g[res].begin(),g[res].end(),(infor){i},cmp)-g[res].begin();\r\n\t\tfor(int i=1;i<=n;i++)\r\n\t\tfor(int j=0;j<g[i].size();j++)if(!g[i][j].bel)work(i,g[i][j]);\r\n\t\tfor(int i=1;i<=n;i++)\r\n\t\tfor(int j=0;j<g[i].size();j++)add(g[i][j].bel,g[g[i][j].x][g[i][j].rev].bel,(g[i][j].id=++tot2));\r\n\t\tdfs(root);\r\n\t\tint t=read();\r\n\t\twhile(t--)\r\n\t\t{\r\n\t\t\tint s=read();cnt=E=0;\r\n\t\t\tfor(int i=1;i<=s;i++)a[i]=read();\r\n\t\t\tfor(int i=1;i<s;i++)calc(a[i],a[i+1]);\r\n\t\t\tcalc(a[s],a[1]);\r\n\t\t\tif(cnt<0)cnt=-cnt,E=-E;\r\n\t\t\tE+=s;E>>=1;\r\n\t\t\tcout<<(E-cnt+1)<<\"\\n\"; \r\n\t\t}\r\n\t\treturn 0;\r\n\t}\r\n}\r\nint main(){return shik::main();}"
+}

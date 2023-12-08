@@ -1,0 +1,36 @@
+{
+    "id": 222872360,
+    "contestId": 237,
+    "creationTimeSeconds": 1694422244,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 237,
+        "index": "E",
+        "name": "Build String",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2000,
+        "tags": [
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 237,
+        "members": [
+            {
+                "handle": "racccccoon"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1351179000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 9,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int maxn=110,inf=0x3f3f3f3f,maxv=150;\r\nint n;char tmp[maxn],t[maxn];int tlen;\r\nint num[maxn][30],w[maxn],a[maxn],id_s[maxn],id_c[30];\r\n\r\nstruct Stream\r\n{\r\n    int idc,s,t;\r\n    struct edge{int to,nxt,c,w;};\r\n    edge e[maxv];int head[maxv],cur[maxv],tot=1;\r\n    int dis[maxv];bool vis[maxn];queue<int>q;\r\n    void add(int u,int v,int c,int w)\r\n    {\r\n        e[++tot]={v,head[u],c,w};head[u]=tot;\r\n    }\r\n    void ade(int u,int v,int c,int w)\r\n    {\r\n        add(u,v,c,w);add(v,u,0,-w);\r\n        // printf(\"%d  %d  %d %d\\n\",u,v,c,w);\r\n    }\r\n    bool SPFA()\r\n    {\r\n        memset(dis,0x3f,sizeof(dis));\r\n        memset(vis,0,sizeof(vis));\r\n        q.push(s);dis[s]=0;vis[s]=1;\r\n        while(!q.empty())\r\n        {\r\n            int u=q.front();q.pop();vis[u]=0;\r\n            // printf(\"sp:%d\\n\",u);\r\n            for(int i=head[u];i;i=e[i].nxt)\r\n            {\r\n                int v=e[i].to,c=e[i].c,w=e[i].w;\r\n                if(c&&dis[v]>dis[u]+w)\r\n                {\r\n                    // printf(\"--%d->%d  %d\\n\",u,v,c);\r\n                    dis[v]=dis[u]+w;\r\n                    if(!vis[v])q.push(v),vis[v]=1;\r\n                }\r\n            }\r\n        }\r\n        // cout<<dis[t]<<endl;\r\n        // cout<<vis[t]<<endl;\r\n        return dis[t]!=inf;\r\n    }\r\n    int dfs(int u,int flow)\r\n    {\r\n        // printf(\"dfs:%d\\n\",u);\r\n        if(u==t)return flow;int res=0;\r\n        vis[u]=1;//\u653e\u5728 return \u4e4b\u540e\r\n        for(int &i=cur[u];i;i=e[i].nxt)\r\n        {\r\n            int v=e[i].to,c=min(e[i].c,flow),w=e[i].w;\r\n            if(!vis[v]&&c&&dis[v]==dis[u]+w)\r\n            {\r\n                int tmp=dfs(v,c);\r\n                res+=tmp,flow-=tmp;\r\n                e[i].c-=tmp,e[i^1].c+=tmp;\r\n            }\r\n            if(!flow)break;\r\n        }\r\n        vis[u]=0;\r\n        return res;\r\n    }\r\n    int Dinic()\r\n    {\r\n        int sumflow=0;\r\n        int res=0;\r\n        while(SPFA())\r\n        {\r\n            // memcpy(cur,head,sizeof(cur));\r\n            for(int i=1;i<=idc;i++)cur[i]=head[i];\r\n            int tmp;while(tmp=dfs(s,inf))res+=tmp*dis[t],sumflow+=tmp;//cout<<\"flow:\"<<tmp<<endl;\r\n        }\r\n        // cout<<sumflow<<endl;\r\n        return (sumflow==tlen)?res:-1;\r\n    }\r\n}f;\r\n\r\nint main()\r\n{\r\n    scanf(\"%s\",t);tlen=strlen(t);\r\n    for(int i=0;i<tlen;i++)\r\n        num[0][t[i]-'a']++;\r\n    scanf(\"%d\",&n);\r\n\r\n    for(int i=1;i<=n;i++)id_s[i]=++f.idc,w[i]=i;\r\n    for(int i=0;i<26;i++)id_c[i]=++f.idc;\r\n    for(int i=1;i<=n;i++)\r\n    {\r\n        scanf(\"%s\",tmp);int len=strlen(tmp);\r\n        for(int j=0;j<len;j++)\r\n        {\r\n            num[i][tmp[j]-'a']++;\r\n        }\r\n        scanf(\"%d\",&a[i]);\r\n    }\r\n\r\n    for(int i=1;i<=n;i++)\r\n    {\r\n        for(int j=0;j<26;j++)\r\n        {\r\n            if(num[i][j])f.ade(id_s[i],id_c[j],num[i][j],w[i]);\r\n        }\r\n    }\r\n    f.s=++f.idc,f.t=++f.idc;\r\n    for(int i=1;i<=n;i++)\r\n        f.ade(f.s,id_s[i],a[i],0);//cout<<a[i]<<endl;\r\n    for(int i=0;i<26;i++)\r\n        if(num[0][i])f.ade(id_c[i],f.t,num[0][i],0);//printf(\"---%d\\n\",num[0][i]);\r\n    int ans=f.Dinic();\r\n    printf(\"%d\\n\",ans);\r\n    // cout<<tlen<<endl;\r\n    return 0;\r\n}"
+}

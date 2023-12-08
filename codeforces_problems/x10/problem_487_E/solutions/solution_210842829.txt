@@ -1,0 +1,38 @@
+{
+    "id": 210842829,
+    "contestId": 487,
+    "creationTimeSeconds": 1687594502,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 487,
+        "index": "E",
+        "name": "Tourists",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 487,
+        "members": [
+            {
+                "handle": "bkifhr10"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1416590400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 1231,
+    "memoryConsumedBytes": 39936000,
+    "source": "#include <iostream>\n#include <cstring>\n#include <stack>\n#include <vector>\n#include <set>\n#include <algorithm>\nusing namespace std;\nconst int inf=0x3f3f3f3f;\nconst int maxn=200005;\nint n,m,q,N,w[maxn];\nint low[maxn],pre[maxn],dfn;\nstack<int>sta;\nvector<int>G[maxn],G2[maxn];\nmultiset<int>s[maxn];\n\nvoid tarjan(int u,int fa){\n    low[u]=pre[u]=++dfn;\n    sta.push(u);\n    for(int v:G[u])if(v!=fa){\n        if(!pre[v]){\n            tarjan(v,u);\n            low[u]=min(low[u],low[v]);\n            if(low[v]>=pre[u]){\n                N++;\n                for(;;){\n                    int x=sta.top();sta.pop();\n                    G2[N].push_back(x);\n                    G2[x].push_back(N);\n                    if(x==v)break;\n                }\n                G2[N].push_back(u);\n                G2[u].push_back(N);\n            }\n        }else low[u]=min(low[u],pre[v]);\n    }\n}\n\nint dep[maxn],pa[maxn],siz[maxn],son[maxn],top[maxn],id[maxn];\nvoid dfs1(int u,int fa){\n    dep[u]=dep[fa]+1;pa[u]=fa;\n    siz[u]=1;son[u]=0;\n    for(int v:G2[u])if(v!=fa){\n        dfs1(v,u);\n        siz[u]+=siz[v];\n        if(u>n)s[u-n].insert(w[v]);\n        if(siz[v]>siz[son[u]])son[u]=v;\n    }\n}\nvoid dfs2(int u,int r){\n    id[u]=++dfn;top[u]=r;\n    if(son[u])dfs2(son[u],r);\n    for(int v:G2[u])if(v!=pa[u]&&v!=son[u])\n        dfs2(v,v);\n}\n\nint minv[524300];\nvoid update(int o,int L,int R,int q,int v){\n    if(L==R){minv[o]=v;return;}\n    int M=(L+R)>>1;\n    if(q<=M)update(o<<1,L,M,q,v);\n    else update(o<<1|1,M+1,R,q,v);\n    minv[o]=min(minv[o<<1],minv[o<<1|1]);\n}\nint query(int o,int L,int R,int ql,int qr){\n    if(ql<=L&&R<=qr)return minv[o];\n    int M=(L+R)>>1,ans=inf;\n    if(ql<=M)ans=min(ans,query(o<<1,L,M,ql,qr));\n    if(M<qr)ans=min(ans,query(o<<1|1,M+1,R,ql,qr));\n    return ans;\n}\nint query(int x,int y){\n    int ans=inf;\n    while(top[x]!=top[y]){\n        if(dep[top[x]]>dep[top[y]])swap(x,y);\n        ans=min(ans,query(1,1,N,id[top[y]],id[y]));\n        y=pa[top[y]];\n    }\n    if(dep[x]>dep[y])swap(x,y);\n    ans=min(ans,query(1,1,N,id[x],id[y]));\n    if(x>n)ans=min(ans,query(1,1,N,id[pa[x]],id[pa[x]]));\n    return ans;\n}\n\nint main(){\n    cin>>n>>m>>q;N=n;\n    for(int i=1;i<=n;i++)cin>>w[i];\n    for(int i=1,a,b;i<=m;i++){\n        cin>>a>>b;\n        G[a].push_back(b);\n        G[b].push_back(a);\n    }\n    tarjan(1,0);\n    dfs1(1,0);\n    dfn=0;dfs2(1,1);\n    for(int i=1;i<=n;i++)\n        update(1,1,N,id[i],w[i]);\n    for(int i=n+1;i<=N;i++)\n        update(1,1,N,id[i],*s[i-n].begin());\n    char typ;\n    for(int a,b;q--;){\n        cin>>typ>>a>>b;\n        if(typ=='A'){\n            cout<<query(a,b)<<endl;\n        }else if(typ=='C'){\n            if(!pa[a]){\n                w[a]=b;\n                update(1,1,N,id[a],b);\n                continue;\n            }\n            int p=pa[a]-n;\n            auto it=s[p].find(w[a]);s[p].erase(it);\n            w[a]=b;\n            s[p].insert(b);\n            update(1,1,N,id[a],b);\n            update(1,1,N,id[pa[a]],*s[p].begin());\n        }\n    }\n    return 0;\n}\n\t\t\t\t\t\t\t    \t\t  \t\t\t\t \t \t \t \t\t\t \t"
+}

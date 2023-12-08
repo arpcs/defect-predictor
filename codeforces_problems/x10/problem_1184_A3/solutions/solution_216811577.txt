@@ -1,0 +1,36 @@
+{
+    "id": 216811577,
+    "contestId": 1184,
+    "creationTimeSeconds": 1690962069,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1184,
+        "index": "A3",
+        "name": "Heidi Learns Hashing (Hard)",
+        "type": "PROGRAMMING",
+        "rating": 3100,
+        "tags": [
+            "fft",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1184,
+        "members": [
+            {
+                "handle": "dongsihan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1562483100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 607,
+    "memoryConsumedBytes": 30924800,
+    "source": "// LUOGU_RID: 118616046\n#include<cstdio>\r\n#include<algorithm>\r\ntypedef unsigned long long ull;\r\nconst int N=1<<18;\r\nconst int MOD[10]={100003,100019,100043,100057,100069,100103,100109,100129,100151},PR[10]={2,2,2,6,10,10,5,2,11,7};\r\nconst int MOD1=998244353,MOD2=469762049,MOD3=167772161,G=3;\r\nconst int INV1=(MOD1+1)/3,INV2=(MOD2+1)/3,INV3=(MOD3+1)/3;\r\ninline ull ksm(ull b,int p,int m)\r\n{\r\n\tull res=1;\r\n\tfor(;p;p>>=1,b=b*b%m) if(p&1) (res*=b)%=m;\r\n\treturn res;\r\n}\r\n__int128 X=__int128(ksm((ull)MOD2*MOD3%MOD1,MOD1-2,MOD1))*MOD2*MOD3,Y=__int128(ksm((ull)MOD1*MOD3%MOD2,MOD2-2,MOD2))*MOD1*MOD3,Z=__int128(ksm((ull)MOD1*MOD2%MOD3,MOD3-2,MOD3))*MOD1*MOD2;\r\nconst __int128 W=__int128(MOD1)*MOD2*MOD3;\r\nstruct Node\r\n{\r\n\tull a,b,c;\r\n\tinline Node operator + (const Node &x)const {return (Node){a+x.a,b+x.b,c+x.c};}\r\n\tinline Node operator - (const Node &x)const {return (Node){a+MOD1-x.a,b+MOD2-x.b,c+MOD3-x.c};}\r\n\tinline Node operator * (const Node &x)const {return (Node){a*x.a%MOD1,b*x.b%MOD2,c*x.c%MOD3};}\r\n\tinline __int128 Get(){return (a*X+b*Y+c*Z)%W;}\r\n}P1[N],P2[N],f[N],g[N];\r\ninline Node Conv(ull x){return (Node){x%MOD1,x%MOD2,x%MOD3};}\r\nint rev[N];\r\ninline void NTT(Node *x,int l,int t)\r\n{\r\n\tfor(int i=0;i<l;++i) if(i<rev[i]) std::swap(x[i],x[rev[i]]);\r\n\tNode *P=(t==1)?P1:P2;\r\n\tfor(int i=2;i<=l;i<<=1)\r\n\t{\r\n\t\tfor(int j=0;j<l;j+=i)\r\n\t\t\tfor(int k=0;k<(i>>1);++k)\r\n\t\t\t{\r\n\t\t\t\tNode z=x[j+k+(i>>1)]*P[k+(i>>1)];\r\n\t\t\t\tx[j+k+(i>>1)]=x[j+k]-z,x[j+k]=x[j+k]+z;\r\n\t\t\t}\r\n\t\tif(i==(1<<12)||i==l) for(int j=0;j<l;++j) x[j].a%=MOD1,x[j].b%=MOD2,x[j].c%=MOD3;\r\n\t}\r\n\tif(t==-1)\r\n\t{\r\n\t\tNode inv;\r\n\t\tinv.a=ksm(l,MOD1-2,MOD1),inv.b=ksm(l,MOD2-2,MOD2),inv.c=ksm(l,MOD3-2,MOD3);\r\n\t\tfor(int i=0;i<l;++i) x[i]=x[i]*inv;\r\n\t}\r\n}\r\nchar a[N],b[N];\r\nint n,m;\r\null k[N],ans[N];\r\nint main()\r\n{\r\n\tscanf(\"%d%d%s%s\",&n,&m,a,b);\r\n\tfor(int i=1;i<N;++i) rev[i]=(rev[i>>1]>>1)|((i&1)?(N>>1):0);\r\n\tfor(int i=2;i<=N;i<<=1)\r\n\t{\r\n\t\tNode p,q,r=(Node){1,1,1},s=(Node){1,1,1};\r\n\t\tp.a=ksm(G,(MOD1-1)/i,MOD1),p.b=ksm(G,(MOD2-1)/i,MOD2),p.c=ksm(G,(MOD3-1)/i,MOD3);\r\n\t\tq.a=ksm(INV1,(MOD1-1)/i,MOD1),q.b=ksm(INV2,(MOD2-1)/i,MOD2),q.c=ksm(INV3,(MOD3-1)/i,MOD3);\r\n\t\tfor(int j=i>>1;j<i;++j,r=r*p,s=s*q) P1[j]=r,P2[j]=s;\r\n\t}\r\n\tfor(int T=0;T<10;++T)\r\n\t{\r\n\t\tull p=1,q=1,inv=ksm(PR[T],MOD[T]-2,MOD[T]);\r\n\t\tfor(int i=0;i<n+MOD[T];++i) f[i]=Conv(p),p=p*q%MOD[T],q=q*PR[T]%MOD[T];\r\n\t\tp=q=1;\r\n\t\tfor(int i=0;i<n;++i) g[i]=Conv((a[i]+MOD[T]-b[i])*p%MOD[T]),p=p*q%MOD[T],q=q*inv%MOD[T];\r\n\t\tfor(int i=n+MOD[T];i<N;++i) f[i].a=f[i].b=f[i].c=0;\r\n\t\tfor(int i=n;i<N;++i) g[i].a=g[i].b=g[i].c=0;\r\n\t\tstd::reverse(g,g+n);\r\n\t\tNTT(f,N,1),NTT(g,N,1);\r\n\t\tfor(int i=0;i<N;++i) f[i]=f[i]*g[i];\r\n\t\tNTT(f,N,-1);\r\n\t\tull cur=1;\r\n\t\tfor(int i=1;i<MOD[T];++i)\r\n\t\t{\r\n\t\t\tcur=cur*PR[T]%MOD[T];\r\n\t\t\tif(2<=cur&&int(cur)<=MOD[T]-2&&f[n-1+i].Get()%MOD[T]==0) return printf(\"%d %llu\\n\",MOD[T],cur),0;\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}"
+}

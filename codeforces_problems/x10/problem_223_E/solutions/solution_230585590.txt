@@ -1,0 +1,37 @@
+{
+    "id": 230585590,
+    "contestId": 223,
+    "creationTimeSeconds": 1698688764,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 223,
+        "index": "E",
+        "name": "Planar Graph",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "flows",
+            "geometry",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 223,
+        "members": [
+            {
+                "handle": "memset0c"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1347809400
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 7372800,
+    "source": "#include<bits/stdc++.h>\ntemplate<class T> inline void read(T &x){\n\tx=0; register char c=getchar(); register bool f=0;\n\twhile(!isdigit(c))f^=c=='-',c=getchar();\n\twhile(isdigit(c))x=x*10+c-'0',c=getchar(); if(f)x=-x;\n}\ntemplate<class T> inline void print(T x){\n\tif(x<0)putchar('-'),x=-x;\n\tif(x>9)print(x/10); putchar(x%10+'0');\n}\ntemplate<class T> inline void print(T x,char c){print(x),putchar(c);}\nconst int N=1e5+10;\nint n,m,vis[N];\nstd::vector<int> G[N],f[N],s[N];\nstd::map<int,int> F[N];\nstruct node{\n\tint x,y;\n\tinline node operator-(const node &rhs)const{return node{x-rhs.x,y-rhs.y};}\n\tinline bool operator<(const node &rhs)const{return atan2(y,x)<atan2(rhs.y,rhs.x);}\n\tinline long long operator*(const node &rhs)const{return (long long)x*rhs.y-(long long)y*rhs.x;}\n}a[N];\ninline int calc(int u,int l,int r){\n\tl=F[u][l],r=F[u][r];\n\t// printf(\"calc %d %d %d [%d] => %d\\n\",u,l,r,G[u].size(),s[u][r]-(l?s[u][l-1]:0)+(l<=r?0:s[u].back()));\n\treturn s[u][r]-(l?s[u][l-1]:0)+(l<=r?0:s[u].back());\n}\nvoid dfs(int u){\n\tint i,j,v;\n\tvis[u]=1,f[u].resize(G[u].size());\n\tfor(i=0;i<G[u].size();i++)if(!vis[v=G[u][i]]){\n\t\tdfs(v),f[u][i]=1;\n\t\tfor(j=0;j<G[v].size();j++)f[u][i]+=f[v][j];\n\t\tfor(j=0;j<G[v].size();j++)if(G[v][j]==u)f[v][j]=-f[u][i];\n\t}\n}\nint main(){\n#ifdef memset0\n\tfreopen(\"1.in\",\"r\",stdin);\n#endif\n\tint i,j,t,k,p=1,u,v,q,ans; std::vector<int> vec;\n\tread(n),read(m);\n\tfor(i=1;i<=m;i++)read(u),read(v),G[u].push_back(v),G[v].push_back(u);\n\tfor(i=1;i<=n;i++)read(a[i].x),read(a[i].y);\n\tfor(i=1;i<=n;i++)if(a[i].x<a[p].x||(a[i].x==a[p].x&&a[i].y<a[p].y))p=i;\n\tG[0].push_back(p),G[p].push_back(0),a[0].x=a[0].y=-1e9-10;\n\tfor(i=0;i<=n;i++){\n\t\tstd::vector<std::pair<node,int>> e(G[i].size());\n\t\tfor(j=0;j<e.size();j++)e[j]=std::make_pair(a[G[i][j]]-a[i],G[i][j]);\n\t\tfor(std::sort(e.begin(),e.end()),j=0;j<e.size();j++)G[i][j]=e[j].second,F[i][G[i][j]]=j;\n\t}\n\tdfs(0);\n\tfor(i=0;i<=n;i++)for(s[i].resize(G[i].size()),s[i][0]=f[i][0],j=1;j<G[i].size();j++)s[i][j]=s[i][j-1]+f[i][j];\n\t// for(i=1;i<=n;i++)for(j=0;j<G[i].size();j++)printf(\"%d->%d:%d\\n\",i,G[i][j],f[i][j]);\n\tfor(read(q),t=1;t<=q;t++){\n\t\tfor(read(k),vec.resize(k),i=0;i<k;i++)read(vec[i]);\n\t\tfor(p=0,i=0;i<k;i++)if(a[vec[i]].x<a[p].x||(a[vec[i]].x==a[vec[p]].x&&a[vec[i]].y<a[vec[p]].y))p=i;\n\t\tif((a[vec[(p+1)%k]]-a[vec[p]])*(a[vec[p]]-a[vec[(p+k-1)%k]])>0)std::reverse(vec.begin(),vec.end());\n\t\tans=calc(vec[0],vec[k-1],vec[1])+calc(vec[k-1],vec[k-2],vec[0]);\n\t\tfor(j=1;j+1<vec.size();j++)ans+=calc(vec[j],vec[j-1],vec[j+1]);\n\t\tprintf(\"%d\\n\",-ans);\n\t}\n}"
+}

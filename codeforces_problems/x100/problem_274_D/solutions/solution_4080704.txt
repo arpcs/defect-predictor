@@ -1,0 +1,38 @@
+{
+    "id": 4080704,
+    "contestId": 274,
+    "creationTimeSeconds": 1373975855,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 274,
+        "index": "D",
+        "name": "Lovely Matrix",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 274,
+        "members": [
+            {
+                "handle": "Dylan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1361374200
+    },
+    "programmingLanguage": "Java 7",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 39,
+    "timeConsumedMillis": 625,
+    "memoryConsumedBytes": 5734400,
+    "source": "import java.util.Arrays;\r\nimport java.util.LinkedList;\r\nimport java.util.Scanner;\r\n\r\n/**\r\n * Created with IntelliJ IDEA.\r\n * Author   : Dylan\r\n * Date     : 2013-07-16\r\n * Time     : 14:42\r\n * Project  : Lovely Matrix\r\n */\r\npublic class Main {\r\n    public static void main(String[] args) {\r\n        Scanner in = new Scanner(System.in);\r\n        int n = in.nextInt();\r\n        int m = in.nextInt();\r\n\r\n        Entry[] a = new Entry[m];\r\n        Node[] gra = new Node[2 * m];\r\n        for (int i = 0; i < m; i++) {\r\n            gra[i] = new Node(i);\r\n            a[i] = new Entry(-1, i);\r\n        }\r\n        int extra = 0;\r\n        for (int i = 0; i < n; i++) {\r\n            int t, cnt = 0;\r\n            for (int j = 0; j < m; j++) {\r\n\r\n                t = in.nextInt();\r\n                if (t == -1) continue;\r\n                a[cnt++] = new Entry(t, j);\r\n\r\n                /*\r\n                a[cnt].num = t;\r\n                a[cnt].column = j;\r\n                cnt++;\r\n                */\r\n\r\n                /*\r\n                a[j].num = in.nextInt();\r\n                a[j].column = j;\r\n                if (a[j].num == -1) cnt++;\r\n                */\r\n            }\r\n            Arrays.sort(a, 0, cnt);\r\n            int k = 1, p;\r\n            for (int j = 0; j < cnt; j++) {\r\n                while (k < cnt && a[k].num == a[j].num) {\r\n                    k++;\r\n                }\r\n                p = k;\r\n                while (p < cnt && a[p].num == a[k].num) {\r\n                    p++;\r\n                }\r\n\r\n                if (k - j > 2 && p - k > 2) {\r\n                    gra[m + extra] = new Node(m + extra);\r\n                    for (int u = j; u < k; u++) {\r\n                        gra[a[u].column].addEdge(gra[m + extra]);\r\n                        gra[m + extra].incInDegree();\r\n                    }\r\n                    for (int v = k; v < p; v++) {\r\n                        gra[m + extra].addEdge(gra[a[v].column]);\r\n                        gra[a[v].column].incInDegree();\r\n                    }\r\n\r\n                } else {\r\n                    if (p > k) {\r\n                        for (int u = j; u < k; u++) {\r\n                            for (int v = k; v < p; v++) {\r\n                                gra[a[u].column].addEdge(gra[a[v].column]);\r\n                                gra[a[v].column].incInDegree();\r\n                            }\r\n                        }\r\n                    }\r\n                }\r\n                j = k - 1;\r\n                k = p;\r\n            }\r\n        }\r\n\r\n        LinkedList<Node> queue = new LinkedList<Node>();\r\n        for (int i = 0; i < m + extra; i++) {\r\n            if (gra[i].inDegree == 0) {\r\n                queue.add(gra[i]);\r\n            }\r\n        }\r\n        int[] ans = new int[m];\r\n        int cnt = 0;\r\n        while (!queue.isEmpty()) {\r\n            Node t = queue.poll();\r\n            for (Node i : t.next) {\r\n                i.decInDegeree();\r\n                if (i.inDegree == 0) {\r\n                    queue.add(i);\r\n                }\r\n            }\r\n            if (t.column < m) ans[cnt++] = t.column;\r\n        }\r\n        if (cnt < m) {\r\n            System.out.println(-1);\r\n        } else {\r\n            for (int i : ans) {\r\n                System.out.print(i + 1 + \" \");\r\n            }\r\n            System.out.println();\r\n        }\r\n    }\r\n}\r\n\r\nclass Entry implements Comparable<Entry> {\r\n    int num;\r\n    int column;\r\n\r\n    Entry(int num, int column) {\r\n        this.num = num;\r\n        this.column = column;\r\n    }\r\n\r\n    @Override\r\n    public int compareTo(Entry o) {\r\n        if (o.num == -1 || num < o.num)\r\n            return -1;\r\n        if (num == -1 || num > o.num)\r\n            return 1;\r\n        return 0;\r\n    }\r\n}\r\n\r\nclass Node {\r\n    int column;\r\n    int inDegree;\r\n    LinkedList<Node> next;\r\n    //HashSet<Node> next;\r\n\r\n    Node(int column) {\r\n        this.column = column;\r\n        this.inDegree = 0;\r\n        this.next = new LinkedList<Node>();\r\n        //this.next = new HashSet<Node>();\r\n    }\r\n\r\n    void addEdge(Node t) {\r\n        next.add(t);\r\n    }\r\n\r\n    void incInDegree() {\r\n        inDegree++;\r\n    }\r\n\r\n    void decInDegeree() {\r\n        inDegree--;\r\n    }\r\n}\r\n"
+}

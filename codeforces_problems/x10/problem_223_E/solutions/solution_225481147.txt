@@ -1,0 +1,37 @@
+{
+    "id": 225481147,
+    "contestId": 223,
+    "creationTimeSeconds": 1695804790,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 223,
+        "index": "E",
+        "name": "Planar Graph",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "flows",
+            "geometry",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 223,
+        "members": [
+            {
+                "handle": "01889421990"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1347809400
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef pair<int, int> VertexPair;\r\nconst int MAX_N = 100010, MAX_M = 100010;\r\n\r\nint numVertices, numEdges, edgeIndex, graph[MAX_N], vertices[MAX_N], nextEdge[MAX_M << 1],\r\n    vertexEdges[MAX_M << 1], rankEdges[MAX_M << 1], visitedVertices[MAX_N], sizeSubgraph[MAX_N], \r\n    queryVertices[MAX_N], answer;\r\n\r\ndouble edgeAngles[MAX_M << 1];\r\nlong long signedArea;\r\n\r\nmap<VertexPair, int> edgeMap;\r\nvector<vector<int>> subgraphEdges(MAX_N);\r\n\r\nstruct Edge {\r\n    int start, end;\r\n} edges[MAX_N];\r\n\r\ninline void readInteger(int &val) {\r\n    char c;\r\n    bool isNegative = false;\r\n    val = 0;\r\n    while (!((((c = getchar()) >= '0') && (c <= '9')) || (c == '-')));\r\n    if (c == '-') isNegative = true;\r\n    else val = c - '0';\r\n    while (((c = getchar()) >= '0') && (c <= '9')) (val *= 10) += c - '0';\r\n    if (isNegative) val = -val;\r\n}\r\n\r\ninline void addEdge(int start, int end) {\r\n    vertexEdges[++edgeIndex] = end;\r\n    nextEdge[edgeIndex] = graph[start];\r\n    graph[start] = edgeIndex;\r\n    edgeMap[make_pair(start, end)] = edgeIndex;\r\n}\r\n\r\ninline bool compareEdges(int edge1, int edge2) {\r\n    if (!edge1) return true;\r\n    if (!edge2) return false;\r\n    return edgeAngles[edge1] < edgeAngles[edge2];\r\n}\r\n\r\nint dfs(int vertex) {\r\n    visitedVertices[vertex] = 1;\r\n    int subgraphSize = 1;\r\n    for (int i = graph[vertex]; i; i = nextEdge[i]) {\r\n        if (!visitedVertices[vertexEdges[i]]) {\r\n            int subtreeSize = dfs(vertexEdges[i]);\r\n            vertexEdges[i] += subtreeSize;\r\n            vertexEdges[i ^ 1] -= subtreeSize;\r\n            subgraphSize += subtreeSize;\r\n        }\r\n    }\r\n    return subgraphSize;\r\n}\r\n\r\nint main() {\r\n    readInteger(numVertices), readInteger(numEdges);\r\n    for (edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++) {\r\n        readInteger(edges[edgeIndex].start);\r\n        readInteger(edges[edgeIndex].end);\r\n        addEdge(edges[edgeIndex].start, edges[edgeIndex].end);\r\n        addEdge(edges[edgeIndex].end, edges[edgeIndex].start);\r\n    }\r\n    for (int i = 1; i <= numVertices; i++) {\r\n        readInteger(vertices[i]);\r\n        readInteger(vertices[i + numVertices]);\r\n    }\r\n    for (int i = 1; i <= numVertices; i++) {\r\n        readInteger(queryVertices[i]);\r\n    }\r\n    for (int i = 1; i <= numEdges; i++) {\r\n        subgraphEdges[edges[i].start].push_back(0);\r\n        for (int j = graph[edges[i].start]; j; j = nextEdge[j]) {\r\n            subgraphEdges[edges[i].start].push_back(j);\r\n            sizeSubgraph[edges[i].start] += vertexEdges[j];\r\n            edgeAngles[j] = atan2(vertices[vertexEdges[j]].second - vertices[edges[i].start + numVertices],\r\n                vertices[vertexEdges[j]].first - vertices[edges[i].start]);\r\n        }\r\n        sort(subgraphEdges[edges[i].start].begin(), subgraphEdges[edges[i].start].end(), compareEdges);\r\n        for (int j = 1; j < subgraphEdges[edges[i].start].size(); j++) {\r\n            rankEdges[subgraphEdges[edges[i].start][j]] = j;\r\n            subgraphEdges[edges[i].start][j] = subgraphEdges[edges[i].start][j - 1] + vertexEdges[subgraphEdges[edges[i].start][j]];\r\n        }\r\n    }\r\n    for (readInteger(numEdges); numEdges--; printf(\"%d\\n\", answer)) {\r\n        readInteger(k);\r\n        for (int i = 1; i <= k; i++) readInteger(queryVertices[i]);\r\n        queryVertices[k + 1] = queryVertices[1];\r\n        for (signedArea = 0, int i = 1; i <= k; i++) {\r\n            signedArea += 1LL * vertices[queryVertices[i]].first * vertices[queryVertices[i + 1]].second\r\n                        - 1LL * vertices[queryVertices[i]].second * vertices[queryVertices[i + 1]].first;\r\n        }\r\n        if (signedArea < 0) reverse(queryVertices + 1, queryVertices + k + 1);\r\n        queryVertices[0] = queryVertices[k];\r\n        queryVertices[k + 1] = queryVertices[1];\r\n        for (answer = k, int i = 1; i <= k; i++) {\r\n            int startEdge = rankEdges[edgeMap[make_pair(queryVertices[i], queryVertices[i - 1])]];\r\n            int endEdge = rankEdges[edgeMap[make_pair(queryVertices[i], queryVertices[i + 1])]];\r\n            answer += subgraphEdges[queryVertices[i]][startEdge] - subgraphEdges[queryVertices[i]][endEdge - 1];\r\n            if (endEdge > startEdge) answer += sizeSubgraph[queryVertices[i]];\r\n        }\r\n    }\r\n    return 0;\r\n}\r\n"
+}

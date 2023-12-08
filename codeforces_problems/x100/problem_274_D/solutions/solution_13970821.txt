@@ -1,0 +1,38 @@
+{
+    "id": 13970821,
+    "contestId": 274,
+    "creationTimeSeconds": 1446295811,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 274,
+        "index": "D",
+        "name": "Lovely Matrix",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 274,
+        "members": [
+            {
+                "handle": "ntu-vjudge"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1361374200
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <stdio.h>\n#include <iostream>\n#include <sstream>\n#include <iomanip>\n#include <cstring>\n#include <cmath>\n#include <algorithm>\n#include <climits>\n#include <vector>\n#include <stack>\n#include <queue>\n#include <set>\n// #include <unordered_set>\n#include <map>\n// #include <unordered_map>\n#include <cassert>\n\n#define SHOW(...) {;}\n#define REACH_HERE {;}\n#define debug(...) {;}\n\n// #undef HHHDEBUG\n#ifdef HHHDEBUG\n#include \"template.h\"\n#endif\n\nusing namespace std;\n\nstruct Graph {\n    struct Edge {\n        int to;\n    };\n\n    #define MAXNODE 300002\n    vector<int> g[MAXNODE];\n    vector<Edge> edge;\n    int n;\n    void init(int nn) {\n        n = nn;\n        for (int i = 0; i <= n; i++)\n            g[i].clear();\n        edge.clear();\n    }\n\n    void add_e(int x, int y) {\n        Edge e = {y};\n        g[x].push_back(edge.size());\n        edge.push_back(e);\n    }\n\n    void show() {\n    \t// for (int i = 0; i <= n; i++) {\n    \t// \tprintf(\"%d:\", i);\n    \t// \tfor (int ie : g[i])\n    \t// \t\tprintf(\" %d\", edge[ie].to);\n    \t// \tprintf(\"\\n\");\n    \t// }\n    \t// printf(\"\\n\");\n    }\n\n    // \n\t// Node index ~ [0, N)\n\t// matters for topological sort\n\t// \n    int in_order[MAXNODE];\n    void init_in_order() {\n    \tfill_n(in_order, n + 1, 0);\n    \tfor (int i = 0; i < n; i++)\n    \t\t// for (int ie : g[i])\n            for (int j = 0; j < g[i].size(); j++)\n    \t\t\tin_order[edge[g[i][j]].to]++;\n    }\n    bool topological_sort(vector<int>& result) {\n    \tinit_in_order();\n    \tqueue<int> q;\n    \tfor (int i = 0; i < n; i++)\n    \t\tif (in_order[i] == 0)\n    \t\t\tq.push(i);\n    \twhile (q.size()) {\n    \t\tint cur = q.front(); q.pop();\n    \t\tresult.push_back(cur);\n    \t\t// for (int ie : g[cur]) {\n            for (int j = 0; j < g[cur].size(); j++) {\n                int ie = g[cur][j];\n    \t\t\tconst Edge& e = edge[ie];\n    \t\t\tin_order[e.to]--;\n    \t\t\tif (in_order[e.to] == 0)\n    \t\t\t\tq.push(e.to);\n    \t\t}\n    \t}\n    \treturn result.size() == n;\n    }\n    void show_order() {\n    \tfor (int i = 0; i < n; i++)\n    \t\tprintf(\"in_order[%d] = %d\\n\", i, in_order[i]);\n    }\n};\n\n// const int HH = 1e5 + 3;\n#define HH 300000\n\nint n;\nint m;\n\nstruct Ele {\n\tint row;\n\tint col;\n\tint val;\n\tbool operator< (const Ele& ele) const {\n\t\tif (val == ele.val) {\n\t\t\tif (row == ele.row)\n\t\t\t\treturn col < ele.col;\n\t\t\treturn row < ele.row;\n\t\t}\n\t\treturn val < ele.val;\n\t}\n};\nvector<Ele> row[HH];\n\nGraph graph;\n\nbool cmp(int x, const Ele& ele) {\n\treturn x < ele.val;\n}\n\nint main() {\n    ios::sync_with_stdio(false);\n\n    cin >> n >> m;\n    for (int i = 0; i < n; i++) {\n    \tvector<Ele>& r = row[i];\n    \tfor (int j = 0; j < m; j++) {\n    \t\tint x;\n    \t\tcin >> x;\n    \t\tif (x != -1)\n    \t\t\tr.push_back((Ele){i, j, x});\n    \t}\n        sort(r.begin(), r.end());\n    \t// sort(begin(r), end(r));\n    }\n\n    graph.init(m + n * m);\n    int temp_node = m;\n    for (int i = 0; i < n; i++) {\n    \tvector<Ele>& r = row[i];\n    \tif (!r.size())\n    \t\tcontinue;\n    \t// int x = begin(r)->val;\n        int x = r.begin()->val;\n    \tvector<Ele>::iterator pre = r.begin();\n    \tvector<Ele>::iterator aft = upper_bound(r.begin(), r.end(), x, cmp);\n    \tfor (vector<Ele>::iterator iter = pre; iter != aft; iter++)\n    \t\tgraph.add_e(iter->col, temp_node);\n\n    \tpre = aft;\n    \twhile (pre != end(r)) {\n    \t\tx = pre->val;\n    \t\taft = upper_bound(pre, end(r), x, cmp);\n    \t\tint next_temp = temp_node + 1;\n\t    \tfor (vector<Ele>::iterator iter = pre; iter != aft; iter++) {\n\t    \t\tint index = iter->col;\n\t    \t\tgraph.add_e(temp_node, index);\n\t    \t\tgraph.add_e(index, next_temp);\n\t    \t}\n\t    \ttemp_node = next_temp;\n\t    \tpre = aft;\n    \t}\n    \ttemp_node++;\n    }\n\n    vector<int> ans;\n    bool ok = graph.topological_sort(ans);\n    if (ok)\n        for (int i = 0; i < ans.size(); i++) {\n    \t// for (int x : ans) {\n        int x = ans[i];// \n    \t\tif (x < m)\n    \t\t\tcout << x + 1 << \" \";\n    \t}\n    else\n    \tcout << -1;\n    cout << endl;\n}\n \t    \t \t\t \t \t  \t\t   \t \t \t\t \t \t"
+}

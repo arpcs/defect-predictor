@@ -1,0 +1,38 @@
+{
+    "id": 221056485,
+    "contestId": 487,
+    "creationTimeSeconds": 1693382935,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 487,
+        "index": "E",
+        "name": "Tourists",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 487,
+        "members": [
+            {
+                "handle": "optima"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1416590400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 389,
+    "memoryConsumedBytes": 33894400,
+    "source": "// LUOGU_RID: 123314787\n//Author: optima\r\n//Date: 2023-08-30 14:46:24\r\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define il inline\r\n#define mkp make_pair\r\n#define pii pair<int,int>\r\n#define pll pair<long long, long long>\r\n#define fi first\r\n#define se second\r\n#define lll __int128\r\n#define ll long long\r\n#define uint unsigned int\r\n#define ull unsigned ll\r\n#define db double\r\n#define ldb long double\r\n#define sq(x) ((x)*(x))\r\n#define pb push_back\r\n#define eb emplace_back\r\n#define all(x) x.begin(),x.end()\r\n#define FileIO(filename) freopen(filename \".in\" ,\"r\",stdin);freopen(filename \".out\",\"w\",stdout)\r\n#define N 100010\r\nint n,m,q,w[N<<1];\r\nint head[N],ver[N<<1],nxt[N<<1],tot;\r\nvoid add(int x,int y) {ver[++tot]=y;nxt[tot]=head[x];head[x]=tot;ver[++tot]=x;nxt[tot]=head[y];head[y]=tot;}\r\nvector <int> g[N<<1];\r\nint bel[N];\r\nint dfn[N<<1],low[N],idx,stk[N],top,num;\r\nvoid tarjan(int x)\r\n{\r\n    dfn[x]=low[x]=++tot;\r\n    stk[++top]=x;\r\n    for (int i=head[x];i;i=nxt[i])\r\n    {\r\n        int y=ver[i];\r\n        if (!dfn[y])\r\n        {\r\n            tarjan(y);low[x]=min(low[x],low[y]);\r\n            if (low[y]==dfn[x])\r\n            {\r\n                int z;num++;\r\n                do\r\n                {\r\n                    z=stk[top--];\r\n                    g[z].eb(n+num);g[n+num].eb(z);\r\n                }while (z!=y);\r\n                g[x].eb(n+num);g[n+num].eb(x);\r\n            }\r\n        }\r\n        else low[x]=min(low[x],dfn[y]);\r\n    }\r\n}\r\nint fa[N<<1],son[N<<1],dep[N<<1],sz[N<<1];\r\nint tp[N<<1],rnk[N<<1];\r\nvoid dfs1(int x)\r\n{\r\n    sz[x]=1;dep[x]=dep[fa[x]]+1;\r\n    for (auto y:g[x])\r\n    {\r\n        if (y==fa[x]) continue;\r\n        fa[y]=x;\r\n        if (x>n && y<=n) bel[y]=x-n;\r\n        dfs1(y);\r\n        sz[x]+=sz[y];\r\n        if (!son[x] || sz[son[x]]<sz[y]) son[x]=y;\r\n    }\r\n}\r\nvoid dfs2(int x,int t)\r\n{\r\n    tp[x]=t;dfn[x]=++idx;rnk[idx]=x;\r\n    if (!son[x]) return;\r\n    dfs2(son[x],t);\r\n    for (auto y:g[x])\r\n        if (y!=fa[x] && y!=son[x]) dfs2(y,y);\r\n}\r\nstruct segment\r\n{\r\n    int mi[N<<3];\r\n    inline void pushup(int p) {mi[p]=min(mi[p<<1],mi[p<<1|1]);}\r\n    void build(int p,int l,int r)\r\n    {\r\n        if (l==r) {mi[p]=w[rnk[l]];return;}\r\n        int mid=((l+r)>>1);\r\n        build(p<<1,l,mid);build(p<<1|1,mid+1,r);\r\n        pushup(p);\r\n    }\r\n    void modify(int p,int l,int r,int x,int v)\r\n    {\r\n        if (l==r) {mi[p]=v;return;}\r\n        int mid=((l+r)>>1);\r\n        if (x<=mid) modify(p<<1,l,mid,x,v);\r\n        else modify(p<<1|1,mid+1,r,x,v);\r\n        pushup(p);\r\n    }\r\n    int getmi(int p,int l,int r,int lx,int rx)\r\n    {\r\n        if (lx<=l && r<=rx) return mi[p];\r\n        int mid=((l+r)>>1);\r\n        int mii=0x3f3f3f3f;\r\n        if (lx<=mid) mii=min(mii,getmi(p<<1,l,mid,lx,rx));\r\n        if (mid<rx) mii=min(mii,getmi(p<<1|1,mid+1,r,lx,rx));\r\n        return mii;\r\n    }\r\n    int lca(int x,int y)\r\n    {\r\n        int fx=tp[x],fy=tp[y];\r\n        while (tp[x]!=tp[y])\r\n        {\r\n            if (dep[fx]>=dep[fy]) x=fa[fx];\r\n            else y=fa[fy];\r\n            fx=tp[x];fy=tp[y];\r\n        }\r\n        return (dfn[x]<dfn[y])?x:y;\r\n    }\r\n    int query(int x,int y)\r\n    {\r\n        int ret=0x3f3f3f3f,fx=tp[x],fy=tp[y];\r\n        while (tp[x]!=tp[y])\r\n        {\r\n            if (dep[fx]>=dep[fy]) ret=min(ret,getmi(1,1,n+num,dfn[fx],dfn[x])),x=fa[fx];\r\n            else ret=min(ret,getmi(1,1,n+num,dfn[fy],dfn[y])),y=fa[fy];\r\n            fx=tp[x];fy=tp[y];\r\n        }\r\n        if (dfn[x]<dfn[y]) ret=min(ret,getmi(1,1,n+num,dfn[x],dfn[y]));\r\n        else ret=min(ret,getmi(1,1,n+num,dfn[y],dfn[x]));\r\n        return ret;\r\n    }\r\n}seg;\r\nmultiset <int> s[N];\r\nsigned main()\r\n{\r\n#ifndef ONLINE_JUDGE\r\n    FileIO(\"test\");\r\n#endif\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(0);cout.tie(0);\r\n    cin >> n >> m >> q;\r\n    for (int i=1;i<=n;i++) cin >> w[i];\r\n    for (int i=1,u,v;i<=m;i++)\r\n    {\r\n        cin >> u >> v;\r\n        add(u,v);\r\n    }\r\n    for (int i=1;i<=n;i++)\r\n        if (!dfn[i]) tarjan(i),top--;\r\n    for (int i=n+1;i<=n+num;i++) w[i]=0x3f3f3f3f;\r\n    dfs1(1);\r\n    idx=0;\r\n    dfs2(1,1);\r\n    for (int x=1;x<=n;x++) \r\n        if (bel[x]) w[bel[x]+n]=min(w[bel[x]+n],w[x]);\r\n    for (int i=1;i<=n;i++) s[bel[i]].insert(w[i]);\r\n    seg.build(1,1,n+num);\r\n    while (q--)\r\n    {\r\n        char c;int a,b;\r\n        cin >> c >> a >> b;\r\n        if (c=='C')\r\n        {\r\n            seg.modify(1,1,n+num,dfn[a],b);\r\n            int y=bel[a];\r\n            if (y)\r\n            {\r\n                s[y].erase(s[y].find(w[a]));\r\n                s[y].insert(b);\r\n                seg.modify(1,1,n+num,dfn[n+y],*s[y].begin());\r\n            }\r\n            w[a]=b;\r\n        }\r\n        else cout << ((seg.lca(a,b)<=n)?seg.query(a,b):min(seg.query(a,b),w[fa[seg.lca(a,b)]])) << '\\n';\r\n    }\r\n    return 0;\r\n}"
+}

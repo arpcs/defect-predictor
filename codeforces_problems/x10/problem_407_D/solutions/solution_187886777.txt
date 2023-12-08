@@ -1,0 +1,36 @@
+{
+    "id": 187886777,
+    "contestId": 407,
+    "creationTimeSeconds": 1672816845,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 407,
+        "index": "D",
+        "name": "Largest Submatrix 3",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2700,
+        "tags": [
+            "dp",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 407,
+        "members": [
+            {
+                "handle": "JunBinLiang"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1396162800
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 12,
+    "timeConsumedMillis": 482,
+    "memoryConsumedBytes": 2867200,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <string>\r\n#include <map>\r\n#include <unordered_map>\r\n#include <set>\r\n#include <unordered_set>\r\n#include <algorithm>\r\n#include <cmath>\r\n#include <cstring>\r\n#include <queue>\r\n#include <list>\r\n#include<fstream>\r\n\r\n\r\nusing namespace std;  \r\nusing ll = long long;\r\n#define pb push_back\r\n\r\n//ifstream fcin(\"test/input.txt\");\r\n//ofstream fcout(\"test/output.txt\");\r\n\r\n\r\nconst int N = 402, M = 160000 + 10;\r\nconst int INF = 1000;\r\nint a[N][N];\r\nint nxt[N][N];\r\nint pre[N][N];\r\nbool is[M];\r\nint mono[N * 2];\r\nint n, m;\r\nvoid solve() {\r\n    scanf(\"%d%d\", &n, &m);\r\n    int res = 0;\r\n    for(int i = 0; i < n; i++) {\r\n        for(int j = 0; j < m; j++) {\r\n            scanf(\"%d\", &a[i][j]);\r\n            nxt[i][j] = INF;\r\n        }\r\n        \r\n        unordered_set<int> s;\r\n        int last = -1;\r\n        for(int j = 0; j < m; j++) {\r\n            if(s.find(a[i][j]) != s.end()) {\r\n                last = j;\r\n                s.clear();\r\n                s.insert(a[i][j]);\r\n            } else {\r\n                res = max(res, j - last);\r\n                s.insert(a[i][j]);\r\n            }\r\n        }\r\n    }\r\n\r\n    \r\n    for(int i = 0; i < n; i++) {\r\n        for(int j = 0; j < m; j++) {\r\n            pre[i][j] = -1;\r\n            for(int k = j - 1; k >= 0; k--) {\r\n                if(a[i][k] == a[i][j]) {\r\n                    pre[i][j] = k;\r\n                    nxt[i][k] = j;\r\n                    break;\r\n                }\r\n            }\r\n        }\r\n    }\r\n    \r\n\r\n    memset(is, false, sizeof is);\r\n\r\n    for(int i = n - 1; i >= 0; i--) {\r\n        vector<int> dp(m, INF);\r\n        vector<int> cur(M, -1);\r\n        \r\n\r\n        /*for(int j = i + 1; j < n; j++) {\r\n            //recover\r\n            for(int k = 0; k < m; k++) {\r\n                int v = a[i][k];\r\n                cur[v] = k;\r\n                is[v] = true;\r\n            }\r\n\r\n            for(int k = m - 1; k >= 0; k--) {\r\n                int v = a[j][k];\r\n                if(!is[v]) {\r\n                    continue;\r\n                }\r\n                \r\n                while(cur[v] >= k) {\r\n                    nxt[j][k] = min(nxt[j][k], cur[v]);\r\n                    cur[v] = pre[i][cur[v]];\r\n                }\r\n                \r\n                if(cur[v] != -1) {\r\n                    nxt[i][cur[v]] = min(nxt[i][cur[v]], k);\r\n                }\r\n            }\r\n\r\n            for(int k = 0; k < m; k++) {\r\n                int v = a[i][k];\r\n                is[v] = false;\r\n            }\r\n        }*/\r\n\r\n\r\n        for(int j = i; j < n; j++) {\r\n            for(int k = 0; k < m; k++) {\r\n                dp[k] = min(dp[k], nxt[j][k]);\r\n            }\r\n\r\n            if(j == i) continue;\r\n            \r\n            for(int k = 0; k < m; k++) {\r\n                int v = a[i][k];\r\n                cur[v] = k;\r\n                is[v] = true;\r\n            }\r\n            \r\n            for(int k = m - 1; k >= 0; k--) {\r\n                int v = a[j][k];\r\n                if(!is[v]) {\r\n                    continue;\r\n                }\r\n                \r\n                while(cur[v] >= k) {\r\n                    nxt[j][k] = min(nxt[j][k], cur[v]);\r\n                    cur[v] = pre[i][cur[v]];\r\n                }\r\n                \r\n                if(cur[v] != -1) {\r\n                    dp[cur[v]] = min(dp[cur[v]], k);\r\n                }\r\n            }\r\n            \r\n            \r\n            for(int k = 0; k < m; k++) {\r\n                int v = a[i][k];\r\n                is[v] = false;\r\n            }\r\n            \r\n            for(int k = 0; k < m; k++) {\r\n                dp[k] = min(dp[k], nxt[j][k]);\r\n            }\r\n            \r\n            \r\n            int hh = 0, tt = 0;\r\n            for(int k = 0, l = 0; k < m; k++) {\r\n                int to = dp[k];\r\n                while(tt - hh > 0 && dp[mono[tt - 1]] >= to) {\r\n                    tt--;\r\n                }\r\n                mono[tt] = k;\r\n                tt++;\r\n                while(l <= k) {\r\n                    while(tt - hh > 0 && mono[hh] < l) {\r\n                        hh++;\r\n                    }\r\n                    if(dp[mono[hh]] <= k) {\r\n                        l++;\r\n                    } else {\r\n                        break;\r\n                    }\r\n                }\r\n                res = max(res, (k - l + 1) * (j - i + 1));\r\n                \r\n                /*if((k - l + 1) * (j - i + 1) == 4) {\r\n                    cout << \"gg  \" << i << \" \" << j << endl;\r\n                    cout << l << \"  \" << k << endl;\r\n                    for(int x : dp) cout << x << \" \";\r\n                    cout << endl << endl;\r\n                    for(int x = 0; x < n; x++) {\r\n                        for(int y = 0; y < m; y++) {\r\n                            cout << nxt[x][y] << \"   \";\r\n                        } cout << endl;\r\n                    }\r\n                    cout << endl << endl;\r\n                }*/\r\n            }\r\n        }\r\n        \r\n        /*cout << i << endl;\r\n        for(int x = 0; x < n; x++) {\r\n            for(int j = 0; j < m; j++) {\r\n                cout << nxt[x][j] << \"   \";\r\n            } cout << endl;\r\n        }\r\n        cout << endl;*/\r\n    }\r\n    \r\n    cout << res << endl;\r\n}\r\n\r\nint main() {\r\n\t// your code goes here\r\n\tint t = 1;\r\n\t//cin >> t;\r\n\twhile(t--) {\r\n\t    solve();\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}
