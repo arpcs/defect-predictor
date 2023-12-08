@@ -1,0 +1,38 @@
+{
+    "id": 72507291,
+    "contestId": 917,
+    "creationTimeSeconds": 1583408369,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 917,
+        "index": "E",
+        "name": "Upside Down",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3400,
+        "tags": [
+            "data structures",
+            "string suffix structures",
+            "strings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 917,
+        "members": [
+            {
+                "handle": "vjudge2"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1517236500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 118,
+    "timeConsumedMillis": 1606,
+    "memoryConsumedBytes": 206233600,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\n\n#define PII pair < int , int >\n#define st first\n#define nd second\n#define VI vector < int >\n#define pb push_back\nconst int _ = 2e5 + 7;\nstruct tp3{int a , b , c;}qr[_];\nstring str[_][2]; int N , M , Q , ans[_] , id[_][2] , qrl[_][2];\n\nstruct ssam{\n\tint tr[_][26] , fa[_] , lst[_] , cnt , nl[_][26];\n\tint ext(int p , int c){\n\t\tint t = ++cnt; lst[t] = lst[p] + 1; while(p && !tr[p][c]){tr[p][c] = t; p = fa[p];}\n\t\tif(!p){fa[t] = 1; return t;} int q = tr[p][c]; if(lst[q] == lst[p] + 1){fa[t] = q; return t;}\n\t\tint k = ++cnt; lst[k] = lst[p] + 1; memcpy(tr[k] , tr[q] , sizeof(tr[k]));\n\t\tfa[k] = fa[q]; fa[q] = fa[t] = k; while(tr[p][c] == q){tr[p][c] = k; p = fa[p];} return t;\n\t}\n\t\n\tint ts , dfn[_] , top[_] , sz[_] , son[_]; VI ed[_];\n\tvoid dfs1(int x){\n\t\tsz[x] = 1;\n\t\tfor(int i = 0 ; i < 26 ; ++i)\n\t\t\tif(!tr[x][i]){tr[x][i] = tr[fa[x]][i]; nl[x][i] = ~nl[fa[x]][i] ? nl[fa[x]][i] : lst[fa[x]] + 1;}\n\t\tfor(auto t : ed[x]){dfs1(t); sz[x] += sz[t]; if(sz[son[x]] < sz[t]) son[x] = t;}\n\t}\n\n\tvoid dfs2(int x , int t){\n\t\ttop[x] = t; dfn[x] = ++ts; if(!son[x]) return;\n\t\tdfs2(son[x] , t); for(auto t : ed[x]) if(t != son[x]) dfs2(t , t);\n\t}\n\t\n\tint ch[_][26] , id[_] , rt , cnd; ssam(){rt = cnd = cnt = 1;}\n\tint ins(string str){int t = rt; for(auto p : str){if(!ch[t][p -= 'a']) ch[t][p] = ++cnd; t = ch[t][p];} return t;}\n\tvoid build(){\n\t\tqueue < int > q; q.push(1); id[1] = 1; memset(nl , -1 , sizeof(nl));\n\t\twhile(!q.empty()){\n\t\t\tint t = q.front(); q.pop();\n\t\t\tfor(int i = 0 ; i < 26 ; ++i) if(ch[t][i]){id[ch[t][i]] = ext(id[t] , i); q.push(ch[t][i]);}\n\t\t}\n\t\tfor(int i = 2 ; i <= cnt ; ++i) ed[fa[i]].pb(i);\n\t\tfor(int i = 0 ; i < 26 ; ++i) tr[0][i] = 1;\n\t\tlst[0] = -1; dfs1(1); dfs2(1 , 1);\n\t}\n\n\tPII qrge(int x){return PII(dfn[id[x]] , dfn[id[x]] + sz[id[x]]);}\n\tPII go(int x , int l , int c){return PII(tr[x][c] , ~nl[x][c] ? nl[x][c] : l + 1);}\n\t\n\tVI pot[_];\n\tvoid push(int x , int v){pot[top[x]].pb(v);} void pop(int x){pot[top[x]].pop_back();}\n\tint qry(int x){\n\t\tx = id[x]; int p = x;\n\t\twhile(x){\n\t\t\tint t = top[x];\n\t\t\tif(pot[t].empty() || pot[t][0] > lst[x] || pot[t][0] == lst[p]) x = fa[t];\n\t\t\telse{auto c = --upper_bound(pot[t].begin() , pot[t].end() , lst[x]); return *c == lst[p] ? *--c : *c;}\n\t\t}\n\t}\n}sam[2];\n\nstruct BIT{\n#define lb(x) x & -x\n\tint arr[_];\n\tvoid add(int x , int v){while(x <= 2e5){arr[x] += v; x += lb(x);}}\n\tint qry(int x){int sum = 0; while(x){sum += arr[x]; x -= lb(x);} return sum;}\n}tr[2] , fkmp;\n\nnamespace kmp{\n\tint nxt1[_] , nxt2[_]; VI ed1[_] , ed2[_] , q[_];\n\n\tvoid pre(string str , int* nxt , VI *ed){\n\t\tnxt[0] = -1; str.insert(str.begin() , 1); ed[0].clear();\n\t\tfor(int i = 1 ; i < str.size() ; ++i){\n\t\t\tint t = nxt[i - 1]; while(~t && str[t + 1] != str[i]) t = nxt[t];\n\t\t\ted[i].clear(); ed[nxt[i] = t + 1].pb(i);\n\t\t}\n\t}\n\n\tint dfn[_] , rdfn[_] , ts;\n\tvoid dfs1(int x){dfn[x] = rdfn[x] = ++ts; for(auto t : ed2[x]){dfs1(t); rdfn[x] = rdfn[t];}}\n\tvoid dfs2(int x , int l){\n\t\tfkmp.add(rdfn[l - x] + 1 , -1); fkmp.add(dfn[l - x] , 1);\n\t\tfor(auto t : q[x]) ans[t] += fkmp.qry(dfn[qrl[t][1]]);\n\t\tfor(auto t : ed1[x]) dfs2(t , l);\n\t\tq[x].clear(); fkmp.add(rdfn[l - x] + 1 , 1); fkmp.add(dfn[l - x] , -1);\n\t}\n\t\n\tvoid work(string s1 , string s2 , VI qry){\n\t\tpre(s1 , nxt1 , ed1); pre(s2 , nxt2 , ed2);\n\t\tfor(auto t : qry) q[qrl[t][0]].pb(t);\n\t\tts = 0; dfs1(0); dfs2(0 , s1.size());\n\t}\n}\n\nnamespace tree{\n\tvector < PII > ed[_];\n\tvoid input(){\n\t\tint x , y; char c; for(int i = 1 ; i < N ; ++i){cin >> x >> y >> c; c -= 'a'; ed[x].pb(PII(y , c)); ed[y].pb(PII(x , c));}\n\t}\n\n\tint nsz , mn , mnid; bool vis[_];\n\tvoid getsz(int x){++nsz; vis[x] = 1; for(auto t : ed[x]) if(!vis[t.st]) getsz(t.st); vis[x] = 0;}\n\tint getrt(int x){\n\t\tint sz = 1 , mx = 0; vis[x] = 1;\n\t\tfor(auto t : ed[x]) if(!vis[t.st]){int v = getrt(t.st); sz += v; mx = max(mx , v);}\n\t\tmx = max(mx , nsz - sz); if(mn > mx){mn = mx; mnid = x;} vis[x] = 0; return sz;\n\t}\n\n\tint bel[_]; VI pot[_]; vector < PII > q[_];\n\tvoid rbel(int x , int v){bel[x] = v; vis[x] = 1; for(auto t : ed[x]) if(!vis[t.st]) rbel(t.st , v); vis[x] = 0;}\n\n\tvoid dfs(int x , int u0 , int u1 , int l0 , int l1 , bool f0 , bool f1){\n\t\tint p0 = sam[0].dfn[sam[0].lst[u0] == l0 ? u0 : sam[0].fa[u0]] ,\n\t\t\tp1 = sam[1].dfn[sam[1].lst[u1] == l1 ? u1 : sam[1].fa[u1]];\n\t\tvis[x] = 1; tr[0].add(p0 , 1); tr[1].add(p1 , 1); if(f0) sam[0].push(u0 , l0); if(f1) sam[1].push(u1 , l1);\n\t\t\n\t\tfor(auto t : q[x]){\n\t\t\tint x = t.st , f = t.nd; PII p = sam[f].qrge(id[qr[x].c][f]);\n\t\t\tans[x] += tr[f].qry(p.nd - 1) - tr[f].qry(p.st - 1); qrl[x][f ^ 1] = sam[f].qry(id[qr[x].c][f]);\n\t\t}\n\t\tq[x].clear();\n\t\tfor(auto t : ed[x])\n\t\t\tif(!vis[t.st]){\n\t\t\t\tPII p = sam[0].go(u0 , l0 , t.nd) , q = sam[1].go(u1 , l1 , t.nd);\n\t\t\t\tdfs(t.st , p.st , q.st , p.nd , q.nd , f0 & (p.nd == l0 + 1) , f1 & (q.nd == l1 + 1));\n\t\t\t}\n\t\tvis[x] = 0; tr[0].add(p0 , -1); tr[1].add(p1 , -1); if(f0) sam[0].pop(u0); if(f1) sam[1].pop(u1);\n\t}\n\n\tvoid divide(int x){\n\t\tVI qry = pot[x]; nsz = 0; mn = 1e9; pot[x].clear(); getsz(x); getrt(x);\n\t\tx = mnid; vis[x] = 1; bel[x] = 0; for(auto t : ed[x]) if(!vis[t.st]) rbel(t.st , t.st);\n\t\tfor(auto t : qry)\n\t\t\tif(bel[qr[t].a] == bel[qr[t].b]) pot[bel[qr[t].a]].pb(t);\n\t\t\telse{q[qr[t].a].pb(PII(t , 1)); q[qr[t].b].pb(PII(t , 0));}\n\t\tdfs(x , 1 , 1 , 0 , 0 , 1 , 1); vis[x] = 1;\n\t\tfor(auto t : ed[x]) if(!vis[t.st]) divide(t.st);\n\t}\n}\n\nint main(){\n\tcin >> N >> M >> Q; tree::input();\n\tfor(int i = 1 ; i <= M ; ++i){\n\t\tcin >> str[i][0]; str[i][1] = str[i][0]; reverse(str[i][1].begin() , str[i][1].end());\n\t\tid[i][0] = sam[0].ins(str[i][0]); id[i][1] = sam[1].ins(str[i][1]);\n\t}\n\tsam[0].build(); sam[1].build(); VI &qry = tree::pot[1]; static VI pot[_];\n\tfor(int i = 1 ; i <= Q ; ++i){cin >> qr[i].a >> qr[i].b >> qr[i].c; qry.pb(i); pot[qr[i].c].pb(i);}\n\ttree::divide(1); for(int i = 1 ; i <= M ; ++i) kmp::work(str[i][0] , str[i][1] , pot[i]);\n\tfor(int i = 1 ; i <= Q ; ++i) printf(\"%d\\n\" , ans[i]);\n\treturn 0;\n}\n\n\t \t\t\t\t\t\t \t  \t \t   \t   \t       \t"
+}

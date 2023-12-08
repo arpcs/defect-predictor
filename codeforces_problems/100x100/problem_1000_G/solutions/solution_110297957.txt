@@ -1,0 +1,36 @@
+{
+    "id": 110297957,
+    "contestId": 1000,
+    "creationTimeSeconds": 1616059816,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "zjwwjhy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 1263,
+    "memoryConsumedBytes": 204697600,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\ntypedef long long ll;\ntypedef unsigned long long ull;\ntypedef long double ld;\n#define PI pair<int,int>\n#define poly vector<int>\n#define For(i,l,r) for(int i=(int)(l);i<=(int)(r);i++)\n#define Rep(i,r,l) for(int i=(int)(r);i>=(int)(l);i--)\n#define pb push_back\n#define mem(a) memset((a),0,sizeof(a))\n#define fi first\n#define se second\ninline char gc(){\n    static char buf[100000],*p1=buf,*p2=buf;\n    return p1==p2&&(p2=(p1=buf)+fread(buf,1,100000,stdin),p1==p2)?EOF:*p1++;\n}\n#define gc getchar\ninline ll read(){\n\tll x = 0; char ch = gc(); bool positive = 1;\n\tfor (; !isdigit(ch); ch = gc())\tif (ch == '-')\tpositive = 0;\n\tfor (; isdigit(ch); ch = gc())\tx = x * 10 + ch - '0';\n\treturn positive ? x : -x;\n}\ninline void write(ll a){\n    if(a<0){\n    \ta=-a; putchar('-');\n\t}\n    if(a>=10)write(a/10);\n    putchar('0'+a%10);\n}\ninline void writeln(ll a){write(a); puts(\"\");}\ninline void wri(ll a){write(a); putchar(' ');}\nll n,Q,nl[500050];\nll h[500050],ver[600060],nxt[600060],edge[600060],tot;\nll dp[500050],g[500050];\nll dep[500050];\nll f[300030][22],st[300030][22],st1[300030][22];\nll ans;\nvoid add(int x,int y,int z){\n\tver[++tot]=y;\n\tedge[tot]=z;\n\tnxt[tot]=h[x];\n\th[x]=tot;\n}\nvoid dfs(int x,int fa){\n\tdp[x]=nl[x];\n\tfor(int i=h[x];i!=0;i=nxt[i]){\n\t\tif(ver[i]==fa) continue;\n\t\tdfs(ver[i],x);\n\t\tdp[x]+=max(0ll,dp[ver[i]]-2*edge[i]);\n\t}\n}\nvoid dfs1(int x,int fa){\n\tfor(int i=h[x];i!=0;i=nxt[i]){\n\t\tif(ver[i]==fa) continue;\n\t\tg[ver[i]]=g[x]-2*edge[i];\n\t\tg[ver[i]]+=max(0ll,dp[x]-max(0ll,dp[ver[i]]-2*edge[i]));\n\t\tg[ver[i]]=max(g[ver[i]],0ll);\n\t\tdfs1(ver[i],x);\n\t}\n}\nvoid DFS(int x,int fa){\n\tfor(int i=1;i<=20;i++){\n\t\tf[x][i]=f[f[x][i-1]][i-1];\n\t\tst[x][i]=st[x][i-1]+st[f[x][i-1]][i-1];\n\t\tst1[x][i]=st1[x][i-1]+st1[f[x][i-1]][i-1];\n\t}\n\tfor(int i=h[x];i!=0;i=nxt[i]){\n\t\tif(ver[i]==fa) continue;\n\t\tf[ver[i]][0]=x;\n\t\tst[ver[i]][0]=edge[i];\n\t\tst1[ver[i]][0]=dp[x]-max(0ll,dp[ver[i]]-2*edge[i]);\n\t\tdep[ver[i]]=dep[x]+1;\n\t\tDFS(ver[i],x);\n\t}\n}\nvoid lca(int l,int r){\n\tans=0;\n\tif(dep[l]>dep[r]) swap(l,r);\n\tint L=l,R=r;\n\tfor(int i=20;i>=0;i--){\n\t\tif(dep[f[r][i]]>=dep[l]){\n\t\t\tans+=st1[r][i];\n\t\t\tans-=st[r][i];\n//\t\t\tcout<<r<<\" \"<<st1[r][i]<<\" \"<<st[r][i]<<endl;\n\t\t\tr=f[r][i];\n\t\t}\n//\t\tcout<<ans<<endl;\n\t}\n//\tcout<<l<<\"-\"<<r<<endl;\n\tif(l==r){\n//\t\tcout<<\"3--->\"<<ans<<\" \"<<dp[R]<<\" \"<<nl[l]<<\" \"<<g[l]<<\" \"<<R<<endl;\n\t\tans+=dp[R];\n\t\tans+=g[l];\n\t\tans-=nl[l];\n\t\treturn ;\n\t}\n\tans+=dp[L]+dp[R];\n//\tcout<<\"1--->\"<<ans<<endl;\n\tfor(int i=20;i>=0;i--){\n\t\tif(f[r][i]!=f[l][i]){\n\t\t\tans+=st1[r][i];\n\t\t\tans+=st1[l][i];\n\t\t\tans-=st[r][i];\n\t\t\tans-=st[l][i];\n\t\t\tr=f[r][i];\n\t\t\tl=f[l][i];\n\t\t}\n\t}\n//\tcout<<\"2--->\"<<ans<<endl;\n\tint fa=f[l][0];\n\tans+=g[fa];\n\tans-=st[l][0]+st[r][0];\n\tans+=(dp[fa]-max(0ll,dp[l]-2*st[l][0])-max(0ll,dp[r]-2*st[r][0]));\n\tans-=nl[fa];\n//\tcout<<g[fa]<<endl;\n\treturn ;\n}\nint main(){\n\tcin>>n>>Q;\n\tfor(int i=1;i<=n;i++){\n\t\tnl[i]=read();\n\t}\n\tfor(int i=1;i<n;i++){\n\t\tint x=read(),y=read(),z=read();\n\t\tadd(x,y,z);\n\t\tadd(y,x,z);\n\t}\n\tdep[1]=1;\n\tdfs(1,0);\n\tdfs1(1,0);\n\tf[1][0]=0;\n\tDFS(1,0);\n\tfor(int i=1;i<=n;i++){\n\t\tg[i]+=nl[i];\n\t}\n\twhile(Q--){\n\t\tint l=read(),r=read();\n\t\tlca(l,r);\n\t\twriteln(ans);\n\t}\n\treturn 0;\n}\n"
+}

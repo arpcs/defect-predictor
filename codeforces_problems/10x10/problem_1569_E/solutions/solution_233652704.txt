@@ -1,0 +1,38 @@
+{
+    "id": 233652704,
+    "contestId": 1569,
+    "creationTimeSeconds": 1700551148,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "E",
+        "name": "Playoff Restoration",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "bitmasks",
+            "brute force",
+            "hashing",
+            "implementation",
+            "meet-in-the-middle"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "HHY_zZhu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 307200,
+    "source": "//#pragma GCC optimize(\"O3,unroll-loops\")\r\n//#pragma GCC target(\"avx2,bmi,bmi2,lzcnt,popcnt\")\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define V vector\r\n#define all0(x) (x).begin(),(x).end()\r\n#define all1(x) (x).begin()+1,(x).end()\r\n#define pb push_back\r\n#define eb emplace_back\r\n#define fi first\r\n#define se second\r\n#define lb lower_bound\r\n#define ub upper_bound\r\n#define cin std::cin\r\n#define cout std::cout\r\ntypedef long long LL;\r\ntypedef pair<int, int> pi;\r\ntypedef pair<LL, LL> pl;\r\n#ifdef LOCAL\r\n#include \"C:/Users/lijia/Desktop/vscode/algo/debug.h\"\r\n#else\r\n#define debug(...) 42\r\n#endif\r\n\r\nconst int MN = 2e5 + 20;//MaxN \u8bb0\u5f97\u6539\u4e00\u4e0b\r\nconst int INF = 2e9+1000;//INF\r\nconst LL INFLL = 8e18+1000;//INF long long \r\nmt19937 mrand(random_device{}());\r\nconst int mod=998244353;\r\n//\u6a21\u677f\u533a\u57df~~~~~~~\r\n\r\n//\u6a21\u677f\u7ed3\u675f~~~~~~~\r\nLL qpow(LL a, LL k) {\r\n\tLL ans = 1;\r\n\twhile (k) {\r\n\t\tif (k & 1) ans = ans * a % mod;\r\n\t\tk >>= 1;\r\n\t\ta = a * a % mod;\r\n\t}\r\n\treturn ans;\r\n}\r\nvoid solve() {\r\n    LL k,T,h;cin>>k>>T>>h;\r\n    V<LL> base(7);\r\n    base[1]=T;\r\n    for(int i=2;i<=6;i++) base[i]=qpow(T,(1<<(i-2))+1);\r\n    debug(base);\r\n\r\n    V<int> num{0,1,2,3,5,9,17};\r\n\r\n    int n=1<<k;\r\n    V<int> rk(n+1,num[k+1]);\r\n    V<int> res(n/2+1);\r\n    for(int i=1;i<=n/2;i++) res[i]=i*2-1;\r\n\r\n    auto cost=[&](int x){\r\n        if(x==1) return base[1];\r\n        return base[(__lg((x-1))+2)];\r\n    };\r\n\r\n    auto dis=[&](int a,int b){\r\n        int ans=a-b;\r\n        if(a-b<0) ans+=mod;\r\n        return ans;\r\n    };\r\n\r\n    set<int> st;\r\n    V<int> bias(1);\r\n    st.insert(0);\r\n    st.insert(dis(cost(1) , cost(num[k+1])));\r\n    int now=2;\r\n    for(int i=1;i<=k-1;i++){\r\n        for(int _=1;_<=(1<<i-1);_++){   \r\n            set<int> nst;\r\n            for(auto y: st){\r\n                y+=dis( cost(now),cost(num[k+1]));\r\n                if(y>=mod) y-=mod;\r\n                nst.insert(y);\r\n            }\r\n            for(auto y:nst) st.insert(y);\r\n        }\r\n        now=(now-1)*2+1;\r\n    }\r\n    for(auto y: st) bias.pb(y);\r\n\r\n    function<bool(int)> dfs=[&](int hav){\r\n        if(hav==1){\r\n            int _rk=rk[res[1]];\r\n            rk[res[1]]=1;\r\n            int now=0;\r\n            for(int i=1;i<=n;i++) now=(now + cost(rk[i])*i)%mod;\r\n            for(int i=1;i<=bias.size();i++){\r\n                if((now+bias[i])%mod== h){\r\n                    return 1;\r\n                }\r\n            }\r\n            rk[res[1]]=_rk;\r\n        }else {\r\n            V<int> _res=res;\r\n            V<int> _rk=rk;\r\n            for(int bit=0;bit<(1<<hav/2);bit++) {\r\n                for(int i=1;i<=hav/2;i++){\r\n                    int l=i*2-1,r=i*2;\r\n                    if(bit>>(i-1)&1){\r\n                        rk[res[r]] = (hav/2)+1;\r\n                        res[i]=res[l];\r\n                    }else {\r\n                        rk[res[l]] = (hav/2)+1;\r\n                        res[i]=res[r];\r\n                    }\r\n                }\r\n\r\n                if(dfs(hav/2)) return 1;\r\n                res=_res;\r\n                rk=_rk;\r\n            }\r\n        }\r\n        return 0;\r\n    };\r\n\r\n    if(dfs(n/2)){\r\n        for(int bit=0;bit<=(1<<n/2);bit++){\r\n            LL now=0;\r\n            for(int i=1;i<=n/2;i++){\r\n                if(bit>>i-1&1) {\r\n                    now+=cost(rk[i*2-1])*i*2+cost(rk[i*2])*(i*2-1);\r\n                    now%=mod;\r\n                }else {\r\n                    now+=cost(rk[i*2-1])*(i*2-1)+cost(rk[i*2])*(i*2);\r\n                    now%=mod;\r\n                }\r\n            }\r\n            if(now==h){\r\n                for(int i=1;i<=n/2;i++) {\r\n                    if(bit>>i-1&1) swap(rk[i*2-1],rk[2*(i)]);\r\n                }\r\n                for(int i=1;i<=n;i++) cout<<rk[i]<<\" \\n\"[i==n];\r\n                return;\r\n            }\r\n        }\r\n        \r\n        for(int i=1;i<=n;i++) cout<<rk[i]<<\" \\n\"[i==n];\r\n    }else cout<<-1<<endl;\r\n}\r\nint32_t main() {\r\n#ifndef LOCAL\r\n    ios::sync_with_stdio(0),cin.tie(0),cout.tie(0);\r\n#endif\r\n#ifdef LOCAL\r\n   freopen(\"C:/Users/lijia/Desktop/vscode/in.txt\",\"r\",stdin);\r\n   freopen(\"C:/Users/lijia/Desktop/vscode/out.txt\",\"w\",stdout);\r\n#endif\r\n    int tt=1;\r\n    //cin >> tt;\r\n    while (tt--) \r\n    solve();\r\n}"
+}

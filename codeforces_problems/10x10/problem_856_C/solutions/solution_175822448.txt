@@ -1,0 +1,36 @@
+{
+    "id": 175822448,
+    "contestId": 856,
+    "creationTimeSeconds": 1665627725,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 856,
+        "index": "C",
+        "name": "Eleventh Birthday",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 856,
+        "members": [
+            {
+                "handle": "vansx"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1505050500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 32972800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\nconst ll MOD=998244353;\r\nconst int N=2005;\r\nint cas,n,a[N],b[N],cnt,sum;\r\nll fac[N],ifac[N],inv[N],dp[2][N][11],f[2][N][11],c[2005][2005];\r\ninline ll A(int x,int y){\r\n\tif(y==0)return 1ll;\r\n\tif(x==0)return 0;\r\n\treturn fac[x]*ifac[x-y]%MOD;\r\n}\r\ninline ll qpow(ll x,ll y){\r\n\tll res=1ll;\r\n\twhile(y){\r\n\t\tif(y&1)res=res*x%MOD;\r\n\t\tx=x*x%MOD;y>>=1;\r\n\t}return res;\r\n}\r\ninline void init(){\r\n\tfac[0]=1;fac[1]=1;ifac[0]=1;\r\n\tifac[1]=1;inv[0]=1;inv[1]=1;\r\n\tfor(ll i=2;i<=2000;i++){\r\n\t\tfac[i]=fac[i-1]*i%MOD;inv[i]=(MOD-MOD/i)*inv[MOD%i]%MOD;\r\n\t\tifac[i]=ifac[i-1]*inv[i]%MOD;\r\n\t}\r\n\tc[0][0]=1;\r\n\tfor(int i=1;i<=2000;i++){\r\n\t\tfor(int j=0;j<=2000;j++)c[i][j]=c[i-1][j];\r\n\t\tfor(int j=1;j<=2000;j++){\r\n\t\t\tc[i][j]=(c[i][j]+c[i][j-1])%MOD;\r\n\t\t}\r\n\t}\r\n\tfor(int i=1;i<=2000;i++){\r\n\t\tfor(int j=0;j<=2000;j++){\r\n\t\t\tc[i][j]=c[i][j]*A(j,j)%MOD;\r\n\t\t}\r\n\t}\r\n}\r\ninline int solve(int x){\r\n\tif(x==0)return 1;\r\n\tint ret=0;\r\n\twhile(x){ret++;x/=10;}\r\n\treturn ret;\r\n}\r\nint main(){\r\n\tscanf(\"%d\",&cas);init();\r\n\twhile(cas--){\r\n\t\tscanf(\"%d\",&n);cnt=0;sum=0;\r\n\t\tfor(int i=1;i<=n;i++)scanf(\"%d\",&a[i]);\r\n\t\tfor(int i=1;i<=n;i++){\r\n\t\t\tb[i]=solve(a[i]);\r\n\t\t\tif(b[i]&1)cnt++,sum=(sum+a[i])%11;\r\n\t\t}\r\n\t\tint tmp=cnt;\r\n\t\tif(cnt&1)cnt=(cnt+1)/2;\r\n\t\telse cnt/=2;\r\n\t\tmemset(dp,0,sizeof dp);\r\n\t\tmemset(f,0,sizeof f);\r\n\t\tint cur=0;dp[0][0][0]=1;\r\n\t\tfor(int i=1;i<=n;i++){\r\n\t\t\tif(b[i]%2==0)continue;cur^=1;\r\n\t\t\tmemset(dp[cur],0,sizeof dp[cur]);\r\n\t\t\tfor(int j=cnt-1;j>=0;j--){\r\n\t\t\t\tfor(int k=0;k<=10;k++){\r\n\t\t\t\t\tdp[cur][j+1][(k+a[i])%11]=(dp[cur][j+1][(k+a[i])%11]+dp[cur^1][j][k])%MOD;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tfor(int j=cnt;j>=0;j--){\r\n\t\t\t\tfor(int k=0;k<=10;k++){\r\n\t\t\t\t\tdp[cur][j][k]=(dp[cur][j][k]+dp[cur^1][j][k])%MOD;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tfor(int i=0;i<=10;i++){\r\n\t\t\t//cout<<A(tmp,cnt)*A(cnt,cnt)<<\" \";\r\n\t\t\tf[0][0][(i-(sum-i)+11)%11]=A(cnt,cnt)*A(tmp-cnt,tmp-cnt)%MOD*dp[cur][cnt][i]%MOD;\r\n\t\t}\r\n\t\tcur=0;/*\r\n\t\tfor(int i=1;i<=n;i++){\r\n\t\t\tif(b[i]&1)continue;cur^=1;//cnt++;\r\n\t\t\tmemset(f[cur],0,sizeof f[cur]);\r\n\t\t\tfor(int j=0;j<=10;j++){\r\n\t\t\t\tf[cur][(j+a[i])%11]=(f[cur][(j+a[i])%11]+f[cur^1][j]*cnt%MOD)%MOD;\r\n\t\t\t}\r\n\t\t}*/\r\n\t\tfor(int i=1;i<=n;i++){\r\n\t\t\tif(b[i]&1)continue;cur^=1;\r\n\t\t\tmemset(f[cur],0,sizeof f[cur]);\r\n\t\t\tfor(int j=0;j<=n-tmp;j++){\r\n\t\t\t\tfor(int k=0;k<=10;k++){\r\n\t\t\t\t\tf[cur][j+1][(k+a[i])%11]=(f[cur][j+1][(k+a[i])%11]+f[cur^1][j][k]*cnt%MOD)%MOD;\r\n\t\t\t\t\tf[cur][j][(k-a[i]+11)%11]=(f[cur][j][(k-a[i]+11)%11]+f[cur^1][j][k]*cnt%MOD)%MOD;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tll ans=0;\r\n\t\tint tt;\r\n\t\tif(cnt%2==0)tt=cnt/2+1;\r\n\t\telse tt=(cnt+1)/2;\r\n\t\t//cout<<tt<<\" !!\"<<endl;\r\n\t\tfor(int i=0;i<=n-tmp;i++){\r\n\t\t\tf[cur][i][0]=f[cur][i][0]*c[tt][i]%MOD*c[cnt+1-tt][n-tmp-i]%MOD;\r\n\t\t\tans=(ans+f[cur][i][0])%MOD;\r\n\t\t}\r\n\t\tprintf(\"%lld\\n\",ans);\r\n\t}\r\n\treturn 0;\r\n} "
+}

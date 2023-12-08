@@ -1,0 +1,38 @@
+{
+    "id": 219871133,
+    "contestId": 1569,
+    "creationTimeSeconds": 1692684282,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "E",
+        "name": "Playoff Restoration",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "bitmasks",
+            "brute force",
+            "hashing",
+            "implementation",
+            "meet-in-the-middle"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "Felix72"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 3993600,
+    "source": "// LUOGU_RID: 122211208\n#include <bits/stdc++.h>\r\nusing namespace std;\r\nconst int mod = 998244353;\r\nlong long k, A, h, pl[7][45][45], rnk[45], mi[45];\r\nstruct node {int res[45];} rec1, rec2;\r\nmap < long long, node > mp1, mp2;\r\nmap < long long, bool > v1, v2;\r\ninline void dfs(long long id, long long l, long long r)\r\n{\r\n//\tcout << id << \" \" << l << \" \" << r << endl;\r\n\tif(id == k)\r\n\t{\r\n\t\tlong long num1 = 0, num2 = 0;\r\n\t\tfor(int i = 1; i <= (1 << k - 1); ++i)\r\n\t\t{\r\n\t\t\tif(i == pl[k - 1][1][(1 << k - 1)])\r\n\t\t\t{\r\n\t\t\t\tnum1 = (num1 + i * mi[1] % mod) % mod;\r\n\t\t\t\tnum2 = (num2 + i * mi[2] % mod) % mod;\r\n\t\t\t\trec1.res[i] = 1, rec2.res[i] = 2;\r\n\t\t\t}\r\n\t\t\telse\r\n\t\t\t{\r\n\t\t\t\tnum1 = (num1 + i * mi[rnk[i]] % mod) % mod;\r\n\t\t\t\tnum2 = (num2 + i * mi[rnk[i]] % mod) % mod;\r\n\t\t\t\trec1.res[i] = rec2.res[i] = rnk[i];\r\n\t\t\t}\r\n\t\t}\r\n\t\tv1[num1] = v2[num2] = true;\r\n\t\tmp1[num1] = rec1, mp2[num2] = rec2;\r\n\t\treturn ;\r\n\t}\r\n\tif(l == (1 << k - 1) + 1)\r\n\t{\r\n\t\tdfs(id + 1, 1, (1 << id + 1));\r\n\t\treturn ;\r\n\t}\r\n\tlong long mid = l + r >> 1;\r\n\tpl[id][l][r] = pl[id - 1][l][mid];\r\n\trnk[pl[id - 1][mid + 1][r]] = (1 << (k - id)) + 1;\r\n\tdfs(id, r + 1, r + (1 << id));\r\n\tpl[id][l][r] = pl[id - 1][mid + 1][r];\r\n\trnk[pl[id - 1][l][mid]] = (1 << (k - id)) + 1;\r\n\tdfs(id, r + 1, r + (1 << id));\r\n}\r\ninline void dfs2(int id, int l, int r)\r\n{\r\n//\tcout << id << \" \" << l << \" \" << r << endl;\r\n\tif(id == k)\r\n\t{\r\n\t\tlong long num1 = 0, num2 = 0, op1, op2;\r\n\t\tfor(int i = (1 << k - 1) + 1; i <= (1 << k); ++i)\r\n\t\t{\r\n\t\t\tif(i == pl[k - 1][(1 << k - 1) + 1][(1 << k)])\r\n\t\t\t{\r\n\t\t\t\tnum1 = (num1 + i * mi[1] % mod) % mod;\r\n\t\t\t\tnum2 = (num2 + i * mi[2] % mod) % mod;\r\n\t\t\t\trec1.res[i] = 1, rec2.res[i] = 2;\r\n\t\t\t}\r\n\t\t\telse\r\n\t\t\t{\r\n\t\t\t\tnum1 = (num1 + i * mi[rnk[i]] % mod) % mod;\r\n\t\t\t\tnum2 = (num2 + i * mi[rnk[i]] % mod) % mod;\r\n\t\t\t\trec1.res[i] = rec2.res[i] = rnk[i];\r\n\t\t\t}\r\n\t\t}\r\n\t\top1 = ((h - num1) % mod + mod) % mod;\r\n\t\top2 = ((h - num2) % mod + mod) % mod;\r\n\t\tif(v2[op1])\r\n\t\t{\r\n\t\t\tnode ans = mp2[op1];\r\n\t\t\tfor(int i = 1; i <= (1 << k - 1); ++i) cout << ans.res[i] << \" \";\r\n\t\t\tfor(int i = (1 << k - 1) + 1; i <= (1 << k); ++i) cout << rec1.res[i] << \" \";\r\n\t\t\texit(0);\r\n\t\t}\r\n\t\tif(v1[op2])\r\n\t\t{\r\n\t\t\tnode ans = mp1[op2];\r\n\t\t\tfor(int i = 1; i <= (1 << k - 1); ++i) cout << ans.res[i] << \" \";\r\n\t\t\tfor(int i = (1 << k - 1) + 1; i <= (1 << k); ++i) cout << rec2.res[i] << \" \";\r\n\t\t\texit(0);\r\n\t\t}\r\n\t\treturn ;\r\n\t}\r\n\tif(l == (1 << k) + 1)\r\n\t{\r\n\t\tdfs2(id + 1, (1 << k - 1) + 1, (1 << k - 1) + (1 << id + 1));\r\n\t\treturn ;\r\n\t}\r\n\tlong long mid = l + r >> 1;\r\n\tpl[id][l][r] = pl[id - 1][l][mid];\r\n\trnk[pl[id - 1][mid + 1][r]] = (1 << (k - id)) + 1;\r\n\tdfs2(id, r + 1, r + (1 << id));\r\n\tpl[id][l][r] = pl[id - 1][mid + 1][r];\r\n\trnk[pl[id - 1][l][mid]] = (1 << (k - id)) + 1;\r\n\tdfs2(id, r + 1, r + (1 << id));\r\n}\r\nint main()\r\n{\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(0), cout.tie(0);\r\n\tmi[0] = 1;\r\n\tcin >> k >> A >> h;\r\n\tfor(int i = 1; i <= 40; ++i) mi[i] = mi[i - 1] * A % mod;\r\n\tfor(int i = 1; i <= (1 << k); ++i) pl[0][i][i] = i;\r\n\tdfs(1, 1, 2);\r\n\tdfs2(1, (1 << k - 1) + 1, (1 << k - 1) + 2);\r\n\tcout << -1 << '\\n';\r\n\treturn 0;\r\n}"
+}

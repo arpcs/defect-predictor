@@ -1,0 +1,36 @@
+{
+    "id": 155514032,
+    "contestId": 1000,
+    "creationTimeSeconds": 1651412870,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "past_last"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 998,
+    "memoryConsumedBytes": 240537600,
+    "source": "// \u5fb7\u4e3d\u838e\u4f60\u597d\u53ef\u7231\u5fb7\u4e3d\u838e\u4f60\u597d\u53ef\u7231\u5fb7\u4e3d\u838e\u4f60\u597d\u53ef\u7231\u5fb7\u4e3d\u838e\u4f60\u597d\u53ef\u7231\u5fb7\u4e3d\u838e\u4f60\u597d\u53ef\u7231\n// \u5fb7\u4e3d\u838e\u7684\u53ef\u7231\u5728\u4e8e\u5fb7\u4e3d\u838e\u5f88\u53ef\u7231\uff0c\u5fb7\u4e3d\u838e\u4e3a\u4ec0\u4e48\u5f88\u53ef\u7231\u5462\uff0c\u8fd9\u662f\u56e0\u4e3a\u5fb7\u4e3d\u838e\u5f88\u53ef\u7231\uff01\n#include <bits/stdc++.h>\nusing namespace std;\n#define int long long\n#define FOR(i, l, r) for(int i = (l); i <= r; ++i)\n#define REP(i, l, r) for(int i = (l); i <  r; ++i)\n#define DFR(i, l, r) for(int i = (l); i >= r; --i)\n#define DRP(i, l, r) for(int i = (l); i >  r; --i)\n#define FORV(i, ver) for(int i = 0; i < ver.size(); i++)\n#define FORP(i, ver) for(auto i : ver)\ntemplate<class T>T wmin(const T &a, const T &b) {return a < b ? a : b;}\ntemplate<class T>T wmax(const T &a, const T &b) {return a > b ? a : b;}\ntemplate<class T>bool chkmin(T &a, const T &b) {return a > b ? a = b, 1 : 0;}\ntemplate<class T>bool chkmax(T &a, const T &b) {return a < b ? a = b, 1 : 0;}\ninline int read() {\n  int x = 0, f = 1;  char ch = getchar();\n  while( !isdigit(ch) ) { if(ch == '-') f = -1;  ch = getchar();  }\n  while( isdigit(ch) ) {  x = (x << 1) + (x << 3) + (ch ^ 48);  ch = getchar();  }\n  return x * f;\n}\nconst int N = 2e6;\nint n, q, nex[N], first[N], v[N], w[N], dis[N], a[N], num;\nvoid add(int from,int to, int val) {\n  nex[++num] = first[from]; first[from] = num;\n  v[num] = to; w[num] = val;\n}\nint dep[N], siz[N], son[N], ff[N], top[N];\nvoid dfs(int x,int fa) {\n  dep[x] = dep[fa] + 1; ff[x] = fa; siz[x] = 1;\n  for (int i = first[x]; i; i = nex[i]) {\n    int to = v[i];\n    if (to == fa) continue;\n    dis[to] = dis[x] + w[i];\n    dfs(to, x); siz[x] += siz[to];\n    if (siz[to] > siz[ son[x] ]) son[x] = to;\n  }\n}\nvoid dfs2(int now,int x) {\n  top[now] = x;\n  if (son[now]) dfs2(son[now], x);\n  for (int i = first[now]; i; i = nex[i]) {\n    int to = v[i];\n    if (to == ff[now] || to == son[now]) continue;\n    dfs2(to, to);\n  }\n}\nint LCA(int x,int y) {\n  while (top[x] != top[y]) {\n    if (dep[ top[x] ] > dep[ top[y] ]) x = ff[top[x]];\n    else y = ff[top[y]];\n  }\n  return dep[x] < dep[y] ? x : y;\n}\nint dp[N], DP[N], g[N];\nvoid dfs3(int x,int fa) {\n  dp[x] = a[x];\n  for (int i = first[x]; i; i = nex[i]) {\n    int to = v[i], val = w[i];\n    if (to == fa) continue;\n    dfs3(to, x);\n    dp[x] += max(0ll, dp[to] - val * 2);\n  }\n}\nvoid d2p(int x,int fa) {\n  for (int i = first[x]; i; i = nex[i]) {\n    int to = v[i];\n    if (to == fa) continue;\n    DP[to] = dp[to] + max(0ll, DP[x] - max(0ll, dp[to]- w[i] * 2) - w[i] * 2);\n    g[to] = g[x] + min(dp[to], w[i] * 2);\n    d2p(to, x);\n  }  \n}\nsigned main () {\n  n = read(), q = read();\n  FOR (i, 1, n)\n    a[i] = read();\n  REP (i, 1, n) {\n    int u = read(), v = read(), w = read();\n    add(u, v, w), add(v, u, w);\n  }\n  dfs(1, 0), dfs2(1, 1);\n  dfs3(1, 0); DP[1] = dp[1]; d2p(1, 0);\n  FOR (i, 1, q) {\n    int u = read(), v = read(), l = LCA(u, v);\n    int ans = g[u] + g[v] - 2 * g[l] + DP[l];\n\t\tans -= (dis[u] - dis[l]) + (dis[v] - dis[l]);\n    cout << ans << \"\\n\";\n  }\n  return 0;\n}"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 155507323,
+    "contestId": 1000,
+    "creationTimeSeconds": 1651407402,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "Afterglow."
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 623,
+    "memoryConsumedBytes": 45875200,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define re register\r\n#define i64 long long\r\n// #define pair pair<int, int>\r\n// #define File(a) freopen(a\".in\", \"r\", stdin), freopen(a\".out\", \"w\", stdout);\r\n#define getchar() (p1 == p2 && (p2 = (p1 = buf) + fread (buf, 1, 1 << 21, stdin), p1 == p2) ? EOF : *p1++)\r\nchar buf[1 << 21], *p1 = buf, *p2 = buf;\r\ninline int read()\r\n{\r\n\tre int x = 0, f = 0;\r\n\tre char c = getchar();\r\n\twhile (!isdigit(c)) {if (c == '-') f = 1;c = getchar();}\r\n\twhile (isdigit(c)) {x = (x << 3) + (x << 1) + c - 48;c = getchar();}\r\n\treturn f ? -x : x;\r\n}\r\ninline string getstr()\r\n{\r\n\tstring res = \"\";\r\n\tre char ch = getchar();\r\n\twhile (isspace(ch)) ch = getchar();\r\n\twhile (!isspace(ch)) res.push_back(ch), ch = getchar();\r\n\treturn res;\r\n}\r\nconst int N = 3e5 + 5;\r\nint n;\r\nint a[N];\r\nint first[N], nex[N << 1], to[N << 1], w[N << 1], num;\r\ninline void Add(int u, int v, int val)\r\n{\r\n\tnex[++num] = first[u];\r\n\tfirst[u] = num;\r\n\tto[num] = v;\r\n\tw[num] = val;\r\n}\r\ni64 f[N], g[N], s[N];// \u5b50\u6811 \u5168\u5c40 \u524d\u7f00\u548c\r\ninline void dp1(int u, int fa)\r\n{\r\n\tf[u] = a[u];\r\n\tfor (re int i = first[u]; i; i = nex[i])\r\n\t{\r\n\t\tint v = to[i];\r\n\t\tif (v == fa) continue;\r\n\t\tdp1(v, u);\r\n\t\tf[u] += max(f[v] - w[i] - w[i], 0ll);\r\n\t}\r\n}\r\ninline void dp2(int u, int fa)\r\n{\r\n\tfor (re int i = first[u]; i; i = nex[i])\r\n\t{\r\n\t\tint v = to[i];\r\n\t\tif (v == fa) continue;\r\n\t\ti64 val = max(f[v] - w[i] - w[i], 0ll);\r\n\t\tg[v] = f[v] + max(g[u] - val - w[i] - w[i], 0ll);\r\n\t\ts[v] = s[u] + f[v] - val;\r\n\t\tdp2(v, u);\r\n\t}\r\n}\r\ni64 dis[N];\r\nint dep[N], son[N], siz[N], fa[N];\r\ninline void dfs1(int u)\r\n{\r\n\tson[u] = -1, siz[u] = 1;\r\n\tfor (re int i = first[u]; i; i = nex[i])\r\n\t{\r\n\t\tint v = to[i];\r\n\t\tif (dep[v]) continue;\r\n\t\tdep[v] = dep[u] + 1, fa[v] = u;\r\n\t\tdis[v] = dis[u] + w[i];\r\n\t\tdfs1(v);\r\n\t\tsiz[u] += siz[v];\r\n\t\tif (son[u] == -1 || siz[v] > siz[son[u]]) son[u] = v;\r\n\t}\r\n}\r\nint dfn[N], rnk[N], cnt, top[N];\r\ninline void dfs2(int u, int tp)\r\n{\r\n\tdfn[u] = ++cnt, rnk[cnt] = u, top[u] = tp;\r\n\tif (son[u] == -1) return;\r\n\tdfs2(son[u], tp);\r\n\tfor (re int i = first[u]; i; i = nex[i])\r\n\t{\r\n\t\tint v = to[i];\r\n\t\tif (v == fa[u] || v == son[u]) continue;\r\n\t\tdfs2(v, v);\r\n\t}\r\n}\r\ninline int LCA(int u, int v)\r\n{\r\n\twhile (top[u] != top[v])\r\n\t{\r\n\t\tif (dep[top[u]] > dep[top[v]]) u = fa[top[u]];\r\n\t\telse v = fa[top[v]];\r\n\t}\r\n\treturn dep[u] < dep[v] ? u : v;\r\n}\r\nsigned main()\r\n{\r\n\tn = read(); int T = read();\r\n\tfor (re int i = 1; i <= n; ++i) a[i] = read();\r\n\tfor (re int i = 1; i < n; ++i)\r\n\t{\r\n\t\tint u = read(), v = read(), val = read();\r\n\t\tAdd(u, v, val), Add(v, u, val);\r\n\t}\r\n\tdp1(1, 1), g[1] = f[1], dp2(1, 1);\r\n\tdep[1] = 1, dfs1(1), dfs2(1, 1);\r\n\twhile (T--)\r\n\t{\r\n\t\tint u = read(), v = read();\r\n\t\tint lca = LCA(u, v);\r\n\t\ti64 ans = s[u] + s[v] - (s[lca] << 1) + g[lca];\r\n\t\tans -= dis[u] + dis[v] - (dis[lca] << 1);\r\n\t\tprintf(\"%lld\\n\", ans);\r\n\t}\r\n\treturn 0;\r\n}"
+}

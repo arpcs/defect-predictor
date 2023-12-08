@@ -1,0 +1,36 @@
+{
+    "id": 164156614,
+    "contestId": 1000,
+    "creationTimeSeconds": 1657807578,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "bkifhr10"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 1981,
+    "memoryConsumedBytes": 131174400,
+    "source": "#include<bits/stdc++.h>\n#define inf 0x3f3f3f3f\n#define ll long long\n#define fi first\n#define se second\nusing namespace std;\nconst int N=3e5+5;\nint n,m,a[N],dep[N],f[N][20],pre[N][20],fa[N],w[N];\nll dp[N],dp2[N],f2[N][20];\nvector<pair<int,int>> g[N];\nint Lca(int x,int y) {\n    if(dep[x]<dep[y]) swap(x,y);\n    for(int i=19;i>=0;i--) {\n        if(dep[f[x][i]]>=dep[y]) x=f[x][i];\n    }\n    if(x==y) return x;\n    for(int i=19;i>=0;i--) {\n        if(f[x][i]!=f[y][i]) x=f[x][i],y=f[y][i];\n    }\n    return f[x][0];\n}\nvoid dfs(int u,int topf) {\n    dp[u]=a[u];\n    for(int i=1;i<=19;i++) f[u][i]=f[f[u][i-1]][i-1];\n    for(auto v:g[u]) {\n        if(v.fi!=topf) {\n            fa[v.fi]=u,w[v.fi]=v.se,dfs(v.fi,u),dp[u]+=max(0ll,dp[v.fi]-2*v.se);\n        }\n    }\n}\nvoid dfs2(int u,int topf) {\n    for(auto v:g[u]) {\n        if(v.fi!=topf) {\n            dp2[v.fi]=dp[v.fi]+max(0ll,dp2[u]-max(0ll,dp[v.fi]-2*v.se)-2*v.se);\n            dfs2(v.fi,u);\n        }\n    }\n}\nvoid dfs3(int u,int topf) {\n    dep[u]=dep[topf]+1,f[u][0]=topf,pre[u][0]=u,f2[u][0]=dp[u];\n    for(int i=1;i<=19;i++) {\n        f[u][i]=f[f[u][i-1]][i-1];\n        pre[u][i]=pre[fa[pre[u][i-1]]][i-1];\n        f2[u][i]=f2[u][i-1]+f2[f[u][i-1]][i-1];\n        if(f[u][i-1]) {\n            int x=pre[u][i-1];\n            f2[u][i]-=max(0ll,dp[x]-2*w[x])+w[x];\n        }\n    }\n    for(auto v:g[u]) {\n        if(v.fi!=topf) {\n            dfs3(v.fi,u);\n        }\n    }\n}\nsigned main() {\n    scanf(\"%d%d\",&n,&m);\n    for(int i=1;i<=n;i++) scanf(\"%d\",&a[i]); \n    for(int i=1;i<n;i++) {\n        int u,v,w;scanf(\"%d%d%d\",&u,&v,&w);\n        g[u].push_back(make_pair(v,w)),g[v].push_back(make_pair(u,w));\n    }\n    dfs(1,0),dp2[1]=dp[1],dfs2(1,0),dfs3(1,0);\n    for(int i=1;i<=m;i++) {\n        int u,v;scanf(\"%d%d\",&u,&v);\n        int u3(0),v3(0);\n        int u2(u),v2(v);\n        int lca=Lca(u,v);\n        ll res(0);\n        for(int j=19;j>=0;j--) {\n            if(dep[f[u][j]]>=dep[lca]) res+=f2[u][j]-max(0ll,dp[u3]-2*w[u3])-w[u3],u3=pre[u][j],u=f[u][j];\n        }\n        for(int j=19;j>=0;j--) {\n            if(dep[f[v][j]]>=dep[lca]) res+=f2[v][j]-max(0ll,dp[v3]-2*w[v3])-w[v3],v3=pre[v][j],v=f[v][j];\n        }\n        for(int j=19;j>=0;j--) {\n            if(dep[f[u2][j]]>dep[lca]) u2=f[u2][j];\n        }\n        for(int j=19;j>=0;j--) {\n            if(dep[f[v2][j]]>dep[lca]) v2=f[v2][j];\n        }\n        if(u2==lca&&v2==lca) {\n            res+=dp2[lca];\n        }\n        else if(u2==lca||v2==lca) {\n            if(u2==lca) swap(u2,v2);\n            res+=dp2[lca]-max(0ll,dp[u2]-2*w[u2])-w[u2];\n        }\n        else {\n            res+=dp2[lca]-max(0ll,dp[u2]-2*w[u2])-max(0ll,dp[v2]-2*w[v2])-w[u2]-w[v2];\n        }\n        printf(\"%lld\\n\",res);\n    }\n}\n\t\t \t\t \t\t \t\t\t\t\t   \t\t\t\t \t \t   \t\t"
+}

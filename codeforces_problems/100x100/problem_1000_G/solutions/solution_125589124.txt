@@ -1,0 +1,36 @@
+{
+    "id": 125589124,
+    "contestId": 1000,
+    "creationTimeSeconds": 1628693393,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "khuepr123"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 1263,
+    "memoryConsumedBytes": 182374400,
+    "source": "/*\r\n#pragma GCC optimize(\"Ofast\")\r\n#pragma GCC target(\"avx,avx2,fma\")\r\n#pragma GCC optimize(\"unroll-loops\")\r\n*/\r\n// lethal option\r\n\r\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define int long long\r\n#define pb push_back\r\n#define fi first\r\n#define se second\r\n#define endl \"\\n\"\r\n#define eb emplace_back\r\n#define ii pair<int, int>\r\n#define PI 3.141592653589793238462643383279502884\r\n#define ll long long\r\n#define for1(i, ff, gg) for(int i = ff; i <= gg; ++i)\r\n#define for2(i, ff, gg) for(int i = ff; i >= gg; --i)\r\nconst ll mod = 1e9 + 7;\r\nconst int maxN = 300005;\r\nconst ll oo = 1e18 + 7;\r\nint n, a[maxN];\r\nint x, y, z, k;\r\n\r\nint dp[maxN]; // max profit from subtree i\r\nint nxt[25][maxN]; // profit going up\r\nint contrib[maxN];\r\nint clutch[maxN];\r\nint par[25][maxN];\r\nvector<ii> vc[maxN];\r\nint h[maxN];\r\nint path[maxN];\r\n\r\nint ans;\r\nvoid inc(int &node, int &jp){\r\n    ans += nxt[jp][node];\r\n    node = par[jp][node];\r\n}\r\n\r\nvoid dfs(int node, int pare){\r\n    par[0][node] = pare;\r\n    h[node] = h[pare] + 1;\r\n    dp[node] = a[node];\r\n    for(ii cc : vc[node]){\r\n        int child = cc.se;\r\n        if(child == pare) continue;\r\n        dfs(child, node);\r\n        x = dp[child] - cc.fi * 2;\r\n        x = max(x, 0ll);\r\n        contrib[child] = x;\r\n        dp[node] += x;\r\n        path[child] = cc.fi;\r\n    }\r\n    for(ii cc : vc[node]){\r\n        int child = cc.se;\r\n        if(child == pare) continue;\r\n        nxt[0][child] = dp[node] - cc.fi - contrib[child];\r\n    }\r\n}\r\n\r\nvoid dfs2(int node, int pare){\r\n    for(ii cc : vc[node]){\r\n        int child = cc.se;\r\n        if(child == pare) continue;\r\n        clutch[child] = max(0ll, clutch[node] + nxt[0][child] - cc.fi);\r\n        dfs2(child, node);\r\n    }\r\n}\r\n\r\nsigned main(){\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(NULL);\r\n    cout.tie(NULL);\r\n    int o; cin >> n >> o;\r\n    for1(i, 1, n){\r\n        cin >> a[i];\r\n    }\r\n    for1(i, 2, n){\r\n        cin >> x >> y >> z;\r\n        vc[x].pb({z, y});\r\n        vc[y].pb({z, x});\r\n    }\r\n    h[0] = -1;\r\n    dfs(1, 0);\r\n    clutch[1] = 0;\r\n    dfs2(1, 0);\r\n    par[0][0] = 0;\r\n    for1(ds, 0, 20){\r\n        for1(i, 1, n){\r\n            par[ds + 1][i] = par[ds][par[ds][i]];\r\n            nxt[ds + 1][i] = nxt[ds][i] + nxt[ds][par[ds][i]];\r\n        }\r\n    }\r\n    while(o--){\r\n        cin >> x >> y;\r\n        if(h[x] < h[y]) swap(x, y);\r\n        int vole = h[x] - h[y];\r\n        // cout << x << \" \" << y << endl;\r\n        ans = dp[x];\r\n        for1(i, 0, 20){\r\n            if(vole & (1 << i)) inc(x, i);\r\n        }\r\n        if(x == y) z = x;\r\n        else{\r\n            ans += dp[y];\r\n            for2(i, 20, 0){\r\n                if(par[i][x] != par[i][y]){\r\n                    inc(x, i);\r\n                    inc(y, i);\r\n                }\r\n            }\r\n            z = par[0][y];\r\n            ans += dp[z] - contrib[x] - contrib[y] - path[x] - path[y];\r\n        }\r\n        cout << ans + clutch[z] << endl;\r\n    }\r\n}\r\n"
+}

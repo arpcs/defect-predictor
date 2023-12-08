@@ -1,0 +1,35 @@
+{
+    "id": 192095669,
+    "contestId": 976,
+    "creationTimeSeconds": 1675484765,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 976,
+        "index": "F",
+        "name": "Minimal k-covering",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 976,
+        "members": [
+            {
+                "handle": "lnyx"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1525099200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 3481600,
+    "source": "#include <cstdio>\r\n#include <iostream>\r\n#include <queue>\r\n#include <vector>\r\n#include <algorithm>\r\n\r\n#define pb push_back\r\n\r\nusing namespace std;\r\n\r\nconst int INF = 1e9;\r\nconst int N = 40007, M = 60007;\r\nint id[M], f[M], e[M], ne[M], h[N], idx;\r\nint n, m, K, S, T;\r\nint cur[N], dep[N], deg[N];\r\nqueue<int> q;\r\nvector<int> ans[N];\r\nint yiw[N], kk[N];\r\n\r\ninline int rd() {\r\n\tint x = 0, f = 1; char s = getchar();\r\n\twhile (s < '0' || s > '9') { if (s == '-') f = -f; s = getchar(); }\r\n\twhile (s >= '0' && s <= '9') {x = (x << 3) + (x << 1) + (s ^ 48); s = getchar(); }\r\n\treturn x * f;\r\n}\r\n\r\ntemplate<typename T> inline void wt(T x, char s) {\r\n\tint stk[114], top = 0;\r\n\tif (x < 0) putchar('-'), x = -x;\r\n\tdo stk[ ++ top] = x % 10, x /= 10; while (x);\r\n\twhile (top) putchar(stk[top -- ] + '0');\r\n\tputchar(s);\r\n}\r\n\r\ninline void add(int a, int b, int c, int d) {\r\n\tid[idx] = d, f[idx] = c, e[idx] = b, ne[idx] = h[a], h[a] = idx ++ ;\r\n\tf[idx] = 0, e[idx] = a, ne[idx] = h[b], h[b] = idx ++ ;\r\n}\r\n\r\ninline int bfs() {\r\n\twhile (q.size()) q.pop();\r\n\tfor (int i = 1; i <= n + m + 2; i ++ ) {\r\n\t\tdep[i] = cur[i] = -1;\r\n\t}\r\n\tq.push(S);\r\n\tdep[S] = 0, cur[S] = h[S];\r\n\twhile (q.size()) {\r\n\t\tint u = q.front();\r\n\t\tq.pop();\r\n\t\tfor (int i = h[u]; i != -1; i = ne[i]) {\r\n\t\t\tint v = e[i];\r\n\t\t\tif (dep[v] != -1 || ! f[i]) continue;\r\n\t\t\tdep[v] = dep[u] + 1;\r\n\t\t\tcur[v] = h[v];\r\n\t\t\tif (v == T) return 1;\r\n\t\t\tq.push(v);\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}\r\n\r\ninline int find(int u, int lim) {\r\n\tif (u == T || !lim) return lim;\r\n\tint flow = 0;\r\n\tfor (int i = cur[u]; i != -1; i = ne[i]) {\r\n\t\tint v = e[i];\r\n\t\tif (dep[v] != dep[u] + 1 || !min(lim - flow, f[i])) continue;\r\n\t\tcur[u] = i;\r\n\t\tint w = find(v, min(lim - flow, f[i]));\r\n\t\tif (!w) dep[v] = -1;\r\n\t\tf[i] -= w, f[i ^ 1] += w, flow += w; \r\n\t}\r\n\treturn flow;\r\n}\r\n\r\ninline int dinic() {\r\n\tint flow = 0, res = 0;\r\n\twhile (bfs()) {\r\n\t\twhile (flow = find(S, INF)) {\r\n\t\t\tres += flow;\r\n\t\t}\r\n\t}\r\n\treturn res;\r\n}\r\n\r\ninline void init() {\r\n\tfor (int i = 1; i <= n + m + 2; i ++ ) h[i] = -1;\r\n}\r\n\r\nint main() {\r\n\t#ifndef ONLINE_JUDGE\r\n\tfreopen(\"in.in\", \"r\", stdin);\r\n\tfreopen(\"out.out\", \"w\", stdout);\r\n\t#endif\r\n\tn = rd(), m = rd(), K = rd(), S = n + m + 1, T = n + m + 2;\r\n\tinit();\r\n\tfor (int i = 1; i <= K; i ++ ) {\r\n\t\tint u = rd(), v = rd();\r\n\t\tadd(u, v, 1, i);\r\n\t\tdeg[u] ++ , deg[v] ++ ;\r\n\t}\r\n\tint mn = INF;\r\n\tfor (int i = 1; i <= n + m; i ++ ) mn = min(mn, deg[i]);\r\n\tfor (int i = 1; i <= n; i ++ ) add(S, i, deg[i] - mn, 0);\r\n\tfor (int i = n + 1; i <= n + m; i ++ ) add(i, T, deg[i] - mn, 0);\r\n\tfor (int now = mn; now >= 0; now -- ) {\r\n\t\tdinic();\r\n\t\tfor (int i = 0; i < idx; i ++ ) {\r\n\t\t\tif (!f[i] && id[i]) ans[now + 1].pb(id[i]), id[i] = 0;\r\n\t\t}\r\n\t\tfor (int i = h[S]; i != -1; i = ne[i]) f[i] ++ ;\r\n\t\tfor (int i = h[T]; i != -1; i = ne[i]) f[i ^ 1] ++ ;\r\n\t}\r\n\tputs(\"0\");\r\n\tfor (int i = 1; i <= mn; i ++ ) {\r\n\t\tfor (int id : ans[i - 1]) ans[i].pb(id);\r\n\t\twt(ans[i].size(), ' ');\r\n\t\tsort(ans[i].begin(), ans[i].end());\r\n\t\tfor (int id : ans[i]) wt(id, ' ');\r\n\t\tputs(\"\");\r\n\t}\r\n\treturn 0;\r\n}"
+}

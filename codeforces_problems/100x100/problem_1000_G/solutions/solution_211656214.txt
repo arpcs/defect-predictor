@@ -1,0 +1,36 @@
+{
+    "id": 211656214,
+    "contestId": 1000,
+    "creationTimeSeconds": 1688156259,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "ziche"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 1309,
+    "memoryConsumedBytes": 62668800,
+    "source": "#include \"bits/stdc++.h\"\nusing namespace std;\n#define ios                                                                    \\\n  ios_base::sync_with_stdio(0);                                                \\\n  cin.tie(0);\n#define FOR(i, a, b) for (int i = a; i < b; i++)\n#define pb push_back\ntypedef long long ll;\ntypedef long double db;\ntypedef pair<int, int> ii;\nconst int N = 3e5 + 5;\nconst int mod = 1e9 + 7;\nint n, q, u, v, w;\nint a[N];\nvector<ii> adj[N];\nll dpU[N], dpD[N];\nint tb[19][N], lvl[N];\nll sv1[N], sv2[N], sv3[N];\nvoid dfs0(int u, int p) {\n  tb[0][u] = p;\n  for (int i = 1; i < 19; i++)\n    tb[i][u] = tb[i - 1][tb[i - 1][u]];\n  for (auto v : adj[u])\n    if (v.first != p) {\n      lvl[v.first] = lvl[u] + 1;\n      dfs0(v.first, u);\n    }\n}\nint LCA(int u, int v) {\n  int d = lvl[v] - lvl[u];\n  for (int i = 0; i < 19; i++)\n    if (d >> i & 1)\n      v = tb[i][v];\n  if (u == v)\n    return u;\n  for (int i = 18; i >= 0; i--)\n    if (tb[i][v] != tb[i][u])\n      v = tb[i][v], u = tb[i][u];\n  return tb[0][u];\n}\nvoid dfs1(int u, int p) {\n  dpD[u] = a[u];\n  for (auto v : adj[u])\n    if (v.first != p) {\n      dfs1(v.first, u);\n      dpD[u] += max(0ll, dpD[v.first] - 2 * v.second);\n    }\n}\nvoid dfs2(int u, int p) {\n  for (auto v : adj[u])\n    if (v.first != p) {\n      dpU[v.first] =\n          max(0ll, +dpU[u] + dpD[u] - max(0ll, dpD[v.first] - 2 * v.second) -\n                       2 * v.second);\n      dfs2(v.first, u);\n    }\n}\nvoid dfs3(int u, int p) {\n  for (auto v : adj[u])\n    if (v.first != p) {\n      sv2[v.first] = sv2[u] - v.second;\n      sv3[v.first] = sv3[u] + (dpD[u] - max(0ll, dpD[v.first] - 2 * v.second));\n      dfs3(v.first, u);\n    }\n}\nll getExeclusion(int from, int to) {\n  swap(from, to);\n  ll ret = sv2[to] - sv2[from];\n  ret += sv3[to] - sv3[from];\n  return ret;\n}\nint main() {\n  scanf(\"%d%d\", &n, &q);\n  FOR(i, 1, n + 1)\n  scanf(\"%d\", a + i);\n  FOR(i, 1, n) {\n    scanf(\"%d%d%d\", &u, &v, &w);\n    adj[u].pb(ii(v, w));\n    adj[v].pb(ii(u, w));\n  }\n  dfs0(1, 0);\n  dfs1(1, 0);\n  dfs2(1, 0);\n  dfs3(1, 0);\n  FOR(i, 0, q) {\n    scanf(\"%d%d\", &u, &v);\n    if (lvl[u] > lvl[v])\n      swap(u, v);\n    if (LCA(u, v) == u)\n      printf(\"%lld\\n\", dpU[u] + dpD[v] + getExeclusion(v, u));\n    else\n      printf(\"%lld\\n\", dpU[LCA(u, v)] + dpD[u] + dpD[v] +\n                           getExeclusion(u, LCA(u, v)) +\n                           getExeclusion(v, LCA(u, v)) - dpD[LCA(u, v)]);\n  }\n  return 0;\n}\n\n// hHVNNtJKVnvcJgvlFVolAsJPAPoeXAKlzbtTdfQWLuHraEXtBxdErwcvNCaMwugRyKtHTUCwvgUAcJlxoqWJlrcotPdhbuoMoMlCVPOjDhenMgyvusKFHPGiCalRzpSD"
+}

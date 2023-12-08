@@ -1,0 +1,37 @@
+{
+    "id": 56183632,
+    "contestId": 860,
+    "creationTimeSeconds": 1561689816,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 860,
+        "index": "E",
+        "name": "Arkady and a Nobody-men",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 860,
+        "members": [
+            {
+                "handle": "zhangleo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1505653500
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 21,
+    "timeConsumedMillis": 1310,
+    "memoryConsumedBytes": 41984000,
+    "source": "#include <cstdio>\r\n#include <cmath>\r\n#include <cstring>\r\n#include <cstdlib>\r\n#include <algorithm>\r\n#include <queue>\r\n#define rint register int\r\n#define rt1 rt<<1\r\n#define rt2 (rt<<1)|1\r\nusing namespace std;\r\nstruct Edge\r\n{\r\n\tint nxt;\r\n\tint to;\r\n}edge[500005];\r\nstruct Seg_tree\r\n{\r\n\tint lazy;\r\n\tint sum;\r\n}tree[2000005];\r\nint head[500005];\r\nint son[500005],siz[500005],ttop[500005],f[500005],nnum[500005],dep[500005],ret[500005],onum[500005],p[500005];\r\nint cnt=1,RT,tot=0,maxdep;\r\nint n;\r\nbool cmp(int a,int b)\r\n{\r\n\treturn dep[a]<dep[b];\r\n}\r\nvoid add(int l,int r)\r\n{\r\n\tedge[cnt].nxt=head[l];\r\n\tedge[cnt].to=r;\r\n\thead[l]=cnt++;\r\n}\r\nvoid dfs(int x)\r\n{\r\n\tsiz[x]=1,dep[x]=dep[f[x]]+1,maxdep=max(maxdep,dep[x]);\r\n\tfor(rint i=head[x];i;i=edge[i].nxt)\r\n\t{\r\n\t\tint to=edge[i].to;\r\n\t\tdfs(to);\r\n\t\tsiz[x]+=siz[to],son[x]=(siz[to]>siz[son[x]])?to:son[x];\r\n\t}\r\n}\r\nvoid redfs(int x,int topx)\r\n{\r\n\tttop[x]=topx,nnum[x]=++tot,onum[tot]=x;\r\n\tif(son[x])redfs(son[x],topx);\r\n\tfor(rint i=head[x];i;i=edge[i].nxt)\r\n\t{\r\n\t\tint to=edge[i].to;\r\n\t\tif(to==son[x])continue;\r\n\t\tredfs(to,to);\r\n\t}\r\n}\r\nvoid pushdown(int rt,int l,int r)\r\n{\r\n\ttree[rt1].lazy+=tree[rt].lazy;\r\n\ttree[rt2].lazy+=tree[rt].lazy;\r\n\tint mid=(l+r)>>1;\r\n\ttree[rt1].sum+=tree[rt].lazy*(mid-l+1);\r\n\ttree[rt2].sum+=tree[rt].lazy*(r-mid);\r\n\ttree[rt].lazy=0;\r\n}\r\nvoid update(int rt,int l,int r,int lq,int rq,int w)\r\n{\r\n\tif(l>=lq&&r<=rq)\r\n\t{\r\n\t\ttree[rt].lazy+=w;\r\n\t\ttree[rt].sum+=(r-l+1)*w;\r\n\t\treturn;\r\n\t}\r\n\tif(tree[rt].lazy)pushdown(rt,l,r);\r\n\tint mid=(l+r)>>1;\r\n\tif(lq<=mid)update(rt1,l,mid,lq,rq,w);\r\n\tif(rq>mid)update(rt2,mid+1,r,lq,rq,w);\r\n\ttree[rt].sum=tree[rt1].sum+tree[rt2].sum;\r\n}\r\nint query(int rt,int l,int r,int lq,int rq)\r\n{\r\n\tif(l>=lq&&r<=rq)return tree[rt].sum;\r\n\tif(tree[rt].lazy)pushdown(rt,l,r);\r\n\tint mid=(l+r)>>1;\r\n\tint s=0;\r\n\tif(lq<=mid)s+=query(rt1,l,mid,lq,rq);\r\n\tif(rq>mid)s+=query(rt2,mid+1,r,lq,rq);\r\n\treturn s;\r\n}\r\nint Query(int x)\r\n{\r\n\tint s=0;\r\n\twhile(x)s+=query(1,1,n,nnum[ttop[x]],nnum[x]),x=f[ttop[x]];\r\n\treturn s;\r\n}\r\nvoid Update(int x)\r\n{\r\n\twhile(x)update(1,1,n,nnum[ttop[x]],nnum[x],1),x=f[ttop[x]];\r\n}\r\nvoid bfs()\r\n{\r\n\tfor(int i=1;i<=n;i++)p[i]=i;\r\n\tsort(p+1,p+n+1,cmp);\r\n\tint las=1,llas=1;\r\n\tfor(int i=1;i<=maxdep;i++)\r\n\t{\r\n\t\twhile(dep[p[las]]==i)Update(p[las]),las++;\r\n\t\twhile(llas<las)ret[p[llas]]=Query(f[p[llas]]),llas++;\r\n\t}\r\n\tfor(int i=1;i<=n;i++)printf(\"%d\\n\",ret[i]-dep[i]+1);\r\n}\r\ninline int read()\r\n{\r\n\tint f=1,x=0;char ch=getchar();\r\n\twhile(ch<'0'||ch>'9'){if(ch=='-')f=-1;ch=getchar();}\r\n\twhile(ch>='0'&&ch<='9'){x=x*10+ch-'0';ch=getchar();}\r\n\treturn x*f;\r\n}\r\nint main()\r\n{\r\n\tn=read();\r\n\tfor(rint i=1;i<=n;++i)\r\n\t{\r\n\t\tf[i]=read();\r\n\t\tif(f[i])add(f[i],i);\r\n\t\telse RT=i;\r\n\t}\r\n\tdfs(RT),redfs(RT,RT),bfs();\r\n\treturn 0;\r\n}"
+}
