@@ -1,0 +1,36 @@
+{
+    "id": 102411948,
+    "contestId": 1076,
+    "creationTimeSeconds": 1608999317,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1076,
+        "index": "D",
+        "name": "Edge Deletion",
+        "type": "PROGRAMMING",
+        "rating": 1800,
+        "tags": [
+            "graphs",
+            "greedy",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1076,
+        "members": [
+            {
+                "handle": "akash456"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1542033300
+    },
+    "programmingLanguage": "GNU C11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 73,
+    "timeConsumedMillis": 1356,
+    "memoryConsumedBytes": 41472000,
+    "source": "#include<stdio.h>\r\n#include<stdlib.h>\r\nint visited[300001];int m,n;int count=0;long long int shortestpath[300001];\r\nstruct greedynode\r\n{\r\n   int number;long long int cost;int node;\r\n}*heap[1600001],*l,*tmp1,*tmp2;\r\nvoid insert(struct greedynode *a,long long int c,int no);\r\n struct greedynode * del();\r\n int min(int a,int b)\r\n {\r\n     if(a>b)return(b);\r\n     return(a);\r\n }\r\nvoid insert(struct greedynode *a,long long int c,int no)\r\n{\r\n    heap[++count]=a;a->cost=c;a->node=no;\r\n    int j;j=count;\r\n    while(j>=2)\r\n    {\r\n        if(heap[j/2]->cost>c)\r\n        {\r\n            heap[j]=heap[j/2];\r\n            j=j/2;continue;\r\n        }\r\n        else\r\n            break;\r\n    }\r\n    heap[j]=a;\r\n}\r\nstruct greedynode* del()\r\n{\r\n    struct greedynode *new1;\r\n    tmp1=heap[1];\r\n    heap[1]=heap[count--];new1=heap[1];\r\n    int j=1;\r\n    while(2*j+1<=count)\r\n    {\r\n        if((new1->cost<heap[2*j]->cost)&&(new1->cost<heap[2*j+1]->cost))\r\n        {\r\n            heap[j]=new1;\r\n            return(tmp1);\r\n        }\r\n        else if((heap[2*j]->cost)<=(heap[2*j+1]->cost))\r\n        {\r\n            heap[j]=heap[2*j];j=j*2;continue;\r\n        }\r\n        else if((heap[2*j]->cost)>(heap[2*j+1]->cost))\r\n        {\r\n            heap[j]=heap[2*j+1];j=j*2+1;continue;\r\n        }\r\n    }\r\n    if(2*j==count)\r\n    {\r\n        if(new1->cost>heap[2*j]->cost)\r\n        {\r\n            heap[j]=heap[2*j];heap[2*j]=new1;return(tmp1);\r\n        }\r\n        else\r\n        {\r\n            heap[j]=new1;return(tmp1);\r\n        }\r\n    }\r\n    heap[j]=new1;\r\n    return(tmp1);\r\n}\r\nstruct edge\r\n{\r\n    int node,edgenumber;struct edge *next;long long int cost;\r\n} *a[300001],*b[300001],*tmp;\r\nint main()\r\n{\r\n    int k;scanf(\"%d %d %d\",&n,&m,&k);int j;\r\n    for(j=0;j<=n;j++)\r\n    {\r\n        a[j]=NULL;b[j]=NULL;visited[j]=0;shortestpath[j]=100000000000000000;\r\n    }\r\n    visited[1]=1;shortestpath[1]=0;\r\n    for(j=0;j<m;j++)\r\n    {\r\n        int r,t;long long int cost;\r\n        scanf(\"%d %d %lld\",&r,&t,&cost);\r\n        tmp=(struct edge*)(malloc(sizeof(struct edge)));\r\n        tmp->next=NULL;tmp->node=t;tmp->cost=cost;\r\n        if(a[r]==NULL)\r\n        {\r\n            a[r]=tmp;b[r]=tmp;\r\n        }\r\n        else\r\n        {\r\n            b[r]->next=tmp;b[r]=tmp;\r\n        }\r\n        tmp->edgenumber=j+1;\r\n        tmp=(struct edge*)(malloc(sizeof(struct edge)));\r\n        tmp->next=NULL;tmp->node=r;tmp->cost=cost;\r\n        if(a[t]==NULL)\r\n        {\r\n            a[t]=tmp;b[t]=tmp;\r\n        }\r\n        else\r\n        {\r\n            b[t]->next=tmp;b[t]=tmp;\r\n        }\r\n        tmp->edgenumber=j+1;\r\n    }\r\n    tmp=a[1];int x=min(k,n-1);\r\n    printf(\"%d\\n\",x);\r\n    while(tmp!=NULL)\r\n    {\r\n        if(((tmp->cost)<shortestpath[tmp->node]))\r\n        {\r\n        tmp2=(struct greedynode*)(malloc(sizeof(struct greedynode)));\r\n        tmp2->number=tmp->edgenumber;\r\n        insert(tmp2,tmp->cost,tmp->node);shortestpath[tmp->node]=tmp->cost;\r\n        }\r\n        tmp=tmp->next;\r\n    }\r\n    while(count!=0)\r\n    {\r\n        l=del();\r\n        if(visited[l->node]==1)\r\n            continue;\r\n            if(x>0){printf(\"%d \",l->number);x--;}\r\n        else\r\n            break;\r\n        tmp=a[l->node];visited[l->node]=1;\r\n        while(tmp!=NULL)\r\n        {\r\n            if((visited[tmp->node]==0)&&((shortestpath[l->node]+(tmp->cost))<shortestpath[tmp->node]))\r\n            {\r\n                 tmp2=(struct greedynode*)(malloc(sizeof(struct greedynode)));\r\n                shortestpath[tmp->node]=shortestpath[l->node]+(tmp->cost);tmp2->number=tmp->edgenumber;\r\n                insert(tmp2,shortestpath[tmp->node],tmp->node);\r\n            }\r\n            tmp=tmp->next;\r\n        }\r\n    }\r\n   // for(j=1;j<=n;j++)\r\n    {\r\n     //   printf(\"%lld \",shortestpath[j]);\r\n    }\r\n    printf(\"\\n\");\r\n}\r\n"
+}

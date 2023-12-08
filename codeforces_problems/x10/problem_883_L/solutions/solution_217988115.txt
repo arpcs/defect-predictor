@@ -1,0 +1,34 @@
+{
+    "id": 217988115,
+    "contestId": 883,
+    "creationTimeSeconds": 1691572161,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 883,
+        "index": "L",
+        "name": "Berland.Taxi",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 883,
+        "members": [
+            {
+                "handle": "erogame"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1508573100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 90,
+    "timeConsumedMillis": 2744,
+    "memoryConsumedBytes": 6451200,
+    "source": "#include <bits/stdc++.h>\r\nusing ul = std::uint32_t;\r\nusing ull = std::uint64_t;\r\nusing li = std::int32_t;\r\nusing ll = std::int64_t;\r\nusing lf = double;\r\n\r\nstd::mt19937 rnd;\r\n\r\nclass node {\r\npublic:\r\n\tul weight = 0;\r\n\tul left = 0;\r\n\tul right = 0;\r\n\tul leftmost = 0;\r\n\tul rightmost = 0;\r\n\tul x = 0;\r\n\tull t = 0;\r\n};\r\n\r\nul n, k, m;\r\n\r\nconst ul maxk = 2e5;\r\n\r\nnode tree[maxk + 1];\r\n\r\nvoid update(ul v)\r\n{\r\n\ttree[v].leftmost = tree[v].left ? tree[tree[v].left].leftmost : v;\r\n\ttree[v].rightmost = tree[v].right ? tree[tree[v].right].rightmost : v;\r\n}\r\n\r\nvoid init(ul id, ul x, ull t)\r\n{\r\n\ttree[id].x = x;\r\n\ttree[id].t = t;\r\n\ttree[id].weight = rnd();\r\n\ttree[id].leftmost = id;\r\n\ttree[id].rightmost = id;\r\n}\r\n\r\nvoid merge(ul a, ul b, ul& v)\r\n{\r\n\tif (!a || !b) {\r\n\t\tv = a ^ b;\r\n\t\treturn;\r\n\t}\r\n\tif (tree[a].weight > tree[b].weight) {\r\n\t\tmerge(tree[a].right, b, tree[a].right);\r\n\t\tv = a;\r\n\t} else {\r\n\t\tmerge(a, tree[b].left, tree[b].left);\r\n\t\tv = b;\r\n\t}\r\n\tupdate(v);\r\n}\r\n\r\nul dis(ul x, ul y)\r\n{\r\n\treturn x < y ? y - x : x - y;\r\n}\r\n\r\nvoid splitbyxtid(ul v, ul& a, ul& b, ul x, ull t, ul id)\r\n{\r\n\tif (!v) {\r\n\t\ta = b = 0;\r\n\t\treturn;\r\n\t}\r\n\tif (tree[v].x != x ? tree[v].x < x : (tree[v].t != t ? tree[v].t < t : v < id)) {\r\n\t\tsplitbyxtid(tree[v].right, tree[v].right, b, x, t, id);\r\n\t\ta = v;\r\n\t} else {\r\n\t\tsplitbyxtid(tree[v].left, a, tree[v].left, x, t, id);\r\n\t\tb = v;\r\n\t}\r\n\tupdate(v);\r\n}\r\n\r\nvoid splitbyt(ul v, ul& a, ul& b, ull t)\r\n{\r\n\tif (!v) {\r\n\t\ta = b = 0;\r\n\t\treturn;\r\n\t}\r\n\tif (tree[v].t < t) {\r\n\t\tsplitbyt(tree[v].right, tree[v].right, b, t);\r\n\t\ta = v;\r\n\t} else {\r\n\t\tsplitbyt(tree[v].left, a, tree[v].left, t);\r\n\t\tb = v;\r\n\t}\r\n\tupdate(v);\r\n}\r\n\r\nvoid popfront(ul v, ul& a, ul& b)\r\n{\r\n\tif (tree[v].left) {\r\n\t\tpopfront(tree[v].left, a, tree[v].left);\r\n\t} else {\r\n\t\tb = tree[v].right;\r\n\t\ttree[v].right = 0;\r\n\t\ta = v;\r\n\t}\r\n\tupdate(v);\r\n}\r\n\r\nul rootwait;\r\nul rootworking;\r\n\r\nint main()\r\n{\r\n\trnd.seed(std::time(0));\r\n\tstd::scanf(\"%u%u%u\", &n, &k, &m);\r\n\tfor (ul i = 1; i <= k; ++i) {\r\n\t\tul x;\r\n\t\tstd::scanf(\"%u\", &x);\r\n\t\tinit(i, x, 0);\r\n\t\tul A, B;\r\n\t\tsplitbyxtid(rootwait, A, B, x, 0, i);\r\n\t\tmerge(A, i, A);\r\n\t\tmerge(A, B, rootwait);\r\n\t}\r\n\tfor (ul i = 1; i <= m; ++i) {\r\n\t\tull t;\r\n\t\tul a, b;\r\n\t\tstd::scanf(\"%llu%u%u\", &t, &a, &b);\r\n\t\twhile (rootworking && tree[tree[rootworking].leftmost].t <= t) {\r\n\t\t\tul A;\r\n\t\t\tpopfront(rootworking, A, rootworking);\r\n\t\t\tul B, C;\r\n\t\t\tsplitbyxtid(rootwait, B, C, tree[A].x, tree[A].t, A);\r\n\t\t\tmerge(B, A, B);\r\n\t\t\tmerge(B, C, rootwait);\r\n\t\t}\r\n\t\tif (!rootwait) {\r\n\t\t\tull spt = tree[tree[rootworking].leftmost].t;\r\n\t\t\twhile (rootworking && tree[tree[rootworking].leftmost].t == spt) {\r\n\t\t\t\tul A;\r\n\t\t\t\tpopfront(rootworking, A, rootworking);\r\n\t\t\t\tul B, C;\r\n\t\t\t\tsplitbyxtid(rootwait, B, C, tree[A].x, tree[A].t, A);\r\n\t\t\t\tmerge(B, A, B);\r\n\t\t\t\tmerge(B, C, rootwait);\r\n\t\t\t}\r\n\t\t}\r\n\t\tul newid = 0;\r\n\t\tul A, B;\r\n\t\tsplitbyxtid(rootwait, A, B, a, 0, 0);\r\n\t\tif (A && B && a - tree[tree[A].rightmost].x == tree[tree[B].leftmost].x - a) {\r\n\t\t\tstd::cerr << \"one\" << std::endl;\r\n\t\t\tul C, D, E, F;\r\n\t\t\tsplitbyxtid(A, C, D, tree[tree[A].rightmost].x, 0, 0);\r\n\t\t\tsplitbyxtid(B, E, F, tree[tree[B].leftmost].x + 1, 0, 0);\r\n\t\t\tif (tree[tree[D].leftmost].t < tree[tree[E].leftmost].t || tree[tree[D].leftmost].t == tree[tree[E].leftmost].t && tree[D].leftmost < tree[E].leftmost) {\r\n\t\t\t\tpopfront(D, newid, D);\r\n\t\t\t} else {\r\n\t\t\t\tpopfront(E, newid, E);\r\n\t\t\t}\r\n\t\t\tmerge(C, D, A);\r\n\t\t\tmerge(E, F, B);\r\n\t\t} else if (!B || A && a - tree[tree[A].rightmost].x < tree[tree[B].leftmost].x - a) {\r\n\t\t\tul C, D;\r\n\t\t\tsplitbyxtid(A, C, D, tree[tree[A].rightmost].x, 0, 0);\r\n\t\t\tpopfront(D, newid, D);\r\n\t\t\tmerge(C, D, A);\r\n\t\t} else {\r\n\t\t\tstd::cerr << \"three\" << std::endl;\r\n\t\t\tpopfront(B, newid, B);\r\n\t\t}\r\n\t\tmerge(A, B, rootwait);\r\n\t\tstd::printf(\"%u %llu\\n\", newid, std::max(tree[newid].t, t) + dis(tree[newid].x, a) - t);\r\n\t\tinit(newid, b, std::max(tree[newid].t, t) + dis(tree[newid].x, a) + dis(a, b));\r\n\t\tsplitbyt(rootworking, A, B, tree[newid].t);\r\n\t\tmerge(A, newid, A);\r\n\t\tmerge(A, B, rootworking);\r\n\t}\r\n\treturn 0;\r\n}\r\n\r\n"
+}

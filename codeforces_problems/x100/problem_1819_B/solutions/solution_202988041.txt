@@ -1,0 +1,39 @@
+{
+    "id": 202988041,
+    "contestId": 1819,
+    "creationTimeSeconds": 1682108329,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1819,
+        "index": "B",
+        "name": "The Butcher",
+        "type": "PROGRAMMING",
+        "points": 1250.0,
+        "rating": 1900,
+        "tags": [
+            "geometry",
+            "greedy",
+            "implementation",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1819,
+        "members": [
+            {
+                "handle": "dan_dolmatov"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1681549500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 218,
+    "memoryConsumedBytes": 0,
+    "source": "#ifdef LOCAL\r\n#define _GLIBCXX_DEBUG 1\r\n#endif\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define sz(a) (int)((a).size())\r\n\r\ntemplate <class T, class V> ostream & operator << (ostream & os, pair<T, V> const& p) { return os << \"{\" << p.first << \",\" << p.second << \"}\"; }\r\ntemplate <class T, class V, class Container> basic_ostream <T, V> & operator << (basic_ostream <T, V> & os, Container const& x) { os << \"[ \"; for (auto& y : x) os << y << \" \"; return os << \"]\"; }\r\ntemplate <typename T> bool chmin(T &a, T b) { return (b < a) ? a = b, 1 : 0; }\r\ntemplate <typename T> bool chmax(T &a, T b) { return (b > a) ? a = b, 1 : 0; }\r\n\r\n#ifdef LOCAL\r\nvoid deb_out() { cerr << endl; }\r\ntemplate <typename Head, typename... Tail> void deb_out(Head H, Tail... T) { cerr << \" \" << H; deb_out(T...); }\r\n#define deb(...) cerr << \"(\" << #__VA_ARGS__ << \"):\", deb_out(__VA_ARGS__)\r\n#else\r\n#define deb(...) 1\r\n#endif\r\n\r\nmt19937 rnd(chrono::steady_clock::now().time_since_epoch().count());\r\n\r\ntypedef long long ll;\r\ntypedef long double ld;\r\n\r\n#define int long long\r\n\r\nvoid solve_test() {\r\n    int n;\r\n    cin >> n;\r\n    vector<pair<int, int>> a(n);\r\n    int total = 0;\r\n    for (auto &p : a) {\r\n        cin >> p.first >> p.second;\r\n        total += p.first * p.second;\r\n    }\r\n    int pos_max = 0;\r\n    for (int i = 0; i < n; ++i) {\r\n        if (a[i].first * a[i].second > a[pos_max].first * a[pos_max].second) {\r\n            pos_max = i;\r\n        }\r\n    }\r\n    \r\n    pair<int, int> max_rec = a[pos_max];\r\n    \r\n    sort(a.begin(), a.end(), [&](pair<int, int> xx, pair<int, int> yy) {\r\n        if (max(xx.first, xx.second) != max(yy.first, yy.second))\r\n            return max(xx.first, xx.second) < max(yy.first, yy.second);\r\n        return min(xx.first, xx.second) < min(yy.first, yy.second);\r\n    });\r\n    multiset<pair<int, int>> st1, st2;\r\n    for (auto p : a) {\r\n        st1.insert(p);\r\n        st2.insert({p.second, p.first});\r\n    }\r\n    auto solve = [&](auto solve, int H, int W) -> bool {\r\n        if (!sz(st1))\r\n            return false;\r\n        if ((st1.begin()->first > H || st1.begin()->second > W) && (st2.begin()->second > H || st2.begin()->first > W))\r\n            return false;\r\n        if (sz(st1) == 1) {\r\n            return st1.begin()->first == H && st1.begin()->second == W;\r\n        }\r\n        auto it1 = st1.lower_bound({H, -1});\r\n        if (it1 != st1.end() && it1->first == H) {\r\n            if (it1->second > W)\r\n                return false;\r\n            int val = it1->second;\r\n            st2.erase(st2.find({it1->second, it1->first}));\r\n            st1.erase(it1);\r\n            return solve(solve, H, W - val);\r\n        }\r\n        auto it2 = st2.lower_bound({W, -1});\r\n        if (it2 != st2.end() && it2->first == W) {\r\n            if (it2->second > H)\r\n                return false;\r\n            int val = it2->second;\r\n            st1.erase(st1.find({it2->second, it2->first}));\r\n            st2.erase(it2);\r\n            return solve(solve, H - val, W);\r\n        }\r\n        return false;\r\n    };\r\n    \r\n    set<array<int, 2>> ans;\r\n    if (total % max_rec.first == 0 && solve(solve, max_rec.first, total / max_rec.first)) {\r\n        ans.insert({max_rec.first, total / max_rec.second});\r\n    }\r\n    st1.clear();\r\n    st2.clear();\r\n    for (auto p : a) {\r\n        st1.insert(p);\r\n        st2.insert({p.second, p.first});\r\n    }\r\n    if (total % max_rec.second == 0 && solve(solve, total / max_rec.second, max_rec.second)) {\r\n        ans.insert({total / max_rec.second, max_rec.second});\r\n    }\r\n    cout << sz(ans) << '\\n';\r\n    for (auto arr : ans) {\r\n        for (auto x : arr)\r\n            cout << x << \" \";\r\n        cout << '\\n';\r\n    }\r\n}\r\n\r\nsigned main() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n    int tt = 1;\r\n    cin >> tt;\r\n    for (int i = 1; i <= tt; ++i) {\r\n        solve_test();\r\n        #ifdef LOCAL\r\n        cout << \"_____________________\" << endl;\r\n        #endif\r\n    }\r\n    #ifdef LOCAL\r\n    cerr << endl << \"Elapsed time: \" << 1. * clock() / CLOCKS_PER_SEC << '\\n';\r\n    #endif\r\n    return 0;\r\n}\r\n"
+}

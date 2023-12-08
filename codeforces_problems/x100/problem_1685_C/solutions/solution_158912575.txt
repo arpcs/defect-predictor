@@ -1,0 +1,37 @@
+{
+    "id": 158912575,
+    "contestId": 1685,
+    "creationTimeSeconds": 1653946561,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1685,
+        "index": "C",
+        "name": "Bring Balance",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1685,
+        "members": [
+            {
+                "handle": "JhonnyZaz"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1653500100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 26,
+    "timeConsumedMillis": 140,
+    "memoryConsumedBytes": 21299200,
+    "source": "#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nconst int INITIAL_VALUE = 0;\r\n\r\ntemplate< typename T, const T& MAX(const T&, const T&) = std::max >\r\nstruct node\r\n{\r\n  int l, r, mid;\r\n  T mx;\r\n  std::unique_ptr<node<T>> L, R;\r\n\r\n  node( int ll, int rr ) : l( ll ), r ( rr )\r\n  {\r\n    mid = ( l + r ) >> 1;\r\n    if( l == r )\r\n    {\r\n      mx = INITIAL_VALUE;\r\n      return;\r\n    }\r\n    L = std::make_unique<node<T>>( l, mid );\r\n    R = std::make_unique<node<T>>( mid + 1, r );\r\n    mx = MAX( L-> mx, R-> mx );\r\n  }\r\n\r\n  void set_value( int x, const T &val )\r\n  {\r\n    if( l == r )\r\n    {\r\n      mx = val;\r\n      return;\r\n    }\r\n    ( x <= mid ? L : R ) -> set_value( x, val );\r\n    mx = MAX( L-> mx, R-> mx );\r\n  }\r\n\r\n  T query( int x, int y )\r\n  {\r\n    if( x == l && y == r )\r\n      return mx;\r\n\r\n    if( y <= mid ) return L->query( x, y );\r\n    if( x > mid ) return R->query( x, y );\r\n    return MAX( L->query( x, mid ), R ->query( mid + 1, y ) );\r\n  }\r\n\r\n\tint query_last( int x )\r\n\t{\r\n\t\tif( l == r )\r\n\t\t\treturn l;\r\n\r\n\t\treturn ( R -> mx >= x ? R -> query_last( x ) : L -> query_last( x ) );\r\n\t}\r\n};\r\n\r\nint main()\r\n{\r\n\tcin.tie( NULL );\r\n\tios_base::sync_with_stdio( 0 );\r\n\t\r\n\tint t;\r\n\tcin >> t;\r\n\twhile( t-- )\r\n\t{\r\n\t\tint n;\r\n\t\tcin >> n;\r\n\r\n\t\tstring s;\r\n\t\tcin >> s;\r\n\r\n\t\tvector< int > acum( 2 * n );\r\n\t\tfor( int i = 0, sum = 0; i < 2 * n; ++ i )\r\n\t\t{\r\n\t\t\tif( s[i] == '(' ) ++ sum;\r\n\t\t\telse --sum;\r\n\t\t\tacum[i] = sum;\r\n\t\t}\r\n\r\n\t\tnode<int> segment_tree( 0, 2 * n - 1 );\r\n\t\tfor( int i = 0; i < 2 * n; ++ i )\r\n\t\t\tsegment_tree.set_value( i, acum[i] );\r\n\r\n\t\tvector< int > mx ( 2 * n );\r\n\t\tfor( int i = 2 * n - 1; i >= 0; -- i )\r\n\t\t{\r\n\t\t\tif( i ) mx[i] = acum[i-1];\r\n\t\t\tif( i != 2 * n - 1 ) mx[i] = max( mx[i], mx[i+1] );\r\n\t\t}\r\n\r\n\t\tvector< pair< int, int > > ans;\r\n\r\n\t\tint best_r = -1, best_l = -1;\r\n\t\tfor( int i = 0; i < 2 * n; ++ i )\r\n\t\t{\r\n\t\t\t//try to go as far as possible\r\n\r\n\t\t\tconst int lower_bound = mx[i] - ( i == 0 ? 0 : acum[i-1] );\r\n\t\t\tint r = segment_tree.query_last( lower_bound );\r\n\r\n\t\t\tif( r > best_r )\r\n\t\t\t\tbest_r = r, best_l = i;\r\n\r\n\t\t\tif( acum[i] < 0 )\r\n\t\t\t{\r\n\t\t\t\tans.push_back( { best_l, best_r } );\r\n\t\t\t\ti = best_r;\r\n\t\t\t}\r\n\t\t}\r\n\r\n\t\tcout << ans.size() << '\\n';\r\n\t\tfor( auto [l,r] : ans )\r\n\t\t\tcout << ++l << \" \" << ++r << '\\n';\r\n\t}\r\n\r\n\treturn 0;\r\n}"
+}

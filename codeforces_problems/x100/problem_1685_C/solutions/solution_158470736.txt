@@ -1,0 +1,37 @@
+{
+    "id": 158470736,
+    "contestId": 1685,
+    "creationTimeSeconds": 1653510645,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1685,
+        "index": "C",
+        "name": "Bring Balance",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1685,
+        "members": [
+            {
+                "handle": "Merlininice"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1653500100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 26,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 6553600,
+    "source": "\r\n\r\n#include <stdio.h>\r\n#include <math.h>\r\n#include <algorithm>\r\n#include <string.h>\r\n#include <set>\r\n#include <map>\r\n#include <queue>\r\n#include <vector>\r\nusing namespace std;\r\nchar s[200005];\r\nint li[200005];\r\nint ri[200005];\r\nint prec[200005];\r\nint nextc[200005];\r\nint maxc[200005];\r\nint dp[200005];\r\nint pre[200005];\r\nint maxnext[200005];\r\nint max(int a, int b) {\r\n    return a>b?a:b;\r\n}\r\nint main() {\r\n    int i,j,k;\r\n    int t;\r\n    int n,m;\r\n    int a,b,c,d;\r\n    scanf(\"%d\", &t);\r\n    int cas = 0;\r\n    while (t--) {\r\n        cas++;\r\n        scanf(\"%d\", &n);\r\n        scanf(\"%s\", s);\r\n        n*=2;\r\n        int now_l = -1;\r\n        int now = 0;\r\n        int ln = 0;\r\n        maxc[0] = 0;\r\n        for (i=0;i<n;++i) {\r\n            if (s[i] == '(') {\r\n                now++;\r\n            } else {\r\n                now--;\r\n            }\r\n            if (now < 0 && now_l == -1) {\r\n                now_l = i;\r\n            }\r\n            if (now > 0 && now_l != -1) {\r\n                li[ln] = now_l;\r\n                ri[ln] = i - 1;\r\n                maxc[ln+1] = 0;\r\n                ln++;\r\n                now_l = -1;\r\n            }\r\n            maxc[ln] = max(maxc[ln], now);\r\n            //printf(\"maxc, ln %d, now %d\\n\", ln, now);\r\n            \r\n        }\r\n        if (now_l != -1) {\r\n            li[ln] = now_l;\r\n            ri[ln] = i - 1;\r\n            maxc[ln+1] = 0;\r\n            ln++;\r\n            now_l = -1;\r\n        }\r\n\r\n        for (i=0;i<ln;++i) {\r\n            //prec\r\n            j = li[i] - 1;\r\n            int now = 0;\r\n            prec[i] = 0;\r\n            while (true) {\r\n                if (j < 0)\r\n                    break;\r\n                if (i != 0 && j == ri[i-1]) {\r\n                    break;\r\n                }\r\n                if (s[j] == ')') {\r\n                    now++;\r\n                } else {\r\n                    now--;\r\n                }\r\n                if (prec[i] < now) {\r\n                    prec[i] = now;\r\n                    li[i] = j;\r\n                }\r\n                j--;\r\n            }\r\n            //nextc\r\n            j = ri[i] + 1;\r\n            now = 0;\r\n            nextc[i] = 0;\r\n            while (true) {\r\n                if (j >= n)\r\n                    break;\r\n                if (i != ln - 1 && j == li[i+1]) {\r\n                    break;\r\n                }\r\n                if (s[j] == '(') {\r\n                    now++;\r\n                } else {\r\n                    now--;\r\n                }\r\n                if (nextc[i] < now) {\r\n                    nextc[i] = now;\r\n                    ri[i] = j;\r\n                }\r\n                j++;\r\n            }\r\n        }\r\n        //for (i=0;i<ln;++i) {\r\n        //    printf(\"%d==%d\\n\", li[i], ri[i]);\r\n        //    printf(\"prec %d== nextc %d == maxc %d\\n\", prec[i], nextc[i], maxc[i]);\r\n        //}\r\n        if (ln == 0) {\r\n            printf(\"0\\n\");\r\n            continue;\r\n        }\r\n        int mxcost = 0;\r\n        maxnext[ln-1] = nextc[ln-1];\r\n        for (i=ln-2; i>=0; --i) {\r\n            maxnext[i] = max(maxnext[i + 1], nextc[i]);\r\n        }\r\n        int ans = 0;\r\n        for (i=0;i<=ln;++i) {\r\n            dp[i] = i;\r\n            pre[i] = i - 1;\r\n        }\r\n        for (i=0;i<ln;++i) {\r\n            int mxcost = 0;\r\n            if (dp[i + 1] > dp[i] + 1) {\r\n                dp[i + 1] = dp[i] + 1;\r\n                pre[i + 1] = i;\r\n            }\r\n            for (j=i+1;j<ln;++j) {\r\n                mxcost = max(mxcost, maxc[j]);\r\n                if (mxcost <= prec[i] + nextc[j]) {\r\n                    if (dp[j + 1] > dp[i] + 1) {\r\n                        dp[j + 1] = dp[i] + 1;\r\n                        pre[j + 1] = i;\r\n                    }\r\n                }\r\n                if (mxcost > prec[i] + maxnext[j]) {\r\n                    break;\r\n                }\r\n            }\r\n        }\r\n        printf(\"%d\\n\", dp[ln]);\r\n        k = ln;\r\n        while (k != 0) {\r\n            i = pre[k];\r\n            j = k - 1;\r\n            printf(\"%d %d\\n\", li[i] + 1, ri[j] + 1);\r\n            k = pre[k];\r\n        }\r\n    }\r\n    return 0;\r\n}\r\n"
+}

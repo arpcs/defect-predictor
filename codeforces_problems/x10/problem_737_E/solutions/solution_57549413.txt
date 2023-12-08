@@ -1,0 +1,38 @@
+{
+    "id": 57549413,
+    "contestId": 737,
+    "creationTimeSeconds": 1563814643,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 737,
+        "index": "E",
+        "name": "Tanya is 5!",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 3300,
+        "tags": [
+            "graph matchings",
+            "graphs",
+            "greedy",
+            "schedules"
+        ]
+    },
+    "author": {
+        "contestId": 737,
+        "members": [
+            {
+                "handle": "Mr.Robot_28"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1479632700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 140,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 204800,
+    "source": "#include <cstdio>\r\n#include <vector>\r\n#include <array>\r\n#include <algorithm>\r\n \r\nconst int INF=1e9+7;\r\n \r\nint ps[10];\r\n \r\nint desire[40][10];\r\n \r\nint child_deg[40];\r\nint machine_deg[10];\r\nint N,M;\r\n \r\n//first N are children\r\n//next M*2 are machines\r\nint graph[60][60];\r\nint deg[60];\r\nint match[60];\r\nbool vis[60];\r\nbool need[60];\r\n \r\nstd::vector<std::array<int,4> > segments;\r\n \r\nvoid add_edge(int child,int machine,int weight){\r\n  int u=child;\r\n  int v=machine+N;\r\n  graph[u][v]=graph[v][u]=weight;\r\n  deg[u]+=weight;\r\n  deg[v]+=weight;\r\n}\r\n \r\nbool dfs_match(int u){\r\n  if(vis[u]) return false;\r\n  vis[u]=true;\r\n  if(!need[u]&&match[u]!=-1){\r\n    match[match[u]]=-1;\r\n    match[u]=-1;\r\n    return true;\r\n  }\r\n  for(int v=0;v<60;v++){\r\n    if(!graph[u][v]) continue;\r\n    if(v==match[u]) continue;\r\n    if(match[v]==-1||dfs_match(match[v])){\r\n      match[u]=v,match[v]=u;\r\n      return true;\r\n    }\r\n  }\r\n  return false;\r\n}\r\n \r\nint find_matching(){\r\n  std::fill(need,need+60,true);\r\n  std::fill(match,match+60,-1);\r\n  for(int i=0;i<60;i++){\r\n    if(match[i]==-1){\r\n      std::fill(vis,vis+60,false);\r\n      dfs_match(i);\r\n    }\r\n  }\r\n  std::fill(deg,deg+60,0);\r\n  for(int i=0;i<60;i++){\r\n    for(int j=0;j<60;j++){\r\n      deg[i]+=graph[i][j];\r\n    }\r\n  }\r\n  int D=*std::max_element(deg,deg+60);\r\n  for(int i=0;i<60;i++){\r\n    need[i]=(deg[i]==D);\r\n  }\r\n  for(int i=0;i<60;i++){\r\n    if(need[i]&&match[i]==-1){\r\n      std::fill(vis,vis+60,false);\r\n      dfs_match(i);\r\n    }\r\n  }\r\n  return D;\r\n}\r\n \r\nint main(){\r\n  int B;\r\n  scanf(\"%d %d %d\",&N,&M,&B);\r\n  for(int i=0;i<M;i++){\r\n    scanf(\"%d\",&ps[i]);\r\n  }\r\n  for(int i=0;i<N;i++){\r\n    int K;\r\n    scanf(\"%d\",&K);\r\n    while(K-- > 0){\r\n      int X,T;\r\n      scanf(\"%d %d\",&X,&T);\r\n      X--;\r\n      desire[i][X]=T;\r\n      child_deg[i]+=T;\r\n      machine_deg[X]+=T;\r\n    }\r\n  }\r\n  int best_mask=0;\r\n  int best_wait=INF;\r\n  for(int mask=0;mask<(1<<M);mask++){\r\n    int cost=0;\r\n    for(int i=0;i<M;i++){\r\n      if(mask&(1<<i)){\r\n\tcost+=ps[i];\r\n      }\r\n    }\r\n    if(cost>B) continue;\r\n    int wait=0;\r\n    for(int i=0;i<N;i++){\r\n      wait=std::max(wait,child_deg[i]);\r\n    }\r\n    for(int i=0;i<M;i++){\r\n      if(mask&(1<<i)){\r\n\twait=std::max(wait,(machine_deg[i]+1)/2);\r\n      }else{\r\n\twait=std::max(wait,machine_deg[i]);\r\n      }\r\n    }\r\n    if(wait<best_wait){\r\n      best_wait=wait;\r\n      best_mask=mask;\r\n    }\r\n  }\r\n  printf(\"%d\\n\",best_wait);\r\n  for(int i=0;i<M;i++){\r\n    printf(\"%d\",(best_mask>>i)&1);\r\n  }\r\n  printf(\"\\n\");\r\n  for(int j=0;j<M;j++){\r\n    if(best_mask&(1<<j)){\r\n      machine_deg[j]=(machine_deg[j]+1)/2;\r\n    }\r\n    int flag=0;\r\n    for(int i=0;i<N;i++){\r\n      int use=std::min(machine_deg[j],desire[i][j]);\r\n      add_edge(i,(j<<1)|flag,use);\r\n      machine_deg[j]-=use;\r\n      desire[i][j]-=use;\r\n      if(desire[i][j]>0){\r\n\tflag=1;\r\n\tmachine_deg[j]=INF;\r\n\ti--;\r\n      }\r\n    }\r\n  }\r\n  /*\r\n  for(int i=0;i<60;i++){\r\n    for(int j=0;j<60;j++){\r\n      printf(\"%d\",graph[i][j]);\r\n    }\r\n    printf(\"\\n\");\r\n    }\r\n  */\r\n  int T=0;\r\n  while(true){\r\n    int D=find_matching();\r\n    if(D==0) break;\r\n    int stay=INF;\r\n    for(int i=0;i<60;i++){\r\n      if(match[i]!=-1){\r\n\tstay=std::min(stay,graph[i][match[i]]);\r\n      }else{\r\n\tstay=std::min(stay,D-deg[i]);\r\n      }\r\n    }\r\n    for(int i=0;i<N;i++){\r\n      if(match[i]!=-1){\r\n\tsegments.push_back({i+1,(match[i]-N)/2+1,T,stay});\r\n\tgraph[i][match[i]]-=stay;\r\n\tgraph[match[i]][i]-=stay;\r\n      }\r\n    }\r\n    T+=stay;\r\n  }\r\n  printf(\"%d\\n\",(int)segments.size());\r\n  for(std::array<int,4> seg:segments){\r\n    printf(\"%d %d %d %d\\n\",seg[0],seg[1],seg[2],seg[3]);\r\n  }\r\n  return 0;\r\n}\r\n"
+}

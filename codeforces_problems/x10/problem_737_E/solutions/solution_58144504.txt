@@ -1,0 +1,38 @@
+{
+    "id": 58144504,
+    "contestId": 737,
+    "creationTimeSeconds": 1564689778,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 737,
+        "index": "E",
+        "name": "Tanya is 5!",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 3300,
+        "tags": [
+            "graph matchings",
+            "graphs",
+            "greedy",
+            "schedules"
+        ]
+    },
+    "author": {
+        "contestId": 737,
+        "members": [
+            {
+                "handle": "Shayan.P"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1479632700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 52428800,
+    "source": "// only miss the sun when it starts to snow\n\n#include<bits/stdc++.h>\n\n#define F first\n#define S second\n#define PB push_back\n#define sz(s) int((s).size())\n#define bit(n,k) (((n)>>(k))&1)\n\n#pragma GCC optimize(\"Ofast,no-stack-protector,unroll-loops,fast-math\")\n#pragma GCC target(\"sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,avx,tune=native\")\n\nusing namespace std;\n\ntypedef long long ll;\ntypedef pair<int,int> pii;\ntypedef pair<ll,ll> pll;\n\nconst int maxn=44, totale= 2510 * 10 * 44, mdelta=2510 * maxn;\n\nint p[maxn], tdo[maxn][maxn], cnt[maxn], inth[maxn];\nbool done[maxn];\n\nint who[2][maxn][mdelta], delta, col[totale], va[totale], vb[totale];\nint arr[2*maxn];\n\nvector<int> vc1, vc2;\n\nvoid add(int a,int b,int id,int numb){\n    vc1.clear(), vc2.clear();\n    \n    for(int i=0;i<delta;i++){\n\t\n\tif(numb<=0) return;\n\t\n\tbool A=who[0][a][i]==-1;\n\tbool B=who[1][b][i]==-1;\n \n\tif(A && B){\n\t    va[id]=a, vb[id]=b, col[id]=i;\n\t    who[0][a][i]=id;\n\t    who[1][b][i]=id;\n\n\t    id++, numb--;\n\t}\n\telse if(A) vc2.PB(i);\n\telse if(B) vc1.PB(i);\n    }\n    if(numb<=0) return;\n\n    assert( min(sz(vc1) , sz(vc2)) >= numb );\n\n    while(numb--){\n\tint c1= vc1.back(), c2= vc2.back();\n\tvc1.pop_back(), vc2.pop_back();\n\t\n\tint C=0;\n\t\n\tint tmp=a;\n\twhile(true){\n\t    if(who[0][tmp][c1]==-1) break;\n\t    arr[C++]=who[0][tmp][c1];\n\t    tmp=vb[ who[0][tmp][c1] ];\n\t    \n\t    if(who[1][tmp][c2]==-1) break;\n\t    \n\t    arr[C++]=who[1][tmp][c2];\n\t    tmp=va[ who[1][tmp][c2] ];\n\t}\n\tswap(who[0][a][c1], who[0][a][c2]);\n\t\n\tfor(int i=0;i<C;i++){\n\t    int u= (i&1 ? va[arr[i]] : vb[arr[i]]);\n\t    bool side= i&1 ? 0 : 1;\n\t    swap(who[side][u][c1], who[side][u][c2]);\n\t    \n\t    if(col[arr[i]] == c1) col[arr[i]]=c2;\n\t    else col[arr[i]]=c1;\n\t}\n\t\n\tva[id]=a, vb[id]=b, col[id]=c1;\n\twho[0][a][c1]=id;\n\twho[1][b][c1]=id;\n    }\n}\n\nint main(){\n    memset(who,-1,sizeof who);\n    \n    int n,m,B; scanf(\"%d%d%d\",&n,&m,&B);\n    int total=0;\n    \n    for(int i=0;i<m;i++)\n\tscanf(\"%d\",&p[i]);\n    \n    for(int i=0;i<n;i++){\n\tint q; scanf(\"%d\",&q);\n\tint sm=0;\n\twhile(q--){\n\t    int a,b; scanf(\"%d%d\",&a,&b);\n\t    tdo[i][--a]=b;\n\t    sm+=b;\n\t    cnt[a]+=b;\n\t}\n\tdelta=max(delta, sm);\n\ttotal+=sm;\n    }\n\n    while(true){\n\tint id=-1;\n\tfor(int i=0;i<m;i++){\n\t    if(p[i]>B || done[i]) continue;\n\t    if(id==-1) id=i;\n\t    if(cnt[id] < cnt[i]) id=i;\n\t}\n\tif(id==-1) break;\n\tB-=p[id];\n\tdone[id]=1;\n\tdelta=max(delta, (cnt[id]+1)/2 );\n    }\n\n    printf(\"%d\\n\",delta);\n    for(int i=0;i<m;i++)\n\tprintf(\"%d\",done[i]);\n    printf(\"\\n\");\n\n    int C=0;\n    \n    for(int i=0;i<n;i++){\n\tfor(int j=0;j<m;j++){\n\t    if(done[j]){\n\t\tint CC= tdo[i][j]/2;\n\t\tadd(i,2*j,C,CC);\n\t\tadd(i,2*j+1, C+CC, tdo[i][j]-CC); \n\t    }\n\t    else{\n\t\tadd(i,2*j,C,tdo[i][j]);\n\t    }\n\t    C+= tdo[i][j];\n\t}\n    }\n\n    vector<pair<pii,pii> > ANS;\n    vector<int> comp;\n    \n    C=0;\n    for(int i=0;i<n;i++){\n\tfor(int j=0;j<m;j++){\n\t    comp.clear();\n\t    for(int k=0;k<tdo[i][j];k++){\n\t\tcomp.PB(col[C++]);\n\t    }\n\t    sort(comp.begin(), comp.end() );\n\n\t    int start=-2, numb=0;\n\n\t    for(auto x:comp){\n\t\tif(start+numb == x){\n\t\t    numb++;\n\t\t}\n\t\telse{\n\t\t    if(start!=-2) ANS.PB({{i+1,j+1},{start,numb}});\n\t\t    numb=1, start=x;\n\t\t}\n\t    }\n\t    if(start!=-2) ANS.PB({{i+1,j+1},{start,numb}});\n\t}\n    }\n    cout<<sz(ANS)<<\"\\n\";\n    for(auto x:ANS){\n\tprintf(\"%d %d %d %d\\n\",x.F.F,x.F.S,x.S.F,x.S.S);\n    }\n    return 0;\n}\n// Deathly mistakes:\n//  * Read the problem carfully.\n//  * Check maxn.\n//  * Overflows.\n\n"
+}

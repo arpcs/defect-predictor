@@ -1,0 +1,37 @@
+{
+    "id": 165917706,
+    "contestId": 1706,
+    "creationTimeSeconds": 1658941221,
+    "relativeTimeSeconds": 1221,
+    "problem": {
+        "contestId": 1706,
+        "index": "B",
+        "name": "Making Towers",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 1100,
+        "tags": [
+            "dp",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1706,
+        "members": [
+            {
+                "handle": "rochak._514"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1658940000
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 19,
+    "timeConsumedMillis": 78,
+    "memoryConsumedBytes": 39731200,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <sstream>\r\n#include <algorithm>\r\n#include <bits/stdc++.h>\r\n#include <cmath>\r\n#include <cstdio>\r\n\r\nusing namespace std;\r\n\r\n#define ll long long\r\n#define ld long double\r\n#define lli long long int\r\n#define pll pair<ll, ll>\r\n#define pii pair<int, int>\r\n#define pdd pair<double, double>\r\n#define ordered_set tree<pll, null_type, less<pll>, rb_tree_tag, tree_order_statistics_node_update>\r\n\r\n#define pb push_back\r\n#define mp make_pair\r\n#define rep(i, a, b) for (ll i = a; i < b; i++)\r\n#define nrep(i, a, b) for (ll i = a; i >= b; i--)\r\n\r\n#define sortv(v) sort(v.begin(), v.end())\r\n#define rev(p) reverse(p.begin(), p.end())\r\n\r\n#define v vector\r\n#define pii pair<int, int>\r\n\r\n#define fi first\r\n#define se second\r\n#define all(x) x.begin(), x.end()\r\n#define sz(x) (int)x.size()\r\n#define PI 3.14159265358979323846\r\n#define len lenght()\r\n\r\n#define ub(v, val) upper_bound(v.begin(), v.end(), val)\r\n#define lb(v, val) lower_bound(v.begin(), v.end(), val)\r\n\r\n#define IOS                           \\\r\n    ios_base::sync_with_stdio(false); \\\r\n    cin.tie(NULL);                    \\\r\n    cout.tie(NULL);\r\n\r\nlong long int mod = 1e9 + 7;\r\nlong long int inf = 9 * 1e18;\r\nconst ll maxn = 2e5 + 100;\r\n\r\n// Sieve of Eratosthenes\r\nconst int MAXN = 1.1e6;\r\nint spf[MAXN];\r\nvoid sieve()\r\n{\r\n    for (int i = 1; i < MAXN; i++)\r\n        spf[i] = 1;\r\n    for (int i = 2; i * i < MAXN; i++)\r\n    {\r\n        for (int j = i * i; j < MAXN; j += i * i)\r\n            spf[j] = i;\r\n    }\r\n}\r\n\r\n// Factorials and Inverse Factorials\r\nll fact[MAXN], inv[MAXN], invFact[MAXN];\r\nvoid factGen()\r\n{\r\n    fact[0] = inv[1] = fact[1] = invFact[0] = invFact[1] = 1;\r\n    for (ll i = 2; i < MAXN; i++)\r\n    {\r\n        fact[i] = (fact[i - 1] * i) % mod;\r\n        inv[i] = mod - (inv[mod % i] * (mod / i) % mod);\r\n        invFact[i] = (inv[i] * invFact[i - 1]) % mod;\r\n    }\r\n}\r\n\r\n// Function for extended Euclidean Algorithm\r\nint gcdExtended(int a, int b, int *x, int *y)\r\n{\r\n    if (a == 0)\r\n    {\r\n        *x = 0, *y = 1;\r\n        return b;\r\n    }\r\n    int x1, y1;\r\n    int gcd = gcdExtended(b % a, a, &x1, &y1);\r\n    *x = y1 - (b / a) * x1;\r\n    *y = x1;\r\n    return gcd;\r\n}\r\n\r\nll gcd(ll a, ll b)\r\n{\r\n    if (b == 0)\r\n        return a;\r\n    return gcd(b, a % b);\r\n}\r\n\r\nll lcm(ll a, ll b)\r\n{\r\n    return (a * b) / gcd(a, b);\r\n}\r\n\r\nstruct DSU\r\n{\r\n    vector<ll> r, par;\r\n    ll mx = 1;\r\n    DSU(ll N)\r\n    {\r\n        r = vector<ll>(N, 1);\r\n        par = vector<ll>(N);\r\n        iota(par.begin(), par.end(), 0);\r\n    }\r\n    ll root(int x)\r\n    {\r\n        if (par[x] == x)\r\n            return x;\r\n        return par[x] = root(par[x]);\r\n    }\r\n\r\n    bool unite(int x, int y)\r\n    {\r\n        x = root(x);\r\n        y = root(y);\r\n        if (x == y)\r\n            return false;\r\n        if (r[x] < r[y])\r\n            swap(x, y);\r\n        r[x] += r[y];\r\n        mx = max(mx, r[x]);\r\n        par[y] = par[x];\r\n        return true;\r\n    }\r\n\r\n    ll size(ll x)\r\n    {\r\n        return r[root(x)];\r\n    }\r\n};\r\n\r\nint gcd(int a, int b)\r\n{\r\n    if (a == 0)\r\n        return b;\r\n    return gcd(b % a, a);\r\n}\r\n\r\nint t, n;\r\nint dp[2][MAXN];\r\n\r\nvoid solve()\r\n{\r\n    ll n;\r\n    cin >> n;\r\n\r\n    rep(i, 0, 2)\r\n    {\r\n        rep(j, 1, n + 1)\r\n        {\r\n            dp[i][j] = 0;\r\n        }\r\n    }\r\n    rep(i, 1, n + 1)\r\n    {\r\n        ll x;\r\n        cin >> x;\r\n        dp[i & 1][x] = max(dp[i & 1][x], dp[(i ^ 1) & 1][x] + 1);\r\n    }\r\n\r\n    for (int i = 1; i <= n; i++)\r\n        cout << max(dp[0][i], dp[1][i]) << \" \\n\"[i == n];\r\n}\r\n\r\nint main()\r\n{\r\n    IOS;\r\n    int t = 1;\r\n    cin >> t;\r\n    rep(i, 1, t + 1)\r\n    {\r\n        solve();\r\n    }\r\n    return 0;\r\n}"
+}

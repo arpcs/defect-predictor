@@ -1,0 +1,39 @@
+{
+    "id": 207423132,
+    "contestId": 1819,
+    "creationTimeSeconds": 1685163165,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1819,
+        "index": "B",
+        "name": "The Butcher",
+        "type": "PROGRAMMING",
+        "points": 1250.0,
+        "rating": 1900,
+        "tags": [
+            "geometry",
+            "greedy",
+            "implementation",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1819,
+        "members": [
+            {
+                "handle": "jz796"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1681549500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 9625600,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef pair<ll,ll> pll;\r\n#define F first\r\n#define S second\r\nconst int mxN = 2e5+2;\r\n\r\npll a[mxN], dp[mxN][2];\r\n\r\nint ub (int v, int l, int r){\r\n    int ret = -1;\r\n    while (l <= r){\r\n        int m = l + (r - l) / 2;\r\n        if (a[m].F == v){\r\n            ret = m;\r\n            l = m + 1;\r\n        } else if (a[m].F > v){\r\n            r = m - 1;\r\n        } else {\r\n            l = m + 1;\r\n        }\r\n    }\r\n    return ret;\r\n}\r\n\r\nvoid solve(){\r\n    int n;\r\n    cin >> n;\r\n    for (int i = 1; i <= n; i++){\r\n        cin >> a[i].F >> a[i].S;\r\n    }\r\n\r\n    sort(a+1, a+n+1);\r\n\r\n    for (int i = 1; i <= n; i++){\r\n        int r = ub(a[i].F, i, n);\r\n        //cout << r << '\\n';\r\n        if (a[i] == a[r]){\r\n            pll x = {a[i].F, a[i].S * (r - i + 1)};\r\n            pll y = {a[i].F * (r - i + 1), a[i].S};\r\n\r\n            if (i == 1) { dp[r][0] = x; dp[r][1] = y; i = r; continue; }\r\n            if (x.F == dp[i-1][0].F || x.S == dp[i-1][0].S){\r\n                if (x.F == dp[i-1][0].F) dp[r][0] = {x.F, x.S + dp[i-1][0].S};\r\n                else dp[r][0] = {x.F + dp[i-1][0].F, x.S};\r\n            } else if (x.F == dp[i-1][1].F || x.S == dp[i-1][1].S){\r\n                if (x.F == dp[i-1][1].F) dp[r][0] = {x.F, x.S + dp[i-1][1].S};\r\n                else dp[r][0] = {x.F + dp[i-1][1].F, x.S};\r\n            } else dp[r][0] = {-1, -1};\r\n\r\n            if (y.F == dp[i-1][0].F || y.S == dp[i-1][0].S){\r\n                if (y.F == dp[i-1][0].F) dp[r][1] = {y.F, y.S + dp[i-1][0].S};\r\n                else dp[r][1] = {y.F + dp[i-1][0].F, y.S};\r\n            } else if (y.F == dp[i-1][1].F || y.S == dp[i-1][1].S){\r\n                if (y.F == dp[i-1][1].F) dp[r][1] = {y.F, y.S + dp[i-1][1].S};\r\n                else dp[r][1] = {y.F + dp[i-1][1].F, y.S};\r\n            } else dp[r][1] = {-1, -1};\r\n\r\n        } else {\r\n            pll x = {a[i].F, 0};\r\n            for (int j = i; j <= r; j++){\r\n                x.S += a[j].S;\r\n            }\r\n\r\n            if (i == 1) { dp[r][0] = x; i = r; continue; }\r\n            if (x.F == dp[i-1][0].F || x.S == dp[i-1][0].S){\r\n                if (x.F == dp[i-1][0].F) dp[r][0] = {x.F, x.S + dp[i-1][0].S};\r\n                else dp[r][0] = {x.F + dp[i-1][0].F, x.S};\r\n            } else if (x.F == dp[i-1][1].F || x.S == dp[i-1][1].S){\r\n                if (x.F == dp[i-1][1].F) dp[r][0] = {x.F, x.S + dp[i-1][1].S};\r\n                else dp[r][0] = {x.F + dp[i-1][1].F, x.S};\r\n            } else dp[r][0] = {-1, -1};\r\n        }\r\n\r\n        i = r;\r\n    }\r\n\r\n    set<pll> st;\r\n    if (dp[n][0].F != -1){\r\n        st.insert(dp[n][0]);\r\n    }\r\n    if (dp[n][1].F != -1){\r\n        st.insert(dp[n][1]);\r\n    }\r\n\r\n    cout << st.size() << '\\n';\r\n    for (auto &p : st){\r\n        cout << p.F << ' ' << p.S << '\\n';\r\n    }\r\n}\r\n\r\n//2 2\r\n//2 2\r\n//2 2 -> 2 6 or 6 2\r\n\r\n//4 6 or 6 4\r\n//\r\n//4 3 -> 6 6 or 6 6\r\n//6 6 -> 11 6 or 6 11\r\n//4 11 -> -1 or 10 11\r\n\r\n\r\nint main(){\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0);\r\n\r\n    int t; cin >> t;\r\n    while (t--) solve();\r\n}"
+}
