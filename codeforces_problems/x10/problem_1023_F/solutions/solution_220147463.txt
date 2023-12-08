@@ -1,0 +1,38 @@
+{
+    "id": 220147463,
+    "contestId": 1023,
+    "creationTimeSeconds": 1692879847,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1023,
+        "index": "F",
+        "name": "Mobile Phone Network",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 2600,
+        "tags": [
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1023,
+        "members": [
+            {
+                "handle": "xuay"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1534516500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 66,
+    "timeConsumedMillis": 2183,
+    "memoryConsumedBytes": 46080000,
+    "source": "// LUOGU_RID: 122606586\n#include<bits/stdc++.h>\r\n#define ll long long\r\n#define endl '\\n'\r\n\r\nusing namespace std;\r\n\r\nconst int MAX=5e5+50;\r\n\r\ninline int read()\r\n{\r\n    int x=0,f=1;char c=getchar();\r\n    while(c<'0'||c>'9') {if(c=='-') f=-1;c=getchar();}\r\n    while(c>='0'&&c<='9') {x=x*10+c-48;c=getchar();}\r\n    return x*f;\r\n}\r\n\r\nint fa[MAX];\r\nint from(int x) {\r\n    if(x==fa[x]) return x;\r\n    return fa[x]=from(fa[x]);\r\n}\r\n\r\nstruct Edge{\r\n    int to,nxt,w;\r\n}e[MAX*2];\r\nint head[MAX],tot;\r\nvoid add(int a,int b,int w)\r\n{\r\n    e[++tot]={b,head[a],w};\r\n    head[a]=tot;\r\n}\r\n\r\nstruct EED{\r\n    int from,to,w;\r\n    bool operator < (const EED a) {\r\n        return w < a.w;\r\n    }\r\n    bool pd;\r\n}ste[MAX];\r\n\r\nint dfn_num;\r\nint dfn[MAX],dep[MAX],son[MAX],top[MAX],size[MAX],w[MAX],mem[MAX];\r\nvoid dfs1(int x,int fat)\r\n{\r\n    fa[x]=fat;\r\n    dep[x]=dep[fat]+1;\r\n    size[x]=1;\r\n\r\n    for(int i=head[x];i;i=e[i].nxt) \r\n    {\r\n        int v=e[i].to;\r\n        if(dep[v]) continue;\r\n        w[v]=e[i].w;\r\n        dfs1(v,x);\r\n        if(size[v]>size[son[x]])\r\n            son[x]=v;\r\n        size[x]+=size[v];\r\n    }\r\n}\r\n\r\nvoid dfs2(int x,int fat)\r\n{\r\n    dfn[x]=++dfn_num;\r\n    mem[dfn_num]=w[x]?0:1;\r\n    top[x]=fat;\r\n    \r\n    if(son[x]) dfs2(son[x],top[x]);\r\n    for(int i=head[x];i;i=e[i].nxt)\r\n    {\r\n        int v=e[i].to;\r\n        if(v!=fa[x]&&v!=son[x]) \r\n            dfs2(v,v);\r\n    }\r\n}\r\n\r\nstruct STREE{\r\n\r\n    #define lson (x<<1)\r\n    #define rson (x<<1|1)\r\n    #define mid ((l+r)>>1)\r\n\r\n    int num[MAX*4];\r\n\r\n    void build(int x,int l,int r)\r\n    {\r\n        if(l==r) {\r\n            num[x]=mem[l]; return ;\r\n        }\r\n        build(lson,l,mid); build(rson,mid+1,r);\r\n        num[x]=num[lson]+num[rson];\r\n    }\r\n\r\n    int find(int x,int l,int r,int tl,int tr)\r\n    {\r\n        if(l>tr||r<tl||!num[x]) return 0;\r\n        if(l>=tl&&r<=tr) { int k=num[x]; num[x]=0; return k; }\r\n        int sum=find(lson,l,mid,tl,tr)+find(rson,mid+1,r,tl,tr);\r\n        num[x]=num[lson]+num[rson];\r\n        return sum;\r\n    }\r\n\r\n    #undef lson\r\n    #undef rson\r\n    #undef mid\r\n\r\n}tree;\r\n\r\nll ans;\r\nint n,k,m;\r\nvoid solve(int u,int v,int k) {\r\n    int tot=0;\r\n    while(top[u]!=top[v]) {\r\n        if(dep[top[u]]<dep[top[v]]) swap(u,v);\r\n        tot+=tree.find(1,1,n,dfn[top[u]],dfn[u]);\r\n        u=fa[top[u]];\r\n    }\r\n    if(dep[u]<dep[v]) swap(u,v);\r\n    tot+=tree.find(1,1,n,dfn[v]+1,dfn[u]);\r\n    ans+=1ll*tot*k;\r\n}\r\n\r\nsigned main()\r\n{\r\n    n=read(),k=read(),m=read();\r\n    iota(fa+1,fa+n+1,1);\r\n    for(int i=1;i<=k;i++)\r\n    {\r\n        int a=read(),b=read();\r\n        add(a,b,0); add(b,a,0);\r\n        fa[from(a)]=from(b);\r\n    }\r\n\r\n    for(int i=1;i<=m;i++)\r\n    {\r\n        ste[i].from=read();\r\n        ste[i].to=read();\r\n        ste[i].w=read();\r\n    }\r\n    sort(ste+1,ste+m+1);\r\n    for(int i=1;i<=m;i++)\r\n    {\r\n        if(from(ste[i].from)==from(ste[i].to)) continue;\r\n        add(ste[i].from,ste[i].to,ste[i].w);\r\n        add(ste[i].to,ste[i].from,ste[i].w);\r\n        fa[from(ste[i].from)]=fa[from(ste[i].to)];\r\n        ste[i].pd=true;\r\n    }\r\n\r\n    memset(fa,0,sizeof(fa));\r\n    w[1]=1; dfs1(1,0); dfs2(1,1);\r\n    tree.build(1,1,n);\r\n\r\n    for(int i=1;i<=m;i++)\r\n    {\r\n        if(ste[i].pd) continue;\r\n        solve(ste[i].from,ste[i].to,ste[i].w);\r\n    }\r\n    if(tree.num[1]) cout<<-1<<endl;\r\n    else cout<<ans<<endl;\r\n}"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 221256163,
+    "contestId": 1023,
+    "creationTimeSeconds": 1693481404,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1023,
+        "index": "F",
+        "name": "Mobile Phone Network",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 2600,
+        "tags": [
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1023,
+        "members": [
+            {
+                "handle": "Sonnety"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1534516500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 66,
+    "timeConsumedMillis": 1871,
+    "memoryConsumedBytes": 69222400,
+    "source": "// LUOGU_RID: 123421605\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define rg register int\r\n#define il inline\r\n#define MYMAX 1e9+7\r\n#define ll long long\r\nconst int maxn=5e5+50;\r\nil int Max(int x,int y)<% if(x>y)return x;return y; %>\r\nil int Min(int x,int y)<% if(x>y)return y;return x; %>\r\nnamespace io{\r\n\t#if ONLINE_JUDGE \r\n\tchar inn[1<<20],*p1=inn,*p2=inn;\r\n\t#define getchar() (p1==p2&&(p2=(p1=inn)+fread(inn,1,1<<20,stdin),p1==p2)?EOF:*p1++)\r\n\t#endif\r\n\til int read(){\r\n   \t\tchar c=getchar();\r\n    \tint x=0,f=1;\r\n   \t\twhile(c<48)<%if(c=='-')f=-1;c=getchar();%>\r\n    \twhile(c>47)x=(x*10)+(c^48),c=getchar();\r\n    \treturn x*f;\r\n\t}\r\n\til void write(int x){\r\n    \tif(x<0)<%putchar('-');x=~x+1;%>\r\n    \tif(x>9) write(x/10);\r\n   \t\tputchar(x%10+'0');\r\n\t} \r\n\til int ins(char *str){\r\n\t \tint len=0;\r\n\t  \twhile(1){\r\n\t\t\tchar c=getchar();\r\n\t\t\tif(c!='\\n' && c!='\\0' && c!='\\r')\tstr[++len]=c;\r\n\t\t\telse{\r\n\t\t    \tbreak;\r\n\t\t\t}\r\n\t  \t}\r\n\t\treturn len;\r\n\t}\r\n}using namespace io;\r\n\r\nint n,k,m,fa[maxn],ans[maxn];\r\nint getfa(int x){\r\n\tif(x==fa[x])\treturn x;\r\n\telse\treturn fa[x]=getfa(fa[x]);\r\n}\r\nstruct link{\r\n\tint a,b,w;\r\n\tbool type;\r\n\tbool operator<(const link &l)const{\r\n\t\treturn w<l.w;\r\n\t}\r\n};link g[maxn],f[maxn];\r\nint w[maxn];\r\n#define next Miku\r\nint head[maxn<<1],t;\r\nstruct edge{\r\n\tint v,w;\r\n\tint next;\r\n};edge e[maxn<<1];\r\nil void add_edge(int u,int v,int w){\r\n\te[++t].v=v;\r\n\te[t].w=w;\r\n\te[t].next=head[u];\r\n\thead[u]=t;\r\n}\r\n\r\nnamespace TreeChain{\r\n\tint myf[maxn],dep[maxn],sonum[maxn],hson[maxn],top[maxn],in[maxn],myin[maxn],tim;\r\n\tvoid dfs1(int now,int fa){\r\n\t\tmyf[now]=fa;\r\n\t\tdep[now]=dep[fa]+1;\r\n\t\tsonum[now]=1;\r\n\t\tfor(rg i=head[now];i;i=e[i].next){\r\n\t\t\tint to=e[i].v;\r\n\t\t\tif(to==fa)\tcontinue;\r\n\t\t\tw[to]=e[i].w;\r\n\t\t\tdfs1(to,now);\r\n\t\t\tsonum[now]+=sonum[to];\r\n\t\t\tif(sonum[hson[now]]<sonum[to])\thson[now]=to;\r\n\t\t}\r\n\t}\r\n\tvoid dfs2(int now,int topp){\r\n\t\tin[now]=++tim;\r\n\t\tmyin[tim]=now;\r\n\t\ttop[now]=topp;\r\n\t\tif(!hson[now])\treturn;\r\n\t\tdfs2(hson[now],topp);\r\n\t\tfor(rg i=head[now];i;i=e[i].next){\r\n\t\t\tint to=e[i].v;\r\n\t\t\tif(to!=myf[now] && to!=hson[now])\tdfs2(to,to);\r\n\t\t}\r\n\t}\r\n\tint LCA(int x,int y){\r\n\t\tint fx=top[x],fy=top[y];\r\n\t\twhile(fx!=fy){\r\n\t\t\tif(dep[fx]<dep[fy])\tswap(x,y),swap(fx,fy);\r\n\t\t\tx=myf[fx],fx=top[x];\r\n\t\t}\r\n\t\tif(dep[x]<dep[y])\treturn x;\r\n\t\treturn y;\r\n\t}\r\n}using namespace TreeChain;\r\nnamespace SegementTree{\r\n\t#define lid (id<<1)\r\n\t#define rid (id<<1|1)\r\n\t#define mid (l+r>>1)\r\n\tstruct Tree{\r\n\t\tint val,lazy;\r\n\t};Tree tr[maxn<<2];\r\n\til void push_up(int id){\r\n\t\ttr[id].val=Max(tr[lid].val,tr[rid].val);\r\n\t}\r\n\til void push_down(int id){\r\n//\t\tcout<<\"id=\"<<id<<\"; lid=\"<<lid<<\"; rid=\"<<rid<<\"; tr[id].lazy=\"<<tr[id].lazy<<\"; tr[rid].lazy=\"<<<<endl;\r\n\t\tif(tr[id].lazy<=tr[lid].val){\r\n\t\t\ttr[lid].val=tr[id].lazy;\r\n\t\t\ttr[lid].lazy=tr[id].lazy;\t\r\n\t\t}\r\n\t\tif(tr[id].lazy<=tr[rid].val){\r\n\t\t\ttr[rid].val=tr[id].lazy;\r\n\t\t\ttr[rid].lazy=tr[id].lazy;\r\n\t\t}\r\n\t\ttr[id].lazy=0;\r\n\t}\r\n\tvoid build_tree(int id,int l,int r){\r\n\t\tif(l==r){\r\n\t\t\ttr[id].val=w[myin[l]];\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tbuild_tree(lid,l,mid);\r\n\t\tbuild_tree(rid,mid+1,r);\r\n\t\tpush_up(id);\r\n\t}\r\n\tvoid update(int id,int l,int r,int x,int y,int w){\r\n\t\tif(w>tr[id].val)\treturn;\r\n\t\tif(x>r || y<l)\treturn;\r\n\t\tif(x<=l && r<=y){\r\n\t\t\ttr[id].val=w;\r\n\t\t\ttr[id].lazy=w;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tif(tr[id].lazy)\tpush_down(id);\r\n\t\tupdate(lid,l,mid,x,y,w);\r\n\t\tupdate(rid,mid+1,r,x,y,w);\r\n\t\tpush_up(id);\r\n\t}\r\n\tint query(int id,int l,int r,int x,int y){\r\n\t\tif(x>r || y<l)\treturn -1919810;\r\n\t\tif(x<=l && r<=y)\treturn tr[id].val;\r\n\t\tif(tr[id].lazy)\tpush_down(id);\r\n\t\treturn query(lid,l,mid,x,y)+query(rid,mid+1,r,x,y);\r\n\t}\r\n\tvoid putans(int id,int l,int r){\r\n\t\tif(l==r){\r\n\t\t\tans[myin[l]]=tr[id].val;\r\n//\t\t\tcout<<\"id=\"<<id<<\"; l=\"<<l<<\"; myin[l]=\"<<myin[l]<<\"; ans[myin[l]]=\"<<ans[myin[l]]<<endl;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tif(tr[id].lazy)\tpush_down(id);\r\n\t\tputans(lid,l,mid);\r\n\t\tputans(rid,mid+1,r);\r\n\t}\r\n\t#undef lid\r\n\t#undef rid\r\n\t#undef mid\r\n}using namespace SegementTree;\r\n\r\nvoid Update(int x,int y,int w){\r\n\tint fx=top[x],fy=top[y];\r\n\twhile(fx!=fy){\r\n\t\tif(dep[fx]<dep[fy])\tswap(x,y),swap(fx,fy);\r\n\t\tupdate(1,1,n,in[fx],in[x],w);\r\n\t\tx=myf[fx],fx=top[x];\r\n\t}\r\n\tif(dep[x]<dep[y])\tswap(x,y);\r\n\tupdate(1,1,n,in[y]+1,in[x],w);\r\n}\r\n\r\nil void input(){\r\n\tn=read(),k=read(),m=read();\r\n\tfor(rg i=1;i<=n;++i)\tfa[i]=i;\r\n\tfor(rg i=1;i<=k;++i){\r\n\t\tg[i].a=read(),g[i].b=read();\r\n\t\tadd_edge(g[i].a,g[i].b,MYMAX);\r\n\t\tadd_edge(g[i].b,g[i].a,MYMAX);\r\n\t\tfa[getfa(g[i].a)]=getfa(g[i].b);\r\n\t}\r\n\tfor(rg i=1;i<=m;++i)\tf[i].a=read(),f[i].b=read(),f[i].w=read();\r\n//\t\tf[i].type=false;\r\n//\t\tfa[getfa(f[i].a)]=getfa(f[i].b);\r\n\tsort(f+1,f+1+m);\r\n\tfor(rg i=1;i<=m;++i){\r\n\t\tint fx=getfa(f[i].a),fy=getfa(f[i].b);\r\n\t\tif(fx==fy)\tcontinue;\r\n\t\tf[i].type=true;\r\n\t\tfa[fx]=fy;\r\n\t\tadd_edge(f[i].a,f[i].b,0);\r\n\t\tadd_edge(f[i].b,f[i].a,0);\r\n\t}\r\n}\r\n\r\nint main(){\r\n\t#ifndef ONLINE_JUDGE\r\n\tfreopen(\"data.in\",\"r\",stdin);\r\n\t#endif\r\n\tinput();\r\n\tdfs1(1,0);\r\n\tdfs2(1,1);\r\n\ttop[1]=myf[1]=1;\r\n//\tfor(rg i=1;i<=n;++i){\r\n//\t\tcout<<\"### i=\"<<i<<\"; myf[i]=\"<<myf[i]<<\"; sonum[i]=\"<<sonum[i]<<\"; hson[i]\"<<\"; in[i]\"<<in[i]<<\"; myin[i]=\"<<myin[i]<<\"; dep[i]=\"<<dep[i]<<\"; fa[i]=\"<<fa[i]<<endl;\r\n//\t}\r\n\tbuild_tree(1,1,n);\r\n\tfor(rg i=1;i<=m;++i){\r\n\t\tif(f[i].type==true)\tcontinue;\r\n\t\tint lca=LCA(f[i].a,f[i].b);\r\n//\t\tcout<<\"###\"<<lca<<' '<<f[i].w<<endl;\r\n\t\tUpdate(f[i].a,lca,f[i].w);\r\n\t\tUpdate(f[i].b,lca,f[i].w);\r\n\t}\r\n//\tfor(rg i=1;i<=(n<<2);++i)\tcout<<\"####\"<<tr[i].val<<endl<<\"&&&\"<<tr[i].lazy<<endl;\r\n\tputans(1,1,n);\r\n\tll ansl=0;\r\n\tfor(rg i=1;i<=n;++i){\r\n//\t\tcout<<\"###\"<<i<<' '<<ans[i]<<endl;\r\n\t\tif(ans[i]==MYMAX)\t<% printf(\"-1\");return 0; %>\r\n\t\tansl+=ans[i];\r\n\t}\r\n\tprintf(\"%lld\\n\",ansl);\r\n\treturn 0;\r\n}\r\n "
+}

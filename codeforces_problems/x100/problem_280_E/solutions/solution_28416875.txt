@@ -1,0 +1,39 @@
+{
+    "id": 28416875,
+    "contestId": 280,
+    "creationTimeSeconds": 1499733017,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "jazengm"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "PyPy 3",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "(* It's a DP algorithm.  Keep y_opt.(i) which is the natural place\r\n   where the point y.(i) will land when considering only points 0, 1,\r\n   2... i.\r\n   \r\n   To compute y_opt.(i) we assume we have already computed the\r\n   previous ones.  What we do now is see if y.(i) acting alone would\r\n   be within the window defined by y_opt.(i-1).  If it is, we're done\r\n   with y_opt.(i).  Say y.(i) is too high to be compatible with\r\n   y_opt.(i-1).  Then we glue these two points together by asserting\r\n   y.(i)-y.(i-1)=b.  (Analogously, if y.(i) is too low compared to\r\n   y_opt.(i-1) we assert y.(i)-y.(i-1)=a instead.)  This pair of\r\n   points has a natural position uninfluenced by anything outside of\r\n   them.  If this position is compatible with y_opt.(i-2) then we're\r\n   done, otherwise we add y.(i-2) to the chain and continue.  So the\r\n   elements are chained together by a sequence of as and bs,\r\n   intermixed.\r\n\r\n   We can prove by induction that the solution that this finds is\r\n   optimal.  The base case is when y.(i) is within the window allowed\r\n   by y_opt.(i-1).  Clearly this is the right answer.  Now suppose\r\n   that we have established that in the optimal solution some chain of\r\n   differences relating y.(k),...,y.(i-2), y.(i) must occur.  This\r\n   means that when searching for the optimal solution we need only\r\n   consider these values moving in lockstep as specified by the chain.\r\n   Looking at point k-1 if the chain is too low, then the optimal\r\n   solution must also have y.(k-1) in the chain being a below y.(k),\r\n   and if point k-1 is too high then it must be in the chain b below\r\n   y.(i).  (The intuition is that of a spring.  If you move your\r\n   finger toward a spring and you touch the spring, pushing harder on\r\n   the spring will keep your finger in contact with the spring.  The\r\n   spring will not suddenly pull away from your finger as you push\r\n   harder.  The (x-y)^2 cost function ensures that this is the correct\r\n   model.)\r\n\r\n   So the algorithm is O(n^2).  It might be possible to work out a\r\n   version of this algorithm that is O(n log n) by keeping the chains\r\n   in a search tree.  Then instead of starting from scratch each time\r\n   when adding a new point, it would edit the current chain.  It is\r\n   not clear that this can be made to work.\r\n\r\n               Danny Sleator <[email\u00a0protected]>\r\n*)\r\n\r\nlet read_int _ = Scanf.bscanf Scanf.Scanning.stdib \" %d \" (fun x -> x)\r\nlet read_float _ = Scanf.bscanf Scanf.Scanning.stdib \" %f \" (fun x -> x)\r\n\r\nlet rec fold i j f init = if i>j then init else fold (i+1) j f (f i init)\r\nlet sum i j f = fold i j (fun i a -> (f i) +. a) 0.0\r\nlet sq x = x *. x\r\nlet (++) (a,b,c) (d,e,f) = (a+.d, b+.e, c+.f)\r\n\r\nlet quad_min (a,b,c) = -. (b /. (2.0 *. a))\r\n  (* ax^2 + bx + c is our quadratic.  Return the value of x that minimizes it *)\r\n  (* a cannot be zero *)\r\n\r\nlet () =\r\n  let n = read_int 0 in\r\n  let q0 = read_float 0 in\r\n  let a0 = read_float 0 in\r\n  let b0 = read_float 0 in\r\n\r\n  let x = Array.init n read_float in\r\n  let y_opt = Array.copy x in\r\n  let chain = Array.make n 0.0 in\r\n\r\n  let bound h v = max (1.0+.h) (min q0 v) in\r\n\r\n  let rec pull_chain j h q = if j<0 then (bound h (quad_min q), j) else\r\n    (* Set the group of points j+1, j+2, ... i all to differ by cumulative h\r\n       the quadratic represented by this group is q. *)\r\n    let yi_nat = bound h (quad_min q) in\r\n      if y_opt.(j) < yi_nat -. h -. b0 then \r\n\tlet ny = x.(j) +. h +. b0 in\r\n\t  chain.(j) <- b0;\r\n\t  pull_chain (j-1) (h+.b0) (q ++ (1.0, -2.0 *. ny, sq ny))\r\n      else if y_opt.(j) > yi_nat -. h -. a0 then \r\n\tlet ny = x.(j) +. h +. a0 in\r\n\t  chain.(j) <- a0;\r\n\t  pull_chain (j-1) (h+.a0) (q ++ (1.0, -2.0 *. ny, sq ny))\r\n      else \r\n\t(yi_nat, j)\r\n  in\r\n\r\n    for i=1 to n-1 do\r\n      let myq = (1.0, -2.0*.x.(i), sq x.(i)) in\r\n      let (yopt, j) = pull_chain (i-1) 0.0 myq in\r\n\ty_opt.(i) <- yopt;\r\n    done;\r\n\r\n    let rec fill_in_y i = if i<0 then () else\r\n      let (_, j) = pull_chain (i-1) 0.0 (1.0, -2.0*.x.(i), sq x.(i)) in\r\n\tfor k=i-1 downto j+1 do\r\n\t  y_opt.(k) <- y_opt.(k+1) -. chain.(k);\r\n\tdone;\r\n\tfill_in_y j\r\n    in\r\n      fill_in_y (n-1);\r\n      \r\n      let total = sum 0 (n-1) (fun i-> sq (y_opt.(i) -. x.(i))) in\r\n\r\n\tfor i=0 to n-1 do \r\n\t  Printf.printf \"%.8f \" y_opt.(i);\r\n\tdone;\r\n\tPrintf.printf \"%.8f\\n\" total;\r\n"
+}

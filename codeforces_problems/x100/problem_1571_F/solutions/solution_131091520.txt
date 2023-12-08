@@ -1,0 +1,36 @@
+{
+    "id": 131091520,
+    "contestId": 1571,
+    "creationTimeSeconds": 1633627146,
+    "relativeTimeSeconds": 9846,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "rosseforp_ytrairom"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 88,
+    "timeConsumedMillis": 374,
+    "memoryConsumedBytes": 144384000,
+    "source": "import java.io.BufferedReader\r\nimport java.io.InputStreamReader\r\nimport java.io.OutputStreamWriter\r\nimport java.io.PrintWriter\r\nimport java.lang.StringBuilder\r\nimport java.util.*\r\nimport kotlin.Comparator\r\nimport kotlin.collections.HashSet\r\nimport kotlin.math.*\r\nimport kotlin.system.exitProcess\r\n\r\nfun test() {\r\n    val (n, m) = readInts()\r\n    val res = intarr(n, -1)\r\n\r\n    val a = mutableListOf<Pair<Int, Int>>()\r\n    var cur_pos = 1\r\n\r\n    for (i in 0 until n) {\r\n        val (x, y) = readInts()\r\n        if (y == 1) {\r\n            if (x > 1) {\r\n                if (cur_pos + x - 1 > m) {\r\n                    println(-1)\r\n                    return\r\n                }\r\n                res[i] = cur_pos\r\n                cur_pos += x\r\n            } else {\r\n                a.add(Pair(1, i))\r\n            }\r\n        } else {\r\n            a.add(Pair(x, i))\r\n        }\r\n    }\r\n\r\n    if (a.size == 0) {\r\n        println(res.joinToString(\" \"))\r\n        return\r\n    }\r\n\r\n    val p = m - cur_pos + 1\r\n    val cnt1 = (p + 1) / 2\r\n    val cnt2 = p - cnt1\r\n\r\n    val dp = intarr2d(a.size, p + 2, 0)\r\n    dp[0][0] = 1\r\n\r\n    if (a[0].first < dp[0].size) dp[0][a[0].first] = 1\r\n\r\n    for (i in 1 until a.size) {\r\n        for (j in dp[i].indices) {\r\n            dp[i][j] = dp[i - 1][j]\r\n            if (j - a[i].first >= 0 && dp[i - 1][j - a[i].first] == 1) {\r\n                dp[i][j] = 1\r\n            }\r\n        }\r\n    }\r\n\r\n    fun recover(sum: Int): Pair<List<Pair<Int, Int>>, List<Pair<Int, Int>>> {\r\n        val taken = mutableListOf<Pair<Int, Int>>()\r\n        val untaken = mutableListOf<Pair<Int, Int>>()\r\n\r\n        var id = dp.size - 1\r\n        var c = sum\r\n        while (id >= 0) {\r\n            if (id == 0) {\r\n                if (c != 0) {\r\n                    taken.add(a[id])\r\n                } else {\r\n                    untaken.add(a[id])\r\n                }\r\n            } else {\r\n                if (dp[id - 1][c] != 1) {\r\n                    taken.add(a[id])\r\n                    c -= a[id].first\r\n                } else {\r\n                    untaken.add(a[id])\r\n                }\r\n            }\r\n            id--\r\n        }\r\n        return Pair(taken, untaken)\r\n    }\r\n\r\n    var alsum = 0\r\n    for (i in a) {\r\n        alsum += i.first\r\n    }\r\n\r\n    for (sum in 0..cnt1) {\r\n        if (alsum - sum <= cnt2 && dp.last()[sum] == 1) {\r\n            val rec = recover(sum)\r\n\r\n            var nxt = cur_pos + 1\r\n            for (i in rec.first) {\r\n                res[i.second] = cur_pos\r\n                repeat(i.first) {\r\n                    cur_pos += 2\r\n                }\r\n            }\r\n            for (i in rec.second) {\r\n                res[i.second] = nxt\r\n                repeat(i.first) {\r\n                    nxt += 2\r\n                }\r\n            }\r\n\r\n            println(res.joinToString(\" \"))\r\n            return\r\n        }\r\n    }\r\n\r\n    println(-1)\r\n}\r\n\r\nfun solve() {\r\n    var tests = 1\r\n    //tests = readInt()\r\n    while (tests-- > 0) {\r\n        test()\r\n    }\r\n}\r\n\r\n// TEMPLATE\r\nfun main(args: Array<String>) {\r\n    reader = BufferedReader(InputStreamReader(System.`in`))\r\n    out = PrintWriter(OutputStreamWriter(System.out))\r\n    solve()\r\n    out.close()\r\n}\r\n\r\nprivate lateinit var out: PrintWriter\r\nprivate lateinit var reader: BufferedReader\r\nprivate var tokenizer: StringTokenizer? = null\r\nprivate fun read(): String {\r\n    while (tokenizer == null || !tokenizer!!.hasMoreTokens()) {\r\n        tokenizer = StringTokenizer(readLn())\r\n    }\r\n    return tokenizer!!.nextToken()\r\n}\r\n\r\nprivate fun readInt() = read().toInt()\r\nprivate fun readLong() = read().toLong()\r\nprivate fun readLn() = reader.readLine()!!\r\nprivate fun readInts() = readLn().split(\" \").map { it.toInt() }\r\nprivate fun readInts(sz: Int) = Array(sz) { readInt() }\r\nprivate fun readLongs() = readLn().split(\" \").map { it.toLong() }\r\nprivate fun readLongs(sz: Int) = Array(sz) { readLong() }\r\nprivate fun print(b: Boolean) = out.print(b)\r\nprivate fun print(i: Int) = out.print(i)\r\nprivate fun print(d: Double) = out.print(d)\r\nprivate fun print(l: Long) = out.print(l)\r\nprivate fun print(s: String) = out.print(s)\r\nprivate fun print(message: Any?) = out.print(message)\r\nprivate fun print(a: Array<Int>) = a.forEach { print(\"$it \") }\r\nprivate fun <T> print(a: Array<out T>) = a.forEach { print(\"$it \") }\r\nprivate fun <T> print(a: Collection<T>) = a.forEach { print(\"$it \") }\r\nprivate fun println(b: Boolean) = out.println(b)\r\nprivate fun println(i: Int) = out.println(i)\r\nprivate fun println(d: Double) = out.println(d)\r\nprivate fun println(l: Long) = out.println(l)\r\nprivate fun println(s: String) = out.println(s)\r\nprivate fun println() = out.println()\r\nprivate fun println(message: Any?) = out.println(message)\r\nprivate fun <T> println(a: Array<out T>) {\r\n    a.forEach { print(\"$it \") }\r\n    println()\r\n}\r\n\r\nprivate fun println(a: IntArray) {\r\n    a.forEach { print(\"$it \") }\r\n    println()\r\n}\r\n\r\nprivate fun <T> println(a: Collection<T>) {\r\n    a.forEach { print(\"$it \") }\r\n    println()\r\n}\r\n\r\nprivate fun intarr(sz: Int, v: Int = 0) = IntArray(sz) { v }\r\nprivate fun longarr(sz: Int, v: Long = 0) = LongArray(sz) { v }\r\nprivate fun intarr2d(n: Int, m: Int, v: Int = 0) = Array(n) { intarr(m, v) }\r\nprivate fun <T> init(vararg elements: T) = elements\r\nprivate fun VI(n: Int = 0, init: Int = 0) = MutableList(n) { init }\r\nprivate fun VVI(n: Int = 0, m: Int = 0, init: Int = 0) = MutableList(n) { VI(m, init) }\r\nprivate fun <T1 : Comparable<T1>, T2 : Comparable<T2>> pairCmp(): Comparator<Pair<T1, T2>> {\r\n    return Comparator { a, b ->\r\n        val res = a.first.compareTo(b.first)\r\n        if (res == 0) a.second.compareTo(b.second) else res\r\n    }\r\n}\r\n\r\n\r\nprivate fun greater(): Comparator<Int> {\r\n    return Comparator { a, b ->\r\n        val res = a.compareTo(b)\r\n        -res\r\n    }\r\n}\r\n"
+}

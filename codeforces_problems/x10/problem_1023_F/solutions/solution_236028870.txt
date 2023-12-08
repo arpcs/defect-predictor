@@ -1,0 +1,38 @@
+{
+    "id": 236028870,
+    "contestId": 1023,
+    "creationTimeSeconds": 1701858461,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1023,
+        "index": "F",
+        "name": "Mobile Phone Network",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 2600,
+        "tags": [
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1023,
+        "members": [
+            {
+                "handle": "xiahaob"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1534516500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 70144000,
+    "source": "#include<bits/stdc++.h>\r\n#define int long long\r\n#define ls (k<<1)\r\n#define rs (k<<1)|1\r\nusing namespace std;\r\ninline int rd(){\r\n\tint s=0,w=1;char ch=getchar();\r\n\tfor(;ch<'0'||ch>'9';ch=getchar())if(ch=='-')w=-1;\r\n\tfor(;ch>='0'&&ch<='9';ch=getchar())s=s*10+ch-'0';\r\n\treturn s*w;\r\n}\r\nconst int inf=0x3f3f3f3f;\r\nconst int N=5e5+5;\r\nint n,k,m,tot,sum;\r\nint fa[N],ans[N];\r\nint siz[N],son[N],dep[N];\r\nint dfn[N],rev[N],top[N];\r\nint Max[N*4],lazy[N*4];\r\nvector<int> a[N];\r\ninline void add(int x,int y){\r\n\ta[x].push_back(y);\r\n}\r\ninline void dfs1(int u,int dad){\r\n\tfa[u]=dad; siz[u]=1; dep[u]=dep[dad]+1;\r\n\tfor(int v:a[u]){\r\n\t\tif(v==dad)continue; \r\n\t\tdfs1(v,u);\r\n\t\tsiz[u]+=siz[v];\r\n\t\tif(siz[son[u]]<siz[v])son[u]=v; \r\n\t}\r\n}\r\ninline void dfs2(int u,int dad,int tp){\r\n\tdfn[u]=++tot;rev[tot]=u;top[u]=tp;\r\n\tif(son[u])dfs2(son[u],u,tp);\r\n\tfor(int v:a[u]){\r\n\t\tif(v==son[u]||v==dad)continue;\r\n\t\tdfs2(v,u,v);\r\n\t}\r\n}\r\ninline void pushdown(int k){\r\n\tif(!lazy[k])return;\r\n\tlazy[ls]=lazy[rs]=1;\r\n\tMax[ls]=min(Max[ls],Max[k]);\r\n\tMax[rs]=min(Max[rs],Max[k]);\r\n\tlazy[k]=0;\r\n}\r\ninline void built(int k,int l,int r){\r\n\tMax[k]=inf;\r\n\tif(l==r)return;\r\n\tint mid=(l+r)>>1;\r\n\tbuilt(ls,l,mid);built(rs,mid+1,r);\r\n}\r\ninline void upd(int k,int l,int r,int x,int y,int vl){\r\n\tif(x<=l&&r<=y){\r\n\t\tlazy[k]=1;\r\n//\t\tprintf(\"ddddd:%d %d %d %d\\n\",k,l,r,vl);\r\n\t\tMax[k]=min(Max[k],vl);\r\n\t\treturn;\r\n\t}\r\n\tpushdown(k);\r\n\tint mid=(l+r)>>1;\r\n\tif(x<=mid)upd(ls,l,mid,x,y,vl);\r\n\tif(mid<y) upd(rs,mid+1,r,x,y,vl);\r\n}\r\ninline void change(int u,int v,int w){\r\n\twhile(top[u]!=top[v]){\r\n\t\tif(dep[top[u]]<dep[top[v]])swap(u,v);\r\n//\t\tprintf(\"test:%d %d %d %d\\n\",top[u],u,dfn[top[u]]+1,dfn[u]);\r\n\t\tupd(1,1,n,dfn[top[u]],dfn[u],w);\r\n\t\tu=fa[top[u]];\r\n\t}\r\n\tif(dep[u]>dep[v])swap(u,v);\r\n//\tprintf(\"test:%d %d %d %d\\n\",u,v,dfn[u]+1,dfn[v]);\r\n\tif(dfn[u]<dfn[v])upd(1,1,n,dfn[u]+1,dfn[v],w);\r\n}\r\ninline void en_sol(int k,int l,int r){\r\n\tif(l==r){\r\n//\t\tputs(\"111\");\r\n\t\tans[rev[l]]=Max[k];\t\r\n\t\treturn;\r\n\t}\r\n//\tprintf(\"%d %d\\n\",l,r); \r\n\tint mid=(l+r)>>1;\r\n\ten_sol(ls,l,mid);\r\n\ten_sol(rs,mid+1,r);\r\n}\r\nsigned main(){\r\n\tn=rd();k=rd();m=rd();\r\n\tfor(int i=1;i<=k;++i){\r\n\t\tint x=rd(),y=rd();\r\n\t\tadd(x,y);add(y,x);\r\n\t}\r\n\tdfs1(1,0);\r\n\tdfs2(1,0,1);\r\n//\tfor(int i=1;i<=n;++i)printf(\"%d: %d\\n\",i,dfn[i]);\r\n\tbuilt(1,1,n);\r\n\tfor(int i=1;i<=m;++i){\r\n\t\tint x=rd(),y=rd(),w=rd();\r\n\t\tchange(x,y,w); \r\n\t}\r\n\ten_sol(1,1,n);\r\n\tfor(int i=2;i<=n;++i){\r\n\t\tif(ans[i]==inf){\r\n\t\t\treturn puts(\"-1\"),0;\r\n\t\t}\r\n\t\tsum+=ans[i];\r\n\t}\r\n\tprintf(\"%lld\",sum);\r\n\treturn 0;\r\n}"
+}

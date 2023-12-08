@@ -1,0 +1,38 @@
+{
+    "id": 229653408,
+    "contestId": 1023,
+    "creationTimeSeconds": 1698217775,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1023,
+        "index": "F",
+        "name": "Mobile Phone Network",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 2600,
+        "tags": [
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1023,
+        "members": [
+            {
+                "handle": "LeoChan2022"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1534516500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 296,
+    "memoryConsumedBytes": 46796800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define LL long long\r\n#define pii pair<int,int>\r\n#define fi first\r\n#define se second\r\n\r\nconst int N=2e5+5;\r\n\r\nint n,m,ncnt,cnt,df;LL aa;int K;\r\nint head[N],f[N],fa[N],dfn[N],low[N],va[N],siz[N],dep[N],son[N],top[N],idfn[N],ans[N],fg[N];\r\n\r\nvector<pii> g[N];\r\n\r\nstruct node{\r\n\tint to,ne,w;\r\n}e[N<<1];\r\n\r\nstruct edge{\r\n\tint fr,to,w,id,ok;\r\n}b[N];\r\n\r\ninline void add2(int x,int y,int id){\r\n\tg[x].push_back({y,id});\r\n}\r\n\r\ninline void add(int x,int y,int w){\r\n\te[++cnt]=(node){y,head[x],w};\r\n\thead[x]=cnt;\r\n}\r\n\r\ninline bool cmp(edge a,edge b){\r\n\treturn a.w<b.w;\r\n}\r\n\r\ninline find(int x){\r\n\tif(x==fa[x]) return x;\r\n\treturn fa[x]=find(fa[x]);\r\n}\r\n\r\ninline void kru(){\r\n\tsort(b+1,b+1+ncnt,cmp);\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tfa[i]=i;\r\n\t}\r\n\tfor(int i=1;i<=ncnt;i++){\r\n\t\tint x=b[i].fr,y=b[i].to;\r\n\t\tint fx=find(x),fy=find(y);\r\n\t\tif(fx!=fy){\r\n\t\t\tfa[fx]=fy;\r\n\t\t\tb[i].ok=1;\r\n\t\t\tadd(x,y,b[i].w);\r\n\t\t\tadd(y,x,b[i].w);\r\n\t\t}\r\n\t}\r\n}\r\n\r\ninline void dfs1(int x,int fa,int val){\r\n\tva[x]=val;\r\n\tsiz[x]=1;\r\n\tdep[x]=dep[fa]+1;\r\n\tf[x]=fa;\r\n\tfor(int i=head[x];i;i=e[i].ne){\r\n\t\tint y=e[i].to;\r\n\t\tif(y!=fa){\r\n\t\t\tdfs1(y,x,e[i].w);\r\n\t\t\tsiz[x]+=siz[y];\r\n\t\t\tif(siz[y]>siz[son[x]]) son[x]=y;\r\n\t\t}\r\n\t}\r\n}\r\n\r\ninline void dfs2(int x,int tp){\r\n\ttop[x]=tp;\r\n\tdfn[x]=++df;\r\n\tidfn[df]=x;\r\n\tif(son[x]) dfs2(son[x],tp);\r\n\tfor(int i=head[x];i;i=e[i].ne){\r\n\t\tint y=e[i].to;\r\n\t\tif(y!=f[x]&&y!=son[x]){\r\n\t\t\tdfs2(y,y);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nstruct seg{\r\n\tint t[N<<2],tg[N<<2];\r\n\tseg(){memset(tg,0x3f,sizeof(tg));}\r\n\tinline void pp2(int p){\r\n\t\tt[p]=max(t[p<<1],t[p<<1|1]);\r\n\t}\r\n\tinline void pp(int p){\r\n\t\tt[p]=min(t[p<<1],t[p<<1|1]);\r\n\t}\r\n\tinline void build(int p,int l,int r){\r\n\t\tif(l==r){\r\n\t\t\tt[p]=va[idfn[l]];\r\n\t\t\treturn ;\r\n\t\t}\r\n\t\tint mid=l+r>>1;\r\n\t\tbuild(p<<1,l,mid);\r\n\t\tbuild(p<<1|1,mid+1,r);\r\n\t\tpp2(p);\r\n\t}\r\n\tinline void pd(int p){\r\n\t\ttg[p<<1]=min(tg[p<<1],tg[p]);\r\n\t\ttg[p<<1|1]=min(tg[p<<1|1],tg[p]);\r\n\t\tt[p<<1]=min(t[p<<1],tg[p]);\r\n\t\tt[p<<1|1]=min(t[p<<1|1],tg[p]);\r\n\t}\r\n\tinline int query2(int p,int l,int r,int x){\r\n\t\tif(l==r){\r\n\t\t\treturn t[p];\r\n\t\t}\r\n\t\tpd(p);\r\n\t\tint mid=l+r>>1;\r\n\t\tif(x<=mid) return query2(p<<1,l,mid,x);\r\n\t\telse return query2(p<<1|1,mid+1,r,x);\r\n\t}\r\n\tinline int query(int p,int l,int r,int ql,int qr){\r\n\t\tif(l>=ql&&r<=qr){\r\n\t\t\treturn t[p];\r\n\t\t}\r\n\t\tint mid=l+r>>1;\r\n\t\tint an=0;\r\n\t\tif(ql<=mid) an=max(an,query(p<<1,l,mid,ql,qr));\r\n\t\tif(qr>mid) an=max(an,query(p<<1|1,mid+1,r,ql,qr));\r\n\t\treturn an;\r\n\t}\r\n\tinline void modify(int p,int l,int r,int ql,int qr,int k){\r\n\t\tif(l>=ql&&r<=qr){\r\n\t\t\tt[p]=min(t[p],k);\r\n\t\t\ttg[p]=min(tg[p],k);\r\n\t\t\treturn ;\r\n\t\t}\r\n\t\tpd(p);\r\n\t\tint mid=l+r>>1;\r\n\t\tif(ql<=mid) modify(p<<1,l,mid,ql,qr,k);\r\n\t\tif(qr>mid) modify(p<<1|1,mid+1,r,ql,qr,k);\r\n\t\tpp(p);\r\n\t}\r\n\tvoid gogogo(){\r\n\t\tmemset(t,0x3f,sizeof(t));\r\n\t}\r\n}sg1,sg2;\r\n\r\ninline int qroad(int x,int y){\r\n\tint an=0;\r\n\twhile(top[x]!=top[y]){\r\n\t\tif(dep[top[x]]<dep[top[y]]) swap(x,y); \r\n\t\tan=max(an,sg1.query(1,1,n,dfn[top[x]],dfn[x]));\r\n\t\tx=f[top[x]];\r\n\t}\r\n\tif(x==y) return an;\r\n\tif(dep[x]>dep[y]) swap(x,y);\r\n\tan=max(an,sg1.query(1,1,n,dfn[x]+1,dfn[y]));\r\n\treturn an;\r\n}\r\n\r\ninline void mroad(int x,int y,int w){\r\n\twhile(top[x]!=top[y]){\r\n\t\tif(dep[top[x]]<dep[top[y]]) swap(x,y);\r\n\t\tsg2.modify(1,1,n,dfn[top[x]],dfn[x],w-1);\r\n\t\tx=f[top[x]];\r\n\t}\r\n\tif(x==y) return ;\r\n\tif(dep[x]>dep[y]) swap(x,y);\r\n\tsg2.modify(1,1,n,dfn[x]+1,dfn[y],w-1);\r\n}\r\n\r\ninline void work(){\r\n\tsg1.build(1,1,n);\r\n\tsg2.gogogo();\r\n\tfor(int i=1;i<=ncnt;i++){\r\n\t\tif(!b[i].ok){\r\n\t\t\tans[b[i].id]=qroad(b[i].fr,b[i].to)-1;\r\n\t\t\tmroad(b[i].fr,b[i].to,b[i].w);\r\n\t\t}\r\n\t}\r\n\tfor(int i=1;i<=ncnt;i++){\r\n\t\tif(b[i].ok){\r\n\t\t\tif(dep[b[i].fr]>dep[b[i].to]) swap(b[i].fr,b[i].to);\r\n\t\t\tans[b[i].id]=sg2.query2(1,1,n,dfn[b[i].to]);\r\n\t\t\tif(ans[b[i].id]==0x3f3f3f3f) ans[b[i].id]=-1;\r\n\t\t}\r\n\t}\r\n}\r\n\r\nint main(){\r\n\tios::sync_with_stdio(0),cin.tie(0);\r\n\tcin>>n>>K>>m;\r\n\tfor(int i=1,x,y;i<=K;i++){\r\n\t\tcin>>x>>y;\r\n\t\tb[++ncnt]=(edge){x,y,0,ncnt,0};\r\n\t\tadd2(x,y,i);\r\n\t\tadd2(y,x,i);\r\n\t}\r\n\tfor(int i=1,x,y,w;i<=m;i++){\r\n\t\tcin>>x>>y>>w;\r\n\t\tb[++ncnt]=(edge){x,y,w,ncnt,0};\r\n\t\tadd2(x,y,i);\r\n\t\tadd2(y,x,i);\r\n\t}\r\n\tkru();\r\n\tdfs1(1,0,0);\r\n\tdfs2(1,1);\r\n\twork();\r\n\tdf=0;\r\n\tfor(int i=1;i<=n;i++) dfn[i]=0;\r\n\tfor(int i=1;i<=K;i++){\r\n\t\tif(ans[i]==-1){\r\n\t\t\tcout<<\"-1\\n\";\r\n\t\t\treturn 0;\r\n\t\t}\r\n\t\taa+=ans[i];\r\n\t}\r\n\tcout<<aa+K<<\"\\n\";\r\n\treturn 0;\r\n}"
+}

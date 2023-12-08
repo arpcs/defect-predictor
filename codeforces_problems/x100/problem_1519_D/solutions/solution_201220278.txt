@@ -1,0 +1,38 @@
+{
+    "id": 201220278,
+    "contestId": 1519,
+    "creationTimeSeconds": 1680935971,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1519,
+        "index": "D",
+        "name": "Maximum Sum of Products",
+        "type": "PROGRAMMING",
+        "rating": 1600,
+        "tags": [
+            "brute force",
+            "dp",
+            "implementation",
+            "math",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1519,
+        "members": [
+            {
+                "handle": "Lint_Whoppers"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1619706900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 30,
+    "timeConsumedMillis": 155,
+    "memoryConsumedBytes": 64307200,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define sync {ios_base ::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);}\r\n#define repi(n) for(int i = 0;i<n;i++)\r\n#define repj(n) for(int j = 0;j<n;j++)\r\n#define rep1(a,b) for(int i = a;i<b;i++)\r\n#define int long long int\r\n#define all(a) a.begin(),a.end()\r\nint mod = 1e9+7;\r\nset<int> primes;\r\nconst int N = 1e6+1000;\r\nint dx[4]={-1,1,0,0};\r\nint dy[4]={0,0,1,-1};\r\nint fact[N];\r\nint invfact[N];\r\nvector<vector<int>> seg(4*N);\r\nint sqr(int x)\r\n{\r\n        return x*x;\r\n}\r\nint gcd(int x,int y)\r\n{\r\n        if(y == 0)\r\n        return x;\r\n        return gcd(y,x%y);\r\n}\r\nint lcm(int x,int y){\r\n        return x*y/gcd(x,y);\r\n}\r\nvoid sieve()\r\n{\r\n        int prime[N];\r\n        for(int i = 0;i<N;i++)\r\n        prime[i] = 1;\r\n        prime[0] = -1;\r\n        prime[1] = -1;\r\n        prime[2] = 1;\r\n        for(int i = 2;i*i<=N;i++)\r\n        {\r\n                if(prime[i] == 1)\r\n                {\r\n                        for(int j = i*i;j<N;j = j + i)\r\n                        prime[j] = -1;\r\n                }\r\n        }\r\n        for(int i = 0;i<N;i++)\r\n        if(prime[i] == 1)\r\n        primes.insert(i); \r\n}\r\nbool isPrime(int a)\r\n{\r\n        for(int i = 2;i<=sqrt(a);i++)\r\n        if(a%i == 0)\r\n        return false;\r\n        return true;\r\n}\r\nint digit(int a)\r\n{\r\n        return to_string(a).length();\r\n}\r\nstruct DSU{\r\n  vector<int> dsu;\r\n  vector<int> szx;\r\n  DSU(int n)\r\n  {\r\n    dsu.resize(n,0);\r\n    szx.resize(n);\r\n    for(int i = 0;i<n;i++)\r\n    dsu[i] = i,szx[i] = 1;\r\n  }\r\n  \r\n  int parent(int n)\r\n  {\r\n    if(dsu[n] == n)\r\n    return n;\r\n    return dsu[n] = parent(dsu[n]);\r\n  }\r\n  \r\n  void merge(int a,int b)\r\n  {\r\n    a = parent(a);\r\n    b = parent(b);\r\n    if(a != b)\r\n    {\r\n      if(szx[a] < szx[b])\r\n      swap(a,b);\r\n      \r\n      dsu[b] = a;\r\n      szx[b] += szx[a];\r\n    }\r\n  }\r\n  \r\n  bool find(int a,int b)\r\n  {\r\n    if(parent(a) == parent(b))\r\n    return true;\r\n    return false;\r\n  }\r\n};\r\nvoid build(int ind,int low,int high,string &a){\r\n        if(low == high){\r\n                vector<int> v(3,0);\r\n\r\n                if(a[low] == '(')\r\n                v[0] = 1;\r\n                else\r\n                v[1] = 1;\r\n\r\n                seg[ind] = v;\r\n\r\n                return;\r\n        }\r\n        int mid = (low + high)/2;\r\n        build(2*ind+1,low,mid,a);\r\n        build(2*ind+2,mid+1,high,a);\r\n        seg[ind] = vector<int>(3,0);\r\n        int r1 = seg[2*ind+1][0];\r\n        int l1 = seg[2*ind+1][1];\r\n        int a1 = seg[2*ind+1][2];\r\n        int r2 = seg[2*ind+2][0];\r\n        int l2 = seg[2*ind+2][1];\r\n        int a2 = seg[2*ind+2][2];\r\n  \r\n        int match = min(r1,l2);\r\n        seg[ind][2] = a1 + a2 + match;\r\n        seg[ind][1] = l1 + l2 - match;\r\n        seg[ind][0] = r1 + r2 - match;  \r\n\r\n    }\r\nvector<int> query(int ind,int low,int high,int l,int r)\r\n     {\r\n        if(low >= l && high <= r){\r\n                return seg[ind];\r\n        }\r\n        if(high < l || low > r)\r\n        return {0,0,0};\r\n        int mid = (low + high)/2;\r\n        vector<int> left = query(2*ind+1,low,mid,l,r);\r\n        vector<int> right = query(2*ind+2,mid+1,high,l,r);\r\n        int x = min(left[0],right[1]);\r\n\r\n        vector<int> ans(3,0);\r\n        ans[2] = left[2] + right[2] + x;\r\n        ans[1] = left[1] + right[1] - x;\r\n        ans[0] = left[0] + right[0] - x;\r\n        return ans;\r\n   }\r\nint expo(int a,int b)\r\n{\r\n        if(b == 0) return 1;\r\n        if(b == 1) return a;\r\n\r\n        if(b%2 == 0) return expo((a * a ),b/2);\r\n        else   return (a * expo((a *a) ,b/2)) ;\r\n}\r\nvoid f(){\r\n        for(int i = 0;i<N;i++)\r\n        fact[i] = 1;\r\n\r\n        for(int i = 1;i<N;i++)\r\n        fact[i] = (i%mod * fact[i-1]%mod)%mod;\r\n}\r\nvoid inv(){\r\n        invfact[0] = 1;\r\n        for(int i = 0;i<N;i++)\r\n        invfact[i] = expo(fact[i],mod-2);\r\n}\r\n\r\n\r\nvoid solve()\r\n{\r\n\r\nint n; cin>>n;\r\nvector<int> a(n),b(n),pre(n,0);\r\n\r\nrepi(n) cin>>a[i];\r\nrepi(n) cin>>b[i];\r\npre[0] = a[0] * b[0];\r\n\r\nfor(int i = 1;i<n;i++)\r\npre[i] = pre[i-1] + a[i] * b[i];\r\n\r\nint res = pre[n-1];\r\nfor(int c = 0;c<n;c++){\r\n        \r\n        int ans = a[c] * b[c];\r\n\r\n        for(int i = c-1, j = c + 1; i >= 0 && j < n;i--,j++){\r\n\r\n                int x = a[i] * b[j];\r\n                int y = a[j] * b[i];\r\n                \r\n                ans = ans + x + y;\r\n                \r\n                if(i-1 >= 0)\r\n                res = max(res,pre[i-1] + pre[n-1]-pre[j] + ans);\r\n                else\r\n                res = max(res,pre[n-1]-pre[j] + ans);\r\n        }\r\n\r\n        ans = 0;\r\n\r\n        for(int i = c, j = c + 1; i >= 0 && j < n;i--,j++){\r\n                int x = a[i] * b[j];\r\n                int y = a[j] * b[i];\r\n                ans = ans + x + y;\r\n                if(i-1 >= 0)\r\n                res = max(res,pre[i-1] + pre[n-1]-pre[j] + ans);\r\n                else\r\n                res = max(res,pre[n-1]-pre[j] + ans);\r\n        }\r\n\r\n}\r\n\r\ncout<<res;\r\n\r\n\r\n\r\n}\r\n    \r\nint32_t main()\r\n{\r\n        // f();\r\n       // inv();\r\n      // sieve();\r\n\r\n    #ifndef ONLINE_JUDGE\r\n    freopen(\"i.txt\",\"r\",stdin);\r\n    freopen(\"o.txt\",\"w\",stdout);\r\n    #endif\r\n    sync;\r\n    int t=1; \r\n    while(t--){\r\n    solve();\r\n    cout<<\"\\n\";\r\n    }\r\n    \r\n    return 0;\r\n}\r\n\r\n   "
+}

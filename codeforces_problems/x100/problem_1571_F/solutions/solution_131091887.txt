@@ -1,0 +1,36 @@
+{
+    "id": 131091887,
+    "contestId": 1571,
+    "creationTimeSeconds": 1633627476,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "clyring"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 170,
+    "memoryConsumedBytes": 23961600,
+    "source": "import kotlin.math.max;\n\nclass Event(val days : Int, val sep : Int, val ix : Int) : Comparable<Event> {\n  override fun compareTo(other : Event) : Int {\n    return sep.compareTo(other.sep);\n  }\n}\n\nfun main() {\n  val (n, m) = readLine()!!.split(' ').map(String::toInt);\n  val unsortedEvents = Array<Event>(n) { ix ->\n    val (ki, ti) = readLine()!!.split(' ').map(String::toInt);\n    Event(ki, ti, ix);\n  };\n  var totalDays = 0;\n  for (e in unsortedEvents)\n    totalDays += e.days;\n\n  val events = unsortedEvents.sorted();\n  var daysUsed = 0;\n  val ans = Array<Int>(n) { -1 };\n  for (e in events) {\n    //print(\"Event(${e.days}, ${e.sep}, ${e.ix})\\n\");\n    if (e.sep > 1)\n      break;\n    ans[e.ix] = daysUsed + 1;\n    daysUsed += e.days;\n  }\n\n  val maxOddDays = (m - daysUsed + 1) / 2;\n  val maxEvenDays = (m - daysUsed) / 2;\n  val minEvenDays = max(0, totalDays - daysUsed - maxOddDays);\n\n  if (minEvenDays > maxEvenDays) {\n    println(-1);\n    return;\n  }\n\n  val canDo = Array(maxEvenDays + 1) { -2 };\n  canDo[0] = -1;\n  for (e in events) {\n    if (e.sep == 1)\n      continue;\n    for (ix in 0 until (maxEvenDays + 1 - e.days)) {\n      //println(\"canDo fixup loop: ix = $ix\");\n      if (canDo[ix] >= -1 && canDo[ix + e.days] < -1)\n        canDo[ix + e.days] = e.ix;\n    }\n  }\n\n  for (ix in minEvenDays until maxEvenDays + 1) {\n    val expectedNumOddDays = totalDays - daysUsed - ix;\n    val expectedFreeEvenDay = daysUsed + 2 + 2 * ix;\n    val expectedFreeOddDay = daysUsed + 1 + 2 * expectedNumOddDays;\n    if (max(expectedFreeEvenDay, expectedFreeOddDay) > m + 2) {\n      println(\"expectations failed?\");\n      val x : Int = null!!;\n      println(\"RTE: $x\");\n    }\n    if (canDo[ix] >= -1) {\n      var nextFreeEvenDay = daysUsed + 2;\n      var newIx = ix;\n      while (newIx != 0) {\n        //println(\"loop: newIx = $newIx\");\n        val e : Event = unsortedEvents[canDo[newIx]];\n        ans[e.ix] = nextFreeEvenDay;\n        nextFreeEvenDay += 2 * e.days;\n        newIx -= e.days;\n      }\n      var nextFreeOddDay = daysUsed + 1;\n      for (e in events) {\n        if (ans[e.ix] == -1) {\n          ans[e.ix] = nextFreeOddDay;\n          nextFreeOddDay += 2 * e.days;\n        }\n      }\n      if (nextFreeEvenDay != expectedFreeEvenDay\n        || nextFreeOddDay!= expectedFreeOddDay) {\n        println(\"expectations inaccurate???\");\n        println(\"evens: have $nextFreeEvenDay, want $expectedFreeEvenDay\");\n        println(\"odds: have $nextFreeOddDay, want $expectedFreeOddDay\");\n        val x : Int = null!!;\n        println(\"RTE: $x\");\n      }\n      print(ans.joinToString(\" \", postfix = \"\\n\"));\n      return;\n    }\n  }\n\n  println(-1);\n  return;\n}\n"
+}

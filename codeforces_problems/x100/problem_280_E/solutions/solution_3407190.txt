@@ -1,0 +1,39 @@
+{
+    "id": 3407190,
+    "contestId": 280,
+    "creationTimeSeconds": 1364287454,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "E",
+        "name": "Sequence Transformation",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "data structures",
+            "dp",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "imbanoob"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <vector>\n#include <list>\n#include <map>\n#include <set>\n#include <deque>\n#include <queue>\n#include <stack>\n#include <algorithm>\n#include <numeric>\n#include <utility>\n#include <sstream>\n#include <iostream>\n#include <cstdlib>\n#include <string>\n#include <cstring>\n#include <cstdio>\n#include <cmath>\n#include <cstdlib>\n#include <ctime>\n#include <cassert>\n#include <climits>\n//#include <ext/hash_map>\n\n\nusing namespace std;\nusing namespace __gnu_cxx;\n\n\n\n#define REP(i,n) for(int i = 0; i < int(n); ++i)\n#define REPV(i, n) for (int i = (n) - 1; (int)i >= 0; --i)\n#define FOR(i, a, b) for(int i = (int)(a); i < (int)(b); ++i)\n\n#define FE(i,t) for (__typeof((t).begin())i=(t).begin();i!=(t).end();++i)\n#define FEV(i,t) for (__typeof((t).rbegin())i=(t).rbegin();i!=(t).rend();++i)\n\n#define two(x) (1LL << (x))\n#define ALL(a) (a).begin(), (a).end()\n\n\n#define pb push_back\n#define ST first\n#define ND second\n#define MP(x,y) make_pair(x, y)\n\ntypedef long long ll;\ntypedef unsigned long long ull;\ntypedef unsigned int uint;\ntypedef pair<int,int> pii;\ntypedef vector<int> vi;\ntypedef vector<string> vs;\n\ntemplate<class T> void checkmin(T &a, T b){if (b<a)a=b;}\ntemplate<class T> void checkmax(T &a, T b){if (b>a)a=b;}\ntemplate<class T> void out(T t[], int n){REP(i, n)cout<<t[i]<<\" \"; cout<<endl;}\ntemplate<class T> void out(vector<T> t, int n=-1){for (int i=0; i<(n==-1?t.size():n); ++i) cout<<t[i]<<\" \"; cout<<endl;}\ninline int countbit(int n){return (n==0)?0:1+countbit(n&(n-1));}\ninline int lowbit(int n){return (n^n-1)&n;}\ninline int ctz(int n){return (n==0?-1:ctz(n>>1)+1);}\nint toInt(string s){int a; istringstream(s)>>a; return a;}\nstring toStr(int a){ostringstream os; os<<a; return os.str();}\n\nconst int maxn=6666;\nconst double eps=1e-9;\nconst double oo=1e9;\n\ndouble mx,a,b;\nint x[maxn];\nint n;\ndouble res;\ndouble respos[maxn];\n\n\nstruct line{\n    double a,b,xo;\n    line(double xo, double a, double b):xo(xo),a(a),b(b){}\n    double eval(double x){return a*x+b;}\n    double point0(){return -b/a;}\n    double findmin(double xa, double xb){\n        double ya=eval(xa), yb=eval(xb);\n        if (ya<-eps && yb>eps) return point0();\n        if (fabs(ya)<fabs(yb)) return xa;\n        return xb;\n    }\n};\n\nvoid find0(vector<line> &tb, int &id0, double &pos0){\n    REP(i,tb.size()-1){\n        double xa=tb[i].xo, xb=tb[i+1].xo;\n        if (tb[i].eval(xa)>-eps){id0=i; pos0=xa; return; }\n        if (tb[i].eval(xb)>-eps){id0=i, pos0=fabs(tb[i].a)<eps?tb[i].xo:tb[i].point0(); return;}\n    }\n    assert(0);\n}\n\n\ndouble solve(int p, vector<line> &_tb){\n    vector<line> tb;\n\n    REP(i,_tb.size()) if (i==_tb.size()-1 || _tb[i].xo<_tb[i+1].xo-eps) tb.pb(_tb[i]);\n\n    int id0; double pos0;\n    if (p==n){\n        find0(tb,id0,pos0);\n        return pos0;\n    }\n\n\n    vector<line> ta;\n    find0(tb,id0,pos0);\n\n\n    int j=0;\n    REP(i,id0+1) if (tb[i].xo+a<mx+eps) ta.pb(line(tb[i].xo+a,tb[i].a,tb[i].b-a*tb[i].a));\n    \n    if (pos0+a<mx+eps){\n        ta.pb(line(pos0+a,0,0));\n        if (pos0+b<mx+eps) ta.pb(line(pos0+b,tb[id0].a,tb[id0].b-b*tb[id0].a));\n    }\n\n    for (int i=id0+1; i+1<tb.size() && tb[i].xo+b<mx+eps; ++i)\n        ta.pb(line(tb[i].xo+b,tb[i].a,tb[i].b-b*tb[i].a));\n    ta.pb(line(mx,oo,oo));\n\n    REP(i,ta.size()) ta[i].a+=2, ta[i].b-=2*x[p];\n    double xx=solve(p+1,ta);\n    xx=max(xx,1+p*a);\n    respos[p]=xx;\n    res+=(x[p]-xx)*(x[p]-xx);\n\n    pair<double,double> best=MP(oo,-1.);\n    REP(i,tb.size()-1){\n        double xa=tb[i].xo, xb=tb[i+1].xo;\n        xa=max(xa,xx-b);\n        xb=min(xb,xx-a);\n        if (xa<xb+eps){\n            double xu=tb[i].findmin(xa,xb);\n            best=min(best,MP(tb[i].eval(xu),xu));\n        }\n\n    }\n    return best.ND;\n\n}\n\nint main(){\n    cin>>n>>mx>>a>>b;\n    REP(i,n) scanf(\" %d\",x+i);\n    vector<line> tb;\n    tb.pb(line(1-a,0,0));\n    tb.pb(line(mx,maxn,maxn));\n\n    solve(0,tb);\n    REP(i,n) printf(\"%.10lf \",respos[i]);\n    puts(\"\");\n    printf(\"%.10lf\\n\",res);\n\n    return 0;\n}\n\n"
+}

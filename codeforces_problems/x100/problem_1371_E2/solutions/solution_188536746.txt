@@ -1,0 +1,40 @@
+{
+    "id": 188536746,
+    "contestId": 1371,
+    "creationTimeSeconds": 1673233942,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1371,
+        "index": "E2",
+        "name": "Asterism (Hard Version)",
+        "type": "PROGRAMMING",
+        "points": 1250.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "combinatorics",
+            "dp",
+            "math",
+            "number theory",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1371,
+        "members": [
+            {
+                "handle": "SAT2020"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1593610500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 100,
+    "timeConsumedMillis": 61,
+    "memoryConsumedBytes": 409600,
+    "source": "#include <vector>\n#include <set>\n#include <queue>\n#include <map>\n#include <algorithm>\n#include <math.h>\n#include <numeric>\n#include <iostream>\n#include <sstream>\n#include <array>\n#include <stack>\n#include <limits.h>\n#include <string.h>\n\n#pragma GCC target (\"avx2\")\n#pragma GCC optimization (\"O3\")\n#pragma GCC optimization (\"unroll-loops\")\n#pragma comment(linker, \"/STACK:102400000,102400000\")\n\nusing namespace std;\nusing ll = long long;\n\n#define endl '\\n'\nll MOD = 1000000007;\nll inv(ll i) {if (i == 1) return 1; return (MOD - ((MOD / i) * inv(MOD % i)) % MOD) % MOD;}\n\n\nvoid problemA()\n{\n    ll n;\n    cin >> n;\n    vector<ll> v(n);\n    \n    for (ll i = 0; i < n; i++)\n        cin >> v[i];\n    \n    if (count(v.begin(), v.end(), v[0]) == n)\n        cout << \"NO\" << endl;\n    \n    else\n    {\n        cout << \"YES\" << endl;\n        swap(v[0], v[max_element(v.begin(), v.end())-v.begin()]);\n        swap(v[1], v[min_element(v.begin(), v.end())-v.begin()]);\n        \n        for (ll val : v)\n            cout << val << \" \";\n        \n        cout << endl;\n    }\n}\n\n// 2, 1, 7, 5, 3, 2, 8, 1, 3, 4, 6, 1\n// 1 4\n// 3 2\n// 1 9 2\n// 7 3 8\n// 4 6 5\n// Alternate the array, min-max\nvoid problemB()\n{\n    ll n;\n    cin >> n;\n    set<ll> vals;\n    \n    for (ll i = 1; i <= n*n; i++)\n        vals.insert(i);\n    \n    vector<vector<ll>> result(n, vector<ll>(n));\n    \n    for (ll i = 0; i < n; i++)\n    {\n        if (i % 2 == 0)\n        {\n            for (ll j = 0; j < n; j++)\n            {\n                if ((i*n+j) % 2 == 0)\n                {\n                    result[i][j] = *vals.begin();\n                    vals.erase(vals.begin());\n                }\n                \n                else\n                {\n                    result[i][j] = *prev(vals.end());\n                    vals.erase(prev(vals.end()));\n                }\n            }\n        }\n        \n        else\n        {\n            for (ll j = n-1; j >= 0; j--)\n            {\n                if ((i*n+n-j-1) % 2 == 0)\n                {\n                    result[i][j] = *vals.begin();\n                    vals.erase(vals.begin());\n                }\n                \n                else\n                {\n                    result[i][j] = *prev(vals.end());\n                    vals.erase(prev(vals.end()));\n                }\n            }\n        }\n    }\n    \n    for (vector<ll> vec : result)\n    {\n        for (ll val : vec)\n            cout << val << \" \";\n        \n        cout << endl;\n    }\n}\n\n\n// What we learned from Problem C:\n// Read carefully (Player i beats Player j <--> i > j, NOT v[i] > v[j])\n// Watch underfined behavior (if you have arr[index-1], make sure that index is > 0)\n// Computer allows us to overthink problems --> don't use it to write down your thought process\n\n// Reading Comprehension: Player i beats Player j if i > j, NOT if v[i] > v[j]\n// If we maximize # of wins, we \"beat\" all players with less wins than us no matter what,\n// and \"lose\" to all players with more wins than us no matter what --> try to beat the tie\nvoid problemC()\n{\n    ll n, m;\n    cin >> n >> m;\n    vector<ll> v(n);\n    \n    for (int i = 0; i < n; i++)\n        cin >> v[i];\n    \n    vector<ll> copy = v;\n    vector<ll> prefix(n+1);\n    sort(copy.begin(), copy.end());\n    \n    for (int i = 1; i <= n; i++)\n        prefix[i] = prefix[i-1] + copy[i-1];\n    \n    int numWins = 0;\n    \n    for (int i = 1; i <= n; i++)\n        if (prefix[i] <= m)\n            numWins++;\n    \n    // If player numWins is not part of the prefix, add it\n    // If player numWins is part of the prefix, this will work\n    // Our mistake: We forgot to check numWins > 0 --> undefined behavior\n    if (numWins > 0 && numWins < n && v[numWins] + prefix[numWins-1] <= m)\n        numWins++;\n    \n    cout << n+1-numWins << endl;\n}\n\n\n// Let g(n) = the # of permutations of length n. Clearly, g(n) = g(n-1) * # of spots for nth element.\n// Because we construct the permutation starting with the lowest element, any new position for current\n// elements that moves those elements back will be fine. Thus, we only need to check that we can move\n// some element p places --> minimum number of candies for a given element = v[i]-(i-(p-1)) = v[i]-i+p-1\nvoid problemD()\n{\n    int n, p;\n    cin >> n >> p;\n    vector<int> v(n);\n    \n    for (int i = 0; i < n; i++)\n        cin >> v[i];\n    \n    sort(v.begin(), v.end());\n    int start = 0;\n    \n    for (int i = 0; i < n; i++)\n        start = max(start, v[i]-i);\n    \n    int end = v[p-1];\n    \n    for (int i = p; i < n; i++)\n        end = min(end, v[i]-(i-(p-1)));\n    \n    cout << max(0, end-start) << endl;\n    \n    for (int i = start; i < end; i++)\n        cout << i << \" \";\n    \n    cout << endl;\n}\n\n\nint main()\n{\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    \n//    ll t;\n//    cin >> t;\n//\n//    while (t--)\n//    {\n////        problemA();\n////        problemB();\n////        problemC();\n//    }\n    \n    problemD();\n}\n"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 131583395,
+    "contestId": 1571,
+    "creationTimeSeconds": 1633978004,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "BOGDAN_"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 52,
+    "timeConsumedMillis": 1590,
+    "memoryConsumedBytes": 286003200,
+    "source": "import java.io.PrintWriter\nimport java.lang.Math.abs\nimport java.math.BigDecimal\nimport java.math.RoundingMode\nimport java.util.*\nimport kotlin.collections.HashMap\n\n@JvmField\nval INPUT = System.`in`\n\n@JvmField\nval OUTPUT = System.out\n\n@JvmField\nval _reader = INPUT.bufferedReader()\n\nfun readLine(): String? = _reader.readLine()\nfun readLn() = _reader.readLine()!!\n\n@JvmField\nvar _tokenizer: StringTokenizer = StringTokenizer(\"\")\n\nfun read(): String {\n    while (_tokenizer.hasMoreTokens().not()) _tokenizer = StringTokenizer(_reader.readLine() ?: return \"\", \" \")\n    return _tokenizer.nextToken()\n}\n\nfun readInt() = read().toInt()\nfun readDouble() = read().toDouble()\nfun readLong() = read().toLong()\nfun readBigDecimal() = read().toBigDecimal()\nfun readStrings(n: Int): List<String> = List(n) { read() }\nfun readLines(n: Int) = List(n) { readLn() }\nfun readInts(n: Int) = List(n) { read().toInt() }\nfun readIntArray(n: Int) = IntArray(n) { read().toInt() }\nfun readDoubles(n: Int) = List(n) { read().toDouble() }\nfun readDoubleArray(n: Int) = DoubleArray(n) { read().toDouble() }\nfun readLongs(n: Int) = List(n) { read().toLong() }\nfun readLongArray(n: Int) = LongArray(n) { read().toLong() }\n\n@JvmField\nval _writer = PrintWriter(OUTPUT, false)\n\ninline fun output(block: PrintWriter.() -> Unit) {\n    _writer.apply(block).flush()\n}\n\nfun main() {\n    val t = 1\n    for (tt in 0 until t) {\n        var n = readInt()\n        var m = readInt()\n        var ind = 0\n\n        var inp = Array(n) { Triple(readInt(), readInt(), ind++) }\n        val inp1 = inp.filter { it.second == 1 }.map { Pair(it.first, it.third) }\n        val inp2 = inp.filter { it.second == 2 }.map { Pair(it.first, it.third) }\n\n        var ans = Array(n) { 0 }\n        ind = 0\n\n        for (i in inp1.indices) {\n            if (ind >= m) break\n            ans[inp1[i].second] = ind\n            ind += inp1[i].first\n        }\n\n        if (ind > m) {\n            println(-1)\n            continue\n        }\n\n        m -= ind\n        var init_ind = ind\n\n        var half1 = (m + 1) / 2\n        var half2 = m / 2\n\n        var dp = Array(half1 + 1) { Array(half2 + 1) { 0 } }\n        var p = Array(half1 + 2) { Array(half2 + 1) { Pair(-1, -1) } }\n\n        dp[0][0] = 1\n        var sum = 0\n        for (i in inp2.indices) {\n            if (sum > m) break\n            for (j in 0..sum) {\n                if (sum - j <= half2 && j <= half1 && dp[j][sum - j] == 1) {\n                    if (inp2[i].first + j <= half1) {\n                        dp[j + inp2[i].first][sum - j] = 1\n                        p[j + inp2[i].first][sum - j] = Pair(j, sum - j)\n                    }\n                    if (inp2[i].first + sum - j <= half2) {\n                        dp[j][sum - j + inp2[i].first] = 1\n                        p[j][sum - j + inp2[i].first] = Pair(j, sum - j)\n                    }\n                }\n            }\n\n            sum += inp2[i].first\n        }\n\n        var init_poses = Pair(-1, -1)\n\n        for (i in 0..sum) {\n            if (i <= half1 && (sum - i) <= half2 && dp[i][sum - i] == 1) {\n                init_poses = Pair(i, sum - i)\n                break\n            }\n        }\n\n        // println(\"init_poses : $init_poses\")\n\n        if (init_poses.first == -1) {\n            println(-1)\n            continue\n        }\n\n        ind = inp2.size - 1\n        while(p[init_poses.first][init_poses.second].first != -1) {\n            var parent = p[init_poses.first][init_poses.second]\n            // println(\"parent : $parent : index: ${inp2[ind].second}\")\n            if (parent.first != init_poses.first) {\n                ans[inp2[ind].second] = parent.first * 2 + init_ind\n            } else {\n                ans[inp2[ind].second] = parent.second * 2 + 1 + init_ind\n            }\n\n            init_poses = parent\n            ind--\n        }\n\n        for (i in ans) print(\"${i + 1} \")\n        println()\n    }\n}\n"
+}

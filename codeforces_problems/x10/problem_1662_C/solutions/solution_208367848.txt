@@ -1,0 +1,36 @@
+{
+    "id": 208367848,
+    "contestId": 1662,
+    "creationTimeSeconds": 1685825928,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1662,
+        "index": "C",
+        "name": "European Trip",
+        "type": "PROGRAMMING",
+        "tags": [
+            "dp",
+            "graphs",
+            "math",
+            "matrices"
+        ]
+    },
+    "author": {
+        "contestId": 1662,
+        "members": [
+            {
+                "handle": "lightseba"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1650798300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define rep(a, b, c) for (int a = (b); a < (c); a++)\r\n#define sz(x) int(size(x))\r\n#define all(x) begin(x), end(x)\r\nusing ll = long long;\r\nusing vi = vector<int>;\r\nusing pii = pair<int, int>;\r\n\r\nconst ll MOD = 998244353;\r\n\r\ntemplate<int MOD, int RT> struct mint {\r\n\tusing mr = const mint&;\r\n\tint v;\r\n\texplicit operator int() const {\r\n\t\treturn v;\r\n\t} // explicit -> don't silently convert to int\r\n\tmint(ll _v = 0) {\r\n\t\tv = int((-MOD < _v && _v < MOD) ? _v : _v % MOD);\r\n\t\tif (v < 0) v += MOD;\r\n\t}\r\n\tmint& operator+=(mr o) {\r\n\t\tif ((v += o.v) >= MOD) v -= MOD;\r\n\t\treturn *this;\r\n\t}\r\n\tmint& operator-=(mr o) {\r\n\t\tif ((v -= o.v) < 0) v += MOD;\r\n\t\treturn *this;\r\n\t}\r\n\tmint& operator*=(mr o) {\r\n\t\tv = int(ll(v) * o.v % MOD);\r\n\t\treturn *this;\r\n\t}\r\n\tmint& operator/=(mr o) { return (*this) *= inv(o); }\r\n\tfriend mint pow(mint a, ll p) {\r\n\t\tmint ans = 1;\r\n\t\tassert(p >= 0);\r\n\t\tfor (; p; p /= 2, a *= a)\r\n\t\t\tif (p & 1) ans *= a;\r\n\t\treturn ans;\r\n\t}\r\n\tfriend mint inv(mr a) {\r\n\t\tassert(a.v != 0);\r\n\t\treturn pow(a, MOD - 2);\r\n\t}\r\n\tfriend mint operator+(mint a, mr b) { return a += b; }\r\n\tfriend mint operator-(mint a, mr b) { return a -= b; }\r\n\tfriend mint operator*(mint a, mr b) { return a *= b; }\r\n\tfriend mint operator/(mint a, mr b) { return a /= b; }\r\n\tbool operator==(mr o) const { return v == o.v; }\r\n\tfriend bool operator!=(mr a, mr b) { return !(a == b); }\r\n\tfriend bool operator<(mr a, mr b) { return a.v < b.v; }\r\n\tmint operator-() const { return mint(-v); }\r\n\tmint& operator++() { return *this += 1; }\r\n\tmint& operator--() { return *this -= 1; }\r\n\tfriend istream& operator>>(istream& is, mint& a) {\r\n\t\treturn is >> a.v;\r\n\t}\r\n\tfriend ostream& operator<<(ostream& os, const mint& a) {\r\n\t\treturn os << a.v;\r\n\t}\r\n\tstatic constexpr mint rt() {\r\n\t\treturn RT;\r\n\t} // primitive root for FFT\r\n};\r\nusing mi = mint<MOD, 5>; // 5 is primitive root for both common mods\r\n\r\ntemplate<class T, int N>\r\nstruct Matrix {\r\n    using M = Matrix;\r\n    array<array<T, N>, N> d{};\r\n\r\n    M& operator+=(const M& B) {\r\n        rep (i, 0, N) rep (j, 0, N) d[i][j] += B.d[i][j];\r\n        return *this;\r\n    }\r\n    M operator+(const M& B) const {\r\n        M C = *this;\r\n        return C += B;\r\n    }\r\n    M operator*(const M& B) const {\r\n        M C{};\r\n        rep (i, 0, N) rep (j, 0, N)\r\n            rep (k, 0, N)\r\n                C.d[i][j] += d[i][k] * B.d[k][j];\r\n        return C;\r\n    }\r\n};\r\n\r\nusing M1 = Matrix<mi, 100>;\r\nusing M2 = Matrix<M1, 2>;\r\n\r\nvoid solve() {\r\n    int n, m, k;\r\n    cin >> n >> m >> k;\r\n\r\n    M1 deg{};\r\n    M1 adj{};\r\n\r\n    rep (_, 0, m) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        u--, v--;\r\n\r\n        ++adj.d[u][v];\r\n        ++adj.d[v][u];\r\n\r\n        --deg.d[u][u];\r\n        --deg.d[v][v];\r\n    }\r\n\r\n    if (k == 1) {\r\n        cout << 0 << \"\\n\";\r\n        return;\r\n    }\r\n\r\n    M1 I{};\r\n    rep (i, 0, n) {\r\n        I.d[i][i] = 1;\r\n    }\r\n\r\n    auto degm1 = deg;\r\n    rep (i, 0, n) if (deg.d[i][i] != 0) ++degm1.d[i][i];\r\n\r\n    M2 A{}, ans{};\r\n    ans.d[0][0] = ans.d[1][1] = I;\r\n    A.d[0][0] = adj;\r\n    A.d[0][1] = degm1;\r\n    A.d[1][0] = I;\r\n\r\n    M1 v1 = adj;\r\n    M1 v2 = adj*adj + deg;\r\n\r\n    k -= 2;\r\n    for (; k > 0; k /= 2, A = A * A)\r\n        if (k & 1) ans = ans * A;\r\n\r\n    auto out = ans.d[0][0] * v2 + ans.d[0][1] * v1;\r\n\r\n    mi sum = 0;\r\n    rep (i, 0, n) sum += out.d[i][i];\r\n    cout << sum << \"\\n\";\r\n}\r\n\r\nint main() {\r\n    cin.tie(0)->sync_with_stdio(0);\r\n    cin.exceptions(cin.failbit);\r\n\r\n    // int t; cin >> t; while (t--)\r\n    solve();\r\n\r\n    return 0;\r\n}\r\n"
+}

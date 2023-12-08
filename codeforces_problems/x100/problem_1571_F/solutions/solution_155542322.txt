@@ -1,0 +1,36 @@
+{
+    "id": 155542322,
+    "contestId": 1571,
+    "creationTimeSeconds": 1651451865,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "1DWalker"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 88,
+    "timeConsumedMillis": 171,
+    "memoryConsumedBytes": 40038400,
+    "source": "import java.io.*\r\nimport java.util.*\r\n\r\n/**\r\n * Built using CHelper plug-in\r\n * Actual solution is at the top\r\n *\r\n * @author Egor Kulikov ([email\u00a0protected])\r\n */\r\nobject programkt {\r\n    @JvmStatic\r\n    fun main(args: Array<String>) {\r\n        val inputStream = System.`in`\r\n        val outputStream: OutputStream = System.out\r\n        val `in` = InputReader(inputStream)\r\n        val out = OutputWriter(outputStream)\r\n        val solver = FKotlinforces()\r\n        solver.solve(1, `in`, out)\r\n        out.close()\r\n    }\r\n\r\n    internal class FKotlinforces {\r\n        fun solve(testNumber: Int, `in`: InputReader, out: OutputWriter) {\r\n            val n = `in`.readInt()\r\n            var m = `in`.readInt()\r\n            val k = IntArray(n)\r\n            val t = IntArray(n)\r\n            `in`.readIntArrays(k, t)\r\n            val ans = IntArray(n)\r\n            for (i in 0 until n) {\r\n                if (t[i] == 1) {\r\n                    ans[i] = m - k[i] + 1\r\n                    m -= k[i]\r\n                }\r\n            }\r\n            if (m < 0) {\r\n                out.printLine(-1)\r\n                return\r\n            }\r\n            val way = Array((m + 3) / 2) { IntArray((m + 2) / 2) }\r\n            way[0][0] = 1\r\n            var sum = 0\r\n            for (i in 0 until n) {\r\n                if (t[i] == 2) {\r\n                    for (j in 0..sum) {\r\n                        val l = sum - j\r\n                        if (j >= way.size)\r\n                            break\r\n                        if (j < way.size && l < way[j].size && way[j][l] != 0) {\r\n                            if (j + k[i] < way.size) {\r\n                                way[j + k[i]][l] = 1\r\n                            }\r\n                            if (l + k[i] < way[j].size) {\r\n                                way[j][l + k[i]] = -1\r\n                            }\r\n                        }\r\n                    }\r\n                    sum += k[i]\r\n                    if (sum > m) {\r\n                        out.printLine(-1)\r\n                        return\r\n                    }\r\n                }\r\n            }\r\n            var a = -1\r\n            var b = -1\r\n            for (i in 0..sum) {\r\n                val j = sum - i\r\n                if (i < way.size && j < way[i].size && way[i][j] != 0) {\r\n                    a = i\r\n                    b = j\r\n                    break\r\n                }\r\n            }\r\n            if (a == -1) {\r\n                out.printLine(-1)\r\n                return\r\n            }\r\n            for (i in n - 1 downTo 0) {\r\n                if (t[i] == 2) {\r\n                    if (way[a][b] == 1) {\r\n                        a -= k[i]\r\n                        ans[i] = 2 * a + 1\r\n                    } else {\r\n                        b -= k[i]\r\n                        ans[i] = 2 * b + 2\r\n                    }\r\n                }\r\n            }\r\n            out.printLine(ans)\r\n        }\r\n    }\r\n\r\n    internal class InputReader(private val stream: InputStream) {\r\n        private val buf = ByteArray(1024)\r\n        private var curChar = 0\r\n        private var numChars = 0\r\n        private val filter: SpaceCharFilter? = null\r\n        fun readIntArrays(vararg arrays: IntArray) {\r\n            for (i in 0 until arrays[0].size) {\r\n                for (j in arrays.indices) {\r\n                    arrays[j][i] = readInt()\r\n                }\r\n            }\r\n        }\r\n\r\n        fun read(): Int {\r\n            if (numChars == -1) {\r\n                throw InputMismatchException()\r\n            }\r\n            if (curChar >= numChars) {\r\n                curChar = 0\r\n                numChars = try {\r\n                    stream.read(buf)\r\n                } catch (e: IOException) {\r\n                    throw InputMismatchException()\r\n                }\r\n                if (numChars <= 0) {\r\n                    return -1\r\n                }\r\n            }\r\n            return buf[curChar++].toInt()\r\n        }\r\n\r\n        fun readInt(): Int {\r\n            var c = read()\r\n            while (isSpaceChar(c)) {\r\n                c = read()\r\n            }\r\n            var sgn = 1\r\n            if (c == '-'.toInt()) {\r\n                sgn = -1\r\n                c = read()\r\n            }\r\n            var res = 0\r\n            do {\r\n                if (c < '0'.toInt() || c > '9'.toInt()) {\r\n                    throw InputMismatchException()\r\n                }\r\n                res *= 10\r\n                res += c - '0'.toInt()\r\n                c = read()\r\n            } while (!isSpaceChar(c))\r\n            return res * sgn\r\n        }\r\n\r\n        fun isSpaceChar(c: Int): Boolean {\r\n            return filter?.isSpaceChar(c) ?: isWhitespace(c)\r\n        }\r\n\r\n        interface SpaceCharFilter {\r\n            fun isSpaceChar(ch: Int): Boolean\r\n        }\r\n\r\n        companion object {\r\n            fun isWhitespace(c: Int): Boolean {\r\n                return c == ' '.toInt() || c == '\\n'.toInt() || c == '\\r'.toInt() || c == '\\t'.toInt() || c == -1\r\n            }\r\n        }\r\n\r\n    }\r\n\r\n    internal class OutputWriter {\r\n        private val writer: PrintWriter\r\n\r\n        constructor(outputStream: OutputStream?) {\r\n            writer = PrintWriter(BufferedWriter(OutputStreamWriter(outputStream)))\r\n        }\r\n\r\n        constructor(writer: Writer?) {\r\n            this.writer = PrintWriter(writer)\r\n        }\r\n\r\n        fun print(array: IntArray) {\r\n            for (i in array.indices) {\r\n                if (i != 0) {\r\n                    writer.print(' ')\r\n                }\r\n                writer.print(array[i])\r\n            }\r\n        }\r\n\r\n        fun printLine(array: IntArray) {\r\n            print(array)\r\n            writer.println()\r\n        }\r\n\r\n        fun close() {\r\n            writer.close()\r\n        }\r\n\r\n        fun printLine(i: Int) {\r\n            writer.println(i)\r\n        }\r\n    }\r\n}"
+}

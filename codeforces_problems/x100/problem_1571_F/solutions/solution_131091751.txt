@@ -1,0 +1,36 @@
+{
+    "id": 131091751,
+    "contestId": 1571,
+    "creationTimeSeconds": 1633627356,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "avdim"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 22323200,
+    "source": "/**\r\n * Accomplished using the EduTools plugin by JetBrains https://plugins.jetbrains.com/plugin/10081-edutools\r\n *\r\n * To modify the template, go to Preferences -> Editor -> File and Code Templates -> Other\r\n */\r\n\r\nclass Competition(\r\n  val k: Int,//Kolvo etapov\r\n  val t: Int,//distance dney\r\n  val number: Int\r\n)\r\n\r\nfun main() {\r\n  val (n, m) = readInts()\r\n  val competitions = List(n) {\r\n    val (k, t) = readInts() // t = 1, 2,   k = 2 .. 5000\r\n    Competition(k, t, it + 1)\r\n  }\r\n  val allDays = List<Competition?>(m) { null }\r\n  val solveCompetition = solveCompetition(allDays, competitions)\r\n  when(solveCompetition) {\r\n    SolveResult.Fail -> {\r\n      println(\"-1\")\r\n    }\r\n    is SolveResult.Success -> {\r\n      val result: List<Competition?> = solveCompetition.days\r\n      val str = competitions.map { result.indexOf(it) }.joinToString(\" \")\r\n      println(str)\r\n    }\r\n  }\r\n}\r\n\r\nsealed class SolveResult {\r\n  object Fail : SolveResult()\r\n  class Success(val days: List<Competition?>) : SolveResult()\r\n}\r\n\r\nfun solveCompetition(days: List<Competition?>, availableCompetitions: List<Competition>): SolveResult {\r\n  if (availableCompetitions.isEmpty())\r\n    return SolveResult.Success(days)\r\n\r\n  val c = availableCompetitions.first()\r\n  val length = (c.k - 1) * c.t\r\n  for (startIndex in 0..days.size - length) {\r\n    val range = (startIndex..(startIndex + (c.k - 1) * c.t) step c.t)\r\n    if (range.last < days.size && days.slice(range).all { it == null }) {\r\n      val newDays = days.toMutableList()\r\n      for (i in range) {\r\n        newDays[i] = c\r\n      }\r\n      val temp = solveCompetition(newDays, availableCompetitions.drop(1))\r\n      if (temp is SolveResult.Success) {\r\n        return temp\r\n      }\r\n    }\r\n  }\r\n  return SolveResult.Fail\r\n}\r\n\r\nprivate fun readInt(): Int = readLine()!!.toInt()\r\nprivate fun readInts(): List<Int> = readLine()!!.split(\" \").map { it.toInt() }\r\n\r\n/**\r\n * \u0418\u0449\u0435\u043c \u043f\u0435\u0440\u0432\u044b\u0439 \u044d\u043b\u0435\u043c\u0435\u043d\u0442 \u0441 condition(it) == true. \u0415\u0441\u043b\u0438 \u0432\u0441\u0435 \u044d\u043b\u0435\u043c\u0435\u043d\u0442\u044b false, \u0432\u0435\u0440\u043d\u0451\u043c null.\r\n * List \u0434\u043e\u043b\u0436\u0435\u043d \u0431\u044b\u0442\u044c \u043e\u0442\u0441\u043e\u0440\u0442\u0438\u0440\u043e\u0432\u0430\u043d \u043f\u043e \u043f\u0440\u0430\u0432\u0438\u043b\u0443: \u0421\u043b\u0435\u0432\u0430 contidion false, \u0441\u043f\u0440\u0430\u0432\u0430 true.\r\n * \u041d\u0430\u043f\u0440\u0438\u043c\u0435\u0440 [false, false, true, true] \u0432\u0435\u0440\u043d\u0451\u0442 \u0438\u043d\u0434\u0435\u043a\u0441 2\r\n * @see (https://medium.com/@elizarov/programming-binary-search-6e999783ba5d)\r\n */\r\nfun <E> List<E>.binarySearchFirstIndex(condition: (E) -> Boolean): Int? {\r\n  var l = -1\r\n  var r = size\r\n  while (l + 1 < r) {\r\n    val m = (l + r) ushr 1 // m = (l + r) / 2\r\n    if (condition(this[m])) {\r\n      r = m // \u041e\u0442\u043b\u0438\u0447\u0438\u0435\r\n    } else {\r\n      l = m // \u041e\u0442\u043b\u0438\u0447\u0438\u0435\r\n    }\r\n  }\r\n  if (r == size) return null // \u041e\u0442\u043b\u0438\u0447\u0438\u0435\r\n  return r // \u041e\u0442\u043b\u0438\u0447\u0438\u0435\r\n}\r\n\r\n/**\r\n * \u0418\u0449\u0435\u043c \u043f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u044d\u043b\u0435\u043c\u0435\u043d\u0442 \u0441 condition(it) == true. \u0415\u0441\u043b\u0438 \u0432\u0441\u0435 \u044d\u043b\u0435\u043c\u0435\u043d\u0442\u044b false, \u0432\u0435\u0440\u043d\u0451\u043c null.\r\n * List \u0434\u043e\u043b\u0436\u0435\u043d \u0431\u044b\u0442\u044c \u043e\u0442\u0441\u043e\u0440\u0442\u0438\u0440\u043e\u0432\u0430\u043d \u043f\u043e \u043f\u0440\u0430\u0432\u0438\u043b\u0443: \u0421\u043b\u0435\u0432\u0430 contidion true, \u0441\u043f\u0440\u0430\u0432\u0430 false.\r\n * \u041d\u0430\u043f\u0440\u0438\u043c\u0435\u0440 [true, true, false, false] \u0432\u0435\u0440\u043d\u0451\u0442 \u0438\u043d\u0434\u0435\u043a\u0441 1\r\n * @see (https://medium.com/@elizarov/programming-binary-search-6e999783ba5d)\r\n */\r\nfun <E> List<E>.binarySearchLastIndex(condition: (E) -> Boolean): Int? {\r\n  var l = -1\r\n  var r = size\r\n  while (l + 1 < r) {\r\n    val m = (l + r) ushr 1 // m = (l + r) / 2\r\n    if (condition(this[m])) {\r\n      l = m // \u041e\u0442\u043b\u0438\u0447\u0438\u0435\r\n    } else {\r\n      r = m // \u041e\u0442\u043b\u0438\u0447\u0438\u0435\r\n    }\r\n  }\r\n  if (l == -1) return null // \u041e\u0442\u043b\u0438\u0447\u0438\u0435\r\n  return l // \u041e\u0442\u043b\u0438\u0447\u0438\u0435\r\n}\r\n"
+}

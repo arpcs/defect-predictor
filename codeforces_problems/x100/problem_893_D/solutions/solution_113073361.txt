@@ -1,0 +1,37 @@
+{
+    "id": 113073361,
+    "contestId": 893,
+    "creationTimeSeconds": 1618476678,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 893,
+        "index": "D",
+        "name": "Credit Card",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "data structures",
+            "dp",
+            "greedy",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 893,
+        "members": [
+            {
+                "handle": "Hp_11"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1511449500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 79,
+    "timeConsumedMillis": 77,
+    "memoryConsumedBytes": 5836800,
+    "source": "#include<bits/stdc++.h>\r\n#define fastio ios_base::sync_with_stdio(false);cin.tie(NULL);cout.tie(NULL);\r\n#define ll long long\r\nusing namespace std;\r\nconst int N = 100005;\r\nint n;\r\nll d;\r\nll a[N];\r\nll arr[N];\r\n/*--------------------------SegmentTree Implementation-------------------------*/\r\nclass SegmentTree {\r\npublic:\r\n\t//arr and n shuold be predefined\r\n\tint size;\r\n\tvector<ll> segT, lazy;\r\n\r\n\tSegmentTree() {\r\n\t\t__init();\r\n\t\tbuild();\r\n\t}\r\n\r\n\t// Change it according to question requirement\r\n\tvoid Merge(int index) {\r\n\t\tsegT[index] = max(segT[2 * index] , segT[2 * index + 1]);\r\n\t}\r\n\r\n\tvoid __init() {\r\n\t\tsize = (1 << (1 + (int)ceil(log2(n))));\r\n\t\tsegT = vector<ll>(size, (ll)(-1e14));\r\n\t\tlazy = vector<ll>(size, 0);\r\n\t}\r\n\r\n\tvoid build(int L = 1, int R = n, int index = 1) {\r\n\t\tif (L == R) {\r\n\t\t\tsegT[index] = arr[L];\t//Change it according to array_name\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint mid = (L + R) / 2;\r\n\t\tbuild(L, mid, 2 * index);\r\n\t\tbuild(mid + 1, R, 2 * index + 1);\r\n\t\tMerge(index);\r\n\t}\r\n\r\n\r\n\tvoid Update(int l, int r, int delta, int L = 1, int R = n, int index = 1) {\r\n\t\tif (lazy[index]) {\r\n\t\t\tsegT[index] += lazy[index];\r\n\t\t\tif (L != R) {\r\n\t\t\t\tlazy[2 * index] += lazy[index];\r\n\t\t\t\tlazy[2 * index + 1] += lazy[index];\r\n\t\t\t}\r\n\t\t\tlazy[index] = 0;\r\n\t\t}\r\n\t\tif (L >= l && R <= r) {\r\n\t\t\tsegT[index] += delta;\r\n\t\t\tif (L != R) {\r\n\t\t\t\tlazy[2 * index] += delta;\r\n\t\t\t\tlazy[2 * index + 1] += delta;\r\n\t\t\t}\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tif (l <= R && L <= r) {\r\n\t\t\tUpdate(l, r, delta, L, (L + R) / 2, 2 * index);\r\n\t\t\tUpdate(l, r, delta, (L + R) / 2 + 1, R, 2 * index + 1);\r\n\t\t\tMerge(index);\r\n\t\t\treturn;\r\n\t\t}\r\n\t}\r\n\r\n\tvoid PUpdate(int ind, int delta) {\r\n\t\tUpdate(ind, ind, delta);\r\n\t}\r\n\r\n\tvoid RUpdate(int l, int r, int delta) {\r\n\t\tUpdate(l, r, delta);\r\n\t}\r\n\r\n\tll Query(int l, int r, int L = 1, int R = n, int index = 1) {\r\n\t\tif (lazy[index]) {\r\n\t\t\tsegT[index] += lazy[index];\r\n\t\t\tif (L != R) {\r\n\t\t\t\tlazy[2 * index] += lazy[index];\r\n\t\t\t\tlazy[2 * index + 1] += lazy[index];\r\n\t\t\t}\r\n\t\t\tlazy[index] = 0;\r\n\t\t}\r\n\t\tif (R <= r && L >= l) {\r\n\t\t\treturn segT[index];\r\n\t\t}\r\n\t\tif (l <= R && r >= L) {\r\n\t\t\t//Change it according to question\r\n\t\t\treturn max(Query(l, r, L, (L + R) / 2, 2 * index), Query(l, r, (L + R) / 2 + 1, R, 2 * index + 1));\r\n\t\t}\r\n\r\n\t\t//Change it according to question\r\n\t\treturn (ll)(-1e14);\r\n\t}\r\n\r\n\tll PQuery(int ind) {\r\n\t\treturn Query(ind, ind);\r\n\t}\r\n\r\n\tll RQuery(int l, int r) {\r\n\t\treturn Query(l, r);\r\n\t}\r\n};\r\n/*----------------------------------------------------------------------------*/\r\nvoid solve() {\r\n\tcin >> n >> d;\r\n\tfor (int i = 1; i <= n; i++) {\r\n\t\tcin >> a[i];\r\n\t\tarr[i] = arr[i - 1] + a[i];\r\n\t\tif (arr[i] > d) {\r\n\t\t\tcout << -1 << \"\\n\";\r\n\t\t\treturn;\r\n\t\t}\r\n\t}\r\n\tint ans = 0;\r\n\tSegmentTree st;\r\n\tll buffer = 0;\r\n\tfor (int i = 1; i <= n; i++) {\r\n\t\tarr[i] += buffer;\r\n\t\tif (a[i] == 0) {\r\n\t\t\tif (arr[i] < 0) {\r\n\t\t\t\tst.RUpdate(i, n, abs(arr[i]));\r\n\t\t\t\tbuffer += abs(arr[i]);\r\n\t\t\t\tll x = st.RQuery(i, n);\r\n\t\t\t\tif (x > d) {\r\n\t\t\t\t\tcout << -1 << \"\\n\";\r\n\t\t\t\t\treturn;\r\n\t\t\t\t}\r\n\t\t\t\telse {\r\n\t\t\t\t\tst.RUpdate(i, n, d - x);\r\n\t\t\t\t\tbuffer += (d - x);\r\n\t\t\t\t}\r\n\t\t\t\tans++;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\r\n\tcout << ans << \"\\n\";\r\n\r\n}\r\nint main() {\r\n#ifndef ONLINE_JUDGE\r\n\tfreopen(\"in.txt\", \"r\", stdin);\r\n\tfreopen(\"out.txt\", \"w\", stdout);\r\n#endif\r\n\tfastio;\r\n\tint T = 1;\r\n\t// cin>>T;\r\n\twhile (T--) {\r\n\t\tsolve();\r\n\t}\r\n}"
+}

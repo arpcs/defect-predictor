@@ -1,0 +1,37 @@
+{
+    "id": 219473220,
+    "contestId": 893,
+    "creationTimeSeconds": 1692375489,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 893,
+        "index": "D",
+        "name": "Credit Card",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "data structures",
+            "dp",
+            "greedy",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 893,
+        "members": [
+            {
+                "handle": "JRKK"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1511449500
+    },
+    "programmingLanguage": "PyPy 3-64",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 79,
+    "timeConsumedMillis": 483,
+    "memoryConsumedBytes": 25088000,
+    "source": "import os\nimport sys\nfrom io import BytesIO, IOBase\nimport math\nfrom math import isclose\n\nBUFSIZE = 4096\nclass FastIO(IOBase):\n    newlines = 0\n\n    def __init__(self, file):\n        self._fd = file.fileno()\n        self.buffer = BytesIO()\n        self.writable = \"x\" in file.mode or \"r\" not in file.mode\n        self.write = self.buffer.write if self.writable else None\n\n    def read(self):\n        while True:\n            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))\n            if not b:\n                break\n            ptr = self.buffer.tell()\n            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)\n        self.newlines = 0\n        return self.buffer.read()\n    \n    def readline(self):\n        while self.newlines == 0:\n            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))\n            self.newlines = b.count(b\"\\n\") + (not b)\n            ptr = self.buffer.tell()\n            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)\n        self.newlines -= 1\n        return self.buffer.readline()\n\n    def flush(self):\n        if self.writable:\n            os.write(self._fd, self.buffer.getvalue())\n            self.buffer.truncate(0), self.buffer.seek(0)\n\n\nclass IOWrapper(IOBase):\n    def __init__(self, file):\n        self.buffer = FastIO(file)\n        self.flush = self.buffer.flush\n        self.writable = self.buffer.writable\n        self.write = lambda s: self.buffer.write(s.encode(\"ascii\"))\n        self.read = lambda: self.buffer.read().decode(\"ascii\")\n        self.readline = lambda: self.buffer.readline().decode(\"ascii\")\n\n\nsys.stdin = IOWrapper(sys.stdin)\nsys.stdout = IOWrapper(sys.stdout)\ninput = lambda: sys.stdin.readline().rstrip(\"\\r\\n\")\n\ndef I():\n    return input()\n\ndef II():\n    return int(input())\n\ndef LII():\n    return list(map(int, input().split()))\n\ninf = float('inf')\n\nn, p = LII()\na = LII()\n\nprefix_sum = [0] * (n + 1)\nfor i in range(1, n + 1):\n    prefix_sum[i] = prefix_sum[i - 1] + a[i - 1]\n    if prefix_sum[i] > p:\n        print(-1)\n        sys.exit()\n\nd, b = [0] * (4 * n  + 1), [0] * (4 * n  + 1)\n\ndef build(s, t, p):\n    # \u5bf9 [s,t] \u533a\u95f4\u5efa\u7acb\u7ebf\u6bb5\u6811,\u5f53\u524d\u6839\u7684\u7f16\u53f7\u4e3a p\n    if s == t:\n        d[p] = prefix_sum[s]\n        return\n    m = s + ((t - s) >> 1)\n    # \u79fb\u4f4d\u8fd0\u7b97\u7b26\u7684\u4f18\u5148\u7ea7\u5c0f\u4e8e\u52a0\u51cf\u6cd5\uff0c\u6240\u4ee5\u52a0\u4e0a\u62ec\u53f7\n    # \u5982\u679c\u5199\u6210 (s + t) >> 1 \u53ef\u80fd\u4f1a\u8d85\u51fa int \u8303\u56f4\n    build(s, m, p * 2); build(m + 1, t, p * 2 + 1)\n    # \u9012\u5f52\u5bf9\u5de6\u53f3\u533a\u95f4\u5efa\u6811\n    d[p] = max(d[p * 2], d[(p * 2) + 1])\n\n\ndef query(l, r, s, t, p):\n    # [l, r] \u4e3a\u67e5\u8be2\u533a\u95f4, [s, t] \u4e3a\u5f53\u524d\u8282\u70b9\u5305\u542b\u7684\u533a\u95f4, p\u4e3a\u5f53\u524d\u8282\u70b9\u7684\u7f16\u53f7\n    if l <= s and t <= r:\n        return d[p]\n    # \u5f53\u524d\u533a\u95f4\u4e3a\u8be2\u95ee\u533a\u95f4\u7684\u5b50\u96c6\u65f6\u76f4\u63a5\u8fd4\u56de\u5f53\u524d\u533a\u95f4\u7684\u548c\n    m = s + ((t - s) >> 1)\n    if b[p] != 0:\n        # \u5982\u679c\u5f53\u524d\u8282\u70b9\u7684\u61d2\u6807\u8bb0\u975e\u7a7a, \u5219\u66f4\u65b0\u5f53\u524d\u8282\u70b9\u4e24\u4e2a\u5b50\u8282\u70b9\u7684\u503c\u548c\u61d2\u6807\u8bb0\u503c\n        d[p * 2] = d[p * 2] + b[p]\n        d[p * 2 + 1] = d[p * 2 + 1] + b[p]\n        # \u5c06\u6807\u8bb0\u4e0b\u4f20\u7ed9\u5b50\u8282\u70b9\n        b[p * 2] = b[p * 2] + b[p]\n        b[p * 2 + 1] = b[p * 2 + 1] + b[p]\n        # \u6e05\u7a7a\u5f53\u524d\u8282\u70b9\u7684\u6807\u8bb0\n        b[p] = 0\n    max_val = -1e10\n    if l <= m:\n        max_val = max(max_val, query(l, r, s, m, p * 2))\n    if r > m:\n        max_val = max(max_val, query(l, r, m + 1, t, p * 2 + 1))\n    return max_val\n\ndef update(l, r, c, s, t, p):\n    # [l, r] \u4e3a\u4fee\u6539\u533a\u95f4, c \u4e3a\u88ab\u4fee\u6539\u7684\u5143\u7d20\u7684\u53d8\u5316\u91cf, [s, t] \u4e3a\u5f53\u524d\u8282\u70b9\u5305\u542b\u7684\u533a\u95f4, p\n    # \u4e3a\u5f53\u524d\u8282\u70b9\u7684\u7f16\u53f7\n    if l <= s and t <= r:\n        d[p] = d[p] + c\n        b[p] = b[p] + c\n        return\n    # \u5f53\u524d\u533a\u95f4\u4e3a\u4fee\u6539\u533a\u95f4\u7684\u5b50\u96c6\u65f6\u76f4\u63a5\u4fee\u6539\u5f53\u524d\u8282\u70b9\u7684\u503c, \u7136\u540e\u6253\u6807\u8bb0, \u7ed3\u675f\u4fee\u6539\n    m = s + ((t - s) >> 1)\n    if b[p] != 0 and s != t:\n        # \u5982\u679c\u5f53\u524d\u8282\u70b9\u7684\u61d2\u6807\u8bb0\u975e\u7a7a, \u5219\u66f4\u65b0\u5f53\u524d\u8282\u70b9\u4e24\u4e2a\u5b50\u8282\u70b9\u7684\u503c\u548c\u61d2\u6807\u8bb0\u503c\n        d[p * 2] = d[p * 2] + b[p]\n        d[p * 2 + 1] = d[p * 2 + 1] + b[p]\n        # \u5c06\u6807\u8bb0\u4e0b\u4f20\u7ed9\u5b50\u8282\u70b9\n        b[p * 2] = b[p * 2] + b[p]\n        b[p * 2 + 1] = b[p * 2 + 1] + b[p]\n        # \u6e05\u7a7a\u5f53\u524d\u8282\u70b9\u7684\u6807\u8bb0\n        b[p] = 0\n    if l <= m:\n        update(l, r, c, s, m, p * 2)\n    if r > m:\n        update(l, r, c, m + 1, t, p * 2 + 1)\n    d[p] = max(d[p * 2], d[p * 2 + 1])\n\nbuild(1, n, 1)\n\nans = 0\nfor i in range(1, n + 1): \n    if a[i - 1] == 0:\n        cur = query(i, i, 1, n, 1)\n        if cur < 0:\n            ans += 1\n            add = p - query(i, n, 1, n, 1)\n            if add + cur < 0:\n                print(-1)\n                sys.exit()\n            update(i + 1, n, add, 1, n, 1)\n    # if a[i - 1] == 0:\n    #     if prefix_sum[i] < 0:\n    #         ans += 1\n    #         print(p)\n    #         add = p - query(i, n, 1, n, 1)\n    #         print(add)\n    #         # if add + prefix_sum[i] < 0:\n    #         #     print(-1)\n    #         #     sys.exit()\n    #         update(i, n, add, 1, n, 1)\nprint(ans)"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 131092508,
+    "contestId": 1571,
+    "creationTimeSeconds": 1633628033,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "crimsonred"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.5",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 88,
+    "timeConsumedMillis": 483,
+    "memoryConsumedBytes": 102297600,
+    "source": "import java.util.*\r\n\r\nfun solve() {\r\n    var (n, m) = readInts(2)\r\n\r\n    var k = Array<Int>(n) { 0 }\r\n    var t = Array<Int>(n) { 0 }\r\n    for (i in k.indices) {\r\n        k[i] = readInt()\r\n        t[i] = readInt()\r\n    }\r\n\r\n    var sum1 = 0\r\n    var sum2 = 0\r\n    for (i in k.indices) {\r\n        if (t[i] == 1) {\r\n            sum1 += k[i]\r\n        } else {\r\n            sum2 += k[i]\r\n        }\r\n    }\r\n\r\n    if (sum1 + sum2 > m) {\r\n        println(-1)\r\n        return\r\n    }\r\n\r\n    // var rem = m - sum1\r\n    // fit sum2 in rem\r\n    var dp = Array<Array<Boolean>>(n + 1) { Array<Boolean>(m + 1) { false }}\r\n    dp[n][0] = true\r\n\r\n    for (i in n - 1 downTo 0) {\r\n        for (sum in 0..m) {\r\n            if (t[i] == 1) {\r\n                dp[i][sum] = dp[i + 1][sum]\r\n                continue\r\n            }\r\n\r\n            dp[i][sum] = dp[i + 1][sum]\r\n            if (k[i] <= sum) {\r\n                dp[i][sum] = dp[i][sum] || dp[i + 1][sum - k[i]]\r\n            }\r\n        }\r\n    }\r\n\r\n    var sum21 = 3 * m\r\n    var sum22 = 0\r\n    var minDiff = 3 * m\r\n\r\n    for (sum in m downTo 0) {\r\n        if (dp[0][sum] && sum <= sum2) {\r\n            var rem = sum2 - sum\r\n            var diff = maxOf(rem, sum) - minOf(rem, sum)\r\n            if (diff < minDiff) {\r\n                minDiff = diff\r\n                sum21 = maxOf(rem, sum)\r\n                sum22 = minOf(rem, sum)\r\n            }\r\n        }\r\n    }\r\n\r\n    // println(sum21)\r\n\r\n    if (sum21 > m / 2 + m % 2) {\r\n        println(-1)\r\n        return\r\n    }\r\n\r\n    var done = Array<Boolean>(n) { false }\r\n    var ans = Array<Int>(n) { 0 }\r\n    var curSum = sum21\r\n    var available = 1\r\n\r\n    for (i in k.indices) {\r\n        if (dp[i + 1][curSum]) {\r\n            continue\r\n        }\r\n\r\n        assert(k[i] <= curSum)\r\n        assert(dp[i][curSum])\r\n\r\n        if (available > m) {\r\n            println(-1)\r\n            return\r\n        }\r\n\r\n        done[i] = true\r\n        ans[i] = available\r\n        // println(\"$i ${ans[i]}\")\r\n        curSum -= k[i]\r\n        available += 2 * k[i]\r\n\r\n        if (available - 2 > m) {\r\n            println(-1)\r\n            return\r\n        }\r\n    }\r\n\r\n    var availableFor1s = available\r\n    available = 2\r\n    for (i in k.indices) {\r\n        if (t[i] == 1 || done[i]) {\r\n            continue\r\n        }\r\n\r\n        if (available > m) {\r\n            println(-1)\r\n            return\r\n        }\r\n\r\n        done[i] = true\r\n        ans[i] = available\r\n        available += 2 * k[i]\r\n\r\n        if (available -2 > m) {\r\n            println(-1)\r\n            return\r\n        }\r\n    }\r\n\r\n    if (available < availableFor1s) {\r\n        --availableFor1s\r\n    }\r\n\r\n    for (i in k.indices) {\r\n        if (t[i] == 2) {\r\n            continue\r\n        }\r\n\r\n        if (availableFor1s > m) {\r\n            println(-1)\r\n            return\r\n        }\r\n\r\n        ans[i] = availableFor1s\r\n        availableFor1s += k[i]\r\n\r\n        if (availableFor1s - 1 > m) {\r\n            println(-1)\r\n            return\r\n        }\r\n    }\r\n\r\n    println(ans.joinToString(\" \"))\r\n}\r\n\r\nfun main() {\r\n    var t = 1\r\n    // var t = readInt()\r\n    while (t-- > 0)\r\n        solve()\r\n}\r\n\r\n/** I/O code start */\r\n@JvmField val INPUT = System.`in`\r\n@JvmField val OUTPUT = System.out\r\n\r\n@JvmField val _reader = INPUT.bufferedReader()\r\nfun readLine(): String? = _reader.readLine()\r\nfun readLn() = _reader.readLine()!!\r\n\r\n@JvmField var _tokenizer: StringTokenizer = StringTokenizer(\"\")\r\nfun read(): String {\r\n    while (_tokenizer.hasMoreTokens().not())\r\n        _tokenizer = StringTokenizer(_reader.readLine() ?: return \"\", \" \")\r\n    return _tokenizer.nextToken()\r\n}\r\n\r\nfun readInt() = read().toInt()\r\nfun readDouble() = read().toDouble()\r\nfun readLong() = read().toLong()\r\n\r\nfun readStrings(n: Int) = List(n) { read() }\r\nfun readLines(n: Int) = List(n) { readLn() }\r\nfun readInts(n: Int) = List(n) { read().toInt() }\r\nfun readDoubles(n: Int) = List(n) { read().toDouble() }\r\nfun readLongs(n: Int) = List(n) { read().toLong() }\r\n\r\nfun readIntArray(n: Int) = IntArray(n) { read().toInt() }\r\nfun readDoubleArray(n: Int) = DoubleArray(n) { read().toDouble() }\r\nfun readLongArray(n: Int) = LongArray(n) { read().toLong() }\r\n"
+}

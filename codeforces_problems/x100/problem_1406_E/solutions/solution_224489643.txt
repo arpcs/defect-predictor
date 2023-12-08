@@ -1,0 +1,37 @@
+{
+    "id": 224489643,
+    "contestId": 1406,
+    "creationTimeSeconds": 1695314891,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1406,
+        "index": "E",
+        "name": "Deleting Numbers",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 2600,
+        "tags": [
+            "interactive",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1406,
+        "members": [
+            {
+                "handle": "Superposition"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1599918300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 102,
+    "timeConsumedMillis": 155,
+    "memoryConsumedBytes": 5017600,
+    "source": "// Om Namah Shivaya\r\n\r\n#include <bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\n\r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\n\r\ntemplate<typename T> using Tree = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;\r\ntypedef long long int ll;\r\ntypedef long double ld;\r\ntypedef pair<int, int> pii;\r\ntypedef pair<ll, ll> pll;\r\n\r\n#define fastio ios_base::sync_with_stdio(false); cin.tie(NULL)\r\n#define pb push_back\r\n#define sz(a) a.size()\r\n#define setbits(x) __builtin_popcountll(x)\r\n#define ff first\r\n#define ss second\r\n#define conts continue\r\n#define ceil2(x, y) ((x + y - 1) / (y))\r\n#define all(a) a.begin(), a.end()\r\n#define rall(a) a.rbegin(), a.rend()\r\n#define yes cout << \"Yes\" << endl\r\n#define no cout << \"No\" << endl\r\n\r\n#define rep(i, n) for(int i = 0; i < n; ++i)\r\n#define rep1(i, n) for(int i = 1; i <= n; ++i)\r\n#define rev(i, s, e) for(int i = s; i >= e; --i)\r\n#define trav(i, a) for(auto &i : a)\r\n\r\ntemplate<typename T>\r\nvoid amin(T &a, T b) {\r\n    a = min(a, b);\r\n}\r\n\r\ntemplate<typename T>\r\nvoid amax(T &a, T b) {\r\n    a = max(a, b);\r\n}\r\n\r\n#ifdef LOCAL\r\n#include \"debug.h\"\r\n#else\r\n#define debug(x) 42\r\n#endif\r\n\r\n/*\r\n\r\n\r\n\r\n*/\r\n\r\nconst int MOD = 1e9 + 7;\r\nconst int N = 1e5 + 5;\r\nconst int inf1 = int(1e9) + 5;\r\nconst ll inf2 = ll(1e18) + 5;\r\n\r\nvector<bool> prime(N,1);\r\n\r\nvoid precalc(){\r\n    prime[0] = prime[1] = 0;\r\n    for(int i = 2; i*i < N; ++i){\r\n        if(!prime[i]) conts;\r\n        for(int j = i*i; j < N; j += i){\r\n            prime[j] = 0;\r\n        }\r\n    }\r\n}\r\n\r\nvoid solve(int test_case)\r\n{\r\n    precalc();\r\n    \r\n    ll n; cin >> n;\r\n    vector<ll> small, big;\r\n\r\n    rep1(i,n){\r\n        if(prime[i]){\r\n            if((ll)i*i <= n){\r\n                small.pb(i);\r\n            }\r\n            else{\r\n                big.pb(i);\r\n            }\r\n        }\r\n    }\r\n\r\n    set<ll> st;\r\n    rep1(i,n) st.insert(i);\r\n\r\n    ll Q = 0;\r\n\r\n    auto A = [&](ll x){\r\n        Q++;\r\n        assert(Q <= 10000);\r\n\r\n        cout << \"A \" << x << endl;\r\n        ll y; cin >> y;\r\n        return y;\r\n    };\r\n\r\n    auto B = [&](ll x){\r\n        Q++;\r\n        assert(Q <= 10000);\r\n\r\n        cout << \"B \" << x << endl;\r\n        ll y; cin >> y;\r\n        return y;\r\n    };\r\n\r\n    vector<ll> pfs;\r\n\r\n    trav(p,small){\r\n        B(p);\r\n        if(A(p)){\r\n            pfs.pb(p);\r\n        }\r\n    }\r\n\r\n    // all composite nums and small primes removed, only big primes remain\r\n    // x can have at most 1 div that is a big prime\r\n    // do sqrt decomp to find this 1 big prime that divides x\r\n\r\n    ll remain = A(1);\r\n\r\n    ll siz = sz(big);\r\n    ll block = max((ll)sqrt(siz),1ll);\r\n\r\n    rep(i,siz){\r\n        if(i*block >= siz) break;\r\n\r\n        bool ok = false;\r\n        for(int j = i*block; j < min((i+1)*block,siz); ++j){\r\n            ll res = B(big[j]);\r\n            if(res == 2){\r\n                pfs.pb(big[j]);\r\n                ok = true;\r\n                break;\r\n            }\r\n\r\n            remain--;\r\n        }\r\n\r\n        if(ok) break;\r\n\r\n        ll remain_now = A(1);\r\n\r\n        if(remain_now == remain+1){\r\n            // found\r\n            for(int j = i*block; j < min((i+1)*block,siz); ++j){\r\n                ll res = A(big[j]);\r\n                if(res){\r\n                    pfs.pb(big[j]);\r\n                    break;\r\n                }\r\n            }\r\n\r\n            break;\r\n        }\r\n        else{\r\n            assert(remain_now == remain);\r\n        }\r\n    }\r\n\r\n    ll ans = 1;\r\n\r\n    trav(p,pfs){\r\n        for(ll po = p*p; ; po *= p){\r\n            if(po > n or A(po) == 0){\r\n                ans *= po/p;\r\n                break;\r\n            }\r\n        }\r\n    }\r\n\r\n    cout << \"C \" << ans << endl;\r\n}\r\n\r\nint main()\r\n{\r\n    fastio;\r\n\r\n    int t = 1;\r\n    // cin >> t;\r\n\r\n    rep1(i, t) {\r\n        solve(i);\r\n    }\r\n\r\n    return 0;\r\n}"
+}

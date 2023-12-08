@@ -1,0 +1,38 @@
+{
+    "id": 216561718,
+    "contestId": 1023,
+    "creationTimeSeconds": 1690799334,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1023,
+        "index": "F",
+        "name": "Mobile Phone Network",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 2600,
+        "tags": [
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1023,
+        "members": [
+            {
+                "handle": "zhez_meow"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1534516500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 66,
+    "timeConsumedMillis": 1606,
+    "memoryConsumedBytes": 110489600,
+    "source": "#pragma GCC optimize(\"Ofast\")\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\nnamespace FastIO {\r\n\tchar buf[1 << 23], *p1 = buf, *p2 = buf;\r\n#define getchar() \\\r\n\t(p1 == p2 && (p2 = (p1 = buf) + fread(buf, 1, 1 << 21, stdin), p1 == p2) ? EOF : *p1 ++)\r\n\tinline int read() {\r\n\t    register int sr = 0;\r\n\t    register char ch = getchar(), last;\r\n\t    while (ch < '0' || ch > '9') last = ch, ch = getchar();\r\n\t    while (ch >= '0' && ch <= '9') sr = (sr << 1) + (sr << 3) + (ch ^ 48), ch = getchar();\r\n\t    return last == '-' ? -sr : sr;\r\n\t}\r\n}\r\nnamespace Milkcat {\r\n\tusing namespace FastIO;\r\n\ttypedef long long LL;\r\n\tconst int N = 1e6 + 5, inf = INT_MAX;\r\n\tstruct edge {\r\n\t\tint u, v, w;\r\n\t\tbool operator < (const edge& x) const {\r\n\t\t\treturn w < x.w;\r\n\t\t}\r\n\t} e[N], qwq[N];\r\n\tint n, m, k, f[N], a[N];\r\n\tvector<edge> t;\r\n\tLL ans;\r\n\tint find(int x) { return f[x] == x ? x : f[x] = find(f[x]); }\r\n\tvoid merge(int u, int v) {\r\n\t\tint fu = find(u), fv = find(v);\r\n\t\tif (fu != fv) f[fv] = fu;\r\n\t}\r\n\tstruct SegmentTree {\r\n\t    LL tag[N << 1];\r\n\t    inline int ls(int p) { return p << 1; }\r\n\t    inline int rs(int p) { return p << 1 | 1; }\r\n\t    void push_down(int p, int l, int r) {\r\n\t        if (tag[p]) tag[ls(p)] = tag[p], tag[rs(p)] = tag[p], tag[p] = 0;\r\n\t    }\r\n\t    void modify(int p, int l, int r, int nl, int nr, LL k) {\r\n\t        if (nl <= l && r <= nr) { tag[p] = k; return; }\r\n\t        push_down(p, l, r);\r\n\t        int mid = (l + r) >> 1;\r\n\t        if (nl <= mid) modify(ls(p), l, mid, nl, nr, k);\r\n\t        if (nr > mid) modify(rs(p), mid + 1, r, nl, nr, k);\r\n\t    }\r\n\t    LL query(int p, int l, int r, int t) {\r\n\t        if (l == r) return tag[p];\r\n\t        push_down(p, l, r);\r\n\t        int mid = (l + r) >> 1;\r\n\t        if (t <= mid) return query(ls(p), l, mid, t);\r\n\t        if (t > mid) return query(rs(p), mid + 1, r, t);\r\n\t    }\r\n\t} Sgt;\r\n\tstruct TreeDecom {\r\n\t\tstruct edge {\r\n\t\t\tint next, to;\r\n\t\t} e[N << 1];\r\n\t\tint tot, cnt, head[N], depth[N], fa[N], siz[N], son[N], top[N], id[N];\r\n\t\tvoid Add(int u, int v) {\r\n\t\t\te[++ cnt].to = v;\r\n\t\t\te[cnt].next = head[u];\r\n\t\t\thead[u] = cnt;\r\n\t\t}\r\n\t\tvoid add(int u, int v) {\r\n\t\t\tAdd(u, v), Add(v, u);\r\n\t\t}\r\n\t\tvoid dfs1(int u, int fat) {\r\n\t\t\tfa[u] = fat, siz[u] = 1, depth[u] = depth[fa[u]] + 1;\r\n\t\t\tfor (int i = head[u]; i; i = e[i].next) {\r\n\t\t\t\tint v = e[i].to;\r\n\t\t\t\tif (v == fa[u]) continue;\r\n\t\t\t\tdfs1(v, u), siz[u] += siz[v];\r\n\t\t\t\tif (!son[u] || siz[v] > siz[son[u]])\r\n\t\t\t\t\tson[u] = v;\r\n\t\t\t}\r\n\t\t}\r\n\t\tvoid dfs2(int u, int topf) {\r\n\t\t\ttop[u] = topf, id[u] = ++ tot;\r\n\t\t\tif (son[u]) dfs2(son[u], topf);\r\n\t\t\tfor (int i = head[u]; i; i = e[i].next) {\r\n\t\t\t\tint v = e[i].to;\r\n\t\t\t\tif (v == fa[u] || v == son[u]) continue;\r\n\t\t\t\tdfs2(v, v);\r\n\t\t\t}\r\n\t\t}\r\n\t\tvoid updRange(int u, int v, int k) {\r\n\t\t\twhile (top[u] != top[v]) {\r\n\t\t\t\tif (depth[top[u]] < depth[top[v]]) swap(u, v);\r\n\t\t\t\tSgt.modify(1, 1, n, id[top[u]], id[u], k), u = fa[top[u]];\r\n\t\t\t}\r\n\t\t\tif (depth[u] > depth[v]) swap(u, v);\r\n\t\t\tif (id[u] < id[v]) Sgt.modify(1, 1, n, id[u] + 1, id[v], k);\r\n\t\t}\r\n\t} T;\r\n\tint main() {\r\n\t\tn = read(), k = read(), m = read();\r\n\t\tfor (int i = 1; i <= n; i ++) f[i] = i;\r\n\t\tfor (int i = 1; i <= k; i ++) {\r\n\t\t\tqwq[i].u = read(), qwq[i].v = read();\r\n\t\t\tmerge(qwq[i].u, qwq[i].v), T.add(qwq[i].u, qwq[i].v);\r\n\t\t}\r\n\t\tfor (int i = 1; i <= m; i ++) e[i].u = read(), e[i].v = read(), e[i].w = read();\r\n\t\tsort(e + 1, e + 1 + m);\r\n\t\tfor (int i = 1; i <= m; i ++) {\r\n\t\t\tint fu = find(e[i].u), fv = find(e[i].v);\r\n\t\t\tif (fu != fv) merge(e[i].u, e[i].v), T.add(e[i].u, e[i].v);\r\n\t\t\telse t.push_back(e[i]);\r\n\t\t}\r\n\t\tT.dfs1(1, 0), T.dfs2(1, 1);\r\n\t\treverse(t.begin(), t.end());\r\n\t\tfor (edge pwp : t) T.updRange(pwp.u, pwp.v, pwp.w);\r\n\t\tfor (int i = 1; i <= k; i ++) {\r\n\t\t\tif (T.depth[qwq[i].u] < T.depth[qwq[i].v]) swap(qwq[i].u, qwq[i].v);\r\n\t\t\tint res = Sgt.query(1, 1, n, T.id[qwq[i].u]);\r\n\t\t\tif (!res) puts(\"-1\"), exit(0);\r\n\t\t\tans += res;\r\n\t\t}\r\n\t\tprintf(\"%lld\\n\", ans);\r\n\t\treturn 0;\r\n\t}\r\n}\r\nint main() {\r\n\treturn Milkcat::main();\r\n}\r\n\r\n"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 131091177,
+    "contestId": 1571,
+    "creationTimeSeconds": 1633626860,
+    "relativeTimeSeconds": 9560,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "korifey"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 140,
+    "memoryConsumedBytes": 2457600,
+    "source": "import java.util.*\r\nimport kotlin.math.abs\r\nimport kotlin.math.max\r\nimport kotlin.math.min\r\n\r\nfun main(args: Array<String>) {\r\n    val scanner = Scanner(System.`in`)\r\n    val n = scanner.nextInt()\r\n    val m = scanner.nextInt()\r\n\r\n    val k = IntArray(n)\r\n    val t = IntArray(n)\r\n    for (i in 0 until n) {\r\n        k[i] = scanner.nextInt()\r\n        t[i] = scanner.nextInt()\r\n    }\r\n\r\n    val begin_idxs = t.withIndex().filter { it.value == 1 }.map { it.index }\r\n    var sum_begin = begin_idxs.sumBy { k[it] }\r\n\r\n    var sum_rem = m - sum_begin\r\n\r\n    val dp = Array(n + 1) { Array(sum_rem + 1) { -1 } }\r\n\r\n    dp[0][0] = 0\r\n\r\n    val begin_idxs_set = begin_idxs.toSet()\r\n\r\n    for (i in 1..n) {\r\n        dp[i] = dp[i - 1].copyOf()\r\n        if (i - 1 in begin_idxs_set) {\r\n            continue\r\n        }\r\n        for (w in 0 until sum_rem) {\r\n            if (dp[i - 1][w] != -1 && w + k[i - 1] <= sum_rem) {\r\n                dp[i][w + k[i - 1]] = i - 1\r\n            }\r\n        }\r\n    }\r\n    var best = 0\r\n\r\n    var kek = (k.sum() - sum_begin)\r\n\r\n    for (w in 0..kek) {\r\n        if (dp[n][w] != -1) {\r\n            if (abs(kek - w - w) < abs(kek - best - best)) {\r\n                best = w\r\n            }\r\n        }\r\n    }\r\n    if (best > kek - best) {\r\n        best = kek - best\r\n    }\r\n\r\n    if (sum_rem < max((kek - best) * 2 - 1, best * 2)) {\r\n        println(-1)\r\n        return\r\n    }\r\n\r\n    var cur_w = best\r\n    var cur_n = n\r\n    val ans_last = mutableListOf<Int>()\r\n    while (cur_w > 0) {\r\n        println(\"$cur_w ${dp[cur_n][cur_w]}\")\r\n        ans_last.add(dp[cur_n][cur_w])\r\n        cur_w -= k[dp[cur_n][cur_w]]\r\n        cur_n--\r\n    }\r\n\r\n    val ans = IntArray(n) {0}\r\n\r\n    var cur_sum = 1\r\n    for (idx in begin_idxs) {\r\n        ans[idx] = cur_sum\r\n        cur_sum += k[idx]\r\n    }\r\n\r\n    var cur_sum1 = cur_sum + 1\r\n\r\n\r\n    for (idx in ans_last) {\r\n        ans[idx] = cur_sum1\r\n        cur_sum1 += k[idx] * 2\r\n    }\r\n\r\n    var cur_sum2 = cur_sum\r\n\r\n    for (idx in (0 until n) - (begin_idxs) - (ans_last)) {\r\n        ans[idx] = cur_sum2\r\n        cur_sum2 += k[idx] * 2\r\n    }\r\n\r\n    print(ans.joinToString(\" \"))\r\n}"
+}

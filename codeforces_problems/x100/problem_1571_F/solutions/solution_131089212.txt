@@ -1,0 +1,36 @@
+{
+    "id": 131089212,
+    "contestId": 1571,
+    "creationTimeSeconds": 1633624764,
+    "relativeTimeSeconds": 7464,
+    "problem": {
+        "contestId": 1571,
+        "index": "F",
+        "name": "Kotlinforces",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "*special",
+            "constructive algorithms",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1571,
+        "members": [
+            {
+                "handle": "taran_1407"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1633617300
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 9,
+    "timeConsumedMillis": 311,
+    "memoryConsumedBytes": 178073600,
+    "source": "fun main(args: Array<String>){\r\n    val (N, M) = readLine()!!.split(\" \").map { it.toInt() }\r\n    val pairs = Array<IntArray>(1+N, {IntArray(2)})\r\n    val L = Array<IntArray>(3, { IntArray(1+N) })\r\n    val C = IntArray(3)\r\n    val S = IntArray(3)\r\n    for(i in 1..N){\r\n        val (K, T) = readLine()!!.split(\" \").map { it.toInt() }\r\n        pairs[i] = intArrayOf(K, T)\r\n        L[T][++C[T]] = i\r\n        S[T] += K\r\n    }\r\n    val total = M-S[1]\r\n    val odd = (total+1)/2\r\n    val even = total-odd\r\n    val INF = Integer.MAX_VALUE/4\r\n    val DP = Array<IntArray>(1+C[2], {IntArray(1+total, {INF})})\r\n    val ind = Array<IntArray>(1+C[2], {IntArray(1+total, {-1})})\r\n    DP[0][0] = 0\r\n    for(i in 1..C[2]){\r\n        val sz = pairs[L[2][i]][0]\r\n        for(j in 0..total){\r\n            if(DP[i-1][j] != INF)\r\n                DP[i][j] = DP[i-1][j]\r\n        }\r\n        for(j in sz..total){\r\n            if(DP[i-1][j-sz] != INF){\r\n                if(DP[i][j] > DP[i-1][j-sz]+sz){\r\n                    DP[i][j] = DP[i-1][j-sz]+sz\r\n                    ind[i][j] = i\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    var possible = false\r\n    var startDP = -1\r\n    var sum = -1\r\n    for(i in 0..total){\r\n        if(DP[C[2]][i] != INF){\r\n            val x = DP[C[2]][i]\r\n            val y = S[2]-x\r\n            if(x <= odd && y <= even){\r\n                possible = true\r\n                startDP = 1\r\n                sum = x\r\n            }\r\n            if(x <= even && y <= odd){\r\n                possible = true\r\n                startDP = 2\r\n                sum = x\r\n            }\r\n        }\r\n    }\r\n    if(!possible){\r\n        println(-1)\r\n        return\r\n    }\r\n    val ans = IntArray(1+N, {-1})\r\n    var other = 3-startDP\r\n    for(i in C[2] downTo 1){\r\n        val id = L[2][i]\r\n        val sz = pairs[id][0]\r\n        if(ind[i][sum] == -1){\r\n            ans[id] = other\r\n            other += 2*sz\r\n        }else{\r\n            ans[id] = startDP\r\n            startDP += 2*sz\r\n            sum -= sz\r\n        }\r\n    }\r\n    var end = M\r\n    for(i in 1..N){\r\n        if(pairs[i][1] == 1){\r\n            end -= pairs[i][0]\r\n            ans[i] = end+1\r\n        }\r\n    }\r\n    println(ans.copyOfRange(1, N+1).joinToString(\" \"))\r\n}"
+}
