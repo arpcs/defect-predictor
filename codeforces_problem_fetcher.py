@@ -130,16 +130,16 @@ def runner(number_of_problems, number_of_solutions):
         
         for retries in range(20):
             try:
+                link = create_problem_link(problem['contestId'], problem['index'])
+                problem['desc'] = codeforces_parser.parse_problem(link)
                 with open(f"{folder_name}/problem.txt", "w") as file:
-                    link = create_problem_link(problem['contestId'], problem['index'])
-                    problem['desc'] = codeforces_parser.parse_problem(link)
                     json.dump(problem, file, indent=4)
                     break
 
             except Exception as e:
                 if retries >= 19:
-                    print(f"Error processing problem data: {problem['contestId']}, {problem['index']} : {e}. \nDeleting problem")
-                    shutil.rmtree(folder_name)
+                    print(f"Error processing problem data: {problem['contestId']}, {problem['index']} : {e}. \nGiving up")
+                    #shutil.rmtree(folder_name)
                 else:
                     print(f"Error processing problem data: {problem['contestId']}, {problem['index']} : {e}. \nRetry [{retries}]")
                 time.sleep(2 + retries*retries / 10)
