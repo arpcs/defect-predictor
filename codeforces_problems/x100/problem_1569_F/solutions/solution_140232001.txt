@@ -1,0 +1,38 @@
+{
+    "id": 140232001,
+    "contestId": 1569,
+    "creationTimeSeconds": 1640158749,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "krimzon"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 732,
+    "memoryConsumedBytes": 43929600,
+    "source": "#include<cstdio>\r\n#include<iostream>\r\n#include<vector>\r\n#include<algorithm>\r\n#include<cstring>\r\n#include<queue>\r\n#include<map>\r\nusing namespace std;\r\n#define ll long long \r\n#define ri int\r\n#define pii pair<int,int>\r\nconst ll mod=998244353;\r\nll add(ll x,ll y){return (x+=y)<mod?x:x-mod;}\r\nll dec(ll x,ll y){return (x-=y)<0?x+mod:x;}\r\nll ksm(ll d,ll t,ll res=1){for(;t;t>>=1,d=d*d%mod) if(t&1) res=res*d%mod;return res;}\r\nconst pii d=(pii){17,19},invd=(pii){ksm(17,mod-2),ksm(19,mod-2)};\r\npii operator+(const pii &p,const pii &q){return (pii){add(p.first,q.first),add(p.second,q.second)};}\r\npii operator-(const pii &p,const pii &q){return (pii){dec(p.first,q.first),dec(p.second,q.second)};}\r\npii operator*(const pii &p,const pii &q){return (pii){1ll*p.first*q.first%mod ,1ll*p.second*q.second%mod};}\r\nint n,m,k,flag=1;\r\nbool g[12][12];\r\nconst int M=17009701;\r\nbool G[M],vis[M];\r\nint link[12],p[6];\r\nbool f[6][2];\r\nbool check(){\r\n    int d=n>>1;\r\n    vector<int> vec;vec.reserve(d);\r\n    for(ri i=0;i<n;++i) if(link[i]>i) vec.push_back(i);\r\n    for(ri i=0;i<d;++i) p[i]=i;\r\n    do{\r\n        {\r\n            int ed=vec[p[d-1]];\r\n            if(!g[ed][link[ed]]) continue;\r\n        }\r\n        memset(f,0,sizeof(f));\r\n        f[0][0]=f[0][1]=1;\r\n        for(ri i=1;i<d;++i) for(ri s=0;s<2;++s) if(f[i-1][s]) for(ri t=0;t<2;++t){\r\n            int u=t?vec[p[i]]:link[vec[p[i]]],v=t?link[vec[p[i]]]:vec[p[i]],x=s?vec[p[i-1]]:link[vec[p[i-1]]],y=s?link[vec[p[i-1]]]:vec[p[i-1]];\r\n            if(g[u][x]&&g[v][y]) f[i][t]=1;\r\n        }\r\n        if(f[d-1][0]||f[d-1][1]){\r\n            // for(ri i=0;i<d;++i) printf(\"%d %d\\n\",vec[p[i]],link[vec[p[i]]]);\r\n            // puts(\"----\");\r\n            return 1;\r\n        }\r\n    }while(next_permutation(p,p+d));\r\n    return 0;\r\n\r\n}\r\nvoid dfs(int cur,int w){\r\n    if(cur==n){\r\n        // ++cnt;\r\n        // for(ri i=0;i<n;++i) printf(\"%d \",link[i]);puts(\"\");\r\n        if(vis[w]) puts(\"fuck\"),flag=0;\r\n        vis[w]=1;\r\n        G[w]=check();\r\n        return;\r\n    }\r\n    if(~link[cur]) dfs(cur+1,(w*19+link[cur]+1)%M);\r\n    else for(ri i=cur+1;i<n;++i) if(link[i]==-1){\r\n        link[i]=cur,link[cur]=i;\r\n        dfs(cur+1,(w*19+link[cur]+1)%M);\r\n        link[cur]=-1,link[i]=-1;\r\n    }\r\n}\r\nll ans;\r\nmap<pii,int> S;\r\nint col[12];\r\nvoid solve(int cur,int w,int cnt,pii mer){\r\n    if(cnt>k) return;\r\n    if(cur==n){\r\n        if(G[w]){\r\n            // for(ri i=0;i<n;++i) printf(\"%d \",link[i]);puts(\"\");\r\n            // for(ri i=0;i<n;++i) printf(\"%d \",col [i]);puts(\"\");\r\n            if(S.count(mer)&&S[mer]!=cnt) puts(\"Fuck\");\r\n            S[mer]=cnt;\r\n        }\r\n        return;\r\n    }\r\n    if(~link[cur]) solve(cur+1,(w*19+link[cur]+1)%M,cnt,mer*d+(pii){col[cur],col[cur]});\r\n    else{\r\n        for(ri i=cur+1;i<n;++i) if(link[i]==-1){\r\n            link[i]=cur,link[cur]=i;\r\n            for(ri c=1;c<=cnt;++c) col[cur]=col[i]=c,solve(cur+1,(w*19+link[cur]+1)%M,cnt,mer*d+(pii){c,c});\r\n                                   col[cur]=col[i]=cnt+1,solve(cur+1,(w*19+link[cur]+1)%M,cnt+1,mer*d+(pii){cnt+1,cnt+1});\r\n            link[cur]=-1,link[i]=-1;\r\n        }\r\n    }\r\n}\r\nll C[20][20],fac[20];\r\nint main(){\r\n    // freopen(\"rand.in\",\"r\",stdin);\r\n    // freopen(\"1.out\",\"w\",stdout);\r\n    scanf(\"%d%d%d\",&n,&m,&k);\r\n    fac[0]=1;for(ri i=1;i<=k;++i) fac[i]=fac[i-1]*i;\r\n    for(ri i=0,j;i<=k;++i) for(j=1,C[i][0]=1;j<=i;++j) C[i][j]=C[i-1][j-1]+C[i-1][j];\r\n    for(ri i=1;i<=m;++i){\r\n        int u,v;scanf(\"%d%d\",&u,&v);u--,v--;\r\n        g[u][v]=g[v][u]=1;\r\n    }\r\n    memset(link,-1,sizeof(link));\r\n    dfs(0,0);solve(0,0,0,(pii){0,0});\r\n    for(auto it:S){\r\n        // printf(\"%d\\n\",it.second);\r\n        ans+=C[k][it.second]*fac[it.second];\r\n    }\r\n    printf(\"%lld\\n\",ans);\r\n}"
+}

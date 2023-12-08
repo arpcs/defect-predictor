@@ -1,0 +1,38 @@
+{
+    "id": 192396248,
+    "contestId": 1569,
+    "creationTimeSeconds": 1675631421,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "Azimjonm0012"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 233,
+    "memoryConsumedBytes": 6041600,
+    "source": "#include <cstdio>\r\r\n#include <cstring>\r\r\n#include <algorithm>\r\r\n#include <unordered_map>\r\r\nusing namespace std;\r\r\ntypedef long long ll;\r\r\nint n,m,k,x,y,e[15][15],col[15],u[7],v[7],f[65][7];\r\r\nunordered_map<ll,bool> mp;\r\r\nll ans;\r\r\ninline bool dp(ll S)\r\r\n{\r\r\n    memset(u,0,sizeof(u));\r\r\n    memset(v,0,sizeof(v));\r\r\n    for(int i=1,c; i<=n; ++i)\r\r\n    {\r\r\n        c=S>>((i-1)<<2)&15;\r\r\n        if(!u[c-1])u[c-1]=i;\r\r\n        else v[c-1]=i;\r\r\n    }\r\r\n    memset(f,0,sizeof(f));\r\r\n    f[0][0]=1;\r\r\n    for(int i=1; i<(1<<(n>>1)); ++i)\r\r\n    {\r\r\n        for(int j=0; j<(n>>1); ++j)\r\r\n        {\r\r\n            if(~i>>j&1)continue;\r\r\n            for(int k=0; k<(n>>1); ++k)\r\r\n            {\r\r\n                if(!f[i^(1<<j)][k])continue;\r\r\n                if(i^(1<<j) && !(e[u[k]][u[j]] && e[v[k]][v[j]])\r\r\n                        && !(e[u[k]][v[j]] && e[v[k]][u[j]]))continue;\r\r\n                if(i==(1<<(n>>1))-1 && !e[u[j]][v[j]])continue;\r\r\n                if(i==(1<<(n>>1))-1)return 1;\r\r\n                f[i][j]=1;\r\r\n                break;\r\r\n            }\r\r\n        }\r\r\n    }\r\r\n    return 0;\r\r\n}\r\r\ninline ll calc(int *c)\r\r\n{\r\r\n    int id[15]= {0};\r\r\n    ll S=0;\r\r\n    for(int i=1,cnt=0; i<=n; ++i)\r\r\n    {\r\r\n        if(!id[c[i]])id[c[i]]=++cnt;\r\r\n        S|=(ll)id[c[i]]<<((i-1)<<2);\r\r\n    }\r\r\n    return S;\r\r\n}\r\r\nbool dfs3(ll S)\r\r\n{\r\r\n    if(mp.count(S))return mp[S];\r\r\n    int c[15]= {0},cnt[15]= {0},id=0;\r\r\n    for(int i=1; i<=n; ++i)\r\r\n    {\r\r\n        c[i]=S>>((i-1)<<2)&15;\r\r\n        ++cnt[c[i]];\r\r\n    }\r\r\n    for(int i=1; i<=n; ++i)\r\r\n    {\r\r\n        if(cnt[c[i]]>2)\r\r\n        {\r\r\n            id=i;\r\r\n            break;\r\r\n        }\r\r\n    }\r\r\n    if(!id)return mp[S]=dp(S);\r\r\n    for(int i=id+1,t=c[id]; i<=n; ++i)\r\r\n    {\r\r\n        if(c[i]!=t)continue;\r\r\n        c[i]=c[id]=14;\r\r\n        if(dfs3(calc(c)))return mp[S]=1;\r\r\n        c[i]=c[id]=t;\r\r\n    }\r\r\n    return mp[S]=0;\r\r\n}\r\r\nvoid dfs(int,int);\r\r\nvoid dfs2(int d,int num,int D,int Num)\r\r\n{\r\r\n    if(d>n)return;\r\r\n    if(!col[d])\r\r\n    {\r\r\n        col[d]=D;\r\r\n        if(~num&1)dfs(D+1,Num*(k-D+1));\r\r\n        dfs2(d+1,num+1,D,Num);\r\r\n        col[d]=0;\r\r\n    }\r\r\n    dfs2(d+1,num,D,Num);\r\r\n}\r\r\nvoid dfs(int d,int num)\r\r\n{\r\r\n    if(!num)return;\r\r\n    int id=1;\r\r\n    while(id<=n && col[id])++id;\r\r\n    if(id>n)\r\r\n    {\r\r\n        if(dfs3(calc(col)))ans+=num;\r\r\n        return;\r\r\n    }\r\r\n    col[id]=d;\r\r\n    dfs2(id+1,2,d,num);\r\r\n    col[id]=0;\r\r\n}\r\r\nint main()\r\r\n{\r\r\n    scanf(\"%d%d%d\",&n,&m,&k);\r\r\n    for(int i=1; i<=m; ++i)\r\r\n    {\r\r\n        scanf(\"%d%d\",&x,&y);\r\r\n        e[x][y]=e[y][x]=1;\r\r\n    }\r\r\n    dfs(1,1);\r\r\n    printf(\"%lld\\n\",ans);\r\r\n    return 0;\r\r\n}\r\r\n"
+}

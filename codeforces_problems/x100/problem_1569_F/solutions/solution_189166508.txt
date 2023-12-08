@@ -1,0 +1,38 @@
+{
+    "id": 189166508,
+    "contestId": 1569,
+    "creationTimeSeconds": 1673672674,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "becaido"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 1559,
+    "memoryConsumedBytes": 206336000,
+    "source": "#pragma GCC optimize(\"O3,unroll-loops\")\r\n#pragma GCC target(\"avx,popcnt,sse4,abm\")\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#ifdef WAIMAI\r\n#define debug(HEHE...) cout << \"[\" << #HEHE << \"] : \", dout(HEHE)\r\nvoid dout() {cout << '\\n';}\r\ntemplate<typename T, typename...U>\r\nvoid dout(T t, U...u) {cout << t << (sizeof...(u) ? \", \" : \"\"), dout(u...);}\r\n#else\r\n#define debug(...) 7122\r\n#endif\r\n\r\n#define ll long long\r\n#define Waimai ios::sync_with_stdio(false), cin.tie(0)\r\n#define FOR(x,a,b) for (int x = a, I = b; x <= I; x++)\r\n#define pb emplace_back\r\n#define F first\r\n#define S second\r\n\r\nconst int SIZE = 15;\r\n\r\nint n, m, k;\r\nll sum;\r\nint pro[SIZE];\r\nbool g[SIZE][SIZE];\r\nvector<vector<int>> num[SIZE], ans[SIZE];\r\n\r\nvoid solve() {\r\n    cin >> n >> m >> k;\r\n    while (m--) {\r\n        int a, b;\r\n        cin >> a >> b;\r\n        a--, b--;\r\n        g[a][b] = g[b][a] = 1;\r\n    }\r\n\r\n    function<void(vector<int>, int)> dfs = [&](vector<int> v, int mx) {\r\n        if (v.size() == n / 2) {\r\n            num[mx].pb(v);\r\n            return;\r\n        }\r\n        v.pb(0);\r\n        FOR (i, 1, mx + 1) {\r\n            v.back() = i;\r\n            dfs(v, max(mx, i));\r\n        }\r\n    };\r\n    dfs(vector<int>(), 0);\r\n\r\n    function<void(vector<pair<int, int>>)> check = [&](vector<pair<int, int>> vp) {\r\n        auto tmp = vp;\r\n        sort(vp.begin(), vp.end());\r\n        bool f = 0;\r\n        do {\r\n            bool ff = 1;\r\n            FOR (i, 1, vp.size() - 1) {\r\n                if (g[vp[i - 1].F][vp[i].F] && g[vp[i - 1].S][vp[i].S]) continue;\r\n                if (g[vp[i - 1].F][vp[i].S] && g[vp[i - 1].S][vp[i].F]) continue;\r\n                ff = 0;\r\n                break;\r\n            }\r\n            ff &= g[vp.back().F][vp.back().S];\r\n            if (ff) {\r\n                f = 1;\r\n                break;\r\n            }\r\n        } while (next_permutation(vp.begin(), vp.end()));\r\n        if (f) {\r\n            vp = tmp;\r\n            vector<int> v(n);\r\n            FOR (i, 1, n / 2) for (auto vi : num[i]) {\r\n                FOR (j, 0, n / 2 - 1) {\r\n                    v[vp[j].F] = v[vp[j].S] = vi[j];\r\n                }\r\n                ans[i].pb(v);\r\n            }\r\n        }\r\n    };\r\n\r\n    function<void(vector<int>, vector<pair<int, int>>)> dfs2 = [&](vector<int> v, vector<pair<int, int>> vp) {\r\n        if (v.size() == 0) {\r\n            check(vp);\r\n            return;\r\n        }\r\n        int x = v.back();\r\n        v.pop_back();\r\n        vp.pb(0, 0);\r\n        FOR (i, 0, v.size() - 1) {\r\n            auto tmp = v;\r\n            int y = v[i];\r\n            tmp.erase(tmp.begin() + i);\r\n            vp.back() = {x, y};\r\n            dfs2(tmp, vp);\r\n        }\r\n    };\r\n    vector<int> v(n);\r\n    iota(v.begin(), v.end(), 0);\r\n    dfs2(v, vector<pair<int, int>>());\r\n\r\n    pro[0] = 1;\r\n    FOR (i, 1, k) pro[i] = pro[i - 1] * (k - i + 1);\r\n    FOR (i, 1, min(n / 2, k)) {\r\n        sort(ans[i].begin(), ans[i].end());\r\n        ans[i].erase(unique(ans[i].begin(), ans[i].end()), ans[i].end());\r\n        sum += 1ll * pro[i] * ans[i].size();\r\n    }\r\n    cout << sum << '\\n';\r\n}\r\n\r\nint main() {\r\n    Waimai;\r\n    solve();\r\n}\r\n"
+}

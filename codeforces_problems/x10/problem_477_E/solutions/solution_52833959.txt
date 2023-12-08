@@ -1,0 +1,35 @@
+{
+    "id": 52833959,
+    "contestId": 477,
+    "creationTimeSeconds": 1555426118,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 477,
+        "index": "E",
+        "name": "Dreamoon and Notepad",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3100,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 477,
+        "members": [
+            {
+                "handle": "_Happy_New_Year_"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1413122400
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 1247,
+    "memoryConsumedBytes": 121856000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define ref(i,x,y)for(int i=x;i<=y;++i)\r\n#define def(i,x,y)for(int i=x;i>=y;--i)\r\n#define Ref(i,x,y)for(int i=x;x<y&&i<=y||x>y&&i>=y;i=i+(x<y?1:-1))\r\n#define fi first\r\n#define se second\r\n#define mp make_pair\r\ntypedef pair<int,int> PII;\r\nconst int N=400010;\r\nint read(){\r\n\tchar c=getchar();int d=0,f=1;\r\n\tfor(;c<'0'||c>'9';c=getchar())if(c=='-')f=-1;\r\n\tfor(;c>='0'&&c<='9';d=d*10+c-48,c=getchar());\r\n\treturn d*f;\r\n}\r\nstruct st{\r\n\tint n,t[N],a[N],F[N][20];\r\n\tvoid init(int*_a,int _n){\r\n\t\tn=0;\r\n\t\tmemset(t,0,sizeof t);\r\n\t\tmemset(a,0,sizeof a);\r\n\t\tn=_n;ref(i,1,n)a[i]=_a[i];\r\n\t\tref(i,2,n)t[i]=t[i>>1]+1;\r\n\t\tref(i,1,n)F[i][0]=a[i];\r\n\t\tref(i,1,n)ref(j,1,t[i])F[i][j]=min(F[i][j-1],F[i-(1<<j-1)][j-1]);\r\n\t}\r\n\tint ask(int x,int y){\r\n\t\tif(x>y)swap(x,y);\r\n\t\tint tt=t[y-x+1];\r\n\t\treturn min(F[x+(1<<tt)-1][tt],F[y][tt]);\r\n\t}\r\n}A,B,C;\r\nint n,a[N],b[N],c[N],m,ans[N],low[N];\r\nstruct atom{int id,x1,y1,x2,y2;}q[N];\r\nint FindL(int L,int R,int Z,int v){\r\n\tL--;while(L<R){\r\n\t\tint mid=(L+R+1)>>1,s=A.ask(mid,Z);\r\n\t\tif(s<=v)L=mid;else R=mid-1;\r\n\t}return L;\r\n}\r\nint FindR(int L,int R,int Z,int v){\r\n\tR++;while(L<R){\r\n\t\tint mid=(L+R)>>1,s=A.ask(Z,mid);\r\n\t\tif(s<=v)R=mid;else L=mid+1;\r\n\t}return L;\r\n}\r\nvoid work(){\r\n\tA.init(a,n);\r\n\tref(i,1,n)b[i]=a[i]-i*2,c[i]=a[i]+i*2;\r\n\tB.init(b,n);C.init(c,n);\r\n\tref(i,1,m)if(q[i].x1<=q[i].x2){\r\n\t\tint x1=q[i].x1,y1=q[i].y1,x2=q[i].x2,y2=q[i].y2;\r\n\t\tlow[i]=A.ask(x1,x2);\r\n\t\tans[i]=min(x2-x1+abs(y2-min(y1,low[i])),x2-x1+1+y2);\r\n\t\tint L=FindL(x1,x2,x2,y2),L1,tmp;\r\n\t\tif(L+1<=x2)tmp=abs(y2-A.ask(L+1,x2));\r\n\t\tif(L>=x1)tmp=min(tmp,abs(y2-a[L]));\r\n\t\tans[i]=min(ans[i],x2-x1+1+tmp);\r\n\t\tif(x1>1&&y2<low[i]){\r\n\t\t\tL=FindL(1,x1-1,x2,y2);\r\n\t\t\tL1=FindL(1,x1-1,x2,y1);\r\n\t\t\tif(L>0)ans[i]=min(ans[i],x1+x2-L*2+y2-a[L]+(a[L]>y1));\r\n\t\t\tint tmp=1e9;\r\n\t\t\tif(L1<=L)tmp=B.ask(L+1,x1)+1;\r\n\t\t\telse tmp=min(B.ask(L+1,L1),B.ask(L1+1,x1)+1);\r\n\t\t\tans[i]=min(ans[i],x1+x2-y2+tmp);\r\n\t\t}\r\n\t\tif(x2<n){\r\n\t\t\tL=FindR(x2+1,n,x2,y2);int Y1=min(low[i],y1);\r\n\t\t\tL1=FindR(x2+1,n,x2,min(low[i],Y1));\r\n\t\t\tif(L<=n)ans[i]=min(ans[i],L*2-x1-x2+y2-a[L]+(a[L]>Y1));\r\n\t\t\tint tmp=1e9;\r\n\t\t\tif(L1>=L)tmp=C.ask(x2,L-1)+1;\r\n\t\t\telse tmp=min(C.ask(x2,L1-1)+1,C.ask(L1,L-1));\r\n\t\t\tans[i]=min(ans[i],-x1-x2-y2+tmp);\r\n\t\t}\r\n\t}\r\n}\r\nint main(){\r\n\tn=read();ref(i,1,n)a[i]=read();\r\n\tm=read();ref(i,1,m)q[i].x1=read(),q[i].y1=read(),q[i].x2=read(),q[i].y2=read(),q[i].id=i;\r\n\twork();\r\n\treverse(a+1,a+n+1);\r\n\tref(i,1,m)q[i].x1=n+1-q[i].x1,q[i].x2=n+1-q[i].x2;\r\n\tref(i,1,m)if(q[i].x1==q[i].x2)q[i].x1++;\r\n\twork();\r\n\tref(i,1,m)printf(\"%d\\n\",ans[i]);\r\n}"
+}

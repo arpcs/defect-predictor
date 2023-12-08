@@ -1,0 +1,38 @@
+{
+    "id": 179152545,
+    "contestId": 1569,
+    "creationTimeSeconds": 1667547015,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "HausyHinu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 904,
+    "memoryConsumedBytes": 6246400,
+    "source": "// LUOGU_RID: 92749608\n#include<bits/stdc++.h>\nusing namespace std;\n#define N 17\n#define M 71\n#define LL long long\n#define INF 0x3f3f3f3f\n#define fi first\n#define se second\nint n,m,k,p[N],p1[N],p2[N];\nbool g[N][N],f[M][N];\nmap<LL,bool>mp;\nLL ans,fc[N];\nvoid work(int nc){ //\u72b6\u538b\u627e\u54c8\u5bc6\u987f\u8def \n\tmemset(f,0,sizeof f);\n\tmemset(p1,-1,sizeof p1);\n\tmemset(p2,-1,sizeof p2);\n\tfor(int i=0;i<n;++i)\n\t\tp2[p[i]]=p1[p[i]],p1[p[i]]=i;\n\tfor(int i=0;i<nc;++i)\n\t\tif(g[p1[i]][p2[i]]) f[1<<i][i]=1;\n\tint s=1<<nc;\n\tfor(int i=0;i<s;++i)\n\t\tfor(int j=0;j<nc;++j) if(f[i][j])\n\t\t\tfor(int k=0;k<nc;++k) if(!(i>>k&1))\n\t\t\t\tf[i|1<<k][k]|=(g[p1[j]][p1[k]]&&g[p2[j]][p2[k]]),\n\t\t\t\tf[i|1<<k][k]|=(g[p1[j]][p2[k]]&&g[p2[j]][p1[k]]);\n\tfor(int i=0;i<nc;++i)\n\t\tif(f[s-1][i]){ //\u627e\u5230\u4e86\u4ee3\u8868\u53ef\u884c\uff0c\u5b58\u8fdbmap \n\t\t\tLL nm=0;\n\t\t\tfor(int j=0;j<n;++j)\n\t\t\t\tnm=nm*6+p[j];\n\t\t\tmp[nm]=true;\n\t\t\tbreak;\n\t\t}\n}\nvoid pre(int nc){ //\u5148\u679a\u4e3e\u67d0\u4e2a\u5b57\u7b26\u4e32\u53ef\u4e0d\u53ef\u884c \n\tint nw=n;\n\tfor(int i=0;i<n;++i)\n\t\tif(p[i]==-1){nw=i;break;}\n\tif(nw==n) return work(nc);\n\tfor(int i=nw+1;i<n;++i)\n\t\tif(p[i]==-1) //\u54ea\u4e24\u4e2a\u5b57\u7b26\u5206\u5728\u5bf9\u79f0\u7684\u4e00\u7ec4 \n\t\t\tp[nw]=p[i]=nc,pre(nc+1),p[nw]=p[i]=-1;\n}\nbool dfs(int p[]){\n\tint pp[N],ct[N]={},q[N]={},cnt=0;\n\tmemset(pp,-1,sizeof pp);\n\tfor(int i=0;i<n;++i) //pp\u7528\u6765\u91cd\u6392p\u6570\u7ec4\uff08\u5c06\u6807\u53f7\u53d8\u6709\u5e8f\uff09 \n\t\tif(pp[p[i]]==-1) pp[p[i]]=cnt++;\n\tfor(int i=0;i<n;++i) //q\u662f\u91cd\u6392\u540e\u7684p \n\t\tq[i]=pp[p[i]],ct[q[i]]++;\n\tLL nm=0;\n\tfor(int i=0;i<n;++i) nm=nm*6+q[i];\n\tif(mp.count(nm)) return mp[nm];\n\tbool fl=false;\n\tfor(int i=0;i<n;++i){ //\u5982\u679c\u5728mp\u91cc\u6ca1\u627e\u5230\n\t\tif(ct[q[i]]<=2) continue;\n\t\tfor(int j=i+1;j<n;++j)\n\t\t\tif(q[i]==q[j]){ //\u5c1d\u8bd5\u5c06\u67d0\u7ec4\u76f8\u540c\u5b57\u7b26\u62c6\u56de\u82e5\u5e72\u5bf9\n\t\t\t\tint tmp=q[i];\n\t\t\t\tq[i]=q[j]=cnt;\n\t\t\t\tfl|=dfs(q);\n\t\t\t\tq[i]=q[j]=tmp;\n\t\t\t\tif(fl) break;\n\t\t\t}\n\t\tif(fl) break;\n\t}\n\treturn mp[nm]=fl;\n}\nvoid solve(int nc){ //\u53bb\u91cd\uff0c\u5373\u5f3a\u5236\u67d0\u51e0\u5bf9\u5b57\u7b26\u76f8\u540c \n\tint nw=n;\n\tfor(int i=0;i<n;++i)\n\t\tif(p[i]==-1){nw=i;break;}\n\tif(nw==n) return dfs(p),void();\n\tfor(int c=0;c<=nc;++c) //\u5206\u5230\u4e4b\u524d\u6709\u7684\u7ec4\u91cc\u6216\u65b0\u5f00\u4e00\u4e2a\u7ec4 \n\t\tfor(int i=nw+1;i<n;++i)\n\t\t\tif(p[i]==-1)\n\t\t\t\tp[nw]=p[i]=c,\n\t\t\t\tsolve(max(c+1,nc)),\n\t\t\t\tp[nw]=p[i]=-1;\n}\nint main(){\n\tscanf(\"%d%d%d\",&n,&m,&k);\n\tfor(int i=1;i<=m;++i){\n\t\tint u,v;scanf(\"%d%d\",&u,&v);\n\t\tg[u-1][v-1]=g[v-1][u-1]=true;\n\t}\n\tmemset(p,-1,sizeof p);\n\tpre(0),solve(0),fc[0]=1;\n\tfor(int i=1;i<=k;++i) fc[i]=fc[i-1]*i;\n\tfor(auto tmp:mp) //\u5bf9\u4e8e\u6240\u6709\u53ef\u884c\u7684\u5b57\u7b26\u7ec4\u5408\u8fdb\u884c\u8ba1\u6570 \n\t\tif(tmp.se){\n\t\t\tLL nm=tmp.fi,mx=1;\n\t\t\twhile(nm)\n\t\t\t\tmx=max(mx,nm%6+1),nm/=6;\n\t\t\tif(mx<=k) ans+=fc[k]/fc[k-mx];\n\t\t} //\u6709mx\u7ec4\u5b57\u7b26\uff0c\u4ecek\u4e2a\u5b57\u7b26\u91cc\u9009mx\u4e2a\u505a\u6392\u5217 \n\tprintf(\"%lld\\n\",ans);\n\treturn 0;\n}"
+}

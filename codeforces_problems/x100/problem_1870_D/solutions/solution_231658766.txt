@@ -1,0 +1,37 @@
+{
+    "id": 231658766,
+    "contestId": 1870,
+    "creationTimeSeconds": 1699324475,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1870,
+        "index": "D",
+        "name": "Prefix Purchase",
+        "type": "PROGRAMMING",
+        "points": 1750.0,
+        "rating": 1800,
+        "tags": [
+            "greedy",
+            "implementation",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1870,
+        "members": [
+            {
+                "handle": "bkifhr7"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1695047700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 27,
+    "timeConsumedMillis": 155,
+    "memoryConsumedBytes": 51404800,
+    "source": "// compile: make data\n// run: ./data < data.in\n#include <bits/stdc++.h>\nusing namespace std;\n#pragma GCC optimize(\"O3,unroll-loops\")\n#pragma GCC target(\"avx2,bmi,bmi2,lzcnt,popcnt\")\n#ifdef LOCAL\n#include <debug/codeforces.h>\n#define debug(x...) _debug_print(#x, x);\n#define Debug(x...) _debug_print_format(#x, x);\nstd::ifstream terminal(\"/dev/tty\");\n#define PP cerr<<\"\\033[1;30mpause...\\e[0m\",terminal.ignore();\n#else\n#define debug(x...)\n#define Debug(x...)\n#define PP\n#endif\ntemplate<typename...Args> void print_(Args...args){((cout<<args<<\" \"),...)<<endl;}\n#define rep(i,a,b) for(int i=(a);i<(int)(b);++i)\n#define sz(v) ((int)(v).size())\n#define print(...) print_(__VA_ARGS__);\n#define FIND(a, x) ((find(a.begin(),a.end(),(x))!=a.end())?1:0)\n#define cmin(x,...) x=min({(x),__VA_ARGS__})\n#define cmax(x,...) x=max({(x),__VA_ARGS__})\n#define INTMAX (int)(9223372036854775807)\n#define INF (int)(1152921504606846976)\n#define NaN (int)(0x8b88e1d0595d51d1)\n#define double long double\n#define int long long\n#define uint unsigned long long\n#define MAXN 200010\n\nstruct bitree {\n    int n;\n    vector<vector<int>> c;\n    vector<int> sum;\n    bitree(vector<int> &a) {\n        n = sz(a); sum.push_back(0);\n        rep(i, 0, n) sum.push_back(sum[i] + a[i]);\n        c.resize(2, vector<int>(n+1, 0));\n    }\n    int lowbit(int x) {return x & (-x); }\n    void add(int b, int x, int y) {for (; x <= n; x += lowbit(x)) c[b][x] += y; }\n    int get(int b, int x) {int ans = 0; for (; x; x -= lowbit(x)) ans += c[b][x]; return ans; }\n    void modify(int p, int k) {modify(p, p, k); }\n    void modify(int l, int r, int k) {add(0, l+1, k); add(0, r+2, -k); add(1, l+1, (l+1)*k); add(1, r+2, -(r+2)*k); }\n    int query(int p) {return query(p, p); }\n    int query(int l, int r) {int ans = sum[r+1] + (r+2)*get(0, r+1) - get(1, r+1); ans -= sum[l] + (l+1)*get(0, l) - get(1, l); return ans; }\n};\n\nstruct STmin {\n    vector<int> a;\n    vector<vector<int>> dp;\n    STmin(vector<int> v) {\n        a = v;\n        build();\n    }\n    void build() {\n        int logn = log2(sz(a)) + 2;\n        dp.assign(sz(a), vector<int>(logn, 0));\n        rep(i, 0, sz(a)) dp[i][0] = a[i];\n        rep(j, 1, logn) {\n            rep(i, 0, sz(a)) {\n                dp[i][j] = min(dp[i][j-1], dp[min(i + (1 << (j-1)), sz(a)-1)][j-1]);\n            }\n        }\n    }\n    int query(int l, int r) {\n        int j = log2(r - l + 1);\n        return min(dp[l][j], dp[r - (1 << j) + 1][j]);\n    }\n};\n\nvoid solve() {\n    int n; cin >> n;\n    vector<int> c(n), cnt(n, 0), ans(n, 0);\n    rep(i, 0, n) cin >> c[i];\n    int k; cin >> k;\n    STmin st(c);\n    rep(i, 0, n-1) cmin(c[i], st.query(i+1, n-1));\n    int num = k / c[0];\n    cnt[0] += num;\n    int total = num * c[0];\n    rep(i, 1, n) {\n        int diff = c[i] - c[i-1];\n        if (diff == 0) {\n            cnt[i] += cnt[i-1];\n            cnt[i-1] = 0;\n            continue;\n        }\n        int nn = min((k - total) / diff, cnt[i-1]);\n        total += nn * diff;\n        cnt[i] += nn;\n        cnt[i-1] -= nn;\n    }\n    bitree bt(ans);\n    rep(i, 0, n) if (cnt[i]) bt.modify(0, i, cnt[i]);\n    rep(i, 0, n) cout << bt.query(i) << \" \\n\"[i==n-1];\n}\n\nint32_t main() {\n    ios::sync_with_stdio(false); cin.tie(nullptr); cout.tie(nullptr);\n\n    int _; cin >> _;\n    while (_--) solve();\n\n    return 0;\n}\n     \t \t \t\t\t\t\t\t \t \t\t\t \t\t\t\t \t \t"
+}

@@ -1,0 +1,39 @@
+{
+    "id": 176115411,
+    "contestId": 1735,
+    "creationTimeSeconds": 1665733111,
+    "relativeTimeSeconds": 5011,
+    "problem": {
+        "contestId": 1735,
+        "index": "D",
+        "name": "Meta-set",
+        "type": "PROGRAMMING",
+        "points": 1750.0,
+        "rating": 1700,
+        "tags": [
+            "brute force",
+            "combinatorics",
+            "data structures",
+            "hashing",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1735,
+        "members": [
+            {
+                "handle": "lingfunny"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1665728100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 54,
+    "timeConsumedMillis": 545,
+    "memoryConsumedBytes": 19660800,
+    "source": "// Problem: D. Meta-set\r\n// URL: https://codeforces.com/contest/1735/problem/D\r\n// Group: Codeforces - Codeforces Round #824 (Div. 2)\r\n// Time: 2022-10-14 14:15\r\n// Author: lingfunny\r\n\r\n#include <bits/stdc++.h>\r\n#define LL long long\r\n#define uint unsigned\r\nusing namespace std;\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/hash_policy.hpp>\r\nusing namespace __gnu_pbds;\r\n\r\nint _, n, k, a[1005][25];\r\nuint val[1005];\r\ngp_hash_table<uint, int> ht;\r\nLL ans, Cs[1005][5];\r\n\r\nuint encode(int a[]) {\r\n\tuint res = 0;\r\n\tfor (int i = 1; i <= k; ++i) res = res * 3 + a[i];\r\n\treturn res;\r\n}\r\nuint solve(int a[], int b[]) {\r\n\tuint res = 0;\r\n\tfor (int i = 1; i <= k; ++i)\r\n\t\tif (a[i] == b[i]) res = res * 3 + a[i];\r\n\t\telse res = res * 3 + (3 ^ a[i] ^ b[i]);\r\n\treturn res;\r\n}\r\nLL C(int n, int m) {\r\n\tif (n < m) return 0;\r\n\tif (~Cs[n][m]) return Cs[n][m];\r\n\tLL res = 1;\r\n\tfor (int i = 1; i <= m; ++i) res = res * (n - i + 1) / i;\r\n\treturn Cs[n][m] = res;\r\n}\r\n\r\nsigned main() {\r\n\tscanf(\"%d%d\", &n, &k);\r\n\tfor (int i = 0; i <= n; ++i) Cs[i][1] = Cs[i][2] = Cs[i][3] = -1;\r\n\tfor (int i = 1; i <= n; ++i) {\r\n\t\tfor (int j = 1; j <= k; ++j) scanf(\"%d\", a[i] + j);\r\n\t\tval[i] = encode(a[i]);\r\n\t\t++ht[val[i]];\r\n\t}\r\n\tif (n < 5) return puts(\"0\"), 0;\r\n\tfor (int i = 1; i + 4 <= n; ++i) {\r\n\t\t--ht[val[i]];\r\n\t\tfor (int j = i + 1; j + 3 <= n; ++j) {\r\n\t\t\t--ht[val[j]];\r\n\t\t\tuint k = solve(a[i], a[j]);\r\n\t\t\tif (val[i] == val[j]) {\r\n\t\t\t\tassert(k == val[i]);\r\n\t\t\t\t// n - j\r\n\t\t\t\tans += C(n - j, 3) - C(n - j - ht[k], 3) - ht[k] * C(n - j - ht[k], 2);\r\n\t\t\t} else if (ht[k]) {\r\n\t\t\t\tassert(val[i] != k && val[j] != k);\r\n\t\t\t\tLL res = C(n - j, 3) - C(n - j - ht[k], 3) - ht[k] * C(n - j - ht[k] - ht[val[i]] - ht[val[j]], 2);\r\n\t\t\t\tans += res;\r\n\t\t\t}\r\n\t\t}\r\n\t\tfor (int j = i + 1; j + 3 <= n; ++j) ++ht[val[j]];\r\n\t}\r\n\tht.clear();\r\n\tfor (int i = 1; i <= n; ++i) ++ht[val[i]];\r\n\tfor (int i = 1; i <= n; ++i) {\r\n\t\tLL tot = 0;\r\n\t\tmap<pair<uint, uint>, LL> mp;\r\n\t\tfor (int j = 1; j <= n; ++j)\r\n\t\t\tif ((i ^ j) && val[i] != val[j]) {\r\n\t\t\t\tuint k = solve(a[i], a[j]);\r\n\t\t\t\tmp[{ min(val[j], k), max(val[j], k) }] += ht[k];\r\n\t\t\t}\r\n\t\t// printf(\"i = %d\\n\", i);\r\n\t\tfor (auto [_, v]: mp) {\r\n\t\t\t// printf(\"%u & %u & %u\\n\", val[i], _.first, _.second);\r\n\t\t\tv /= 2, ans += tot * v, tot += v;\r\n\t\t}\r\n\t}\r\n\tprintf(\"%lld\\n\", ans);\r\n\treturn 0;\r\n}"
+}

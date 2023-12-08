@@ -1,0 +1,38 @@
+{
+    "id": 136956448,
+    "contestId": 1569,
+    "creationTimeSeconds": 1637895782,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "A_G"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 1013,
+    "memoryConsumedBytes": 6553600,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\ntypedef long long ll;\n\nint n, m, k;\nvector<vector<bool>> adj;\nvector<unsigned int> pow6(12);\nunordered_map<unsigned int, bool> validgroups;\nvector<int> labelcounts(12);\nll ans = 0;\n\nbool valid (vector<vector<int>>& groups) {\n  vector<vector<bool>> dp(1<<(n/2), vector<bool>(n/2, 0));\n  vector<int> is_queued(1<<(n/2));\n  queue<int> q;\n  for (int i = 0; i < n/2; i++) {\n    if (adj[groups[i][0]][groups[i][1]]) {\n      dp[1<<i][i] = 1;\n    }\n    q.push(1<<i);\n    is_queued[1<<i] = 1;\n  }\n  while (!q.empty()) {\n    int s = q.front();\n    q.pop();\n    for (int i = 0; i < n/2; i++) {\n      if (!(s&(1<<i))) {\n        int newset = s|(1<<i);\n        for (int j = 0; j < n/2; j++) {\n          if (dp[s][j] && \n              (\n               (adj[groups[i][0]][groups[j][0]] && adj[groups[i][1]][groups[j][1]])\n               || \n               (adj[groups[i][0]][groups[j][1]] && adj[groups[i][1]][groups[j][0]])\n              )\n             ) {\n            dp[newset][i] = 1;\n          }\n        }\n        if (!is_queued[newset]) {\n          q.push(newset);\n          is_queued[newset] = 1;\n        }\n      }\n    }\n  }\n  for (int i = 0; i < n/2; i++) {\n    if (dp[(1<<(n/2))-1][i]) return 1;\n  }\n  return 0;\n}\n\nunsigned int ghash(vector<vector<int>>& grouping) {\n  unsigned int ans = 0;\n  for (int i = 0; i < grouping.size(); i++) {\n    for (int j: grouping[i]) ans += i*pow6[j];\n  }\n  return ans;\n}\n\nbool majorizer(const vector<int>& a, const vector<int>& b) {\n  return a[0] < b[0];\n}\n\nbool dfs(vector<vector<int>> grouping) {\n  unsigned int hashval = ghash(grouping);\n  if (validgroups.count(hashval)) {\n    return validgroups[hashval];\n  }\n  bool good = 0;\n  int u = grouping.size();\n  if (u == n/2) {\n    good = valid(grouping);\n  }\n  for (int k = 0; k < u; k++) {\n    int m = grouping[k].size();\n    if (m == 2) continue;\n    for (int i = 1; i < (1<<(m-1))-1; i++) {\n      if (__builtin_parity(i)&1) continue;\n      vector<vector<int>> y = grouping;\n      y[k].clear();\n      y.push_back(vector<int>());\n      y[k].push_back(grouping[k][0]);\n      for (int j = 0; j < m-1; j++) {\n        if ((i>>j)&1) y[u].push_back(grouping[k][j+1]);\n        else y[k].push_back(grouping[k][j+1]);\n      }\n      sort(y.begin(), y.end(), majorizer);\n      if (dfs(y)) {\n        good = 1;\n      }\n    }\n  }\n  validgroups[hashval] = good;\n  if (good) ans += labelcounts[u];\n  return good;\n}\n\nint main () {\n  ios_base::sync_with_stdio(0); cin.tie(0);\n  pow6[0] = 1;\n  for (int i = 0; i < 11; i++) {\n    pow6[i+1] = 6*pow6[i];\n  }\n  cin >> n >> m >> k;\n  for (int i = 0; i < n; i++) {\n    adj.emplace_back(n);\n  }\n  labelcounts[1] = k;\n  for (int i = 1; i < 11; i++) {\n    labelcounts[i+1] = labelcounts[i]*(k-i);\n  }\n  while (m--) {\n    int u, v;\n    cin >> u >> v;\n    u--, v--;\n    adj[u][v] = 1;\n    adj[v][u] = 1;\n  }\n  vector<vector<int>> start;\n  start.push_back(vector<int>(n));\n  iota(start[0].begin(), start[0].end(), 0);\n  dfs(start);\n  cout << ans << endl;\n}\n"
+}

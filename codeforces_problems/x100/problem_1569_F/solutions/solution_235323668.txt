@@ -1,0 +1,38 @@
+{
+    "id": 235323668,
+    "contestId": 1569,
+    "creationTimeSeconds": 1701495982,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "ezoilearner"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 122,
+    "timeConsumedMillis": 4289,
+    "memoryConsumedBytes": 50585600,
+    "source": "#include<bits/stdc++.h>\r\n#define rep(i,a,b) for(int i=(a);i<=(b);++i)\r\n#define per(i,a,b) for(int i=(a);i>=(b);--i)\r\n#define eb emplace_back\r\n#define mp make_pair\r\n#define fi first\r\n#define se second\r\ntypedef long long ll;\r\nusing namespace std;\r\nconstexpr int BASE=131,P=1e9+7;\r\nint n,m,k,type[13],match[13],ele[13][13];\r\nbool has_pair[13],graph[13][13];ll cal[13][13];\r\nvector<pair<int,int>>final;\r\ninline bool check(vector<pair<int,int>>vec)\r\n{\r\n\tstatic bool dp[1<<6][6];\r\n\tint m=n/2,all=(1<<m)-1;\r\n\tmemset(dp,false,sizeof dp);\r\n\trep(i,0,m-1)if(graph[vec[i].first][vec[i].second])dp[1<<i][i]=true;\r\n\trep(mask,0,all)\r\n\t\trep(i,0,m-1)if((mask>>i&1)&&dp[mask][i])\r\n\t\t\trep(j,0,m-1)if(!(mask>>j&1))\r\n\t\t\t\tif((graph[vec[i].first][vec[j].first]&graph[vec[i].second][vec[j].second])||(graph[vec[i].first][vec[j].second]&graph[vec[i].second][vec[j].first]))\r\n\t\t\t\t\tdp[mask|(1<<j)][j]=1;\r\n\trep(i,0,m-1)if(dp[all][i])return 1;\r\n\treturn 0;\r\n}\r\ninline void solve(vector<pair<int,int>>vec)\r\n{\r\n\tauto dfs2=[&](int t,int group,auto dfs2)->void\r\n\t{\r\n\t\tif(t==n/2)\r\n\t\t{\r\n\t\t\tvector<vector<int>>all;\r\n//\t\t\tputs(\"group:\");\r\n\t\t\trep(i,1,group)\r\n\t\t\t{\r\n\t\t\t\tvector<int>cur;\r\n//\t\t\t\tprintf(\"sz[%d] = %d\\n\",i,ele[i][0]);\r\n\t\t\t\trep(j,1,ele[i][0])\r\n\t\t\t\t{\r\n//\t\t\t\t\tprintf(\"%d %d \",vec[ele[i][j]].first,vec[ele[i][j]].second);\r\n\t\t\t\t\tcur.emplace_back(vec[ele[i][j]].first);\r\n\t\t\t\t\tcur.emplace_back(vec[ele[i][j]].second);\r\n\t\t\t\t}\r\n//\t\t\t\tputs(\"\");\r\n\t\t\t\tall.emplace_back(cur);\r\n\t\t\t}\r\n\t\t\tsort(all.begin(),all.end(),[&](vector<int>a,vector<int>b){return a.front()<b.front();});\r\n\t\t\trep(i,0,group-1)for(auto x:all[i])type[x]=i+1;\r\n//\t\t\tprintf(\"group=%d\\n\",group);puts(\"type:\");rep(i,1,n)printf(\"%d \",type[i]);puts(\"\");\r\n\t\t\tint H=0;\r\n\t\t\trep(i,1,n)H=(1LL*H*BASE+type[i])%P;\r\n\t\t\tfinal.emplace_back(mp(H,group));\r\n\t\t\treturn;\r\n\t\t}\r\n\t\trep(i,1,group)ele[i][++ele[i][0]]=t,dfs2(t+1,group,dfs2),ele[i][ele[i][0]--]=0;\r\n\t\tele[group+1][ele[group+1][0]=1]=t,dfs2(t+1,group+1,dfs2),ele[group+1][ele[group+1][0]--]=0;\r\n\t};\r\n\tdfs2(0,0,dfs2);\r\n}\r\ninline void dfs(int x)\r\n{\r\n\tif(x>n)\r\n\t{\r\n\t\tvector<pair<int,int>>cur;\r\n\t\trep(i,1,n)if(match[i])cur.emplace_back(mp(i,match[i]));\r\n//\t\tputs(\"current match:\");\r\n//\t\tfor(auto x:cur) printf(\"pair[u v]: %d %d\\n\",x.first,x.second);\r\n\t\tif(check(cur))solve(cur);\r\n\t\treturn;\r\n\t}\r\n\tif(has_pair[x])dfs(x+1);\r\n\telse\r\n\t{\r\n\t\thas_pair[x]=1;\r\n\t\trep(i,x+1,n)if(!has_pair[i])\r\n\t\t{\r\n\t\t\thas_pair[i]=1,match[x]=i;\r\n\t\t\tdfs(x+1);\r\n\t\t\thas_pair[i]=0,match[x]=0;\r\n\t\t}\r\n\t\thas_pair[x]=0;\r\n\t}\r\n}\r\nint main(){\r\n\tios::sync_with_stdio(false);cin.tie(0);cout.tie(0);\r\n\tcin>>n>>m>>k;\r\n\trep(i,1,m){int u,v;cin>>u>>v;graph[u][v]=graph[v][u]=1;}\r\n\trep(i,1,k)\r\n\t{\r\n\t\tcal[i][0]=1;\r\n\t\trep(j,1,i)cal[i][j]=cal[i][j-1]*(i-j+1);\r\n\t}\r\n\tdfs(1);\r\n\tsort(final.begin(),final.end());\r\n\tint z=final.size()-1;ll ans=0;\r\n\trep(i,0,z)\r\n\t\tif(!i||final[i].first!=final[i-1].first)\r\n\t\t\tans+=cal[k][final[i].second];\r\n\treturn cout<<ans<<'\\n',0;\r\n}"
+}

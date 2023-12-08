@@ -1,0 +1,35 @@
+{
+    "id": 58702245,
+    "contestId": 477,
+    "creationTimeSeconds": 1565684092,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 477,
+        "index": "E",
+        "name": "Dreamoon and Notepad",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3100,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 477,
+        "members": [
+            {
+                "handle": "shixiangyu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1413122400
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 20,
+    "timeConsumedMillis": 1013,
+    "memoryConsumedBytes": 59187200,
+    "source": "// luogu-judger-enable-o2\n#include<stdio.h>\r\n#include<algorithm>\r\nusing namespace std;\r\nconst int maxn=400050,maxb=20,INF=1e9;\r\nint bd[maxn];\r\nint n,q,a[maxn];\r\nint minn[maxn][maxb];\r\ninline int get_min(int ll,int rr)\r\n{\r\n\tif(ll>rr) swap(ll,rr);\r\n\tint t=bd[rr-ll];\r\n\treturn min(minn[rr][t],minn[ll+(1<<t)-1][t]);\r\n}\r\nstruct Query\r\n{\r\n\tint id,r1,c1,r2,c2,ans;\r\n\tbool z;\r\n\tbool operator < (const Query &yy) const { return id<yy.id; }\r\n\tvoid scan(int i)\r\n\t{ \r\n\t\tid=i;\r\n\t\tscanf(\"%d%d%d%d\",&r1,&c1,&r2,&c2);\r\n\t\tif(r1>r2) z=1,r1=n-r1+1,r2=n-r2+1;\r\n\t\telse z=0;\r\n\t}\r\n};\r\nQuery que[maxn];\r\nint st[maxn],aa[maxn],top=0;\r\nint ts=0,l[maxn*2],r[maxn*2],mn[maxn*2];\r\nbool cmp(const Query &xx,const Query &yy) { return xx.r2<yy.r2; }\r\ninline void update(int x) { mn[x]=min(mn[l[x]],mn[r[x]]); }\r\nvoid build(int x,int ll,int rr)\r\n{\r\n\tif(ll==rr) return ;\r\n\tint mid=(ll+rr)>>1;\r\n\tbuild(l[x]=++ts,ll,mid);\r\n\tbuild(r[x]=++ts,mid+1,rr);\r\n}\r\nvoid modify(int x,int ll,int rr,int pos,int k)\r\n{\r\n\tif(ll==rr) { mn[x]=k;return ; }\r\n\tint mid=(ll+rr)>>1;\r\n\tif(pos<=mid)\r\n\t\tmodify(l[x],ll,mid,pos,k);\r\n\telse\r\n\t\tmodify(r[x],mid+1,rr,pos,k);\r\n\tupdate(x);\r\n}\r\nint query(int x,int ll,int rr,int a,int b)\r\n{\r\n\tif(a<=ll&&rr<=b) return mn[x];\r\n\tif(ll==rr) return INF;\r\n\tint mid=(ll+rr)>>1,s=INF;\r\n\tif(a<=mid)\r\n\t\ts=min(s,query(l[x],ll,mid,a,b));\r\n\tif(b>mid)\r\n\t\ts=min(s,query(r[x],mid+1,rr,a,b));\r\n\treturn s;\r\n}\r\nvoid work(bool c)\r\n{\r\n\tint i,j,d,t;\r\n\tfor(i=1;i<=n;i++)\r\n\t{\r\n\t\tminn[i][0]=a[i];\r\n\t\tfor(j=0;minn[i][j];j++)\r\n\t\t\tminn[i][j+1]=min(minn[i][j],minn[i-(1<<j)][j]);\r\n\t}\r\n\ttop=0;\r\n\tfor(i=0,j=1;i<q;i++)\r\n\t\tif(que[i].z==c)\r\n\t\t{\r\n\t\t\tint r1=que[i].r1,r2=que[i].r2,c1=que[i].c1,c2=que[i].c2,&ans=que[i].ans,s0=r2-r1+1;\r\n\t\t\tans=r2-r1+min(abs(c2-min(get_min(r1,r2),c1)),1+c2);\r\n\t\t\tfor(;j<=r2;j++)\r\n\t\t\t{\r\n\t\t\t\twhile(top&&a[st[top]]>=a[j])\r\n\t\t\t\t\ttop--;\r\n\t\t\t\tst[++top]=j;\r\n\t\t\t\taa[top]=a[j];\r\n\t\t\t\tmodify(1,1,n,top,a[j]+(n-j)*2);\r\n\t\t\t}\r\n\t\t\tint p=upper_bound(st+1,st+1+top,r1)-st;\r\n\t\t\td=upper_bound(aa+1,aa+1+top,c1)-aa;\r\n\t\t\tt=lower_bound(aa+1,aa+1+top,c2)-aa;\r\n\t\t\tif(t>=p)\r\n\t\t\t\tans=min(ans,s0+a[st[t]]-c2);\r\n\t\t\telse\r\n\t\t\t{\r\n\t\t\t\tif(r1<r2) ans=min(ans,s0+a[st[p]]-c2);\r\n\t\t\t\tif(t>=d)\r\n\t\t\t\t\tans=min(ans,s0+query(1,1,n,t,p-1)-c2-(n-r1)*2);\r\n\t\t\t\telse\r\n\t\t\t\t{\r\n\t\t\t\t\tans=min(ans,s0-1+query(1,1,n,t,min(d,p)-1)-c2-(n-r1)*2);\r\n\t\t\t\t\tif(d<p) ans=min(ans,s0+query(1,1,n,d,p-1)-c2-(n-r1)*2);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tif(t>p) ans=min(ans,s0+c2-a[st[t-1]]);\r\n\t\t\telse if(t>1) ans=min(ans,s0-(t<=d)+(r1-st[t-1])*2+c2-a[st[t-1]]);\r\n\t\t}\r\n\ttop=0;\r\n\tfor(i=q-1,j=n;i>=0;i--)\r\n\t\tif(que[i].z==c)\r\n\t\t{\r\n\t\t\tint r1=que[i].r1,r2=que[i].r2,c1=que[i].c1,c2=que[i].c2,&ans=que[i].ans,s0=r2-r1+1;\r\n\t\t\tfor(;j>=r2;j--)\r\n\t\t\t{\r\n\t\t\t\twhile(top&&a[st[top]]>=a[j]) top--;\r\n\t\t\t\tst[++top]=j;\r\n\t\t\t\taa[top]=a[j];\r\n\t\t\t\tmodify(1,1,n,top,a[j]+j*2);\r\n\t\t\t}\r\n\t\t\td=upper_bound(aa+1,aa+1+top,min(c1,get_min(r1,r2)))-aa;\r\n\t\t\tt=lower_bound(aa+1,aa+1+top,c2)-aa;\r\n\t\t\tif(t>=d)\r\n\t\t\t\tans=min(ans,s0+query(1,1,n,t,top-1)-c2-r2*2);\r\n\t\t\telse\r\n\t\t\t\tans=min(ans,s0+min(-1+query(1,1,n,t,d-1),query(1,1,n,d,top-1))-c2-r2*2);\r\n\t\t\tif(t>1) ans=min(ans,s0-(t<=d)+(st[t-1]-r2)*2+c2-a[st[t-1]]);\r\n\t\t}\r\n}\r\nint main()\r\n{\r\n\tint i,j;\r\n\tfor(bd[1]=0,i=2;i<maxn;i<<=1)\r\n\t\tbd[i]=bd[i>>1]+1;\r\n\tfor(i=3;i<maxn;i++)\r\n\t\tif(!bd[i]) bd[i]=bd[i-1];\r\n\tscanf(\"%d\",&n);\r\n\tfor(i=1;i<=n;i++)\r\n\t\tscanf(\"%d\",&a[i]);\r\n\tscanf(\"%d\",&q);\r\n\tfor(i=0;i<q;i++)\r\n\t\tque[i].scan(i);\r\n\tsort(que,que+q,cmp);\r\n\tbuild(++ts,1,n);\r\n\twork(0);\r\n\tfor(i=1;i<=n/2;i++)\r\n\t\tswap(a[i],a[n-i+1]);\r\n\twork(1);\r\n\tsort(que,que+q);\r\n\tfor(i=0;i<q;i++)\r\n\t\tprintf(\"%d\\n\",que[i].ans);\r\n\treturn 0;\r\n}"
+}

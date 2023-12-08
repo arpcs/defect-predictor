@@ -1,0 +1,35 @@
+{
+    "id": 178518485,
+    "contestId": 477,
+    "creationTimeSeconds": 1667130803,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 477,
+        "index": "E",
+        "name": "Dreamoon and Notepad",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3100,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 477,
+        "members": [
+            {
+                "handle": "xukai"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1413122400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 218009600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\nconst int N=400010;\r\nint n,a[N];\r\nstruct SegmentTree{\r\n\tstruct Node{\r\n\t\tint l,r;\r\n\t\tvector<int>stk;\r\n\t}tr[N<<2];\r\n\tvoid build(int p,int l,int r){\r\n\t\ttr[p].l=l,tr[p].r=r;\r\n\t\tvector<int>stk;\r\n\t\tfor(int i=l;i<=r;i++){\r\n\t\t\twhile(stk.size()&&a[i]<=stk.back())stk.pop_back();\r\n\t\t\tstk.push_back(a[i]);\r\n\t\t}\r\n\t\ttr[p].stk=stk;\r\n\t\tif(l==r)return;\r\n\t\tint mid=(l+r)>>1;\r\n\t\tbuild(p<<1,l,mid),build(p<<1|1,mid+1,r);\r\n\t}\r\n\tint Qans(int p,int l,int r,int x,int&lmt){\r\n\t\tif(l<=tr[p].l&&tr[p].r<=r){\r\n//\t\t\t\tif(tr[p].l<=10&&tr[p].r>=10)cerr<<lmt<<\"XXX \"<<'\\n';\r\n\t\t\tif(lmt<=x){\r\n\t\t\t\tauto it=lower_bound(tr[p].stk.begin(),tr[p].stk.end(),lmt);\r\n\t\t\t\tlmt=min(lmt,tr[p].stk.front());\r\n\t\t\t\tif(it!=tr[p].stk.begin()){\r\n\t\t\t\t\tit--;\r\n\t\t\t\t\treturn x-*it;\r\n\t\t\t\t}\r\n\t\t\t\telse{\r\n\t\t\t\t\treturn 1e9;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tauto it=lower_bound(tr[p].stk.begin(),tr[p].stk.end(),x);\r\n\t\t\tint res=1e9;\r\n\t\t\tif(it!=tr[p].stk.end()&&*it<=lmt){\r\n\t\t\t\tres=*it-x;\r\n\t\t\t}\r\n\t\t\tif(it!=tr[p].stk.begin()){\r\n\t\t\t\tit--;\r\n\t\t\t\tres=min(res,x-*it);\r\n\t\t\t}\r\n\t\t\tlmt=min(lmt,tr[p].stk.front());\r\n\t\t\treturn res;\r\n\t\t}\r\n\t\tint res=1e9;\r\n\t\tif(r>=tr[p<<1|1].l)res=Qans(p<<1|1,l,r,x,lmt);\r\n\t\tif(l<=tr[p<<1].r)res=min(res,Qans(p<<1,l,r,x,lmt));\r\n\t\treturn res;\r\n\t}\r\n\tint Qmin(int p,int l,int r){\r\n\t\tif(l<=tr[p].l&&tr[p].r<=r)return tr[p].stk.front();\r\n\t\tint res=1e9;\r\n\t\tif(l<=tr[p<<1].r)res=Qmin(p<<1,l,r);\r\n\t\tif(r>=tr[p<<1|1].l)res=min(res,Qmin(p<<1|1,l,r));\r\n\t\treturn res;\r\n\t}\r\n}s1,s2;\r\nint q;\r\nstruct Ques{\r\n\tint r,c,r1,c1;\r\n\tint ans;\r\n}qs[N];\r\nvector<int>v[N];\r\nvector<int>s;\r\nstruct Seg1{\r\n\tstruct Node{\r\n\t\tint ch[2],minv;\r\n\t}tr[N*20];int tot;\r\n\tvoid pushup(int p){\r\n\t\ttr[p].minv=1e9;\r\n\t\tif(tr[p].ch[0])tr[p].minv=tr[tr[p].ch[0]].minv;\r\n\t\tif(tr[p].ch[1])tr[p].minv=min(tr[p].minv,tr[tr[p].ch[1]].minv);\r\n\t}\r\n\tvoid set(int&p,int l,int r,int x,int v){\r\n\t\tif(!p)p=++tot;\r\n\t\tif(l==r){\r\n\t\t\ttr[p].minv=v;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint mid=(l+r)>>1;\r\n\t\tif(x<=mid)set(tr[p].ch[0],l,mid,x,v);\r\n\t\telse set(tr[p].ch[1],mid+1,r,x,v);\r\n\t\tpushup(p);\r\n\t}\r\n\tint query(int p,int l,int r,int L,int R){\r\n\t\tif(!p)return 1e9;\r\n\t\tif(L<=l&&r<=R)return tr[p].minv;\r\n\t\tint res=1e9,mid=(l+r)>>1;\r\n\t\tif(L<=mid)res=query(tr[p].ch[0],l,mid,L,R);\r\n\t\tif(R>mid)res=min(res,query(tr[p].ch[1],mid+1,r,L,R));\r\n\t\treturn res;\r\n\t}\r\n\tvoid clear(){\r\n\t\tfor(int i=1;i<=tot;i++)tr[i].ch[0]=tr[i].ch[1]=tr[i].minv=0;\r\n\t\ttot=0;\r\n\t}\r\n}seg;int root;\r\nbool cmp(int i,int j){\r\n\treturn a[i]<a[j];\r\n}\r\nint main(){\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(0);\r\n\tcout.tie(0);\r\n\t\r\n\tcin>>n;\r\n\tfor(int i=1;i<=n;i++)cin>>a[i];\r\n\ts1.build(1,1,n);\r\n\treverse(a+1,a+1+n);\r\n\ts2.build(1,1,n);\r\n\treverse(a+1,a+1+n);\r\n\t\r\n//\tfor(int i=1;i<=n;i++)cerr<<i<<\">>\"<<a[i]<<'\\n';\r\n\tcin>>q;\r\n\tfor(int i=1;i<=q;i++){\r\n\t\tint r,c,r1,c1,lmt=1e9;cin>>r>>c>>r1>>c1;\r\n\t\tqs[i].r=r,qs[i].c=c,qs[i].r1=r1,qs[i].c1=c1;\r\n\t\tif(r==r1){\r\n\t\t\tqs[i].ans=min(abs(c-c1),min(1+c1,1+a[r]-c1));\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tif(r<r1){\r\n\t\t\tint v=s1.Qmin(1,r,r1);\r\n\t\t\tc=min(c,v);\r\n\t\t\tqs[i].ans=r1-r+min(abs(c-c1),1+min(c1,s1.Qans(1,r,r1,c1,lmt)));\r\n//\t\t\tlmt=1e9;\r\n//\t\t\tcerr<<\"Q \"<<r<<' '<<r1<<' '<<c1<<' '<<s1.Qans(1,r,r1,c1,lmt)<<'\\n';\r\n\t\t}\r\n\t\telse{\r\n\t\t\tint v=s1.Qmin(1,r1,r);\r\n\t\t\tc=min(c,v);\r\n\t\t\tqs[i].ans=r-r1+min(abs(c-c1),1+min(c1,s2.Qans(1,n-r+1,n-r1+1,c1,lmt)));\r\n\t\t}\r\n\t}\r\n//\treturn 0;\r\n\tfor(int i=1;i<=q;i++)v[min(qs[i].r,qs[i].r1)].push_back(i);\r\n\t\r\n\tfor(int i=1;i<=n;i++){\r\n\t\twhile(s.size()&&a[i]<=a[s.back()]){\r\n\t\t\tseg.set(root,1,1e8,a[s.back()],1e9);\r\n//\t\t\tcerr<<\"Del \"<<a[s.back()]<<'\\n';\r\n\t\t\ts.pop_back();\r\n\t\t}\r\n\t\tseg.set(root,1,1e8,a[i],a[i]-2*i);\r\n//\t\tcerr<<\"SET \"<<i<<' '<<a[i]-2*i<<'\\n';\r\n\t\ts.push_back(i);\r\n\t\t\r\n\t\tfor(int j:v[i]){\r\n\t\t\tint lmt=1e8;\r\n\t\t\tif(i==qs[j].r){\r\n\t\t\t\tlmt=s1.Qmin(1,qs[j].r,qs[j].r1);\r\n\t\t\t}\r\n\t\t\ta[n+1]=qs[j].c1;\r\n\t\t\tauto it=lower_bound(s.begin(),s.end(),n+1,cmp);\r\n\t\t\tif(it!=s.begin()){\r\n\t\t\t\tit--;\r\n\t\t\t\tif(a[*it]>=lmt){\r\n\t\t\t\t\tqs[j].ans=min(qs[j].ans,qs[j].c1-a[*it]+abs(qs[j].r-qs[j].r1)+2*i-2*(*it)+1);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tint res=1e9;\r\n\t\t\tif(qs[j].c1<=lmt)res=seg.query(root,1,1e8,qs[j].c1,lmt);\r\n//\t\t\tcerr<<\"RES \"<<res<<' '<<lmt<<'\\n';\r\n\t\t\tqs[j].ans=min(qs[j].ans,res-qs[j].c1+2*i+abs(qs[j].r-qs[j].r1)+1);\r\n\t\t}\r\n\t}\r\n\tseg.clear(),s.clear();root=0;\r\n\tfor(int i=1;i<=n;i++)v[i].clear();\r\n\tfor(int i=1;i<=q;i++)v[max(qs[i].r,qs[i].r1)].push_back(i);\r\n\t\r\n//\tcerr<<\"A \"<<qs[1].c1-a[10]+11-2+1<<'\\n';\r\n\tfor(int i=n;i;i--){\r\n\t\twhile(s.size()&&a[i]<=a[s.back()]){\r\n\t\t\tseg.set(root,1,1e8,a[s.back()],1e9);\r\n\t\t\ts.pop_back();\r\n\t\t}\r\n\t\tseg.set(root,1,1e8,a[i],a[i]+2*i);\r\n//\t\tcerr<<\"SET \"<<i<<' '<<a[i]+2*i<<'\\n';\r\n\t\ts.push_back(i);\r\n\t\t\r\n\t\tfor(int j:v[i]){\r\n\t\t\tint lmt=1e8;\r\n\t\t\tif(i==qs[j].r){\r\n\t\t\t\tlmt=s1.Qmin(1,qs[j].r1,qs[j].r);\r\n\t\t\t}\r\n\t\t\ta[n+1]=qs[j].c1;\r\n\t\t\tauto it=lower_bound(s.begin(),s.end(),n+1,cmp);\r\n\t\t\tif(it!=s.begin()){\r\n\t\t\t\tit--;\r\n\t\t\t\tif(a[*it]>=lmt){\r\n\t\t\t\t\tqs[j].ans=min(qs[j].ans,qs[j].c1-a[*it]+abs(qs[j].r-qs[j].r1)-2*i+2*(*it)+1);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tint res=1e9;\r\n\t\t\tif(qs[j].c1<=lmt)res=seg.query(root,1,1e8,qs[j].c1,lmt);\r\n//\t\t\tcerr<<\"RES \"<<res<<'\\n';\r\n\t\t\tqs[j].ans=min(qs[j].ans,res-qs[j].c1-2*i+abs(qs[j].r-qs[j].r1)+1);\r\n\t\t}\r\n\t}\r\n\tfor(int i=1;i<=q;i++)cout<<qs[i].ans<<'\\n';\r\n}\r\n"
+}
