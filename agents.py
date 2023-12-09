@@ -118,6 +118,9 @@ def filter_pack_solutions(container: helper.ProblemSolutionContainer, packs: Lis
         filtered_packs.append(helper.ProblemPack(pack.get_problem_id(), filtered_solutions))
     return filtered_packs
 
+defect_eval_ver = 'defect_evaluation_v4'
+defect_eval_gpt4_ver = 'defect_evaluation_gpt4_v4'
+
 def pick_problem_packs(container: helper.ProblemSolutionContainer, number_of_small_packs=15, small_pack_solution_size=10, number_of_big_packs=5, big_pack_solution_size=30):
     filtered_packs = []
     for index, problem in enumerate(container.problems):
@@ -145,7 +148,12 @@ def pick_problem_packs(container: helper.ProblemSolutionContainer, number_of_sma
     already_done_packs = []
     for pack in filtered_packs:
         problem_obj = container.problems[pack.problem_id]
-        if "category_evaluation" in problem_obj:
+        good = False
+        for solution_id in pack.get_solution_ids():
+            solution_obj = container.solutions[solution_id]
+            if defect_eval_ver in solution_obj or defect_eval_gpt4_ver in solution_obj:
+                good = True
+        if "category_evaluation" in problem_obj or good:
             already_done_packs.append(pack)
 
     filtered_packs = [obj for obj in filtered_packs if obj not in already_done_packs]
@@ -158,9 +166,14 @@ def pick_problem_packs(container: helper.ProblemSolutionContainer, number_of_sma
     small_packs = filter_pack_solutions(container, small_packs, small_pack_solution_size)
     big_packs = filter_pack_solutions(container, big_packs, big_pack_solution_size)
 
-    return_packs = small_packs + big_packs
-    return_packs = already_done_packs + return_packs[:(number_of_big_packs + number_of_small_packs - len(already_done_packs))]
-    return return_packs
+    return_new_packs = small_packs + big_packs
+    pick_this_many = (number_of_big_packs + number_of_small_packs - len(already_done_packs))
+    pick_this_many = pick_this_many if pick_this_many > 0 else 0
+    return_new_packs = return_new_packs[:pick_this_many]
+    return_packs = already_done_packs + return_new_packs
+
+    final_return = return_packs[:(number_of_big_packs + number_of_small_packs)]
+    return final_return
 
 def parse_category_evaluation_json(text):
     try:
@@ -199,13 +212,18 @@ def parse_defect_evaluation_json(text):
         good_categories = 0
         bad_categories = 0
         good_defect_evaluations = {}
+        defect_categories = ['good solution', 'wrong solution', 'compilation error', 'runtime error']
         for category, perc in defect_evaluation.items():
             if not isinstance(category, str) or (not isinstance(perc, int) and not isinstance(perc, float)):
                 bad_categories += 1
                 print(f"Bad field: {str(category)} : {str(perc)}")
             else:
                 good_defect_evaluations[category.lower()] = perc
-                if category not in picked_categories:
+                category = category.lower() if category.lower() != 'good_solution' else 'good solution'
+                category = category if category != 'wrong_solution' else 'wrong solution'
+                category = category if category != 'compilation_error' else 'compilation error'
+                category = category if category != 'runtime_error' else 'runtime error'
+                if category.lower() not in defect_categories and category.lower() not in picked_categories:
                     bad_categories += 1
                     print(f"Bad category: {str(category)} : {str(perc)}")
                 else:
@@ -238,6 +256,7 @@ def fill_category_evaluation(file_path, messages):
         except Exception as e:
             print(f"An error occurred: {e}")
 
+
 def fill_defect_evaluation(file_path, messages, is_gpt_4):
     response = get_request(messages, is_gpt_4)
     defect_evaluation = parse_defect_evaluation_json(response)
@@ -248,9 +267,9 @@ def fill_defect_evaluation(file_path, messages, is_gpt_4):
                 data = json.load(file)
                 print("Actually is: " + data['verdict']+ " is gpt4= "+ str(is_gpt_4))
             if is_gpt_4 == False: 
-                data['defect_evaluation'] = defect_evaluation
+                data[defect_eval_ver] = defect_evaluation
             else:
-                data['defect_evaluation_gpt_4'] = defect_evaluation
+                data[defect_eval_gpt4_ver] = defect_evaluation
             pass
             with open(file_path, 'w', encoding='utf-8') as file:
                 json.dump(data, file, indent=4)
@@ -296,16 +315,17 @@ def do_defect_evaluations(container: helper.ProblemSolutionContainer, packs: Lis
         problem_obj = container.problems[pack.problem_id]
         for solution_id in pack.solution_ids:
             solution_obj = container.solutions[solution_id]
-            if ((is_gpt_4 == False and "defect_evaluation" not in solution_obj) or (is_gpt_4 == True and "defect_evaluation_gpt_4" not in solution_obj)):
+            if ((is_gpt_4 == False and defect_eval_ver not in solution_obj) or (is_gpt_4 == True and defect_eval_gpt4_ver not in solution_obj)):
                 messages =[
                 {"role": "system", "content": "You are a helpful assistant designed to output JSON."},
                 {"role": "user", "content": "I will give a programming task and a program."
-                "Your job is to evaluate the solution for the problem for these categories: 'Good solution', 'COMPILATION ERROR', 'RUNTIME ERROR'."
-                "Give a percentage value from 0 to 100, which indicates the chance that the solution is a 'good solution' or produces a 'compilation error' or produces a 'runtime error' for the given problem."
+                "Your job is to evaluate the solution for the problem for these 4 categories: {'good solution', 'wrong solution', 'compilation error', 'runtime error'}."
+                "Give a percentage value from 0 to 100, which indicates the seperate chances of the solution beeing a 'good solution' or a 'wrong solution' or that it produces a 'compilation error' or produces a 'runtime error' for the given problem."
+                "The 4 percentages dont have to sum to 100."
                 "Give the answer in a JSON format containing a field defect_evaluation, which is a map with category keys and the percentage values."
                 f"Give the JSON only, nothing else, no other text. \nHere is the problem: {problem_obj['desc']} \nHere is the program: {solution_obj['source']}"}
                 ]  
-                fill_defect_evaluation(container.solution_paths[solution_id], messages, is_gpt_4 = False)
+                fill_defect_evaluation(container.solution_paths[solution_id], messages, is_gpt_4)
             else:
                 print(f"Already Done defect evaluation: {problem_obj['contestId']} : {solution_obj['id']}")
         
@@ -314,10 +334,10 @@ def count_filed_category_evaluation(probs_sols):
     return len([probs_sol for probs_sol in probs_sols if 'category_evaluation' in probs_sol])
 
 def count_filed_defect_evaluation(probs_sols):
-    return len([probs_sol for probs_sol in probs_sols if 'defect_evaluation' in probs_sol])
+    return len([probs_sol for probs_sol in probs_sols if defect_eval_ver in probs_sol])
 
 def count_filed_defect_evaluation_gpt_4(probs_sols):
-    return len([probs_sol for probs_sol in probs_sols if 'defect_evaluation_gpt_4' in probs_sol])
+    return len([probs_sol for probs_sol in probs_sols if defect_eval_gpt4_ver in probs_sol])
 
 def main():
     problems = helper.problem_getter()
@@ -350,11 +370,11 @@ def main():
     # fill_suggested_categories(200 - solution_suggested_categories_count, solutions, solution_paths, "solution")
 
     #problem_packs = pick_problem_packs(problem_solution_container, 15, 10, 5, 30)
-    problem_packs = pick_problem_packs(problem_solution_container, 1, 10, 1, 30)
+    problem_packs = pick_problem_packs(problem_solution_container, 1, 10, 9, 10)
 
-    # do_category_evaluations(problem_solution_container, problem_packs)
+    do_category_evaluations(problem_solution_container, problem_packs)
 
-    do_defect_evaluations(problem_solution_container, problem_packs, True)
+    do_defect_evaluations(problem_solution_container, problem_packs, False)
 
 if __name__ == "__main__":
     main()
