@@ -161,7 +161,7 @@ def parse_category_evaluation_json(text):
         category_evaluation = json_obj["category_evaluation"]
         if (len(category_evaluation) <= 3):
             return None
-        print(f"Got category_evaluation: {str(category_evaluation)}")
+        # print(f"Got category_evaluation: {str(category_evaluation)}")
         good_categories = 0
         bad_categories = 0
         good_category_evaluations = {}
@@ -177,6 +177,33 @@ def parse_category_evaluation_json(text):
                 else:
                     good_categories += 1
         return good_category_evaluations
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON from {text}: {e}")
+    except Exception as e:
+        print(f"Error reading file {text}: {e}")
+    return None
+
+def parse_defect_evaluation_json(text):
+    try:
+        json_obj = json.loads(text)
+        defect_evaluation = json_obj["defect_evaluation"]
+        if (len(defect_evaluation) < 3):
+            return None
+        good_categories = 0
+        bad_categories = 0
+        good_defect_evaluations = {}
+        for category, perc in defect_evaluation.items():
+            if not isinstance(category, str) or (not isinstance(perc, int) and not isinstance(perc, float)):
+                bad_categories += 1
+                print(f"Bad field: {str(category)} : {str(perc)}")
+            else:
+                good_defect_evaluations[category.lower()] = perc
+                if category not in picked_categories:
+                    bad_categories += 1
+                    print(f"Bad category: {str(category)} : {str(perc)}")
+                else:
+                    good_categories += 1
+        return good_defect_evaluations
     except json.JSONDecodeError as e:
         print(f"Error decoding JSON from {text}: {e}")
     except Exception as e:
@@ -204,6 +231,27 @@ def fill_category_evaluation(file_path, messages):
         except Exception as e:
             print(f"An error occurred: {e}")
 
+def fill_defect_evaluation(file_path, messages):
+    response = get_request(messages)
+    defect_evaluation = parse_defect_evaluation_json(response)
+    if defect_evaluation is not None:
+        print("Final defect_evaluation: " + str(defect_evaluation))
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                data = json.load(file)
+            data['defect_evaluation'] = defect_evaluation
+            pass
+            with open(file_path, 'w', encoding='utf-8') as file:
+                json.dump(data, file, indent=4)
+                pass
+
+        except FileNotFoundError:
+            print(f"File not found: {file_path}")
+        except json.JSONDecodeError:
+            print(f"Error decoding JSON from file: {file_path}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
 def do_category_evaluations(container: helper.ProblemSolutionContainer, packs: List[helper.ProblemPack]):
     for pack in packs:
         problem_obj = container.problems[pack.problem_id]
@@ -217,7 +265,7 @@ def do_category_evaluations(container: helper.ProblemSolutionContainer, packs: L
             ]
             fill_category_evaluation(container.problem_paths[pack.problem_id], messages)
         else:
-            print(f"Already Done: {problem_obj['contestId']}")
+            print(f"Already Done category evaluation: {problem_obj['contestId']}")
         for solution_id in pack.solution_ids:
             solution_obj = container.solutions[solution_id]
             if ("category_evaluation" not in solution_obj):
@@ -230,13 +278,32 @@ def do_category_evaluations(container: helper.ProblemSolutionContainer, packs: L
                 ]  
                 fill_category_evaluation(container.solution_paths[solution_id], messages)
             else:
-                print(f"Already Done: {problem_obj['contestId']} : {solution_obj['id']}")
+                print(f"Already Done category evaluation: {problem_obj['contestId']} : {solution_obj['id']}")
         
-
-
+def do_defect_evaluations(container: helper.ProblemSolutionContainer, packs: List[helper.ProblemPack]):
+    for pack in packs:
+        problem_obj = container.problems[pack.problem_id]
+        for solution_id in pack.solution_ids:
+            solution_obj = container.solutions[solution_id]
+            if ("defect_evaluation" not in solution_obj):
+                messages =[
+                {"role": "system", "content": "You are a helpful assistant designed to output JSON."},
+                {"role": "user", "content": "I will give a programming task and a program."
+                "Your job is to evaluate the solution for the problem for these categories: 'Good solution', 'COMPILATION ERROR', 'RUNTIME ERROR'."
+                "Give a percentage value from 0 to 100, which indicates the chance that the solution is a 'good solution' or produces a 'compilation error' or produces a 'runtime error' for the given problem."
+                "Give the answer in a JSON format containing a field defect_evaluation, which is a map with category keys and the percentage values."
+                f"Give the JSON only, nothing else, no other text. \nHere is the problem: {problem_obj['desc']} \nHere is the program: {solution_obj['source']}"}
+                ]  
+                fill_defect_evaluation(container.solution_paths[solution_id], messages)
+            else:
+                print(f"Already Done defect evaluation: {problem_obj['contestId']} : {solution_obj['id']}")
+        
 
 def count_filed_category_evaluation(probs_sols):
     return len([probs_sol for probs_sol in probs_sols if 'category_evaluation' in probs_sol])
+
+def count_filed_defect_evaluation(probs_sols):
+    return len([probs_sol for probs_sol in probs_sols if 'defect_evaluation' in probs_sol])
 
 def main():
     problems = helper.problem_getter()
@@ -247,6 +314,7 @@ def main():
 
     solutions = helper.solution_getter()
     solution_paths = helper.solution_path_iterator(lambda _, full_path, _3: full_path)
+    problem_solution_container = helper.ProblemSolutionContainer(problems, problem_paths, solutions, solution_paths)
 
     solution_suggested_categories_count = count_filed_suggested_categories(solutions)
     print(f"Already created suggested categories for solutions: {solution_suggested_categories_count}")
@@ -257,15 +325,20 @@ def main():
     solution_category_evaluation_count = count_filed_category_evaluation(solutions)
     print(f"Already filled categories for solutions: {solution_category_evaluation_count}")
 
-    problem_solution_container = helper.ProblemSolutionContainer(problems, problem_paths, solutions, solution_paths)
-    problem_packs = pick_problem_packs(problem_solution_container, 15, 10, 5, 30)
+    defect_evaluation_count = count_filed_defect_evaluation(solutions)
+    print(f"Already filled defect evaluations: {defect_evaluation_count}")
 
-    do_category_evaluations(problem_solution_container, problem_packs)
 
     # fill_suggested_categories(200 - problem_suggested_categories_count, problems, problem_paths, "problem")
 
-
     # fill_suggested_categories(200 - solution_suggested_categories_count, solutions, solution_paths, "solution")
+
+    #problem_packs = pick_problem_packs(problem_solution_container, 15, 10, 5, 30)
+    problem_packs = pick_problem_packs(problem_solution_container, 1, 10, 1, 30)
+
+    # do_category_evaluations(problem_solution_container, problem_packs)
+
+    do_defect_evaluations(problem_solution_container, problem_packs)
 
 if __name__ == "__main__":
     main()
