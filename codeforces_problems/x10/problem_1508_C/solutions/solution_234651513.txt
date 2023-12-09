@@ -1,0 +1,42 @@
+{
+    "id": 234651513,
+    "contestId": 1508,
+    "creationTimeSeconds": 1701133427,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1508,
+        "index": "C",
+        "name": "Complete the MST",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2500,
+        "tags": [
+            "bitmasks",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1508,
+        "members": [
+            {
+                "handle": "wa_sender"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1618583700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 30,
+    "timeConsumedMillis": 2558,
+    "memoryConsumedBytes": 55193600,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define ll long long\r\n#define all(v) v.begin(), v.end()\r\ntemplate <class T>\r\nvoid print(vector<T> &v) {for (auto x : v) cout << x << \" \"; cout << \"\\n\";}\r\nconst ll mod = 1e9 + 7;\r\n\r\nstruct dsu {\r\n    ll n;\r\n    vector<ll> color;\r\n    vector<ll> d;\r\n\r\n    dsu (int n) : n(n) {\r\n        d.assign(n, 1);\r\n        color.resize(n);\r\n        iota(all(color), 0);\r\n    }\r\n\r\n    ll col(ll a) {\r\n        if (a == color[a]) return a;\r\n        else return color[a] = col(color[a]);\r\n    }\r\n\r\n    ll unite (ll a, ll b) {\r\n        a = col(a);\r\n        b = col(b);\r\n        if (a == b) return 0 ;\r\n        if (d[a] < d[b]) swap(a, b);\r\n        color[b] = a;\r\n        d[a] += d[b];\r\n        return 1;\r\n    }\r\n};\r\n\r\nvoid TestCase() {\r\n    ll n, m;\r\n    cin >> n >> m;\r\n\r\n    dsu each_edge(n);\r\n    vector<set<ll>> g(n);\r\n    vector<tuple<ll, ll, ll>> g1(n);\r\n    set<ll> curr_exists;\r\n    vector<pair<ll, ll>> zero_edges;\r\n\r\n    ll cur_xor = 0;\r\n    ll need_zero_edges = n * (n - 1) / 2 - m;\r\n    ll used = 0;\r\n    for (ll i = 0; i < m; ++i) {\r\n        ll a, b, w;\r\n        cin >> a >> b >> w;\r\n        --a; --b;\r\n        g[a].insert(b);\r\n        g[b].insert(a);\r\n        g1.push_back({w, a, b});\r\n        cur_xor ^= w;\r\n    }\r\n\r\n    for (ll i = 0; i < n; ++i)\r\n        curr_exists.insert(i);\r\n\r\n    sort(all(g1));\r\n    while (!curr_exists.empty()) {\r\n        ll v = *curr_exists.begin();\r\n        curr_exists.erase(v);\r\n        queue<ll> q;\r\n        vector<ll> recursive; \r\n        q.push(v);\r\n        while (!q.empty()) {\r\n            ll tp = q.front();\r\n            q.pop();\r\n            recursive.push_back(tp);\r\n            vector<ll> next;\r\n            for (ll el : curr_exists) {\r\n                if (!g[tp].count(el)) {\r\n                    zero_edges.push_back({tp, el});\r\n                    next.push_back(el);\r\n                }\r\n            }\r\n            for (ll el : next) {\r\n                curr_exists.erase(el);\r\n                q.push(el);\r\n            }\r\n        }\r\n        used += recursive.size() - 1;\r\n        for (ll el : recursive) each_edge.unite(el, recursive[0]);\r\n    }\r\n\r\n    ll min_mst = 0;\r\n    for (auto [w, a, b] : g1)\r\n        if (each_edge.unite(a, b)) min_mst += w;\r\n\r\n    if (used != need_zero_edges) {\r\n        cout << min_mst << '\\n';\r\n        return;\r\n    }\r\n    ll ans = min_mst + cur_xor;\r\n    ll sz = zero_edges.size();\r\n    for (ll i = 0; i < sz; ++i) {\r\n        dsu all_zero(n);\r\n        ll count_edge = 0;\r\n        ll total = 0;\r\n        for (ll j = 0; j < sz; ++j) {\r\n            if (i != j)\r\n                if (all_zero.unite(zero_edges[j].first, zero_edges[j].second)) ++count_edge;\r\n        }\r\n        for (auto [w, a, b] : g1) {\r\n            if (all_zero.unite(a, b)) {\r\n                ++count_edge;\r\n                total += w;\r\n            }\r\n        }\r\n        if (count_edge == n - 1) ans = min(ans, total);\r\n    }\r\n    cout << ans << '\\n';\r\n}\r\n\r\nint main() {\r\n    int t = 1;\r\n    while (t--) {\r\n        TestCase();\r\n    }\r\n    return 0;\r\n}\n/* Tue Nov 28 2023 04:03:47 GMT+0300 (Moscow Standard Time) */\n"
+}

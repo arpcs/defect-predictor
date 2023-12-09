@@ -1,0 +1,38 @@
+{
+    "id": 231050729,
+    "contestId": 1778,
+    "creationTimeSeconds": 1698974323,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1778,
+        "index": "E",
+        "name": "The Tree Has Fallen!",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2500,
+        "tags": [
+            "bitmasks",
+            "dfs and similar",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1778,
+        "members": [
+            {
+                "handle": "YYZNB"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1675262100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 109,
+    "memoryConsumedBytes": 114585600,
+    "source": "// LUOGU_RID: 133045247\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int maxn=200005;\r\nint T,N,A[maxn];\r\nvector<int> E[maxn];\r\nint read(){\r\n\tint ret=0,f=1;char ch=getchar();\r\n\twhile(!isdigit(ch)){if(ch=='-') f=-f;ch=getchar();}\r\n\twhile(isdigit(ch)) ret=(ret<<3)+(ret<<1)+(ch&15),ch=getchar();\r\n\treturn ret*f;\r\n}\r\nstruct LB{\r\n\tint S[30];\r\n\tvoid clear(){memset(S,0,sizeof S);}\r\n\tvoid insert(int x){\r\n\t\tfor(int i=29;x&&i>=0;i--)\r\n\t\t if(x>>i&1) {\r\n\t\t \tif(!S[i]) return S[i]=x,void();\r\n\t\t \tx^=S[i];\r\n\t\t }\r\n\t}\r\n\tint query(){\r\n\t\tint ret=0;\r\n\t\tfor(int i=29;i>=0;i--)\r\n\t\t if((ret^S[i])>ret) ret^=S[i];\r\n\t\treturn ret;\r\n\t}\r\n}P1[maxn],P2[maxn],P3[maxn],P4[maxn];\r\nint Fa[maxn][18],Dep[maxn];\r\nvoid DFS(int root,int fa){\r\n\tFa[root][0]=fa;Dep[root]=Dep[fa]+1;\r\n\tfor(int i=1;i<18;i++) Fa[root][i]=Fa[Fa[root][i-1]][i-1];\r\n\tP1[root].insert(A[root]);\r\n\tfor(auto son:E[root]) if(son!=fa){\r\n\t\tDFS(son,root);\r\n\t\tfor(int j=19;j>=0;j--)\r\n\t\t if(P1[son].S[j]) P1[root].insert(P1[son].S[j]);\r\n\t}\r\n}\r\nLB merge(LB a,LB b,LB c){\r\n\tLB d;d.clear();\r\n\tfor(int j=19;j>=0;j--){\r\n\t\tif(a.S[j]) d.insert(a.S[j]);\r\n\t\tif(b.S[j]) d.insert(b.S[j]);\r\n\t\tif(c.S[j]) d.insert(c.S[j]);\r\n\t}\r\n\treturn d;\r\n}\r\nvoid DFS2(int root,int fa){\r\n\tint Len=E[root].size();P3[0].clear();P4[Len].clear();\r\n\tfor(int i=0;i<Len;i++){\r\n\t\tif(i) P3[i]=P3[i-1];int son=E[root][i];\r\n\t\tif(son==fa) continue;\r\n\t\tfor(int j=19;j>=0;j--)\r\n\t\t if(P1[son].S[j]) P3[i].insert(P1[son].S[j]);\r\n\t}\r\n\tfor(int i=Len-1;i>=0;i--){\r\n\t\tP4[i]=P4[i+1];int son=E[root][i];\r\n\t\tfor(int j=19;j>=0;j--)\r\n\t\t if(P1[son].S[j]) P4[i].insert(P1[son].S[j]);\r\n\t}\r\n\tfor(int i=0;i<Len;i++){\r\n\t\tint son=E[root][i];if(son==fa) continue;\r\n\t\tif(i) P2[son]=merge(P2[root],P3[i-1],P4[i+1]);\r\n\t\telse P2[son]=merge(P2[root],P4[Len],P4[i+1]);\r\n\t\tP2[son].insert(A[root]);\r\n\t}\r\n\tfor(auto son:E[root]) if(son!=fa) DFS2(son,root);\r\n}\r\nint Get(int x,int step){\r\n\tif(step<0) return -1;\r\n\tfor(int i=17;i>=0;i--)\r\n\t if(step>>i&1) x=Fa[x][i];\r\n\treturn x;\r\n}\r\nint main(){\r\n\tT=read();\r\n\twhile(T--){\r\n\t\tN=read();\r\n\t\tfor(int i=1;i<=N;i++) E[i].clear(),P1[i].clear(),P2[i].clear();\r\n\t\tfor(int i=1;i<=N;i++) A[i]=read();\r\n\t\tfor(int i=1;i<N;i++){\r\n\t\t\tint x=read(),y=read();\r\n\t\t\tE[x].emplace_back(y);\r\n\t\t\tE[y].emplace_back(x);\r\n\t\t}\r\n\t\tDFS(1,0);DFS2(1,0);\r\n\t\tint Q=read();\r\n\t\twhile(Q--){\r\n\t\t\tint x=read(),y=read(),Now=Get(x,Dep[x]-Dep[y]-1);\r\n\t\t\tif(x==y) printf(\"%d\\n\",P1[1].query());else\r\n\t\t\tif(Dep[x]<=Dep[y]||Fa[Now][0]!=y) printf(\"%d\\n\",P1[y].query());\r\n\t\t\telse printf(\"%d\\n\",P2[Now].query());\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}"
+}

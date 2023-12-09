@@ -1,0 +1,34 @@
+{
+    "id": 59057586,
+    "contestId": 1192,
+    "creationTimeSeconds": 1566157039,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "yongwhan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 185,
+    "timeConsumedMillis": 1965,
+    "memoryConsumedBytes": 221286400,
+    "points": 100.0,
+    "source": "#include<cstdio>\r\n#include<algorithm>\r\n#include<set>\r\n#include<vector>\r\n#include<map>\r\n#include<queue>\r\n#define N_ 1510000\r\n#define pii pair<int,int>\r\nusing namespace std;\r\n \r\nint dx[8] = { -1,-1,-1,0,1,1,1,0 }, dy[8] = { 1,0,-1,-1,-1,0,1,1 };\r\n \r\nint UF[N_];\r\nmap<pii, int>Map, Map2;\r\n \r\nint n;\r\n \r\nstruct point {\r\n\tint x, y;\r\n}P[N_];\r\n \r\nvector<int>E[N_], G[N_];\r\n \r\nint Num[N_], cnt;\r\nset<pii>Set;\r\n \r\nvoid DFS(int a) {\r\n\tNum[a] = ++cnt;\r\n\tfor (auto &x : E[a]) {\r\n\t\tif (!Num[x]) DFS(x);\r\n\t}\r\n}\r\n \r\n \r\nint vis[N_], blocked[N_], pos[N_], w[N_][9];\r\nint BN[N_], ReNum[N_], Q[N_], head, tail;\r\n \r\nint Find(int a) {\r\n\tif (a == UF[a])return a;\r\n\treturn UF[a] = Find(UF[a]);\r\n}\r\nvoid Merge(int a, int b) {\r\n\ta = Find(a), b = Find(b);\r\n\tif (a != b)UF[a] = b;\r\n}\r\n \r\npriority_queue<int>PQ;\r\nvoid BFS() {\r\n\twhile (head < tail) {\r\n\t\tint x = Q[++head];\r\n\t\tfor (auto &t : G[x]) {\r\n\t\t\tif (vis[t])continue;\r\n\t\t\tif (!blocked[t]) {\r\n\t\t\t\tQ[++tail] = t;\r\n\t\t\t\tvis[t] = 1;\r\n\t\t\t}\r\n\t\t\telse if (!pos[t]) {\r\n\t\t\t\tpos[t] = 1;\r\n\t\t\t\tPQ.push(ReNum[t]);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\n \r\nint main() {\r\n\tint i, j, sub;\r\n\tscanf(\"%d%d\", &n, &sub);\r\n\tfor (i = 1; i <= n; i++) {\r\n\t\tint x, y;\r\n\t\tscanf(\"%d%d\", &x,&y);\r\n\t\tP[i] = { x,y };\r\n\t\tMap[{x, y}] = i;\r\n\t\tSet.insert({ x,y });\r\n\t}\r\n\tfor (i = 1; i <= n; i++) {\r\n\t\tfor (j = 0; j < 8; j++) {\r\n\t\t\tint tx = P[i].x + dx[j], ty = P[i].y + dy[j];\r\n\t\t\tSet.insert({ tx,ty });\r\n\t\t\tif (Map.count({ tx,ty })) {\r\n\t\t\t\tE[i].push_back(Map[{tx, ty}]);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tDFS(1);\r\n\tif (cnt != n) {\r\n\t\tputs(\"NO\");\r\n\t\treturn 0;\r\n\t}\r\n\tint c = 0;\r\n\tfor (auto &t : Set) {\r\n\t\tMap2[t] = ++c;\r\n\t}\r\n\tfor (auto &t : Set) {\r\n\t\tint a = Map2[t];\r\n\t\tfor (j = 1; j < 8; j+=2) {\r\n\t\t\tint tx = t.first + dx[j], ty = t.second + dy[j];\r\n\t\t\tif (Map2.count({ tx, ty })) {\r\n\t\t\t\tG[a].push_back(Map2[{tx, ty}]);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tfor (i = 1; i <= n; i++) {\r\n\t\tfor (j = 0; j < 8; j++) {\r\n\t\t\tint tx = P[i].x + dx[j], ty = P[i].y + dy[j];\r\n\t\t\tw[i][j] = Map2[{tx, ty}];\r\n\t\t}\r\n\t}\r\n \r\n\tfor (i = 1; i <= n; i++) {\r\n\t\tBN[i] = Map2[{P[i].x, P[i].y}];\r\n\t\tReNum[BN[i]] = i;\r\n\t\tblocked[BN[i]] = 1;\r\n\t}\r\n \r\n\tfor (i = 1; i <= c; i++)UF[i] = i;\r\n\tfor (i = 1; i <= c; i++){\r\n\t\tfor (auto &x : G[i]) {\r\n\t\t\tif (!blocked[i] && !blocked[x])Merge(i, x);\r\n\t\t}\r\n\t}\r\n\tQ[++tail] = 1;\r\n\tvis[1] = 1;\r\n\tBFS();\r\n\tvector<int>Res;\r\n\twhile (!PQ.empty()) {\r\n\t\tint a = PQ.top();\r\n\t\tPQ.pop();\r\n\t\tint x = BN[a], ck = 0;\r\n\t\tif (!pos[x] || !blocked[x])continue;\r\n\t\tint pv = -1;\r\n\t\tfor (i = 0; i < 8; i++) {\r\n\t\t\tint t = w[a][i];\r\n\t\t\tif (blocked[t])pv = i;\r\n\t\t}\r\n\t\tif (pv != -1) {\r\n\t\t\tint TP[9], cc = 0;\r\n\t\t\tfor (i = 0; i < 8; i++)TP[i] = 0;\r\n\t\t\tfor (i = 0; i < 8; i++) {\r\n\t\t\t\tint t = w[a][(pv+i)%8];\r\n\t\t\t\tif (blocked[t]) cc++;\r\n\t\t\t\telse TP[(pv+i)%8] = cc;\r\n\t\t\t}\r\n\t\t\tfor (i = 1; i < 8; i += 2) {\r\n\t\t\t\tfor (int j = i+2; j < 8; j += 2) {\r\n\t\t\t\t\tint t1 = w[a][i], t2 = w[a][j];\r\n\t\t\t\t\tif (!blocked[t1] && !blocked[t2] && TP[i] != TP[j] && Find(t1) == Find(t2))ck = 1;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tif (ck)continue;\r\n\t\t}\r\n \r\n\t\tRes.push_back(a);\r\n\t\tblocked[x] = 0;\r\n\t\tQ[++tail] = x;\r\n\t\tvis[x] = 1;\r\n\t\tBFS();\r\n\t\tfor (auto &z : G[x]) {\r\n\t\t\tif (!blocked[z])Merge(x, z);\r\n\t\t}\r\n\t\tfor (auto &z : E[a]) {\r\n\t\t\tPQ.push(z);\r\n\t\t}\r\n\t}\r\n\tputs(\"YES\");\r\n\treverse(Res.begin(), Res.end());\r\n\tfor (auto &t : Res)printf(\"%d\\n\", t);\r\n}"
+}

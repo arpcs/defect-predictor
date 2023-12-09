@@ -1,0 +1,38 @@
+{
+    "id": 228380809,
+    "contestId": 1359,
+    "creationTimeSeconds": 1697441431,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1359,
+        "index": "F",
+        "name": "RC Kaboom Show",
+        "type": "PROGRAMMING",
+        "rating": 2900,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "geometry",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1359,
+        "members": [
+            {
+                "handle": "jucason_xu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1590676500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 2230,
+    "memoryConsumedBytes": 9728000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define rd(i,n) for(int i=0;i<n;i++)\r\n#define rp(i,n) for(int i=1;i<=n;i++)\r\n#define rep(i,a,b) for(int i=a;i<=b;i++)\r\n#define per(i,a,b) for(int i=b;i>=a;i--)\r\n#define st string\r\n#define vt vector\r\n#define pb push_back\r\n//#define int long long\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef pair<int,int> pii;\r\ntypedef pair<ll,ll> pll;\r\nconst ld eps=1e-15;\r\nint n,x[25005],y[25005],dx[25005],dy[25005],s[25005];\r\nld len[25005],sx[25005],sy[25005];\r\nld ax[25005],ay[25005],bx[25005],by[25005];\r\nstruct event{\r\n    ld x,y;\r\n    int id,tp;\r\n    bool operator <(const event b)const{\r\n        return x+eps<b.x;\r\n    }\r\n}evs[50005];\r\nstatic ld X;\r\nstruct myline{\r\n    ld k,b,l,r;int id;\r\n    bool operator <(const myline y)const{\r\n        ld ares=k*X+b,bres=y.k*X+y.b;\r\n        if(fabs(ares-bres)<eps)return id<y.id;\r\n        return ares<bres;\r\n    }\r\n}Line[25005];\r\nset<myline>se;\r\nset<myline>::iterator pos[25005];\r\ninline bool ckmit(int a,int b){\r\n    ld L=max(Line[a].l,Line[b].l);\r\n    ld R=min(Line[a].r,Line[b].r);\r\n    if(R+eps<L)return 0;\r\n    if(fabs(Line[b].k-Line[a].k)<eps){\r\n        return fabs(Line[a].b-Line[b].b)<eps;\r\n    }\r\n    ld x=(Line[a].b-Line[b].b)/(Line[b].k-Line[a].k);\r\n    if(x+eps<L||R+eps<x)return 0;\r\n    return 1;\r\n}\r\nint test=0;\r\ninline bool check(ld t){\r\n  //  if(test>=61)cout<<\"curr\"<<endl;\r\n    rp(i,n){\r\n        ax[i]=x[i],bx[i]=x[i]+t*sx[i];\r\n        ay[i]=y[i],by[i]=y[i]+t*sy[i];\r\n        if(bx[i]+eps<ax[i]){\r\n            swap(ax[i],bx[i]);\r\n            swap(ay[i],by[i]);\r\n        }\r\n        Line[i].l=ax[i],Line[i].r=bx[i];\r\n        evs[2*i-1]={ax[i],ay[i],i,1};\r\n        evs[2*i+0]={bx[i],by[i],i,0};\r\n  //      cout<<ax[i]<<\" \"<<ay[i]<<\" \"<<bx[i]<<\" \"<<by[i]<<endl;\r\n    }\r\n    se.clear();\r\n    sort(evs+1,evs+1+2*n);\r\n    rep(i,1,2*n){\r\n        if(evs[i].tp){\r\n            X=evs[i].x;\r\n            auto ite=se.lower_bound(Line[evs[i].id]);\r\n            if(ite!=se.end()&&ckmit(evs[i].id,ite->id))return 1;\r\n            if(ite!=se.begin()){\r\n                ite--;\r\n                if(ckmit(evs[i].id,ite->id))return 1;\r\n            }pos[evs[i].id]=se.insert(Line[evs[i].id]).first;\r\n        }else{\r\n            auto ite=pos[evs[i].id],ite_l=ite,ite_r=ite;\r\n            if(ite!=se.begin()&&ite!=se.end()){\r\n                ite_l--,ite_r++;\r\n                if(ite_r!=se.end()){\r\n                    if(ckmit(ite_l->id,ite_r->id))return 1;\r\n                }\r\n            }se.erase(ite);\r\n        }\r\n    }return 0;\r\n}\r\nsigned main(){\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    cin>>n;\r\n    rp(i,n){\r\n        cin>>x[i]>>y[i]>>dx[i]>>dy[i]>>s[i];\r\n        len[i]=sqrt(dx[i]*dx[i]+dy[i]*dy[i]);\r\n        sx[i]=s[i]*dx[i]/len[i];\r\n        sy[i]=s[i]*dy[i]/len[i];\r\n        Line[i].k=sy[i]/sx[i];\r\n        Line[i].b=y[i]-Line[i].k*x[i];\r\n        Line[i].id=i;\r\n    }\r\n    ld l=0,r=1e12,mid,ans=-1;\r\n    rd(_,100){\r\n        test=_;\r\n        mid=(l+r)/2;\r\n        if(check(mid))r=mid,ans=mid;\r\n        else l=mid;\r\n    }\r\n    if(ans==-1)cout<<\"No show :(\\n\";\r\n    else cout<<fixed<<setprecision(15)<<ans<<'\\n';\r\n    return 0;\r\n}\r\n//Rain Rain Rain"
+}

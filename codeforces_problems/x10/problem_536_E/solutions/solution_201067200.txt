@@ -1,0 +1,37 @@
+{
+    "id": 201067200,
+    "contestId": 536,
+    "creationTimeSeconds": 1680807824,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 536,
+        "index": "E",
+        "name": "Tavas on the Path",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 536,
+        "members": [
+            {
+                "handle": "chappy1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1429029300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 101,
+    "timeConsumedMillis": 607,
+    "memoryConsumedBytes": 31539200,
+    "source": "//InTheNameOfGOD\r\n//PRS;)\r\n#include<bits/stdc++.h>\r\n#define rep(i, l, r) for(int i = l; i < r; ++i)\r\n#define per(i, l, r) for(int i = r - 1; i >= l; --i)\r\n#define Fast cin.tie(0) -> sync_with_stdio(0);\r\n#define X first\r\n#define Y second\r\ntypedef int ll;\r\nusing namespace std;\r\ntypedef pair<ll, ll> pl;\r\ntypedef pair<ll, pl> pi;\r\ntypedef pair<pl, pl> pii;\r\nconstexpr ll xn = 1e5 + 5;\r\nvector<pi> g[xn];\r\npii e[xn];\r\npi ch[xn];\r\npl a[xn];\r\nll ans[xn], c[xn], f[xn], h[xn], p[xn], st[xn], ft[xn], sz[xn], n, t;\r\nvoid df1(ll v, ll par, ll d)\r\n{\r\n\tll mx = -1;\r\n\th[v] = d, p[v] = par, sz[v] = 1;\r\n\tfor(pi u : g[v]) if(u.X != par)\r\n\t{\r\n\t\tdf1(u.X, v, d + 1), sz[v] += sz[u.X];\r\n\t\tif(sz[u.X] > mx) ch[v] = u, mx = sz[u.X];\r\n\t}\r\n}\r\nvoid df2(ll v, ll cn, ll in)\r\n{\r\n\tst[v] = ft[in] = ++t, c[v] = cn;\r\n\tif(ch[v].X) df2(ch[v].X, cn, ch[v].Y.Y);\r\n\tfor(pi u : g[v]) if(!c[u.X]) df2(u.X, u.X, u.Y.Y);\r\n}\r\nstruct prs\r\n{\r\n\tll ok, l, r, v;\r\n\tvoid init()\r\n\t{\r\n\t\tl = r = v = 0, ok = 1;\r\n\t}\r\n\tprs operator + (const prs &mrs) const\r\n\t{\r\n\t\tprs ret;\r\n\t\tret.v = mrs.v + v;\r\n\t\tif(mrs.l && r) ret.v += f[mrs.l + r] - f[mrs.l] - f[r];\r\n\t\tret.l = l + (ok ? mrs.l : 0), ret.r = mrs.r + (mrs.ok ? r : 0), ret.ok = ok & mrs.ok;\r\n\t\treturn ret;\r\n\t}\r\n} seg[xn << 2];\r\nprs get(ll u, ll l, ll r, ll l1, ll r1)\r\n{\r\n\tif(l1 <= l && r <= r1) return seg[u];\r\n\tll md = l + r >> 1;\r\n\tif(r1 <= md) return get(u << 1, l, md, l1, r1);\r\n\tif(md < l1) return get(u << 1 | 1, md + 1, r, l1, r1);\r\n\treturn get(u << 1, l, md, l1, r1) + get(u << 1 | 1, md + 1, r, l1, r1);\r\n}\r\nvoid upd(ll u, ll l, ll r, ll x)\r\n{\r\n\tif(l == r) return seg[u].ok = seg[u].l = seg[u].r = 1, seg[u].v = f[1], void();\r\n\tll md = l + r >> 1;\r\n\tmd < x ? upd(u << 1 | 1, md + 1, r, x) : upd(u << 1, l, md, x);\r\n\tseg[u] = seg[u << 1] + seg[u << 1 | 1];\r\n}\r\ninline ll doj(ll x, ll y)\r\n{\r\n\tprs l1, r1, t1;\r\n\tl1.init(), r1.init();\r\n\twhile(c[x] != c[y])\r\n\t{\r\n\t\tif(h[c[y]] < h[c[x]]) l1 = get(1, 1, n, st[c[x]], st[x]) + l1, x = p[c[x]];\r\n\t\telse r1 = get(1, 1, n, st[c[y]], st[y]) + r1, y = p[c[y]];\r\n\t}\r\n\tif(h[y] < h[x]) l1 = get(1, 1, n, st[y] + 1, st[x]) + l1;\r\n\telse if(h[x] != h[y]) r1 = get(1, 1, n, st[x] + 1, st[y]) + r1;\r\n\tswap(l1.l, l1.r);\r\n\treturn (l1 + r1).v;\r\n}\r\ninline bool cmp(pii a, pii b)\r\n{\r\n\treturn a.Y.X > b.Y.X;\r\n}\r\nint main()\r\n{\r\n\tFast\r\n\tint q;\r\n\tcin >> n >> q;\r\n\trep(i, 1, n) cin >> f[i];\r\n\trep(i, 1, n)\r\n\t{\r\n\t\tint u, v, w;\r\n\t\tcin >> u >> v >> w;\r\n\t\tg[u].push_back({v, {w, i}}), g[v].push_back({u, {w, i}}), a[i] = {w, i};\r\n\t}\r\n\tdf1(1, 0, 0), df2(1, 1, 0);\r\n\trep(i, 0, q) e[i].Y.Y = i;\r\n\trep(i, 0, q) cin >> e[i].X.X >> e[i].X.Y >> e[i].Y.X;\r\n\tsort(a + 1, a + n + 1, greater<pl>()), sort(e, e + q, cmp);\r\n\tll mrs = 1;\r\n\trep(i, 0, q)\r\n\t{\r\n\t\twhile(mrs <= n && e[i].Y.X <= a[mrs].X) upd(1, 1, n, ft[a[mrs++].Y]);\r\n\t\tans[e[i].Y.Y] = doj(e[i].X.X, e[i].X.Y);\r\n\t}\r\n\trep(i, 0, q) cout << ans[i] << '\\n';\r\n}\r\n"
+}

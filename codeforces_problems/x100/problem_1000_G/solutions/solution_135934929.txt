@@ -1,0 +1,36 @@
+{
+    "id": 135934929,
+    "contestId": 1000,
+    "creationTimeSeconds": 1637128340,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "little_rain"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\n#define ll long long\r\nusing namespace std;\r\n\r\nint read()\r\n{\r\n    int s=0, t=1; char ch=getchar();\r\n    for (; !isdigit(ch); ch=getchar()) if (ch=='-') t=-1;\r\n    for (; isdigit(ch); ch=getchar()) s=s*10+ch-'0';\r\n    return s*t;\r\n}\r\n\r\nconst int M=4e5+5, N=2e5+5;\r\nint he[N], ne[M], ed[M], tot\r\nll len1[M], len[M], val[N], f[N], g[N];\r\nvoid add(int x, int y, int z){\r\n    ed[++tot]=y; ne[tot]=he[x]; he[x]=tot; len1[tot]=z; len[tot]=z+z;\r\n}\r\nvoid dfs(int rt, int fat)\r\n{\r\n    for (int i=he[rt]; i; i=ne[i]) if (ed[i]!=fat)\r\n    {\r\n        dfs(ed[i], rt);\r\n        f[rt]+=max(f[ed[i]]+val[ed[i]]-len[i], 0);\r\n    }\r\n}\r\nvoid dfs2(int rt, int fat)\r\n{\r\n    for (int i=he[rt]; i; i=ne[i]) if (ed[i]!=fat)\r\n    {\r\n        g[ed[i]]=max(g[rt]+f[rt]-max(f[ed[i]]+val[ed[i]]-len[i], 0)+val[rt]-len[i], 0);\r\n        dfs2(ed[i], rt);\r\n    }\r\n}\r\nll d[N], fa[N][20], fs[N][20], up[N][20], down[N][20];\r\nvoid init(int rt, int fat, int D)\r\n{\r\n    d[rt]=D;\r\n    for (int i=1; i<20; i++)\r\n    {\r\n        fa[rt][i]=fa[fa[rt][i-1]][i-1];\r\n        fs[rt][i]=fs[fa[rt][i-1]][i-1]+fs[rt][i-1];\r\n        up[rt][i]=up[fa[rt][i-1]][i-1]+up[rt][i-1];\r\n        down[rt][i]=down[fa[rt][i-1]][i-1]+down[rt][i-1];\r\n    }\r\n    for (int i=he[rt]; i; i=ne[i]) if (ed[i]!=fat)\r\n    {\r\n        fa[ed[i]][0]=rt;\r\n        fs[ed[i]][0]=f[rt]-max(f[ed[i]]+val[ed[i]]-len[i], 0);\r\n        up[ed[i]][0]=val[rt]-(len[i]-len1[i]);\r\n        down[ed[i]][0]=val[ed[i]]-len1[i];\r\n        init(ed[i], rt, D+1);\r\n    }\r\n}\r\nint lca(int u, int v)\r\n{\r\n    if (d[v]>d[u]) swap(u, v);\r\n    for (int i=19; i>=0; i--) if (d[fa[u][i]]>=d[v]) u=fa[u][i];\r\n    if (u==v) return u;\r\n    for (int i=19; i>=0; i--) if (fa[u][i]!=fa[v][i]) u=fa[u][i], v=fa[v][i];\r\n    return fa[u][0];\r\n}\r\nll jump(int u, int t, int fl)\r\n{\r\n    ll res=f[u];\r\n    for (int i=19; i>=0; i--) if (d[fa[u][i]]>=d[t])\r\n    {\r\n        res+=fs[u][i]+(fl?up[u][i]:down[u][i]);\r\n        u=fa[u][i];\r\n    }\r\n    return res;\r\n}\r\nint main()\r\n{\r\n    #ifndef ONLINE_JUDGE\r\n    freopen(\"test.in\", \"r\", stdin);\r\n    freopen(\"test.out\", \"w\", stdout);\r\n    #endif\r\n    int n=read(), q=read(), x, y, z1, z2;\r\n    for (int i=1; i<=n; i++) val[i]=read();\r\n    for (int i=1; i<n; i++)\r\n        x=read(), y=read(), z1=read(), add(x, y, z1), add(y, x, z1);\r\n    dfs(1, 0); dfs2(1, 0); init(1, 0, 1);\r\n    while (q--)\r\n    {\r\n        x=read(), y=read(); int l=lca(x, y);\r\n        printf(\"%d\\n\", val[x]+jump(x, l, 1)+jump(y, l, 0)-f[l]+g[l]);\r\n    }\r\n}"
+}

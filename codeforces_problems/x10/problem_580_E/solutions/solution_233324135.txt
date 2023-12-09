@@ -1,0 +1,37 @@
+{
+    "id": 233324135,
+    "contestId": 580,
+    "creationTimeSeconds": 1700322352,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 580,
+        "index": "E",
+        "name": "Kefa and Watch",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2500,
+        "tags": [
+            "data structures",
+            "hashing",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 580,
+        "members": [
+            {
+                "handle": "luogu_bot5"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1442939400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 65126400,
+    "source": "// LUOGU_RID: 135822241\n#include <iostream>\n#include <cstdio>\n\n#define lt 2*x\n#define rt 2*x+1\nusing namespace std;\ntypedef unsigned long long ULL;\nconst int MAXN = (int)1e6;\nULL t[4*MAXN], p[MAXN+1], p2[MAXN+1];\nint N, M, K, ltag[4*MAXN];\nchar str[MAXN+1];\n\nvoid buildPow()\n{\n        p[0] = 1, p2[0] = 1;\n        for (int i = 1; i <= MAXN; i++)\n                p[i] = p[i-1]*11;\n        for (int i = 1; i <= MAXN; i++)\n                p2[i] = p2[i-1]+p[i];\n}\n\nvoid build(int l, int r, int x)\n{\n        if (l == r)\n        {\n                t[x] = str[l]-47;\n                return;\n        }\n        int mid = (l+r)>>1;\n        build(l, mid, lt);\n        build(mid+1, r, rt);\n        t[x] = t[lt]*p[r-mid]+t[rt];\n}\n\nvoid pushdown(int l, int r, int x)\n{\n        if (ltag[x])\n        {\n                ltag[lt] = ltag[rt] = ltag[x];\n                int mid = (l+r)>>1;\n                t[lt] = ltag[x]*p2[mid-l];\n                t[rt] = ltag[x]*p2[r-mid-1];\n                ltag[x] = 0;\n        }\n}\n\nvoid update(int l, int r, int x, int L, int R, int c)\n{\n        if (L <= l && r <= R)\n        {\n                t[x] = c*p2[r-l];\n                ltag[x] = c;\n                return;\n        }\n        int mid = (l+r)>>1;\n        pushdown(l, r, x);\n        if (L <= mid) update(l, mid, lt, L, R, c);\n        if (mid < R) update(mid+1, r, rt, L, R, c);\n        t[x] = t[lt]*p[r-mid]+t[rt];\n}\n\nULL query(int l, int r, int x, int L, int R)\n{\n        if (l > r) return 0;\n        if (L <= l && r <= R)\n                return t[x];\n        int mid = (l+r)>>1;\n        pushdown(l, r, x);\n        if (L <= mid && mid < R) return query(l, mid, lt, L, R)*p[r-mid]+query(mid+1, r, rt, L, R);\n        else if (L <= mid) return query(l, mid, lt, L, R);\n        else if (mid < R) return query(mid+1, r, rt, L, R);\n        return 0;\n}\n\nint main()\n{\n        scanf(\"%d%d%d\", &N, &M, &K);\n        scanf(\"%s\", str);\n        M += K;\n        buildPow();\n        build(0, N-1, 1);\n        for (int i = 0; i < M; i++)\n        {\n                int opt, l, r, arg;\n                scanf(\"%d%d%d%d\", &opt, &l, &r, &arg);\n                l--, r--;\n                if (opt == 1)\n                        update(0, N-1, 1, l, r, arg+1);\n                else if (opt == 2)\n                {\n                        ULL ha = query(0, N-1, 1, l+arg, r), ha1 = query(0, N-1, 1, l, r-arg);\n                        if (ha == ha1)\n                                printf(\"YES\\n\");\n                        else\n                                printf(\"NO\\n\");\n                }\n        }\n        return 0;\n}"
+}

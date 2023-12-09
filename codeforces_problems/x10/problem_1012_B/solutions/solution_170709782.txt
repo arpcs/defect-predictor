@@ -1,0 +1,39 @@
+{
+    "id": 170709782,
+    "contestId": 1012,
+    "creationTimeSeconds": 1662191942,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1012,
+        "index": "B",
+        "name": "Chemical table",
+        "type": "PROGRAMMING",
+        "points": 1250.0,
+        "rating": 1900,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "matrices"
+        ]
+    },
+    "author": {
+        "contestId": 1012,
+        "members": [
+            {
+                "handle": "mehar_batta"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1532938500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 170,
+    "timeConsumedMillis": 264,
+    "memoryConsumedBytes": 22118400,
+    "source": "// RADHASOAMI , WITH THE GRACE OF HUZUR I PROMISE TO FIGHT TILL THE LAST SECOND OF EVERY CONTEST AND CODE TO MY FULL POTENTIAL ......\n\n#include <iostream>\n#include <vector>\n#include <unordered_map>\n#include <cmath>\n#include <cstring>\n#include <algorithm>\n#include <set>\n#include <map>\n#include <queue>\n\n#define ll long long int\n#define mod 1000000007\n\nusing namespace std;\n\n// ====================  FUNCTIONS FOR INPUT AND OUTPUT OF VECTORS =======================================================\n\nvoid input(vector < ll > &arr)\n{\n   for(int i = 0;i < arr.size();i++)\n      cin >> arr[i];\n}\n\nvoid output(vector < ll > &arr)\n{\n   for(int i = 0;i < arr.size();i++)\n      cout << arr[i] << \" \";\n\n   cout << \"\\n\";\n}\n\n// ==============================  FOR MATHEMATICAL FUNCTIONS =============================================================\n\nll gcd(ll a,ll b)\n{\n   if(b==0)\n     return a;\n\n   return gcd(b,a%b);\n}\n\nll power(ll a,ll b)\n{\n    if(b==0)\n      return 1;\n\n    if(b==1)\n      return a;\n\n    ll smallans=power(a,b/2);\n    ll myans=(smallans*smallans)%mod;\n\n    if((b&1))\n      myans=(myans*a)%mod;\n\n    return myans;\n}\n\nll multiply(ll a,ll b)\n{\n   ll ans=((a%mod)*(b%mod))%mod;\n\n   return ans;\n}\n\nll divide(ll a,ll b)\n{\n   return multiply(a,power(b,mod-2));\n}\n\n// ============================ SEGMENT TREE FOR DEFAULT MINIMUM QUERY ==================================================\n\nvoid manageLazy(vector <ll> &tree,vector <ll> &lazy,ll idx)\n{\n   tree[2*idx + 1] += lazy[idx];\n   lazy[2*idx + 1] += lazy[idx];\n\n   tree[2*idx + 2] += lazy[idx]; \n   lazy[2*idx + 2] += lazy[idx];\n\n   lazy[idx] = 0;\n}\n\nvoid build(vector <ll> &tree,vector <ll> &arr,ll left,ll right,ll idx)\n{\n    if(left == right)\n    {\n       tree[idx] = arr[left];\n       return;\n    }\n\n    ll mid = (left + right) / 2;\n    build(tree , arr , left , mid , 2*idx + 1);\n    build(tree , arr , mid + 1 , right , 2*idx + 2);\n\n    tree[idx] = min(tree[2*idx + 1],tree[2*idx + 2]);\n}\n\nvoid update(vector <ll> &tree,vector <ll> &lazy,ll tl,ll tr,ll l,ll r,ll idx,ll val)\n{\n   if(l > r)\n     return;\n\n   if(l == tl && tr == r)\n   {\n      tree[idx] += val;\n      lazy[idx] += val;\n      return;\n   }\n\n   manageLazy(tree,lazy,idx);\n   ll mid = (tl + tr) / 2;\n\n   update(tree,lazy,tl,mid,l,min(r,mid),2*idx + 1,val);\n   update(tree,lazy,mid + 1,tr,max(l,mid + 1),r,2*idx + 2,val);\n\n   tree[idx] = min(tree[2*idx + 1],tree[2*idx + 2]);\n\n}\n\nll query(vector <ll> &tree,vector<ll> & lazy,ll tl,ll tr,ll l,ll r,ll idx)\n{\n   if(l > r)\n     return 1e18;\n\n   if(l <= tl && tr <= r)\n     return tree[idx];\n\n   manageLazy(tree,lazy,idx);\n   ll mid = (tl + tr) / 2;\n\n   ll a = query(tree,lazy,tl,mid,l,min(r,mid),2*idx + 1);\n   ll b = query(tree,lazy,mid + 1,tr,max(l,mid + 1),r,2*idx + 2);\n\n   return min(a,b);\n}\n\n// ==================================  SPARSE TABLE FOR DEFAULT MINIMUM QUERY ==================================================\n\nvoid precompute_min(vector < vector < ll > > &sparsetable , vector < ll > &a)\n{\n   int n = sparsetable.size();\n   int p = sparsetable[0].size();\n\n   for(int i = 0;i < n;i++)  \n     sparsetable[i][0] = a[i];\n\n   for(int j = 1;j < p;j++)\n   {\n      for(int i = 0;i + (1 << j) <= n;i++)\n        sparsetable[i][j] = min(sparsetable[i][j - 1] , sparsetable[i + (1 << (j - 1))][j - 1]);\n   }\n   \n}\n\nll minquery(vector < vector < ll > > &sparsetable , vector < ll > &log , ll l , ll r)\n{\n   ll range = r - l + 1;\n   if(range == 0)  return sparsetable[l][0];\n   ll j = log[range];\n   return min(sparsetable[l][j] , sparsetable[r - (1 << j) + 1][j]);\n}\n\n//========================== BINARY INDEX TREE =========================================================================\n\nvoid update(vector<ll> &tree,ll index,ll val)\n{\n   index++;\n   while(index < tree.size())\n   {\n      tree[index]=(tree[index] + val) %mod;\n \n      index+=index&(-index);\n   }\n}\n \nll calculate(vector<ll> &tree,ll index)\n{\n   ll sum=0;\n   index++;\n   while(index > 0)\n   {\n      sum=(sum + tree[index])%mod;\n \n      index-=index&(-index);\n   }\n \n   return sum;\n}\n\n//=========================== FOR DISJOINT SET UNION ====================================================================\n\nll findpar(ll p,vector<ll> &parent)\n{\n    if(parent[p]==p)\n     return p;\n\n    parent[p]=findpar(parent[p],parent);\n\n    return parent[p];\n}\n\nvoid merge(ll a, ll b,vector<ll> &parent,vector<ll> &size_) \n{\n    a = findpar(a,parent);\n    b = findpar(b,parent);\n    \n    if (a != b) \n    {\n        if (size_[a] < size_[b])\n             swap(a, b);\n             \n        parent[b] = a;\n        size_[a] += size_[b];\n    }\n}\n\n//   ====================================== FOR STORING AND COUNTING THE PRIMES USING SIEVE ============================\n\nvoid sieve(vector<bool> &primes,vector<ll> &count)\n{\n   for(int i=2;i<primes.size();i++)\n   {\n      if(primes[i])\n      {\n         count.push_back(i);\n         for(int j=i*i;j<primes.size();j+=i)\n           primes[j]=false;\n      }\n   }\n}\n\n// =====================================================================================================================\n\nvoid solve()\n{\n   ll n, m, q;\n   cin >> n >> m >> q;\n\n   map < ll , vector < ll > > col;\n   vector < ll > par(n + 1, 0);\n   vector < ll > size(n + 1, 1);\n   \n   for(int i = 1;i <= n;i++)  par[i] = i;\n\n   for(int i = 0;i < q;i++)\n   {\n      ll u, v;\n      cin >> u >> v;\n\n      col[v].push_back(u);\n   }\n   \n   ll counted = 0;\n   for(auto keys : col)\n   {\n      counted++;\n      for(int y = 0;y < keys.second.size() - 1;y++)\n        merge(keys.second[y], keys.second[y + 1], par, size);\n   }\n\n   ll ans = 0;\n\n   for(ll i = 1;i < n;i++)\n   {\n      if(findpar(i, par) != findpar(i + 1, par))\n      {\n         merge(i, i + 1, par, size);\n         ans++;\n      }\n   }\n\n   ans += m - counted;\n   cout << ans << \"\\n\";\n\n}\n\nint main()\n{\n   ios_base::sync_with_stdio(false); \n   cin.tie(NULL);\n   cout.tie(NULL);\n   #ifndef ONLINE_JUDGE\n      freopen(\"input.txt\", \"r\", stdin);\n      freopen(\"output.txt\", \"w\", stdout);\n   #endif\n\n   int t = 1;\n   // cin >> t;\n\n   while(t--)\n   {\n\n      solve();\n      \n   }\n\n   return 0;\n}"
+}

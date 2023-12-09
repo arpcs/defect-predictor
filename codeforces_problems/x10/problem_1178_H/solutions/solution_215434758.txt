@@ -1,0 +1,37 @@
+{
+    "id": 215434758,
+    "contestId": 1178,
+    "creationTimeSeconds": 1690256186,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1178,
+        "index": "H",
+        "name": "Stock Exchange",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "binary search",
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1178,
+        "members": [
+            {
+                "handle": "Elysia_Eden"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1563636900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 137,
+    "timeConsumedMillis": 2090,
+    "memoryConsumedBytes": 4608000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long LL;\r\nconst int N=2e4+5,MX=1e9+5;\r\n\r\nstruct Edge{\r\n\tint to,nxt,val,f;\r\n}E[N<<3];\r\nint tot=1,head[N<<2];\r\ninline void Add_edge(int u,int v,int val,int f){\r\n\tE[++tot]=(Edge){v,head[u],val,f},head[u]=tot;\r\n\tE[++tot]=(Edge){u,head[v],0,-f},head[v]=tot;\r\n} \r\nstruct Line{\r\n\tint a,b,id;\r\n\tLL val;\r\n\tvoid get(LL t){val=1ll*a*t+b;}\r\n\tbool operator < (const Line &rhs){\r\n\t\treturn val==rhs.val?id>rhs.id:val<rhs.val;\r\n\t}\r\n}p[N],q[N];\r\nint n,pl[N],ql[N],tim[N];\r\nbool check(LL t){\r\n\tfor(int i=1;i<=(n<<1);++i)p[i].get(t);\r\n\tsort(p+1,p+1+(n<<1));\r\n\tfor(int i=1;i<=(n<<1);++i)pl[p[i].id]=i,tim[i]=0;\r\n\tfor(int i=1,j=0,x;i<=(n<<1);++i){\r\n\t\tj=max(j,pl[x=q[i].id]);\r\n\t\tif(x<=n)tim[j]++;\r\n\t}\r\n\tfor(int i=n<<1;i;--i)tim[i]+=tim[i+1];\r\n\tfor(int i=n<<1,sum=0;i;--i){\r\n\t\tsum+=(p[i].id>n);\r\n\t\tif(tim[i]<sum)return 0;\r\n\t}\r\n\treturn 1;\r\n}\r\n\r\ninline int in(int x){return x;}\r\ninline int out(int x){return x+(n<<1);}\r\ninline int pre1(int x){return x+(n<<2);}\r\ninline int pre2(int x){return x+(n<<2)+(n<<1);}\r\n\r\nint S,T,siz[N],pre[N],dis[N],lst[N];\r\nbool vis[N];\r\nbool spfa(){\r\n\tfor(int i=0;i<=T;++i)dis[i]=MX;\r\n\tvis[S]=1,dis[S]=0,siz[S]=MX;\r\n\tqueue<int> q;\r\n\tq.push(S);\r\n\twhile(!q.empty()){\r\n\t\tint u=q.front();q.pop();\r\n\t\tvis[u]=0;\r\n\t\tfor(int i=head[u];i;i=E[i].nxt){\r\n\t\t\tint v=E[i].to;\r\n\t\t\tif(E[i].val&&dis[v]>dis[u]+E[i].f){\r\n\t\t\t\tdis[v]=dis[u]+E[i].f;\r\n\t\t\t\tlst[v]=i,pre[v]=u,siz[v]=min(siz[u],E[i].val);\r\n\t\t\t\tif(!vis[v]){\r\n\t\t\t\t\tvis[v]=1;\r\n\t\t\t\t\tq.push(v);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn dis[T]<MX;\r\n}\r\nint ans,cost;\r\nvoid EK(){\r\n\tans=cost=0;\r\n\twhile(spfa()){\r\n\t\tint co=0,fl=siz[T];\r\n\t\tans+=fl;\r\n\t\tfor(int i=T,id;i;i=pre[i]){\r\n\t\t\tid=lst[i],co+=E[id].f;\r\n\t\t\tE[id].val-=fl,E[id^1].val+=fl;\r\n\t\t}\r\n\t\tcost+=co*fl;\r\n\t}\r\n}\r\nvoid WLL(LL t){\r\n\tS=0,T=pre2(n<<1)+1;\r\n\tfor(int i=1;i<=(n<<1);++i)p[i].get(t);\r\n\tsort(p+1,p+1+(n<<1));\r\n\tfor(int i=1;i<=(n<<1);++i)pl[p[i].id]=i;\r\n\tfor(int i=1;i<=n;++i){\r\n\t\tAdd_edge(S,in(i),1,0);\r\n\t\tAdd_edge(in(i),out(i),1,0);\r\n\t\tAdd_edge(out(i+n),in(i+n),1,0);\r\n\t\tAdd_edge(in(i+n),T,1,0);\r\n\t}\r\n\tfor(int i=1;i<(n<<1);++i){\r\n\t\tAdd_edge(pre1(i+1),pre1(i),MX,0);\r\n\t\tAdd_edge(pre2(i+1),pre2(i),MX,0);\r\n\t}\r\n\tfor(int i=1;i<=n;++i){\r\n\t\tAdd_edge(in(i),pre1(ql[i]),1,1);\r\n\t\tAdd_edge(pre1(ql[i]),out(i),MX,0);\r\n\t\tAdd_edge(out(i),pre2(pl[i]),MX,1);\r\n\t}\r\n\tfor(int i=n+1;i<=(n<<1);++i){\r\n\t\tAdd_edge(pre1(ql[i]),out(i),MX,0);\r\n\t\tAdd_edge(out(i),pre2(pl[i]),MX,1);\r\n\t\tAdd_edge(pre2(pl[i]),in(i),1,0);\r\n\t}\r\n\tEK();\r\n}\r\nint main(){\r\n\tscanf(\"%d\",&n);\r\n\tfor(int i=1;i<=(n<<1);++i){\r\n\t\tp[i].id=i;\r\n\t\tscanf(\"%d%d\",&p[i].a,&p[i].b);\r\n\t\tq[i]=p[i],q[i].get(0ll);\r\n\t}\r\n\tsort(q+1,q+1+(n<<1));\r\n\tfor(int i=1;i<=(n<<1);++i)ql[q[i].id]=i;\r\n\tLL l=0ll,r=1e9+1ll,mid;\r\n\twhile(l<r){\r\n\t\tmid=(l+r)>>1;\r\n\t\tif(check(mid))r=mid;\r\n\t\telse l=mid+1;\r\n\t}\r\n\tif(l>1e9){\r\n\t\tputs(\"-1\");\r\n\t\treturn 0;\r\n\t}\r\n\tWLL(l);\r\n\tcout<<l<<\" \"<<cost<<endl;\r\n\treturn 0;\r\n}\r\n"
+}

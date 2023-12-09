@@ -1,0 +1,35 @@
+{
+    "id": 229402900,
+    "contestId": 1209,
+    "creationTimeSeconds": 1698055911,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1209,
+        "index": "G2",
+        "name": "Into Blocks (hard version)",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1209,
+        "members": [
+            {
+                "handle": "LinkWish"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1568466300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 264806400,
+    "source": "//Linkwish's code\r\n#include<bits/stdc++.h>\r\n#define endl '\\n'\r\n#define fi first\r\n#define se second\r\n#define si static inline\r\nusing namespace std;\r\ntypedef const int ci;\r\ntypedef const long long cl;\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef __int128 li;\r\ntypedef pair<int,int> pii;\r\ntypedef pair<ll,ll> pll;\r\nconst int iinf=INT_MAX;\r\nconst ll linf=LLONG_MAX;\r\nconst ld pi=acos(-1);\r\ntemplate<typename T>\r\nsi bool gmax(T &x,T y)\r\n{if(y>x){x=y;return 1;}return 0;}\r\ntemplate<typename T>\r\nsi bool gmin(T &x,T y)\r\n{if(y<x){x=y;return 1;}return 0;}\r\nci mod=998244353;\r\nsi void madd(int &x,int y){(x+=y)%=mod;}\r\nsi int msum(int x,int y){return (x+y)%mod;}\r\nsi int mmns(int x,int y){return (x-y+mod)%mod;}\r\nsi void mmul(int &x,int y){x=1ll*x*y%mod;}\r\nsi int mprd(int x,int y){return 1ll*x*y%mod;}\r\nci N=200005,lim=200000;\r\nbool st;\r\n\r\nint n,m;\r\nint a[N];\r\nstruct Seg{int l,r,amt;inline Seg(){l=iinf,r=0,amt=0;}}p[N];\r\nstruct BF{int id;Seg info;}s[N];\r\nint top;\r\nmt19937 R(time(0));\r\nstruct node{int ls,rs,L,R,thi,mx,key,sz,sum;}t[N*33];\r\nint cnt;\r\nsi int np(int id=0){\r\n\tt[++cnt]={0,0,p[id].l,p[id].r,p[id].amt,p[id].amt,(int)R(),1,p[id].amt};\r\n\tif(cnt>=N*35)exit(114);\r\n\treturn cnt;\r\n}\r\nsi void push_up(int x){\r\n\tt[x].mx=max({t[t[x].ls].mx,t[t[x].rs].mx,t[x].thi});\r\n\tt[x].sum=t[t[x].ls].sum+t[t[x].rs].sum+t[x].thi;\r\n\tt[x].sz=t[t[x].ls].sz+t[t[x].rs].sz+1;\r\n}\r\nint merge(int x,int y){\r\n\tif(!x||!y)return x+y;\r\n\tint ret=np();\r\n\tif(t[x].key<t[y].key)t[ret]=t[x],t[ret].rs=merge(t[x].rs,y);\r\n\telse t[ret]=t[y],t[ret].ls=merge(x,t[y].ls);\r\n\treturn push_up(ret),ret;\r\n}\r\nvoid split(int now,int &l,int &r,int k,int op){\r\n\tif(!now)return l=r=0,void();\r\n\tint ret=np();t[ret]=t[now];\r\n\tif((!op&&k<=t[now].R)||(op&&k<t[now].L))r=ret,split(t[now].ls,l,t[ret].ls,k,op);\r\n\telse l=ret,split(t[now].rs,t[ret].rs,r,k,op);\r\n\tpush_up(ret);\r\n}\r\nvoid look(int x){\r\n\tif(!x)return ;\r\n\tlook(t[x].ls);\r\n\tcout<<t[x].L<<' '<<t[x].R<<' '<<t[x].thi<<' '<<t[x].sum<<endl;\r\n\tlook(t[x].rs);\r\n}\r\nsi void update(int &rt,int x,int col){\r\n\ts[++top]={col,p[col]};gmin(p[col].l,x),gmax(p[col].r,x),p[col].amt++;\r\n\tint a,b,c,tmp;split(rt,a,b,p[col].l,0);split(b,b,c,p[col].r,1);\r\n\tif(!b)tmp=np(col);\r\n\telse if(t[b].sz==1){\r\n\t\tt[tmp=np()]=t[b];gmin(t[tmp].L,x),gmax(t[tmp].R,x);\r\n\t\tif(gmax(t[tmp].mx,p[col].amt))t[tmp].sum=p[col].amt,t[tmp].thi=p[col].amt;\r\n\t}\r\n\telse{\r\n\t\ttmp=np(col);\r\n\t\tif(gmax(t[tmp].mx,t[b].mx))t[tmp].thi=t[b].mx,t[tmp].sum=t[b].mx;\r\n\t\tint cur=b;while(cur)gmin(t[tmp].L,t[cur].L),cur=t[cur].ls;\r\n\t\tcur=b;while(cur)gmax(t[tmp].R,t[cur].R),cur=t[cur].rs;\r\n\t}\r\n\trt=merge(merge(a,tmp),c);\r\n}\r\n\r\nvector<pii> g[N<<2];\r\nsi int ls(int x){return x<<1;}\r\nsi int rs(int x){return x<<1|1;}\r\nvoid add(int x,int l,int r,int L,int R,pii v){\r\n\tif(l>=L&&r<=R)return g[x].push_back(v),void();\r\n\tint mid=(l+r)>>1;\r\n\tif(L<=mid)add(ls(x),l,mid,L,R,v);\r\n\tif(R>mid)add(rs(x),mid+1,r,L,R,v);\r\n}\r\nsi void back(int t1,int tc){\r\n\twhile(top>t1)p[s[top].id]=s[top].info,top--;\r\n\tcnt=tc;\r\n}\r\nvoid solve(int x,int rt,int l,int r){\r\n\tint t1=top,tc=cnt;\r\n\tfor(pii i:g[x])update(rt,i.fi,i.se);\r\n\tif(l==r){\r\n//\t\tcout<<\"IN \"<<l<<endl;\r\n\t\tcout<<n-t[rt].sum<<endl;\r\n//\t\tlook(rt);\r\n//\t\tcout<<endl;\r\n\t\tback(t1,tc);\r\n\t\treturn ;\r\n\t}\r\n\tint mid=(l+r)>>1;\r\n\tsolve(ls(x),rt,l,mid);\r\n\tsolve(rs(x),rt,mid+1,r);\r\n\tback(t1,tc);\r\n}\r\n\r\nint lst[N];\r\n\r\nbool ed;\r\nsigned main(){\r\n\tcerr<<(&st-&ed)/1024.0/1024<<endl;\r\n\tios::sync_with_stdio(0);\r\n\tcin.tie(0),cout.tie(0);\r\n\tcin>>n>>m;\r\n\tfor(int i=1;i<=n;i++)cin>>a[i],lst[i]=0;\r\n\tfor(int i=1,x,y;i<=m;i++){\r\n\t\tcin>>x>>y;\r\n\t\tadd(1,0,m,lst[x],i-1,pii(x,a[x]));\r\n\t\ta[x]=y,lst[x]=i;\r\n\t}\r\n\tfor(int i=1;i<=n;i++)add(1,0,m,lst[i],n,pii(i,a[i]));\r\n\tsolve(1,0,0,m);\r\n\treturn 0;\r\n}"
+}

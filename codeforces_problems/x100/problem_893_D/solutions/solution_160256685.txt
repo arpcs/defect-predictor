@@ -1,0 +1,37 @@
+{
+    "id": 160256685,
+    "contestId": 893,
+    "creationTimeSeconds": 1655026032,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 893,
+        "index": "D",
+        "name": "Credit Card",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "data structures",
+            "dp",
+            "greedy",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 893,
+        "members": [
+            {
+                "handle": "joker_x"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1511449500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 10,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\n \r\nusing namespace std;\r\n \r\nnamespace atcoder {\r\n \r\nnamespace internal {\r\n \r\n// @param n `0 <= n`\r\n// @return minimum non-negative `x` s.t. `n <= 2**x`\r\nint ceil_pow2(int n) {\r\n    int x = 0;\r\n    while ((1U << x) < (unsigned int)(n)) x++;\r\n    return x;\r\n}\r\n \r\n// @param n `1 <= n`\r\n// @return minimum non-negative `x` s.t. `(n & (1 << x)) != 0`\r\nconstexpr int bsf_constexpr(unsigned int n) {\r\n    int x = 0;\r\n    while (!(n & (1 << x))) x++;\r\n    return x;\r\n}\r\n \r\n// @param n `1 <= n`\r\n// @return minimum non-negative `x` s.t. `(n & (1 << x)) != 0`\r\nint bsf(unsigned int n) {\r\n#ifdef _MSC_VER\r\n    unsigned long index;\r\n    _BitScanForward(&index, n);\r\n    return index;\r\n#else\r\n    return __builtin_ctz(n);\r\n#endif\r\n}\r\n \r\n}  // namespace internal\r\n \r\n}  // namespace atcoder\r\n \r\nnamespace atcoder {\r\n \r\ntemplate <class S, S (*op)(S, S), S (*e)()> struct segtree {\r\n  public:\r\n    segtree() : segtree(0) {}\r\n    explicit segtree(int n) : segtree(std::vector<S>(n, e())) {}\r\n    explicit segtree(const std::vector<S>& v) : _n(int(v.size())) {\r\n        log = internal::ceil_pow2(_n);\r\n        size = 1 << log;\r\n        d = std::vector<S>(2 * size, e());\r\n        for (int i = 0; i < _n; i++) d[size + i] = v[i];\r\n        for (int i = size - 1; i >= 1; i--) {\r\n            update(i);\r\n        }\r\n    }\r\n \r\n    void set(int p, S x) {\r\n        assert(0 <= p && p < _n);\r\n        p += size;\r\n        d[p] = x;\r\n        for (int i = 1; i <= log; i++) update(p >> i);\r\n    }\r\n \r\n    S get(int p) const {\r\n        assert(0 <= p && p < _n);\r\n        return d[p + size];\r\n    }\r\n \r\n    S prod(int l, int r) const {\r\n        assert(0 <= l && l <= r && r <= _n);\r\n        S sml = e(), smr = e();\r\n        l += size;\r\n        r += size;\r\n \r\n        while (l < r) {\r\n            if (l & 1) sml = op(sml, d[l++]);\r\n            if (r & 1) smr = op(d[--r], smr);\r\n            l >>= 1;\r\n            r >>= 1;\r\n        }\r\n        return op(sml, smr);\r\n    }\r\n \r\n    S all_prod() const { return d[1]; }\r\n \r\n    template <bool (*f)(S)> int max_right(int l) const {\r\n        return max_right(l, [](S x) { return f(x); });\r\n    }\r\n    template <class F> int max_right(int l, F f) const {\r\n        assert(0 <= l && l <= _n);\r\n        assert(f(e()));\r\n        if (l == _n) return _n;\r\n        l += size;\r\n        S sm = e();\r\n        do {\r\n            while (l % 2 == 0) l >>= 1;\r\n            if (!f(op(sm, d[l]))) {\r\n                while (l < size) {\r\n                    l = (2 * l);\r\n                    if (f(op(sm, d[l]))) {\r\n                        sm = op(sm, d[l]);\r\n                        l++;\r\n                    }\r\n                }\r\n                return l - size;\r\n            }\r\n            sm = op(sm, d[l]);\r\n            l++;\r\n        } while ((l & -l) != l);\r\n        return _n;\r\n    }\r\n \r\n    template <bool (*f)(S)> int min_left(int r) const {\r\n        return min_left(r, [](S x) { return f(x); });\r\n    }\r\n    template <class F> int min_left(int r, F f) const {\r\n        assert(0 <= r && r <= _n);\r\n        assert(f(e()));\r\n        if (r == 0) return 0;\r\n        r += size;\r\n        S sm = e();\r\n        do {\r\n            r--;\r\n            while (r > 1 && (r % 2)) r >>= 1;\r\n            if (!f(op(d[r], sm))) {\r\n                while (r < size) {\r\n                    r = (2 * r + 1);\r\n                    if (f(op(d[r], sm))) {\r\n                        sm = op(d[r], sm);\r\n                        r--;\r\n                    }\r\n                }\r\n                return r + 1 - size;\r\n            }\r\n            sm = op(d[r], sm);\r\n        } while ((r & -r) != r);\r\n        return 0;\r\n    }\r\n \r\n  private:\r\n    int _n, size, log;\r\n    std::vector<S> d;\r\n \r\n    void update(int k) { d[k] = op(d[2 * k], d[2 * k + 1]); }\r\n};\r\n \r\n}  // namespace atcoder\r\n \r\nusing namespace atcoder;\r\n \r\nlong long int op(long long int a,long long int b)\r\n{\r\n\treturn max(a,b);\r\n}\r\nlong long int e()\r\n{\r\n\treturn 0;\r\n}\r\n \r\nlong long int n,d,t;\r\nvector <long long int> a;\r\n \r\nint main(void)\r\n{\r\n\tcin.tie(0);\r\n\tios::sync_with_stdio(false);\r\n \r\n\tcin >> n >> d;\r\n\tfor(int i=0;i<n;i++)\r\n\t{\r\n\t\tcin >> t;\r\n\t\ta.push_back(t);\r\n\t}\t\r\n \r\n\tsegtree <long long int,op,e> seg(n);\r\n\t\r\n\tvector <int> pos;\r\n\tlong long int val = 0;\r\n\tfor(int i=0;i<n;i++)\r\n\t{\r\n\t\tif(a[i]==0)\r\n\t\t{\r\n\t\t\tpos.push_back(i);\r\n\t\t\tif(val < 0)\r\n\t\t\t{\r\n\t\t\t\tval = 0;\r\n\t\t\t}\r\n\t\t\tseg.set(i,val);\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tval += a[i];\r\n\t\t\tseg.set(i,val);\r\n\t\t}\r\n\t}\r\n \r\n\tif(seg.all_prod() > d)\r\n\t{\r\n\t\tcout << -1 << '\\n';\r\n\t\treturn 0;\r\n\t}\r\n\tpos.push_back(n);\r\n\tint res = 0;\r\n\tval = 0;\r\n\tint idx = 1;\r\n\tfor(int i=0;i<n;i++)\r\n\t{\r\n\t\tif(a[i]==0)\r\n\t\t{\r\n\t\t\tif(val < 0)\r\n\t\t\t{\r\n\t\t\t\tres++;\r\n\t\t\t\tlong long int M = seg.prod(i+1,pos[idx++]);\r\n\t\t\t\tval = d - M;\r\n\t\t\t}\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tval += a[i];\r\n\t\t}\r\n\t}\r\n \r\n\tcout << res << '\\n';\r\n \r\n\treturn 0;\r\n}"
+}

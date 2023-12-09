@@ -1,0 +1,35 @@
+{
+    "id": 226947971,
+    "contestId": 1209,
+    "creationTimeSeconds": 1696645434,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1209,
+        "index": "G2",
+        "name": "Into Blocks (hard version)",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1209,
+        "members": [
+            {
+                "handle": "bkifhr10"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1568466300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 25,
+    "timeConsumedMillis": 1372,
+    "memoryConsumedBytes": 45772800,
+    "source": "#include <cstdio>\n#include <set>\nusing namespace std;\n\nconst int maxn = 200010;\ninline void init(void);\ninline void modify(int, int);\ninline int query(void);\nint a[maxn], n;\n\nint main() {\n    int q;\n    scanf(\"%d %d\", &n, &q);\n    for (int i = 1; i <= n; i++) scanf(\"%d\", a + i);\n    init(), printf(\"%d\\n\", query());\n    while (q--) {\n        int i, x;\n        scanf(\"%d %d\", &i, &x);\n        modify(i, x), printf(\"%d\\n\", query());\n    }\n    return 0;\n}\n\nstruct node {\n    int l, r;\n    int mi, tag;\n    int mx, lx, rx, sum;\n};\nnode t[maxn << 2];\n\ninline int ls(const int u) { return u << 1; }\n\ninline int rs(const int u) { return u << 1 | 1; }\n\ninline void pushup(const int u) {\n    t[u].mi = min(t[ls(u)].mi, t[rs(u)].mi);\n    t[u].mx = max(t[ls(u)].mx, t[rs(u)].mx);\n    if (t[ls(u)].mi < t[rs(u)].mi) {\n        t[u].lx = t[ls(u)].lx;\n        t[u].rx = max(t[ls(u)].rx, t[rs(u)].mx);\n        t[u].sum = t[ls(u)].sum;\n    } else if (t[ls(u)].mi > t[rs(u)].mi) {\n        t[u].lx = max(t[ls(u)].mx, t[rs(u)].lx);\n        t[u].rx = t[rs(u)].rx;\n        t[u].sum = t[rs(u)].sum;\n    } else {\n        t[u].lx = t[ls(u)].lx;\n        t[u].rx = t[rs(u)].rx;\n        t[u].sum = t[ls(u)].sum + max(t[ls(u)].rx, t[rs(u)].lx) + t[rs(u)].sum;\n    }\n    return;\n}\n\ninline void mark(const int u, const int x) {\n    t[u].mi += x, t[u].tag += x;\n    return;\n}\n\ninline void pushdown(const int u) {\n    if (!t[u].tag) return;\n    mark(ls(u), t[u].tag);\n    mark(rs(u), t[u].tag);\n    t[u].tag = 0;\n    return;\n}\n\nvoid build(const int l, const int r, const int u) {\n    t[u].l = l, t[u].r = r;\n    if (l == r) return;\n    int mid = (l + r) >> 1;\n    build(l, mid, ls(u));\n    build(mid + 1, r, rs(u));\n    return;\n}\n\nvoid modify(const int p, const int u, const int x) {\n    if (p < t[u].l || t[u].r < p) return;\n    if (t[u].l == t[u].r) {\n        t[u].lx = t[u].mx = x;\n        return;\n    }\n    pushdown(u);\n    modify(p, ls(u), x);\n    modify(p, rs(u), x);\n    pushup(u);\n    return;\n}\n\nvoid modify(const int l, const int r, const int u, const int x) {\n    if (r < t[u].l || t[u].r < l) return;\n    if (l <= t[u].l && t[u].r <= r) {\n        mark(u, x);\n        return;\n    }\n    pushdown(u);\n    modify(l, r, ls(u), x);\n    modify(l, r, rs(u), x);\n    pushup(u);\n    return;\n}\n\nset<int> pl[maxn];\n\ninline void init(void) {\n    build(1, n, 1);\n    for (int i = 1; i <= n; i++) pl[a[i]].insert(i);\n    for (int i = 1; i <= maxn - 10; i++) {\n        if (pl[i].empty()) continue;\n        modify(*pl[i].begin(), 1, pl[i].size());\n        modify(*pl[i].begin(), *pl[i].rbegin() - 1, 1, 1);\n    }\n    return;\n}\n\ninline void modify(const int i, const int x) {\n    modify(*pl[a[i]].begin(), 1, 0);\n    modify(*pl[a[i]].begin(), *pl[a[i]].rbegin() - 1, 1, -1);\n    pl[a[i]].erase(i);\n    if (!pl[a[i]].empty()) {\n        modify(*pl[a[i]].begin(), 1, pl[a[i]].size());\n        modify(*pl[a[i]].begin(), *pl[a[i]].rbegin() - 1, 1, 1);\n    }\n    a[i] = x;\n    if (!pl[a[i]].empty()) {\n        modify(*pl[a[i]].begin(), 1, 0);\n        modify(*pl[a[i]].begin(), *pl[a[i]].rbegin() - 1, 1, -1);\n    }\n    pl[a[i]].insert(i);\n    modify(*pl[a[i]].begin(), 1, pl[a[i]].size());\n    modify(*pl[a[i]].begin(), *pl[a[i]].rbegin() - 1, 1, 1);\n    return;\n}\n\ninline int query(void) { return n - t[1].lx - t[1].sum - t[1].rx; }\n\n\t \t \t \t\t\t\t \t \t\t  \t \t \t\t \t   \t \t"
+}

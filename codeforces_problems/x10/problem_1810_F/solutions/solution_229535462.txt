@@ -1,0 +1,38 @@
+{
+    "id": 229535462,
+    "contestId": 1810,
+    "creationTimeSeconds": 1698139113,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1810,
+        "index": "F",
+        "name": "M-tree",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2800,
+        "tags": [
+            "data structures",
+            "math",
+            "sortings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1810,
+        "members": [
+            {
+                "handle": "frizzywhiting"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1680273300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 7987200,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\nconst int N = 2e5 + 10;\nint a[N];\nint n, m, q;\nint p[N];\nint tr[N << 2], tag[N << 2];\nvoid pushup(int rt) { tr[rt] = max(tr[rt << 1], tr[rt << 1 | 1]); }\nvoid build(int rt, int l, int r) {\n  tag[rt] = 0;\n  if (l == r) {\n    tr[rt] = a[p[l]] + l;\n    return;\n  }\n  int pos = (l + r) >> 1;\n  build(rt << 1, l, pos);\n  build(rt << 1 | 1, pos + 1, r);\n  pushup(rt);\n}\nvoid pushdown(int rt) {\n  if (tag[rt]) {\n    tag[rt << 1] += tag[rt];\n    tag[rt << 1 | 1] += tag[rt];\n    tr[rt << 1] += tag[rt];\n    tr[rt << 1 | 1] += tag[rt];\n    tag[rt] = 0;\n  }\n}\nvoid update(int rt, int l, int r, int L, int R, int val) {\n  if (L <= l && r <= R) {\n    tr[rt] += val;\n    tag[rt] += val;\n    return;\n  }\n  pushdown(rt);\n  int pos = (l + r) >> 1;\n  if (L <= pos) update(rt << 1, l, pos, L, R, val);\n  if (R > pos) update(rt << 1 | 1, pos + 1, r, L, R, val);\n  pushup(rt);\n}\nint query(int rt, int l, int r, int L, int R) {\n  if (L <= l && r <= R) {\n    return tr[rt];\n  }\n  pushdown(rt);\n  int pos = (l + r) >> 1;\n  int ans = 0;\n  if (L <= pos) ans = max(ans, query(rt << 1, l, pos, L, R));\n  if (R > pos) ans = max(ans, query(rt << 1 | 1, pos + 1, r, L, R));\n  return ans;\n}\nint main() {\n  int t;\n  scanf(\"%d\", &t);\n  while (t--) {\n    scanf(\"%d %d %d\", &n, &m, &q);\n    for (int i = 1; i <= n; i++) {\n      scanf(\"%d\", &a[i]);\n      p[i] = i;\n    }\n    sort(p + 1, p + n + 1, [&](int x, int y) { return a[x] > a[y]; });\n    build(1, 1, n);\n    int cnt = (n - 1) / (m - 1);\n    while (q--) {\n      int x, y;\n      scanf(\"%d %d\", &x, &y);\n      int pos = (x - 1) / (m - 1) + 1;\n      int block = (x - 1) % (m - 1);\n      update(1, 1, n, (pos - 1) * (m - 1) + 1,\n             min(n, (pos - 1) * (m - 1) + m), y - a[p[x]]);\n      a[p[x]] = y;\n      sort(p + 1, p + n + 1, [&](int x, int y) { return a[x] > a[y]; });\n      build(1, 1, n);\n      printf(\"%d \", query(1, 1, n, 1, cnt));\n    }\n    puts(\"\");\n  }\n  return 0;\n}\n"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 137315227,
+    "contestId": 1000,
+    "creationTimeSeconds": 1638167613,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "18Michael"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 49254400,
+    "source": "#include<cstdio>\r\n#define Mx 18\r\n#define LL long long\r\nint n,q,edge_t=0,lax,lay;LL ans;\r\nint a[300002],la[300002]={},dep[300002],vf[300002],siz[300002],son[300002],top[300002];\r\nLL F[300002]={},G[300002]={},pre[300002]={};\r\nint fa[300002][22];\r\nstruct aaa\r\n{\r\n\tint to,nx,val;\r\n}edge[600002];\r\ntemplate<class T>void read(T &x)\r\n{\r\n\tx=0;int f=0;char ch=getchar();\r\n\twhile(ch<'0' || ch>'9')f|=(ch=='-'),ch=getchar();\r\n\twhile(ch>='0' && ch<='9')x=(x<<3)+(x<<1)+(ch^48),ch=getchar();\r\n\tx=f? -x:x;return ;\r\n}\r\ninline LL max(LL x,LL y)\r\n{\r\n\treturn x>y? x:y;\r\n}\r\ninline void swap(int &x,int &y)\r\n{\r\n\tint z=x;x=y,y=z;\r\n}\r\ninline void add_edge(int x,int y,int z)\r\n{\r\n\tedge[++edge_t]=(aaa){y,la[x],z},la[x]=edge_t;\r\n\tedge[++edge_t]=(aaa){x,la[y],z},la[y]=edge_t;\r\n}\r\ninline void dfs(int x,int f,int d)\r\n{\r\n\tfa[x][0]=f,dep[x]=d,siz[x]=1,pre[x]+=a[x];\r\n\tfor(int i=la[x],v;i;i=edge[i].nx)\r\n\t\tif((v=edge[i].to)!=f)\r\n\t\t{\r\n\t\t\tdfs(v,x,d+1),siz[x]+=siz[v],F[x]+=max(F[v]+a[v]-2*edge[i].val,0),pre[v]-=(vf[v]=edge[i].val);\r\n\t\t\tif(siz[v]>siz[son[x]])son[x]=v;\r\n\t\t}\r\n}\r\ninline void dfs1(int x,int f,int t)\r\n{\r\n\ttop[x]=t,G[x]=F[x]+max(G[f]-max(F[x]+a[x]-2*vf[x],0)+a[f]-2*vf[x],0);\r\n\tif(son[x])pre[x]+=F[x]-max(F[son[x]]+a[son[x]]-2*vf[son[x]],0),pre[son[x]]+=pre[x],dfs1(son[x],x,t);\r\n\tfor(int i=la[x],v;i;i=edge[i].nx)\r\n\t\tif((v=edge[i].to)!=f && v!=son[x])\r\n\t\t\tdfs1(v,x,v);\r\n}\r\ninline void get_LCA()\r\n{\r\n\tfor(int i=1;i<=Mx;++i)\r\n\t\tfor(int j=1;j<=n;++j)\r\n\t\t\tfa[j][i]=fa[fa[j][i-1]][i-1];\r\n}\r\ninline int LCA(int x,int y)\r\n{\r\n\tif(dep[x]<dep[y])swap(x,y);\r\n\tfor(int i=Mx;~i;--i)\r\n\t\tif(dep[fa[x][i]]>=dep[y])\r\n\t\t\tx=fa[x][i];\r\n\tif(x==y)return x;\r\n\tfor(int i=Mx;~i;--i)\r\n\t\tif(fa[x][i]!=fa[y][i])\r\n\t\t\tx=fa[x][i],y=fa[y][i];\r\n\treturn fa[x][0];\r\n}\r\nint main()\r\n{\r\n\tread(n),read(q);\r\n\tfor(int i=1;i<=n;++i)read(a[i]);\r\n\tfor(int i=1,x,y,z;i<n;++i)read(x),read(y),read(z),add_edge(x,y,z);\r\n\tdfs(1,0,1),dfs1(1,0,1),get_LCA();\r\n\t//for(int i=1;i<=n;++i)printf(\"%d:%lld %lld %lld %d\\n\",i,F[i],G[i],pre[i],top[i]);\r\n\tfor(int x,y,z,X,Y;q--;)\r\n\t{\r\n\t\tread(x),read(y),lax=X=x,lay=Y=y,z=LCA(x,y),ans=0;\r\n\t\tif(son[x])ans+=max(F[son[x]]+a[son[x]]-2*vf[son[x]],0);\r\n\t\tif(son[y] && x!=y)ans+=max(F[son[y]]+a[son[y]]-2*vf[son[y]],0);\r\n\t\t//printf(\" %d %d %d %lld\\n\",x,y,z,ans);\r\n\t\twhile(top[x]!=top[z])\r\n\t\t{\r\n\t\t\tif(dep[fa[top[x]][0]]>dep[z])\r\n\t\t\t{\r\n\t\t\t\tans-=max(F[top[x]]+a[top[x]]-2*vf[top[x]],0);\r\n\t\t\t\tans+=max(F[son[fa[top[x]][0]]]+a[son[fa[top[x]][0]]]-2*vf[son[fa[top[x]][0]]],0);\r\n\t\t\t}\r\n\t\t\tans+=pre[x],lax=x,x=fa[top[x]][0];\r\n\t\t}\r\n\t\t//printf(\" %d %d %d %lld\\n\",x,y,z,ans);\r\n\t\twhile(top[y]!=top[z])\r\n\t\t{\r\n\t\t\tif(dep[fa[top[y]][0]]>dep[z])\r\n\t\t\t{\r\n\t\t\t\tans-=max(F[top[y]]+a[top[y]]-2*vf[top[y]],0);\r\n\t\t\t\tans+=max(F[son[fa[top[y]][0]]]+a[son[fa[top[y]][0]]]-2*vf[son[fa[top[y]][0]]],0);\r\n\t\t\t}\r\n\t\t\tans+=pre[y],lay=y,y=fa[top[y]][0];\r\n\t\t}\r\n\t\tfor(int i=Mx;~i;--i)if(dep[fa[lax][i]]>dep[z])lax=fa[lax][i];\r\n\t\tfor(int i=Mx;~i;--i)if(dep[fa[lay][i]]>dep[z])lay=fa[lay][i];\r\n\t\t//printf(\" %d %d %d %lld\\n\",x,y,z,ans);\r\n\t\tans+=pre[x]-pre[z]+pre[y]-pre[z]+a[z];\r\n\t\t//printf(\"  %d %d %d %lld\\n\",x,y,z,ans);\r\n\t\tans+=G[z];\r\n\t\tif(lax==z || lay==z)ans-=F[z];\r\n\t\telse\r\n\t\t{\r\n\t\t\t//printf(\"  la:%d %d %lld\\n\",lax,lay,ans);\r\n\t\t\tans-=max(F[lax]+a[lax]-2*vf[lax],0);\r\n\t\t\tans-=max(F[lay]+a[lay]-2*vf[lay],0);\r\n\t\t}\r\n\t\t//printf(\"   %d %d %d %lld\\n\",x,y,z,ans);\r\n\t\t//ans+=max(G[fa[z][0]]-max(F[z]+a[z]-2*vf[z],0)+a[fa[z][0]]-2*vf[z],0);\r\n\t\t\r\n\t\tprintf(\"%lld\\n\",ans);\r\n\t}\r\n\treturn 0;\r\n}\r\n/*\r\n10 10\r\n85 82 25 53 68 16 34 97 18 99\r\n5 6 24\r\n5 9 16\r\n9 4 5\r\n6 1 64\r\n4 3 14\r\n6 8 82\r\n6 7 28\r\n4 2 37\r\n8 10 85\r\n4 10\r\n7 8\r\n8 9\r\n1 5\r\n9 3\r\n9 7\r\n10 4\r\n6 8\r\n4 8\r\n2 2\r\n\r\n94\r\n\r\n147\r\n94\r\n128\r\n118\r\n121\r\n119\r\n147\r\n88\r\n133\r\n105\r\n*/"
+}

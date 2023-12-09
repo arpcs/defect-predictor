@@ -1,0 +1,37 @@
+{
+    "id": 209052928,
+    "contestId": 1307,
+    "creationTimeSeconds": 1686282572,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "yuanhaowei"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 265,
+    "memoryConsumedBytes": 204800,
+    "source": "// LUOGU_RID: 112313017\n#include <cfloat>\r\n#include <climits>\r\n#include <cstdio>\r\n#include <queue>\r\n#include <vector>\r\nusing namespace std;\r\n\r\nconst int maxn = 60;\r\nstruct edge {\r\n    int to, rev, c;\r\n    bool f;\r\n};\r\nvector<edge> G[maxn];\r\ninline vector<pair<int, int>> mcmf(int, int, int);\r\n\r\nint main() {\r\n    int n, m;\r\n    scanf(\"%d %d\", &n, &m);\r\n    auto AddEdge = [](const int u, const int v, const int c) {\r\n        G[u].push_back({ v, 0, c, true });\r\n        G[v].push_back({ u, 0, -c, false });\r\n        G[u].back().rev = G[v].size() - 1;\r\n        G[v].back().rev = G[u].size() - 1;\r\n        return;\r\n    };\r\n    while (m--) {\r\n        int u, v, w;\r\n        scanf(\"%d %d %d\", &u, &v, &w);\r\n        AddEdge(u, v, w);\r\n    }\r\n    auto vec = mcmf(1, n, n);\r\n    int q;\r\n    scanf(\"%d\", &q);\r\n    while (q--) {\r\n        int x;\r\n        scanf(\"%d\", &x);\r\n        long double ans = LDBL_MAX;\r\n        for (auto i : vec) ans = min(ans, (long double)(i.second + x) / i.first);\r\n        printf(\"%.10Lf\\n\", ans);\r\n    }\r\n    return 0;\r\n}\r\n\r\nint d[maxn];\r\nbool vis[maxn];\r\n\r\ninline bool spfa(const int s, const int t, const int tot) {\r\n    for (int i = 1; i <= tot; i++) d[i] = INT_MAX;\r\n    static queue<int> Q;\r\n    d[s] = 0, Q.push(s), vis[s] = true;\r\n    while (!Q.empty()) {\r\n        int u = Q.front();\r\n        Q.pop(), vis[u] = false;\r\n        for (auto e : G[u])\r\n            if (e.f && d[e.to] > d[u] + e.c) {\r\n                d[e.to] = d[u] + e.c;\r\n                if (!vis[e.to])\r\n                    Q.push(e.to);\r\n            }\r\n    }\r\n    return d[t] != INT_MAX;\r\n}\r\n\r\nvector<edge>::iterator cur[maxn];\r\n\r\nbool dfs(const int u, const int t) {\r\n    if (u == t)\r\n        return true;\r\n    vis[u] = true;\r\n    for (auto& it = cur[u]; it != G[u].end(); it++)\r\n        if (d[it->to] == d[u] + it->c && it->f && !vis[it->to] && dfs(it->to, t)) {\r\n            it->f = false, G[it->to][it->rev].f = true;\r\n            vis[u] = false;\r\n            return true;\r\n        }\r\n    vis[u] = false;\r\n    return false;\r\n}\r\n\r\ninline vector<pair<int, int>> mcmf(const int s, const int t, const int tot) {\r\n    int f = 0, c = 0;\r\n    vector<pair<int, int>> ret;\r\n    while (spfa(s, t, tot)) {\r\n        for (int i = 1; i <= tot; i++) cur[i] = G[i].begin();\r\n        while (dfs(s, t)) f++, c += d[t];\r\n        ret.emplace_back(f, c);\r\n    }\r\n    return ret;\r\n}\r\n"
+}

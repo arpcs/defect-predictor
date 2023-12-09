@@ -1,0 +1,38 @@
+{
+    "id": 206696826,
+    "contestId": 696,
+    "creationTimeSeconds": 1684639879,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 696,
+        "index": "D",
+        "name": "Legen...",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2500,
+        "tags": [
+            "data structures",
+            "dp",
+            "matrices",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 696,
+        "members": [
+            {
+                "handle": "daoquanglinh2k7"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1468514100
+    },
+    "programmingLanguage": "Clang++20 Diagnostics",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 2457600,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define ll long long\r\n\r\nconst int NM = 200;\r\n\r\nstruct node{\r\n\tint parent, pch, nxt[26], go[26], suffix_link, cost;\r\n};\r\n\r\nstruct aho_corasick{\r\n\tnode T[NM+5];\r\n\tint nNode;\r\n\t\r\n\tint add_node(){\r\n\t\tint cur = nNode++;\r\n\t\tT[cur].parent = T[cur].pch = T[cur].suffix_link = -1;\r\n\t\tfor (int i = 0; i < 26; i++){\r\n\t\t\tT[cur].nxt[i] = -1;\r\n\t\t\tT[cur].go[i] = -1;\r\n\t\t}\r\n\t\tT[cur].cost = 0;\r\n\t\treturn cur;\r\n\t}\r\n\taho_corasick(){\r\n\t\tnNode = 0;\r\n\t\tadd_node();\r\n\t}\r\n\tvoid add_string(string s, int c){\r\n\t\tint cur = 0;\r\n\t\tfor (int i = 0; i < s.size(); i++){\r\n\t\t\tif (T[cur].nxt[s[i]-'a'] == -1){\r\n\t\t\t\tT[cur].nxt[s[i]-'a'] = add_node();\r\n\t\t\t\tT[nNode-1].parent = cur;\r\n\t\t\t\tT[nNode-1].pch = s[i]-'a';\r\n\t\t\t}\r\n\t\t\tcur = T[cur].nxt[s[i]-'a'];\r\n\t\t}\r\n\t\tT[cur].cost += c;\r\n\t}\r\n\tvoid build(){\r\n\t\tqueue <int> Q;\r\n\t\tQ.push(0);\r\n\t\twhile (!Q.empty()){\r\n\t\t\tint u = Q.front(); Q.pop();\r\n\t\t\tif (u > 0){\r\n\t\t\t\tint p = T[u].parent, c = T[u].pch;\r\n\t\t\t\tp = T[p].suffix_link;\r\n\t\t\t\twhile (p >= 0 && T[p].nxt[c] == -1) p = T[p].suffix_link;\r\n\t\t\t\tif (p == -1) T[u].suffix_link = 0;\r\n\t\t\t\telse T[u].suffix_link = T[p].nxt[c];\r\n\t\t\t\tT[u].cost += T[T[u].suffix_link].cost;\r\n\t\t\t}\r\n\t\t\tfor (int i = 0; i < 26; i++)\r\n\t\t\t\tif (T[u].nxt[i] != -1){\r\n\t\t\t\t\tT[u].go[i] = T[u].nxt[i];\r\n\t\t\t\t\tQ.push(T[u].nxt[i]);\r\n\t\t\t\t}\r\n\t\t\t\telse{\r\n\t\t\t\t\tif (u == 0) T[u].go[i] = 0;\r\n\t\t\t\t\telse T[u].go[i] = T[T[u].suffix_link].go[i];\r\n\t\t\t\t}\r\n\t\t}\r\n\t\tT[0].suffix_link = 0;\r\n\t}\r\n} AC;\r\n\r\nstruct matrix{\r\n\tint M, N; ll grid[NM+5][NM+5];\r\n\tmatrix(int a, int b){\r\n\t\tM = a, N = b;\r\n\t\tmemset(grid, 0, sizeof(grid));\r\n\t}\r\n};\r\n\r\nint n, a[NM+5];\r\nll l;\r\nstring s[NM+5];\r\n\r\nmatrix operator * (matrix a, matrix b){\r\n\tmatrix c(a.M, b.N);\r\n\tfor (int i = 0; i < c.M; i++)\r\n\t\tfor (int j = 0; j < c.N; j++){\r\n\t\t\tc.grid[i][j] = -1;\r\n\t\t\tfor (int k = 0; k < a.N; k++)\r\n\t\t\t\tif (a.grid[i][k] >= 0 && b.grid[k][j] >= 0)\r\n\t\t\t\t\tc.grid[i][j] = max(c.grid[i][j], a.grid[i][k]+b.grid[k][j]);\r\n\t\t}\r\n\treturn c;\r\n}\r\n\r\nmatrix binpow(matrix a, int k){\r\n\tmatrix res(a.M, a.N);\r\n\tfor (int i = 0; i < a.M; i++)\r\n\t\tfor (int j = 0; j < a.N; j++)\r\n\t\t\tif (i != j) res.grid[i][j] = -1;\r\n\twhile (k > 0){\r\n\t\tif (k&1) res = res*a;\r\n\t\tk >>= 1;\r\n\t\ta = a*a;\r\n\t}\r\n\treturn res;\r\n}\r\n\r\nvoid solve(){\r\n\tAC = aho_corasick();\r\n\tfor (int i = 1; i <= n; i++)\r\n\t\tAC.add_string(s[i], a[i]);\r\n\tAC.build();\r\n\tmatrix A(1, AC.nNode), B(AC.nNode, AC.nNode);\r\n\tfor (int i = 1; i < AC.nNode; i++)\r\n\t\tA.grid[0][i] = -1;\r\n\tfor (int i = 0; i < AC.nNode; i++)\r\n\t\tfor (int j = 0; j < AC.nNode; j++)\r\n\t\t\tB.grid[i][j] = -1;\r\n\tfor (int i = 0; i < AC.nNode; i++)\r\n\t\tfor (int j = 0; j < 26; j++)\r\n\t\t\tB.grid[i][AC.T[i].go[j]] = (ll)AC.T[AC.T[i].go[j]].cost;\r\n\tB = binpow(B, l);\r\n\tA = A*B;\r\n\tll ans = 0;\r\n\tfor (int i = 0; i < AC.nNode; i++)\r\n\t\tans = max(ans, A.grid[0][i]);\r\n\tcout << ans;\r\n}\r\n\r\nint main(){\r\n\tios_base::sync_with_stdio(0);\r\n\tcin.tie(0);\r\n\tcout.tie(0);\r\n\tcin >> n >> l;\r\n\tfor (int i = 1; i <= n; i++)\r\n\t\tcin >> a[i];\r\n\tfor (int i = 1; i <= n; i++)\r\n\t\tcin >> s[i];\r\n\tsolve();\r\n\treturn 0;\r\n}"
+}

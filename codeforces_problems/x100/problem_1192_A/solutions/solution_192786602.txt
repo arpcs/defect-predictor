@@ -1,0 +1,34 @@
+{
+    "id": 192786602,
+    "contestId": 1192,
+    "creationTimeSeconds": 1675885446,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "Archaeopteryx"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 185,
+    "timeConsumedMillis": 3135,
+    "memoryConsumedBytes": 101273600,
+    "points": 100.0,
+    "source": "#include <bits/stdc++.h>\r\n\nusing namespace std;\n\nstruct point {\nint x, y;\n\npoint(int x = 0, int y = 0): x(x), y(y) {}\n\npoint& operator += (const point &o) {\nx += o.x; y += o.y; return *this;\n}\n\npoint& operator -= (const point &o) {\nx -= o.x; y -= o.y; return *this;\n}\n\npoint operator + (const point &o) const {\nreturn point(*this) += o;\n}\n\npoint operator - (const point &o) const {\nreturn point(*this) -= o;\n}\n\nbool operator < (const point &o) const {\nreturn x < o.x || (x == o.x && y < o.y);\n}\n};\n\npoint d[8] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1},\n{1, 1}, {-1, 1}, {-1, -1}, {1, -1}};\n\nconst int N = 150005;\n\npoint a[N]; int cnt;\nmap<point, int> idx, cmp;\nset<int> can;\n\nvoid dfs1(point u) {\nif (!idx.count(u) || !cmp[u]) return;\ncmp[u] = 0;\nfor (int k = 0; k < 8; k++)\ndfs1(u + d[k]);\n}\n\nvoid dfs2(point u) {\nif (cnt == 1 && idx.count(u))\ncan.insert(idx[u]);\nif (!cmp.count(u) || !cmp[u] || cmp[u] == cnt) return;\ncmp[u] = cnt;\nfor (int k = 0; k < 4; k++)\ndfs2(u + d[k]);\n}\n\nbool check(point u) {\nvector<int> lst;\nfor (int k = 0; k < 4; k++)\nif (!cmp[u + d[k]] || !cmp[u + d[k + 4]]) {\nbool has = true;\nfor (int j = 0; j < 4; j++) {\nk = (k + 1) % 4;\nint tmp = cmp[u + d[k]];\nif (has && tmp) {\nif (count(lst.begin(), lst.end(), tmp))\nreturn false;\nlst.push_back(tmp); has = false;\n}\nhas |= !tmp || !cmp[u + d[k + 4]];\n}\nbreak;\n}\nidx.erase(u); cmp[u] = -1; dfs2(u);\nfor (int i = 4; i < 8; i++){\nif (!cmp[u + d[i]]){\nfor (int j = 0; j < 4; j++) {\nif (cmp[u + d[i] + d[j]] == 1){\ncan.insert(idx[u + d[i]]); break;\n}\n}\n}\n}\nreturn true;\n}\n\nint main() {\ncin.tie(0)->sync_with_stdio(0);\nint n, t; cin >> n >> t;\nfor (int i = 0; i < n; i++) {\ncin >> a[i].x >> a[i].y;\nidx[a[i]] = i;\ncmp[a[i]] = -1;\nfor (int k = 0; k < 8; k++)\ncmp[a[i] + d[k]] = -1;\n}\ndfs1(a[0]);\nfor (int i = 0; i < n; i++)\nif (cmp[a[i]]) return cout << \"NO\\n\", 0;\nfor (auto p : cmp)\nif (p.second < 0) {\n++cnt; dfs2(p.first);\n}\ncnt = 1; vector<int> ans;\nwhile (can.size()) {\nint i = *can.rbegin(); can.erase(i);\nif (check(a[i])) ans.push_back(i + 1);\n}\ncout << \"YES\\n\";\nfor (int k = n - 1; k >= 0; k--)\ncout << ans[k] << '\\n';\n}"
+}

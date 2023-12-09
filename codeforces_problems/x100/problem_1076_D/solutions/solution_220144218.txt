@@ -1,0 +1,36 @@
+{
+    "id": 220144218,
+    "contestId": 1076,
+    "creationTimeSeconds": 1692878079,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1076,
+        "index": "D",
+        "name": "Edge Deletion",
+        "type": "PROGRAMMING",
+        "rating": 1800,
+        "tags": [
+            "graphs",
+            "greedy",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1076,
+        "members": [
+            {
+                "handle": "kumi786"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1542033300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 43,
+    "timeConsumedMillis": 1060,
+    "memoryConsumedBytes": 81100800,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\ntypedef long long int ll;\n\nll mod = 998244353;\npriority_queue<ll, vector<ll>, greater<ll> > minh;\npriority_queue<ll> maxh;\n\nvoid dfs(ll curr, ll par,vector<ll> adj[])\n{\n    if(adj[curr].size()==1)\n    {\n        return ;\n    }\n\n    for(int i=0;i<adj[curr].size();i++)\n    {\n        if(adj[curr][i]==par)\n            continue;\n\n        dfs(adj[curr][i],curr,adj);\n    }\n\n    return;\n}\nll gcdExtended(ll a, ll b, ll* x, ll* y)\n{\n\n\n    if (a == 0) {\n        *x = 0, *y = 1;\n        return b;\n    }\n\n\n    ll x1, y1;\n    ll gcd = gcdExtended(b % a, a, &x1, &y1);\n\n\n    *x = y1 - (b / a) * x1;\n    *y = x1;\n\n    return gcd;\n}\nll modInverse(long long int A, long long int M)\n{\n    ll x, y;\n    ll g = gcdExtended(A, M, &x, &y);\n    if (g != 1)\n        return -1;\n    else {\n\n        ll res = (x % M + M) % M;\n        return res;\n    }\n}\nvoid BuildSegTree(ll node,ll start,ll ende,vector<ll>& tree,vector<ll>& arr)\n{\n    if(start==ende){\n\ttree[node] = arr[start];\n\treturn ;\n    }\n\n    ll mid = (start+ende)/2;\n    BuildSegTree(2*node,start,mid,tree,arr);\n    BuildSegTree(2*node+1,mid+1,ende,tree,arr);\n    tree[node] = tree[2*node] + tree[2*node+1];\n    return ;\n\n}\nll querySegTree(ll node,ll start,ll ende,ll l,ll r,vector<ll>&tree)\n{\n    if(l>ende || r<start)\n\treturn 0;\n\n    if(l<=start && r>=ende){\n\treturn tree[node];\n    }\n\n    ll mid = (start+ende)/2;\n    return querySegTree(2*node,start,mid,l,r,tree) + querySegTree(2*node+1,mid+1,ende,l,r,tree);\n}\nvoid updateSegTree(ll node,ll start,ll ende,ll pos,ll val,vector<ll>& tree)\n{\n\n    if(start==ende)\n    {\n        tree[node] = val;\n        return ;\n    }\n\n    ll mid = (start+ende)/2;\n    if(pos<=mid)\n    \tupdateSegTree(2*node,start,mid,pos,val,tree);\n    else\n    \tupdateSegTree(2*node + 1,mid+1,ende,pos,val,tree);\n    tree[node] = tree[2*node] + tree[2*node+1];\n    return ;\n}\n\n\n\nint main()\n{\n        ios_base::sync_with_stdio(false);\n    \tcin.tie(NULL);\r\n\r\n    \tll n,m,k;\r\n    \tcin>>n>>m>>k;\r\n\r\n    \tvector<vector<pair<ll,ll>>> adj(n+1);\r\n    \tmap<pair<ll,ll>,ll> mp;\r\n\r\n    \tfor(int i=1;i<=m;i++)\r\n        {\r\n            ll u,v,w;\r\n            cin>>u>>v>>w;\r\n            adj[u].push_back({v,w});\r\n            adj[v].push_back({u,w});\r\n            mp[{u,v}] = i;\r\n            mp[{v,u}] = i;\r\n        }\r\n\r\n        vector<ll> d(n+1,LONG_MAX);\r\n        d[1] = 0;\r\n\r\n        priority_queue<pair<ll,ll>, vector<pair<ll,ll>>, greater<pair<ll,ll>> > q;\r\n\r\n        q.push({0,1});\r\n\r\n        while(q.empty()==0)\r\n        {\r\n            ll u = q.top().second;\r\n\r\n            for(pair<ll,ll> j:adj[u])\r\n            {\r\n                if(j.second+d[u]<d[j.first])\r\n                {\r\n                    d[j.first] = j.second + d[u];\r\n                    q.push({d[j.first],j.first});\r\n                }\r\n            }\r\n\r\n            q.pop();\r\n        }\r\n\r\n        vector<pair<ll,ll>> ans;\r\n        map<pair<ll,ll>,ll> taken;\r\n        vector<ll> dis(n+1,LONG_MAX);\r\n        dis[1] = 0;\r\n        q.push({0,1});\r\n        while(q.empty()==0)\r\n        {\r\n            ll u = q.top().second;\r\n\r\n            for(pair<ll,ll> j:adj[u])\r\n            {\r\n                if(d[j.first] == dis[j.first])\r\n                    continue;\r\n\r\n                if(j.second+dis[u]==d[j.first])\r\n                {\r\n                    dis[j.first] = j.second + dis[u];\r\n                    q.push({dis[j.first],j.first});\r\n\r\n                    ans.push_back({u,j.first});\r\n\r\n                }\r\n            }\r\n\r\n            q.pop();\r\n        }\r\n\r\n        cout<<min(k,ll(ans.size()))<<endl;\r\n        for(int i=0;i<min(ll(ans.size()),k);i++)\r\n        {\r\n            cout<<mp[{ans[i].first,ans[i].second}]<<\" \";\r\n        }\r\n\r\n        cout<<endl;\r\n\r\n\r\n\n\n}\n"
+}

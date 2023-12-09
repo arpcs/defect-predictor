@@ -1,0 +1,37 @@
+{
+    "id": 233880222,
+    "contestId": 1178,
+    "creationTimeSeconds": 1700727239,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1178,
+        "index": "H",
+        "name": "Stock Exchange",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "binary search",
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1178,
+        "members": [
+            {
+                "handle": "bbbqqq"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1563636900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 11264000,
+    "source": "// LUOGU_RID: 136468054\n# include <bits/stdc++.h>\n\nusing namespace std;\n\n# define ll long long\n\nint read()\n{\n# define C ch = getchar()\n    int x = 0; char C;\n    for(; ch > '9' || ch < '0'; C); for(; ch >= '0' && ch <= '9'; C) x = (x << 3) + (x << 1) + (ch ^ 48);\n    return x;\n}\n\nconst int N = 1e5 + 5 , INF = 0x3f3f3f3f;\nint n , ans , id1[N] , id2[N];\nll a[N] , k[N<<1] , b[N<<1];\n\nstruct Edge\n{\n    int nxt , to , f , w;\n} edge[N<<1];\nint ecnt = 1 , head[N];\n\nvoid AddEdge(int u , int v , int f , int w)\n{\n    edge[++ecnt] = {head[u] , v , f , w};\n    head[u] = ecnt;\n    edge[++ecnt] = {head[v] , u , 0 , -w};\n    head[v] = ecnt;\n}\n\nbool check(int T)\n{\n    for(int i = 1; i <= 2 * n; i++) id1[i] = id2[i] = i;\n    sort(id1 + 1 ,  id1 + 2 * n + 1 , [](int x , int y) {return b[x] == b[y] ? k[x] > k[y] : b[x] < b[y];});\n    sort(id2 + n + 1 , id2 + 2 * n + 1 , [=](int x , int y) {return k[x] * T + b[x] < k[y] * T + b[y];});\n    ll mx = 0;\n    for(int i = 1; i <= 2 * n; i++)\n    {\n        mx = max(mx , k[id1[i]] * T + b[id1[i]]);\n        if(id1[i] <= n) a[id1[i]] = mx;\n    }\n    sort(a + 1 , a + n + 1);\n    for(int i = 1; i <= n; i++) if(a[i] < k[id2[i + n]] * T + b[id2[i + n]]) return 0;\n    return 1;\n}\n\nint cnt , s , t , sum[N] , in[N] , out[N] , last[N] , fa[N] , dis[N] , vis[N];\n\nbool SPFA()\n{\n    for(int i = 1; i <= cnt; i++) fa[i] = -1 , last[i] = 0 , dis[i] = INF;\n    queue< int > Q;\n    Q.push(s) , dis[s] = 0 , fa[s] = 0;\n    while(!Q.empty())\n    {\n        int u = Q.front(); Q.pop();\n        vis[u] = 0;\n        for(int i = head[u]; i; i = edge[i].nxt)\n        {\n            int v = edge[i].to;\n            if(dis[v] > dis[u] + edge[i].w && edge[i].f)\n            {\n                dis[v] = dis[u] + edge[i].w;\n                fa[v] = u;\n                last[v] = i;\n                if(!vis[v]) vis[v] = 1 , Q.push(v);\n            }\n        }\n    }\n    return ~fa[t];\n}\n\nvoid MCMF()\n{\n    while(SPFA())\n    {\n        ans += dis[t];\n        int now = t;\n        while(now != s)\n        {\n            edge[last[now]].f--;\n            edge[last[now] ^ 1].f++;\n            now = fa[now];\n        }\n    }\n}\n\nvoid work(int T)\n{\n    s = ++cnt , t = ++cnt;\n    for(int i = 1; i <= 2 * n; i++)\n    {\n        id1[i] = id2[i] = i;\n        in[i] = ++cnt , out[i] = ++cnt;\n        if(i <= n) AddEdge(s , in[i] , 1 , 0);\n        else AddEdge(out[i] , t , 1 , 0);\n        AddEdge(in[i] , out[i] , INF , 0);\n    }\n    sort(id1 + 1 , id1 + 2 * n + 1 , [](int x , int y) {return b[x] < b[y];});\n    sort(id2 + 1 , id2 + 2 * n + 1 , [=](int x , int y) {return k[x] * T + b[x] < k[y] * T + b[y];});\n    sum[1] = in[id1[1]];\n    for(int i = 2; i <= 2 * n; i++)\n    {\n        sum[i] = ++cnt;\n        AddEdge(sum[i] , sum[i - 1] , INF , 0);\n        AddEdge(sum[i] , in[id1[i]] , INF , 0);\n    }\n    for(int i = 2; i <= 2 * n; i++) AddEdge(in[id1[i]] , sum[i - 1] , INF , 1);\n    sum[1] = in[id2[1]];\n    for(int i = 2; i <= 2 * n; i++)\n    {\n        sum[i] = ++cnt;\n        AddEdge(sum[i] , sum[i - 1] , INF , 0);\n        AddEdge(sum[i] , out[id2[i]] , INF , 0);\n    }\n    for(int i = 2; i <= 2 * n; i++) AddEdge(out[id2[i]] , sum[i - 1] , INF , 1);\n    MCMF();\n}\n\nint main()\n{\n    n = read();\n    for(int i = 1; i <= 2 * n; i++) k[i] = read() , b[i] = read();\n    int l = 0 , r = 1e9 + 1;\n    while(l < r)\n    {\n        int mid = l + r >> 1;\n        if(check(mid)) r = mid;\n        else l = mid + 1;\n    }\n    if(l == 1e9 + 1) return cout << -1 , 0;\n    cout << l << ' ';\n    work(l);\n    cout << ans;\n    return 0;\n}"
+}

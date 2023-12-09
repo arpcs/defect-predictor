@@ -1,0 +1,37 @@
+{
+    "id": 233392035,
+    "contestId": 536,
+    "creationTimeSeconds": 1700380283,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 536,
+        "index": "E",
+        "name": "Tavas on the Path",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 536,
+        "members": [
+            {
+                "handle": "nima."
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1429029300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 101,
+    "timeConsumedMillis": 670,
+    "memoryConsumedBytes": 55091200,
+    "source": "/**\r\n *    author:  NimaAryan\r\n *    created: 2023-11-18 19:37:17  \r\n**/\r\n#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#ifdef LOCAL\r\n#include \"algo/debug.h\"\r\n#endif\r\n\r\nusing i64 = long long;\r\n\r\nvector<int> f;\r\n\r\nstruct Info {\r\n  int len = 0;\r\n  int L = 0, R = 0;\r\n  int pref = 0;\r\n  int suff = 0;\r\n  int T = 0;\r\n\r\n  void reverse() {\r\n    swap(L, R);\r\n    swap(pref, suff);\r\n  }\r\n};\r\nInfo operator+(Info a, Info b) {\r\n  if (a.len == 0) {\r\n    return b;\r\n  }\r\n  if (b.len == 0) {\r\n    return a;\r\n  }\r\n  Info res;\r\n  res.len = a.len + b.len;\r\n  res.L = a.L;\r\n  res.R = b.R;\r\n  res.pref = a.pref;\r\n  if (a.pref == a.len) {\r\n    res.pref += b.pref;\r\n  }\r\n  res.suff = b.suff;\r\n  if (b.suff == b.len) {\r\n    res.suff += a.suff;\r\n  }\r\n  res.T = a.T + b.T;\r\n  res.T -= f[a.suff];\r\n  res.T -= f[b.pref];\r\n  res.T += f[a.suff + b.pref];\r\n  return res;\r\n}\r\n\r\nclass SegmentTree {\r\n public:\r\n  int n;\r\n  vector<Info> info;\r\n\r\n  SegmentTree() { }\r\n\r\n  void init(int n_, const Info& v = Info()) {\r\n    n = n_;\r\n    info.assign(4 << __lg(n), Info());\r\n    auto build = [&](auto self, int p, int l, int r) -> void {\r\n      if (r - l == 1) {\r\n        info[p] = v;\r\n        return;\r\n      }\r\n      int m = (l + r) / 2;\r\n      self(self, 2 * p, l, m);\r\n      self(self, 2 * p + 1, m, r);\r\n      pull(p);\r\n    };\r\n    build(build, 1, 0, n);\r\n  }\r\n\r\n  void pull(int p) {\r\n    info[p] = info[2 * p] + info[2 * p + 1];\r\n  }\r\n\r\n  void modify(int p, int l, int r, int x, const Info& v) {\r\n    if (r - l == 1) {\r\n      info[p] = v;\r\n      return;\r\n    }\r\n    int m = (l + r) / 2;\r\n    if (x < m) {\r\n      modify(2 * p, l, m, x, v);\r\n    } else {\r\n      modify(2 * p + 1, m, r, x, v);\r\n    }\r\n    pull(p);\r\n  }\r\n  void modify(int x, const Info& v) {\r\n    modify(1, 0, n, x, v);\r\n  }\r\n\r\n  Info range_query(int p, int l, int r, int lx, int rx) {\r\n    if (l >= rx || r <= lx) {\r\n      return Info();\r\n    }\r\n    if (l >= lx && r <= rx) {\r\n      return info[p];\r\n    }\r\n    int m = (l + r) / 2;\r\n    return range_query(2 * p, l, m, lx, rx) +\r\n           range_query(2 * p + 1, m, r, lx, rx);\r\n  }\r\n  Info range_query(int lx, int rx) {\r\n    return range_query(1, 0, n, lx, rx);\r\n  }\r\n};\r\n\r\nclass HLD {\r\n public:\r\n  int n;\r\n  vector<vector<int>> adj;\r\n\r\n  int maxup;\r\n  vector<vector<int>> up;\r\n\r\n  vector<int> par;\r\n  vector<int> siz;\r\n  vector<int> dep;\r\n  vector<int> heavy;\r\n\r\n  int T;\r\n  vector<int> tin;\r\n  vector<int> tout;\r\n  vector<int> top;\r\n\r\n  SegmentTree seg;\r\n\r\n  HLD(int n) : n(n) {\r\n    adj.resize(n);\r\n    maxup = 2 * __lg(n);\r\n  }\r\n\r\n  void add_edge(int x, int y) {\r\n    adj[x].push_back(y);\r\n    adj[y].push_back(x);\r\n  }\r\n\r\n  void dfs1(int x = 0) {\r\n    up[x][0] = par[x];\r\n    for (int i = 1; i <= maxup; ++i) {\r\n      up[x][i] = up[up[x][i - 1]][i - 1];\r\n    }\r\n\r\n    siz[x] = 1;\r\n    for (int y : adj[x]) {\r\n      adj[y].erase(find(adj[y].begin(), adj[y].end(), x));\r\n      par[y] = x;\r\n      dep[y] = dep[x] + 1;\r\n      dfs1(y);\r\n      if (heavy[x] == -1 || siz[y] > siz[heavy[x]]) {\r\n        heavy[x] = y;\r\n      }\r\n      siz[x] += siz[y];\r\n    }\r\n  }\r\n\r\n  void dfs2(int x = 0, int t = 0) {\r\n    tin[x] = T++;\r\n    top[x] = t;\r\n    if (heavy[x] != -1) {\r\n      dfs2(heavy[x], t);\r\n    }\r\n    for (int y : adj[x]) {\r\n      if (y != heavy[x]) {\r\n        dfs2(y, y);\r\n      }\r\n    }\r\n    tout[x] = T;\r\n  }\r\n\r\n  void work(const Info& v = Info()) {\r\n    up.assign(n, vector(maxup + 1, 0));\r\n    par.assign(n, 0);\r\n    siz.assign(n, 0);\r\n    dep.assign(n, 0);\r\n    heavy.assign(n, -1);\r\n    dfs1();\r\n\r\n    T = 0;\r\n    tin.assign(n, 0);\r\n    tout.assign(n, 0);\r\n    top.assign(n, 0);\r\n    dfs2();\r\n\r\n    seg.init(n, v);\r\n  }\r\n\r\n  void modify(int x, const Info& v) {\r\n    seg.modify(tin[x], v);\r\n  }\r\n\r\n  Info query(int x, int y) {\r\n    Info xp, yp;\r\n    while (top[x] != top[y]) {\r\n      if (dep[top[x]] < dep[top[y]]) {\r\n        swap(x, y), swap(xp, yp);\r\n      }\r\n      xp = seg.range_query(tin[top[x]], tin[x] + 1) + xp;\r\n      x = par[top[x]];\r\n    }\r\n    if (dep[x] > dep[y]) {\r\n      swap(x, y), swap(xp, yp);\r\n    }\r\n    xp.reverse();\r\n    return xp + (seg.range_query(tin[x] + 1, tin[y] + 1) + yp);\r\n  }\r\n};\r\n\r\nstruct Edge {\r\n  int v, u;\r\n  i64 w;\r\n\r\n  bool operator<(const Edge& other) const {\r\n    return w > other.w;\r\n  }\r\n};\r\nstruct Query {\r\n  int x, y;\r\n  i64 l;\r\n\r\n  int id;\r\n\r\n  bool operator<(const Query& other) const {\r\n    return l > other.l;\r\n  }\r\n};\r\n\r\nint main() {\r\n  ios::sync_with_stdio(false);\r\n  cin.tie(nullptr);\r\n  \r\n  int n, q;\r\n  cin >> n >> q;\r\n\r\n  f.resize(n);\r\n  for (int i = 1; i < n; ++i) {\r\n    cin >> f[i];\r\n  }\r\n\r\n  HLD hld(n);\r\n  vector<Edge> edges;\r\n  for (int i = 0; i < n - 1; ++i) {\r\n    int v, u;\r\n    cin >> v >> u;\r\n    --v, --u;\r\n    i64 w;\r\n    cin >> w;\r\n    hld.add_edge(v, u);\r\n    edges.push_back({v, u, w});\r\n  }\r\n  hld.work(Info{1});\r\n  sort(edges.begin(), edges.end());\r\n\r\n  vector<Query> queries;\r\n  for (int i = 0; i < q; ++i) {\r\n    int x, y;\r\n    cin >> x >> y;\r\n    --x, --y;\r\n    i64 l;\r\n    cin >> l;\r\n    queries.push_back({x, y, l, i});\r\n  }\r\n  sort(queries.begin(), queries.end());\r\n\r\n  vector<int> ans(q);\r\n  for (int i = 0, j = 0; i < q; ++i) {\r\n    auto [x, y, l, id] = queries[i];\r\n\r\n    while (j < edges.size()) {\r\n      auto [v, u, w] = edges[j];\r\n      if (l <= w) {\r\n        if (hld.dep[v] < hld.dep[u]) {\r\n          swap(v, u);\r\n        }\r\n        hld.modify(v, Info{1, 1, 1, 1, 1, f[1]});\r\n        ++j;\r\n      } else {\r\n        break;\r\n      }\r\n    }\r\n\r\n    ans[id] = hld.query(x, y).T;\r\n  }\r\n\r\n  for (int i = 0; i < q; ++i) {\r\n    cout << ans[i] << \"\\n\";\r\n  }\r\n\r\n  return 0;\r\n}"
+}

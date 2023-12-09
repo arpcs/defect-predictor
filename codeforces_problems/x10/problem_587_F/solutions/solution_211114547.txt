@@ -1,0 +1,36 @@
+{
+    "id": 211114547,
+    "contestId": 587,
+    "creationTimeSeconds": 1687771120,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 587,
+        "index": "F",
+        "name": "Duff is Mad",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3000,
+        "tags": [
+            "data structures",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 587,
+        "members": [
+            {
+                "handle": "include_BM"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1444926600
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "//People who believe in miracles are as amazing as miracles themselves.\r\n#include<bits/stdc++.h>\r\n#define ll long long\r\nusing namespace std;\r\ninline ll read(){\r\n    ll x=0,f=1;char ch=getchar();\r\n    while(ch<'0'||ch>'9'){if(ch=='-') f=-f;ch=getchar();}\r\n    while(ch>='0'&&ch<='9')x=(x<<3)+(x<<1)+(ch^48),ch=getchar();\r\n    return x*f;\r\n}\r\n\r\nconst int N=1e5+10,S=650;\r\nint n,m,lim,len[N],tot,pos[N],id[N],idn,du[N],cnt[N],dfn[N],dfnum,siz[N],rt[N]; char *s[N],t[N],*now=t; ll num[N/S+10][N];\r\n\r\nstruct node{\r\n    int son[26],fail;\r\n}tr[N];\r\n\r\nvector<int> G[N];\r\n\r\nvoid dfs(int x){\r\n    siz[x]=1,dfn[x]=++dfnum;\r\n    for(auto y:G[x]) dfs(y),siz[x]+=siz[y];\r\n}\r\n\r\nnamespace Tree{\r\n    int tot;\r\n    struct node{\r\n        int ls,rs,num;\r\n    }tr[N*40];\r\n    #define mid ((l+r)>>1)\r\n    void chg(int &x,int y,int l,int r,int p,int q){\r\n        tr[x=++tot]=tr[y];\r\n        if(l==p&&r==q) return ++tr[x].num,void();\r\n        if(q<=mid) chg(tr[x].ls,tr[y].ls,l,mid,p,q);\r\n        else if(p>mid) chg(tr[x].rs,tr[y].rs,mid+1,r,p,q);\r\n        else chg(tr[x].ls,tr[y].ls,l,mid,p,mid),chg(tr[x].rs,tr[y].rs,mid+1,r,mid+1,q);\r\n    }\r\n    int que(int y,int x,int l,int r,int p){\r\n        if(l==r) return tr[x].num-tr[y].num;\r\n        return tr[x].num-tr[y].num+(p<=mid?que(tr[y].ls,tr[x].ls,l,mid,p):que(tr[y].rs,tr[x].rs,mid+1,r,p));\r\n    }\r\n}\r\n\r\nsigned main(){\r\n    cerr<<(&bg-&ed)/1048576.0<<endl;\r\n    n=read(),m=read(),lim=S;\r\n    for(int i=1;i<=n;++i){\r\n        scanf(\"%s\",now+1),s[i]=now,len[i]=strlen(s[i]+1),now+=len[i]+1;\r\n        for(int j=1,now=0;j<=len[i];++j){\r\n            if(!tr[now].son[s[i][j]-'a']) tr[now].son[s[i][j]-'a']=++tot;\r\n            now=tr[now].son[s[i][j]-'a'];\r\n            if(j==len[i]) pos[i]=now;\r\n        }\r\n    }\r\n    queue<int> q;\r\n    for(int i=0;i<26;++i) if(tr[0].son[i]) q.emplace(tr[0].son[i]);\r\n    while(!q.empty()){\r\n        int u=q.front(); q.pop();\r\n        for(int i=0;i<26;++i)\r\n            if(tr[u].son[i]){\r\n                tr[tr[u].son[i]].fail=tr[tr[u].fail].son[i];\r\n                q.emplace(tr[u].son[i]);\r\n            }\r\n            else tr[u].son[i]=tr[tr[u].fail].son[i];\r\n    }\r\n    for(int i=1;i<=n;++i)\r\n        if(len[i]>=lim){\r\n            id[i]=++idn;\r\n            for(int j=1,now=0;j<=len[i];++j)\r\n                now=tr[now].son[s[i][j]-'a'],++cnt[now];\r\n            for(int j=1;j<=tot;++j) ++du[tr[j].fail];\r\n            for(int j=1;j<=tot;++j) if(!du[j]) q.emplace(j);\r\n            while(!q.empty()){\r\n                int u=q.front(); q.pop();\r\n                cnt[tr[u].fail]+=cnt[u]; if(!--du[tr[u].fail]) q.emplace(tr[u].fail);\r\n            }\r\n            for(int j=1;j<=n;++j) num[idn][j]=cnt[pos[j]]+num[idn][j-1];\r\n            memset(cnt,0,sizeof cnt);\r\n        }\r\n    for(int i=1;i<=tot;++i) G[tr[i].fail].emplace_back(i);\r\n    dfs(0);\r\n    for(int i=1;i<=n;++i) Tree::chg(rt[i],rt[i-1],1,tot+1,dfn[pos[i]],dfn[pos[i]]+siz[pos[i]]-1);\r\n    for(int l,r,k;m;--m){\r\n        l=read(),r=read(),k=read();\r\n        if(len[k]>=lim) printf(\"%lld\\n\",num[id[k]][r]-num[id[k]][l-1]);\r\n        else{\r\n            ll ans=0;\r\n            for(int i=1,now=0;i<=len[k];++i)\r\n                now=tr[now].son[s[k][i]-'a'],ans+=Tree::que(rt[l-1],rt[r],1,tot+1,dfn[now]);\r\n            printf(\"%lld\\n\",ans);\r\n        }\r\n    }\r\n    return 0;\r\n}"
+}

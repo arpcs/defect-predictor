@@ -1,0 +1,38 @@
+{
+    "id": 132715576,
+    "contestId": 696,
+    "creationTimeSeconds": 1634920171,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 696,
+        "index": "D",
+        "name": "Legen...",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2500,
+        "tags": [
+            "data structures",
+            "dp",
+            "matrices",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 696,
+        "members": [
+            {
+                "handle": "fslse"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1468514100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 47,
+    "timeConsumedMillis": 499,
+    "memoryConsumedBytes": 79155200,
+    "source": "#pragma GCC optimize(3,\"Ofast\",\"inline\")\r\n\r\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define BEGIN signed main(){ios::sync_with_stdio(0),cin.tie(0),cout.tie(0);\r\n#define END return 0;}\r\n#define endl '\\n'\r\n\r\n// #define int long long\r\n#define sqr(x) ((x)*(x))\r\n#define lowbit(x) ((x)&-(x))\r\n\r\ntypedef long double ld;\r\ntypedef long long ll;\r\ntypedef unsigned long long ull;\r\n\r\nstruct custom_hash{\r\n    static uint64_t splitmix64(uint64_t x){\r\n        x+=0x9e3779b97f4a7c15;\r\n        x=(x^(x>>30))*0xbf58476d1ce4e5b9;\r\n        x=(x^(x>>27))*0x94d049bb133111eb;\r\n        return x^(x>>31);\r\n    }\r\n\r\n    size_t operator()(uint64_t x)const{\r\n        static const uint64_t FIXED_RANDOM=chrono::steady_clock::now().time_since_epoch().count();\r\n        return splitmix64(x+FIXED_RANDOM);\r\n    }\r\n\r\n    template<class T1,class T2>size_t operator()(const pair<T1,T2>& key)const{//\u54c8\u5e0c\u78b0\u649e\u6982\u7387\u8f83\u9ad8\r\n        return hash<T1>()(key.first+1)^hash<T2>()(key.second+2);\r\n    }\r\n};//\u81ea\u5b9a\u4e49\u54c8\u5e0c\r\n\r\ntemplate<class T>void read(T& x)\r\n{\r\n    x=0;int f=1;char c=getchar();\r\n    while(c<'0'||c>'9'){if(c=='-')f=-1;c=getchar();}\r\n    while(c>='0'&&c<='9'){x=(x<<3)+(x<<1)+(c^48);c=getchar();}\r\n    x*=f;\r\n}//\u5feb\u8bfb\r\n\r\nconst int N=2e6+10;\r\n\r\nstruct AC\r\n{\r\n    static const int SIZE=5e5+10;\r\n    int trie[SIZE][26],tot;\r\n    int fail[SIZE];\r\n    ll w[SIZE];\r\n\r\n    void insert(char *str,int val)\r\n    {\r\n        int p=0;\r\n        for(int i=0;str[i];++i)\r\n        {\r\n            int ch=str[i]-'a';\r\n            if(!trie[p][ch])trie[p][ch]=++tot;\r\n            p=trie[p][ch];\r\n        }\r\n        w[p]+=val;\r\n    } \r\n\r\n    void getfail()\r\n    {\r\n        queue<int>q;\r\n        for(int i=0;i<26;++i)\r\n            if(trie[0][i])q.push(trie[0][i]);\r\n        while(q.size())\r\n        {\r\n            int u=q.front();q.pop();\r\n            w[u]+=w[fail[u]];\r\n            for(int i=0;i<26;++i)\r\n            {\r\n                if(trie[u][i])\r\n                {\r\n                    fail[trie[u][i]]=trie[fail[u]][i];\r\n                    q.push(trie[u][i]);\r\n                }\r\n                else trie[u][i]=trie[fail[u]][i];\r\n            }\r\n        }\r\n    }\r\n}ac;\r\n\r\nstruct Matrix\r\n{\r\n    int n,m;\r\n    ll a[210][210];\r\n    Matrix(){memset(a,-0x3f,sizeof a);}\r\n    Matrix(int n,int m):n(n),m(m){memset(a,-0x3f,sizeof a);}\r\n    friend Matrix operator*(Matrix& A,Matrix& B)\r\n    {\r\n        Matrix C(A.n,B.m);\r\n        for(int i=0;i<=A.n;++i)\r\n            for(int j=0;j<=B.m;++j)\r\n                for(int k=0;k<=A.m;++k)\r\n                    C.a[i][j]=max(C.a[i][j],A.a[i][k]+B.a[k][j]);\r\n        return C;\r\n    }\r\n    friend Matrix mpow(Matrix S,Matrix T,ll k)\r\n    {\r\n        Matrix ans=S;\r\n        while(k)\r\n        {\r\n            if(k&1)ans=ans*T;\r\n            k>>=1;\r\n            T=T*T;\r\n        }\r\n        return ans;\r\n    }\r\n};\r\n\r\nll n,m,a[N];\r\nchar str[N];\r\n\r\nBEGIN\r\n#ifdef FSLSE\r\n    freopen(\"input.txt\",\"r\",stdin);\r\n    freopen(\"output.txt\",\"w\",stdout);\r\n#endif\r\n\r\n    cin>>n>>m;\r\n    for(int i=1;i<=n;++i)cin>>a[i];\r\n    for(int i=1;i<=n;++i)\r\n    {\r\n        cin>>str;\r\n        ac.insert(str,a[i]);\r\n    }\r\n    ac.getfail();\r\n    Matrix S(ac.tot,ac.tot);\r\n    for(int p=0;p<=ac.tot;++p)\r\n        for(int i=0;i<26;++i)\r\n            S.a[p][ac.trie[p][i]]=ac.w[ac.trie[p][i]];\r\n\r\n    Matrix re=mpow(S,S,m-1);\r\n    ll ans=0;\r\n    for(int i=0;i<=ac.tot;++i)ans=max(ans,re.a[0][i]);\r\n    cout<<ans<<endl;\r\n\r\nEND"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 173428623,
+    "contestId": 696,
+    "creationTimeSeconds": 1664110457,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 696,
+        "index": "D",
+        "name": "Legen...",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2500,
+        "tags": [
+            "data structures",
+            "dp",
+            "matrices",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 696,
+        "members": [
+            {
+                "handle": "hzy1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1468514100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 47,
+    "timeConsumedMillis": 623,
+    "memoryConsumedBytes": 1843200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nusing i64 = long long;\r\nconst int N = 205;\r\nconst i64 inf = 1e18;\r\nstruct Matrix {\r\n\tint n, m;\r\n\tvector<vector<i64>> a;\r\n\tMatrix(int n, int m, i64 v = 0) : n(n), m(m), a(n + 1, vector<i64>(m + 1, v)) {}\r\n};\r\nMatrix operator * (const Matrix &lhs, const Matrix &rhs) {\r\n\tassert(lhs.m == rhs.n);\r\n\tMatrix res(lhs.n, rhs.m, -inf);\r\n\tfor(int i = 1; i <= lhs.n; ++i) {\r\n\t\tfor(int j = 1; j <= rhs.m; ++j) {\r\n\t\t\tfor(int k = 1; k <= lhs.m; ++k) {\r\n\t\t\t\tres.a[i][j] = max(res.a[i][j], lhs.a[i][k] + rhs.a[k][j]);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn res;\r\n}\r\nMatrix power(Matrix x, i64 k) {\r\n\tassert(k >= 1);\r\n\tauto res = x;\r\n\t--k;\r\n\twhile(k) {\r\n\t\tif(k & 1) {\r\n\t\t\tres = res * x;\r\n\t\t}\r\n\t\tx = x * x;\r\n\t\tk >>= 1;\r\n\t}\r\n\treturn res;\r\n}\r\nint n, a[N];\r\ni64 l;\r\nint ch[N][26], fail[N], tot;\r\ni64 score[N];\r\nvoid insert(string str, int val) {\r\n\tint x = 0;\r\n\tfor(auto c : str) {\r\n\t\tif(!ch[x][c - 'a']) {\r\n\t\t\tch[x][c - 'a'] = ++tot;\r\n\t\t}\r\n\t\tx = ch[x][c - 'a'];\r\n\t}\r\n\tscore[x] += val;\r\n}\r\nvoid getFail() {\r\n\tqueue<int> q;\r\n\tfor(int i = 0; i < 26; ++i) {\r\n\t\tif(ch[0][i]) {\r\n\t\t\tq.push(ch[0][i]);\r\n\t\t}\r\n\t}\r\n\twhile(!q.empty()) {\r\n\t\tint x = q.front();\r\n\t\tq.pop();\r\n\t\tfor(int i = 0; i < 26; ++i) {\r\n\t\t\tif(ch[x][i]) {\r\n\t\t\t\tfail[ch[x][i]] = ch[fail[x]][i];\r\n\t\t\t\tq.push(ch[x][i]);\r\n\t\t\t} else {\r\n\t\t\t\tch[x][i] = ch[fail[x]][i];\r\n\t\t\t}\r\n\t\t}\r\n\t\tscore[x] += score[fail[x]];\r\n\t}\r\n\t// for(int i = 0; i <= tot; ++i) {\r\n\t// \tcerr << \"score[\" << i << \"] = \" << score[i] << \"\\n\";\r\n\t// }\r\n}\r\nsigned main() {\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(0);\r\n\tcin >> n >> l;\r\n\tfor(int i = 1; i <= n; ++i) {\r\n\t\tcin >> a[i];\r\n\t}\r\n\tfor(int i = 1; i <= n; ++i) {\r\n\t\tstring s;\r\n\t\tcin >> s;\r\n\t\tinsert(s, a[i]);\r\n\t}\r\n\tgetFail();\r\n\t// dp[i, j]\u6784\u9020\u524di\u4e2a\u5b57\u7b26\uff0c\u5728AC\u81ea\u52a8\u673a\u4e0a\u8d70\u5230j\u70b9\uff0c\u6700\u5927\u5f97\u5206\r\n\t// memset(dp, -0x3f, sizeof(dp));\r\n\t// dp[0][0] = 0;\r\n\t// for(int i = 1; i <= l; ++i) {\r\n\t// \tfor(int j = 0; j <= tot; ++j) {\r\n\t// \t\tfor(int k = 0; k < 26; ++k) {\r\n\t// \t\t\tdp[i][ch[j][k]] = max(dp[i][ch[j][k]], dp[i - 1][j] + score[ch[j][k]]);\r\n\t// \t\t}\r\n\t// \t}\r\n\t// }\r\n\t// int ans = 0;\r\n\t// for(int i = 0; i <= tot; ++i) {\r\n\t// \tans = max(ans, dp[l][i]);\r\n\t// }\r\n\t// cout << ans << \"\\n\";\r\n\tMatrix A(1, tot + 1, -inf), B (tot + 1, tot + 1, -inf);\r\n\tfor(int i = 0; i <= tot; ++i) {\r\n\t\tfor(int j = 0; j < 26; ++j) {\r\n\t\t\tB.a[i + 1][ch[i][j] + 1] = score[ch[i][j]];\r\n\t\t}\r\n\t}\r\n\tA.a[1][1] = 0;\r\n\tA = A * power(B, l);\r\n\ti64 ans = 0;\r\n\tfor(int i = 0; i <= tot; ++i) {\r\n\t\tans = max(ans, A.a[1][i + 1]);\r\n\t}\r\n\tcout << ans << \"\\n\";\r\n\treturn 0;\r\n}"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 231385371,
+    "contestId": 464,
+    "creationTimeSeconds": 1699126908,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 464,
+        "index": "D",
+        "name": "World of Darkraft - 2",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2700,
+        "tags": [
+            "dp",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 464,
+        "members": [
+            {
+                "handle": "Be_dos"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1410103800
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <iostream>\n#include <cmath>\n#include <cctype>\n#include <vector>\n#include <algorithm>\n#include <set>\n#include <map>\n#include <deque>\n#include <stack>\n#include <unordered_set>\n#include <sstream>\n#include <cstring>\n#include <iomanip>\n#include <queue>\n#include <unordered_map>\n#include <random>\n#include <cfloat>\n#include <chrono>\n#include <bitset>\n#include <complex>\n#include <functional>\n#include <immintrin.h>\n\n#define PI 3.14159265358979\n\n//#pragma GCC optimize(\"-O3\")\n\n// C_j = sum A_i * p^i * B_(j - i) * (1 - p)^(j - i) * C_j^i = (p +\n\nstd::map<int32_t, double*> per_k;\n\ndouble approximate_cnk(int32_t n, int32_t k, int32_t p1, int32_t p2) {\n    // n! / (k! (n - k)!) * (p1 / (p1 + p2))^k * (p2 / (p1 + p2))^(n - k)\n    if(n <= 100) {\n        double res = 1;\n        for(int32_t i = n - k + 1; i <= n; i++) {\n            res *= i;\n            res /= i - (n - k);\n        }\n        //for(int32_t i = 1; i <= k; i++)\n        //    res /= i;\n        //for(int32_t i = 1; i <= n - k; i++)\n        //    res /= i;\n        for(int32_t i = 1; i <= k; i++)\n            res *= (double)p1 / (p1 + p2);\n        for(int32_t i = 1; i <= n - k; i++)\n            res *= (double)p2 / (p1 + p2);\n\n        /*double res2 = std::sqrt(2 * M_PI * n) / std::sqrt(2 * M_PI * k) / std::sqrt(2 * M_PI * (n - k));\n        res2 *= std::exp(1.0 / (12 * n));\n        res2 /= std::exp(1.0 / (12 * k));\n        res2 /= std::exp(1.0 / (12 * (n - k)));\n        res2 *= std::pow(((double)n / k) * ((double)p1 / (p1 + p2)), k);\n        res2 *= std::pow(((double)n / (n - k)) * ((double)(p2) / (p1 + p2)), n - k);\n        //if(n >= 20)\n        //    std::cout << n << \" \" << std::abs(res - res2) << \"\\n\";*/\n        return res;\n    } else {\n        //double res = std::sqrt(2 * M_PI * n) / std::sqrt(2 * M_PI * k) / std::sqrt(2 * M_PI * (n - k));\n        double res = std::sqrt(n) / std::sqrt(k) / std::sqrt(2 * PI * (n - k));\n        res *= std::exp(1.0 / (12 * n));\n        res /= std::exp(1.0 / (12 * k));\n        res /= std::exp(1.0 / (12 * (n - k)));\n        // n^n / (k^k)/(n - k)^(n - k)\n        // (n / k)^k * (n / (n - k))^(n - k)\n        // k ~ n * p1\n        // (1 / p1)^k * (1 / p2)^(n - k)\n        //\n        // ((n / k) * (1 / p1))^k * ((n / (n - k)) * (1 / p2))^(n - k)\n        // cancels out!\n        if(n <= 500) {\n            res *= std::pow(((double)n / k) * ((double)p1 / (p1 + p2)), k);\n            res *= std::pow(((double)n / (n - k)) * ((double)(p2) / (p1 + p2)), n - k);\n        }\n        return res;\n    }\n    return -1;\n}\n\ndouble* solve(int32_t n, int32_t k, bool need_last) {\n    auto it = per_k.find(k);\n    if(it != per_k.end())\n        return it->second;\n\n    if(k == 1) {\n        std::pair<double, double>* dp = new std::pair<double, double>[500];\n        for(int32_t i = 0; i < 500; i++)\n            dp[i] = {0, 0};\n        dp[1] = {1, 0};\n        std::pair<double, double>* dp2 = new std::pair<double, double>[500];\n        double* per_num_coins = new double[n + 1];\n        per_num_coins[0] = 0;\n        for(int32_t i = 1; i <= n; i++) {\n            for(int32_t j = 0; j < 500; j++)\n                dp2[j] = {0, 0};\n            per_num_coins[i] = per_num_coins[i - 1];\n\n            for(int32_t j = 1; j < 500; j++) {\n                double prob_same = (double)j / (j + 1);\n                dp2[j].first += dp[j].first * prob_same;\n                per_num_coins[i] += ((j + 1) / 2.0) * prob_same * dp[j].first;\n\n                if(j < 500 - 1) {\n                    dp2[j + 1].first += dp[j].first * (1 - prob_same);\n                    per_num_coins[i] += j * (1 - prob_same) * dp[j].first;\n                }\n            }\n\n            std::swap(dp, dp2);\n        }\n\n        per_k[1] = per_num_coins;\n        return per_num_coins;\n    }\n\n    double* res_left = solve(n, k / 2, false);\n    double* res_right = solve(n, k - (k / 2), false);\n\n    double* res = new double[n + 1];\n    res[0] = 0;\n    double prob_left = (double)(k / 2) / k;\n    double prob_right = (double)(k - k / 2) / k;\n    for(int32_t i = (need_last ? n : 1); i <= n; i++) {\n        int32_t optimal_ind = std::round(i * ((double)(k / 2) / k));\n        res[i] = 0;\n        double prob = approximate_cnk(i, optimal_ind, k / 2, k - k / 2);\n        for(int32_t j = optimal_ind; j <= i; j++) {\n            res[i] += (res_left[j] + res_right[i - j]) * prob;\n            prob *= (double)(i - j) / (j + 1) * (prob_left / prob_right);\n            if(prob < 1e-11)\n                break;\n        }\n        prob = approximate_cnk(i, optimal_ind, k / 2, k - k / 2);\n        for(int32_t j = optimal_ind; j >= 1; j--) {\n            prob *= (double)j / (i - j + 1) * (prob_right / prob_left);\n            if(prob < 1e-11)\n                break;\n            res[i] += (res_left[j - 1] + res_right[i - j + 1]) * prob;\n        }\n    }\n    per_k[k] = res;\n    return res;\n}\n\nint main() {\n    int32_t n, k;\n    std::cin >> n >> k;\n\n    double* res = solve(n, k, true);\n    std::cout << std::setprecision(20);\n    std::cout << res[n];\n    return 0;\n}"
+}

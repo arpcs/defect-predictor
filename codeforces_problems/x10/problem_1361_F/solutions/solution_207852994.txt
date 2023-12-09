@@ -1,0 +1,37 @@
+{
+    "id": 207852994,
+    "contestId": 1361,
+    "creationTimeSeconds": 1685449249,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1361,
+        "index": "F",
+        "name": "Johnny and New Toy",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3300,
+        "tags": [
+            "data structures",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1361,
+        "members": [
+            {
+                "handle": "erduolong"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1591281300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 30,
+    "timeConsumedMillis": 10560,
+    "memoryConsumedBytes": 922214400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nconst int N = 200010;\r\nint tp,a[N],b[N],idx;\r\nmt19937 rnd(19260817);\r\nstruct tn{int ls,rs,val,sz,cnt;unsigned pri;}tr[N*100];\r\nint getnode(int val){tr[++idx] = {0,0,val,1,1,rnd()};return idx;}\r\nvoid pushup(int u){tr[u].sz = tr[tr[u].ls].sz+tr[tr[u].rs].sz+tr[u].cnt;}\r\nvoid split(int u,int val,int &a,int &b){\r\n\tif(!u) return a = b = 0,void(0);\r\n\tif(tr[u].val <= val) a = u,split(tr[u].rs,val,tr[u].rs,b);\r\n\telse b = u,split(tr[u].ls,val,a,tr[u].ls);\r\n\tpushup(u);\r\n}\r\nint merge(int u,int v){\r\n\tif(!u || !v) return u^v;\r\n\tif(tr[u].pri >= tr[v].pri) return tr[u].rs = merge(tr[u].rs,v),pushup(u),u;\r\n\treturn tr[v].ls = merge(u,tr[v].ls),pushup(v),v;\r\n}\r\nvoid change(int &rt,int val,int cnt){\r\n\tint u,v,w;\r\n\tsplit(rt,val-1,u,v),split(v,val,v,w);\r\n\tif(!v) v = getnode(val);\r\n\telse if(!(tr[v].cnt += cnt,tr[v].sz += cnt)) v = 0;\r\n\trt = merge(merge(u,v),w);\r\n}\r\nint query(int &rt,int val,bool z){\r\n\tint u,v,res;\r\n\tsplit(rt,val-(!z),u,v);\r\n\tres = z?tr[v].sz:tr[u].sz;\r\n\trt = merge(u,v);\r\n\treturn res;\r\n}\r\nbool c;\r\nvector<int> v[N];\r\nlong long ans,tmp;\r\nstruct str{int a,b,c,d,t[2];long long r,s;}st[N*50],z;\r\nvoid build(int l,int r){\r\n\tif(r-l <= 1) return;\r\n\tint mn = l;\r\n\tfor(int i = l+1;i < r;++i) if(b[i] < b[mn]) mn = i;\r\n\tst[++tp] = {l,mn,mn+1,r};\r\n\tfor(int i = mn+1;i <= r;++i) change(st[tp].t[1],a[i],1);\r\n\tfor(int i = l;i <= mn;++i) st[tp].r += query(st[tp].t[1],a[i],1),change(st[tp].t[0],a[i],1);\r\n\tans += min(st[tp].r,(st[tp].s = (r-mn)*1ll*(mn-l+1))-st[tp].r);\r\n\tfor(int i = l;i <= r;++i) v[i].push_back(tp);\r\n\tbuild(l,mn),build(mn+1,r);\r\n}\r\nbool in(int x,int l,int r){return l <= x && x <= r;}\r\nint main(){\r\n\tint n,q,x,y;\r\n\tscanf(\"%d\",&n);\r\n\tfor(int i = 1;i <= n;++i) scanf(\"%d\",&a[i]);\r\n\tfor(int i = 1;i < n;++i) scanf(\"%d\",&b[i]);\r\n\tbuild(1,n);\r\n\tscanf(\"%d\",&q);\r\n\twhile(q--){\r\n\t\tscanf(\"%d %d\",&x,&y);\r\n\t\tfor(int t:v[x]){\r\n\t\t\tz = st[t],ans -= min(z.r,z.s-z.r),c = in(x,z.c,z.d);\r\n\t\t\tz.r += query(z.t[c^1],a[y],c^1)-query(z.t[c^1],a[x],c^1);\r\n\t\t\tchange(z.t[c],a[x],-1),change(z.t[c],a[y],1),ans += min(z.r,z.s-z.r),st[t] = z;\r\n\t\t}\r\n\t\tfor(int t:v[y]){\r\n\t\t\tz = st[t],ans -= min(z.r,z.s-z.r),c = in(y,z.c,z.d);\r\n\t\t\tz.r += query(z.t[c^1],a[x],c^1)-query(z.t[c^1],a[y],c^1);\r\n\t\t\tchange(z.t[c],a[y],-1),change(z.t[c],a[x],1),ans += min(z.r,z.s-z.r),st[t] = z;\r\n\t\t}\r\n\t\tswap(a[x],a[y]);\r\n\t\tprintf(\"%lld\\n\",ans);\r\n\t}\r\n\treturn 0;\r\n}"
+}

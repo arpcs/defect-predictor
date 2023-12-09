@@ -1,0 +1,36 @@
+{
+    "id": 164117056,
+    "contestId": 1000,
+    "creationTimeSeconds": 1657785607,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "StardustQ"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 100966400,
+    "source": "// \u9b54\u6014\u4eba\u505a\u9b54\u6014\u9898\u3002\r\n#include <cstdio>\r\n#include <vector>\r\nusing namespace std;\r\n\r\ntypedef long long LL;\r\nint Abs (int x) { return x < 0 ? -x : x; }\r\nint Max (int x, int y) { return x > y ? x : y; }\r\nint Min (int x, int y) { return x < y ? x : y; }\r\n\r\nint Read () {\r\n    int x = 0, k = 1;\r\n    char s = getchar ();\r\n    while (s < '0' || s > '9') {\r\n        if (s == '-')\r\n            k = -1;\r\n        s = getchar ();\r\n    }\r\n    while ('0' <= s && s <= '9') \r\n        x = (x << 3) + (x << 1) + (s ^ 48), s = getchar ();\r\n    return x * k;\r\n}\r\n\r\nvoid Write (LL x) {\r\n    if (x < 0)\r\n        putchar ('-'), x = -x;\r\n    if (x > 9)\r\n        Write (x / 10);\r\n    putchar (x % 10 + '0');\r\n}\r\n\r\nvoid Print (LL x, char s) { Write (x), putchar (s); }\r\n\r\nconst int Maxn = 3e5 + 5;\r\n\r\nstruct Edge {\r\n    int v, w;\r\n    Edge () {}\r\n    Edge (int V, int W) { v = V, w = W; }\r\n};\r\n\r\n\r\nvector <Edge> Graph[Maxn];\r\nLL f[Maxn], g[Maxn], h[Maxn][25];\r\nint a[Maxn], Fath[Maxn][25], Dep[Maxn];\r\n\r\nvoid Add_Edge (int u, int v, int w) { Graph[u].push_back (Edge (v, w)), Graph[v].push_back (Edge (u, w)); }\r\n\r\nvoid Calc_F (int u, int Fa) {\r\n    f[u] = a[u];\r\n    for (int i = 0, v, w; i < Graph[u].size (); i++) {\r\n        v = Graph[u][i].v, w = Graph[u][i].w;\r\n        if (v == Fa)\r\n            continue;\r\n        Calc_F (v, u);\r\n        if (f[v] - (w << 1) > 0)\r\n            f[u] += f[v] - (w << 1);\r\n    }\r\n}\r\n\r\nvoid Dfs (int u, int Fa) {\r\n    for (int i = 0, v, w; i < Graph[u].size (); i++) {\r\n        v = Graph[u][i].v, w = Graph[u][i].w;\r\n        if (v == Fa)\r\n            continue;\r\n        Dep[v] = Dep[u] + 1, Fath[v][0] = u, h[v][0] = f[v] + f[u] - w;\r\n        if (f[v] - (w << 1) > 0)\r\n            h[v][0] -= f[v] - (w << 1);\r\n        for (int j = 1; j < 25; j++) {\r\n            Fath[v][j] = Fath[Fath[v][j - 1]][j - 1];\r\n            h[v][j] = h[v][j - 1] + h[Fath[v][j - 1]][j - 1] - f[Fath[v][j - 1]];\r\n        }\r\n        g[v] = Max (g[v], g[u] + h[v][0] - w - f[v]);\r\n        Dfs (v, u);\r\n    }\r\n}\r\n\r\nLL Query (int u, int v) {\r\n    LL Res = 0;\r\n    int x = u, y = v;\r\n    if (Dep[v] > Dep[u]) \r\n        swap (u, v);\r\n    for (int i = 24; i >= 0; i--)\r\n        if (Dep[Fath[u][i]] >= Dep[v])\r\n            Res += h[u][i] - f[u], u = Fath[u][i];\r\n    if (u == v)\r\n        return Res + (Dep[x] > Dep[y] ? f[x] : f[y]) + g[u];\r\n    for (int i = 24; i >= 0; i--)\r\n        if (Fath[u][i] != Fath[v][i])\r\n            Res += h[u][i] + h[v][i] - f[u] - f[v], u = Fath[u][i], v = Fath[v][i];\r\n    return Res + h[u][0] + h[v][0] - f[u] - f[v] + g[Fath[u][0]] - f[Fath[u][0]] + f[x] + f[y];\r\n}\r\n\r\nint main () {\r\n    int n = Read (), q = Read ();\r\n    for (int i = 1; i <= n; i++)\r\n        a[i] = Read ();\r\n    for (int i = 1, u, v, w; i < n; i++)\r\n        u = Read (), v = Read (), w = Read (), Add_Edge (u, v, w);\r\n    Calc_F (1, -1), Dfs (1, -1);\r\n    for (int i = 1, u, v; i <= q; i++)\r\n        u = Read (), v = Read (), Print (Query (u, v), '\\n');\r\n    return 0;\r\n}"
+}

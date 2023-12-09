@@ -1,0 +1,35 @@
+{
+    "id": 235468132,
+    "contestId": 1209,
+    "creationTimeSeconds": 1701581417,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1209,
+        "index": "G2",
+        "name": "Into Blocks (hard version)",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1209,
+        "members": [
+            {
+                "handle": "hyforces"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1568466300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 29696000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define N 200100\r\n#define A N\r\nint n,q;\r\nset<int>occ[A];\r\nint arr[N];\r\nstruct godtree{\r\n    struct Node{\r\n        int lv;//value of leftside max\r\n        int rv;//value of rightside max\r\n        int gmx;//global max\r\n        int smv;//sum of realized intervals\r\n        int mnc;//minimum connect\r\n        int lzc;//lazy connect\r\n        void apply(int lc){\r\n            mnc+=lc;\r\n            lzc+=lc;\r\n        }\r\n        friend Node operator+(const Node&x,const Node&y){\r\n            if(x.mnc==y.mnc){\r\n                return {x.lv,y.rv,max(x.gmx,y.gmx),x.smv+y.smv+max(x.rv,y.lv),x.mnc,0};\r\n            }\r\n            else if(x.mnc<y.mnc){\r\n                return {x.lv,max(y.gmx,x.rv),max(x.gmx,y.gmx),x.smv,x.mnc,0};\r\n            }\r\n            else{\r\n                return {max(x.gmx,y.lv),y.rv,max(x.gmx,y.gmx),y.smv,y.mnc,0};\r\n            }\r\n        }\r\n    }seg[4*N];\r\n    void push(int node){\r\n        seg[node<<1].apply(seg[node].lzc);\r\n        seg[node<<1|1].apply(seg[node].lzc);\r\n        seg[node].lzc=0;\r\n    }\r\n    void set(int i,int v,int lo,int hi,int node){\r\n        if(lo==hi){\r\n            seg[node].gmx=seg[node].lv=v;\r\n            return;\r\n        }\r\n        push(node);\r\n        int mid=(lo+hi)/2;\r\n        if(i<=mid)set(i,v,lo,mid,node<<1);\r\n        else set(i,v,mid+1,hi,node<<1|1);\r\n        seg[node]=seg[node<<1]+seg[node<<1|1];\r\n    }\r\n    void radd(int l,int r,int v,int lo,int hi,int node){\r\n        if(l<=lo&&hi<=r){\r\n            seg[node].apply(v);\r\n            return;\r\n        }\r\n        push(node);\r\n        int mid=(lo+hi)/2;\r\n        if(l<=mid)radd(l,r,v,lo,mid,node<<1);\r\n        if(r>mid)radd(l,r,v,mid+1,hi,node<<1|1);\r\n        seg[node]=seg[node<<1]+seg[node<<1|1];\r\n    }\r\n    void setv(int i,int v){\r\n        set(i,v,0,n-1,1);\r\n    }\r\n    void connect(int l,int r){\r\n        radd(l,r-1,1,0,n-1,1);\r\n    }\r\n    void unconnect(int l,int r){\r\n        radd(l,r-1,-1,0,n-1,1);\r\n    }\r\n    int gans(){\r\n        return n-seg[1].smv-seg[1].lv-seg[1].rv;\r\n    }\r\n}pro;\r\nvoid del(int i){\r\n    pair<int,int>org={*occ[arr[i]].begin(),*occ[arr[i]].rbegin()};\r\n    occ[arr[i]].erase(i);\r\n    pair<int,int>nrg=(occ[arr[i]].empty())?pair<int,int>{-1,-1}:pair<int,int>{*occ[arr[i]].begin(),*occ[arr[i]].rbegin()};\r\n    if(org.first!=nrg.first){\r\n        pro.setv(org.first,0);\r\n        if(nrg.first!=-1)pro.setv(nrg.first,occ[arr[i]].size());\r\n    }\r\n    else{\r\n        pro.setv(org.first,occ[arr[i]].size());\r\n    }\r\n    if(org!=nrg){\r\n        pro.unconnect(org.first,org.second);\r\n        if(occ[arr[i]].size()>1)pro.connect(nrg.first,nrg.second);\r\n    }\r\n}\r\nvoid add(int i){\r\n    pair<int,int>org=(occ[arr[i]].empty()?pair<int,int>{-1,-1}:pair<int,int>{*occ[arr[i]].begin(),*occ[arr[i]].rbegin()});\r\n    occ[arr[i]].insert(i);\r\n    pair<int,int>nrg={*occ[arr[i]].begin(),*occ[arr[i]].rbegin()};\r\n    if(org.first!=nrg.first){\r\n        if(org.first!=-1)pro.setv(org.first,0);\r\n        pro.setv(nrg.first,occ[arr[i]].size());\r\n    }\r\n    else{\r\n        pro.setv(org.first,occ[arr[i]].size());\r\n    }\r\n    if(org!=nrg){\r\n        if(org.first!=org.second)pro.unconnect(org.first,org.second);\r\n        pro.connect(nrg.first,nrg.second);\r\n    }\r\n}\r\nsigned main(){\r\n    iostream::sync_with_stdio(false);cin.tie(NULL);\r\n    cin>>n>>q;\r\n    for(int a=0;a<n;++a){\r\n        cin>>arr[a];\r\n        occ[arr[a]].insert(a);\r\n    }\r\n    for(int a=0;a<A;++a){\r\n        if(occ[a].size()){\r\n            if(occ[a].size()>1)pro.connect(*occ[a].begin(),*occ[a].rbegin());\r\n            pro.setv(*occ[a].begin(),occ[a].size());\r\n        }\r\n    }\r\n    cout<<pro.gans()<<endl;\r\n    for(int a=0;a<q;++a){\r\n        int i,v;cin>>i>>v;--i;\r\n        del(i);\r\n        arr[i]=v;\r\n        add(i);\r\n        cout<<pro.gans()<<endl;\r\n    }\r\n}\r\n\r\n/*\r\n5 1\r\n1 1 1 1 1\r\n5 3\r\n\r\n\r\n2 1\r\n4 1\r\n5 3\r\n2 3\r\n4 2\r\n2 1\r\n\r\n */"
+}

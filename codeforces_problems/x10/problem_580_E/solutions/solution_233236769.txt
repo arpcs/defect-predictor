@@ -1,0 +1,37 @@
+{
+    "id": 233236769,
+    "contestId": 580,
+    "creationTimeSeconds": 1700276209,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 580,
+        "index": "E",
+        "name": "Kefa and Watch",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2500,
+        "tags": [
+            "data structures",
+            "hashing",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 580,
+        "members": [
+            {
+                "handle": "pennymagic156"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1442939400
+    },
+    "programmingLanguage": "PyPy 3-64",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 61,
+    "memoryConsumedBytes": 512000,
+    "source": "import sys\ninput = sys.stdin.readline\n\ndef readList():\n    return list(map(int, input().split()))\ndef readInt():\n    return int(input())\ndef readInts():\n    return map(int, input().split())\ndef readStr():\n    return input().strip()\n\nclass LazySegTree:\n    def _update(self, k):\n        self.d[k] = self.op(self.d[2 * k], self.d[2 * k + 1], self.length[2*k + 1])\n\n    def _all_apply(self, k, f):\n        self.d[k] = self.mapping(f, self.d[k], self.length[k])\n        if k < self.size:\n            self.lz[k] = self.composite(f, self.lz[k])\n\n    def _push(self, k):\n        self._all_apply(2 * k, self.lz[k])\n        self._all_apply(2 * k + 1, self.lz[k])\n        self.lz[k] = self.identity\n\n    # customized\n    def mapping(self, a, x, l):\n        if a == -1:\n            return x\n        if a == 0:\n            return 0\n        else:\n            return self.p[a][l]\n        #return l\n\n    # customized\n    def composite(self, a, b):\n        return a if a >= 0 else b\n\n    def __init__(self, V, OP, E):\n        self.n = len(V)\n        self.log = (self.n - 1).bit_length()\n        self.size = 1 << self.log\n        self.d = [E for i in range(2 * self.size)]\n        self.length = [0] * (2 * self.size)\n        self.e = E\n        self.op = OP\n        self.identity = -1\n        self.lz = [-1] * self.size\n        self.p = []\n        for i in range(self.n):\n            self.d[self.size + i] = V[i]\n            self.length[self.size + i] = 1\n        for i in range(self.size - 1, 0, -1):\n            self._update(i)\n            self.length[i] = self.length[2 * i] + self.length[2 * i + 1]\n\n    # assign x to point p w/ lazy prop\n    def set(self, p, x):\n        assert 0 <= p < self.n\n        p += self.size\n        for i in range(self.log, 0, -1):\n            self._push(p >> i)\n        self.d[p] = x\n        for i in range(1, self.log + 1):\n            self._update(p >> i)\n\n    # query point p w/ lazy prop\n    def get(self, p):\n        assert 0 <= p < self.n\n        p += self.size\n        for i in range(self.log, 0, -1):\n            self._push(p >> i)\n        return self.d[p]\n\n    # query range l, r w/ lazy prop\n    def prod(self, l, r):\n        assert 0 <= l <= r <= self.n\n        if l == r:\n            return self.e\n        l += self.size\n        r += self.size\n        # lazy prop from the root\n        for i in range(self.log, 0, -1):\n            if ((l >> i) << i) != l:\n                self._push(l >> i)\n            if ((r >> i) << i) != r:\n                self._push(r >> i)\n        sml, smr = self.e, self.e\n        tmp = 0\n        while l < r:\n            if l & 1:\n                sml = self.op(sml, self.d[l], self.length[l])\n                l += 1\n            if r & 1:\n                r -= 1\n                smr = self.op(self.d[r], smr, tmp)\n                tmp += self.length[r]\n            l >>= 1\n            r >>= 1\n        return self.op(sml, smr, tmp)\n\n    # query the whole array a[1...n]\n    def all_prod(self):\n        return self.d[1]\n\n    # update point w/ lazy prop\n    def apply_point(self, p, f):\n        assert 0 <= p < self.n\n        p += self.size\n        for i in range(self.log, 0, -1):\n            self._push(p >> i)\n        self.d[p] = self.mapping(f, self.d[p], self.length[p])\n        for i in range(1, self.log + 1):\n            self._update(p >> i)\n\n    # update query w/ lazy prop\n    def apply(self, l, r, f):\n        assert 0 <= l <= r <= self.n\n        if l == r:\n            return\n        l += self.size\n        r += self.size\n        for i in range(self.log, 0, -1):\n            if ((l >> i) << i) != l:\n                self._push(l >> i)\n            if ((r >> i) << i) != r:\n                self._push((r - 1) >> i)\n        l2, r2 = l, r\n        while l < r:\n            if l & 1:\n                self._all_apply(l, f)\n                l += 1\n            if r & 1:\n                r -= 1\n                self._all_apply(r, f)\n            l >>= 1\n            r >>= 1\n        l, r = l2, r2\n        # update from the leaf\n        for i in range(1, self.log + 1):\n            if ((l >> i) << i) != l:\n                self._update(l >> i)\n            if ((r >> i) << i) != r:\n                self._update((r - 1) >> i)\n\n\n# BF, EC, DB, CC, CL\ndef solve():\n    n, m, k = readInts()\n    arr = [int(v)+1 for v in readStr()]\n    mo = 10**9 + 7\n    mo2 = 10**9 + 9\n    base = 11\n    pa, pb = [], [pow(11, i, mo) for i in range(n+1)]\n    for i in range(10):\n        pa.append([0])\n        for j in range(1, n+1):\n            pa[i].append((pa[i][-1] * base + (i+1)) % mo)\n\n    seg = LazySegTree(arr, lambda x, y, z: (x * pb[z] + y) % mo, 0)\n    seg2 = LazySegTree(arr, lambda x, y, z: (x * pb[z] + y) % mo2, 0)\n    seg.p = pa\n    seg2.p = pa\n    for _ in range(m + k):\n        idx, l, r, v = readList()\n        if idx == 1:\n            seg.apply(l-1, r, v)\n            seg2.apply(l-1, r, v)\n        else:\n            if seg.prod(l-1, r-v) == seg.prod(l-1+v, r) and seg2.prod(l-1, r-v) == seg2.prod(l-1+v, r):\n                print(\"YES\")\n            else:\n                print(\"NO\")\n    return\n\nsolve()\n\n\n\n\n\n\n\n"
+}

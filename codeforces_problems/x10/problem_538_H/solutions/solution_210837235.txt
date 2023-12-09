@@ -1,0 +1,38 @@
+{
+    "id": 210837235,
+    "contestId": 538,
+    "creationTimeSeconds": 1687590286,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 538,
+        "index": "H",
+        "name": "Summer Dichotomy",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "2-sat",
+            "data structures",
+            "dfs and similar",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 538,
+        "members": [
+            {
+                "handle": "yyyyxh"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1430064000
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 5017600,
+    "source": "#include <cstdio>\r\n#include <algorithm>\r\nusing namespace std;\r\nint read(){\r\n\tchar c=getchar();int x=0;\r\n\twhile(c<48||c>57) c=getchar();\r\n\tdo x=(x<<1)+(x<<3)+(c^48),c=getchar();\r\n\twhile(c>=48&&c<=57);\r\n\treturn x;\r\n}\r\nconst int N=100003,INF=0x3f3f3f3f;\r\nint tl,tr;\r\nint n,m,k;\r\nint hd[N],ver[N<<1],nxt[N<<1],tot;\r\nvoid add(int u,int v){\r\n\tnxt[++tot]=hd[u];hd[u]=tot;ver[tot]=v;\r\n}\r\nvoid chmx(int &x,int v){if(x<v) x=v;}\r\nvoid chmn(int &x,int v){if(x>v) x=v;}\r\nbool vis[N],col[N];\r\nint bel[N];\r\nbool nosol;\r\nint cl[2],cr[2];\r\nint sl[N],sr[N];\r\nvoid dfs(int u,bool c){\r\n\tif(vis[u]){\r\n\t\tif(col[u]!=c) nosol=1;\r\n\t\treturn;\r\n\t}\r\n\tbel[u]=k;\r\n\tchmx(cl[c],sl[u]);\r\n\tchmn(cr[c],sr[u]);\r\n\tvis[u]=1;col[u]=c;\r\n\tfor(int i=hd[u];i;i=nxt[i]){\r\n\t\tint v=ver[i];\r\n\t\tdfs(v,c^1);\r\n\t\tif(nosol) return;\r\n\t}\r\n}\r\nint pl[N][2],pr[N][2];\r\nbool flip[N];\r\nint main(){\r\n\ttl=read();tr=read();\r\n\tn=read();m=read();\r\n\tint mx=-INF,mn=INF;\r\n\tfor(int i=1;i<=n;++i){\r\n\t\tsl[i]=read();sr[i]=read();\r\n\t\tchmx(mx,sl[i]);\r\n\t\tchmn(mn,sr[i]);\r\n\t}\r\n\tfor(int i=1;i<=m;++i){\r\n\t\tint u=read(),v=read();\r\n\t\tadd(u,v);add(v,u);\r\n\t}\r\n\tfor(int i=1;i<=n;++i){\r\n\t\tif(vis[i]) continue;\r\n\t\tcl[0]=cl[1]=-INF;cr[0]=cr[1]=INF;\r\n\t\t++k;dfs(i,0);\r\n\t\tif(nosol){puts(\"IMPOSSIBLE\");return 0;}\r\n\t\tpl[k][0]=cl[0];pr[k][0]=cr[0];\r\n\t\tpl[k][1]=cl[1];pr[k][1]=cr[1];\r\n\t}\r\n\tbool fl=1;\r\n\tfor(int i=1;i<=k;++i){\r\n\t\tif(pl[i][0]<=tr-mx&&pr[i][0]>=tl-mn){\r\n\t\t\tflip[i]=0;continue;\r\n\t\t}\r\n\t\tif(pl[i][1]<=tr-mx&&pr[i][1]>=tl-mn){\r\n\t\t\tflip[i]=1;\r\n\t\t\tswap(pl[i][0],pl[i][1]);\r\n\t\t\tswap(pr[i][0],pr[i][1]);\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tfl=0;break;\r\n\t}\r\n\tif(fl) goto cons;\r\n\tfor(int i=1;i<=k;++i){\r\n\t\tif(pl[i][0]<=tr-mx&&pr[i][1]>=tl-mn){\r\n\t\t\tflip[i]=0;continue;\r\n\t\t}\r\n\t\tif(pl[i][1]<=tr-mx&&pr[i][0]>=tl-mn){\r\n\t\t\tflip[i]=1;\r\n\t\t\tswap(pl[i][0],pl[i][1]);\r\n\t\t\tswap(pr[i][0],pr[i][1]);\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t}\r\n\tif(fl) goto cons;\r\n\tputs(\"IMPOSSIBLE\");\r\n\treturn 0;\r\ncons:\r\n\tputs(\"POSSIBLE\");\r\n\tcl[0]=cl[1]=0;cr[0]=cr[1]=INF;\r\n\tfor(int i=1;i<=k;++i){\r\n\t\tchmx(cl[0],pl[i][0]);\r\n\t\tchmn(cr[0],pr[i][0]);\r\n\t\tchmx(cl[1],pl[i][1]);\r\n\t\tchmn(cr[1],pr[i][1]);\r\n\t}\r\n\tint tmn=cl[0]+cl[1],tmx=cr[0]+cr[1];\r\n\tif(tl<=tmn&&tmn<=tr){\r\n\t\tprintf(\"%d %d\\n\",cl[0],cl[1]);\r\n\t\tgoto output;\r\n\t}\r\n\tif(tl<=tmx&&tmx<=tr){\r\n\t\tprintf(\"%d %d\\n\",cr[0],cr[1]);\r\n\t\tgoto output;\r\n\t}\r\n\tif(cl[1]<=tl-cl[0]&&tl-cl[0]<=cr[1]){\r\n\t\tprintf(\"%d %d\\n\",cl[0],tl-cl[0]);\r\n\t\tgoto output;\r\n\t}\r\n\tif(cl[0]<=tl-cl[1]&&tl-cl[1]<=cr[0]){\r\n\t\tprintf(\"%d %d\\n\",tl-cl[1],cl[1]);\r\n\t\tgoto output;\r\n\t}\r\n\tif(cl[1]<=tl-cr[0]&&tl-cr[0]<=cr[1]){\r\n\t\tprintf(\"%d %d\\n\",cr[0],tl-cr[0]);\r\n\t\tgoto output;\r\n\t}\r\n\tif(cl[0]<=tl-cr[1]&&tl-cr[1]<=cr[0]){\r\n\t\tprintf(\"%d %d\\n\",tl-cr[1],cr[1]);\r\n\t\tgoto output;\r\n\t}\r\noutput:\r\n\tfor(int i=1;i<=n;++i){\r\n\t\tif(col[i]==flip[bel[i]]) putchar('1');\r\n\t\telse putchar('2');\r\n\t}\r\n\tputchar('\\n');\r\n\treturn 0;\r\n}"
+}

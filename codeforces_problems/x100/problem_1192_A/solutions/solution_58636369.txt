@@ -1,0 +1,34 @@
+{
+    "id": 58636369,
+    "contestId": 1192,
+    "creationTimeSeconds": 1565570386,
+    "relativeTimeSeconds": 8986,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "haas"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1565561400
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "points": 0.0,
+    "source": "#include <iostream>\n#include <map>\n#include <vector>\n#include <set>\n\nusing namespace std;\n\ntypedef pair<int, int> pie;\n#define X first\n#define Y second\n#define push shit\n\nconst int maxN = 150 * 1000 + 100;\nconst int adj[8][2] = { \n\t{-1, 0}, {-1, 1}, \n\t{0, 1}, {1, 1}, \n\t{1, 0}, {1,-1}, \n\t{0, -1}, {-1, -1}\n};\n\nint n, t;\npie a[maxN];\nvector <int> s;\nmap <pie, int> f, f2;\n\nvoid bfs(pie x, int adjs, bool push) {\n\tvector <pie> q;\n\tq.push_back(x);\n\tif (f[x] > 0) f[x] = -f[x];\n\telse f[x] = -1; \n\tfor (int i = 0; i < (int)q.size(); i++) {\n\t\tx = q[i];\n\t\tif (push) s.push_back(-f[x]);\n\t\tfor (int i = 0; i < 8; i += adjs) {\n\t\t\tpie y (x.X + adj[i][0], x.Y + adj[i][1]);\n\t\t\tif (f.count(y) > 0 && f[y] >= 0) {\n\t\t\t\tq.push_back(y);\n\t\t\t\tif (f[y] > 0) f[y] = -f[y];\n\t\t\t\telse f[y] = -1; \n\t\t\t}\n\t\t}\n\t}\n}\n\nbool onedge(pie x) {\n\tbool ans = false;\n\tfor (int i = 0; i < 8; i += 2) {\n\t\tpie y (x.X + adj[i][0], x.Y + adj[i][1]);\n\t\tif (f2.count(y) == 0) ans = true;\n\t}\n\treturn ans;\n}\n\nbool ready(pie x) {\n\tvector <int> stat;\n\tint side = 0, corner = 0;\n\tfor (int i = 0; i < 8; i++) {\n\t\tpie y (x.X + adj[i][0], x.Y + adj[i][1]);\n\t\tstat.push_back(f2.count(y) > 0);\n\t}\n\tfor (int i = 0; i < 4; i++) side += stat[2 * i], corner += stat[2 * i + 1];\n\t//cerr << \"side=\" << side << ' ' << \"corner=\" << corner << ' ';\n\tif (side == 0) return corner <= 1;\n\tif (side == 1)\n\t\tfor (int i = 0; i < 4; i++) \n\t\t\tif (stat[2 * i] == 1) \n\t\t\t\treturn stat[(2 * i + 3) % 8] + stat[(2 * i + 5) % 8] == 0;\n\tif (side == 2) {\n\t\tfor (int i = 0; i < 4; i++)\n\t\t\tif (stat[2 * i] == 1 && stat[(2 * i + 2) % 8] == 1)\n\t\t\t\treturn stat[(2 * i + 5) % 8] == 0;\n\t\treturn 0;\n\t}\n\tif (side == 3) return 1;\n\treturn 0;\n}\n\n/*int ready(pie x) {\n\tcerr << \"ready \" << x.X << ' ' << x.Y << ' ';\n\tint ans = ready2(x);\n\tcerr << (ans? \"X\" : \".\") << endl;\n\treturn ans;\n}*/\n\nvoid solve() {\n\tset <int, std::greater<int>> edge;\n\tfor (auto x : f2) {\n\t\tif (onedge(x.X) && ready(x.X)) edge.insert(x.Y);\n\t}\n\n\ts.resize(0);\n\twhile ((int)edge.size()) {\n\t\tpie x = a[*edge.begin()];\n\t\tedge.erase(*edge.begin());\n\t\ts.push_back(f2[x]);\n\t\tf2.erase(x);\n\t\tfor (int i = 0; i < 8; i++) {\n\t\t\tpie y (x.X + adj[i][0], x.Y + adj[i][1]);\n\t\t\tif (f2.count(y) > 0 && onedge(y) && ready(y)) edge.insert(f2[y]);\n\t\t}\n\t}\n\t\n\treverse(s.begin(), s.end());\n}\n\nint main() {\n\tcin >> n >> t;\n\tfor (int i = 1; i <= n; i++) cin >> a[i].X >> a[i].Y;\n\t\n\tfor (int i = 1; i <= n; i++) f[a[i]] = i;\n\tf2 = f;\n\tbfs(a[1], 1, true);\n\tif ((int)s.size() != n) { cout << \"NO\" << endl; return 0; } \n\t\n\tfor (int i = 1; i <= n; i++)\n\t\tfor (int j = 0; j < 8; j++) {\n\t\t\tpie adjcell(a[i].X + adj[j][0], a[i].Y + adj[j][1]); \n\t\t\tf[adjcell] = min(f[adjcell], 0);\n\t\t}\n\n\tpie start;\n\tfor (auto y : f) if (y.Y == 0) { start = y.X; break; } \n\tbfs(start, 2, false);\n\n\tfor (auto y : f) if (y.Y >= 0) {\n\t\tcout << \"NO\" << endl; return 0;\n\t}\n\n\tif (t == 2) solve();\n\t\n\tcout << \"YES\" << endl;\n\tfor (int i = 0; i < (int)s.size(); i++)\n\t\tcout << s[i] << endl;\n\n\treturn 0;\n}\n"
+}

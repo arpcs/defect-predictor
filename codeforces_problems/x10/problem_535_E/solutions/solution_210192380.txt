@@ -1,0 +1,36 @@
+{
+    "id": 210192380,
+    "contestId": 535,
+    "creationTimeSeconds": 1687137036,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 535,
+        "index": "E",
+        "name": "Tavas and Pashmaks",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2600,
+        "tags": [
+            "geometry",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 535,
+        "members": [
+            {
+                "handle": "BirthdayParadox"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1429029300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 40,
+    "timeConsumedMillis": 327,
+    "memoryConsumedBytes": 68403200,
+    "source": "#include <bits/stdc++.h>\r\ntypedef __int128_t ll;\r\n\r\nusing namespace std;\r\n\r\ntemplate <typename T>\r\nstruct Point { // this actually represents an inverted point now!\r\n    T nx, dx, ny, dy;\r\n    Point operator+(Point & P) {return {nx * P.dx + P.nx * dx, P.dx * dx, ny * P.dy + P.ny * dy, P.dy * dy};}\r\n    Point operator-(Point & P) {return {nx * P.dx - P.nx * dx, P.dx * dx, ny * P.dy - P.ny * dy, P.dy * dy};}\r\n    bool operator<(const Point & P) const {return make_pair(nx * P.dx, ny * P.dy) < make_pair(P.nx * dx, P.ny * dy);}\r\n    bool operator==(const Point & P) const {return make_pair(nx * P.dx, ny * P.dy) == make_pair(P.nx * dx, P.ny * dy);} \r\n    int turn(const Point & P) { // 1 means ccw\r\n        if(nx * P.dx * P.ny * dy > ny * P.dy * P.nx * dx) {\r\n            return 1;\r\n        } else if(nx * P.dx * P.ny * dy == ny * P.dy * P.nx * dx) {\r\n            return 0;\r\n        }\r\n        return -1;\r\n    }\r\n};\r\n\r\ntemplate <typename T>\r\nvector<Point<T>> convex_hull(vector<Point<T>> points) {\r\n    sort(points.begin(), points.end());\r\n    points.erase(unique(points.begin(), points.end()), points.end());\r\n    if(points.size() <= 1) {\r\n        return points;\r\n    }\r\n    vector<Point<T>> hull(points.size() + 1);\r\n    int s = 0, t = 0;\r\n    for(int it = 2; it--; s = --t, reverse(points.begin(), points.end())) {\r\n        for(Point p: points) {\r\n            while(t >= s + 2 && (hull[t - 1] - hull[t - 2]).turn(p - hull[t - 2]) <= 0) {\r\n                t--;\r\n            }\r\n            hull[t++] = p;\r\n        }\r\n    }\r\n    return {hull.begin(), hull.begin() + t - (t == 2 && hull[0] == hull[1])};\r\n}\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(false); cin.tie(0);\r\n    int n; cin >> n;\r\n    vector<Point<ll>> cp;\r\n    map<Point<ll>, int> id;\r\n    int mx = 0, my = 0; // reciprocal of minimum coordinate\r\n    for(int i = 0, x, y; i < n; i++) {\r\n        cin >> x >> y;\r\n        cp.push_back({1, x, 1, y});\r\n        id[cp.back()] = i;\r\n        mx = max(mx, x), my = max(my, y);\r\n    }\r\n    auto chull = convex_hull(cp);\r\n    int p1 = 0, sz = chull.size();\r\n    while(chull[p1].dx != mx || chull[(p1 + 1) % sz].dx == mx) ++p1;\r\n    vector<int> ans;\r\n    while(true) {\r\n        ans.push_back(id[chull[p1]] + 1);\r\n        if(chull[p1].dy == my) break;\r\n        p1 = (p1 + 1) % sz;\r\n    }\r\n    sort(ans.begin(), ans.end());\r\n    for(int a: ans) {\r\n        cout << a << \" \";\r\n    }\r\n    cout << '\\n';\r\n}"
+}

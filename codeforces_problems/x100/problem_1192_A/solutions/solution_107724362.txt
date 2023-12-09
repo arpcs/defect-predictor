@@ -1,0 +1,34 @@
+{
+    "id": 107724362,
+    "contestId": 1192,
+    "creationTimeSeconds": 1613590236,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "rainboy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 185,
+    "timeConsumedMillis": 763,
+    "memoryConsumedBytes": 30003200,
+    "points": 100.0,
+    "source": "#include <stdio.h>\n#include <string.h>\n\n#define N\t150000\n\nint min(int a, int b) { return a < b ? a : b; }\n\nunsigned int X = 12345;\n\nint rand_() {\n\treturn (X *= 3) >> 1;\n}\n\nint dx[] = { 0, 1, 0, -1, -1, 1, 1, -1 };\nint dy[] = { 1, 0, -1, 0, 1, 1, -1, -1 };\n\nint xx[N], yy[N];\n\nvoid sort(int *ii, int l, int r) {\n\twhile (l < r) {\n\t\tint i = l, j = l, k = r, i_ = ii[l + rand_() % (r - l)], tmp;\n\n\t\twhile (j < k)\n\t\t\tif (ii[j] == i_)\n\t\t\t\tj++;\n\t\t\telse if (xx[ii[j]] < xx[i_] || xx[ii[j]] == xx[i_] && yy[ii[j]] < yy[i_]) {\n\t\t\t\ttmp = ii[i], ii[i] = ii[j], ii[j] = tmp;\n\t\t\t\ti++, j++;\n\t\t\t} else {\n\t\t\t\tk--;\n\t\t\t\ttmp = ii[j], ii[j] = ii[k], ii[k] = tmp;\n\t\t\t}\n\t\tsort(ii, l, i);\n\t\tl = k;\n\t}\n}\n\nint ds[N * 8];\n\nint find(int i) {\n\treturn ds[i] < 0 ? i : (ds[i] = find(ds[i]));\n}\n\nvoid join(int i, int j) {\n\ti = find(i);\n\tj = find(j);\n\tif (i == j)\n\t\treturn;\n\tif (ds[i] > ds[j])\n\t\tds[i] = j;\n\telse {\n\t\tif (ds[i] == ds[j])\n\t\t\tds[i]--;\n\t\tds[j] = i;\n\t}\n}\n\nint jj[N][8], ta[N], tb[N];\n\nvoid dfs(int f, int i) {\n\tstatic int time;\n\tint h;\n\n\tta[i] = tb[i] = ++time;\n\tfor (h = 0; h < 8; h++) {\n\t\tint j = jj[i][h];\n\n\t\tif (j == -1)\n\t\t\tcontinue;\n\t\tif (!ta[j]) {\n\t\t\tdfs(i * 8 + h, j);\n\t\t\tif (tb[j] < ta[i])\n\t\t\t\tjoin(i * 8 + h, f);\n\t\t\ttb[i] = min(tb[i], tb[j]);\n\t\t} else if (ta[j] < ta[i]) {\n\t\t\tjoin(i * 8 + h, f);\n\t\t\ttb[i] = min(tb[i], ta[j]);\n\t\t}\n\t}\n}\n\nint next[N * 4], prev[N * 4], kk[N];\n\nint ok(int i) {\n\tint h, r, j, k;\n\n\tr = -1;\n\tfor (h = 0; h < 8; h++)\n\t\tif (jj[i / 4][h] != -1) {\n\t\t\tif (r == -1)\n\t\t\t\tr = find(i / 4 * 8 + h);\n\t\t\telse if (find(i / 4 * 8 + h) != r)\n\t\t\t\treturn 0;\n\t\t}\n\tk = 1;\n\tfor (j = next[i]; j != i && j / 4 == i / 4; j = next[j])\n\t\tk++;\n\tif (j == i)\n\t\treturn 1;\n\tfor (j = prev[i]; j / 4 == i / 4; j = prev[j])\n\t\tk++;\n\treturn kk[i / 4] == k;\n}\n\nint pq[N], iq[1 + N], cnt;\n\nint lt(int i, int j) { return i > j; }\n\nint p2(int p) {\n\treturn (p *= 2) > cnt ? 0 : (p < cnt && lt(iq[p + 1], iq[p]) ? p + 1 : p);\n}\n\nvoid pq_up(int i) {\n\tint p, q, j;\n\n\tfor (p = pq[i]; (q = p / 2) && lt(i, j = iq[q]); p = q)\n\t\tiq[pq[j] = p] = j;\n\tiq[pq[i] = p] = i;\n}\n\nvoid pq_dn(int i) {\n\tint p, q, j;\n\n\tfor (p = pq[i]; (q = p2(p)) && lt(j = iq[q], i); p = q)\n\t\tiq[pq[j] = p] = j;\n\tiq[pq[i] = p] = i;\n}\n\nvoid pq_add(int i) {\n\tif (!pq[i])\n\t\tpq[i] = ++cnt, pq_up(i);\n}\n\nvoid pq_remove(int i) {\n\tif (pq[i]) {\n\t\tint j = iq[cnt--];\n\n\t\tif (j != i)\n\t\t\tpq[j] = pq[i], pq_up(j), pq_dn(j);\n\t\tpq[i] = 0;\n\t}\n}\n\nint pq_first() { return iq[1]; }\n\nint main() {\n\tstatic int ii[N], hh[N], ii_[N * 4], ans[N];\n\tint n, n_, t, h, i, j, k;\n\n\tscanf(\"%d%d\", &n, &t);\n\tfor (i = 0; i < n; i++) {\n\t\tscanf(\"%d%d\", &xx[i], &yy[i]);\n\t\tii[i] = i;\n\t}\n\tsort(ii, 0, n);\n\tmemset(ds, -1, n * 8 * sizeof *ds);\n\tfor (h = 0; h < 8; h++)\n\t\tfor (i = 0, j = 0; i < n; i++) {\n\t\t\tint x = xx[ii[i]] + dx[h], y = yy[ii[i]] + dy[h];\n\n\t\t\twhile (j < n && (xx[ii[j]] < x || xx[ii[j]] == x && yy[ii[j]] < y))\n\t\t\t\tj++;\n\t\t\tif (j < n && xx[ii[j]] == x && yy[ii[j]] == y) {\n\t\t\t\tjoin(ii[i] * 8 + h, ii[j] * 8 + h ^ 2);\n\t\t\t\tjj[ii[i]][h] = ii[j];\n\t\t\t} else\n\t\t\t\tjj[ii[i]][h] = -1;\n\t\t}\n\tdfs(-1, 0);\n\tfor (i = 0; i < n; i++)\n\t\tif (!ta[i]) {\n\t\t\tprintf(\"NO\\n\");\n\t\t\treturn 0;\n\t\t}\n\ti = ii[0], h = 0, k = 0;\n\tdo {\n\t\thh[i] = h, kk[i]++, ii_[k++] = i * 4 + h;\n\t\tif (jj[i][h + 4] != -1)\n\t\t\ti = jj[i][h + 4], h = (h + 3) % 4;\n\t\telse if (jj[i][h] != -1)\n\t\t\ti = jj[i][h];\n\t\telse\n\t\t\th = (h + 1) % 4;\n\t} while (i != ii[0] || h != 0);\n\tfor (h = 0; h < k; h++)\n\t\tnext[ii_[h]] = ii_[(h + 1) % k], prev[ii_[(h + 1) % k]] = ii_[h];\n\tfor (h = 0; h < k; h++)\n\t\tif (ok(ii_[h]))\n\t\t\tpq_add(ii_[h] / 4);\n\t\telse\n\t\t\tpq_remove(ii_[h] / 4);\n\tn_ = 0;\n\twhile (cnt) {\n\t\tint i_, j_;\n\n\t\ti = pq_first(), pq_remove(i);\n\t\tans[n_++] = i;\n\t\tif (n_ == n)\n\t\t\tbreak;\n\t\tfor (h = 0; h < 8; h++)\n\t\t\tif (jj[i][h] != -1)\n\t\t\t\tjj[jj[i][h]][h ^ 2] = -1, jj[i][h] = -1;\n\t\ti_ = i * 4 + hh[i];\n\t\twhile (i_ / 4 == i)\n\t\t\ti_ = prev[i_];\n\t\tj_ = i * 4 + hh[i];\n\t\twhile (j_ / 4 == i)\n\t\t\tj_ = next[j_];\n\t\tkk[i_ / 4]--, kk[j_ / 4]--;\n\t\ti = i_ / 4, h = i_ % 4, k = 0;\n\t\tdo {\n\t\t\thh[i] = h, kk[i]++, ii_[k++] = i * 4 + h;\n\t\t\tif (jj[i][h + 4] != -1)\n\t\t\t\ti = jj[i][h + 4], h = (h + 3) % 4;\n\t\t\telse if (jj[i][h] != -1)\n\t\t\t\ti = jj[i][h];\n\t\t\telse\n\t\t\t\th = (h + 1) % 4;\n\t\t} while (i != j_ / 4 || h != j_ % 4);\n\t\thh[i] = h, kk[i]++, ii_[k++] = i * 4 + h;\n\t\tfor (h = 0; h + 1 < k; h++)\n\t\t\tnext[ii_[h]] = ii_[h + 1], prev[ii_[h + 1]] = ii_[h];\n\t\tfor (h = 0; h < k; h++)\n\t\t\tif (ok(ii_[h]))\n\t\t\t\tpq_add(ii_[h] / 4);\n\t\t\telse \n\t\t\t\tpq_remove(ii_[h] / 4);\n\t}\n\tprintf(\"YES\\n\");\n\twhile (n_--)\n\t\tprintf(\"%d\\n\", ans[n_] + 1);\n\treturn 0;\n}\n"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 99006518,
+    "contestId": 1076,
+    "creationTimeSeconds": 1605856244,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1076,
+        "index": "D",
+        "name": "Edge Deletion",
+        "type": "PROGRAMMING",
+        "rating": 1800,
+        "tags": [
+            "graphs",
+            "greedy",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1076,
+        "members": [
+            {
+                "handle": "ghr226"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1542033300
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 83558400,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\n#define re register\n#define LenLen long long\ntypedef unsigned int uint;\ntypedef unsigned long long ull;\n#define fir first\n#define sec second\n#define pb push_back\n#define mp make_pair\n\n#define int long long\n\nnamespace IO {\nchar buf_[1 << 21], *p1_ = buf_, *p2_ = buf_;\n#define ch()                                                                 \\\n  (p1_ == p2_ &&                                                             \\\n           (p2_ = (p1_ = buf_) + fread(buf_, 1, 1 << 21, stdin), p1_ == p2_) \\\n       ? EOF                                                                 \\\n       : *p1_++)\ninline int in() {\n  int s = 0, f = 1;\n  char x = getchar();\n  for (; x < '0' || x > '9'; x = getchar())\n    if (x == '-') f = -1;\n  for (; x >= '0' && x <= '9'; x = getchar()) s = (s * 10) + (x & 15);\n  return f == 1 ? s : -s;\n}\nchar _buf[1 << 21];\nint _pos = -1;\ninline void flush() { fwrite(_buf, 1, _pos + 1, stdout), _pos = -1; }\ninline void pc(char x) {\n  if (_pos == (1 << 21) - 1) flush();\n  _buf[++_pos] = x;\n}\ninline void out(int x) {\n  char k[30];\n  int pos = 0;\n  if (!x) return pc('0');\n  if (x < 0) pc('-'), x = -x;\n  while (x) k[++pos] = (x % 10) | 48, x /= 10;\n  for (int i = pos; i; i--) pc(k[i]);\n}\ninline void out(string x) {\n  int len = x.size();\n  for (int i = 0; i < len; i++) pc(x[i]);\n}\n}  // namespace IO\nusing namespace IO;\n\nconst int A = 6e5 + 5;\nconst int INF = 1e18;\nint n, m, K;\n\nstruct Node {\n  int x, y, w;\n  Node(int _x = 0, int _y = 0, int _w = 0) { x = _x, y = _y, w = _w; }\n  inline friend bool operator<(Node u, Node v) {\n    if (u.x != v.x)\n      return u.x < v.x;\n    else if (u.y != v.y)\n      return u.y < v.y;\n    else\n      return u.w < v.w;\n  }\n};\n\nmap<Node, int> cc;\n\nint head[A], tot_road;\nstruct Road {\n  int nex, to, w;\n} road[2 * A];\ninline void edge(int x, int y, int w) {\n  road[++tot_road] = {head[x], y, w}, head[x] = tot_road;\n}\nint dis[A], ex[A], pre[A], val[A];\npriority_queue<pair<int, int> > q;\n\ninline void djk() {\n  for (int i = 1; i <= n; i++) dis[i] = INF, ex[i] = 0;\n  dis[1] = 0;\n  q.push(mp(0, 1));\n  while (!q.empty()) {\n    int x = q.top().second;\n    q.pop();\n    if (ex[x]) continue;\n    ex[x] = 1;\n    for (int y = head[x]; y; y = road[y].nex) {\n      int z = road[y].to, w = road[y].w;\n      if (dis[z] > dis[x] + w) {\n        dis[z] = dis[x] + w;\n        pre[z] = x, val[z] = w;\n        q.push(mp(-dis[z], z));\n      }\n    }\n  }\n  return;\n}\n\nvector<int> r[A];\nint id[A], dep[A];\n\ninline void DFS(int x) {\n  for (int i = 0; i < r[x].size(); i++) {\n    int z = r[x][i];\n    dep[z] = dep[x] + 1;\n    DFS(z);\n  }\n  return;\n}\n\nint t[A], c[A];\n\ninline void Sort() {\n  for (int i = 1; i <= n; i++) t[dep[i]]++;\n  for (int i = 1; i <= n; i++) t[i] += t[i - 1];\n  for (int i = 1; i <= n; i++) c[t[dep[i]]--] = i;\n  return;\n}\n\nsigned main() {\n  n = in(), m = in(), K = in();\n  for (int i = 1; i <= m; i++) {\n    int u = in(), v = in(), w = in();\n    edge(u, v, w), edge(v, u, w);\n    cc.insert(mp(Node(u, v, w), i));\n    cc.insert(mp(Node(v, u, w), i));\n  }\n  djk();\n  for (int i = 2; i <= n; i++)\n    r[pre[i]].pb(i), id[i] = cc[Node(pre[i], i, val[i])];\n  dep[1] = 1;\n  DFS(1);\n  Sort();\n  out(min(K, n - 1)), pc('\\n');\n  for (int i = 2; i <= min(n, K + 1); i++) out(id[i]), pc(' ');\n  pc('\\n');\n  flush();\n  return 0;\n}"
+}

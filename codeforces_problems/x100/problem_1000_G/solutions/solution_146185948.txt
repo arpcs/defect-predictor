@@ -1,0 +1,36 @@
+{
+    "id": 146185948,
+    "contestId": 1000,
+    "creationTimeSeconds": 1644718833,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "The_way_to_Rome"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 2510,
+    "memoryConsumedBytes": 71270400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\nconst int N = 3e5 + 5;\r\nint fir[N],nxt[N<<1],to[N<<1],w[N<<1],ect = 0,n,q,a[N];\r\ninline void addedge(int u1,int v1,int w1)\r\n{\r\n\tnxt[++ect] = fir[u1];fir[u1] = ect;to[ect] = v1;w[ect] = w1;\r\n}\r\nll f[N],g[N],sum[N];\r\nint dep[N],anc[N][20];\r\nint gofa[N];\r\nvoid dfs1(int x,int fa)\r\n{\r\n\tf[x] = 0;\r\n\tdep[x] = dep[fa] + 1;\r\n\tanc[x][0] = fa;\r\n\tfor(int i = 1;i <= 19;i++)\r\n\t\tanc[x][i] = anc[anc[x][i-1]][i-1];\r\n\r\n\tfor(int i = fir[x],y;y=to[i],i;i = nxt[i])\r\n\t{\r\n\t\tif(y == fa) continue;\r\n\t\tgofa[y] = w[i];\r\n\t\tdfs1(y,x);\r\n\t\tf[x] = f[x] + max(0ll,f[y] - 2 * w[i] + a[y]);\r\n\t}\r\n\tfor(int i = fir[x],y;y=to[i],i;i=nxt[i])\r\n\t\tsum[y] = f[x] -  max(0ll,f[y] - 2 * w[i] + a[y]);\r\n}\r\nvoid dfs2(int x,int fa)\r\n{\r\n\tg[x] = max(0ll,g[fa] + f[fa] + a[fa] - 2 * gofa[x] - max(0ll,f[x] - 2*gofa[x] + a[x]));\r\n\tfor(int i = fir[x],y;y=to[i],i;i=nxt[i])\r\n\t{\r\n\t\tif(y == fa) continue;\r\n\t\tdfs2(y,x);\r\n\t}\r\n}\r\ninline int lca(int x,int y)\r\n{\r\n\tif(dep[x] < dep[y]) swap(x,y);\r\n\tfor(int i = 19;i >= 0;i--)\r\n\t\tif(dep[anc[x][i]] >= dep[y])\r\n\t\t\tx = anc[x][i];\r\n\tif(x == y) return x;\r\n\tfor(int i = 19;i >= 0;i--)\r\n\t\tif(anc[x][i] != anc[y][i])\r\n\t\t\tx = anc[x][i],y = anc[y][i];\r\n\treturn anc[x][0];\r\n}\r\ninline int jump(int x,int lim)\r\n{\r\n\tfor(int i = 19;i >= 0;i--)\r\n\t\tif(dep[anc[x][i]] > dep[lim]) x = anc[x][i];\r\n\treturn x;\r\n}\r\n\r\n//sum_u\r\nll Ssum[N],Sf[N],Sa[N],Sw[N];\r\nvoid dfs3(int x,int fa)\r\n{\r\n\tSsum[x] = Ssum[fa] + sum[x];\r\n\tSf[x] = Sf[fa] + f[x];\r\n\tSa[x] = Sa[fa] + a[x];\r\n\tfor(int i = fir[x],y;y=to[i],i;i=nxt[i])\r\n\t\tif(y != fa) Sw[y] = Sw[x] + w[i],dfs3(y,x);\r\n}\r\ninline ll QrySum(int x,int y) { return Ssum[x] - Ssum[anc[y][0]];} //y -> x sum\r\ninline ll Qryf(int x,int y) { return Sf[x] - Sf[anc[y][0]];}\r\ninline ll Qrya(int x,int y)\r\n{\r\n\tint p = lca(x,y);\r\n\treturn Sa[x] + Sa[y] - Sa[p] - Sa[anc[p][0]];\r\n}\r\ninline ll Qryw(int x,int y) \r\n{\r\n\tint p = lca(x,y);\r\n\treturn Sw[x] + Sw[y] - 2 * Sw[p];\r\n}\r\ninline ll chain(int x,int y)\r\n{\r\n\t// int x1 = jump(x,y);\r\n\tif(x == y) return f[x];\r\n\tint x1 = jump(x,y);\r\n\treturn f[x] + QrySum(x,x1);\r\n}\r\nint main()\r\n{\r\n\tscanf(\"%d%d\",&n,&q);\r\n\tfor(int i = 1;i <= n;i++) scanf(\"%d\",&a[i]);\r\n\tfor(int i = 1,u,v,w;i < n;i++)\r\n\t\tscanf(\"%d%d%d\",&u,&v,&w),addedge(u,v,w),addedge(v,u,w);\r\n\tdfs1(1,0);\r\n\tdfs2(1,0);\r\n\tdfs3(1,0);\r\n\r\n\tfor(int _ = 1;_ <= q;_++)\r\n\t{\r\n\t\tint u,v;\r\n\t\tscanf(\"%d%d\",&u,&v);\r\n\t\tif(dep[u] > dep[v]) swap(u,v);\r\n\t\tif(u == v) { printf(\"%lld\\n\",f[u] + g[u] + a[u]);continue;}\r\n\t\tint p = lca(u,v);\r\n\t\tint u1 = jump(u,p),v1 = jump(v,p);\r\n\t\t// printf(\"u,v,p,u1,v1:%d,%d,%d,%d,%d\\n\",u,v,p,u1,v1);\r\n\t\t// printf(\"chain:%lld,%lld\\n\",chain(u,p),chain(v,v1));\r\n\t\t// printf(\"g[p]=%lld\\n\",g[p]);\r\n\t\t// printf(\"turn:%lld\\n\",max(0ll,f[v1] - 2 * gofa[v1] + a[v1]));\r\n\t\t// printf(\"calc:%lld\\n\",Qrya(u,p) + Qrya(v,v1) - Qryw(u,u1) - Qryw(v,v1));\r\n\t\t// f[u] + QrySum()\r\n\t\tbool is_chain = (p == u) || (p == v);\r\n\t\tll ans = chain(u,p) + chain(v,v1) - max(0ll,f[v1] - 2 * gofa[v1] + a[v1]) + g[p];\r\n\t\tans = ans + Qrya(u,v) - Qryw(u,v);\r\n\t\tprintf(\"%lld\\n\",ans);\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

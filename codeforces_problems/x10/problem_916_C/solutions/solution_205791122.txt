@@ -1,0 +1,37 @@
+{
+    "id": 205791122,
+    "contestId": 916,
+    "creationTimeSeconds": 1684045113,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 916,
+        "index": "C",
+        "name": "Jamie and Interesting Graph",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 1600,
+        "tags": [
+            "constructive algorithms",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 916,
+        "members": [
+            {
+                "handle": "ishwarendra"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1516372500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 1228800,
+    "source": "#include \"bits/stdc++.h\"\r\n\r\n#ifdef LOCAL\r\n#include \"F:\\CPP\\Debug\\debug.h\" \r\n#else\r\n#define print(...) 1;\r\n#endif\r\n\r\nusing i64 = long long;\r\n\r\nnamespace nt\r\n{\r\n    std::vector<bool> sieve(const int n)\r\n    {\r\n        std::vector<bool> is_prime(n, true);\r\n        is_prime[0] = is_prime[1] = false;\r\n        for (int i = 2; i * i < n; i++)\r\n        {\r\n            for (int j = i * i; j < n; j += i)\r\n                is_prime[j] = false;\r\n        }\r\n\r\n        return is_prime;\r\n    }\r\n\r\n    std::vector<int> linearSieve(const int n)\r\n    {\r\n        std::vector<bool> is_prime(n, true);\r\n        is_prime[0] = is_prime[1] = false;\r\n\r\n        std::vector<int> prime;\r\n\r\n        for (int i = 2; i < n; i++)\r\n        {\r\n            if (is_prime[i])\r\n                prime.emplace_back(i);\r\n\r\n            for (int j = 0; j < std::size(prime) and i * prime[j] < n; j++)\r\n            {\r\n                is_prime[i * prime[j]] = false;\r\n                if (i % prime[j] == 0)\r\n                    break;\r\n\r\n            }\r\n        }\r\n\r\n        return prime;\r\n    }\r\n\r\n    std::vector<int> minPrime(const int n)\r\n    {\r\n        std::vector<int> min_prime(n);\r\n        std::iota(std::begin(min_prime), std::end(min_prime), 0);\r\n \r\n        for (int i = 2; i * i < n; i++)\r\n        {   \r\n            if (min_prime[i] != i)\r\n                continue;\r\n            for (int j = i * i; j < n; j += i)\r\n                min_prime[j] = std::min(min_prime[j], i);\r\n        }\r\n \r\n        return min_prime;\r\n    }\r\n\r\n    std::vector<int> phiUptoN(const int n)\r\n    {\r\n        std::vector<int> phi(n), prime;\r\n        phi[1] = 1;\r\n\r\n        std::vector<bool> is_prime(n, true);\r\n\r\n        for (int i = 2; i < n; i++)\r\n        {\r\n            if (is_prime[i])\r\n            {\r\n                phi[i] = i - 1;\r\n                prime.emplace_back(i);\r\n            }\r\n\r\n            for (int j = 0; j < std::size(prime) and 1LL * i * prime[j] < n; j++)\r\n            {\r\n                is_prime[i * prime[j]] = false;\r\n\r\n                if (i % prime[j])\r\n                    phi[i * prime[j]] = phi[i] * phi[prime[j]];\r\n                else\r\n                {\r\n                    phi[i * prime[j]] = prime[j] * phi[i];\r\n                    break;\r\n                }\r\n            }\r\n        }\r\n\r\n        return phi;\r\n    }\r\n\r\n    template<class T>\r\n    T phi(T x)\r\n    {\r\n        assert(x > 0);\r\n        T res = 1;\r\n        for (T i = 2; i * i <= x; i++)\r\n        {\r\n            if (x % i)\r\n                continue;\r\n\r\n            T cur = 1;\r\n            while (x % i == 0)\r\n                x /= i, cur *= i;\r\n            res *= (cur - cur / i);\r\n        }\r\n\r\n        if (x > 1)\r\n            res *= (x - 1);\r\n        return res;\r\n    }\r\n};\r\n\r\nint main()\r\n{\r\n    std::ios::sync_with_stdio(false);\r\n    std::cin.tie(nullptr);\r\n    \r\n    int n, m;\r\n    std::cin >> n >> m;\r\n\r\n    constexpr int N = 1e6 + 500;\r\n    auto prime = nt::linearSieve(N);\r\n\r\n    auto id = std::upper_bound(std::begin(prime), std::end(prime), 2 * n - 4) - std::begin(prime);\r\n    int p1 = -1, p2 = -1;\r\n    for (int i = id; i < std::ssize(prime) - 1; i++)\r\n    {\r\n        auto it = std::lower_bound(std::begin(prime) + i + 1, std::end(prime), prime[i]);\r\n        if (it == std::end(prime))\r\n            continue;\r\n        if (!std::binary_search(std::begin(prime), std::end(prime), *it))\r\n            continue;\r\n\r\n        p1 = prime[i];\r\n        p2 = *it;\r\n        break;\r\n    }   \r\n\r\n    std::cout << p2 << \" \" << 2 * n - 4 + p2 << \"\\n\";\r\n\r\n    assert(p1 != -1 && p2 != -1);\r\n    for (int i = 1; i < n - 1; i++)\r\n        std::cout << \"1 \" << i + 1 << \" \" << \"2\\n\";\r\n    std::cout << \"1 \" << n << \" \" << p2 << \"\\n\";\r\n    m -= n - 1;\r\n\r\n    int max = 1e9;\r\n    for (int i = 1; i < n and m > 0; i++)\r\n    {\r\n        for (int j = i + 1; j < n and m > 0; j++)\r\n        {\r\n            std::cout << i + 1 << \" \" << j + 1 << \" \" << max;\r\n            m--;\r\n            max--;\r\n        }\r\n    }\r\n\r\n    return 0;\r\n}"
+}

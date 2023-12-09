@@ -1,0 +1,38 @@
+{
+    "id": 124098580,
+    "contestId": 295,
+    "creationTimeSeconds": 1627547005,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "kiranraj.kkb"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 3788800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing ll = long long;\r\nusing ld = long double;\r\nconst ll MOD = 1e+9 + 7;\r\n\r\nint n, k, arr[55], cnt1, cnt2;\r\nbool visited[55][55][2];\r\npair<int, int> val[55][55][2];\r\n\r\n\r\nll power(ll x, ll y, ll m = MOD) {\r\n    if (y == 0) return 1;\r\n    ll p = power(x, y / 2, m) % m;\r\n    p = (p * p) % m;\r\n    return (y % 2 == 0) ? p : (x * p) % m;\r\n}\r\n\r\nint modInverse(int a, int m) {\r\n    return power(a, m - 2, m);\r\n}\r\n\r\nll choose2(ll n, ll r, ll mod = MOD) {\r\n    ll ans = 1;\r\n    for (ll i = n - r + 1; i <= n; i++)\r\n        ans = ans * i % mod;\r\n    for (int j = 2; j <= r; j++) ans = ans * modInverse(j, mod) % mod;\r\n    return ans;\r\n}\r\n\r\npair<int, int> dp(int c1, int c2, bool left) {\r\n    if (val[c1][c2][left].first) return val[c1][c2][left];\r\n    if (c1 == 0 && c2 == 0) return {0, 1};\r\n    if (visited[c1][c2][left]) return {1e6, 0};\r\n    visited[c1][c2][left] = true;\r\n    pair<int, int> ans = {1e6, 0};\r\n    if (left) {\r\n        int x = min(k / 50, c1);\r\n        for (; x >= 0; x--) {\r\n            auto v = dp(c1 - x, max(0, c2 - (k - x * 50) / 100), false);\r\n            v.second = (ll) v.second * choose2(c1, x) % MOD;\r\n            if (v.first < ans.first) ans = v;\r\n            else if (v.first == ans.first) ans.second += v.second;\r\n        }\r\n    }\r\n    else {\r\n        for (int x = 1; x <= min(k / 50, cnt1 - c1); x++) {\r\n            auto v = dp(c1 + x, c2, true);\r\n            v.second = v.second * choose2(cnt1 - c1, x) % MOD;\r\n            if (v.first < ans.first) ans = v;\r\n            else if (v.first == ans.first) ans.second += v.second;\r\n        }\r\n\r\n        for (int x = 1; x <= min(k / 100, cnt2 - c2); x++) {\r\n            auto v = dp(c1, c2 + x, true);\r\n            v.second = v.second * choose2(cnt2 - c2, x) % MOD;\r\n            if (v.first < ans.first) ans = v;\r\n            else if (v.first == ans.first) ans.second += v.second;\r\n        }\r\n    }\r\n    ans.first++;\r\n    return val[c1][c2][left] = ans;\r\n}\r\n\r\nint main() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(nullptr); cout.tie(nullptr);\r\n    cout << fixed; cout << setprecision(10);\r\n\r\n    cin >> n >> k;\r\n    for (int i = 1; i <= n; i++) cin >> arr[i];\r\n    for (int i = 1; i <= n; i++) cnt1 += arr[i] == 50;\r\n    cnt2 = n - cnt1;\r\n    auto ans = dp(cnt1, cnt2, true);\r\n    if (ans.first >= 1e6) cout << -1 << '\\n' << 0;\r\n    else cout << ans.first << '\\n' << ans.second;\r\n}"
+}

@@ -1,0 +1,35 @@
+{
+    "id": 161924106,
+    "contestId": 241,
+    "creationTimeSeconds": 1656316431,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 241,
+        "index": "E",
+        "name": "Flights",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 241,
+        "members": [
+            {
+                "handle": "StardustQ"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1351783800
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 123,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 1433600,
+    "source": "#include <queue>\r\n#include <cstdio>\r\n#include <vector>\r\nusing namespace std;\r\n\r\nint Abs (int x) { return x < 0 ? -x : x; }\r\nint Max (int x, int y) { return x > y ? x : y; }\r\nint Min (int x, int y) { return x < y ? x : y; }\r\n\r\nint Read () {\r\n    int x = 0, k = 1;\r\n    char s = getchar ();\r\n    while (s < '0' || s > '9') {\r\n        if (s == '-')\r\n            k = -1;\r\n        s = getchar ();\r\n    }\r\n    while ('0' <= s && s <= '9') \r\n        x = (x << 3) + (x << 1) + (s ^ 48), s = getchar ();\r\n    return x * k;\r\n}\r\n\r\nvoid Write (int x) {\r\n    if (x < 0)\r\n        putchar ('-'), x = -x;\r\n    if (x > 9)\r\n        Write (x / 10);\r\n    putchar (x % 10 + '0');\r\n}\r\n\r\nvoid Print (int x, char s) { Write (x), putchar (s); }\r\n\r\n// Dis[v] - 1 >= Dis[u], Dis[u] + 2 >= Dis[v]\r\n// Add_Edge (v, u, -1), Add_Edge (u, v, 2);\r\n\r\nconst int Inf = 1e9;\r\nconst int Maxn = 1e3 + 5;\r\nconst int Maxm = 5e3 + 5;\r\n\r\nstruct Node {\r\n    int v, w;\r\n    Node () {}\r\n    Node (int V, int W) { v = V, w = W; }\r\n};\r\n\r\nstruct Edge {\r\n    int u, v;\r\n    Edge () {}\r\n    Edge (int U, int V) { u = U, v = V; }\r\n};\r\n\r\n\r\nEdge e[Maxm];\r\nvector <Node> Dag[Maxn];\r\nvector <int> Graph[Maxn];\r\nbool Vis[Maxn], Flag[Maxn];\r\nint Dis[Maxn], Cnt[Maxn], n, m;\r\n\r\nvoid Add_Edge (int u, int v) { Graph[u].push_back (v); }\r\nvoid Add_Dag (int u, int v, int w) { Dag[u].push_back (Node (v, w)); }\r\n\r\nvoid Dfs (int u) {\r\n    Vis[u] = true;\r\n    if (u == n) {\r\n        Flag[n] = true;\r\n        return ;\r\n    }\r\n    for (int i = 0, v; i < Graph[u].size (); i++) {\r\n        v = Graph[u][i];\r\n        if (!Vis[v])\r\n            Dfs (v);\r\n        Flag[u] |= Flag[v];\r\n    }\r\n}\r\n\r\nbool Spfa () {\r\n    for (int i = 1; i <= n; i++)\r\n        Dis[i] = Inf, Vis[i] = false;\r\n    queue <int> q; \r\n    q.push (1), Vis[1] = true, Dis[1] = 1;\r\n    while (!q.empty ()) {\r\n        int u = q.front (); q.pop (), Vis[u] = false;\r\n        if (Cnt[u] == n - 1)\r\n            return false;\r\n        Cnt[u]++;\r\n        for (int i = 0, v, w; i < Dag[u].size (); i++) {\r\n            v = Dag[u][i].v, w = Dag[u][i].w;\r\n            if (Dis[v] > Dis[u] + w) {\r\n                Dis[v] = Dis[u] + w;\r\n                if (!Vis[v])\r\n                    q.push (v), Vis[v] = true;\r\n            }\r\n        }\r\n    }\r\n    return true;\r\n}\r\n\r\nint main () {\r\n    n = Read (), m = Read ();\r\n    for (int i = 1; i <= m; i++)\r\n        e[i].u = Read (), e[i].v = Read (), Add_Edge (e[i].u, e[i].v);\r\n    Dfs (1);\r\n    for (int i = 1; i <= m; i++)\r\n        if (Flag[e[i].u] && Flag[e[i].v])\r\n            Add_Dag (e[i].u, e[i].v, 2), Add_Dag (e[i].v, e[i].u, -1);\r\n    if (!Spfa ()) \r\n        printf (\"No\\n\");\r\n    else {\r\n        printf (\"Yes\\n\");\r\n        for (int i = 1; i <= m; i++)\r\n            if (Flag[e[i].u] && Flag[e[i].v])\r\n                Print (Dis[e[i].v] - Dis[e[i].u], '\\n');\r\n            else\r\n                Print (1, '\\n');\r\n    }\r\n    return 0;\r\n}"
+}

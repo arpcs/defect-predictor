@@ -1,0 +1,38 @@
+{
+    "id": 230818416,
+    "contestId": 1778,
+    "creationTimeSeconds": 1698839822,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1778,
+        "index": "E",
+        "name": "The Tree Has Fallen!",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2500,
+        "tags": [
+            "bitmasks",
+            "dfs and similar",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1778,
+        "members": [
+            {
+                "handle": "sak_kn"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1675262100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 25,
+    "timeConsumedMillis": 1169,
+    "memoryConsumedBytes": 108748800,
+    "source": "// LUOGU_RID: 132810931\n#include <cstdio>\r\n#include <cstring>\r\n#include <algorithm>\r\n\r\n#define N 200010\r\n\r\nstruct Base\r\n{\r\n\tint p[32];\r\n\tvoid ins(int x)\r\n\t{\r\n\t\tfor(int i = 30;~i;i--)\r\n\t\t{\r\n\t\t\tif(x & (1 << i))\r\n\t\t\t{\r\n\t\t\t\tif(!p[i])\r\n\t\t\t\t{\r\n\t\t\t\t\tp[i] = x;\r\n\t\t\t\t\tbreak;\r\n\t\t\t\t}\r\n\t\t\t\telse\r\n\t\t\t\t\tx ^= p[i];\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tvoid operator = (const Base &B)\r\n\t{\r\n\t\tfor(int i = 30;~i;i--)\r\n\t\t\tp[i] = B.p[i];\r\n\t}\r\n\tvoid operator += (const Base &B)\r\n\t{\r\n\t\tfor(int i = 30;~i;i--)\r\n\t\t\tins(B.p[i]);\r\n\t}\r\n\tint query_max()\r\n\t{\r\n\t\tint res = 0;\r\n\t\tfor(int i = 30;~i;i--)\r\n\t\t{\r\n\t\t\tif((res ^ p[i]) > res)\r\n\t\t\t\tres ^= p[i];\r\n\t\t}\r\n\t\treturn res;\r\n\t}\r\n\tvoid clear()\r\n\t{\r\n\t\tfor(int i = 30;~i;i--)\r\n\t\t\tp[i] = 0;\r\n\t}\r\n};\r\n\r\nint h[N],e[N << 1],ne[N << 1],idx;\r\nvoid add_edge(int x,int y)\r\n{\r\n\tne[++idx] = h[x];\r\n\th[x] = idx;\r\n\te[idx] = y;\r\n}\r\nvoid add(int x,int y)\r\n{\r\n\tadd_edge(x,y);\r\n\tadd_edge(y,x);\r\n}\r\nBase pre[N],suc[N];\r\nint dfn[N],fdfn[N],dfncnt;\r\nBase sum[N];\r\nint a[N],sz[N];\r\n\r\nint kfa[N][25];\r\n\r\nvoid dfs(int k,int fa)\r\n{\r\n\tdfn[k] = ++dfncnt;\r\n\tkfa[k][0] = fa;\r\n\tfor(int i = 1;i <= 20;i++)\r\n\t\tkfa[k][i] = kfa[kfa[k][i - 1]][i - 1];\r\n\tsz[k] = 1;\r\n\tfdfn[dfncnt] = k;\r\n\tsum[k].ins(a[k]);\r\n\tfor(int i = h[k];~i;i = ne[i])\r\n\t{\r\n\t\tint nx = e[i];\r\n\t\tif(nx == fa)\r\n\t\t\tcontinue;\r\n\t\tdfs(nx,k);\r\n\t\tsum[k] += sum[nx];\r\n\t\tsz[k] += sz[nx];\r\n\t}\r\n}\r\n\r\nint T;\r\nint n,m;\r\n\r\nint main()\r\n{\r\n\tmemset(h,-1,sizeof(h));\r\n\tscanf(\"%d\",&T);\r\n\twhile(T--)\r\n\t{\r\n\t\tscanf(\"%d\",&n);\r\n\t\tfor(int i = 1;i <= n;i++)\r\n\t\t\tscanf(\"%d\",&a[i]);\r\n\t\tfor(int i = 1,x,y;i < n;i++)\r\n\t\t{\r\n\t\t\tscanf(\"%d%d\",&x,&y);\r\n\t\t\tadd(x,y);\r\n\t\t}\r\n\t\tdfs(1,1);\r\n\t\tpre[0].clear();\r\n\t\tfor(int i = 1;i <= n;i++)\r\n\t\t{\r\n\t\t\tpre[i].ins(a[fdfn[i]]);\r\n\t\t\tpre[i] += pre[i - 1];\r\n\t\t}\r\n\t\tsuc[n + 1].clear();\r\n\t\tfor(int i = n;i >= 1;i--)\r\n\t\t{\r\n\t\t\tsuc[i].ins(a[fdfn[i]]);\r\n\t\t\tsuc[i] += suc[i + 1];\r\n\t\t}\r\n\t\tscanf(\"%d\",&m);\r\n\t\tBase now;\r\n\t\tfor(int i = 1,r,v;i <= m;i++)\r\n\t\t{\r\n\t\t\tscanf(\"%d%d\",&r,&v);\r\n\t\t\tnow.clear();\r\n\t\t\tif(r == v)\r\n\t\t\t\tnow = pre[n];\r\n\t\t\telse if(dfn[v] <= dfn[r] && dfn[r] <= dfn[v] + sz[v] - 1)\r\n\t\t\t{\r\n\t\t\t\tint t = r;\r\n\t\t\t\tfor(int i = 20;~i;i--)\r\n\t\t\t\t{\r\n\t\t\t\t\tint f = kfa[t][i];\r\n\t\t\t\t\tif(dfn[v] <= dfn[f] && dfn[f] <= dfn[v] + sz[v] && v != f)\r\n\t\t\t\t\t\tt = f;\r\n\t\t\t\t}\r\n\t\t\t\tint L = dfn[t];\r\n\t\t\t\tint R = dfn[t] + sz[t] - 1;\r\n\t\t\t\tnow = pre[L - 1];\r\n\t\t\t\tnow += suc[R + 1];\r\n\t\t\t\tnow.ins(a[v]);\r\n\t\t\t}\r\n\t\t\telse\r\n\t\t\t\tnow = sum[v];\r\n\t\t\tprintf(\"%d\\n\",now.query_max());\r\n\t\t}\r\n\t\tfor(int i = 1;i <= n;i++)\r\n\t\t{\r\n\t\t\th[i] = -1;\r\n\t\t\tpre[i].clear();\r\n\t\t\tsuc[i].clear();\r\n\t\t\tsum[i].clear();\r\n\t\t\tdfn[i] = fdfn[i] = 0;\r\n\t\t\tsz[i] = 0;\r\n\t\t}\r\n\t\tfor(int i = 1;i <= idx;i++)\r\n\t\t\tne[i] = 0;\r\n\t\tidx = dfncnt = 0;\r\n\t}\t\r\n\treturn 0;\r\n}"
+}

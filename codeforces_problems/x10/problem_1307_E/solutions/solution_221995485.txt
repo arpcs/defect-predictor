@@ -1,0 +1,40 @@
+{
+    "id": 221995485,
+    "contestId": 1307,
+    "creationTimeSeconds": 1693949465,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "E",
+        "name": "Cow and Treats",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2500,
+        "tags": [
+            "binary search",
+            "combinatorics",
+            "dp",
+            "greedy",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "Julto"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 307200,
+    "source": "#include <bits/stdc++.h>\r\n#define int long long\r\nusing namespace std;\r\n\r\nconst int INF = 2e18;\r\n\r\nint n, m, s[5001];\r\nvector<pair<int, int>> sweet[5001];\r\narray<int, 2> sum[5002][2];\r\n\r\narray<int, 2> comb(array<int, 2> a, array<int, 2> b){\r\n    if(a[0] > b[0]){\r\n        return a;\r\n    }\r\n    if(b[0] > a[0]){\r\n        return b;\r\n    }\r\n    return {a[0], a[1] + b[1]};\r\n}\r\n\r\nsigned main(){\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    freopen(\"in.txt\", \"r\", stdin);\r\n    cin >> n >> m;\r\n    for(int i = 1; i <= n; i++){\r\n        cin >> s[i];\r\n    }\r\n    for(int i = 1; i <= m; i++){\r\n        int a, b; cin >> a >> b;\r\n        int cb = b;\r\n        int first = -1, last = -1;\r\n        for(int j = 1; j <= n; j++){\r\n            if(s[j] == a){\r\n                cb--;\r\n                if(cb == 0){\r\n                    first = j;\r\n                    break;\r\n                }\r\n            }\r\n        }\r\n        cb = b;\r\n        for(int j = n; j >= 1; j--){\r\n            if(s[j] == a){\r\n                cb--;\r\n                if(cb == 0){\r\n                    last = j;\r\n                    break;\r\n                }\r\n            }\r\n        }\r\n        if(first != -1 && last != -1){\r\n            sweet[a].push_back({first, last});\r\n        }\r\n    }\r\n    vector<vector<vector<array<int, 2>>>> dp(n + 1, vector<vector<array<int, 2>>> (2, vector<array<int, 2>> (4, {-INF, 0})));\r\n    dp[0][1][0] = {0, 1};\r\n    for(int i = 1; i <= n; i++){\r\n        dp[i][0][0] = {0, 1};\r\n    }\r\n    for(int i = 1; i <= n; i++){\r\n        for(auto j : sweet[i]){\r\n            for(int k = 0; k <= n; k++){\r\n                for(int a = 1; a >= 0; a--){\r\n                    for(int b = 3; b > 0; b--){\r\n                        if(k == j.first && (b & 1)){\r\n                            dp[k][1][b] = comb(dp[k][1][b], {dp[k][a][b ^ 1][0] + 1, dp[k][a][b ^ 1][1]});\r\n                        }\r\n                        if(k > j.first && (b & 1)){\r\n                            dp[k][a][b] = comb(dp[k][a][b], {dp[k][a][b ^ 1][0] + 1, dp[k][a][b ^ 1][1]});\r\n                        }\r\n                        if(k < j.second && (b & 2)){\r\n                            dp[k][a][b] = comb(dp[k][a][b], {dp[k][a][b ^ 2][0] + 1, dp[k][a][b ^ 2][1]});\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n        }\r\n        for(int j = 0; j <= n; j++){\r\n            for(int a = 0; a < 2; a++){\r\n                for(int b = 1; b < 4; b++){\r\n                    //cout << j << \" \" << a << \" \" << b << \" \" << dp[j][a][b][0] << \" \" << dp[j][a][b][1] << '\\n';\r\n                    dp[j][a][0] = comb(dp[j][a][0], {dp[j][a][b]});\r\n                    dp[j][a][b] = {-INF, 0};\r\n                }\r\n            }\r\n        }\r\n    }\r\n    array<int, 2> ans = {0, 0};\r\n    for(int i = 0; i <= n; i++){\r\n        ans = comb(ans, dp[i][1][0]);\r\n    }\r\n    cout << ans[0] << \" \" << ans[1];\r\n}"
+}

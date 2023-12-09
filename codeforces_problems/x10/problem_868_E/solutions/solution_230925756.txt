@@ -1,0 +1,37 @@
+{
+    "id": 230925756,
+    "contestId": 868,
+    "creationTimeSeconds": 1698907550,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 868,
+        "index": "E",
+        "name": "Policeman and a Tree",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2700,
+        "tags": [
+            "dp",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 868,
+        "members": [
+            {
+                "handle": "wdnmdwrnmmp"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1507187100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 265,
+    "memoryConsumedBytes": 512000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n//#define int long long\r\n#define rep(i,j,k) for(int i=(j);i<=(k);i++)\r\n#define per(i,j,k) for(int i=(j);i>=(k);i--)\r\n#define pb push_back\r\n#define mp make_pair\r\n#define fi first\r\n#define se second\r\ntypedef vector<int> vi;\r\ntypedef pair<int,int> pi;\r\n\r\nconst int N=51,inf=1e9;\r\nvoid chmin(int &x,const int &y){\r\n\tif(y<x){\r\n\t\tx=y;\r\n\t}\r\n}\r\nvoid chmax(int &x,const int &y){\r\n\tif(y>x){\r\n\t\tx=y;\r\n\t}\r\n}\r\nint n,m,s;\r\nvector<pi> G[N];\r\nint c[N];\r\nvoid Input(){\r\n\tcin>>n;\r\n\trep(i,1,n-1){\r\n\t\tint u,v,w;cin>>u>>v>>w;\r\n\t\tG[u].pb(mp(v,w));\r\n\t\tG[v].pb(mp(u,w));\r\n\t}\r\n\tcin>>s;\r\n\tcin>>m;\r\n\trep(i,1,m){\r\n\t\tint x;cin>>x;\r\n\t\tc[x]++;\r\n\t}\r\n}\r\nint dis[N][N];\r\nvi leaf[N];\r\nvoid dfs0(int rt,int u,int p){\r\n\tbool flag=1;\r\n\tfor(pi ed:G[u]){\r\n\t\tint v=ed.fi,w=ed.se;\r\n\t\tif(v==p){\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tflag=0;\r\n\t\tdis[rt][v]=dis[rt][u]+w;\r\n\t\tdfs0(rt,v,u);\r\n\t}\r\n\tif(flag){\r\n\t\tleaf[rt].pb(u);\r\n\t}\r\n}\r\nvoid init(){\r\n\trep(i,1,n){\r\n\t\tdfs0(i,i,0);\r\n\t}\r\n}\r\nvoid dfs1(int u,int p,int &num,vi &S){\r\n\tbool flag=1;\r\n\tnum+=c[u];\r\n\tfor(pi ed:G[u]){\r\n\t\tint v=ed.fi;\r\n\t\tif(v==p){\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tflag=0;\r\n\t\tdfs1(v,u,num,S);\r\n\t}\r\n\tif(flag){\r\n\t\tS.pb(u);\r\n\t}\r\n}\r\nint f[N][N];\r\nint dp(int u,int x){\r\n\tif(x==0){\r\n\t\treturn 0;\r\n\t}\r\n\tint &res=f[u][x];\r\n\tif(res!=-1){\r\n\t\treturn res;\r\n\t}\r\n\tvector<vi> g(leaf[u].size()+1,vi(x+1,0));\r\n\tg[0][0]=inf;\r\n\trep(i,0,(int)leaf[u].size()-1){\r\n\t\trep(j,0,x){\r\n\t\t\tchmax(g[i+1][j],g[i][j]);\r\n\t\t\trep(k,1,x-j){\r\n\t\t\t\tchmax(g[i+1][j+k],min(g[i][j],dis[u][leaf[u][i]]+dp(leaf[u][i],x-k)));\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn res=g[leaf[u].size()][x];\r\n}\r\nvoid solve(){\r\n\tinit();\r\n\tmemset(f,0xff,sizeof(f));\r\n\tvector<pair<int,vi>> vs;\r\n\tint num=0;\r\n\tfor(pi ed:G[s]){\r\n\t\tint v=ed.fi;\r\n\t\tvs.pb( mp(0,(vi){}) );\r\n\t\tdfs1(v,s,vs.back().fi,vs.back().se);\r\n\t\tnum+=vs.back().fi;\r\n\t}\r\n\tint ans=inf;\r\n\tfor(auto x:vs){\r\n\t\tif(!x.fi){\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tif(x.se.size()==1){\r\n\t\t\tchmin(ans,dis[s][x.se[0]]+dp(x.se[0],num-x.fi));\r\n\t\t}\r\n\t\telse{\r\n\t\t\tvector<vi> h(x.se.size()+1,vi(x.fi+1,0));\r\n\t\t\th[0][0]=inf;\r\n\t\t\trep(i,0,(int)x.se.size()-1){\r\n\t\t\t\trep(j,0,x.fi){\r\n\t\t\t\t\tchmax(h[i+1][j],h[i][j]);\r\n\t\t\t\t\trep(k,1,x.fi-j){\r\n\t\t\t\t\t\tchmax(h[i+1][j+k],min(h[i][j],dis[s][x.se[i]]+dp(x.se[i],num-k)));\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tchmin(ans,h[x.se.size()][x.fi]);\r\n\t\t}\r\n\t}\r\n\tcout<<ans<<endl;\r\n}\r\nsigned main(){\r\n\t#ifndef ONLINE_JUDGE\r\n\tfreopen(\".in\",\"r\",stdin);\r\n\t#endif\r\n\tios::sync_with_stdio(0);cin.tie(0);cout.tie(0);\r\n\tInput();\r\n\tsolve();\r\n\treturn 0;\r\n}\r\n"
+}

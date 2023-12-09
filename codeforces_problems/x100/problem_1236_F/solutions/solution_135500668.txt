@@ -1,0 +1,38 @@
+{
+    "id": 135500668,
+    "contestId": 1236,
+    "creationTimeSeconds": 1636909024,
+    "relativeTimeSeconds": 4024,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "ProWizard84"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1636905000
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define pb push_back\r\n#define ll long long\r\nconst ll MOD = 1000000007;\r\nint n, m;\r\nvector<vector<int>> g;\r\nvector<int> inv2;\r\nll mult(ll x, ll y) {\r\n\treturn (x * y) % MOD;\r\n}\r\nll add(ll x, ll y) {\r\n\tll r = x + y;\r\n\tif (r >= MOD)\r\n\t\tr -= MOD;\r\n\treturn r;\r\n}\r\nll sub(ll x, ll y) {\r\n\tll r = x - y;\r\n\tif (r < 0) r += MOD;\r\n\treturn r;\r\n}\r\nll pow(ll x, ll e) {\r\n\tif (e == 0) return 1LL;\r\n\tif (e & 1) return mult(x, pow(x, e - 1));\r\n\tll r = pow(x, e / 2);\r\n\treturn mult(r, r);\r\n}\r\nvoid init() {\r\n\tcin >> n >> m;\r\n\tg.resize(n, vector<int>());\r\n\tfor (int i = 1; i <= m; i ++) {\r\n\t\tint x, y; cin >> x >> y; x --; y --;\r\n\t\tg[x].pb(y);\r\n\t\tg[y].pb(x);\r\n\t}\r\n\tinv2.resize(max(n, m)+1);\r\n\tinv2[0] = 1;\r\n\tll inverse2 = pow(2, MOD - 2);\r\n\tfor (int i = 1; i <= max(n, m); i ++)\r\n\t\tinv2[i] = mult(inv2[i-1], inverse2);\r\n}\r\nvector<vector<int>> cycles;\r\nvector<int> vis, st, pos;\r\nvector<vector<int>> vertexCycles;\r\nvoid dfs(int x, int fa) {\r\n\tvis[x] = 1;\r\n\tst.pb(x);\r\n\tpos[x] = st.size() - 1;\r\n\tfor (int y : g[x]) {\r\n\t\tif (vis[y] == 2) continue;\r\n\t\tif (vis[y] == 0)\r\n\t\t\tdfs(y, x);\r\n\t\tif (vis[y] == 1 && y != fa) {\r\n\t\t\tvector<int> newCycle;\r\n\t\t\tfor (unsigned int i = pos[y]; i < st.size(); i ++)\r\n\t\t\t\tnewCycle.pb(st[i]);\r\n\t\t\tcycles.pb(newCycle);\r\n\t\t}\r\n\t}\r\n\tvis[x] = 2;\r\n\tst.pop_back();\r\n}\r\nvoid find_cycles() {\r\n\tpos.resize(n);\r\n\tvis.resize(n, 0);\r\n\tdfs(0, -1);\r\n\tvertexCycles.resize(n, vector<int>());\r\n\tfor (auto c : cycles) {\r\n\t\tfor (int v : c) {\r\n\t\t\tvertexCycles[v].push_back(c.size());\r\n\t\t}\r\n\t}\r\n#ifdef LOCAL\r\n\tcerr << \"Cycles:\" << endl;\r\n\tfor (auto c : cycles) {\r\n\t\tfor (int v : c) {\r\n\t\t\tcerr << v << \" \";\r\n\t\t} cerr << endl;\r\n\t}\r\n#endif\r\n}\r\nll E_vertex() {\r\n\treturn mult(n, inv2[1]);\r\n}\r\nll E_edge() {\r\n\treturn mult(m, inv2[2]);\r\n}\r\nll E_cycle() {\r\n\tint sum = 0;\r\n\tfor (auto c : cycles)\r\n\t\tsum = add(sum, inv2[c.size()]);\r\n\treturn sum;\r\n}\r\nll E_vertex2() {\r\n\tll r = mult(mult(n, n - 1), inv2[2]);\r\n\tr = add(r, mult(n, inv2[1]));\r\n\treturn r;\r\n}\r\nll E_edge2() {\r\n\tll r = 0;\r\n\tfor (int x = 0; x < n; x ++) {\r\n\t\tfor (int y : g[x]) {\r\n\t\t\tif (y > x) continue;\r\n\t\t\tint sibling_edges = g[x].size() - 1 + g[y].size() - 1;\r\n\t\t\tint not_sibling_edges = m - (g[x].size() + g[y].size() - 1);\r\n\t\t\tr = add(r, mult(not_sibling_edges, inv2[4]));\r\n\t\t\tr = add(r, mult(sibling_edges, inv2[3]));\r\n\t\t\tr = add(r, inv2[2]);\r\n\t\t}\r\n\t}\r\n\treturn r;\r\n}\r\nll E_cycle2() {\r\n\tll r = 0;\r\n\tll E_c = E_cycle();\r\n\tfor (auto c : cycles) {\r\n\t\tr = add(r, inv2[c.size()]);\r\n\t\tll E_neighbor_cycle = 0;\r\n\t\tfor (int x : c) {\r\n\t\t\tfor (int cycleSz : vertexCycles[x])\r\n\t\t\t\tE_neighbor_cycle = add(E_neighbor_cycle, inv2[cycleSz]);\r\n\t\t\tE_neighbor_cycle = sub(E_neighbor_cycle, inv2[c.size()]);\r\n\t\t}\r\n\t\tr = add(r, mult(2, mult(inv2[c.size()], E_neighbor_cycle)));\r\n\r\n\t\tll E_free_cycle = sub(sub(E_c, inv2[c.size()]), E_neighbor_cycle);\r\n\t\tr = add(r, mult(inv2[c.size()], E_free_cycle));\r\n\t}\r\n\treturn r;\r\n}\r\nll E_vertex_edge() {\r\n\tll r = 0;\r\n\tfor (int x = 0; x < n; x ++) {\r\n\t\tint sibling_edges = g[x].size();\r\n\t\tint not_sibling_edges = m - g[x].size();\r\n\t\tr = add(r, mult(sibling_edges, inv2[2]));\r\n\t\tr = add(r, mult(not_sibling_edges, inv2[3]));\r\n\t}\r\n\treturn r;\r\n}\r\nll E_vertex_cycle() {\r\n\tll r = 0;\r\n\tll E_c = E_cycle();\r\n\tfor (int x = 0; x < n; x ++) {\r\n\t\tll E_my_cycles = 0;\r\n\t\tfor (int cycleSz : vertexCycles[x])\r\n\t\t\tE_my_cycles = add(E_my_cycles, inv2[cycleSz]);\r\n\t\tr = add(r, E_my_cycles);\r\n\r\n\t\tll E_free_cycles = sub(E_c, E_my_cycles);\r\n\t\tr = add(r, mult(inv2[1], E_free_cycles));\r\n\t}\r\n\treturn r;\r\n}\r\nll E_edge_cycle() {\r\n\tll r = 0;\r\n\tfor (auto c : cycles) {\r\n\t\tint contain_edges = c.size();\r\n\t\tr = add(r, mult(contain_edges, inv2[c.size()]));\r\n\t\tint touch_edges = 0;\r\n\t\tfor (int x : c)\r\n\t\t\ttouch_edges += g[x].size() - 2;\r\n\t\tr = add(r, mult(touch_edges, inv2[c.size()+1]));\r\n\t\tint free_edges = m - contain_edges - touch_edges;\r\n\t\tr = add(r, mult(free_edges, inv2[c.size()+2]));\r\n\t}\r\n\treturn r;\r\n}\r\nvoid work() {\r\n\tfind_cycles();\r\n\tll E_v = E_vertex(), E_e = E_edge(), E_c = E_cycle();\r\n\tll E1 = add(sub(E_v, E_e), E_c);\r\n\tll E_v2 = E_vertex2(), E_e2 = E_edge2(), E_c2 = E_cycle2();\r\n\tll E_ve = E_vertex_edge(), E_vc = E_vertex_cycle(), E_ec = E_edge_cycle();\r\n\tll E2 = add(add(E_v2, E_e2), E_c2);\r\n\tE2 = sub(E2, mult(2, E_ve));\r\n\tE2 = sub(E2, mult(2, E_ec));\r\n\tE2 = add(E2, mult(2, E_vc));\r\n\tll ans = sub(E2, mult(E1, E1));\r\n\tcout << ans << endl;\r\n}\r\nint main() {\r\n\tios_base::sync_with_stdio(false);\r\n\tcin.tie(nullptr);\r\n\twork();\r\n\treturn 0;\r\n}"
+}

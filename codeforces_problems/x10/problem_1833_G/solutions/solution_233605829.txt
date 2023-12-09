@@ -1,0 +1,40 @@
+{
+    "id": 233605829,
+    "contestId": 1833,
+    "creationTimeSeconds": 1700503808,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1833,
+        "index": "G",
+        "name": "Ksyusha and Chinchilla",
+        "type": "PROGRAMMING",
+        "rating": 1800,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "greedy",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1833,
+        "members": [
+            {
+                "handle": "CoderAbhi27"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1684506900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 14,
+    "timeConsumedMillis": 576,
+    "memoryConsumedBytes": 47308800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define int long long\r\n#define INF INT64_MAX\r\n#define pb push_back\r\n#define all(x) (x).begin(),(x).end()\r\n#define rall(x) (x).rbegin(),(x).rend()\r\n#define mii map<int, int>\r\n#define pii pair<int, int>\r\n#define vi vector<int>\r\n#define vb vector<bool>\r\n#define vvi vector<vi>\r\n#define vpii vector<pii>\r\n#define ff first\r\n#define ss second\r\n#define rep(i,x,y) for(int i=x; i<y; i++)\r\n#define setbitsll(n)  __builtin_popcountll(n)\r\n#define setbits(n)  __builtin_popcount(n)\r\n#define yn(f) f?cout<<\"YES\\n\":cout<<\"NO\\n\"\r\n\r\nconst int M=1000000007;\r\n\r\nint lcm(int a, int b){int g=__gcd(a, b); return a/g*b;}\r\n\r\nint fact(int n){n%=M; if(n<=1) return 1; return n*fact(n-1)%M;}\r\n\r\nint powm(int x,int n){\r\n    x%=M;\r\n    if(n==0)return 1; if(n==1)return x;\r\n    int p= powm(x*x,n/2);\r\n    if(n%2) return p*x%M; return p;\r\n}\r\n\r\nint mod_div(int p, int q){ return p*powm(q,M-2)%M;}\r\n\r\nint bitsize(int n){if(n==0) return 0; return 1+bitsize(n>>1);}\r\n\r\n\r\nconst int N=1e7;\r\nvi isPrime, primes;\r\nvoid sieve(){\r\n    isPrime.assign(N+1,1);\r\n    isPrime[0]=0; isPrime[1]=0;\r\n    for(int i=2; i*i<=N; i++) if(isPrime[i]) for(int j=i*i; j<=N; j+=i) isPrime[j]=0;\r\n    //rep(i,2,N+1) if(isPrime[i]) primes.pb(i);\r\n}\r\n\r\n/*-------------------------------------------------------------------------------------------------------------------------------------*/\r\n\r\nvi par, rnk;\r\n\r\nvoid make_set(int n)\r\n{\r\n    par.assign(n+1,0);\r\n    rnk.assign(n+1,1);\r\n    rep(i,1,n+1) par[i]=i;\r\n}\r\n\r\nint find_set(int x)\r\n{\r\n    if(par[x]==x) return x;\r\n    return par[x]=find_set(par[x]);\r\n}\r\n\r\nvoid union_set(int a, int b)\r\n{\r\n    int p1=find_set(a), p2=find_set(b);\r\n    if(p1==p2) return;\r\n    if(rnk[p1]>rnk[p2]){\r\n        par[p2]=p1;\r\n        rnk[p1]+=rnk[p2];\r\n    }\r\n    else{\r\n        par[p1]=p2;\r\n        rnk[p2]+=rnk[p1];\r\n    }\r\n}\r\n\r\n//MST\r\nvoid solve(){\r\n    int n; cin>>n;\r\n    map<pii,int> edge;\r\n    vi order(n+1,0);\r\n    vvi adj(n+1);\r\n    rep(i,1,n)\r\n    {\r\n        int u,v; cin>>u>>v;\r\n        order[u]++;\r\n        order[v]++;\r\n        adj[u].pb(v);\r\n        adj[v].pb(u);\r\n        edge[{u,v}]=i;\r\n        edge[{v,u}]=i;\r\n    }\r\n    if(n%3){\r\n        cout<<\"-1\\n\";\r\n        return;\r\n    }\r\n    make_set(n);\r\n    queue<int> q;\r\n    vi vis(n+1,0);\r\n    rep(i,1,n+1) if(order[i]==1) {q.push(i);}\r\n    set<int> dlt;\r\n    while(!q.empty()){\r\n        int u=q.front();\r\n        vis[u]=1;\r\n        q.pop();\r\n        int v=0;\r\n        for(auto i:adj[u]) if(!vis[i]){\r\n            v=i;\r\n            break;\r\n        }\r\n        if(v==0) continue;\r\n        int p1=find_set(u), p2=find_set(v);\r\n        if(rnk[p1]>=3 || rnk[p2]>=3){\r\n            dlt.insert(edge[{u,v}]);\r\n            //cout<<u<<' '<<v<<' ';\r\n        }\r\n        else{\r\n            union_set(u,v);\r\n        }\r\n        order[v]--;\r\n        if(order[v]==1) q.push(v);\r\n\r\n    }\r\n    rep(i,1,n+1)\r\n    {\r\n        if(rnk[find_set(i)]!=3){\r\n            cout<<\"-1\\n\";\r\n            return;\r\n        }\r\n    }\r\n    cout<<dlt.size()<<'\\n';\r\n    for(auto d:dlt) cout<<d<<' ';\r\n    cout<<'\\n';\r\n}\r\n\r\nint32_t main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n    cout.tie(NULL);\r\n    int t=1;\r\n    cin>>t;\r\n    rep(i,1,t+1){\r\n        //cout<<\"Case #\"<<i<<\": \";\r\n        solve();\r\n    }\r\n\r\n    return 0;\r\n}\r\n"
+}

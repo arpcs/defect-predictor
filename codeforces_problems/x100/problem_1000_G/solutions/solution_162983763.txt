@@ -1,0 +1,36 @@
+{
+    "id": 162983763,
+    "contestId": 1000,
+    "creationTimeSeconds": 1657099577,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "KaJo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 779,
+    "memoryConsumedBytes": 85094400,
+    "source": "/// KoJa\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define task \"test\"\r\n#define pb push_back\r\n#define SZ(a) (a).begin(), (a).end()\r\n#define SZZ(a, Begin, End) (a) + (Begin), (a) + (Begin) + (End)\r\n#define BIT(a) (1LL << (a))\r\n#define vec vector\r\n#define fi first\r\n#define se second\r\n\r\ntypedef long long ll;\r\ntypedef pair<int, int> ii;\r\n\r\ntemplate <class T>\r\ninline bool maximize(T &a, const T &b) { return (a < b ? (a = b, 1) : 0); }\r\ntemplate <class T>\r\ninline bool minimize(T &a, const T &b) { return (a > b ? (a = b, 1) : 0); }\r\nvoid fastio()\r\n{\r\n    ios_base::sync_with_stdio(NULL);\r\n    cin.tie(NULL);\r\n    if (fopen(task \".inp\", \"r\"))\r\n    {\r\n        freopen(task \".inp\", \"r\", stdin);\r\n        freopen(task \".out\", \"w\", stdout);\r\n    }\r\n    else if(fopen(task \".in\", \"r\"))\r\n    {\r\n        freopen(task \".in\", \"r\", stdin);\r\n        freopen(task \".out\", \"w\", stdout);\r\n    }\r\n}\r\nconst int N = int(3e5) + 100;\r\nconst ll INF = 1e18;\r\nvec<vec<ii>> adj(N);\r\nint n, q, a[N], par[N][20], depth[N];\r\nll d[N], dp[N];\r\nvec<ll> dto[N];\r\nvoid dfs1(int u, int p)\r\n{\r\n    d[u] = a[u];\r\n    sort(SZ(adj[u]));\r\n    for(ii v : adj[u])\r\n        if(v.fi != p)\r\n        {\r\n            depth[v.fi] = depth[u] + 1;\r\n            par[v.fi][0] = u;\r\n            dfs1(v.fi, u);\r\n            d[u] += max(0LL, d[v.fi] - 2LL*v.se);\r\n        }\r\n}\r\nvoid dfs2(int u, int p)\r\n{\r\n    dp[u] = a[u];\r\n    dto[u].assign((int)adj[u].size(), 0LL);\r\n    for(int i = 0; i < (int)adj[u].size(); i++)\r\n    {\r\n        int v = adj[u][i].fi;\r\n        int w = adj[u][i].se;\r\n        ll val = max(0LL, d[v] - 2LL*w);\r\n        dp[u] += val;\r\n        dto[u][i] = val;\r\n    }\r\n\r\n    for(int i = 0;  i < (int)adj[u].size(); i++)\r\n    {\r\n        int v = adj[u][i].fi;\r\n        if(v == p)\r\n            continue;\r\n        ll tmp = d[u];\r\n        d[u] = dp[u] - dto[u][i];\r\n        dfs2(v, u);\r\n        d[u] = tmp;\r\n    }\r\n}\r\nint lca(int u, int v)\r\n{\r\n    if(depth[u] < depth[v])\r\n        swap(u, v);\r\n    for(int i = 19; i >= 0; i--)\r\n        if(depth[par[u][i]] >= depth[v])\r\n            u = par[u][i];\r\n    if(u == v)\r\n        return u;\r\n    for(int i = 19; i >= 0; i--)\r\n        if(par[u][i] != par[v][i])\r\n        {\r\n            u = par[u][i];\r\n            v = par[v][i];\r\n        }\r\n    return par[u][0];\r\n}\r\nll getW(int u, int v)\r\n{\r\n    int pos = lower_bound(SZ(adj[u]), ii(v, -1)) - adj[u].begin();\r\n    if((pos >= (int)adj[u].size())||(adj[u][pos].fi != v))\r\n        return 0LL;\r\n    return dto[u][pos];\r\n}\r\nstruct FenwickTree\r\n{\r\n    int n;\r\n    vec<ll> tree;\r\n    FenwickTree(int _n = 0)\r\n    {\r\n        this->n = _n;\r\n        tree.assign(n + 10, 0);\r\n    }\r\n    void update(int i, ll val)\r\n    {\r\n        if(i == 0)\r\n            return;\r\n        for(; i <= n; i += ((i)&(-i)))\r\n            tree[i] += val;\r\n    }\r\n    ll getSum(int i)\r\n    {\r\n        ll res = 0;\r\n        for(; i > 0; i -= ((i)&(-i)))\r\n            res += tree[i];\r\n        return res;\r\n    }\r\n} bit;\r\nvoid init()\r\n{\r\n    cin >> n >> q;\r\n    for(int i = 1; i <= n; i++)\r\n        cin >> a[i];\r\n    for(int i = 1; i <= n - 1; i++)\r\n    {\r\n        int x, y, w;\r\n        cin >> x >> y >> w;\r\n        adj[x].pb(ii(y, w));\r\n        adj[y].pb(ii(x, w));\r\n    }\r\n}\r\nvec<vec<ii>> queries(N);\r\nll ans[N];\r\nvoid calc(int u, int p)\r\n{\r\n    ll add = dp[u] - getW(u, par[u][0]);\r\n    bit.update(depth[u], add);\r\n\r\n    for(ii x : queries[u])\r\n    {\r\n        int id = x.se;\r\n        int w = x.fi;\r\n        ans[id] += bit.getSum(depth[u]) - bit.getSum(depth[w] - 1) + getW(w, par[w][0]);\r\n    }\r\n\r\n    for(int i = 0; i < (int)adj[u].size(); i++)\r\n    {\r\n        int v = adj[u][i].fi;\r\n        int w = adj[u][i].se;\r\n        if(v == p)\r\n            continue;\r\n        ll sub = dto[u][i] + w;\r\n        bit.update(depth[u], -sub);\r\n        calc(v, u);\r\n        bit.update(depth[u], sub);\r\n    }\r\n    bit.update(depth[u], -add);\r\n}\r\nvoid process(const int &tc)\r\n{\r\n    depth[0] = -1;\r\n    depth[1] = 1;\r\n    dfs1(1, -1);\r\n    for(int i = 1; i < 20; i++)\r\n        for(int u = 1; u <= n; u++)\r\n            par[u][i] = par[par[u][i - 1]][i - 1];\r\n    dfs2(1, -1);\r\n    bit = FenwickTree(n);\r\n    for(int i = 1; i <= q; i++)\r\n    {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        int w = lca(u, v);\r\n        queries[u].pb(ii(w, i));\r\n        queries[v].pb(ii(w, i));\r\n        ans[i] = -dp[w];\r\n    }\r\n    calc(1, -1);\r\n    for(int i = 1; i <= q; i++)\r\n        cout << ans[i] << '\\n';\r\n}\r\nint main()\r\n{\r\n    fastio();\r\n    int t = 1;\r\n    //cin >> t;\r\n    for(int i = 1; i <= t; i++)\r\n    {\r\n        init();\r\n        process(i);\r\n    }\r\n    return 0;\r\n}\r\n"
+}

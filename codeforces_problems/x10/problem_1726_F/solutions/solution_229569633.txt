@@ -1,0 +1,38 @@
+{
+    "id": 229569633,
+    "contestId": 1726,
+    "creationTimeSeconds": 1698154235,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "F",
+        "name": "Late For Work (submissions are not allowed)",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 2900,
+        "tags": [
+            "data structures",
+            "greedy",
+            "schedules",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "nguyenquocthinhhung"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 2457600,
+    "source": "#include <bits/stdc++.h>\r\n#define rep(i, l, r) for(int i = (l); i <= (r); i++)\r\n#pragma GCC optimize(\"O3,unroll-loops\")\r\n#pragma GCC target(\"avx2,bmi,bmi2,lzcnt,popcnt\")\r\n\r\nusing namespace std;\r\nusing ll = long long;\r\n\r\nconst int N = 2e5 + 5;\r\nconst ll inf = 1e18;\r\n\r\nstruct IO {\r\n    static const int bufSize = 1 << 17;\r\n    char inBuf[bufSize], *in1, *in2;\r\n    inline __attribute((always_inline))\r\n    int read() {\r\n        if(in1 > inBuf + bufSize - 32) [[unlikely]] {\r\n            auto len = in2 - in1;\r\n            memcpy(inBuf, in1, len);\r\n            in1 = inBuf, in2 = inBuf + len;\r\n            in2 += fread(in2, 1, bufSize - len, stdin);\r\n            if(in2 != inBuf + bufSize) *in2 = 0;\r\n        }\r\n        int res = 0;\r\n        char c;\r\n        while((c = *in1++) < 48);\r\n        while(res = res * 10 + c - 48, (c = *in1++) >= 48);\r\n        return res;\r\n    }\r\n    IO() {\r\n        in1 = inBuf;\r\n        in2 = in1 + fread(in1, 1, bufSize, stdin);\r\n    }\r\n} IO;\r\n\r\nstruct barrett {\r\n    uint32_t m; uint64_t im;\r\n    barrett(uint32_t m) :m(m), im(~0ull / m + 1) {}\r\n    uint32_t mod(uint64_t x)const {\r\n        return x - uint64_t((__uint128_t)x * im >> 64) * m;\r\n    }\r\n};\r\n\r\nint n, t, g[N], c[N], d[N];\r\n\r\ninline int sub(int a, int b) { return (a -= b) < 0 ? a + t : a; }\r\nint main() {\r\n    n = IO.read(), t = IO.read();\r\n    barrett bt(t);\r\n    rep(i, 1, n) {\r\n        g[i] = IO.read(), c[i] = IO.read();\r\n        if(c[i]) c[i] = t - c[i];\r\n        if((g[i] += c[i]) >= t) g[i] -= t;\r\n    }\r\n    d[1] = 0;\r\n    ll sum = 0;\r\n    rep(i, 2, n) {\r\n        int x = IO.read();\r\n        sum += x, d[i] = bt.mod(d[i - 1] + x);\r\n    }\r\n    map<int, ll> p;\r\n    rep(i, 1, n) p[sub(g[i] - 1, d[i])] = 0;\r\n    rep(i, 1, n) {\r\n        int l = sub(g[i], d[i]), r = sub(c[i], d[i]);\r\n        ll mn = inf;\r\n        auto it = p.lower_bound(l);\r\n        if(r < l) {\r\n            while(it != p.end()) mn = min(mn, it->second + r - it->first + t), it = p.erase(it);\r\n            it = p.begin();\r\n        }\r\n        while(it != p.end() && it->first <= r) mn = min(mn, it->second + r - it->first), it = p.erase(it);\r\n        if(mn != inf) p[r] = mn;\r\n    }\r\n    ll ans = inf;\r\n    for(auto [a, b] : p) ans = min(ans, b);\r\n    cout << ans + sum;\r\n}"
+}

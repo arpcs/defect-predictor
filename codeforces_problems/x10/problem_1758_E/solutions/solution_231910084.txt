@@ -1,0 +1,38 @@
+{
+    "id": 231910084,
+    "contestId": 1758,
+    "creationTimeSeconds": 1699434153,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1758,
+        "index": "E",
+        "name": "Tick, Tock",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2500,
+        "tags": [
+            "combinatorics",
+            "dfs and similar",
+            "dsu",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1758,
+        "members": [
+            {
+                "handle": "little_vegetable"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1669390500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 7168000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define ll long long\r\nconst int N=2e5+5;\r\nconst ll mod=1e9+7;\r\nint n,m,H,fa[N];\r\nstruct node{\r\n\tint x,y;\r\n\tfriend node operator+(node A,node B){\r\n\t\tnode res;\r\n\t\tres.x=(A.x+B.x)%H;\r\n\t\tres.y=(A.y+B.y)%H;\r\n\t\treturn res;\r\n\t}\r\n\tfriend bool operator==(node A,node B){\r\n\t\treturn A.x==B.x&&A.y==B.y;\r\n\t}\r\n\tvoid clear(){\r\n\t\tx=y=0;\r\n\t}\r\n}f[N];\r\nvoid init(){\r\n\tfor(int i=1;i<=n*m;i++){\r\n\t\tfa[i]=i;\r\n\t\tf[i].clear();\r\n\t}\r\n}\r\nint a[N];\r\n#define F(i,j) (i-1)*m+j\r\nbool is0;\r\nint Find(int x){\r\n\tif(fa[x]==x){\r\n\t\treturn x;\r\n\t}\r\n\tint res=Find(fa[x]);\r\n\tf[x]=f[x]+f[fa[x]];\r\n\treturn fa[x]=res;\r\n}\r\nvoid merge(int u,int v,node w){\r\n\tu=Find(u),v=Find(v);\r\n\tif(u==v){\r\n\t\tis0|=!(f[v]+w==f[u]);\r\n\t}else{\r\n\t\tfa[v]=u;\r\n\t\tf[v]=w;\r\n\t}\r\n}\r\nvector<pair<int,int> >E[N];\r\nint visx[N],visy[N];\r\nint solve(){\r\n\tis0=false;\r\n\tscanf(\"%d%d%d\",&n,&m,&H);\r\n\tinit();\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tvisx[i]=0;\r\n\t}\r\n\tfor(int i=1;i<=m;i++){\r\n\t\tvisy[i]=0;\r\n\t}\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tfor(int j=1;j<=m;j++){\r\n\t\t\tE[F(i,j)].clear();\r\n\t\t}\r\n\t}\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tfor(int j=1;j<=m;j++){\r\n\t\t\tscanf(\"%d\",&a[F(i,j)]);\r\n\t\t}\r\n\t}\r\n\tint res=n+m-2;\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tint tmp=0;\r\n\t\tfor(int j=1;j<=m;j++){\r\n\t\t\tif(~a[F(i,j)]){\r\n\t\t\t\tres=n+m-3;\r\n\t\t\t\tif(tmp){\r\n\t\t\t\t\tmerge(F(i,tmp),F(i,j),node{0,(a[F(i,j)]-a[F(i,tmp)]+H)%H});\r\n\t\t\t\t}\r\n\t\t\t\ttmp=j;\r\n\t\t\t\tif(is0){\r\n\t\t\t\t\treturn 0;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tfor(int j=1;j<=m;j++){\r\n\t\tint tmp=0;\r\n\t\tfor(int i=1;i<=n;i++){\r\n\t\t\tif(~a[F(i,j)]){\r\n\t\t\t\tres=n+m-3;\r\n\t\t\t\tif(tmp){\r\n\t\t\t\t\tmerge(F(tmp,j),F(i,j),node{(a[F(i,j)]-a[F(tmp,j)]+H)%H,0});\r\n\t\t\t\t}\r\n\t\t\t\ttmp=i;\r\n\t\t\t\tif(is0){\r\n\t\t\t\t\treturn 0;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tfor(int j=1;j<=m;j++){\r\n\t\t\tif(~a[F(i,j)]){\r\n\t\t\t\tE[Find(F(i,j))].push_back(make_pair(i,j));\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tfor(int i=1;i<=n*m;i++){\r\n\t\tint tmpx=0,tmpy=0;\r\n\t\tfor(int j=0;j<E[i].size();j++){\r\n\t\t\tint x=E[i][j].first,y=E[i][j].second;\r\n\t\t\tif(!visx[x]){\r\n\t\t\t\ttmpx++;\r\n\t\t\t\tif(tmpx>=2){\r\n\t\t\t\t\tres--;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tvisx[x]=1;\r\n\t\t\tif(!visy[y]){\r\n\t\t\t\ttmpy++;\r\n\t\t\t\tif(tmpy>=2){\r\n\t\t\t\t\tres--;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tvisy[y]=1;\r\n\t\t}\r\n\t}\r\n\tll ans=1;\r\n\tfor(int i=1;i<=res;i++){\r\n\t\tans=ans*H%mod;\r\n\t}\r\n\treturn ans;\r\n}\r\nint main(){\r\n\tint T;\r\n\tscanf(\"%d\",&T);\r\n\twhile(T--){\r\n\t\tprintf(\"%d\\n\",solve());\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

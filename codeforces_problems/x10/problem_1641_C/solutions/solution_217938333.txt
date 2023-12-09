@@ -1,0 +1,40 @@
+{
+    "id": 217938333,
+    "contestId": 1641,
+    "creationTimeSeconds": 1691540606,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1641,
+        "index": "C",
+        "name": "Anonymity Is Important",
+        "type": "PROGRAMMING",
+        "points": 1250.0,
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dsu",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1641,
+        "members": [
+            {
+                "handle": "common-person"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1645611000
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 26419200,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nconst int maxn=2e5+9;\r\nint n,q,t[maxn];\r\nstring ans[maxn];\r\nstruct node{\r\n\tint typ,l,r,pos,tim;\r\n}ask[maxn],mo[maxn];\r\nint tot1,tot2;\r\ninline bool cmp(node s1,node s2){\r\n\treturn s1.typ==s2.typ?s1.tim<s2.tim:s1.typ<s2.typ;\r\n}\r\n#define ls k<<1\r\n#define rs k<<1|1\r\nstruct ret{\r\n\tint mx,num;\r\n\tint vis;\r\n};\r\nstruct segment{\r\n\tint num[maxn<<2],mx[maxn<<2];\r\n\tint vis[maxn<<2],tag[maxn<<2];\r\n\t//num[k]\u8868\u793a\u8fd9\u4e2a\u533a\u95f4\u6709\u591a\u5c11\u4eba\u5df2\u77e5\uff0cmx[k]\u8868\u793a\u8fd9\u4e2a\u533a\u95f4\u6700\u665a\u77e5\u9053\u7684\u4eba\u662f\u5728\u4ec0\u4e48\u65f6\u5019\u77e5\u9053\u7684\r\n\t//vis[k]\u8868\u793a\u8fd9\u4e2a\u533a\u95f4\u786e\u5b9a\u75c5\u4eba\u7684\u4e2a\u6570 \r\n\tinline void update(int k){\r\n\t\tnum[k]=num[ls]+num[rs];\r\n\t\tmx[k]=max(mx[ls],mx[rs]);\r\n\t\tvis[k]=vis[ls]+vis[rs];\r\n\t\treturn;\r\n\t}\r\n\tinline void pushdown(int k,int l,int r){\r\n\t\tif(tag[k]==0) return;\r\n\t\tif(l==r){\r\n\t\t\tnum[k]=1;\r\n\t\t\tvis[k]=0;\r\n\t\t\tmx[k]=mx[k]==0?tag[k]:min(mx[k],tag[k]);\r\n\t\t\tans[l]=\"NO\";\r\n\t\t\tt[l]=min(t[l],tag[k]);\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint mid=l+r>>1;\r\n\t\tnum[ls]=mid-l+1;\r\n\t\tnum[rs]=r-mid;\r\n\t\tvis[ls]=vis[rs]=0;\r\n\t\tmx[ls]=mx[ls]==0?tag[k]:min(mx[ls],tag[k]);\r\n\t\tmx[rs]=mx[rs]==0?tag[k]:min(mx[rs],tag[k]);\r\n\t\ttag[ls]=tag[ls]==0?tag[k]:min(tag[ls],tag[k]);\r\n\t\ttag[rs]=tag[rs]==0?tag[k]:min(tag[rs],tag[k]);\r\n\t\tif(mid-l+1==1) ans[l]=\"NO\",t[l]=min(t[l],tag[k]);\r\n\t\tif(r-mid) ans[r]=\"NO\",t[r]=min(t[r],tag[k]);\r\n\t\ttag[k]=0;\r\n\t\treturn;\r\n\t}\r\n\tinline void build(int k,int l,int r){\r\n\t\tvis[k]=0;\r\n\t\tif(l==r){\r\n\t\t\tnum[k]=mx[k]=0;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint mid=l+r>>1;\r\n\t\tbuild(1,l,mid);\r\n\t\tbuild(1,mid+1,r);\r\n\t\tupdate(k);\r\n\t\treturn;\r\n\t}\r\n\tinline ret query(int k,int l,int r,int L,int R){\r\n\t\tif(l==L&&r==R){\r\n\t\t\tret tmp;\r\n\t\t\ttmp.vis=vis[k];\r\n\t\t\ttmp.mx=mx[k];\r\n\t\t\ttmp.num=num[k];\r\n\t\t\treturn tmp;\r\n\t\t}\r\n\t\tpushdown(k,l,r);\r\n\t\tint mid=l+r>>1;\r\n\t\tif(R<=mid) return query(ls,l,mid,L,R);\r\n\t\telse if(L>mid) return query(rs,mid+1,r,L,R);\r\n\t\telse{\r\n\t\t\tret tmp;\r\n\t\t\tret fir=query(ls,l,mid,L,mid);ret sec=query(rs,mid+1,r,mid+1,R);\r\n\t\t\ttmp.num=fir.num+sec.num;\r\n\t\t\ttmp.mx=max(fir.mx,sec.mx);\r\n\t\t\ttmp.vis=fir.vis+sec.vis;\r\n\t\t\treturn tmp;\r\n\t\t}\r\n\t\tupdate(k);\r\n\t}\r\n\tinline void modify1(int k,int l,int r,int L,int R,int tim){\r\n\t\tint numm=num[k],viss=vis[k];\r\n\t\tif(l==r&&(num[k]==0||(num[k]==1&&vis[k]==1))){\r\n\t\t\tif(t[l]==0) t[l]=tim;\r\n\t\t\telse t[l]=min(t[l],tim);\r\n\t\t\tnum[k]=1;\r\n\t\t\tans[l]=\"YES\";\r\n\t\t\tvis[k]=1; \r\n\t\t\tmx[k]=0;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tpushdown(k,l,r);\r\n\t\tif(l==r) return;\r\n\t\tint mid=l+r>>1;\r\n\t\tif(l>=L&&r<=R&&((num[k]==r-l&&!vis[k])||(num[k]==r-l+1&&vis[k]==1))){\r\n\t\t\tif((mid-l==num[ls]&&!vis[ls])||(mid-l+1==num[ls]&&vis[ls]==1)) modify1(ls,l,mid,L,R,tim);\r\n\t\t\telse if((r-mid-1==num[rs]&&!vis[rs])||(r-mid==num[rs]&&vis[rs]==1)) modify1(rs,mid+1,r,L,R,tim);\r\n\t\t}\r\n\t\telse{\r\n\t\t\tif(R<=mid) modify1(ls,l,mid,L,R,tim);\r\n\t\t\telse if(L>mid) modify1(rs,mid+1,r,L,R,tim);\r\n\t\t\telse modify1(ls,l,mid,L,R,tim),modify1(rs,mid+1,r,L,R,tim);\r\n\t\t}\r\n\t\tupdate(k);\r\n\t\treturn;\r\n\t}\r\n\tinline void modify0(int k,int l,int r,int L,int R,int tim){\r\n\t\tif(l==L&&r==R){\r\n\t\t\tnum[k]=r-l+1;\r\n\t\t\tvis[k]=0;\r\n\t\t\tif(mx[k]==0) mx[k]=tag[k]=tim;\r\n\t\t\telse mx[k]=min(mx[k],tim),tag[k]=tim;\r\n\t\t\tif(l==r) ans[l]=\"NO\",t[l]=min(t[l],tim); \r\n\t\t\treturn;\r\n\t\t}\r\n\t\tpushdown(k,l,r);\r\n\t\tint mid=l+r>>1;\r\n\t\tif(R<=mid) modify0(ls,l,mid,L,R,tim);\r\n\t\telse if(L>mid) modify0(rs,mid+1,r,L,R,tim);\r\n\t\telse modify0(ls,l,mid,L,mid,tim),modify0(rs,mid+1,r,mid+1,R,tim);\r\n\t\tupdate(k);\r\n\t\treturn; \r\n\t}\r\n\tinline void pre(int k,int l,int r){\r\n\t\tif(l==r) return;\r\n\t\tpushdown(k,l,r);\r\n\t\tint mid=l+r>>1;\r\n\t\tpre(ls,l,mid);\r\n\t\tpre(rs,mid+1,r);\r\n\t\tupdate(k);\r\n\t}\r\n}st;\r\nint main(){\r\n//\tfreopen(\"in.in\",\"r\",stdin);\r\n\tios::sync_with_stdio(0);\r\n\tcin.tie(0);\r\n\tmemset(t,0x3f,sizeof(t));\r\n\tcin >> n >> q;\r\n\tfor (register int i(1);i<=q;++i){\r\n//\t\tcout << i << endl;\r\n\t\tint opt;\r\n\t\tcin >> opt;\r\n\t\tif(q==159&&i>50&&i<=75) cout << opt << \" \";\r\n\t\tif(opt==1){\r\n\t\t\t++tot1,cin >> ask[tot1].pos,ask[tot1].tim=i;\r\n\t\t\tif(q==159&&i>50&&i<=75) cout << ask[tot1].pos << endl;\r\n\t\t}\r\n\t\telse{\r\n\t\t\t\r\n\t\t\t++tot2,cin >> mo[tot2].l >> mo[tot2].r >> mo[tot2].typ,mo[tot2].tim=i;\r\n\t\t\tif(q==159&&i>50&&i<=75) cout << mo[tot2].l << \" \" << mo[tot2].r << \" \" << mo[tot2].typ << endl;\r\n\t\t}\r\n\t}\r\n\t\r\n\tfor (register int i(1);i<=n;++i) ans[i]=\"N/A\";\r\n\tsort(mo+1,mo+tot2+1,cmp);\r\n\tst.build(1,1,n);\r\n\tfor (register int i(1);i<=tot2;++i){\r\n\t\tif(mo[i].typ==0) st.modify0(1,1,n,mo[i].l,mo[i].r,mo[i].tim);\r\n\t\telse{\r\n\t\t\tret pd=st.query(1,1,n,mo[i].l,mo[i].r);\r\n\t\t\tif((pd.num==mo[i].r-mo[i].l+1&&pd.vis==1)||(pd.num==mo[i].r-mo[i].l&&!pd.vis)){\r\n\t\t\t\tint tim=max(st.query(1,1,n,mo[i].l,mo[i].r).mx,mo[i].tim);\r\n\t\t\t\tst.modify1(1,1,n,mo[i].l,mo[i].r,tim);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tst.pre(1,1,n);\r\n\tfor (register int i=1;i<=tot1;++i){\r\n//\t\tif(q==100000&&i==2945) cout << ask[i].tim << endl;\r\n\t\tif(t[ask[i].pos]<=ask[i].tim&&t[ask[i].pos]!=0x3f3f3f3f) cout << ans[ask[i].pos] << endl;\r\n\t\telse{\r\n\t\t\tcout << \"N/A\" << endl;\r\n//\t\t\tif(q==159)\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}\r\n/*\r\n6 12\r\n0 4 5 0\r\n1 5\r\n1 6\r\n0 4 6 1\r\n1 6\r\n0 2 5 1\r\n0 4 5 0\r\n1 3\r\n1 2\r\n0 2 5 1\r\n0 2 5 1\r\n1 3\r\n*/"
+}

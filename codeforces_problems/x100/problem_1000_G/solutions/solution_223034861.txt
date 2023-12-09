@@ -1,0 +1,36 @@
+{
+    "id": 223034861,
+    "contestId": 1000,
+    "creationTimeSeconds": 1694494025,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "ArashJafariyan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\nusing ll = long long;\nusing pii = array<int, 2>;\n\n#define pb push_back\n\nconst int LG = 18 + 1, N = 3e5 + 4;\n\nstruct Info {\n    int pr = 0, ru = -1, rd = -1;\n};\n\nint n, q, a[N], h[N], e[N];\nll dpd[N], dpu[N], s[N];\nvector<pii> g[N];\nInfo anc[N][LG];\n\nvoid pre(int v, int p) {\n    for (auto [u, w] : g[v]) {\n        if (u ^ p) {\n            h[u] = h[v] + 1;\n            e[u] = w;\n            pre(u, v);\n        }\n    }\n}\n\nvoid dfsd(int v, int p) {\n    for (auto [u, w] : g[v]) {\n        if (u ^ p) {\n            dfsd(u, v);\n            ll t = dpd[u] + a[u] - (e[u] << 1);\n            if (t > 0) {\n                dpd[v] += t;\n            }\n        }\n    }\n}\n\nvoid dfsu(int v, int p) {\n    s[v] = max(1ll * a[v], a[v] + dpu[v]);\n    for (auto [u, w] : g[v]) {\n        if (u ^ p) {\n            ll t = dpd[u] + a[u] - (e[u] << 1);\n            if (t > 0) {\n                s[v] += t;\n            }\n        }\n    }\n    for (auto [u, w] : g[v]) {\n        if (u ^ p) {\n            dpu[u] = s[v] - (e[u] << 1);\n            ll t = dpd[u] + a[u] - (e[u] << 1);\n            if (t > 0) {\n                dpu[u] -= t;\n            }\n            dfsu(u, v);\n        }\n    }\n    s[v] -= max(1ll * a[v], a[v] + dpu[v]);\n}\n\nInfo mrg(Info x, Info y) {\n    Info ret;\n    ret.ru = y.ru;\n    ret.rd = y.rd;\n\n    int v = x.ru, u = x.rd;\n    ret.pr = x.pr + y.pr;\n    ll t = dpd[u] + a[u] - (e[u] << 1);\n    if (t > 0) {\n        ret.pr -= t;    \n    }\n    return ret;\n}\n\nvoid calc(int v, int p) {\n    for (int i = 1; i < LG; ++i) {\n        int u = anc[v][i - 1].ru;\n        if (u ^ -1) {\n            anc[v][i] = mrg(anc[v][i - 1], anc[u][i - 1]);\n        }\n    }\n\n    for (auto [u, w] : g[v]) {\n        if (u ^ p) {\n            anc[u][0].pr = s[u] + a[u] - e[u];\n            anc[u][0].rd = u;\n            anc[u][0].ru = v;\n            calc(u, v);\n        }\n    }\n}\n\nint lca(int v, int u) {\n    if (h[v] < h[u]) {\n        swap(v, u);\n    }\n    \n    int dif = h[v] - h[u];\n    for (int i = 0; i < LG; ++i) {\n        if ((1 << i) & dif) {\n            v = anc[v][i].ru;        \n        }\n    }\n    if (v == u) {\n        return v;\n    }\n \n    for (int i = LG - 1; i >= 0; --i) {\n        if (anc[v][i].ru != anc[u][i].ru) {\n            v = anc[v][i].ru;\n            u = anc[u][i].ru;\n        }\n    }\n    return anc[v][0].ru;\n}\n\nint main() {\n    ios::sync_with_stdio(0);\n    cin.tie(0);\n\n    cin >> n >> q;\n    for (int i = 0; i < n; ++i) {\n        cin >> a[i];\n    }\n    for (int i = 0; i < n - 1; ++i) {\n        int v, u, w;\n        cin >> v >> u >> w;\n        --v, --u;\n        g[v].pb({u, w});\n        g[u].pb({v, w});\n    }\n\n    pre(0, 0);\n    dfsd(0, 0);\n    dfsu(0, 0);\n    calc(0, 0);\n\n\n    while (q--) {\n        int v, u;\n        cin >> v >> u;\n        --v, --u;\n        \n        if (v == u) {\n            ll out = dpd[v];\n            out += dpu[v];\n            out += a[v];\n            cout << out; \n        }\n        else {\n            int w = lca(v, u);\n            if (w == v || w == u) {\n                if (h[v] > h[u]) {\n                    swap(v, u);\n                }\n                \n                ll out = 0;\n                int y = u;\n                for (int i = LG - 1; i >= 0; --i) {\n                    int x = anc[u][i].ru;\n                    if (x != -1 && h[x] >= h[v]) {\n                        out += anc[u][i].pr;\n                        y = anc[u][i].rd;\n                        u = x;\n                    }\n                }\n                out += s[v];\n                ll t = dpd[y] + a[y] - (e[y] << 1);\n                if (t > 0) {\n                    out -= t;\n                }\n                out += a[v];\n                out += dpu[v];\n                cout << out;\n            }\n            else {\n                ll out = 0;\n                int y = u;\n                int z = v;\n                for (int i = LG - 1; i >= 0; --i) {\n                    int x = anc[u][i].ru;\n                    if (x != -1 && h[x] >= h[w]) {\n                        out += anc[u][i].pr;\n                        y = anc[u][i].rd;\n                        u = x;\n                    }\n                    x = anc[v][i].ru;\n                    if (x != -1 && h[x] >= h[w]) {\n                        out += anc[v][i].pr;\n                        z = anc[v][i].rd;\n                        v = x;\n                    }\n                }\n                out += s[w];\n                ll t = dpd[y] + a[y] - (e[y] << 1);\n                if (t > 0) {\n                    out -= t;\n                }\n                t = dpd[z] + a[z] - (e[z] << 1);\n                if (t > 0) {\n                    out -= t;\n                }\n                out += a[w];\n                out += dpu[w];\n                cout << out;\n            }\n        }\n        cout << '\\n';\n    }\n\n    return 0;\n}\n\n\n"
+}

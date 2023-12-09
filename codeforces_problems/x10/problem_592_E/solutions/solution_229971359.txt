@@ -1,0 +1,37 @@
+{
+    "id": 229971359,
+    "contestId": 592,
+    "creationTimeSeconds": 1698391387,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 592,
+        "index": "E",
+        "name": "BCPC",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2700,
+        "tags": [
+            "binary search",
+            "geometry",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 592,
+        "members": [
+            {
+                "handle": "Nerovix"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1446309000
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 52,
+    "timeConsumedMillis": 2635,
+    "memoryConsumedBytes": 261222400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define ll long long\r\n#define db long double\r\n#define pb push_back\r\n#define pii pair<int,int>\r\n#define fi first\r\n#define se second\r\n#define pb push_back\r\n#define mpr make_pair\r\n\r\n// #define int ll\r\n\r\nconst int mod=998244353;\r\nint add(int x,int y){\r\n    x+=y;\r\n    return x>=mod?x-mod:x;\r\n}\r\nvoid adto(int&x,int y){\r\n    x+=y;\r\n    x>=mod?x-=mod:x;\r\n}\r\nint mul(int x,int y){\r\n    return 1ll*x*y%mod;\r\n}\r\nint qpow(int a,int b){\r\n    int ans=1;\r\n    while(b){\r\n        if(b&1)ans=mul(ans,a);\r\n        a=mul(a,a);b>>=1;\r\n    }\r\n    return ans;\r\n}\r\n\r\nconst int maxn=16e5+10;\r\nconst db eps=1e-11;\r\nconst db pi=acos(-1);\r\n\r\nint n;\r\nint c,d;\r\ndb normalize(db x){\r\n    while(x<-pi)x+=pi*2;\r\n    while(x>=pi)x-=pi*2;\r\n    return x;\r\n}\r\nstruct point{\r\n    int x,y;\r\n    db t;\r\n    int lsht;\r\n    int id;\r\n    void set(int _x,int _y){\r\n        x=_x,y=_y;\r\n        t=atan2(y,x);\r\n        t=normalize(t);\r\n    }\r\n    friend bool operator<(point a,point b){\r\n        return a.t<b.t;\r\n    }\r\n}p[maxn<<1];\r\npair<int,int>ddd(pair<int,int>p){\r\n    int g=__gcd(abs(p.fi),abs(p.se));\r\n    return mpr(p.fi/g,p.se/g);\r\n}\r\nll sum[maxn<<1],ss[maxn<<1];\r\nll sumsum[maxn<<1];\r\nvoid solve(){\r\n    cin>>n>>c>>d;\r\n    for(int i=1;i<=n;i++){\r\n        int x,y;\r\n        cin>>x>>y;\r\n        x-=c,y-=d;\r\n        p[i].set(x,y);\r\n    }\r\n    sort(p+1,p+n+1);\r\n    map<pair<int,int>,pair<int,vector<int> > > mp;\r\n    for(int i=1;i<=n;i++){\r\n        mp[ddd(mpr(p[i].x,p[i].y))].se.pb(i);\r\n        mp[ddd(mpr(-p[i].x,-p[i].y))].fi++;\r\n    }\r\n    \r\n    #define shit pair<pair<int,int>,pair<int,vector<int>>>\r\n    vector<shit>v(mp.begin(),mp.end());\r\n    sort(v.begin(),v.end(),[&](const shit&a,const shit&b){\r\n        db at=atan2(a.fi.se,a.fi.fi);\r\n        db bt=atan2(b.fi.se,b.fi.fi);\r\n        if(abs(at-bt)>pi/2)\r\n        return at<bt;\r\n        return 1ll*a.fi.fi*b.fi.se>1ll*b.fi.fi*a.fi.se;\r\n    });\r\n    int vs=v.size();\r\n    for(int i=0;i<vs;i++){\r\n        // cout<<v[i].fi.fi<<\" \"<<v[i].fi.se<<\" \"<<v[i].se.fi<<\" \"<<v[i].se.se.size()<<\"   laksdjflakjdf\\n\";\r\n        v.pb(v[i]);\r\n    }\r\n    for(int i=0;i<v.size();i++){\r\n        if(i)sum[i]=sum[i-1]+v[i-1].se.fi;\r\n    }\r\n    for(int i=0;i<v.size();i++){\r\n        sumsum[i]=sum[i]*v[i].se.se.size();\r\n        ss[i]=v[i].se.se.size();\r\n        if(i)sumsum[i]+=sumsum[i-1],ss[i]+=ss[i-1];\r\n    }\r\n    // for(int i=0;i<v.size();i++){\r\n    //     cout<<sum[i]<<\" \\n\"[i+1==v.size()];\r\n    // }\r\n    // for(int i=0;i<v.size();i++){\r\n    //     cout<<sumsum[i]<<\" \\n\"[i+1==v.size()];\r\n    // }\r\n    // for(int i=0;i<v.size();i++){\r\n    //     cout<<ss[i]<<\" \\n\"[i+1==v.size()];\r\n    // }\r\n    ll ans=0;\r\n    for(int i=0,j=0;i<vs;i++){\r\n        j=max(i,j);\r\n        while(j+1<v.size()&&1ll*v[i].fi.fi*v[j+1].fi.se>1ll*v[i].fi.se*v[j+1].fi.fi)j++;\r\n        // cout<<i<<\" \"<<j<<\" \"<<sumsum[i]<<\" \"<<sumsum[j]<<\" \"<<sum[i+1]<<\" \"<<ss[j]<<\" \"<<ss[i]<<\" \"<<1ll*v[i].se.se.size()*(sumsum[j]-sumsum[i]-sum[i+1]*(ss[j]-ss[i]))<<\"\\n\";\r\n        ans+=1ll*v[i].se.se.size()*(sumsum[j]-sumsum[i]-sum[i+1]*(ss[j]-ss[i]));\r\n    }\r\n    ans/=3;\r\n    cout<<ans<<\"\\n\";\r\n    \r\n}  \r\n\r\nsigned main(){\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0),cout.tie(0);\r\n    // cout<<fixed<<setprecision(20);\r\n    // srand(time(0));\r\n    int t=1;\r\n    // cin>>t;\r\n    while(t--)solve();\r\n    return 0;\r\n}"
+}

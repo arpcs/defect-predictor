@@ -1,0 +1,36 @@
+{
+    "id": 224253994,
+    "contestId": 587,
+    "creationTimeSeconds": 1695276379,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 587,
+        "index": "F",
+        "name": "Duff is Mad",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3000,
+        "tags": [
+            "data structures",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 587,
+        "members": [
+            {
+                "handle": "juruo_lzy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1444926600
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 87,
+    "timeConsumedMillis": 576,
+    "memoryConsumedBytes": 88064000,
+    "source": "#pragma GCC optimize(\"Ofast\")\r\n#include <bits/stdc++.h>\r\n#define P pair\r\n#define fi first \r\n#define se second \r\n#define bg begin \r\n#define eb emplace_back \r\n#define vec vector\r\n#define mst memset\r\n#define ll long long\r\nusing namespace std; const int N = 4e5 + 5, B = 340; string s;\r\nint n, m, a[N], ord = 26, len, cnt[N], lg[N], sz[N], hd[N]; ll ans[N], sum[N];\r\nvec<int> big; vec<int> pos[N];\r\nstruct BinaryIndexedTree {\r\n    #define lb(x) ((x) & (-(x)))\r\n    int sum[N];\r\n    void init() { mst(sum, 0, sizeof sum); }\r\n    void modify(int x, int v) { for (; x <= len; x += lb(x)) sum[x] += v; }\r\n    int query(int x) { \r\n        int ret = 0; for (; x; x -= lb(x)) ret += sum[x]; return ret;\r\n    }\r\n} bit;\r\nstruct SuffixArray {\r\n    int rk[N], sa[N], ht[N], val[20][N]; P<P<int, int>, int> p[N], tmp[N];\r\n    void init() {\r\n        mst(rk, 0, sizeof rk); mst(val, 0, sizeof val); \r\n        mst(ht, 0, sizeof ht); mst(p, 0, sizeof p);\r\n    }\r\n    void Sort() {\r\n        for (int i = 1; i <= len; ++i) ++cnt[a[i]];\r\n        for (int i = 1; i <= ord; ++i) cnt[i] += cnt[i - 1];\r\n        for (int i = 1; i <= len; ++i) rk[i] = cnt[a[i] - 1] + 1;\r\n        for (int l = 1, id; l <= len; l <<= 1) {\r\n            for (int i = 1; i <= len; ++i)\r\n                p[i] = {{rk[i], i + l > len ? 0 : rk[i + l]}, i};\r\n            mst(cnt, 0, sizeof cnt);\r\n            for (int i = 1; i <= len; ++i) ++cnt[p[i].fi.se];\r\n            for (int i = 1; i <= len; ++i) cnt[i] += cnt[i - 1];\r\n            for (int i = len; i >= 1; --i) tmp[cnt[p[i].fi.se]--] = p[i];\r\n            for (int i = 1; i <= len; ++i) p[i] = tmp[i];\r\n            mst(cnt, 0, sizeof cnt);\r\n            for (int i = 1; i <= len; ++i) ++cnt[p[i].fi.fi];\r\n            for (int i = 1; i <= len; ++i) cnt[i] += cnt[i - 1];\r\n            for (int i = len; i >= 1; --i) tmp[cnt[p[i].fi.fi]--] = p[i];\r\n            for (int i = 1; i <= len; ++i) p[i] = tmp[i]; id = 0;\r\n            for (int i = 1; i <= len; ++i) { \r\n                if (i == 1 || p[i].fi != p[i - 1].fi) ++id; rk[p[i].se] = id; \r\n            }\r\n            if (id == len) break;\r\n        }   \r\n        for (int i = 1; i <= len; ++i) sa[rk[i]] = i;\r\n    }\r\n    void height() {\r\n        for (int i = 1, k = 0; i <= len; ++i) {\r\n            lg[i] = __lg(i); if (rk[i] == 1) { k = 0; continue; }\r\n            if (k) --k; int j = sa[rk[i] - 1];\r\n            for (; i + k <= len && j + k <= len && a[i + k] == a[j + k]; ++k); \r\n            val[0][rk[i]] = ht[i] = k;\r\n        }\r\n        for (int i = 1; (1 << i) <= len; ++i) \r\n            for (int j = 1; j + (1 << i) - 1 <= len; ++j)\r\n                val[i][j] = min(val[i - 1][j], val[i - 1][j + (1 << (i - 1))]);\r\n    }\r\n    int LCP(int l, int r) {\r\n        if (l == r) return len - sa[l] + 1;\r\n        int k = lg[r - l]; return min(val[k][l + 1], val[k][r - (1 << k) + 1]);\r\n    }\r\n} SA;\r\nstruct Query { int id, val, k; }; vector<Query> g[N];\r\nsigned main() {\r\n    cin.tie(0), cout.tie(0), cin.sync_with_stdio(0); cin >> n >> m;\r\n    for (int i = 1; i <= n; ++i) {\r\n        cin >> s; sz[i] = s.size(); hd[i] = len + 1;\r\n        for (int j = 0; j < sz[i]; ++j) a[++len] = s[j] - 'a' + 1; \r\n        a[++len] = ++ord; if (sz[i] > B) big.eb(i);\r\n    }\r\n    SA.init(); SA.Sort(); SA.height(); bit.init();\r\n    for (int i : big)\r\n        for (int j = 1; j <= len; ++j)\r\n            if (SA.sa[j] >= hd[i] && SA.sa[j] < hd[i] + sz[i]) pos[i].eb(j);\r\n    for (int i = 1, l, r, k; i <= m; ++i) {\r\n        cin >> l >> r >> k; \r\n        g[l - 1].eb(Query{i, -1, k}); g[r].eb(Query{i, 1, k});\r\n    }\r\n    for (int i = 1; i <= len; ++i) {\r\n        int l = 1, r = SA.rk[hd[i]], ql, qr;\r\n        while (l <= r) {\r\n            int mid = (l + r) >> 1;\r\n            if (SA.LCP(mid, SA.rk[hd[i]]) >= sz[i]) ql = mid, r = mid - 1;\r\n            else l = mid + 1;\r\n        }\r\n        l = SA.rk[hd[i]], r = len;\r\n        while (l <= r) {\r\n            int mid = (l + r) >> 1;\r\n            if (SA.LCP(SA.rk[hd[i]], mid) >= sz[i]) qr = mid, l = mid + 1;\r\n            else r = mid - 1;\r\n        }\r\n        bit.modify(ql, 1); bit.modify(qr + 1, -1);\r\n        for (int j : big) {\r\n            int l_ = lower_bound(pos[j].bg(), pos[j].end(), ql) - pos[j].bg(), \r\n                r_ = upper_bound(pos[j].bg(), pos[j].end(), qr) - pos[j].bg();\r\n            sum[j] += r_ - l_;\r\n        }\r\n        for (auto j : g[i])\r\n            if (sz[j.k] > B) ans[j.id] += j.val * sum[j.k];\r\n            else for (int k = hd[j.k]; k < hd[j.k] + sz[j.k]; ++k)\r\n                    ans[j.id] += bit.query(SA.rk[k]) * j.val;\r\n    }\r\n    for (int i = 1; i <= m; ++i) cout << ans[i] << '\\n'; return 0;\r\n}"
+}

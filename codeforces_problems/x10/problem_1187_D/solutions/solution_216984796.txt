@@ -1,0 +1,35 @@
+{
+    "id": 216984796,
+    "contestId": 1187,
+    "creationTimeSeconds": 1691065372,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1187,
+        "index": "D",
+        "name": "Subarray Sorting",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "data structures",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1187,
+        "members": [
+            {
+                "handle": "dshfjka"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1561905900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 173,
+    "timeConsumedMillis": 1824,
+    "memoryConsumedBytes": 18329600,
+    "source": "#include <bits/stdc++.h>\r\n#define LL long long\r\n#define int long long\r\nusing namespace std;\r\nLL n;\r\nconst LL maxn=3e5+5;\r\nstruct Segtree {\r\n   \tLL t[4*maxn+5];\r\n\r\n    LL combine(const LL & x, const LL& y) {\r\n        return min(x,y);\r\n    }\r\n\r\n    void build(int v, int s, int e, vector<LL>& a) {\r\n   // \tprintf(\"%lld %lld %lld\\n\",v,s,e);\r\n        if (s == e) {\r\n            t[v] = a[s];\r\n        } else {\r\n            int mid = (s + e) >> 1;\r\n            build(v << 1, s, mid, a);\r\n            build(v << 1 | 1, mid + 1, e, a);\r\n            t[v] = combine(t[v << 1], t[v << 1 | 1]);\r\n          \r\n        }\r\n    //    printf(\"t[%lld]=%lld\\n\",v,t[v]);\r\n    }\r\n    \r\n    LL get(int v, int s, int e, int l, int r) {\r\n        if (e < l || s > r || l > r)\r\n            return 1e18;\r\n        if (l <= s && e <= r)\r\n            return t[v];\r\n        int mid = (s + e) >> 1;\r\n        LL p1 = get(v << 1, s, mid, l, r);\r\n        LL p2 = get(v << 1 | 1, mid + 1, e, l, r);\r\n        return combine(p1, p2);\r\n    }\r\n    void update(LL v, LL l, LL r,LL x,LL idx)\r\n    {\r\n    \tif( l==r){\r\n    \t\tt[v]=1e18;\r\n    \t//\tprintf(\"x=%lld t[%lld]=%lld\\n\",x,v,t[v]);\r\n    \t\treturn;\r\n\t\t}\r\n\t\tLL mid=(l+r)/2;\r\n\t\tif(x<=mid)update(v<<1,l,mid,x,idx);\r\n\t\telse update(v<<1 |1,mid+1,r,x,idx);\r\n\t\tt[v] = combine(t[v << 1], t[v << 1 | 1]);\r\n\t}\r\n};\r\nsigned main()\r\n{\r\n\tLL tc;\r\n\tscanf(\"%lld\",&tc);\r\n\twhile(tc--)\r\n\t{\r\n\t\tscanf(\"%lld\",&n);\r\n\t\tvector<LL>v;\r\n\t\tv.push_back(0);\r\n\t\tLL arr[n+5],brr[n+5];\r\n\t\tfor(LL a=1;a<=n;a++)\r\n\t\t{\r\n\t\t\tLL x;\r\n\t\t\tscanf(\"%lld\",&x);\r\n\t\t\tv.push_back(x);\r\n\t\t}\r\n\t\tfor(LL a=1;a<=n;a++)\r\n\t\t{\r\n\t\t\tscanf(\"%lld\",&brr[a]);\r\n\t\t}\r\n\t\tSegtree s;\r\n\t\ts.build(1,1,n,v);\r\n\t\tLL left=1,right=n;\r\n\t\tbool masuk=false;\r\n\t\tfor(LL a=1;a<=n;a++)\r\n\t\t{\r\n\t\t//\tprintf(\"a=%lld\\n\",a);\r\n\t\t\tleft=1,right=n;\r\n\t\t\tLL ans=-1;\r\n\t\t\twhile(left<=right)\r\n\t\t\t{\r\n\t\t\t\tLL mid=(left+right)/2;\r\n\t\t\r\n\t\t\t\tLL hasil=s.get(1,1,n,1,mid);\r\n\t\t//\t\tprintf(\"mid=%lld dan hasil=%lld\\n\",mid,hasil);\r\n\t\t\t\tif(hasil==brr[a])\r\n\t\t\t\t{\r\n\t\t\t\t\t\r\n\t\t\t\t\tans=mid;\r\n\t\t\t//\t\tprintf(\"MASUK ans=%lld\\n\",ans);\r\n\t\t\t\t\tright=mid-1;\r\n\t\t\t\t}\r\n\t\t\t\telse if(hasil<brr[a])\r\n\t\t\t\t{\r\n\t\t\t\t\tright=mid-1;\r\n\t\t\t\t}\r\n\t\t\t\telse\r\n\t\t\t\t{\r\n\t\t\t\t\tleft=mid+1;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t//\tprintf(\"ans=%lld\\n\",ans);\r\n\t\t\tif(ans==-1){\r\n\t\t\t//\tprintf(\"HALO\\n\");\r\n\t\t\t\tmasuk=1;\r\n\t\t\t\tprintf(\"NO\\n\");\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t\telse\r\n\t\t\t{\r\n\t\t\t\ts.update(1,1,n,ans,1e18);\r\n\t\t\t\tleft=ans;\r\n\t\t\t}\r\n\t\t}\r\n\t\tif(!masuk)printf(\"YES\\n\");\r\n\t}\r\n}"
+}

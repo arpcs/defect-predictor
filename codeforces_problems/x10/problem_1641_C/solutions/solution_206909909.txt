@@ -1,0 +1,40 @@
+{
+    "id": 206909909,
+    "contestId": 1641,
+    "creationTimeSeconds": 1684824848,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1641,
+        "index": "C",
+        "name": "Anonymity Is Important",
+        "type": "PROGRAMMING",
+        "points": 1250.0,
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dsu",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1641,
+        "members": [
+            {
+                "handle": "HHY_zZhu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1645611000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 25702400,
+    "source": "#pragma GCC optimize(\"O3,unroll-loops\")\r\n#pragma GCC target(\"avx2,bmi,bmi2,lzcnt,popcnt\")\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define V vector\r\n#define all0(x) (x).begin(),(x).end()\r\n#define all1(x) (x).begin()+1,(x).end()\r\n#define pb push_back\r\n#define fi first\r\n#define se second\r\n#define lb lower_bound\r\n#define ub upper_bound\r\n#define rep(i,a,b) for(int i=a;i<=b;i++)\r\n#define per(i,a,b) for(int i=a;i>=b;i--)\r\ntypedef long long LL;\r\ntypedef pair<int, int> pi;\r\ntypedef pair<LL, LL> pl;\r\n\r\nconst int MaxN = 2e5 + 20;//MaxN \u8bb0\u5f97\u6539\u4e00\u4e0b\r\nconst int INF = 2e9+1000;//INF\r\nconst LL INFLL = 8e18+1000;//INF long long \r\n//\u6a21\u677f\u533a\u57df~~~~~~~\r\nstruct tag{\r\n\tint st;\r\n}t0={-1};\r\nstruct info{\r\n\tLL tot,am,mn;\r\n}i0{0,0,INF};\r\nstruct node{\r\n\ttag t;\r\n\tinfo i;\t\r\n};\r\ntag operator + (const tag& t1,const tag& t2){\r\n    if(t2.st==-1) return t1;\r\n\treturn t2;\r\n}\r\nbool operator== (const tag& t1,const tag& t2){\r\n    return (t1.st==t2.st);\r\n}\r\ninfo operator +(const info& i,const tag& t){\r\n\treturn {(t.st==-1?i.tot:t.st*i.am),i.am,i.mn};\r\n}\r\ninfo operator +(const info& i1,const info& i2){\r\n\treturn {i1.tot+i2.tot,i1.am+i2.am,min(i1.mn,i2.mn)};\r\n}\r\nnode seg[MaxN*4];\r\nvoid pullup(int x){\r\n\tseg[x].i=seg[x*2].i+seg[x*2+1].i;\r\n}\r\nvoid pushdown(int x){\r\n\tif(seg[x].t==t0) return;\r\n\tseg[x*2].i  =seg[x*2].i  +seg[x].t;\r\n\tseg[x*2+1].i=seg[x*2+1].i+seg[x].t;\r\n\tseg[x*2].t=seg[x*2].t+seg[x].t;\r\n\tseg[x*2+1].t=seg[x*2+1].t+seg[x].t;\r\n\tseg[x].t=t0;\r\n}\r\nvoid build(int x,int l,int r){\r\n\tseg[x].t=t0;\r\n\tif(l==r){\r\n\t\tseg[x].i={1,1,INF};\r\n\t\treturn;\r\n\t}\r\n\tint mid=(l+r)/2;\r\n\tbuild(x*2,l,mid),build(x*2+1,mid+1,r);\r\n\tpullup(x);\r\n}\r\nvoid change(int x,int l,int r,int al,int ar,int d){\r\n\tif(al<=l&&r<=ar) {\r\n\t\tseg[x].i=seg[x].i+tag{d};\r\n\t\tseg[x].t=seg[x].t+tag{d};\r\n\t\treturn;\r\n\t}\r\n\tint mid=(l+r)/2;\r\n\tpushdown(x);\r\n\tif(al<=mid) change(x*2,l,mid,al,ar,d);\r\n\tif(ar>=mid+1) change(x*2+1,mid+1,r,al,ar,d);\r\n\tpullup(x);\r\n}\r\nvoid modify(int x,int l,int r,int p,int d){\r\n    if(l==r&&l==p) {seg[x].i.mn=d;return;}\r\n    int mid=(l+r)/2;\r\n    pushdown(x);\r\n    if(p<=mid) modify(x*2,l,mid,p,d);\r\n    else modify(x*2+1,mid+1,r,p,d);\r\n    pullup(x);\r\n}\r\ninfo query(int x,int l,int r,int ql,int qr){\r\n\tif(ql<=l&&r<=qr) {\r\n\t\treturn seg[x].i;\r\n\t}\r\n\tint mid=(l+r)/2;\r\n\tpushdown(x);\r\n\tinfo ans=i0;\r\n\tif(ql<=mid) ans=ans+query(x*2,l,mid,ql,qr);\r\n\tif(qr>=mid+1) ans=ans+query(x*2+1,mid+1,r,ql,qr);\r\n\treturn ans;\r\n}\r\nint bFind(int x,int l,int r,int tf){\r\n    if(l==r) return l;\r\n\tint mid=(l+r)/2;\r\n\tpushdown(x);\r\n    if(seg[x*2].i.tot>=tf) return bFind(x*2,l,mid,tf);\r\n    else return bFind(x*2+1,mid+1,r,tf-seg[x*2].i.tot);\r\n}\r\nint bFind2(int x,int l,int r,int tf){\r\n    if(l==r) return l;\r\n\tint mid=(l+r)/2;\r\n\tpushdown(x);\r\n    if(seg[x*2+1].i.tot>=tf) return bFind2(x*2+1,mid+1,r,tf);\r\n    else return bFind2(x*2,l,mid,tf-seg[x*2+1].i.tot);\r\n}\r\n//\u6a21\u677f\u7ed3\u675f~~~~~~~\r\n\r\nvoid solve() {\r\n\tint n,q; cin>>n>>q;\r\n    build(1,1,n);\r\n    for(int i=1;i<=q;i++){\r\n        int t;cin>>t;\r\n        if(t==0){\r\n            int l,r,x;cin>>l>>r>>x;\r\n            if(x==1){\r\n                modify(1,1,n,l,r);\r\n            }else {\r\n                change(1,1,n,l,r,0);\r\n            }\r\n        }else {\r\n            int a;\r\n            cin>>a;\r\n            if(query(1,1,n,a,a).tot==0) {\r\n                cout<<\"NO\"<<endl;\r\n                continue;\r\n            }\r\n            int totot=seg[1].i.tot;\r\n            int tot=query(1,1,n,1,a).tot;\r\n            int l=bFind(1,1,n,tot-1),r=bFind2(1,1,n,totot-tot);\r\n            if(l!=1||(l==1&&seg[1].i.tot==1)) l++;\r\n            if(r!=n||(r==n&&seg[1].i.tot==1)) r--;\r\n            if(a==1) l=1;\r\n            if(a==n) r=n;\r\n            if(r>=l) {\r\n                int mn=query(1,1,n,l,a).mn;\r\n                if(mn<=r) {\r\n                    cout<<\"YES\"<<endl;\r\n                    continue;\r\n                }  \r\n            }\r\n            cout<<\"N/A\"<<endl;\r\n        }\r\n    }\r\n}\r\nint main() {\r\n#ifndef LOCAL\r\n\tios::sync_with_stdio(0),cin.tie(0),cout.tie(0);\r\n#endif\r\n#ifdef LOCAL\r\n\tfreopen(\"in.in\",\"r\",stdin);\r\n\tfreopen(\"out.out\",\"w\",stdout);\r\n#endif\r\n\tint tt=1;\r\n\twhile (tt--) \r\n\tsolve();\r\n}"
+}

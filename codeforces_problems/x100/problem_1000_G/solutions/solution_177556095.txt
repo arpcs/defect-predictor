@@ -1,0 +1,36 @@
+{
+    "id": 177556095,
+    "contestId": 1000,
+    "creationTimeSeconds": 1666512870,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "ducati"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 265,
+    "memoryConsumedBytes": 62566400,
+    "source": "// LUOGU_RID: 91192620\n#include <bits/stdc++.h>\r\n#define int long long\r\nusing namespace std;\r\nconst int maxl=200005,maxg=20;\r\n\r\nint read(){\r\n\tint s=0,w=1;char ch=getchar();\r\n\twhile (ch<'0'||ch>'9'){if (ch=='-')  w=-w;ch=getchar();}\r\n\twhile (ch>='0'&&ch<='9'){s=(s<<1)+(s<<3)+(ch^'0');ch=getchar();}\r\n\treturn s*w;\r\n}\r\nint n,q,cnt,head[maxl],lg[maxl],dep[maxl],fa[maxl][maxg];\r\nint a[maxl],f[maxl],g[maxl],h[maxl],contrib[maxl],preh[maxl],prez1[maxl],prez2[maxl];\r\n\r\nstruct edge{int nxt,to,z1,z2;}e[maxl<<1];\r\nvoid add_edge(int u,int v,int x,int y){\r\n\te[++cnt].to=v,e[cnt].z1=x,e[cnt].z2=y;\r\n\te[cnt].nxt=head[u],head[u]=cnt;\r\n}\r\nvoid dfs1(int u,int fath){\r\n\tf[u]=a[u];\r\n\tfor (int i=head[u];i;i=e[i].nxt){\r\n\t\tint v=e[i].to;\r\n\t\tif (v==fath)  continue;\r\n\t\tdfs1(v,u),contrib[v]=max(f[v]-e[i].z1-e[i].z2,0ll),f[u]+=contrib[v];\r\n\t}\r\n\tfor (int i=head[u];i;i=e[i].nxt){\r\n\t\tint v=e[i].to;\r\n\t\tif (v^fath)  h[v]=f[u]-contrib[v];\r\n\t}\r\n}\r\nvoid dfs2(int u,int fath,int fz1,int fz2){\r\n\tif (fath)  f[fath]-=contrib[u],f[u]+=max(f[fath]-fz1-fz2,0ll);\r\n\tg[u]=f[u];\r\n\t\r\n\tfor (int i=head[u];i;i=e[i].nxt){\r\n\t\tint v=e[i].to;\r\n\t\tif (v^fath)  dfs2(v,u,e[i].z1,e[i].z2);\r\n\t}\r\n\tif (fath)  f[u]-=max(f[fath]-fz1-fz2,0ll),f[fath]+=contrib[u];\r\n}\r\nvoid dfs3(int u,int fath){\r\n\tpreh[u]=preh[fath]+h[u],dep[u]=dep[fath]+1,fa[u][0]=fath;\r\n\tfor (int i=1;i<=lg[dep[u]];i++)  fa[u][i]=fa[fa[u][i-1]][i-1];\r\n\tfor (int i=head[u];i;i=e[i].nxt){\r\n\t\tint v=e[i].to;\r\n\t\tif (v==fath)  continue;\r\n\t\tprez1[v]=prez1[u]+e[i].z1,prez2[v]=prez2[u]+e[i].z2,dfs3(v,u);\r\n\t}\r\n}\r\nint up_tree(int u,int d){\r\n\tif (d<0)  return 0;\r\n\tfor (int i=lg[d];i>=0;i--){\r\n\t\tif (d&(1<<i))  u=fa[u][i];\r\n\t}\r\n\treturn u;\r\n}\r\nint LCA(int x,int y){\r\n\tif (dep[x]<dep[y])  swap(x,y);\r\n\twhile (dep[x]>dep[y])  x=fa[x][lg[dep[x]-dep[y]]-1];\r\n\tif (x==y)  return x;\r\n\t\r\n\tfor (int k=lg[dep[x]];k>=0;k--){\r\n\t\tif (fa[x][k]^fa[y][k])  x=fa[x][k],y=fa[y][k];\r\n\t}\r\n\treturn fa[x][0];\r\n}\r\nint work_double_path(int u,int v,int l){\r\n\tint res=f[u]+f[v],x=up_tree(u,dep[u]-dep[l]-1),y=up_tree(v,dep[v]-dep[l]-1);\r\n\tif (x)  res+=preh[u]-preh[x];\r\n\tif (y)  res+=preh[v]-preh[y];\r\n\tres+=(g[l]-contrib[x]-contrib[y]);\r\n\treturn res;\r\n}\r\nint work_single_path(int u,int v){\r\n\tint x=up_tree(u,dep[u]-dep[v]-1);\r\n\tint res=f[u]+(preh[u]-preh[x])+(g[v]-contrib[x]);\r\n\treturn res;\r\n}\r\nint calc_length(int u,int v,int l){\r\n\tint x=prez2[u]-prez2[l];\r\n\tint y=prez1[v]-prez1[l];\r\n\treturn x+y;\r\n}\r\n\r\nsigned main(){\r\n\tn=read(),q=read();\r\n\tfor (int i=1;i<=n;i++)  a[i]=read(),lg[i]=log2(i)+1;\r\n\tfor (int i=1;i<n;i++){\r\n\t\tint u=read(),v=read(),x=read(),y=x;\r\n\t\tadd_edge(u,v,x,y),add_edge(v,u,y,x);\r\n\t}\r\n\tdfs1(1,0),dfs2(1,0,0,0),dfs3(1,0);\r\n\t\r\n\twhile (q--){\r\n\t\tint u=read(),v=read(),l=LCA(u,v),delt=calc_length(u,v,l),ans;\r\n\t\tif (dep[u]<dep[v])  swap(u,v);\r\n\t\t\r\n\t\tif (u==v)  ans=g[u];\r\n\t\telse if (l==v)  ans=work_single_path(u,v);\r\n\t\telse ans=work_double_path(u,v,l);\r\n\t\tprintf(\"%lld\\n\",ans-delt);\r\n\t}\r\n\treturn 0;\r\n}"
+}

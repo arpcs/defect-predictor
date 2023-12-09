@@ -1,0 +1,36 @@
+{
+    "id": 216962900,
+    "contestId": 1000,
+    "creationTimeSeconds": 1691054548,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "pzj114514"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "// LUOGU_RID: 118831573\n#include<bits/stdc++.h>\n#define int long long\nusing namespace std;\nconst int N=2e5+5;\nint n,q,Log[N],a[N],fa[N][20],sum[N][20],dep[N],f[N],g[N];\nstruct edge{\n\tint to,val;\n};\nvector<edge> G[N];\nvoid dfs1(int u){\n\tf[u]=a[u];\n\tfor(auto H:G[u]){\n\t\tint v=H.to,w=H.val;\n\t\tif(v==fa[u][0])\n\t\t\tcontinue;\n\t\tfa[v][0]=u,dep[v]=dep[u]+1;\n\t\tfor(int i=1;i<=Log[dep[v]];++i)\n\t\t\tfa[v][i]=fa[fa[v][i-1]][i-1];\n\t\tdfs1(v);\n\t\tf[u]+=max(f[v]-2*w,0);\n\t}\n}\nvoid dfs2(int u){\n\tfor(auto H:G[u]){\n\t\tint v=H.to,w=H.val;\n\t\tif(v==fa[u][0])\n\t\t\tcontinue;\n\t\tsum[v][0]=f[v]+f[u]-w-max(f[v]-2*w,0);\n\t\tg[v]=max(g[v],g[u]+sum[v][0]-w-f[v]);\n\t\tfor(int i=1;i<=Log[dep[v]];++i)\n\t\t\tsum[v][i]=sum[v][i-1]+sum[fa[v][i-1]][i-1]-f[fa[v][i-1]];\n\t\tdfs2(v);\n\t}\n}\ninline int get(int u,int v){\n\tint a=u,b=v,ans=0;\n\tif(dep[u]>dep[v])\n\t\tswap(u,v);\n\twhile(dep[u]!=dep[v]){\n\t\tans+=sum[v][Log[dep[v]-dep[u]]]-f[v];\n\t\tv=fa[v][Log[dep[v]-dep[u]]];\n\t}\n\tif(u==v)\n\t\treturn ans+(dep[a]>dep[b]?f[a]:f[b])+g[u];\n\tfor(int k=Log[dep[u]];~k;--k)\n\t\tif(fa[u][k]!=fa[v][k]){\n\t\t\tans+=sum[u][k]-f[u]+sum[v][k]-f[v];\n\t\t\tu=fa[u][k],v=fa[v][k];\n\t\t}\n\treturn ans+sum[u][0]-f[u]+sum[v][0]-f[v]-f[fa[u][0]]+f[a]+f[b]+g[fa[u][0]];\n}\nsigned main(){\n\tios::sync_with_stdio(0);\n    cin.tie(0);\n    cout.tie(0);\n    cin>>n>>q;\n    for(int i=1;i<=n;++i)\n    \tcin>>a[i];\n    for(int i=1,u,v,w;i<n;++i){\n    \tcin>>u>>v>>w;\n    \tG[u].push_back(edge({v,w}));\n    \tG[v].push_back(edge({u,w}));\n\t}\n\tfor(int i=2;i<=n;++i)\n\t\tLog[i]=Log[i>>1]+1;\n\tdfs1(1),dfs2(1);\n\twhile(q--){\n\t\tint u,v;\n\t\tcin>>u>>v;\n\t\tcout<<get(u,v)<<endl;\n\t}\n    return 0;\n}"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 73349624,
+    "contestId": 536,
+    "creationTimeSeconds": 1584288023,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 536,
+        "index": "E",
+        "name": "Tavas on the Path",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 536,
+        "members": [
+            {
+                "handle": "Shayan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1429029300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 638,
+    "memoryConsumedBytes": 20582400,
+    "source": "//              +-- -- --++-- +-In the name of ALLAH-+ --++-- -- --+              \\\\\n\n#include <bits/stdc++.h>\n\n#define F first\n#define S second\n#define _sz(x) (int)x.size()\n#define pb push_back\n#define all(x) x.begin(), x.end()\n\n#define error(x) cout << #x << \" = \" << x << endl\n\nusing namespace std;\nusing ll = long long;\nusing ld = long double;\nusing pii = pair<int, int>;\n\nconst int N = 1e5 + 20;\nint n, q;\nint f[N];\nvector <int> g[N];\n\nstruct edge \n{\n\tint u, v, w;\n} E[N];\n\nstruct query\n{\n\tint u, v, l;\n\tint res;\n} Q[N];\n\n\nvector <int> ved[N], vqu[N], values;\n\nint par[N], h[N], sz[N], st[N], ft[N], tme;\n\nvoid dfs1 (int v)\n{\n\tsz[v] = 1;\n\tst[v] = tme++;\n\t\n\tfor (int i : g[v])\n\t{\n\t\tint u = E[i].u ^ E[i].v ^ v;\n\n\t\tif (u == par[v]) continue;\n\n\t\tpar[u] = v;\n\t\th[u] = h[v] + 1;\n\t\tdfs1(u);\n\n\t\tsz[v] += sz[u];\n\t}\n\n\tft[v] = tme;\n}\n\nint head[N];\n\nvoid dfs2 (int v)\n{\n\tint big = -1;\t\n\n\tfor (int i : g[v])\n\t{\n\t\tint u = E[i].u ^ E[i].v ^ v;\n\n\t\tif (u == par[v]) continue;\n\t\tif (big == -1 || sz[u] > sz[big]) big = u;\n\t}\n\n\tif (big != -1)\n\t{\n\t\thead[big] = head[v];\n\t\tdfs2(big);\n\t}\n\n\tfor (int i : g[v])\n\t{\n\t\tint u = E[i].u ^ E[i].v ^ v;\n\t\t\n\t\tif (u == par[v] || u == big) continue;\n\n\t\thead[u] = u;\n\t\tdfs2(u);\n\t}\n}\n\nstruct node \n{\n\tint pref, suff;\n\tint sum;\n\tbool full;\n\n\tnode () {\n\t\tpref = suff = sum = full = 0;\n\t}\n} seg[N << 2], emp;\n\n#define mid ((s + e) >> 1)\n#define lc (v << 1)\n#define rc (lc ^ 1)\n\ninline node merge (node a, node b)\n{\n\tnode res;\n\n\tres.pref = a.pref + a.full * b.pref;\n\tres.suff = b.full * a.suff + b.suff;\n\tres.full = a.full & b.full;\n\n\tres.sum = a.sum + b.sum - f[a.suff] - f[b.pref] + f[a.suff + b.pref];\n\n\treturn res;\n}\n\nvoid add (int p, int v = 1, int s = 0, int e = n)\n{\n\tif (e - s == 1)\n\t{\n\t\tseg[v].pref = seg[v].suff = seg[v].full = 1;\n\t\tseg[v].sum = f[1];\n\t\treturn;\n\t}\n\n\tif (p < mid) add(p, lc, s, mid);\n\telse add(p, rc, mid, e);\n\n\tseg[v] = merge(seg[lc], seg[rc]);\n}\n\nnode get (int l, int r, int v = 1, int s = 0, int e = n)\n{\n\tif (r <= s || e <= l) return emp;\n\tif (l <= s && e <= r) return seg[v];\n\n\treturn merge(get(l, r, lc, s, mid), get(l, r, rc, mid, e));\n}\n\ninline node calc (int u, int v)\n{\n\tnode x, y;\n\n\twhile (head[u] != head[v])\n\t{\n\t\tif (h[u] < h[v])\n\t\t{\n\t\t\tnode tmp = get(st[head[v]], st[v] + 1);\n\t\t\ty = merge(tmp, y);\n\n\t\t\tv = par[head[v]];\n\t\t}\n\t\telse\n\t\t{\n\t\t\tnode tmp = get(st[head[u]], st[u] + 1);\n\t\t\tx = merge(tmp, x);\n\n\t\t\tu = par[head[u]];\n\t\t}\n\t}\n\n\tif (h[v] > h[u])\n\t{\n\t\tnode tmp = get(st[u] + 1, st[v] + 1);\n\t\tx = merge(tmp, x); \n\t}\n\t\n\tif (h[u] > h[v])\n\t{\n\t\tnode tmp = get(st[v] + 1, st[u] + 1);\n\t\ty = merge(tmp, y);\n\t}\n\n\tswap(x.pref, x.suff);\n\t\n\treturn merge(x, y);\n}\n\nint main()\n{\n\tios::sync_with_stdio(false), cin.tie(0), cout.tie(0);\n\n\temp.full = 1;\n\n\tcin >> n >> q;\n\n\tfor (int i = 1; i <= n - 1; i++) cin >> f[i];\n\n\tfor (int i = 0; i < n - 1; i++)\n\t{\n\t\tcin >> E[i].u >> E[i].v >> E[i].w;\n\t\tE[i].u--, E[i].v--;\n\n\t\tg[E[i].u].pb(i);\n\t\tg[E[i].v].pb(i);\n\n\t\tvalues.pb(E[i].w);\n\t}\n\n\tsort(all(values));\n\tvalues.resize( unique(all(values)) - values.begin() );\n\n\tfor (int i = 0; i < n - 1; i++)\n\t{\n\t\tE[i].w = lower_bound(all(values), E[i].w) - values.begin();\n\t\tved[E[i].w].pb(i);\n\t}\n\n\tfor (int i = 0; i < q; i++)\n\t{\n \t\tcin >> Q[i].u >> Q[i].v >> Q[i].l;\n\t\tQ[i].u--, Q[i].v--;\n\t\t\n\t\tQ[i].l = lower_bound(all(values), Q[i].l) - values.begin();\n\n\t\tvqu[Q[i].l].pb(i);\n\t}\n\n\tdfs1(0);\n\tdfs2(0);\n\n\tfor (int i = _sz(values) - 1; i >= 0; i--)\n\t{\n\t\tfor (int j : ved[i])\n\t\t{\n\t\t\tint x = E[j].u;\n\t\t\tif (h[E[j].v] > h[x]) x = E[j].v;\n\n\t\t\tadd(st[x]);\n\t\t}\n\n\t\tfor (int j : vqu[i])\n\t\t{\n\t\t\tnode res = calc(Q[j].u, Q[j].v);\n\t\t\tQ[j].res = res.sum;\n\t\t}\n\t}\n\n\tfor (int i = 0; i < q; i++) cout << Q[i].res << '\\n';\n}\n"
+}

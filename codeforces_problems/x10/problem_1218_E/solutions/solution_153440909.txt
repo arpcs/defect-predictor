@@ -1,0 +1,35 @@
+{
+    "id": 153440909,
+    "contestId": 1218,
+    "creationTimeSeconds": 1649753245,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1218,
+        "index": "E",
+        "name": "Product Tuples",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "divide and conquer",
+            "fft"
+        ]
+    },
+    "author": {
+        "contestId": 1218,
+        "members": [
+            {
+                "handle": "Tyyyyyy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1568554500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 36,
+    "timeConsumedMillis": 780,
+    "memoryConsumedBytes": 104550400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nnamespace IO\r\n{\r\n\tconst int SZ=1<<20;\r\n\tchar gchar()\r\n\t{\r\n\t    static char buf[SZ];\r\n\t    static int i=SZ;\r\n\t    if(i==SZ)i=0,fread(buf,1,SZ,stdin);\r\n\t    return buf[i++];\r\n\t}\r\n\tvoid pchar(char c)\r\n\t{\r\n\t    static char buf[SZ];\r\n\t    static int i=0;\r\n\t    if(c)buf[i++]=c;\r\n\t    if(!c||i==SZ)fwrite(buf,1,i,stdout),i=0;\r\n\t}\r\n\ttemplate<typename T>void read(T &x)\r\n\t{\r\n\t    x=0;\r\n\t    static char c;\r\n\t    while((c=gchar())>'9'||c<'0');\r\n\t    x=c-'0';\r\n\t    while((c=gchar())>='0'&&c<='9')\r\n\t\t\tx=(x<<1)+(x<<3)+(c^48);\r\n\t}\r\n\ttemplate<typename T>void i_write(T x)\r\n\t{\r\n\t    if(x>9)i_write(x/10);\r\n\t    pchar(x%10+'0');\r\n\t}\r\n\ttemplate<typename T>void write(T x,char end='\\n')\r\n\t{\r\n\t    if(x<0)pchar('-'),x=-x;\r\n\t    if(x>9)i_write(x/10);\r\n\t    pchar(x%10+'0');\r\n\t    pchar(end);\r\n\t}\r\n}\r\nusing IO::read;\r\nusing IO::write;\r\nconst int gen=3,mod=998244353,N=1e6+10,M=1e5+10;\r\nnamespace poly\r\n{\r\n\tint g[23][N],inv[N];\r\n\tint power(int x,int y)\r\n\t{\r\n\t\tint t=1;\r\n\t\twhile(y)\r\n\t\t{\r\n\t\t\tif(y&1)t=1ll*t*x%mod;\r\n\t\t\tx=1ll*x*x%mod;\r\n\t\t\ty>>=1;\r\n\t\t}\r\n\t\treturn t;\r\n\t}\r\n\tvoid prework()\r\n\t{\r\n\t\tfor(int i=1;i<=18;i++)\r\n\t\t{\r\n\t\t\tg[i][0]=1,g[i][1]=power(gen,(mod-1)>>i);\r\n\t\t\tfor(int j=2;j<=2e5;j++)\r\n\t\t\t\tg[i][j]=1ll*g[i][j-1]*g[i][1]%mod;\r\n\t\t}\r\n\t} \r\n\tint len,rev[N];\r\n\tvoid makerev()\r\n\t{\r\n\t\tint II=log(len)/log(2)-1;\r\n\t\tfor(int i=0;i<len;i++)\r\n\t\t\trev[i]=rev[i>>1]>>1|(i&1)<<II;\r\n\t}\r\n\tvoid ntt(int *F,int typ)\r\n\t{\r\n\t\tfor(int i=0;i<len;i++)\r\n\t\t\tif(i<rev[i])swap(F[i],F[rev[i]]);\r\n\t\tfor(int i=2,ii=1,t=1;i<=len;i<<=1,ii<<=1,t++)\r\n\t\t\tfor(int j=0;j<len;j+=i)\r\n\t\t\t\tfor(int k=0;k<ii;k++)\r\n\t\t\t\t{\r\n\t\t\t\t\tint tt=1ll*F[j+k+ii]*g[t][k]%mod;\r\n\t\t\t\t\tF[j+k+ii]=((F[j+k]-tt)%mod+mod)%mod;\r\n\t\t\t\t\tF[j+k]=(F[j+k]+tt)%mod;\r\n\t\t\t\t}\r\n\t\tif(typ==-1)\r\n\t\t{\r\n\t\t\treverse(F+1,F+len);\r\n\t\t\tint invn=power(len,mod-2);\r\n\t\t\tfor(int i=0;i<len;i++)\r\n\t\t\t\tF[i]=1ll*F[i]*invn%mod; \r\n\t\t}\r\n\t}\t\r\n}\r\nusing poly::power;\r\nusing poly::prework;\r\nusing poly::len;\r\nusing poly::makerev;\r\nusing poly::ntt;\r\nint n,k,m,a[M],b[M],f[M],g[M];\r\nvector<int>solve(int l,int r)\r\n{\r\n\tif(l==r)return {1,(b[l]%mod+mod)%mod};\r\n\tint mid=(l+r)>>1;\r\n\tvector<int>F=solve(l,mid),G=solve(mid+1,r);\r\n\tlen=1;\r\n\twhile(len<2*(r-l+1)+2)len<<=1;\r\n\tmakerev();\r\n\tfor(int i=0;i<=mid-l+1;i++)f[i]=F[i];\r\n\tfor(int i=mid-l+2;i<len;i++)f[i]=0;\r\n\tfor(int i=0;i<=r-mid;i++)g[i]=G[i];\r\n\tfor(int i=r-mid+1;i<len;i++)g[i]=0;\r\n\tntt(f,1),ntt(g,1);\r\n\tfor(int i=0;i<len;i++)f[i]=1ll*f[i]*g[i]%mod;\r\n\tntt(f,-1);\r\n\tvector<int>ret;\r\n\tfor(int i=0;i<=r-l+1;i++)ret.push_back(f[i]);\r\n\treturn ret;\r\n}\r\nint main()\r\n{\r\n\tprework();\r\n\tscanf(\"%d%d\",&n,&k);\r\n\tfor(int i=1;i<=n;i++)scanf(\"%d\",&a[i]);\r\n\tscanf(\"%d\",&m);\r\n\tint t,q,l,r,d;\r\n\twhile(m--)\r\n\t{\r\n\t\tscanf(\"%d%d\",&t,&q);\r\n\t\tif(t==1)\r\n\t\t{\r\n\t\t\tscanf(\"%d%d\",&l,&d);\r\n\t\t\tfor(int i=1;i<=n;i++)b[i]=q-a[i];\r\n\t\t\tb[l]=q-d;\r\n\t\t\tvector<int>v=solve(1,n);\r\n\t\t\tprintf(\"%d\\n\",(v[k]%mod+mod)%mod);\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tscanf(\"%d%d%d\",&l,&r,&d);\r\n\t\t\tfor(int i=1;i<=n;i++)b[i]=q-a[i];\r\n\t\t\tfor(int i=l;i<=r;i++)b[i]-=d;\r\n\t\t\tvector<int>v=solve(1,n);\r\n\t\t\tprintf(\"%d\\n\",(v[k]%mod+mod)%mod);\r\n\t\t}\r\n\t}\r\n\tIO::pchar(0);\r\n\treturn 0;\r\n}\r\n"
+}

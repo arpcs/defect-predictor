@@ -1,0 +1,39 @@
+{
+    "id": 225720291,
+    "contestId": 253,
+    "creationTimeSeconds": 1695947618,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 253,
+        "index": "C",
+        "name": "Text Editor",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 1600,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "greedy",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 253,
+        "members": [
+            {
+                "handle": "Heitivis"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1354960800
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 204800,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define DBG(x) cout << \"[\" << #x << \"]: \" << x << endl\r\n#define F(x) std::fixed << std::setprecision(1) << (x)\r\n/* TYPES  */\r\n#define ll long long\r\n#define pii pair<int, int>\r\n#define pll pair<long long, long long>\r\n#define vi vector<int>\r\n#define vll vector<long long>\r\n#define mii map<int, int>\r\n#define si set<int>\r\n#define sc set<char>\r\n\r\nbool exists(ll x, ll y, vll &a){\r\n    if(a.size()>=y){\r\n        if(a[y-1]>=x && x>0)\r\n            return true;\r\n    }\r\n    return false;\r\n}\r\n\r\nint possiblePath(int n, int m, int s, int e, vll lines)\r\n{\r\n    queue<pair<int, int> > q;\r\n    q.push({ s, e });\r\n    int dx[] = { -1, 0, 1, 0};\r\n    int dy[] = { 0, 1, 0, -1};\r\n    map<pll, ll> dis;\r\n\r\n    dis[{s, e}] = 0;\r\n\r\n    while (!q.empty()) {\r\n\r\n        pair<int, int> p = q.front();\r\n        q.pop();\r\n        if(p.first==n && p.second == m)\r\n            break;\r\n        for (int i = 0; i < 4; i++) {\r\n            int x = p.first + dx[i];\r\n            int y = p.second + dy[i];\r\n            if (exists(x, y, lines)&& dis.find({x,y}) == dis.end()) {\r\n                dis[{x,y}] = dis[{p.first,p.second}] + 1;\r\n                q.push({ x, y });\r\n            }else if(dis.find({x,y}) == dis.end()){\r\n                if(i==1 && y<=lines.size()){\r\n                    x=lines[y-1];\r\n                    if (exists(x, y, lines) && dis.find({x,y}) == dis.end()) {\r\n                        dis[{x,y}] = dis[{p.first,p.second}] + 1;\r\n                        q.push({ x, y });\r\n                    }\r\n\r\n                }\r\n                if(i==3 && y-1>=0){\r\n                    x=lines[y-1];\r\n                    if (exists(x, y, lines)&& dis.find({x,y}) == dis.end()) {\r\n                        dis[{x,y}] = dis[{p.first,p.second}] + 1;\r\n                        q.push({ x, y });\r\n                    }\r\n                }\r\n            }\r\n        }\r\n        //cout<<endl;\r\n    }\r\n    if( dis.find({n,m}) == dis.end())\r\n        return -1;\r\n    return dis[{n,m}];\r\n}\r\n\r\nint main()\r\n{\r\n\tifstream fin(\"input.txt\");\r\n\tofstream fout(\"output.txt\");\r\n    vll lines;\r\n    ll n, a, r1, c1, r2, c2, res;\r\n    ll shortest=LONG_MAX;\r\n    fin>>n;\r\n    for(ll i = 1; i<=n; i++){\r\n        fin>>a;\r\n        if(shortest>a+1){\r\n            shortest=a+1;\r\n        }\r\n        lines.push_back(a+1);\r\n    }\r\n    ll minDistance = std::numeric_limits<ll>::max();\r\n    fin>>r1>>c1>>r2>>c2;\r\n    for(ll i = 0; i<n; i++){\r\n        if(lines[i]==shortest){\r\n            ll distance;\r\n            ll value = i+1;\r\n            ll a = min(r1, r2);\r\n            ll b = max(r1, r2);\r\n            if (value >= a && value <= b) {\r\n                // If the value is within the interval, the distance is 0\r\n                distance = 0;\r\n            } else {\r\n                // Otherwise, calculate the distance to the closest endpoint of the interval\r\n                ll distanceToA = abs(value - a);\r\n                ll distanceToB = abs(value - b);\r\n                distance = min(distanceToA, distanceToB);\r\n            }\r\n\r\n            // Check if this value is closer than the current closest value\r\n            if (distance < minDistance) {\r\n                minDistance = distance;\r\n                //closestValue = value;\r\n            }\r\n        }\r\n    }\r\n    if(minDistance==0){\r\n        if(shortest<max(c1, c2)){\r\n            res = abs(shortest-c2);\r\n            res += abs(r1-r2);\r\n        }else{\r\n            res = abs(c1-c2);\r\n            res+= abs(r1-r2);\r\n        }\r\n    }else{\r\n        if(shortest<max(c1, c2)){\r\n            ll res1, res2;\r\n            res1 = abs(c1-c2);\r\n            res1+= abs(r1-r2);\r\n            res2 = minDistance*2;\r\n            res2+= abs(shortest-c2);\r\n            res2+=abs(r1-r2);\r\n            res = min(res1, res2);\r\n        }\r\n    }\r\n\r\n    //fout<<possiblePath(c2, r2, c1, r1, lines)<<endl;\r\n    fout<<res<<endl;\r\n\r\n    return 0;\r\n}"
+}

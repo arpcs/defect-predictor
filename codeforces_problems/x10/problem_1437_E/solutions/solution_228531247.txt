@@ -1,0 +1,38 @@
+{
+    "id": 228531247,
+    "contestId": 1437,
+    "creationTimeSeconds": 1697541288,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1437,
+        "index": "E",
+        "name": "Make It Increasing",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "constructive algorithms",
+            "data structures",
+            "dp",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1437,
+        "members": [
+            {
+                "handle": "OutsiderZz"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1603809300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 106,
+    "timeConsumedMillis": 264,
+    "memoryConsumedBytes": 14028800,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing ll = long long;\r\n\r\ntemplate <typename T>\r\nstruct Fenwick {\r\n    int n, lg;\r\n    std::vector<T> a;\r\n\r\n    Fenwick(int n) : n(n), a(n + 1, T()), lg(std::__lg(n)) {}\r\n\r\n    int lowbit(int x) {\r\n        return x & -x;\r\n    }\r\n\r\n    void add(int x, T v) {\r\n        assert(x > 0);\r\n        for (int i = x; i <= n; i += lowbit(i)) {\r\n            a[i] = std::max(v, a[i]);\r\n        }\r\n    }\r\n\r\n    void clear(int x) {\r\n        assert(x > 0);\r\n        for (int i = x; i <= n; i += lowbit(i)) {\r\n            a[i] = 0;\r\n        }\r\n    }\r\n\r\n    T sum(int x) {\r\n        assert(x <= n);\r\n\r\n        T res = T();\r\n\r\n        for (int i = x; i; i -= lowbit(i)) {\r\n            res = std::max(res, a[i]);\r\n        }\r\n        return res;\r\n    }\r\n\r\n    int kth(int k) {\r\n        int x = 0;\r\n        for (int i = lg; i >= 0; -- i) {\r\n            if (x + (1 << i) <= n && a[x + (1 << i)] < k) {\r\n                x += 1 << i;\r\n                k -= a[x];\r\n            }\r\n        }\r\n        if (x == n) {\r\n            return -1;\r\n        }\r\n        else {\r\n            return x + 1;\r\n        }\r\n    }\r\n};\r\n\r\nint main() {\r\n    std::cin.tie(nullptr);\r\n    std::ios_base::sync_with_stdio(false);\r\n\r\n    int n, m; \r\n    std::cin >> n >> m;\r\n\r\n    std::vector<int> a(n);\r\n    for (int i = 0; i < n; ++ i) {\r\n        std::cin >> a[i];\r\n        a[i] -= i;\r\n    }\r\n\r\n    std::vector<int> ban(m);\r\n    for (int i = 0; i < m; ++ i) {\r\n        std::cin >> ban[i];\r\n        ban[i] --;\r\n    }\r\n\r\n    for (int i = 1; i < m; ++ i) {\r\n        if (a[ban[i]] < a[ban[i - 1]]) {\r\n            std::cout << -1 << \"\\n\";\r\n            return 0;\r\n        }\r\n    }\r\n\r\n    auto d = a;\r\n    d.emplace_back(-1E9);\r\n    sort(d.begin(), d.end());\r\n    d.erase(std::unique(d.begin(), d.end()), d.end());\r\n\r\n    int N = d.size();\r\n    Fenwick<int> tr(N);\r\n    ban.emplace_back(n);\r\n    int cur = 0;\r\n    int ans = 0;\r\n    for (int i = 0; i <= m; ++ i) {\r\n        std::vector<int> b;\r\n        while (cur < ban[i]) {\r\n            b.emplace_back(a[cur]);\r\n            cur ++;\r\n        }\r\n\r\n        int M = b.size();\r\n        std::vector<int> dp(M);\r\n        int res = 0;\r\n        for (int j = 0; j < M; ++ j) {\r\n            int x = std::lower_bound(d.begin(), d.end(), b[j]) - d.begin();\r\n            int lo = i ? a[ban[i - 1]] : -1E9;\r\n            int hi = i == m ? 2E9 : a[ban[i]];\r\n            if (d[x] < lo || d[x] > hi) {\r\n                continue;\r\n            }\r\n            dp[j] = tr.sum(x) + 1;\r\n            tr.add(x, dp[j]);\r\n            res = std::max(res, dp[j]);\r\n        }\r\n        for (int j = 0; j < M; ++ j) {\r\n            int x = std::lower_bound(d.begin(), d.end(), b[j]) - d.begin();\r\n            tr.clear(x);\r\n        }\r\n        //std::cerr << M << \" \" << res << \" \" << M - res << \"\\n\";\r\n        ans += M - res;\r\n        cur ++;\r\n    }\r\n\r\n    std::cout << ans << \"\\n\";\r\n    \r\n    return 0;\r\n}"
+}

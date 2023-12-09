@@ -1,0 +1,34 @@
+{
+    "id": 57760607,
+    "contestId": 1192,
+    "creationTimeSeconds": 1564077110,
+    "relativeTimeSeconds": 13610,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "Arturgo"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "PARTIAL",
+    "testset": "TESTS",
+    "passedTestCount": 69,
+    "timeConsumedMillis": 3500,
+    "memoryConsumedBytes": 24166400,
+    "points": 29.0,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <unordered_map>\r\n#include <list>\r\n#include <set>\r\n#include <cstdio>\r\nusing namespace std;\r\n\r\nint deps[8][2] = {\r\n\t{1, 0},\r\n\t{1, 1},\r\n\t{0, 1},\r\n\t{-1, 1},\r\n\t{-1, 0},\r\n\t{-1, -1},\r\n\t{0, -1},\r\n\t{1, -1}\r\n};\r\n\r\nstruct Info {\r\n\tbool estPasse;\r\n\tint zone;\r\n\tint id;\r\n\r\n\tInfo(int _id = -1) {\r\n\t\tid = _id;\r\n\t\testPasse = false;\r\n\t\tzone = -1;\r\n\t}\r\n};\r\n\r\nnamespace std {\r\n  template <>\r\n  struct hash<pair<int, int>>\r\n  {\r\n    size_t operator()(const pair<int, int>& k) const\r\n    {\r\n      using std::size_t;\r\n      using std::hash;\r\n      using std::string;\r\n\r\n      // Compute individual hash values for first,\r\n      // second and third and combine them using XOR\r\n      // and bit shifting:\r\n\r\n      return ((hash<int>()(k.first)\r\n               ^ (hash<int>()(k.second) << 1)) >> 1);\r\n    }\r\n  };\r\n\r\n}\r\n\r\nvector<pair<int, int>> points;\r\n\r\nunordered_map<pair<int, int>, Info> infos;\r\n\r\nset<int> valides;\r\n\r\nint zone(int lig, int col) {\r\n\tif(infos[{lig, col}].zone == -1)\r\n\t\treturn -1 - infos[{lig, col}].id;\r\n\treturn infos[{lig, col}].zone;\r\n}\r\n\r\nbool estPoint(int lig, int col) {\r\n\treturn infos[{lig, col}].id != -1;\r\n}\r\n\r\nvoid update(pair<int, int> coord) {\r\n\tif(infos.find(coord) == infos.end())\r\n\t\treturn;\r\n\tif(infos[coord].id == -1)\r\n\t\treturn;\r\n\r\n\tvalides.erase(infos[coord].id);\r\n\r\n\tbool toucheInf = false;\r\n\tfor(int iDep = 0;iDep < 4;iDep++) {\r\n\t\tif(zone(coord.first + deps[2 * iDep][0], coord.second + deps[2 * iDep][1]) == 0)\r\n\t\t\ttoucheInf = true;\r\n\t}\r\n\r\n\tbool connecte = true;\r\n\r\n\tbool pointBas = estPoint(coord.first + 1, coord.second + 1) || estPoint(coord.first + 1, coord.second) || estPoint(coord.first + 1, coord.second - 1);\r\n\tbool pointHaut = estPoint(coord.first - 1, coord.second + 1) || estPoint(coord.first - 1, coord.second) || estPoint(coord.first - 1, coord.second - 1);\r\n\tbool pointDroite = estPoint(coord.first + 1, coord.second + 1) || estPoint(coord.first, coord.second + 1) || estPoint(coord.first - 1, coord.second + 1);\r\n\tbool pointGauche = estPoint(coord.first + 1, coord.second - 1) || estPoint(coord.first, coord.second - 1) || estPoint(coord.first - 1, coord.second - 1);\r\n\r\n\tif(zone(coord.first + 1, coord.second) == zone(coord.first - 1, coord.second) && pointDroite && pointGauche)\r\n\t\tconnecte = false;\r\n\tif(zone(coord.first, coord.second + 1) == zone(coord.first, coord.second - 1) && pointBas && pointHaut)\r\n\t\tconnecte = false;\r\n\tif(zone(coord.first + 1, coord.second) == zone(coord.first, coord.second + 1) && (pointHaut || pointGauche) && estPoint(coord.first + 1, coord.second + 1))\r\n\t\tconnecte = false;\r\n\tif(zone(coord.first + 1, coord.second) == zone(coord.first, coord.second - 1) && (pointHaut || pointDroite) && estPoint(coord.first + 1, coord.second - 1))\r\n\t\tconnecte = false;\r\n\tif(zone(coord.first - 1, coord.second) == zone(coord.first, coord.second + 1) && (pointBas || pointGauche) && estPoint(coord.first - 1, coord.second + 1))\r\n\t\tconnecte = false;\r\n\tif(zone(coord.first - 1, coord.second) == zone(coord.first, coord.second - 1) && (pointBas || pointDroite) && estPoint(coord.first - 1, coord.second - 1))\r\n\t\tconnecte = false;\r\n\r\n\tif(toucheInf && connecte) {\r\n\t\tvalides.insert(infos[coord].id);\r\n\t}\r\n}\r\n\r\nvoid dfs(pair<int, int> coord, int couleur) {\r\n\tif(infos.find(coord) == infos.end())\r\n\t\treturn;\r\n\tif(infos[coord].zone == 0 || (couleur != 0 && infos[coord].zone != -1))\r\n\t\treturn;\r\n\tif(infos[coord].id != -1)\r\n\t\treturn;\r\n\r\n\tinfos[coord].zone = couleur;\r\n\r\n\tfor(int iDep = 0;iDep < 8;iDep++) {\r\n\t\tupdate({coord.first + deps[iDep][0], coord.second + deps[iDep][1]});\r\n\t}\r\n\r\n\tfor(int iDep = 0;iDep < 4;iDep++) {\r\n\t\tdfs({coord.first + deps[2 * iDep][0], coord.second + deps[2 * iDep][1]}, couleur);\r\n\t}\r\n}\r\n\r\nint taille(pair<int, int> coord) {\r\n\tif(infos.find(coord) == infos.end())\r\n\t\treturn 0;\r\n\tif(infos[coord].id == -1)\r\n\t\treturn 0;\r\n\r\n\tif(infos[coord].estPasse)\r\n\t\treturn 0;\r\n\tinfos[coord].estPasse = true;\r\n\r\n\tint t = 1;\r\n\tfor(int iDep = 0;iDep < 8;iDep++) {\r\n\t\tt += taille({coord.first + deps[iDep][0], coord.second + deps[iDep][1]});\r\n\t}\r\n\r\n\treturn t;\r\n}\r\n\r\nint main() {\r\n\tint nbPoints, type;\r\n\tscanf(\"%d%d\", &nbPoints, &type);\r\n\r\n\tfor(int iPoint = 0;iPoint < nbPoints;iPoint++) {\r\n\t\tint lig, col;\r\n\t\tscanf(\"%d%d\", &lig, &col);\r\n\r\n\t\tpoints.push_back({lig, col});\r\n\r\n\t\tinfos[{lig, col}] = Info();\r\n\t\tfor(int iDep = 0;iDep < 8;iDep++) {\r\n\t\t\tinfos[{lig + deps[iDep][0], col + deps[iDep][1]}] = Info();\r\n\t\t}\r\n\t}\r\n\r\n\tfor(int iPoint = 0;iPoint < nbPoints;iPoint++) {\r\n\t\tinfos[points[iPoint]] = Info(iPoint);\r\n\t}\r\n\r\n\t//check connexe ?\r\n\tif(taille(points[0]) != nbPoints) {\r\n\t\tprintf(\"NO\\n\");\r\n\t\treturn 0;\r\n\t}\r\n\r\n\tint nbZones = 0;\r\n\tdfs(infos.begin()->first, nbZones++);\r\n\r\n\tfor(auto info : infos) {\r\n\t\tif(info.second.zone == -1 && info.second.id == -1)\r\n\t\t\tdfs(info.first, nbZones++);\r\n\t}\r\n\r\n\tprintf(\"YES\\n\");\r\n\r\n\tvector<int> ordre;\r\n\twhile(!valides.empty()) {\r\n\t\tint melId = *valides.rbegin();\r\n\t\tordre.push_back(melId);\r\n\t\tvalides.erase(melId);\r\n\r\n\t\tinfos[points[melId]].id = -1;\r\n\t\tdfs(points[melId], 0);\t\r\n\t}\r\n\r\n\twhile(!ordre.empty()) {\r\n\t\tprintf(\"%d\\n\", ordre.back() + 1);\r\n\t\tordre.pop_back();\r\n\t}\r\n\treturn 0;\r\n}"
+}

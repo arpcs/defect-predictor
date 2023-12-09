@@ -1,0 +1,38 @@
+{
+    "id": 135501013,
+    "contestId": 1236,
+    "creationTimeSeconds": 1636909288,
+    "relativeTimeSeconds": 4288,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "ProWizard84"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1636905000
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 40038400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define USE_IOSTREAM \\{\\\r\n\tios::sync_with_stdio(false);\\\r\n\tcin.tie(0);\\\r\n\tcout.tie(0);\\\r\n}\r\n#define pii pair<int, int>\r\n#define mp make_pair\r\ntypedef long long ll;\r\n#define FAIL_RETURN \\\r\ndo\\{\\\r\n    printf(\"-1\\n\");\\\r\n    return 0;\\\r\n} while(0);\r\nconst ll MOD = 1e9 + 7;\r\nll mypower(ll a, ll b){\r\n    ll res = 1;\r\n    while (b){\r\n        if (b & 1){\r\n            res = res * a % MOD;\r\n        }\r\n        b >>= 1;\r\n        a = a * a % MOD;\r\n    }\r\n    return res;\r\n}\r\nconst int N = 5e5 + 10;\r\nvector<int> graph[N];\r\nint mark[N];\r\nint visit[N];\r\nint inStack[N];\r\nint dfn[N];\r\nint low[N];\r\nint pa[N];\r\nll num[N];\r\nll inv2[N];\r\nll eVertex;\r\nll eEdge;\r\nll eCycle;\r\nll eVertexPair;\r\nll eEdgePair;\r\nll eCyclePair;\r\nll eVertexEdge;\r\nll eVertexCycle;\r\nll eEdgeCyle;\r\nvector<int> cycle[N];\r\nll cycleTotalSum;\r\nll cycleSum[N];\r\nll edgeCnt[N];\r\nvoid tarjan(int u, int pre, int &idx, int &comIdx){\r\n\tdfn[u] = low[u] = ++idx;\r\n\tvisit[u] = 1;\r\n\tfor (auto v : graph[u]){\r\n\t\tif (!visit[v]){\r\n\t\t\ttarjan(v, u, idx, comIdx);\r\n\t\t\tlow[u] = min(low[u], low[v]);\r\n            if (low[v] < dfn[u]){\r\n                num[u] = num[v] + 1;\r\n                mark[u] = mark[v];\r\n                cycle[mark[u]].push_back(u);\r\n            }\r\n            else if (low[v] == dfn[u]){\r\n                int cnt = num[v];\r\n                cycleTotalSum = (cycleTotalSum + inv2[cnt]) % MOD;\r\n                cycleSum[u] = (cycleSum[u] + inv2[cnt]) % MOD;\r\n                cycle[mark[v]].push_back(u);\r\n            }\r\n\t\t}\r\n\t\telse if (v != pre){\r\n\t\t\tlow[u] = min(low[u], dfn[v]);\r\n            if (low[u] == dfn[v]){\r\n                num[u] = 2;\r\n                mark[u] = ++comIdx;\r\n                cycle[comIdx].push_back(u);\r\n            }\r\n\t\t}\r\n\t}\r\n}\r\nint main(){\r\n\t#ifndef ONLINE_JUDGE\r\n\tfreopen(\"1.txt\", \"r\", stdin);\r\n\t#endif\r\n    int n, m, u, v;\r\n    scanf(\"%d%d\", &n, &m);\r\n    for (int i = 1; i <= m; i++){\r\n        scanf(\"%d%d\", &u, &v);\r\n        graph[u].push_back(v);\r\n        graph[v].push_back(u);\r\n    }\r\n    inv2[0] = 1;\r\n    inv2[1] = mypower(2, MOD - 2);\r\n    for (int i = 1; i <= n; i++){\r\n        inv2[i] = inv2[i - 1] * inv2[1] % MOD;\r\n    }\r\n    if (n == 1){\r\n        printf(\"%lld\\n\", inv2[2]);\r\n        return 0;\r\n    }\r\n    int idx = 0;\r\n    int comIdx = 0;\r\n    tarjan(1, 0, idx, comIdx);\r\n    for (int i = 1; i <= n; i++){\r\n        for (auto u : graph[i]){\r\n            if (u < i){\r\n                continue;\r\n            }\r\n            int c1 = graph[i].size();\r\n            int c2 = graph[u].size();\r\n            eEdgePair = (eEdgePair + (c1 - 1 + c2 - 1) * inv2[3] + (m + 1 - c1 - c2 + MOD) * inv2[4]) % MOD;\r\n        }\r\n        if (mark[i]){\r\n            int com = mark[i];\r\n            cycleSum[i] = (cycleSum[i] + inv2[cycle[com].size()]) % MOD;\r\n        }\r\n    }\r\n    for (int i = 1; i <= comIdx; i++){\r\n        ll sum = 0;\r\n        ll edgeCnt = 0;\r\n        for (auto u : cycle[i]){\r\n           sum = (sum + cycleSum[u] - inv2[cycle[i].size()] + MOD) % MOD; \r\n           edgeCnt += graph[u].size();\r\n        }\r\n        int cnt = cycle[i].size();\r\n        eCyclePair = (eCyclePair + sum * inv2[cnt - 1] \r\n                    + inv2[cnt] * (cycleTotalSum - sum - inv2[cnt] + 2*MOD) % MOD) % MOD;\r\n        eCycle = (eCycle + inv2[cnt]) % MOD;\r\n        eVertexCycle = (eVertexCycle + cnt * inv2[cnt] + (n - cnt) * inv2[cnt + 1]) % MOD;\r\n        edgeCnt -= 2 * cnt;\r\n        eEdgeCyle = (eEdgeCyle \r\n                + (cnt * inv2[cnt] + edgeCnt * inv2[cnt + 1] + (m - cnt - edgeCnt) * inv2[cnt + 2])) % MOD;\r\n    }\r\n    eVertex = n * inv2[1] % MOD;\r\n    eEdge = m * inv2[2] % MOD;\r\n    eVertexPair = (eVertex + ((ll)n * (n - 1)) * inv2[2]) % MOD;\r\n    eCyclePair = (eCyclePair + eCycle) % MOD;\r\n    eEdgePair = (eEdgePair + eEdge) % MOD;\r\n    eVertexEdge = m * (2 * inv2[2] + (n - 2) * inv2[3]) % MOD;\r\n    ll ex = (eVertex - eEdge + eCycle + MOD) % MOD;\r\n    ll sqrEx = ex * ex % MOD;\r\n    ll eSqrX = ((eVertexPair + eEdgePair + eCyclePair) % MOD - 2 * (eVertexEdge - eVertexCycle + eEdgeCyle) % MOD + MOD) % MOD;\r\n    ll ans = (eSqrX - sqrEx + MOD) % MOD;\r\n    printf(\"%lld\\n\", ans);\r\n\treturn 0;\r\n}"
+}

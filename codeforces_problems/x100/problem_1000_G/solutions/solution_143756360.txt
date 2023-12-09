@@ -1,0 +1,36 @@
+{
+    "id": 143756360,
+    "contestId": 1000,
+    "creationTimeSeconds": 1642926496,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "phtniit"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 53248000,
+    "source": "#include <bits/stdc++.h>\n\nusing namespace std;\n\ntypedef long long i64;\ntypedef unsigned long long u64;\ntypedef unsigned int u32;\ntypedef pair<int, int> pii;\n\nconst int inf = 1000000007;\nconst i64 prm = 998244353;\n//const i64 inf2 = inf*inf;\nconst int maxn = 300010;\n\nint dep[maxn], fa[maxn][22];\nint hson[maxn], rt[maxn], in[maxn], rnk[maxn];\nvector<int> vt[maxn];\nvoid dfs1(int u, int f) {\n\tfa[u][0] = f;\n\tdep[u] = dep[f] + 1;\n\thson[u] = 0;\n\n\tstatic int sz[maxn];\n\tsz[u] = 1;\n\tfor (int i = 0; i < vt[u].size(); ++i) {\n\t\tint v = vt[u][i];\n\t\tif (v == f) {\n\t\t\tcontinue;\n\t\t}\n\t\tdfs1(v, u);\n\t\tif (sz[v] > sz[hson[u]]) {\n\t\t\thson[u] = v;\n\t\t}\n\t\tsz[u] += sz[v];\n\t}\n}\nvoid dfs2(int u, int r) {\n\trt[u] = r;\n\tstatic int nn = 0;\n\tin[u] = ++nn;\n\trnk[nn] = u;\n\tif (hson[u]) {\n\t\tdfs2(hson[u], r);\n\t}\n\tfor (int i = 0; i < vt[u].size(); ++i) {\n\t\tint v = vt[u][i];\n\t\tif (v != fa[u][0] && v != hson[u]) {\n\t\t\tdfs2(v, v);\n\t\t}\n\t}\n}\n\nint lca(int u, int v) {\n\tif (dep[u] > dep[v]) {\n\t\tswap(u, v);\n\t}\n\tif (dep[v] > dep[u]) {\n\t\tfor (int i = 20; i >= 0; --i) if (dep[v] >= dep[u] + (1<<i)) {\n\t\t\tv = fa[v][i];\n\t\t}\n\t}\n\tassert(dep[u] == dep[v]);\n\tif (u == v) {\n\t\treturn u;\n\t}\n\tfor (int i = 20; i >= 0; --i) if (fa[u][i] != fa[v][i]) {\n\t\tu = fa[u][i];\n\t\tv = fa[v][i];\n\t}\n\treturn fa[v][0];\n}\n\nvoid init(int n) {\n\tdfs1(1, 0);\n\tdfs2(1, 1);\n\tfor (int i = 1; i <= 20; ++i) {\n\t\tfor (int j = 1; j <= n; ++j) {\n\t\t\tfa[j][i] = fa[fa[j][i-1]][i-1];\n\t\t}\n\t}\n}\n\nvector<pii> g[maxn];\ni64 w1[maxn]; // all\ni64 w2[maxn]; // all except hson\ni64 w3[maxn]; // from father\ni64 w4[maxn]; // edge-weight on u\nvoid dfs3(int u) {\n\t// initial w1[u] is from input \n\tfor (int i = 0; i < g[u].size(); ++i) {\n\t\tint v = g[u][i].first;\n\t\tif (v == fa[u][0]) {\n\t\t\tcontinue;\n\t\t}\n\t\tw4[v] = g[u][i].second;\n\t\tdfs3(v);\n\t\tif (w1[v] - w4[v]*2 > 0) {\n\t\t\tw1[u] += (w1[v] - w4[v]*2);\n\t\t}\n\t}\n\tw2[u] = w1[u];\n\tif (hson[u] && w1[hson[u]] - w4[hson[u]]*2 > 0) {\n\t\tw2[u] -= (w1[hson[u]] - w4[hson[u]]*2);\n\t}\n}\nvoid dfs4(int u) {\n\ti64 w = w1[u] + w3[u];\n\tfor (int i = 0; i < g[u].size(); ++i) {\n\t\tint v = g[u][i].first;\n\t\tif (v == fa[u][0]) {\n\t\t\tcontinue;\n\t\t}\n\t\ti64 ww = w;\n\t\tif (w1[v] - w4[v]*2 > 0) { // not include v it self\n\t\t\tww -= (w1[v] - w4[v]*2);\n\t\t}\n\t\tif (ww - w4[v]*2 > 0) {\n\t\t\tw3[v] = ww - w4[v]*2;\n\t\t} else {\n\t\t\tw3[v] = 0;\n\t\t}\n\t\tdfs4(v);\n\t}\n}\n\ni64 w2s[maxn];\nint N;\nvoid add(int k, i64 w) {\n\tfor (int i = k; i <= N; i += i&-i) {\n\t\tw2s[i] += w;\n\t}\n}\ni64 sum(int k) {\n\ti64 r = 0;\n\tfor (int i = k; i > 0; i -= i&-i) {\n\t\tr += w2s[i];\n\t}\n\treturn r;\n}\ni64 gao(int u, int v) {\n\tauto f = [&](int x, int d) {\n\t\ti64 ans = 0;\n\t\tif (dep[x] < d) {\n\t\t\treturn ans;\n\t\t}\n\n\t\twhile (dep[x] >= d) {\n\t\t\tint r = rt[x];\n\t\t\tif (dep[r] <= d) {\n\t\t\t\tr = rnk[ in[r] + d-dep[r] ];\n\t\t\t}\n\n\t\t\tans += w1[x]; // x requests all\n\t\t\tif (in[r] <= in[x] - 1) {\n\t\t\t\tans += sum(in[x]-1) - sum(in[r]-1); // sum of w2 in range [in[r], in[x]-1]\n\t\t\t}\n\t\t\tif (w1[r] - w4[r]*2 > 0) { // which will be counted at fa[r][0]\n\t\t\t\tans -= (w1[r] - w4[r]*2);\n\t\t\t}\n\t\t\tans -= w4[r];\n\t\t\tx = fa[r][0];\n\t\t}\n\t\treturn ans;\n\t};\n\tint w = lca(u, v);\n\treturn f(u, dep[w]+1) + f(v, dep[w]+1) + w1[w] + w3[w];\n}\n\nint main() {\n\tios::sync_with_stdio(0);cin.tie(0);cout.tie(0);\n\t//fflush(stdout);\n\tint n, q;\n\tcin >> n >> q;\n\tfor (int i = 1; i <= n; ++i) {\n\t\tcin >> w1[i];\n\t}\n\tfor (int i = 1, u, v, w; i < n; ++i) {\n\t\tcin >> u >> v >> w;\n\t\tg[u].emplace_back(v, w);\n\t\tg[v].emplace_back(u, w);\n\t\tvt[u].push_back(v);\n\t\tvt[v].push_back(u);\n\t}\n\tinit(n);\n\tdfs3(1);\n\tdfs4(1);\n\tN = n;\n\tfor (int i = 1; i <= n; ++i) {\n\t\tadd(in[i], w2[i]);\n\t}\n\tfor (int i = 0, u, v; i < q; ++i) {\n\t\tcin >> u >> v;\n\t\tcout << gao(u, v) << endl;\n\t}\n\n\treturn 0;\n}\n"
+}

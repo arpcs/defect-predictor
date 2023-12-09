@@ -1,0 +1,36 @@
+{
+    "id": 116564947,
+    "contestId": 1000,
+    "creationTimeSeconds": 1621341075,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "allfadeaway"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 109,
+    "memoryConsumedBytes": 65945600,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n \r\ntemplate<typename T> inline bool upmin(T &x, T y) { return y <= x ? x = y, 1 : 0; }\r\ntemplate<typename T> inline bool upmax(T &x, T y) { return x <= y ? x = y, 1 : 0; }\r\n \r\n#define MP(A,B) make_pair(A,B)\r\n#define PB(A) push_back(A)\r\n#define SIZE(A) ((int)A.size())\r\n#define LEN(A) ((int)A.length())\r\n#define FOR(i,a,b) for(int i=(a);i<(b);++i)\r\n#define fi first\r\n#define se second\r\n \r\ntypedef long long ll;\r\ntypedef unsigned long long ull;\r\ntypedef long double lod;\r\ntypedef pair<int, int> PR;\r\ntypedef vector<int> VI; \r\n \r\nconst lod eps = 1e-9;\r\nconst lod pi = acos(-1);\r\nconst int oo = 1 << 30;\r\nconst ll loo = (1ll << 62) - 1;\r\nconst int MAXN = 200005;\r\nconst int mods = 998244353;\r\nconst int MX = 100000;\r\nconst int inv2 = (mods + 1) >> 1;\r\nconst int INF = 0x3f3f3f3f; //1061109567\r\n/*--------------------------------------------------------------------*/\r\n \r\nnamespace FastIO{\r\n\tconstexpr int SIZE = (1 << 21) + 1;\r\n\tint num = 0, f;\r\n\tchar ibuf[SIZE], obuf[SIZE], que[65], *iS, *iT, *oS = obuf, *oT = obuf + SIZE - 1, c;\r\n\t#define gc() (iS == iT ? (iT = ((iS = ibuf) + fread(ibuf, 1, SIZE, stdin)), (iS == iT ? EOF : *iS ++)) : *iS ++)\r\n\tinline void flush() {\r\n\t\tfwrite(obuf, 1, oS - obuf, stdout);\r\n\t\toS = obuf;\r\n\t}\r\n\tinline void putc(char c) {\r\n\t\t*oS ++ = c;\r\n\t\tif (oS == oT) flush();\r\n\t}\r\n\tinline void getc(char &c) {\r\n\t\tfor (c = gc(); !isalpha(c) && c != EOF; c = gc());\r\n\t}\r\n\tinline void reads(char *st) {\r\n\t\tchar c;\r\n\t\tint n = 0;\r\n\t\tgetc(st[++ n]);\r\n\t\tfor (c = gc(); isalpha(c) ; c = gc()) st[++ n] = c;\r\n\t\tst[++ n] = '\\0';\r\n\t}\r\n\ttemplate<class I>\r\n\tinline void read(I &x) {\r\n\t\tfor (f = 1, c = gc(); c < '0' || c > '9' ; c = gc()) if (c == '-') f = -1;\r\n\t\tfor (x = 0; c >= '0' && c <= '9' ; c = gc()) x = (x << 3) + (x << 1) + (c & 15);\r\n\t\tx *= f;\r\n\t}\r\n\ttemplate<class I>\r\n\tinline void print(I x) {\r\n\t\tif (x < 0) putc('-'), x = -x;\r\n\t\tif (!x) putc('0');\r\n\t\twhile (x) que[++ num] = x % 10 + 48, x /= 10;\r\n\t\twhile (num) putc(que[num --]);\r\n\t}\r\n\tinline void putstr(string st) {\r\n\t\tfor (int i = 0; i < (int)st.size() ; ++ i) putc(st[i]);\r\n\t}\r\n\tstruct Flusher_{~Flusher_(){flush();}} io_Flusher_;\r\n}\r\nusing FastIO :: read;\r\nusing FastIO :: putc;\r\nusing FastIO :: putstr;\r\nusing FastIO :: reads;\r\nusing FastIO :: print;\r\n\r\n\r\n\r\n\r\n\r\n\r\nstruct enode{ int nxt, to, c; } e[MAXN << 1];\r\nint head[MAXN], C[MAXN], fa[MAXN][20], dep[MAXN], a[MAXN], Log[MAXN], edgenum = 0;\r\nll f[MAXN], g[MAXN], h[MAXN], sum[MAXN][20];\r\n\r\nvoid add(int u, int v, int c) {\r\n\te[++ edgenum] = (enode){head[u], v, c}, head[u] = edgenum;\r\n}\r\nvoid tree_dp(int x, int father) {\r\n\tfor (int i = head[x]; i ; i = e[i].nxt) {\r\n\t\tint v = e[i].to;\r\n\t\tif (v == father) continue;\r\n\t\ttree_dp(v, x);\r\n\t}\r\n\tf[x] = a[x];\r\n\tfor (int i = head[x]; i ; i = e[i].nxt) {\r\n\t\tint v = e[i].to, c = e[i].c;\r\n\t\tif (v == father) continue;\r\n\t\tf[x] += max(f[v] - c - c, 0ll);\r\n\t}\r\n\tfor (int i = head[x]; i ; i = e[i].nxt) {\r\n\t\tint v = e[i].to, c = e[i].c;\r\n\t\tif (v == father) continue;\r\n\t\tg[v] = f[x] - max(f[v] - c - c, 0ll);\r\n\t}\r\n}\r\nvoid dfs(int x, int father) {\r\n\tdep[x] = dep[father] + 1, fa[x][0] = father, sum[x][0] = g[x] - C[x];\r\n\tfor (int i = 1; i <= Log[dep[x]] ; ++ i) fa[x][i] = fa[fa[x][i - 1]][i - 1], sum[x][i] = sum[x][i - 1] + sum[fa[x][i - 1]][i - 1];\r\n\tfor (int i = head[x]; i ; i = e[i].nxt) {\r\n\t\tint v = e[i].to, c = e[i].c;\r\n\t\tif (v == father) continue;\r\n\t\th[v] = max(h[x] + f[x] - max(f[v] - c - c, 0ll) - c - c, 0ll);\r\n\t\tC[v] = c;\r\n\t\tdfs(v, x);\r\n\t}\r\n}\r\nint getlca(int x, int y) {\r\n\tif (dep[x] < dep[y]) swap(x, y);\r\n\tfor (int i = Log[dep[x]]; i >= 0 ; -- i)\r\n\t\tif (dep[fa[x][i]] >= dep[y]) x = fa[x][i];\r\n\tif (x == y) return x;\r\n\tfor (int i = Log[dep[x]]; i >= 0 ; -- i)\r\n\t\tif (fa[x][i] != fa[y][i]) x = fa[x][i], y = fa[y][i];\r\n\treturn fa[x][0];\r\n}\r\nint jump(int u, int d) {\r\n\tfor (int i = Log[d]; i >= 0 ; -- i)\r\n\t\tif ((d >> i) & 1) u = fa[u][i];\r\n\treturn u;\r\n}\r\nll getsum(int u, int d) {\r\n\tll ans = 0;\r\n\tfor (int i = Log[d]; i >= 0 ; -- i)\r\n\t\tif ((d >> i) & 1) ans += sum[u][i], u = fa[u][i];\r\n\treturn ans;\r\n}\r\n\r\nsigned main() {\r\n#ifndef ONLINE_JUDGE\r\n\tfreopen(\"a.in\", \"r\", stdin);\r\n#endif\t\r\n\tint n, Case;\r\n\tread(n), read(Case);\r\n\tfor (int i = 1; i <= n ; ++ i) read(a[i]);\r\n\tfor (int i = 1, u, v, c; i < n ; ++ i) read(u), read(v), read(c), add(u, v, c), add(v, u, c);\r\n\ttree_dp(1, 0);\r\n\tdep[0] = -1, Log[1] = 0;\r\n\tfor (int i = 2; i <= n ; ++ i) Log[i] = Log[i >> 1] + 1;\r\n\tdfs(1, 0);\r\n\r\n//\tfor (int i = 1; i <= n ; ++ i) cout << i << \":\" << f[i] << \" \" << g[i] << \" \" << h[i] << endl;\r\n\twhile (Case --) {\r\n\t\tint u, v;\r\n\t\tread(u), read(v);\r\n\t\tif (dep[u] < dep[v]) swap(u, v);\r\n\r\n\t\tll ans = 0;\r\n\t\tint t = getlca(u, v);\r\n\t\tif (u == v) ans = h[u] + f[u];\r\n\t\telse if (v == t) {\r\n\t\t\tint uu = jump(u, dep[u] - dep[t] - 1);\r\n\t\t\tans = h[t] + f[t] - max(f[uu] - C[uu] - C[uu], 0ll) + getsum(u, dep[u] - dep[t] - 1) + f[u] - C[uu];\r\n\t\t}\r\n\t\telse {\r\n\t\t\tint uu = jump(u, dep[u] - dep[t] - 1), vv = jump(v, dep[v] - dep[t] - 1);\r\n\t\t\tans = h[t] + f[t] - max(f[uu] - C[uu] - C[uu], 0ll) - max(f[vv] - C[vv] - C[vv], 0ll) - C[uu] - C[vv];\r\n\t\t\tans += getsum(u, dep[u] - dep[t] - 1) + getsum(v, dep[v] - dep[t] - 1) + f[u] + f[v]; \t\r\n\t\t}\r\n\t\tprint(ans), putc('\\n');\r\n\t}\r\n\treturn 0;\r\n}"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 68314667,
+    "contestId": 1236,
+    "creationTimeSeconds": 1578314696,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "star_magic_young"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 156,
+    "memoryConsumedBytes": 31027200,
+    "source": "#include<bits/stdc++.h>\n#define LL long long\n#define uLL unsigned long long\n#define db double\n\nusing namespace std;\nconst int N=5e5+10,mod=1e9+7;\nint rd()\n{\n    int x=0,w=1;char ch=0;\n    while(ch<'0'||ch>'9') {if(ch=='-') w=-1;ch=getchar();}\n    while(ch>='0'&&ch<='9') {x=(x<<3)+(x<<1)+(ch^48);ch=getchar();}\n    return x*w;\n}\nint to[N<<1],nt[N<<1],hd[N],dg[N],tot=1;\nvoid adde(int x,int y)\n{\n\t++tot,to[tot]=y,nt[tot]=hd[x],hd[x]=tot,++dg[x];\n\t++tot,to[tot]=x,nt[tot]=hd[y],hd[y]=tot,++dg[y];\n}\nvoid ad(int &x,int y){x+=y,x-=x>=mod?mod:0;}\nvector<int> cr[N];\nint n,m,tc,pp[N],pw[N],st[N],tp,cpt,n1[N],n2[N],sg[N];\nbool mk[N],vs[N];\nvoid dfs(int x)\n{\n\tvs[x]=1,st[++tp]=x;\n\tfor(int i=hd[x];i;i=nt[i])\n\t{\n\t\tif(mk[i>>1]) continue;\n\t\tmk[i>>1]=1;\n\t\tint y=to[i];\n\t\tif(!vs[y]) dfs(y);\n\t\telse\n\t\t{\n\t\t\t++tc;\n\t\t\tfor(int j=tp;j;--j)\n\t\t\t{\n\t\t\t\tint z=st[j];\n\t\t\t\tcr[tc].push_back(z);\n\t\t\t\tif(z==y) break;\n\t\t\t}\n\t\t}\n\t}\n\t--tp;\n}\n\nint main()\n{\n\tn=rd(),m=rd();\n\tpp[0]=pw[0]=1,pp[1]=2,pw[1]=500000004;\n\tfor(int i=2;i<=m;++i)\n\t{\n\t\tpp[i]=1ll*pp[i-1]*pp[1]%mod;\n\t\tpw[i]=1ll*pw[i-1]*pw[1]%mod;\n\t}\n\tfor(int i=1;i<=m;++i) adde(rd(),rd());\n\tdfs(1);\n\tint ans=0;\n\tad(ans,1ll*n*pw[1]%mod);\n\tad(ans,mod-1ll*m*pw[2]%mod);\n\tfor(int i=1;i<=tc;++i)\n\t{\n\t\tint nn=cr[i].size();\n\t\tad(ans,pw[nn]);\n\t}\n\tans=(mod-1ll*ans*ans%mod)%mod;\n\tad(ans,1ll*n*pw[1]%mod);\n\tad(ans,1ll*n*(n-1)%mod*pw[2]%mod);\n\tfor(int i=1;i<=m;++i)\n\t{\n\t\tad(ans,pw[2]);\n\t\tint nm=dg[to[i<<1]]+dg[to[i<<1|1]]-2;\n\t\tad(ans,1ll*nm*pw[3]%mod);\n\t\tad(ans,1ll*(m-1-nm)*pw[4]%mod);\n\t}\n\tfor(int i=1;i<=tc;++i)\n\t{\n\t\tint nn=cr[i].size();\n\t\tfor(int j=0;j<nn;++j)\n\t\t{\n\t\t\tint x=cr[i][j];\n\t\t\tn1[x]+=1,ad(n2[x],pw[nn]),ad(sg[i],dg[x]);\n\t\t}\n\t\tad(cpt,pw[nn]);\n\t}\n\tfor(int i=1;i<=tc;++i)\n\t{\n\t\tint nn=cr[i].size();\n\t\tad(ans,pw[nn]);\n\t\tint s1=1,s2=pw[nn];\n\t\tfor(int j=0;j<nn;++j)\n\t\t{\n\t\t\tint x=cr[i][j];\n\t\t\ts1+=n1[x]-1,ad(s2,(n2[x]-pw[nn]+mod)%mod);\n\t\t\tad(ans,1ll*pw[nn-1]*(n2[x]-pw[nn]+mod)%mod);\n\t\t}\n\t\tad(ans,1ll*pw[nn]*(tc-s1)%mod*(cpt-s2+mod)%mod);\n\t}\n\tfor(int i=1;i<=tc;++i)\n\t{\n\t\tint nn=cr[i].size();\n\t\tad(ans,2ll*nn*pw[nn]%mod);\n\t\tad(ans,2ll*(n-nn)*pw[nn+1]%mod);\n\t\tad(ans,mod-2ll*nn*pw[nn]%mod);\n\t\tad(ans,mod-2ll*(sg[i]-2*nn+mod)%mod*pw[nn+1]%mod);\n\t\tad(ans,mod-2ll*(1ll*m-nn-(sg[i]-2*nn)+mod+mod)%mod*pw[nn+2]%mod);\n\t}\n\tad(ans,mod-2ll*m*2%mod*pw[2]%mod);\n\tad(ans,mod-2ll*m*(n-2)%mod*pw[3]%mod);\n\tprintf(\"%d\\n\",ans);\n    return 0;\n}\n"
+}

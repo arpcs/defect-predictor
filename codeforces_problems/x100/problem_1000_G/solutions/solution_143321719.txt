@@ -1,0 +1,36 @@
+{
+    "id": 143321719,
+    "contestId": 1000,
+    "creationTimeSeconds": 1642593501,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "akhan42"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 1887,
+    "memoryConsumedBytes": 125952000,
+    "source": "#include <bits/stdc++.h>\n//#include <ext/pb_ds/assoc_container.hpp>\n\nusing namespace std;\n//using namespace __gnu_pbds;\n\n#define F first\n#define S second\n#define forn(i, n) for(int i = 0; i < n; ++i)\n#define forbn(i, b, n) for(int i = b; i < n; ++i)\n#define sz(v) (int)v.size()\n#define pb push_back\n#define eb emplace_back\n#define all(v) v.begin(), v.end()\n#define mp make_pair\n\ntypedef pair<int, int> ii;\ntypedef vector<int> vi;\ntypedef vector<ii> vii;\ntypedef long long ll;\n//typedef tree<ii, null_type, less<ii>, rb_tree_tag, tree_order_statistics_node_update> ordered_set;\n\ntemplate <class T> inline void mineq(T &a, T b) { a = min(a, b); }\ntemplate <class T> inline void maxeq(T &a, T b) { a = max(a, b); }\n\n\nstruct Psums {\n\tint n;\n\tvector<ll> t;\n\n\tPsums(vector<ll> & v) {\n\t\tn = sz(v);\n\t\tt.resize(n + 1);\n\t\tforbn(i, 1, n + 1)\n\t\t\tt[i] = t[i - 1] + v[i - 1];\n\t}\n\n\tll query(int l, int r) {\n\t\treturn t[r + 1] - t[l];\n\t}\n\n\tll except_i(int i) {\n\t\treturn query(0, i - 1) + query(i + 1, n - 1);\n\t}\n\n\tll except2(int i1, int i2) {\n\t\tif(i1 > i2) swap(i1, i2);\n\t\treturn query(0, i1 - 1) + query(i1 + 1, i2 - 1) + query(i2 + 1, n - 1);\n\t}\n};\n\n\nconst int MX = 300 * 1000 + 10;\nconst int mxpw = 19;\nvii gr[MX];\nvii grt[MX];\nint par[mxpw][MX];\nll par_cum[mxpw][MX];\nint timer = -1;\nint tin[MX], tout[MX];\nint vals[MX];\nll dp_in[MX], dp_out[MX];\nPsums* psum[MX];\n\n\nvoid dfs(int node = 1, int pr = 0) {\n\tpar[0][node] = pr;\n\ttin[node] = ++timer;\n\tvector<ll> son_vals(sz(gr[node]));\n\n\tforn(i, sz(gr[node])) {\n\t\tint nb = gr[node][i].F, w = gr[node][i].S;\n\t\tgr[nb].erase(find(all(gr[nb]), mp(node, w)));\n\n\t\tdfs(nb, node);\n\n\t\tson_vals[i] = max(0ll, dp_in[nb] + vals[nb] - 2 * w);\n\t\tdp_in[node] += son_vals[i];\n\n\t\tgrt[node].eb(tin[nb], nb);\n\t}\n\ttout[node] = timer;\n\tpsum[node] = new Psums(son_vals);\n}\n\n\nvoid dfs2(int node = 1, int pr = 0, int pri = 0) {\n\tif(pr) {\n\t\tll rem_exc = psum[pr]->except_i(pri), w = gr[pr][pri].S;\n\t\tll pr_val = dp_out[pr] + vals[pr] - 2 * w;\n\t\tdp_out[node] = max(0ll, pr_val + rem_exc);\n\n\t\tpar_cum[0][node] = -w + rem_exc + vals[pr];\n\t}\n\n\tforn(i, sz(gr[node])) {\n\t\tint nb = gr[node][i].F;\n\n\t\tdfs2(nb, node, i);\n\t}\n}\n\n\nbool par_son(int pr, int son) {\n\treturn pr == 0 || (tin[pr] <= tin[son] && tout[son] <= tout[pr]);\n}\n\n\nint get_index(int pr, int son) {\n\tint index = lower_bound(all(grt[pr]), mp(tin[son], MX)) - grt[pr].begin();\n\treturn index - 1;\n}\n\n\nvoid solve() {\n\tint n, q;\n\tcin >> n >> q;\n\tforbn(i, 1, n + 1)\n\t\tcin >> vals[i];\n\n\tforn(_, n - 1) {\n\t\tint a, b, w;\n\t\tcin >> a >> b >> w;\n\t\tgr[a].eb(b, w);\n\t\tgr[b].eb(a, w);\n\t}\n\n\tdfs();\n\tdfs2();\n\n\tforbn(d, 1, mxpw) {\n\t\tforn(i, n + 1) {\n\t\t\tint to = par[d - 1][i];\n\t\t\tif(to == 0) continue;\n\t\t\tpar[d][i] = par[d - 1][to];\n\n\t\t\tpar_cum[d][i] = par_cum[d - 1][i] + par_cum[d - 1][to];\n\t\t}\n\t}\n\n\tforn(_, q) {\n\t\tint u, v;\n\t\tcin >> u >> v;\n\t\tif(tin[u] > tin[v])\n\t\t\tswap(u, v);\n\n\t\tll sum = 0;\n\t\tif(par_son(u, v)) {\n\t\t\tsum += dp_in[v] + dp_out[u] + vals[v];\n\t\t\tfor(int pw = mxpw - 1; pw >= 0; pw--) {\n\t\t\t\tif(!par_son(par[pw][v], u) || par[pw][v] == u) {\n\t\t\t\t\tsum += par_cum[pw][v];\n\t\t\t\t\tv = par[pw][v];\n\t\t\t\t}\n\t\t\t}\n\t\t} else {\n\t\t\tsum += dp_in[u] + dp_in[v] + vals[u] + vals[v];\n\n\t\t\tfor(int pw = mxpw - 1; pw >= 0; pw--) {\n\t\t\t\tif(!par_son(par[pw][u], v)) {\n\t\t\t\t\tsum += par_cum[pw][u];\n\t\t\t\t\tu = par[pw][u];\n\t\t\t\t}\n\t\t\t}\n\t\t\tfor(int pw = mxpw - 1; pw >= 0; pw--) {\n\t\t\t\tif(!par_son(par[pw][v], u)) {\n\t\t\t\t\tsum += par_cum[pw][v];\n\t\t\t\t\tv = par[pw][v];\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tint lca = par[0][u];\n\t\t\tint ui = get_index(lca, u), vi = get_index(lca, v);\n\t\t\tsum += dp_out[lca] + psum[lca]->except2(ui, vi);\n\t\t\tsum += 0ll - gr[lca][ui].S - gr[lca][vi].S + vals[lca];\n\t\t}\n\n\t\tcout << sum << '\\n';\n\t}\n}\n\n\nint main() {\n\tios_base::sync_with_stdio(false);\n\tcin.tie(nullptr);\n//\tcout.tie(nullptr);\n\n//\tfreopen(\"grassplant.in\", \"r\", stdin);\n//\tfreopen(\"grassplant.out\", \"w\", stdout);\n\n\tint t = 1;\n//\tcin >> t;\n\twhile(t--) {\n\t\tsolve();\n\t}\n}\n"
+}

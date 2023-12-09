@@ -1,0 +1,36 @@
+{
+    "id": 160226947,
+    "contestId": 594,
+    "creationTimeSeconds": 1654978793,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 594,
+        "index": "E",
+        "name": "Cutting the Line",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3100,
+        "tags": [
+            "string suffix structures",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 594,
+        "members": [
+            {
+                "handle": "HOLlC"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1447000200
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 23,
+    "timeConsumedMillis": 202,
+    "memoryConsumedBytes": 206745600,
+    "source": "//\r\n// Created by MerCI on 2022/6/12.\r\n//\r\n\r\n#include <bits/stdc++.h>\r\n\r\n#define all(a) a.begin(),a.end()\r\n#define rall(a) a.rbegin(),a.rend()\r\n\r\n#define endl '\\n'\r\n#define ls p << 1\r\n#define rs p << 1 | 1\r\n//#define int long long\r\nusing namespace std;\r\nconst int N = 1e7 + 1009;\r\n//const int N = 2e5 + 1009;\r\n//const int N = 5009;\r\n//const int N = 309\r\nstring s, a, ans, s1;\r\nint len, k, cnt, z[N];\r\nstruct node{int l, r, p;} suf[N];\r\nvoid exkmp(string s) {\r\n    z[0] = s.size();\r\n    for(int i = 1, l = 0, r = 0; i <= len; i ++) {\r\n        while(i <= r) z[i] = min(z[i - l], r - i + 1);\r\n        while(s[z[i]] == s[i + z[i]]) z[i] ++;\r\n        if(i + z[i] > r) l = i, r = i + z[i] - 1;\r\n    }\r\n}\r\nvoid work() {\r\n    cin >> s >> k;\r\n    a = s;\r\n    int flag = 0;\r\n    if(a[0] == 'h' && a[1] == 'e') flag = 1;\r\n    if(flag) cout << k << endl;\r\n    reverse(s.begin(), s.end());\r\n    if(k == 1) {cout << min(a, s) << endl; return;}\r\n    for(int i = 0, j = 0, k = 1; i < s.size(); j = i, k = i + 1) {\r\n        while(k < s.size() && s[k] >= s[j]) s[k ++] > s[j] ? j = i : j ++;\r\n        int L = i;\r\n        while(i <= j) i += k - j;\r\n        suf[++ cnt] = {L, i - 1, k - j};\r\n    }\r\n    if(flag) cout << \"first\" << endl;\r\n    while(k >= 3 && cnt) {\r\n        for(int i = suf[cnt].l; i <= suf[cnt].r; i ++) ans += s[i];\r\n        if(suf[cnt].p == 1) {\r\n            cnt --;\r\n            while(cnt && suf[cnt].p == 1) {\r\n                for(int i = suf[cnt].l; i <= suf[cnt].r; i ++) ans += s[i];\r\n                cnt --;\r\n            }\r\n        } else cnt --;\r\n        k --;\r\n    }\r\n    if(flag)cout << \"second\" << endl;\r\n    if(!cnt) {\r\n        cout << ans << endl;\r\n        return;\r\n    }\r\n    int len = suf[cnt].r;\r\n    for(int i = len; i >= 0; i --) s1 += s[i];  //\u524d\u540e\u90fd\u4e0d\u7ffb\u8f6c\r\n    s = s1; a = s; reverse(s.begin(), s.end());\r\n    function<string()> solve = [&] {\r\n        int ans1 = 0, ans2 = 0;\r\n        string s1 = \"\", s2 = \"\";\r\n        for(int i = 0, j = 0, k = 1; i < s.size(); j = i, k = i + 1) {\r\n            while(k < s.size() && s[k] >= s[j]) s[k ++] > s[j] ? j = i : j ++;\r\n            if(i != j) ans1 = i;\r\n            while(i <= j) ans2 = i, i += k - j;\r\n        }\r\n        for(int i = ans1; i < s.size(); i ++) s1 += s[i];\r\n        for(int i = ans1 - 1; i >= 0; i --) s1 += s[i];\r\n        for(int i = ans2; i < s.size(); i ++) s2 += s[i];\r\n        for(int i = ans2 - 1; i >= 0; i --) s2 += s[i];\r\n        return min(s1, s2);\r\n    }; //\u524d\u7ffb\u540e\u4e0d\u7ffb\r\n    s1 = min(s1, solve());\r\n    if(flag)cout << \"third\" << endl;\r\n    function<string(string)> solve1 = [&](string s){\r\n        int L = 0;\r\n        s += s;\r\n        string ans = \"\";\r\n        for(int i = 0, j = 0, k = 1; i < s.size() / 2; j = i, k = i + 1) {\r\n            while(k < s.size() && s[k] >= s[j]) s[k ++] > s[j] ? j = i : j ++;\r\n            L = i;\r\n            while(i <= j) i += k - j;\r\n        }\r\n        for(int i = L; i <= L + s.size() / 2 - 1; i ++) ans += s[i];\r\n        return ans;\r\n    };  //\u524d\u540e\u90fd\u7ffb\u8f6c\r\n    s1 = min(s1, solve1(s));\r\n    if(flag)cout << \"forth\" << endl;\r\n    function<string(string, string)> solve2 = [&](string s, string a) {\r\n        s += a;\r\n        exkmp(s);\r\n        function<int(int, int)> cmp = [&](int x, int y) {\r\n            int len1 = z[a.size() + x];\r\n            int len2 = y - x;\r\n            if(len1 < len2) return a[x + len1 - 1] < s[len1 - 1];\r\n            else {\r\n                int len3 = z[len2 - 1];\r\n                if(len3 > a.size() - len2) return false;\r\n                return s[len3 - 1] < s[len2 + len3 - 1];\r\n            }\r\n        };\r\n        int f = 1;\r\n        string ans = \"\";\r\n        for(int i = 2; i < s.size() - 1; i ++) if(cmp(i, f)) f = i;\r\n        for(int i = 0; i < f; i ++) ans += s[i];\r\n        for(int i = s.size() - 1; i >= f; i --) ans += s[i];\r\n        return ans;\r\n    };\r\n    s1 = min(s1, solve2(s, a));\r\n    if(flag)cout << \"last\" << endl;\r\n    ans += s1;\r\n    cout << ans << endl;\r\n}\r\n\r\nsigned main() {\r\n#ifdef LOCAL\r\n    freopen(\"C:\\\\Users\\\\MerCI\\\\Desktop\\\\acm\\\\data.in\", \"r\", stdin);\r\n    freopen(\"C:\\\\Users\\\\MerCI\\\\Desktop\\\\acm\\\\data.out\", \"w\", stdout);\r\n#endif\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    int Case = 1;\r\n    while (Case--) work();\r\n    return 0;\r\n}"
+}

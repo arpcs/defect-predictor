@@ -1,0 +1,37 @@
+{
+    "id": 229705205,
+    "contestId": 868,
+    "creationTimeSeconds": 1698243035,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 868,
+        "index": "E",
+        "name": "Policeman and a Tree",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2700,
+        "tags": [
+            "dp",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 868,
+        "members": [
+            {
+                "handle": "purplevine"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1507187100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 358,
+    "memoryConsumedBytes": 268390400,
+    "source": "// LUOGU_RID: 131609831\n#include <bits/stdc++.h>\r\n\r\nint main() {\r\n  int n, s, m; scanf(\"%d\", &n);\r\n  std::vector<std::vector<int>> e(n, std::vector<int> (n));\r\n  std::vector<int> deg(n), siz(n);\r\n  for (int i = 0, u, v, w; i < n; i++) {\r\n    scanf(\"%d %d %d\", &u, &v, &w), --u, --v;\r\n    e[u][v] = e[v][u] = w, ++deg[u], ++deg[v];\r\n  }\r\n  auto dis = e;\r\n  for (int k = 0; k < n; k++)\r\n    for (int i = 0; i < n; i++)\r\n      for (int j = 0; j < n; j++)\r\n        dis[i][j] = std::min(dis[i][j], dis[i][k] + dis[k][j]);\r\n  scanf(\"%d %d\", &s, &m);\r\n  std::vector<int> pl(m);\r\n  for (auto &u : pl) scanf(\"%d\", &u), ++siz[u];\r\n  std::vector<std::vector<int>> f(n, std::vector<int> (m + 1));\r\n  std::vector<int> leaf;\r\n  for (int i = 0; i < n; i++) if (deg[i] == 1) leaf.push_back(i);\r\n  auto chk = [&](int u, int x, int lim) -> bool {\r\n    int sum = 0;\r\n    for (auto v : leaf) if (v != u) {\r\n      int p = m;\r\n      for (; p && f[v][x - p] + dis[u][v] > lim; --p) ;\r\n      sum += p;\r\n    }\r\n    return sum >= x;\r\n  } ;\r\n  for (int j = 0; j <= m; j++) {\r\n    for (int i = 0; i < n; i++) {\r\n      int l = 0, r = 1e9;\r\n      while (l <= r) {\r\n        int mid = l + r >> 1;\r\n        if (chk(i, j, mid)) f[i][j] = mid, r = mid - 1;\r\n        else l = mid + 1;\r\n      }\r\n    }\r\n  }\r\n  std::vector<int> bl(n);\r\n  auto dfs = [&](auto self, int u, int f) -> void {\r\n    for (auto v : e[u]) if (v != f) \r\n      bl[v] = bl[u], self(self, v, u), siz[u] += siz[v];\r\n  } ;\r\n  for (auto u : e[s]) bl[u] = u, dfs(dfs, u, s);\r\n  auto chk2 = [&](int lim) -> bool {\r\n    std::vector<int> res((int) e[s].size());\r\n    int k = e[s].size(), sum = 0;\r\n    for (int i = 0; i < k; i++) res[i] = siz[e[s][i]];\r\n    for (int i = 0; i < k; i++) {\r\n      int j = res[i];\r\n      for (; j && dis[s][leaf[i]] + f[leaf[i]][m - j] > lim; --j) ;\r\n      sum += j;\r\n    }\r\n    return sum >= m;\r\n  } ;\r\n  int l = 0, r = 1e9, ans = 0;\r\n  while (l <= r) {\r\n    int mid = l + r >> 1;\r\n    if (chk2(mid)) ans = mid, r = mid - 1;\r\n    else r = mid + 1;\r\n  }\r\n  printf(\"%d\\n\", ans);\r\n}"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 212936278,
+    "contestId": 587,
+    "creationTimeSeconds": 1688890739,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 587,
+        "index": "F",
+        "name": "Duff is Mad",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3000,
+        "tags": [
+            "data structures",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 587,
+        "members": [
+            {
+                "handle": "vjudge5"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1444926600
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 87,
+    "timeConsumedMillis": 623,
+    "memoryConsumedBytes": 55398400,
+    "source": "#include <iostream>\n#include <cstdio>\n#include <queue>\n\nusing LL = long long;\n\nconst int N = 1e5 + 10, B = 400;\nstd::string s[N];\nint n, Q, ind[N];\nLL res[N], cur[N];\nstruct Query { int l, r, k; } q[N];\nstd::vector<int> at[N];\n\nstruct Block {\n\tLL lt[N / B + 10], val[N];\n\t\n\tvoid add(int l, int r, LL c) {\n\t\tif (l / B == r / B) {\n\t\t\tfor (int i = l; i <= r; ++ i) val[i] += c;\n\t\t\treturn;\n\t\t}\n\t\tfor (; l % B; ++ l) val[l] += c;\n\t\twhile (l + B <= r) lt[l / B] += c, l += B;\n\t\tfor (; l <= r; ++ l) val[l] += c;\n\t}\n\t\n\tLL ask(int pos) { return lt[pos / B] + val[pos]; }\n} Bl;\n\nstruct AC_Automaton {\n\tstruct Node {\n\t\tint ch[26];\n\t\tint len, fa;\n\t} tr[N];\n\tstd::vector<int> g[N];\n\tint tot, sz[N], dfn[N];\n\t\n\tvoid insert(const char *s, int id)\n\t{\n\t\tint u = 0;\n\t\tfor (int i = 0; s[i]; ++ i) {\n\t\t\tint &t = tr[u].ch[s[i] - 'a'];\n\t\t\tif (!t) t = ++ tot;\n\t\t\tu = t;\n\t\t}\n\t\tind[id] = u;\n\t}\n\t\n\tvoid dfs(int x) {\n\t\tsz[x] = 1, dfn[x] = ++ *dfn;\n\t\tfor (int v : g[x]) dfs(v), sz[x] += sz[v];\n\t\t// std::cout << x << ' ' << dfn[x] << ' ' << sz[x] << '\\n';\n\t}\n\t\n\tvoid build()\n\t{\n\t\tstd::queue<int> q;\n\t\tfor (int i = 0; i < 26; ++ i)\n\t\t\tif (tr[0].ch[i]) q.push(tr[0].ch[i]);\n\t\twhile (!q.empty()) {\n\t\t\tint x = q.front();\n\t\t\tq.pop();\n\t\t\tfor (int i = 0; i < 26; ++ i)\n\t\t\t\tif (tr[x].ch[i]) tr[tr[x].ch[i]].fa = tr[tr[x].fa].ch[i], q.push(tr[x].ch[i]);\n\t\t\t\telse tr[x].ch[i] = tr[tr[x].fa].ch[i];\n\t\t}\n\t\tfor (int i = 1; i <= tot; ++ i) g[tr[i].fa].push_back(i);\n\t\tdfs(0);\n\t}\n\t\n\tLL solve(std::string s) {\n\t\tint u = 0;\n\t\tLL res = 0;\n\t\tfor (char &c : s) {\n\t\t\tu = tr[u].ch[c - 'a'];\n\t\t\tres += Bl.ask(dfn[u]);\n\t\t}\n\t\treturn res;\n\t}\n} acam;\n\nstruct SAM {\n\tstruct Node {\n\t\tint ch[26];\n\t\tint len, fa;\n\t} tr[N << 1];\n\tint ls, tot, f[N << 1];\n\tstd::vector<int> g[N << 1];\n\n\tvoid init() {\n\t\tfor (int i = 1; i <= tot; ++ i) tr[i] = {}, g[i].clear(), f[i] = 0;\n\t\tls = tot = 1;\n\t}\n\n\tvoid extend(int c)\n\t{\n\t\tint p = ls, np = ++ tot;\n\t\tls = tot, tr[np].len = tr[p].len + 1, f[tot] = 1;\n\t\tfor (; p && !tr[p].ch[c]; p = tr[p].fa) tr[p].ch[c] = np;\n\t\tif (!p) tr[np].fa = 1;\n\t\telse {\n\t\t\tint q = tr[p].ch[c];\n\t\t\tif (tr[q].len == tr[p].len + 1) tr[np].fa = q;\n\t\t\telse {\n\t\t\t\tint nq = ++ tot;\n\t\t\t\ttr[nq] = tr[q], tr[nq].len = tr[p].len + 1, tr[q].fa = tr[np].fa = nq;\n\t\t\t\tfor (; p && tr[p].ch[c] == q; p = tr[p].fa) tr[p].ch[c] = nq;\n\t\t\t}\n\t\t}\n\t}\n\t\n\tvoid dfs(int x) {\n\t\tfor (int v : g[x]) dfs(v), f[x] += f[v];\n\t}\n\t\n\tvoid work() {\n\t\tfor (int i = 2; i <= tot; ++ i) g[tr[i].fa].push_back(i);\n\t\tdfs(1);\n\t}\n\t\n\tint solve(std::string s) {\n\t\tint u = 1;\n\t\tfor (char &c : s) u = tr[u].ch[c - 'a'];\n\t\treturn u ? f[u] : 0;\n\t}\n} sam;\n\nint main()\n{\n\tstd::cin.tie(0)->sync_with_stdio(false);\n\tstd::cin >> n >> Q;\n\tfor (int i = 1; i <= n; ++ i) std::cin >> s[i], acam.insert(s[i].c_str(), i);\n\tfor (int i = 1; i <= Q; ++ i) std::cin >> q[i].l >> q[i].r >> q[i].k;\n\tacam.build();\n\tfor (int i = 1; i <= n; ++ i) {\n\t\tif ((int) s[i].size() <= B) continue;\n\t\tsam.init();\n\t\tfor (char &c : s[i]) sam.extend(c - 'a');\n\t\tsam.work();\n\t\tfor (int j = 1; j <= n; ++ j) cur[j] = sam.solve(s[j]) + cur[j - 1];\n\t\tfor (int j = 1; j <= Q; ++ j) {\n\t\t\tif (q[j].k != i) continue;\n\t\t\tres[j] = cur[q[j].r] - cur[q[j].l - 1];\n\t\t}\n\t}\n\tfor (int i = 1; i <= Q; ++ i) {\n\t\tif ((int) s[q[i].k].size() > B) continue;\n\t\tat[q[i].l - 1].push_back(i), at[q[i].r].push_back(i);\n\t}\n\tfor (int i = 1; i <= n; ++ i) {\n\t\tBl.add(acam.dfn[ind[i]], acam.dfn[ind[i]] + acam.sz[ind[i]] - 1, 1);\n\t\tfor (int id : at[i]) res[id] += (q[id].r == i ? 1 : -1) * acam.solve(s[q[id].k]);\n\t}\n\tfor (int i = 1; i <= Q; ++ i) printf(\"%lld\\n\", res[i]);\n\treturn 0;\n}\n \t \t\t\t\t  \t\t\t     \t \t \t  \t\t \t \t\t"
+}

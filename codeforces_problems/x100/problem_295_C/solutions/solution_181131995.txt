@@ -1,0 +1,38 @@
+{
+    "id": 181131995,
+    "contestId": 295,
+    "creationTimeSeconds": 1668539629,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "1L1YA"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define ll long long\r\n#define ld long double\r\n#define Mp make_pair\r\n#define Pb push_back\r\n#define dokme(x) cout << x , exit(0)\r\n#define pii pair<int,int>\r\n\r\nconst ll MOD=1e9+7;\r\nconst int MXN=55;\r\nint n,m,arr[MXN],l,r,cnt50,cnt100,dp[2][MXN][MXN],sum,dist[2][MXN][MXN];\r\nll mul[MXN],di[MXN];\r\nmap<int,int> mp;\r\n\r\nll pow(ll a,ll b){return (!b?1:pow(a*a%MOD,b/2)*(b&1LL?a:1)%MOD);}\r\nll inv(ll x){return pow(x, MOD - 2);}\r\nll C(ll n, ll r){if(r>=0 && r<=n) return (mul[n]*di[r]%MOD)*di[n-r]%MOD; return 0;}\r\n\r\nvoid BFS(){\r\n    queue<pair<bool,pii>> Q;\r\n    //for(int j=min(m/100,cnt100),i=min((m-j*100)/50,cnt50);i<=m/50 && i<=cnt50 && j>=0;i+=2,j--)\r\n    for(int i=0;i<=cnt50;i++)\r\n        for(int j=0;j<=cnt100;j++)\r\n            if((i || j) && i*50+j*100<=m){\r\n                Q.push(Mp(1,Mp(i,j)));\r\n                dist[1][i][j]=1;\r\n                dp[1][i][j]=C(cnt50,i)*C(cnt100,j)%MOD;\r\n            }\r\n    dist[0][cnt50][cnt100]=-1;\r\n    while(!Q.empty()){\r\n        auto v=Q.front();\r\n        //cerr << v.first << \" \" << v.second.first << \" \" << v.second.second << \" \" << dp[v.first][v.second.first][v.second.second] <<'\\n';\r\n        if(v.first==1 && v.second.first==cnt50 && v.second.second==cnt100){\r\n            cout << dist[1][cnt50][cnt100] << '\\n' << dp[1][cnt50][cnt100];\r\n            exit(0);\r\n        }\r\n        Q.pop();\r\n        if(v.first){\r\n            if(v.second.first && (!dist[0][cnt50-v.second.first+1][cnt100-v.second.second] || dist[1][v.second.first][v.second.second]+1==dist[0][cnt50-v.second.first+1][cnt100-v.second.second])){\r\n                Q.push(Mp(0,Mp(cnt50-v.second.first+1,cnt100-v.second.second)));\r\n                dist[0][cnt50-v.second.first+1][cnt100-v.second.second]=dist[1][v.second.first][v.second.second]+1;\r\n                dp[0][cnt50-v.second.first+1][cnt100-v.second.second]=(dp[0][cnt50-v.second.first+1][cnt100-v.second.second]+dp[1][v.second.first][v.second.second]*v.second.first%MOD)%MOD;\r\n            }\r\n            if(v.second.second && (!dist[0][cnt50-v.second.first][cnt100-v.second.second+1] || dist[1][v.second.first][v.second.second]+1==dist[0][cnt50-v.second.first][cnt100-v.second.second+1])){\r\n                Q.push(Mp(0,Mp(cnt50-v.second.first,cnt100-v.second.second+1)));\r\n                dist[0][cnt50-v.second.first][cnt100-v.second.second+1]=dist[1][v.second.first][v.second.second]+1;\r\n                dp[0][cnt50-v.second.first][cnt100-v.second.second+1]=(dp[0][cnt50-v.second.first][cnt100-v.second.second+1]+dp[1][v.second.first][v.second.second]*v.second.second%MOD)%MOD;\r\n            }\r\n        }\r\n        else{\r\n            //for(int j=min(m/100,v.second.second),i=min(m/50%2,v.second.first);i<=v.second.first && i<=m/50 && j>=0;i+=2,j--)\r\n            for(int i=0;i<=v.second.first;i++)\r\n                for(int j=0;j<=v.second.second;j++)\r\n                    if((i || j) && i*50+j*100<=m && (!dist[1][cnt50-v.second.first+i][cnt100-v.second.second+j] || dist[0][v.second.first][v.second.second]+1==dist[1][cnt50-v.second.first+i][cnt100-v.second.second+j])){\r\n                        Q.push(Mp(1,Mp(cnt50-v.second.first+i,cnt100-v.second.second+j)));\r\n                        dist[1][cnt50-v.second.first+i][cnt100-v.second.second+j]=dist[0][v.second.first][v.second.second]+1;\r\n                        dp[1][cnt50-v.second.first+i][cnt100-v.second.second+j]=(dp[1][cnt50-v.second.first+i][cnt100-v.second.second+j]+dp[0][v.second.first][v.second.second]*C(v.second.first,i)%MOD*C(v.second.second,j)%MOD)%MOD;\r\n                    }\r\n        }\r\n    }\r\n}\r\n\r\nint main(){\r\n    ios::sync_with_stdio(0);cin.tie(0);cout.tie(0);\r\n\r\n    mul[0]=di[0]=1;\r\n    for(int i=1;i<MXN;i++) \r\n        mul[i]=mul[i-1]*i%MOD;\r\n    for(int i=1;i<MXN;i++) \r\n        di[i]=di[i-1]*inv(i)%MOD;\r\n    \r\n    cin >> n >> m;\r\n    for(int i=1;i<=n;i++){\r\n        cin >> arr[i];\r\n        if(arr[i]==50)\r\n            cnt50++;\r\n        sum+=arr[i];\r\n    }\r\n    cnt100=n-cnt50;\r\n    BFS();\r\n    cout << -1 << '\\n' << 0;\r\n\r\n    return 0;\r\n}"
+}

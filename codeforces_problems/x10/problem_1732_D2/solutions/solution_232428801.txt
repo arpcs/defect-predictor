@@ -1,0 +1,37 @@
+{
+    "id": 232428801,
+    "contestId": 1732,
+    "creationTimeSeconds": 1699731209,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1732,
+        "index": "D2",
+        "name": "Balance (Hard version)",
+        "type": "PROGRAMMING",
+        "points": 1250.0,
+        "rating": 2400,
+        "tags": [
+            "brute force",
+            "data structures",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1732,
+        "members": [
+            {
+                "handle": "ArvinCiu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1666519500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 25,
+    "timeConsumedMillis": 1309,
+    "memoryConsumedBytes": 257536000,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\n\r\nconst int MAX_N = 2e5 + 5;\r\n\r\nstruct Fenwick {\r\n    int tree[MAX_N+5];\r\n\r\n    void reset() {\r\n        fill(tree, tree+MAX_N+5, 0);\r\n    }\r\n\r\n    void update(int pos, int val) {\r\n        pos++;\r\n\r\n        while (pos < MAX_N) {\r\n            tree[pos] += val;\r\n            pos += pos&(-pos);\r\n        }\r\n    }\r\n\r\n    int query(int pos) {\r\n        pos++;\r\n\r\n        int ans = 0;\r\n        while (pos > 0) {\r\n            ans += tree[pos];\r\n            pos -= pos&(-pos);\r\n        }\r\n        return ans;\r\n    }\r\n} tree[300];\r\n\r\nint main(){\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0); cout.tie(0);\r\n    \r\n    int q;\r\n    cin >> q;\r\n\r\n    pair<char, ll> p[q];\r\n    vector<ll> query;\r\n    unordered_set<ll> upd;\r\n    for (int t=0; t<q; t++) {\r\n        cin >> p[t].first >> p[t].second;\r\n\r\n        if (p[t].first == '+') {\r\n            upd.insert(p[t].second);\r\n        } else if (p[t].first == '-') {\r\n            upd.insert(p[t].second);\r\n        } else if (p[t].first == '?') {\r\n            query.push_back(p[t].second);\r\n        } else {\r\n            assert(false);\r\n        }\r\n    }\r\n    \r\n    sort(query.begin(), query.end());\r\n    query.erase(unique(query.begin(), query.end()), query.end());\r\n\r\n    vector<ll> w;\r\n    unordered_set<ll> special, important;\r\n    for (auto val : query) {\r\n        ll cnt = 0;\r\n        vector<ll> tmp;\r\n        for (int y=1; y<805&&val<=((ll)1e18)/y; y++) {\r\n            if (upd.count(y*val)) {\r\n                cnt++;\r\n                tmp.push_back(y*val);\r\n            } else {\r\n                break;\r\n            }\r\n        }\r\n        if (cnt >= 800) {\r\n            special.insert(val);\r\n            w.push_back(val);\r\n        } else {\r\n            for (auto val : tmp) {\r\n                important.insert(val);\r\n            }\r\n        }\r\n    }\r\n    \r\n    assert(w.size() <= 300);\r\n\r\n    map<ll, int> idx;\r\n    for (int i=0; i<w.size(); i++) {\r\n        tree[i].reset();\r\n        idx[w[i]] = i;\r\n    }\r\n\r\n    unordered_set<ll> exist;\r\n    for (int i=0; i<q; i++) {\r\n        if (p[i].first == '+') {\r\n            if (important.count(p[i].second)) exist.insert(p[i].second);\r\n            for (int j=0; j<w.size(); j++) {\r\n                if (p[i].second % w[j] == 0 && p[i].second/w[j] <= 2e5) {\r\n                    tree[j].update(p[i].second/w[j], 1);\r\n                }\r\n            }\r\n        } else if (p[i].first == '-') {\r\n            if (important.count(p[i].second)) exist.erase(p[i].second);\r\n            for (int j=0; j<w.size(); j++) {\r\n                if (p[i].second % w[j] == 0 && p[i].second/w[j] <= 2e5) {\r\n                    tree[j].update(p[i].second/w[j], -1);\r\n                }\r\n            }\r\n        } else if (p[i].first == '?') {\r\n            if (special.count(p[i].second)) {\r\n                int curIdx = idx[p[i].second];\r\n                int left = 1, right = 200000, ans = 200001;\r\n                while (left <= right) {\r\n                    int mid = (left+right) >> 1;\r\n\r\n                    if (tree[curIdx].query(mid) == mid) {\r\n                        left = mid+1;\r\n                    } else {\r\n                        ans = mid;\r\n                        right = mid-1;\r\n                    }\r\n                }\r\n                cout << ans*p[i].second << \"\\n\";\r\n            } else {\r\n                bool found = false;\r\n                for (int y=1; y<200001&&p[i].second<=((ll) 1e18)/y; y++) {\r\n                    if (exist.count(y*p[i].second)) continue;\r\n\r\n                    found = true;\r\n                    cout << y*p[i].second << \"\\n\";\r\n                    break;\r\n                }\r\n\r\n                if (found) continue;\r\n\r\n                ll rem = ((ll) 1e18) / p[i].second;\r\n                cout << (rem+1) * p[i].second << \"\\n\";\r\n            }\r\n        } else {\r\n            assert(false);\r\n        }\r\n    }\r\n    return 0;\r\n}"
+}

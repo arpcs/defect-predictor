@@ -1,0 +1,36 @@
+{
+    "id": 162506688,
+    "contestId": 1000,
+    "creationTimeSeconds": 1656739465,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "qiliangzhe"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 1309,
+    "memoryConsumedBytes": 254873600,
+    "source": "#include<bits/stdc++.h>\r\n#define int long long\r\nusing namespace std;\r\ntypedef long long ll;\r\nbool f1;\r\nint n,m,a[300005],f[300005],g[300005];\r\nsigned fi[300005],ne[600005],to[600005],w[600005],dep[300005],ue[300005],cnt=1;\r\nstruct node\r\n{\r\n\tint dis1:50,dis2:50,val:50,emm:50;\r\n\tsigned anc;\r\n}arr[19][300005];\r\nvoid ae(int a,int b,int c){to[++cnt]=b,w[cnt]=c,ne[cnt]=fi[a],fi[a]=cnt;}\r\nvoid dfs1(int u,int fa,int id)\r\n{\r\n\tdep[u]=dep[fa]+1,f[u]=a[u],arr[0][u].anc=fa,arr[0][u].dis1=w[id^1],arr[0][u].dis2=w[id],ue[u]=id^1;\r\n\tfor(int k=1;k<19;++k)\r\n\t\tarr[k][u].anc=arr[k-1][arr[k-1][u].anc].anc,\r\n\t\tarr[k][u].dis1=arr[k-1][u].dis1+arr[k-1][arr[k-1][u].anc].dis1,\r\n\t\tarr[k][u].dis2=arr[k-1][u].dis2+arr[k-1][arr[k-1][u].anc].dis2;\r\n\tfor(int i=fi[u];i;i=ne[i])\r\n\t\tif(to[i]!=fa)\r\n\t\t\tdfs1(to[i],u,i),f[u]+=max(f[to[i]]-w[i]-w[i^1],0ll);\r\n}\r\nvoid dfs2(int u,int fa,int id)\r\n{\r\n\tarr[0][u].val=f[u],arr[0][u].emm=max(0ll,f[u]-w[id]-w[id^1]);\r\n\tfor(int k=1;k<19;++k)\r\n\t\tarr[k][u].val=arr[k-1][u].val+arr[k-1][arr[k-1][u].anc].val,arr[k][u].emm=arr[k-1][u].emm+arr[k-1][arr[k-1][u].anc].emm;\r\n\tint tmp=g[fa]-max(0ll,f[u]-w[id]-w[id^1]);\r\n\tg[u]=f[u]+max(0ll,tmp-w[id]-w[id^1]);\r\n\tfor(int i=fi[u];i;i=ne[i])\r\n\t\tif(to[i]!=fa)dfs2(to[i],u,i);\r\n}\r\nint lca(int x,int y)\r\n{\r\n\tif(dep[x]<dep[y])swap(x,y);\r\n\tfor(int k=18;~k;--k)\r\n\t\tif(dep[x]-(1<<k)>=dep[y])x=arr[k][x].anc;\r\n\tif(x==y)return x;\r\n\tfor(int k=18;~k;--k)\r\n\t\tif(arr[k][x].anc!=arr[k][y].anc)\r\n\t\t\tx=arr[k][x].anc,y=arr[k][y].anc;\r\n\treturn arr[0][x].anc;\r\n}\r\nint solve(int x,int y)\r\n{\r\n\tint z=lca(x,y);\r\n\tif(x==y)return g[x];\r\n\telse if(z==x)\r\n\t{\r\n\t\tint res=0;\r\n\t\tfor(int k=18;~k;--k)\r\n\t\t\tif(dep[y]-(1<<k)>=dep[x])\r\n\t\t\t\tres+=arr[k][y].val-arr[k][y].dis2-arr[k][y].emm,y=arr[k][y].anc;\r\n\t\treturn res+g[y];\r\n\t}\r\n\telse if(z==y)\r\n\t{\r\n\t\tint res=0;\r\n\t\tfor(int k=18;~k;--k)\r\n\t\t\tif(dep[x]-(1<<k)>=dep[y])\r\n\t\t\t\tres+=arr[k][x].val-arr[k][x].dis1-arr[k][x].emm,x=arr[k][x].anc;\r\n\t\treturn res+g[x];\r\n\t}\r\n\telse\r\n\t{\r\n\t\tint res=0;\r\n\t\tfor(int k=18;~k;--k)\r\n\t\t{\r\n\t\t\tif(dep[x]-(1<<k)>=dep[z])\r\n\t\t\t\tres+=arr[k][x].val-arr[k][x].dis1-arr[k][x].emm,x=arr[k][x].anc;\r\n\t\t\tif(dep[y]-(1<<k)>=dep[z])\r\n\t\t\t\tres+=arr[k][y].val-arr[k][y].dis2-arr[k][y].emm,y=arr[k][y].anc;\r\n\t\t}\r\n\t\treturn res+g[z];\r\n\t}\r\n}\r\nchar buf[4194304],*p1=buf,*p2=buf,pbuf[4194304],*pp=pbuf;\r\ninline char gc()\r\n{\r\n\treturn p1==p2&&(p2=(p1=buf)+fread(buf,1,4194304,stdin),p1==p2)?EOF:*p1++;\r\n\t//return getchar();\r\n}\r\ninline int read()\r\n{\r\n\tint x=0;\r\n\tchar ch=gc(),flag=0;\r\n\twhile(ch<'0'||ch>'9')\r\n\t\tflag|=(ch=='-'),ch=gc();\r\n\twhile(ch>='0'&&ch<='9')\r\n\t\tx=(x<<3)+(x<<1)+ch-'0',ch=gc();\r\n\treturn flag?~x+1:x;\r\n}\r\ninline void push(char c)\r\n{\r\n\tif(pp-pbuf==4194304)\r\n\t\tfwrite(pbuf,1,4194304,stdout),pp=pbuf;\r\n\t*pp++=c;\r\n\t//putchar(c);\r\n}\r\ninline void write(int x)\r\n{\r\n\tstatic int sta[30];\r\n\tint top=0;\r\n\tif(x<0)\r\n\t\tpush('-'),x=-x;\r\n\tdo\r\n\t\tsta[top++]=x%10,x/=10;\r\n\twhile(x);\r\n\twhile(top)\r\n\t\tpush(sta[--top]+'0');\r\n}\r\nvoid flush()\r\n{\r\n\tfwrite(pbuf,pp-pbuf,1,stdout);\r\n}\r\nbool f2;\r\nsigned main()\r\n{//cerr<<&f2-&f1<<endl;\r\n\tn=read(),m=read();\r\n\t\r\n\tfor(int i=1;i<=n;++i)\r\n\t\ta[i]=read();\r\n\tfor(int i=1,a,b,c,d;i<n;++i)\r\n\t\ta=read(),b=read(),c=read(),d=c,ae(a,b,c),ae(b,a,d);\r\n\tdfs1(1,0,0),dfs2(1,0,0);\r\n\twhile(m--)\r\n\t{\r\n\t\tint x=read(),y=read();\r\n\t\twrite(solve(x,y)),push('\\n');\r\n\t}\r\n\tflush();\r\n\treturn 0;\r\n}"
+}

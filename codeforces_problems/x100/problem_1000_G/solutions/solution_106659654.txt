@@ -1,0 +1,36 @@
+{
+    "id": 106659654,
+    "contestId": 1000,
+    "creationTimeSeconds": 1612601308,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "FatihSolak"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 77,
+    "memoryConsumedBytes": 161075200,
+    "source": "#include <bits/stdc++.h>\r\n#define N 300005\r\n#define K 20\r\nusing namespace std;\r\nlong long arr[N],dep[N];\r\nlong long top_extra[N];\r\nlong long sub_extra[N];\r\nvector<long long> adj[N];\r\nmap<pair<long long,long long>,long long>mp;\r\nstruct Node{\r\n    long long pos,path_val,extra;\r\n    Node(){pos = 0,path_val = 0,extra = 0;}\r\n};\r\nNode par[N][K];\r\nvoid dfs(int v,int p){\r\n    par[v][0].pos = p;\r\n    par[v][0].path_val = arr[v] - mp[{v,p}];\r\n    sub_extra[v] = arr[v];\r\n    dep[v] = dep[p]+1;\r\n    for(auto u:adj[v]){\r\n        if(u == p)continue;\r\n        dfs(u,v);\r\n        sub_extra[v] += max(0ll,sub_extra[u] - 2*mp[{u,v}]); \r\n    }\r\n}\r\nvoid dfs2(int v,int p){\r\n    top_extra[v] = max(0ll, (sub_extra[p] - max(0ll,sub_extra[v] - 2*mp[{v,p}])) + top_extra[p] - 2*mp[{v,p}]);\r\n    for(auto u:adj[v]){\r\n        if(u == p)continue;\r\n        dfs2(u,v);\r\n    }\r\n}\r\nlong long get_child(int u,int v){\r\n    for(int i=K-1;i>=0;i--){\r\n        if(dep[par[u][i].pos] > dep[v]){\r\n            u = par[u][i].pos;\r\n        }\r\n    }\r\n    return u;\r\n}\r\nvoid answer(int u,int v){\r\n    if(dep[u] < dep[v])swap(u,v);\r\n    long long extra = 0;\r\n    long long path = 0;\r\n    long long tmpu = u,tmpv=v;\r\n    for(int i=K-1;i>=0;i--){\r\n        if(dep[par[u][i].pos] >= dep[v]){\r\n            if(tmpu == u){\r\n                extra+=par[u][i].extra;\r\n            }\r\n            else{\r\n                long long c = get_child(tmpu,u);\r\n                extra+= par[u][i].extra - max(0ll,sub_extra[c]-2*mp[{c,u}]);\r\n            }\r\n            path+=par[u][i].path_val;\r\n            u = par[u][i].pos;\r\n        }\r\n    }\r\n    if(u == v){\r\n        long long c = get_child(tmpu,u);\r\n        cout << extra+path+top_extra[u]+sub_extra[u]-max(0ll,sub_extra[c]-2*mp[{c,u}])<<endl;\r\n        return;\r\n    }\r\n    for(int i=K-1;i>=0;i--){\r\n        if(par[u][i].pos != par[v][i].pos){\r\n            if(tmpu == u){\r\n                extra+=par[u][i].extra;\r\n            }\r\n            else{\r\n                long long c = get_child(tmpu,u);\r\n                extra+= par[u][i].extra - max(0ll,sub_extra[c]-2*mp[{c,u}]);\r\n            }\r\n            path+=par[u][i].path_val;\r\n            u = par[u][i].pos;\r\n            if(tmpv == v){\r\n                extra+=par[v][i].extra;\r\n            }\r\n            else{\r\n                long long c = get_child(tmpv,v);\r\n                extra+= par[v][i].extra - max(0ll,sub_extra[c]-2*mp[{c,v}]);\r\n            }\r\n            path+=par[v][i].path_val;\r\n            v = par[v][i].pos;\r\n        }\r\n    }\r\n    long long lca = par[u][0].pos;\r\n    path += par[u][0].path_val + par[v][0].path_val;\r\n    cout << top_extra[lca] + path + extra + sub_extra[lca] - max(0ll,sub_extra[u]-2*mp[{u,lca}])  - max(0ll,sub_extra[v]-2*mp[{v,lca}])<<endl;\r\n}\r\nvoid solve(){\r\n    long long n,q;\r\n    cin >> n >> q;\r\n    for(long long i = 1;i<=n;i++){\r\n        cin >> arr[i];\r\n    }\r\n    for(long long i=1;i<n;i++){\r\n        long long u,v,w;\r\n        cin >> u >> v >> w;\r\n        adj[u].push_back(v);\r\n        adj[v].push_back(u);\r\n        mp[{u,v}] = w;\r\n        mp[{v,u}] = w;\r\n    }\r\n    dfs(1,0);\r\n    dfs2(1,0);\r\n    for(int i=0;i<=n;i++){\r\n        par[i][0].extra = sub_extra[i]-arr[i] + sub_extra[par[i][0].pos] -arr[par[i][0].pos]- max(0ll,sub_extra[i]-2*mp[{i,par[i][0].pos}]);\r\n    }\r\n    for(int j=1;j<K;j++){\r\n        for(int i=1;i<=n;i++){\r\n            par[i][j].pos = par[par[i][j-1].pos][j-1].pos;\r\n            par[i][j].path_val = par[i][j-1].path_val + par[par[i][j-1].pos][j-1].path_val;\r\n        }\r\n    }\r\n    for(int j=1;j<K;j++){\r\n        for(int i=1;i<=n;i++){\r\n            long long c = get_child(i,par[i][j-1].pos);\r\n            par[i][j].extra = par[i][j-1].extra + par[par[i][j-1].pos][j-1].extra - max(0ll,sub_extra[c]-2*mp[{c,par[i][j-1].pos}]);\r\n        }\r\n    }\r\n    while(q--){\r\n        int u,v;\r\n        cin >> u >> v;\r\n        if(u == v){\r\n            cout << sub_extra[v] + top_extra[v] << endl;\r\n            continue;\r\n        }\r\n        answer(u,v);\r\n    }\r\n}\r\nint main(){\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(nullptr);cout.tie(nullptr);\r\n    #ifdef Local\r\n    freopen(\"in.txt\",\"r\",stdin);\r\n    freopen(\"out.txt\",\"w\",stdout);\r\n    #endif\r\n    int t=1;\r\n    //cin>>t;\r\n    while(t--){\r\n        solve();\r\n    }\r\n    #ifdef Local\r\n    cout<<endl<<fixed<<setprecision(2)<<1000.0 * clock() / CLOCKS_PER_SEC<< \" milliseconds \";\r\n    #endif\r\n}"
+}

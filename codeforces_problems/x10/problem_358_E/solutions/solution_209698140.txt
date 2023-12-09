@@ -1,0 +1,38 @@
+{
+    "id": 209698140,
+    "contestId": 358,
+    "creationTimeSeconds": 1686769432,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 358,
+        "index": "E",
+        "name": "Dima and Kicks",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2300,
+        "tags": [
+            "brute force",
+            "dsu",
+            "graphs",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 358,
+        "members": [
+            {
+                "handle": "LipArcanjo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1382715000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 22,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 21094400,
+    "source": "#pragma GCC optimize(\"Ofast\")\r\n#pragma GCC target(\"avx,avx2,fma\")\r\n#pragma GCC optimize(\"unroll-loops\")\r\n\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define pb push_back\r\n#define fi first\r\n#define se second\r\n\r\nvoid dbg_out(){ cerr << endl; }\r\ntemplate<typename H, typename ... T>\r\nvoid dbg_out(H h, T... t){ cerr << ' ' << h; dbg_out(t...); }\r\n#define dbg(...) {cerr << #__VA_ARGS__ << ':'; dbg_out(__VA_ARGS__); }\r\n\r\nusing ll = long long;\r\n\r\nmt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());\r\n\r\nconst int MAXN = 2e5 + 5;\r\nconst int MOD = 1e9+7; //998244353;\r\nconst int INF = 0x3f3f3f3f;\r\nconst ll INF64 = ll(4e18) + 5;\r\n\r\nvector<pair<int,int>> d = { {1,0},{0,1},{-1,0},{0,-1}};\r\n\r\nvoid solve(){\r\n\tint n,m;\r\n\tcin >> n >> m;\r\n\tvector<vector<int>> a(n, vector<int>(m));\r\n\tauto z = a;\r\n\tfor(int i = 0; i < n; i++){\r\n\t\tfor(int j = 0; j < m; j++){\r\n\t\t\tcin >> a[i][j];\r\n\t\t\tz[i][j] = a[i][j];\r\n\t\t}\r\n\t}\r\n\tauto valid = [&](int i, int j){\r\n\t\treturn i >= 0 && j >= 0 && i < n && j < m && a[i][j] >= 1 && z[i][j] == 1;\r\n\t};\r\n\tvector<vector<int>> cnt(n, vector<int>(m));\r\n\tint imp=0;\r\n\tfor(int i = 0; i < n; i++){\r\n\t\tfor(int j = 0; j < m; j++){\r\n\t\t\tif(!valid(i,j)) continue;\r\n\t\t\tfor(int k = 0; k < 4; k++){\r\n\t\t\t\tint ni = i + d[k].fi;\r\n\t\t\t\tint nj = j + d[k].se;\r\n\t\t\t\tcnt[i][j] += valid(ni,nj);\r\n\t\t\t}\r\n\t\t\timp += cnt[i][j]%2;\r\n\t\t\tif(cnt[i][j] == 4) a[i][j] = 2;\r\n\t\t}\r\n\t}\r\n\tif(imp >= 3){\r\n\t\tcout << -1 << '\\n';\r\n\t\treturn;\r\n\t}\r\n\tint ini = -1;\r\n\tint inj = -1;\r\n\tvector<vector<int>> need(n, vector<int>(m));\r\n\tfor(int i = 0; i < n; i++){\r\n\t\tfor(int j = 0; j < m; j++){\r\n\t\t\tif(cnt[i][j] == 1){\r\n\t\t\t\tneed[i][j] = 1;\r\n\t\t\t\tif(ini == -1){\r\n\t\t\t\t\tini = i;\r\n\t\t\t\t\tinj = j;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tif(cnt[i][j] == 4) need[i][j] = 2;\r\n\t\t\tif(cnt[i][j] != 2) continue;\r\n\t\t\tfor(int k = 0; k < 4; k++){\r\n\t\t\t\tint qtd = 0;\r\n\t\t\t\tfor(int l = 0; l < 2; l++){\r\n\t\t\t\t\tint a = (k+l)%4;\r\n\t\t\t\t\tqtd += valid(i+d[a].fi,j+d[a].se);\r\n\t\t\t\t}\r\n\r\n\t\t\t\tif(qtd == 2){\r\n\t\t\t\t\tneed[i][j] = 1;\r\n\t\t\t\t\tif(ini == -1){\r\n\t\t\t\t\t\tini = i;\r\n\t\t\t\t\t\tinj = j;\r\n\t\t\t\t\t}\r\n\t\t\t\t\tbreak;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tif(ini == -1){\r\n\t\tcout << -1 << '\\n';\r\n\t\treturn;\r\n\t}\r\n\r\n\tset<int> ans;\r\n\tauto CP = a;\r\n\r\n\tfor(int base=1; base<=2;base++){\r\n\r\n\t\tvector<pair<int,int>> pos;\r\n\t\t//pode comecar ou nao aqui\r\n\t\ta = CP;\r\n\t\ta[ini][inj] = base-1;\r\n\t\tpos.pb({ini,inj});\r\n\t\tfor(int k = 0; k < 4; k++){\r\n\t\t\tbool vl = false;\r\n\t\t\tint b = k;\r\n\t\t\tint ai = ini+d[k].fi;\r\n\t\t\tint aj = inj+d[k].se;\r\n\t\t\tif(!valid(ai,aj)) continue;\r\n\t\t\twhile(a[ai][aj] != 0){\r\n\t\t\t\tpos.pb({ai,aj});\r\n\t\t\t\ta[ai][aj]--;\r\n\t\t\t\tbool mudou = false;\r\n\t\t\t\tfor(int l = b,w=0;w<4; l++,w++){\r\n\t\t\t\t\tl %= 4;\r\n\t\t\t\t\tint ni = ai+d[l].fi;\r\n\t\t\t\t\tint nj = aj+d[l].se;\r\n\t\t\t\t\tif(valid(ni,nj)){\r\n\t\t\t\t\t\tai = ni;\r\n\t\t\t\t\t\taj = nj;\r\n\t\t\t\t\t\tmudou = true;\r\n\t\t\t\t\t\tbreak;\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t\tif(!mudou) break;\r\n\t\t\t}\r\n\t\t\tif(vl) reverse(pos.begin(), pos.end());\r\n\t\t}\r\n\t\tint sz = pos.size();\r\n\t\tbool fal = false;\r\n\t\tfor(int i = 0; i < n; i++){\r\n\t\t\tfor(int j = 0; j < m; j++){\r\n\t\t\t\tif(a[i][j]){\r\n\t\t\t\t\tfal |= 1;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tif(fal) continue;\r\n\t\tint g = sz-1;\r\n\t\tint last = 0;\r\n\t\tfor(int k = 1; k < sz; k++){\r\n\t\t\tauto [i,j] = pos[k];\r\n\t\t\tif(need[i][j] == 1){\r\n\t\t\t\tg = __gcd(g,k-last);\r\n\t\t\t\tlast=k;\r\n\t\t\t}\r\n\t\t}\r\n\t\t//jumpts validos sao divisives por g\r\n\t\tfor(int k = 2; k <= g; k++){\r\n\t\t\tif(g%k) continue;\r\n\t\t\tfor(int i = 0; i < sz; i+=k){\r\n\t\t\t\tauto [e,f] = pos[i];\r\n\t\t\t\ta[e][f] += 1;\r\n\t\t\t}\r\n\t\t\tbool foi = true;\r\n\t\t\tfor(int i = 0; i < n; i++){\r\n\t\t\t\tfor(int j = 0; j < m; j++){\r\n\t\t\t\t\t//tvz aqui tem que mudar\r\n\t\t\t\t\t//foi &= a[i][j] <= 1;\r\n\t\t\t\t\tif(need[i][j]) foi &= a[i][j] >= 1;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tif(foi){\r\n\t\t\t\tans.insert(k);\r\n\t\t\t}\r\n\r\n\t\t\tfor(int i = 0; i < n; i++){\r\n\t\t\t\tfor(int j = 0; j < m; j++){\r\n\t\t\t\t\ta[i][j] = 0;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tint szans = ans.size();\r\n\tif(szans == 0){\r\n\t\tcout << -1 << '\\n';\r\n\t\treturn;\r\n\t}\r\n\tfor(auto x : ans) cout << x << ' ';\r\n\tcout << '\\n';\r\n}\r\n\r\nsigned main(){\r\n\r\n\tios::sync_with_stdio(false); cin.tie(NULL);\r\n\r\n\tint t = 1;\r\n\t//cin >> t;\r\n\twhile(t--){\r\n\t\tsolve();\r\n\t}\r\n\r\n\treturn 0;\r\n}\r\n"
+}

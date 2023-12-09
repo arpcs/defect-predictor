@@ -1,0 +1,36 @@
+{
+    "id": 139036173,
+    "contestId": 1000,
+    "creationTimeSeconds": 1639451343,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "Sparkle_Twilight"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 748,
+    "memoryConsumedBytes": 63897600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define N 300030\r\ntypedef long long ll;\r\nint n,Q,a[N];\r\nvector<pair<int,int> > G[N];\r\nint dep[N],f[N],son[N],top[N],siz[N];\r\nll dis[N],sw[N],dp[N],D[N],g[N],U[N],sdp[N],sD[N];\r\nvoid dfs1(int u){\r\n siz[u]=1;\r\n sw[u]=sw[f[u]]+a[u];\r\n for(auto [v,w]:G[u]){\r\n  if(v==f[u])continue;\r\n  f[v]=u;\r\n  dep[v]=dep[u]+1;\r\n  dis[v]=dis[u]+w;\r\n  dfs1(v);\r\n  siz[u]+=siz[v];\r\n  if(siz[v]>siz[son[u]]){\r\n   son[u]=v;\r\n  }\r\n } \r\n}\r\nvoid dfs2(int u,int topf){\r\n top[u]=topf;\r\n if(!son[u])return;\r\n dfs2(son[u],topf);\r\n for(auto [v,w]:G[u]){\r\n  if(v==f[u]||v==son[u])continue;\r\n  dfs2(v,v);\r\n }\r\n}\r\nvoid dfs3(int u){\r\n dp[u]=a[u];\r\n for(auto [v,w]:G[u]){\r\n  if(v==f[u])continue;\r\n  dfs3(v);\r\n  dp[u]+=D[v]=max(0LL,dp[v]-2*w);\r\n }\r\n}\r\nvoid dfs4(int u){\r\n sdp[u]=sdp[f[u]]+dp[u];\r\n sD[u]=sD[f[u]]+D[u];\r\n for(auto [v,w]:G[u]){\r\n  if(v==f[u])continue;\r\n  g[v]=dp[v]+(U[v]=max(0LL,g[u]-D[v]-2*w));\r\n  dfs4(v);\r\n } \r\n}\r\ninline int LCA(int u,int v){\r\n while(top[u]^top[v]){\r\n  if(dep[top[u]]<dep[top[v]])swap(u,v);\r\n  u=f[top[u]];\r\n }\r\n if(dep[u]>dep[v])swap(u,v);\r\n return u; \r\n}\r\nint main(){\r\n ios::sync_with_stdio(false);\r\n cin.tie(0);\r\n cin>>n>>Q;\r\n for(int i=1;i<=n;++i){\r\n  cin>>a[i];\r\n }\r\n for(int i=1;i<n;++i){\r\n  int u,v,w;\r\n  cin>>u>>v>>w;\r\n  G[u].emplace_back(v,w);\r\n  G[v].emplace_back(u,w);\r\n }\r\n dfs1(1);\r\n dfs2(1,1);\r\n dfs3(1);\r\n g[1]=dp[1];\r\n dfs4(1);\r\n while(Q--){\r\n  int u,v;\r\n  cin>>u>>v;\r\n  int z=LCA(u,v);\r\n  ll ans=sdp[u]+sdp[v]-sdp[z]-sdp[f[z]];\r\n  ans-=sD[u]+sD[v]-(sD[z]<<1);\r\n  ans-=dis[u]+dis[v]-(dis[z]<<1);\r\n  ans+=U[z];\r\n  cout<<ans<<'\\n';\r\n }\r\n return 0;\r\n}\r\n  "
+}

@@ -1,0 +1,37 @@
+{
+    "id": 107263829,
+    "contestId": 1307,
+    "creationTimeSeconds": 1613203047,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "dqa2021"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 139,
+    "memoryConsumedBytes": 2457600,
+    "source": "#include<bits/stdc++.h>\r\n#define pb push_back\r\nusing namespace std;\r\ntypedef unsigned long long ull;\r\ntypedef unsigned uint;\r\ntypedef long long ll;\r\n#define G getchar()\r\nint read()\r\n{\r\n\tint x=0; bool flg=false; char ch=G;\r\n\tfor (;!isdigit(ch);ch=G) if (ch=='-') flg=true;\r\n\tfor (;isdigit(ch);ch=G) x=(x<<3)+(x<<1)+(ch^48);\r\n\treturn flg?-x:x;\r\n}\r\n#undef G\r\n#define fi first\r\n#define se second\r\n/*\r\nconst int mod=;\r\ninline int upd(const int &x){return x+(x>>31&mod);}\r\ninline void add(int &x,const int &y){x=upd(x+y-mod);}\r\ninline void iadd(int &x,const int &y){x=upd(x-y);}\r\nint qpow(int x,int y){\r\n\tint res=1;\r\n\tfor (;y;y>>=1,x=1LL*x*x%mod)\r\n\t\tif (y&1) res=1LL*res*x%mod;\r\n\treturn res;\r\n}\r\n*/\r\ntypedef pair<int,int> P;\r\n#define rep(i,l,r) for (int i(l);i<=int(r);i++)\r\n#define per(i,l,r) for (int i(r);i>=int(l);i--)\r\nconst int INF=1e9;\r\n\r\nint n,m;\r\nstruct E{\r\n\tint t,n,v;\r\n}e[2510];\r\nint cnt=1,last[55],_last[55];\r\ninline void addedge(int x,int y){  // x != y\r\n//\tprintf(\"addedge %d %d\\n\",x,y);\r\n\tstatic int id[55][55];\r\n\tif (!id[x][y]){\r\n\t\te[++cnt]=(E){y,last[x],0},last[x]=cnt;\r\n\t\te[++cnt]=(E){x,last[y],0},last[y]=cnt;\r\n\t\tid[x][y]=cnt-1,id[y][x]=cnt;\r\n\t}\r\n\te[id[x][y]].v++;\r\n}\r\nint mp[55][55]; bool ban[55][55],key[55][55];\r\nP c[100010]; int top;  // len_lb mincut\r\n\r\nint dis[55];\r\nvoid dij(){\r\n\tstatic bool mrk[55];\r\n\trep(i,1,n) dis[i]=INF,mrk[i]=0; dis[1]=0;\r\n\trep(t,1,n){\r\n\t\tint p=-1;\r\n\t\trep(i,1,n) if (!mrk[i]&&dis[i]^INF&&(!~p||dis[i]<dis[p])) p=i;\r\n\t\tif (!~p) break;\r\n\t\tmrk[p]=1;\r\n\t\trep(i,1,n) if (!mrk[i]&&mp[p][i]^INF&&!ban[p][i]) dis[i]=min(dis[i],dis[p]+mp[p][i]);\r\n\t}\r\n\trep(i,1,n) rep(j,1,n) if (i^j&&mp[i][j]^INF&&!ban[i][j]&&dis[i]^INF&&dis[j]^INF&&dis[i]+mp[i][j]==dis[j]&&!key[i][j]) key[i][j]=1,addedge(i,j);\r\n//\trep(i,1,n) printf(\"  dis %d = %d\\n\",i,dis[i]);\r\n}\r\n\r\nint dep[55];\r\nbool bfs(){\r\n\tstatic int que[55],hd,tl; hd=tl=0;\r\n\tmemset(dep+1,-1,n<<2);\r\n\tdep[1]=1,que[++tl]=1;\r\n\twhile (hd<tl){\r\n\t\tint u=que[++hd],v;\r\n\t\tfor (int i=last[u];i;i=e[i].n)\r\n\t\t\tif (e[i].v&&!~dep[v=e[i].t]){\r\n\t\t\t\tdep[v]=dep[u]+1;\r\n\t\t\t\tif (v==n) return 1;\r\n\t\t\t\tque[++tl]=v;\r\n\t\t\t}\r\n\t}\r\n\treturn 0;\r\n}\r\nint dfs(int x,int f){\r\n\tif (x==n) return f;\r\n\tint t,used=0;\r\n\tfor (int &i=_last[x],v;i;i=e[i].n)\r\n\t\tif (e[i].v&&dep[x]+1==dep[v=e[i].t]){\r\n\t\t\tt=dfs(v,min(e[i].v,f-used));\r\n\t\t\te[i].v-=t; e[i^1].v+=t;\r\n\t\t\tused+=t; if (used==f) return used;\r\n\t\t}\r\n\tif (!used) dep[x]=-1;\r\n\treturn used;\r\n}\r\nbool vis[55];\r\nvoid dfs0(int x){\r\n\tvis[x]=1;\r\n\tfor (int i=last[x],v;i;i=e[i].n)\r\n\t\tif (e[i].v&&!vis[v=e[i].t])\r\n\t\t\tdfs0(v);\r\n}\r\nint dinic(){\r\n\tint z=0;\r\n\twhile (bfs()){\r\n//\t\tprintf(\"  ok bfs\\n\");\r\n\t\tmemcpy(_last+1,last+1,n<<2);\r\n\t\tz+=dfs(1,INF);\r\n//\t\tprintf(\"  test z %d\\n\",z);\r\n\t}\r\n//\tif (!z) return 0;\r\n\tmemset(vis+1,0,n); dfs0(1);\r\n\trep(i,1,n) rep(j,1,n) ban[i][j]=key[i][j]&&vis[i]&&!vis[j];\r\n//\trep(i,1,n) rep(j,1,n) if (ban[i][j]) printf(\"  ban %d %d\\n\",i,j);\r\n//\tputs(\"test\");\r\n\treturn z;\r\n}\r\n\r\nvoid solve(){\r\n\tn=read(),m=read();\r\n\trep(i,1,n) rep(j,1,n) mp[i][j]=i==j?0:INF;\r\n\trep(i,1,m){\r\n\t\tint u=read(),v=read(),w=read();\r\n\t\tmp[u][v]=min(mp[u][v],w);\r\n\t}\r\n\tint q=read();\r\n\tstatic P d[100010];\r\n\tstatic double ans[100010];\r\n\trep(i,1,q) d[i]=P(read(),i);\r\n//\tif (m==2450) printf(\"test %d\\n\",d[1].fi);\r\n\tsort(d+1,d+q+1);\r\n\tdij(); const int B=dis[n];\r\n//\tif (m==2450) printf(\"test %d\\n\",B);\r\n\twhile (1){\r\n\t\tdij();\r\n//\t\tprintf(\"test disn %d\\n\",dis[n]);\r\n\t\tif (dis[n]==INF||dis[n]-B>d[q].fi) break;\r\n\t\tc[++top].fi=dis[n]-B;\r\n\t\tc[top].se=c[top-1].se+dinic();\r\n\t}\r\n//\trep(i,1,top) printf(\"c %d: %d %d\\n\",i,c[i].fi,c[i].se);\r\n\tc[top+1].fi=INF;\r\n\tdouble U=0.0;\r\n\tfor (int i=1,j=1;i<=top;i++){\r\n\t\tconst double V=i==top?1e18:(c[i+1].fi-c[i].fi)*1.0*c[i].se;\r\n\t\twhile (j<=q&&d[j].fi<U+V) ans[d[j].se]=c[i].fi+(d[j].fi-U)/c[i].se,j++;\r\n\t\tU+=V;\r\n\t}\r\n\trep(i,1,q) printf(\"%.10lf\\n\",B+ans[i]);\r\n}\r\nint main()\r\n{\r\n\tfor (int T=1;T--;) solve();\r\n\treturn 0;\r\n}\r\n"
+}

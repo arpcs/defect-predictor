@@ -1,0 +1,37 @@
+{
+    "id": 224819413,
+    "contestId": 1178,
+    "creationTimeSeconds": 1695525309,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1178,
+        "index": "H",
+        "name": "Stock Exchange",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "binary search",
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1178,
+        "members": [
+            {
+                "handle": "jasonjason"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1563636900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 137,
+    "timeConsumedMillis": 1622,
+    "memoryConsumedBytes": 4812800,
+    "source": "// LUOGU_RID: 125877961\n#include<bits/stdc++.h>\r\n#define LL long long\r\nusing namespace std;\r\nconst int N=4400+10,NN=N<<2,M=NN*15,inf=1145141;\r\nint to[M],nt[M],c[M],w[M],hd[NN],tot=1;\r\nvoid adde(int x,int y,int z,int zz)\r\n{\r\n    ++tot,to[tot]=y,nt[tot]=hd[x],c[tot]=z,w[tot]= zz,hd[x]=tot;\r\n    ++tot,to[tot]=x,nt[tot]=hd[y],c[tot]=0,w[tot]=-zz,hd[y]=tot;\r\n}\r\nint di[NN],a2,pr[NN],fw[NN],ps,pt,tt;\r\nbool vs[NN];\r\nvoid huhe_dinic()\r\n{\r\n    queue<int> q;\r\n    while(1)\r\n    {\r\n    \tmemset(di,0x3f3f3f,sizeof(int)*(tt+1));\r\n    \tfw[ps]=inf,fw[pt]=0;\r\n    \tdi[ps]=0,vs[ps]=1,q.push(ps);\r\n    \twhile(!q.empty()){\r\n    \t    int x=q.front();\r\n    \t    q.pop();\r\n    \t    for(int i=hd[x];i;i=nt[i]){\r\n        \t\tint y=to[i];\r\n        \t\tif(c[i]>0&&di[y]>di[x]+w[i]){\r\n        \t\t    di[y]=di[x]+w[i];\r\n        \t\t    pr[y]=i,fw[y]=min(fw[x],c[i]);\r\n        \t\t    if(!vs[y]) vs[y]=1,q.push(y);\r\n        \t\t}\r\n    \t    }\r\n    \t    vs[x]=0;\r\n    \t}\r\n    \tif(!fw[pt]) return;\r\n    \ta2+=di[pt]*fw[pt];\r\n    \tint x=pt;\r\n    \twhile(x!=ps){\r\n    \t    int i=pr[x];\r\n    \t    c[i]-=fw[pt],c[i^1]+=fw[pt];\r\n    \t    x=to[i^1];\r\n    \t}   \r\n    }\r\n}\r\nint n,nn,s1[N],s2[N],cn[N];\r\nLL a[N],b[N],a1=-1,l,r,ti;\r\nLL nps(int i,LL t){return a[i]*t+b[i];}\r\nbool cmp1(int aa,int bb){return b[aa]!=b[bb]?b[aa]<b[bb]:a[aa]>a[bb];}\r\nbool cmp2(int aa,int bb){return nps(aa,ti)<nps(bb,ti);}\r\n\r\nint main(){\r\n    cin>>n,nn=n+n;\r\n    for(int i=1;i<=nn;++i) cin>>a[i]>>b[i];\r\n    for(int i=1;i<=nn;++i) s1[i]=s2[i]=i;\r\n    sort(s1+1,s1+nn+1,cmp1);\r\n    l=0,r=1e9+10;\r\n    while(l<=r){\r\n    \tti=(l+r)>>1;\r\n    \tfor(int i=1;i<=nn;++i) cn[i]=0;\r\n    \tfor(int i=1,j=0;i<=nn;++i){\r\n    \t    int x=s1[i];\r\n    \t    if(!j||nps(x,ti)>nps(j,ti)) j=x;\r\n    \t    if(x<=n) ++cn[j];\r\n    \t}\r\n    \tsort(s2+1,s2+nn+1,cmp2);\r\n    \tint nw=0;\r\n    \tfor(int i=nn,j=nn;i;--j,i=j){\r\n    \t    while(j>1&&nps(s2[i],ti)==nps(s2[j-1],ti)) --j;\r\n    \t    for(int k=i;k>=j;--k) nw+=cn[s2[k]];\r\n    \t    for(int k=i;k>=j;--k) nw-=s2[k]>n;\r\n    \t    if(nw<0) break;\r\n    \t}\r\n    \tif(nw>=0) a1=ti,r=ti-1;\r\n    \telse l=ti+1;\r\n    }\r\n    if(a1==-1){cout<<a1;return 0;}\r\n    ps=0,tt=pt=nn+nn+2;\r\n    for(int i=1;i<=nn;++i){\r\n    \tif(i<=n) adde(ps,i,1,0);\r\n    \telse adde(i+nn,pt,1,0);\r\n    \tadde(i,i+nn,inf,0);\r\n    }\r\n    ti=a1,sort(s2+1,s2+nn+1,cmp2);\r\n    for(int i=1,j=1,lp=++tt;i<=nn;++j,i=j){\r\n    \twhile(j<nn&&b[s1[i]]==b[s1[j+1]]) ++j;\r\n    \tint np=++tt;\r\n    \tfor(int k=i;k<=j;++k) adde(s1[k],np,inf,1);\r\n    \tfor(int k=i;k<=j;++k) adde(np,s1[k],inf,0);\r\n    \tadde(np,lp,inf,0),lp=np;\r\n    }\r\n    for(int i=1,j=1,lp=++tt;i<=nn;++j,i=j){\r\n    \twhile(j<nn&&nps(s2[i],ti)==nps(s2[j+1],ti)) ++j;\r\n    \tint np=++tt;\r\n    \tfor(int k=i;k<=j;++k) adde(s2[k]+nn,np,inf,1);\r\n    \tfor(int k=i;k<=j;++k) adde(np,s2[k]+nn,inf,0);\r\n    \tadde(np,lp,inf,0),lp=np;\r\n    }\r\n    huhe_dinic();\r\n    cout<<a1<<' '<<a2;\r\n    return 0;\r\n}\r\n\r\n"
+}

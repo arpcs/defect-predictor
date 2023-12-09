@@ -1,0 +1,37 @@
+{
+    "id": 207850894,
+    "contestId": 1361,
+    "creationTimeSeconds": 1685448051,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1361,
+        "index": "F",
+        "name": "Johnny and New Toy",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3300,
+        "tags": [
+            "data structures",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1361,
+        "members": [
+            {
+                "handle": "lnyx"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1591281300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 10,
+    "timeConsumedMillis": 467,
+    "memoryConsumedBytes": 506982400,
+    "source": "#include<cstdio>\r\n#include<iostream>\r\nnamespace IO{\r\n\ttemplate<typename T> inline void rd(T &x){\r\n\t\tx=0;bool f=0;char c=0;\r\n\t\twhile(c<'0'||c>'9') f|=c=='-',c=getchar();\r\n\t\twhile('0'<=c&&c<='9') x=x*10+(c^48),c=getchar();\r\n\t\tx=f?-x:x;\r\n\t}\r\n\ttemplate<typename T,typename ...Args> inline void rd(T &x,Args &...args){rd(x),rd(args...);}\r\n\ttemplate<typename T> inline void wt(char c,T x){\r\n\t\tint stk[114],top=0;\r\n\t\tif(x<0) x=-x,putchar('-');\r\n\t\tdo stk[++top]=x%10,x/=10; while(x);\r\n\t\twhile(top) putchar(stk[top--]+'0');\r\n\t\tputchar(c);\r\n\t}\r\n\ttemplate<typename T,typename ...Args> inline void wt(char c,T x,Args ...args){wt(c,x),wt(c,args...);}\r\n\ttemplate<typename T,typename ...Args> inline void wt(char s,char c,T x,Args ...args){wt(c,x),wt(c,args...),putchar(s);}\r\n};\r\nusing namespace IO;\r\nusing namespace std;\r\ntypedef long long LL;\r\nconst int INF=1e9;\r\nconst int N=4e5+7;\r\nint n,m;\r\nint p[N],w[N];\r\nint stk[N],top;\r\nint ls[N],rs[N],fa[N],L[N],R[N];\r\nint rt[N];\r\nstruct sgement_tree{\r\n\tint sum[N*100],ls[N*100],rs[N*100],idx;\r\n\tinline void pushup(int u){sum[u]=sum[ls[u]]+sum[rs[u]];}\r\n\tinline void add(int &u,int l,int r,int x,int k){\r\n\t\tif(!u) u=++idx;\r\n\t\tif(l==r) return sum[u]+=k,void();\r\n\t\tint mid=(l+r)>>1;\r\n\t\tif(x<=mid) add(ls[u],l,mid,x,k);\r\n\t\telse add(rs[u],mid+1,r,x,k);\r\n\t\tpushup(u);\r\n\t}\r\n\tinline int que(int u,int L,int R,int l,int r){\r\n\t\tif(l>r) return 0;\r\n\t\tif(l<=L&&R<=r) return sum[u];\r\n\t\tint mid=(L+R)>>1,ans=0;\r\n\t\tif(l<=mid) ans=que(ls[u],L,mid,l,r);\r\n\t\tif(r>mid) ans+=que(rs[u],mid+1,R,l,r);\r\n\t\treturn ans;\r\n\t}\r\n\tinline int merge(int p,int q,int l,int r){\r\n\t\tint mid=(l+r)>>1,u=++idx;\r\n\t\tif(l==r) return sum[u]=sum[p]+sum[q],u;\r\n\t\tls[u]=merge(ls[p],ls[q],l,mid),rs[u]=merge(rs[p],rs[q],mid+1,r);\r\n\t\tpushup(u);\r\n\t\treturn u;\r\n\t}\r\n}tr;\r\nstruct bit{\r\n\tint tr[N];\r\n\tinline void add(int i,int x){for(;i;i-=i&(-i)) tr[i]+=x;}\r\n\tinline int que(int i){int ans=0; for(;i<=n;i+=i&(-i)) ans+=tr[i]; return ans;}\r\n}bit;\r\nLL pre[N],suf[N];\r\nLL ans[N];\r\nbool flag[N];\r\ninline void solve(int u,int l,int r,int x,int val){\r\n\tif(flag[u]) return ;\r\n\tflag[u]=1;\r\n\tif(l<=x&&x<u){\r\n\t\t// cerr<<tr.que(rt[rs[u]],1,n,p[x]+1,n)<<\" \"<<p[x]+1<<\" \"<<n<<endl;\r\n\t\tpre[u]-=tr.que(rt[rs[u]],1,n,1,p[x]-1),pre[u]+=tr.que(rt[rs[u]],1,n,1,val-1);\r\n\t\tsuf[u]-=tr.que(rt[rs[u]],1,n,p[x]+1,n),suf[u]+=tr.que(rt[rs[u]],1,n,val+1,n);\r\n\t}\r\n\tif(u<x&&x<=r){\r\n\t\t// cerr<<tr.que(rt[ls[u]],1,n,3,3)<<\" \"<<p[x]+1<<\" \"<<n<<endl;\r\n\t\tpre[u]-=tr.que(rt[ls[u]],1,n,p[x]+1,n),pre[u]+=tr.que(rt[ls[u]],1,n,val+1,n);\r\n\t\tsuf[u]-=tr.que(rt[ls[u]],1,n,1,p[x]-1),suf[u]+=tr.que(rt[ls[u]],1,n,1,val-1);\r\n\t}\r\n\t// cerr<<l<<\" \"<<r<<\" \"<<x<<\" \"<<val<<\" \"<<pre[u]<<\" \"<<suf[u]<<endl;\r\n}\r\ninline void dfs(int u,int l,int r){\r\n\tif(p[u]) tr.add(rt[u],1,n,p[u],1);\r\n\tif(ls[u]) dfs(ls[u],l,u-1),rt[u]=tr.merge(rt[u],rt[ls[u]],1,n);\r\n\tif(rs[u]) dfs(rs[u],u+1,r),rt[u]=tr.merge(rt[u],rt[rs[u]],1,n);\r\n\tL[u]=l,R[u]=r;\r\n\tfor(int i=l;i<u;i++) if(p[i]) bit.add(p[i],1);\r\n\tfor(int i=u+1;i<=r;i++) if(p[i]) pre[u]+=bit.que(p[i]);\r\n\tfor(int i=l;i<u;i++) if(p[i]) bit.add(p[i],-1);\r\n\tfor(int i=u+1;i<=r;i++) if(p[i]) bit.add(p[i],1);\r\n\tfor(int i=l;i<u;i++) if(p[i]) suf[u]+=bit.que(p[i]);\r\n\tfor(int i=u+1;i<=r;i++) if(p[i]) bit.add(p[i],-1);\r\n}\r\ninline LL calc(int u,int l,int r){\r\n\tif(ls[u]) ans[u]+=calc(ls[u],l,u-1);\r\n\tif(rs[u]) ans[u]+=calc(rs[u],u+1,r);\r\n\treturn ans[u]+=min(pre[u],suf[u]);\r\n}\r\ninline void change(int x,int y,int val){\r\n\tint u=fa[x]; while(u) solve(u,L[u],R[u],x,val),u=fa[u];\r\n\tu=fa[y]; while(u) solve(u,L[u],R[u],x,val),u=fa[u];\r\n\tu=fa[x]; while(u) flag[u]=0,u=fa[u];\r\n\tu=fa[y]; while(u) flag[u]=0,u=fa[u];\r\n\tu=x; while(u) tr.add(rt[u],1,n,p[x],-1),tr.add(rt[u],1,n,val,1),u=fa[u];\r\n\tp[x]=val;\r\n}\r\nint main(){\r\n#ifndef ONLINE_JUDGE\r\n\tfreopen(\"in.in\",\"r\",stdin);\r\n\tfreopen(\"out.out\",\"w\",stdout);\r\n#endif\r\n\trd(n),n=n*2-1;\r\n\tfor(int i=1;i<=n;i+=2) rd(p[i]),w[i]=INF;\r\n\tfor(int i=2;i<=n;i+=2) rd(w[i]);\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tint k=top;\r\n\t\twhile(top&&w[stk[top]]>w[i]) top--;\r\n\t\trs[stk[top]]=i,fa[i]=stk[top];\r\n\t\tif(top!=k) ls[i]=stk[top+1],fa[stk[top+1]]=i;\r\n\t\tstk[++top]=i;\r\n\t}\r\n\trd(m);\r\n\tdfs(rs[0],1,n),calc(rs[0],1,n);\r\n\twhile(m--){\r\n\t\tint x,y; rd(x,y),x=x*2-1,y=y*2-1;\r\n\t\tint valx=p[x],valy=p[y];\r\n\t\tchange(x,y,valy),change(y,x,valx);\r\n\t\tint u=x; while(u) ans[u]=ans[ls[u]]+ans[rs[u]]+min(pre[u],suf[u]),u=fa[u];\r\n\t\tu=y; while(u) ans[u]=ans[ls[u]]+ans[rs[u]]+min(pre[u],suf[u]),u=fa[u];\r\n\t\twt('\\n',ans[rs[0]]);\r\n\t}\r\n\treturn 0;\r\n}"
+}

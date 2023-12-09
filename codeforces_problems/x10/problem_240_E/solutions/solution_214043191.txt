@@ -1,0 +1,36 @@
+{
+    "id": 214043191,
+    "contestId": 240,
+    "creationTimeSeconds": 1689514934,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 240,
+        "index": "E",
+        "name": "Road Repairs",
+        "type": "PROGRAMMING",
+        "rating": 2800,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 240,
+        "members": [
+            {
+                "handle": "bhjiang"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1350370800
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 60,
+    "timeConsumedMillis": 436,
+    "memoryConsumedBytes": 52121600,
+    "source": "/**\r\n  *@filename:E_Road_Repairs\r\n  *@author: pursuit\r\n  *@created: 2021-08-18 15:36\r\n**/\r\n#include <bits/stdc++.h>\r\n#define debug(a) cout << \"debug : \" << (#a)<< \" = \" << a << endl\r\n\r\nusing namespace std;\r\n\r\ntypedef pair<int,int> pii;\r\ntypedef long long ll;\r\nconst int N = 1e6 + 10;\r\nconst int P = 1e9 + 7;\r\nconst int INF = 0x3f3f3f3f;\r\n\r\n/*\r\n\u9898\u610f\uff1a\r\n*/\r\nint n,m,u,v,flag,pre[N],preId[N];\r\nint inCost[N];\r\nint id[N],vis[N],use[N];\r\nstruct node{\r\n    int u,v,cost,flag,id;//flag\u4ee3\u8868\u9053\u8def\u7684\u72b6\u51b5\uff0c\u82e5\u4e3a1\uff0c\u5219\u9700\u8981\u5bf9\u5176\u8fdb\u884c\u4fee\u590d\u3002\r\n}edges[N];\r\nstruct Cancel{\r\n    int pre,cur;//pre\u4e3a\u53ef\u80fd\u88ab\u53d6\u6d88\u7684\u90a3\u6761\u8fb9\u7684id\uff0c\u800ccur\u4fdd\u5b58\u7684\u662f\u53ef\u80fd\u65b0\u589e\u7684\u90a3\u6761\u8fb9\u7684\u66f4\u65b0\u524d\u7684id\u3002\r\n}cancel[N];\r\nvoid addEdge(int u,int v,int flag,int id){\r\n    edges[id].u = u;\r\n    edges[id].v = v;\r\n    edges[id].flag = edges[id].cost = flag;\r\n    edges[id].id = id;\r\n}\r\nint zhuliu(int root){\r\n    int res = 0,total = m;//res\u7edf\u8ba1\u8fb9\u6743\u548c\u3002total\u4e3a\u4e0b\u4e00\u6761\u65b0\u5efa\u8fb9\u7684id\u3002\r\n    while(true){\r\n        for(int i = 1; i <= n; ++ i)inCost[i] = INF, id[i] = vis[i] = -1,pre[i] = -1;//\u521d\u59cb\u5316\u5165\u8fb9\u6d88\u8017\u7b49\u3002\r\n        for(int i = 0; i < m; ++ i){\r\n            u = edges[i].u, v = edges[i].v, flag = edges[i].cost;\r\n            if(u != v && flag < inCost[v]){\r\n                //cout << u << \"->\" << v << endl;\r\n                inCost[v] = flag;\r\n                pre[v] = u;\r\n                //\u66f4\u65b0\u52a0\u5165\u5230\u8fb9\u96c6\u7684\u90a3\u6761\u8fb9\u7684id\u3002\r\n                preId[v] = edges[i].id;\r\n            }\r\n        }\r\n        for(int i = 1; i <= n; ++ i){\r\n            if(i != root && inCost[i] == INF){\r\n                //\u8bf4\u660e\u4e0d\u5b58\u5728\u5165\u8fb9\uff0c\u65e0\u6cd5\u6784\u6210\u6811\u5f62\u56fe\u3002\r\n                return -1;\r\n            }\r\n        }\r\n        inCost[root] = 0;\r\n        int tn = 0;//\u65b0\u7684\u7f16\u53f7\u3002\r\n        for(int i = 1; i <= n; ++ i){\r\n            res += inCost[i];//\u7edf\u8ba1\u5165\u8fb9\u6d88\u8017\u3002\r\n            v = i;\r\n            //\u5c06\u65b0\u56fe\u4e2d\u7528\u5230\u7684\u8fb9\u4fdd\u5b58\u8d77\u6765\u3002\r\n            if(i != root)use[preId[v]] ++;\r\n            while(vis[v] != i && id[v] == -1 && v != root){\r\n                vis[v] = i;\r\n                v = pre[v];//\u4e0d\u65ad\u8fed\u4ee3\u524d\u9a71\u7ed3\u70b9\uff0c\u77e5\u9053\u66f4\u65b0\u5230\u6839\u7ed3\u70b9\u3002\u82e5\u662f\u73af\uff0c\u5f53\u5904\u4e8evis[v] = i\u65f6\u5373\u4f1a\u9000\u51fa\uff0c\u5373\u56de\u5230\u8d77\u70b9\u3002\r\n            }\r\n            if(v != root && id[v] == -1){\r\n                //\u8bf4\u660e\u4e0d\u662f\u4ee5root\u4e3a\u6839\u7ed3\u70b9\u3002\u5373\u51fa\u73b0\u4e86\u6709\u5411\u73af\r\n                id[v] = ++tn;\r\n                for(u = pre[v]; u != v; u = pre[u])id[u] = tn;//\u91cd\u65b0\u7ed9\u6709\u5411\u73af\u7f16\u53f7\uff0c\u4fbf\u4e8e\u4e4b\u540e\u7f29\u70b9\u3002\r\n            }\r\n        }\r\n        if(tn == 0)break;//\u8bf4\u660e\u6ca1\u6709\u91cd\u65b0\u7f16\u53f7\uff0c\u5373\u4e0d\u5b58\u5728\u6709\u5411\u73af\u3002\r\n        for(int i = 1; i <= n; ++ i){\r\n            if(id[i] == -1){\r\n                id[i] = ++tn;//\u7ed9\u672a\u91cd\u65b0\u7f16\u53f7\u7684\u4e5f\u91cd\u65b0\u7f16\u53f7\uff0c\u4fbf\u4e8e\u5904\u7406\u3002\r\n            }\r\n        }\r\n        for(int i = 0; i < m; ++ i){\r\n            int vv = edges[i].v;//\u7531\u4e8e\u5165\u8fb9\u8fd8\u5b58\u7740\u662f\u539f\u6765\u7684\u7f16\u53f7\uff0c\u6240\u4ee5\u8fd9\u91cc\u53d6\u51fa\u5165\u8fb9\u7ec8\u70b9\u3002\r\n            //\u83b7\u53d6\u91cd\u65b0\u7684\u7f16\u53f7\u3002\r\n            edges[i].u = id[edges[i].u], edges[i].v = id[edges[i].v];\r\n            if(edges[i].u != edges[i].v){\r\n                //\u8fd9\u91cc\u770b\u505a\u662f\u73af\u5916\u4e00\u70b9\u5165\u73af\u5185\u7684v\u70b9\uff0c\u6240\u4ee5\u6211\u4eec\u9700\u8981\u51cf\u53bb\u73af\u5185\u5165\u8fb9\u6743\u3002\r\n                //\u8fd9\u6837\u53ef\u4ee5\u907f\u514d\u91cd\u590d\u8ba1\u7b97\u3002\r\n                edges[i].cost -= inCost[vv];//\u66f4\u65b0\u6743\u503c\uff0c\u56e0\u4e3a\u8fd9\u4e2a\u5df2\u7ecf\u88ab\u7d2f\u52a0\u4e86\u3002\r\n                //\u5c06\u8fd9\u6761\u8fb9\u7684\u66f4\u65b0\u4fe1\u606f\u4fdd\u5b58\u8d77\u6765\u3002\r\n                cancel[total].pre = preId[vv];//\u539f\u672c\u6307\u5411v\u7684\u8fb9\u5c31\u53d6\u6d88\u4e86\u3002\r\n                cancel[total].cur = edges[i].id;//\u4fdd\u7559\u66f4\u65b0\u524d\u7684id\u3002\r\n                edges[i].id = total ++;\r\n            }\r\n        }\r\n        n = tn;//\u66f4\u65b0\u65b0\u7684\u7ed3\u70b9\u6570\u91cf\u3002\r\n        root = id[root];//\u66f4\u65b0\u6839\u7ed3\u70b9\u7f16\u53f7\u3002\r\n    }\r\n    //\u6b63\u5e38\u3002\r\n    for(int i = total - 1; i >= m; -- i){\r\n        if(use[i]){\r\n            use[cancel[i].pre] --;\r\n            use[cancel[i].cur] ++;\r\n        }\r\n    }\r\n    return res;\r\n}\r\nvoid solve(){\r\n    int ans = zhuliu(1);\r\n    printf(\"%d\\n\", ans);\r\n    if(ans > 0){\r\n        //\u627e\u5230\u9700\u8981\u4fee\u590d\u7684\u8def\u5f84\u7f16\u53f7\u3002\r\n        for(int i = 0; i < m; ++ i){\r\n            if(use[i] && edges[i].flag)printf(\"%d \", i + 1);\r\n            //cout << i << \":\" << use[i] << endl;\r\n        }\r\n        puts(\"\");\r\n    }\r\n}\r\nint main(){\t\r\n    freopen(\"input.txt\",\"r\",stdin);\r\n    freopen(\"output.txt\", \"w\", stdout); \r\n    scanf(\"%d%d\", &n, &m);\r\n    for(int i = 0; i < m; ++ i){\r\n        scanf(\"%d%d%d\", &u, &v, &flag);\r\n        addEdge(u,v,flag,i);\r\n    }\r\n    solve();\r\n    return 0;\r\n}\r\n"
+}

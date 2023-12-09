@@ -1,0 +1,38 @@
+{
+    "id": 226949858,
+    "contestId": 1758,
+    "creationTimeSeconds": 1696648054,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1758,
+        "index": "E",
+        "name": "Tick, Tock",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2500,
+        "tags": [
+            "combinatorics",
+            "dfs and similar",
+            "dsu",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1758,
+        "members": [
+            {
+                "handle": "stoDiwanulorz"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1669390500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 63,
+    "timeConsumedMillis": 234,
+    "memoryConsumedBytes": 43929600,
+    "source": "// LUOGU_RID: 128094438\n//code by Emissary\n#include<bits/stdc++.h>\n\n#define fi first\n#define se second\n#define vc vector\n#define db double\n#define ll long long\n#define mk make_pair\n#define pb push_back\n#define PI pair<int,int>\n#define ull unsigned long long\n#define err cerr << \"   -_-   \" << endl\n#define debug cerr << \" ------------------- \" << endl\n\n#define input(x) freopen(#x\".in\",\"r\",stdin)\n#define output(x) freopen(#x\".out\",\"w\",stdout)\n\n#define NO puts(\"No\")\n#define YES puts(\"Yes\")\n\n//#define int long long\n\nusing namespace std;\n\nnamespace IO{\n\tinline int read(){\n\t\tint X=0, W=0; char ch=getchar();\n\t\twhile(!isdigit(ch)) W|=ch=='-', ch=getchar();\n\t\twhile(isdigit(ch)) X=(X<<1)+(X<<3)+(ch^48), ch=getchar();\n\t\treturn W?-X:X;\n\t}\n\tinline void write(int x){\n\t\tif(x<0) x=-x, putchar('-');\n\t\tif(x>9) write(x/10);\n\t\tputchar(x%10+'0');\n\t}\n\tinline void sprint(int x){write(x), putchar(32);}\n\tinline void eprint(int x){write(x), putchar(10);}\n}using namespace IO;\n\nconst int MAXN = 2e5+5;\nconst int mod = 1e9+7;\n\nint n, m, h, hd, tl, dis1[MAXN], dis2[MAXN], ans;\n\nPI Q[MAXN];\n\nset<PI> S1[MAXN], S2[MAXN];\n\nvc<PI> G1[MAXN], G2[MAXN];\n\nbool vis1[MAXN], vis2[MAXN];\n\nstruct dsu{\n\tint fa[MAXN];\n\tinline void reset(int n){for(int i=1;i<=n;++i) fa[i]=i;}\n\tinline int find(int x){return x==fa[x]?x:fa[x]=find(fa[x]);}\n\tinline void merge(int x, int y){fa[find(x)]=find(y);}\n\tinline bool same(int x, int y){return find(x)==find(y);}\n}T[2];\n\ninline void dfs1(int x){\n\tvis1[x]=1;\n\tfor(auto i:G1[x]){\n\t\tT[0].merge(x,i.fi);\n\t\tif(vis1[i.fi]) continue;\n\t\tdis1[i.fi]=((dis1[x]-i.se)%h+h)%h; dfs1(i.fi);\n\t}\n\treturn ;\n}\n\ninline void dfs2(int x){\n\tvis2[x]=1;\n\tfor(auto i:G2[x]){\n\t\tT[1].merge(x,i.fi);\n\t\tif(vis2[i.fi]) continue;\n\t\tdis2[i.fi]=((dis2[x]-i.se)%h+h)%h; dfs2(i.fi);\n\t}\n\treturn ;\n}\n\ninline void solve(){\n\thd=1, tl=0; ans=1;\n\tn=read(), m=read(), h=read();\n\tT[0].reset(n); T[1].reset(m);\n\tfor(int i=1;i<=n;++i) S1[i].clear(), G2[i].clear(), vis2[i]=0;\n\tfor(int i=1;i<=m;++i) S2[i].clear(), G1[i].clear(), vis1[i]=0;\n\tfor(int i=1;i<=n;++i){\n\t\tfor(int j=1;j<=m;++j){\n\t\t\tint x=read();\n\t\t\tif(x==-1) Q[++tl]=mk(i,j);\n\t\t\telse S1[i].insert(mk(j,x)), S2[j].insert(mk(i,x));\n\t\t}\t\n\t}\n\tset<PI> :: iterator it; int las, lasval;\n\tfor(int i=1;i<=n;++i){\n\t\tif(S1[i].size()==0) continue;\n\t\tit=S1[i].begin(); las=0; lasval=0;\n\t\twhile(it!=S1[i].end()){\n\t\t\tif(las) G1[(*it).fi].pb(mk(las,(*it).se-lasval)), G1[las].pb(mk((*it).fi,lasval-(*it).se));\n\t\t\tlas=(*it).fi, lasval=(*it).se; ++it;\n\t\t}\t\n\t}\t\n\tfor(int i=1;i<=m;++i){\n\t\tif(S2[i].size()==0) continue;\n\t\tit=S2[i].begin(); las=0; lasval=0;\n\t\twhile(it!=S2[i].end()){\n\t\t\tif(las) G2[(*it).fi].pb(mk(las,(*it).se-lasval)), G2[las].pb(mk((*it).fi,lasval-(*it).se));\n\t\t\tlas=(*it).fi, lasval=(*it).se; ++it;\n\t\t}\t\n\t}\n\tfor(int i=1;i<=n;++i) if(!vis2[i]) dis2[i]=0, dfs2(i);\n\tfor(int i=1;i<=m;++i) if(!vis1[i]) dis1[i]=0, dfs1(i);\n\tbool sol=1;\n\tfor(int i=1;i<=m;++i){\n\t\tfor(auto j:G1[i]){\n\t\t\tif((dis1[j.fi]-dis1[i]+h)%h==(h-j.se)%h) continue;\n\t\t\tsol=0;\n\t\t}\n\t}\n\tfor(int i=1;i<=n;++i){\n\t\tfor(auto j:G2[i]){\n\t\t\tif((dis2[j.fi]-dis2[i]+h)%h==(h-j.se)%h) continue;\n\t\t\tsol=0;\n\t\t}\n\t}\n\tif(!sol) return eprint(0);\n\tint x, y, flag;\n\tfor(int i=1;i<=tl;++i){\n\t\tx=Q[i].fi, y=Q[i].se; flag=0;\n\t\tit=S1[x].lower_bound(mk(y,0));\n\t\tif(it!=S1[x].end()) flag|=!T[0].same((*it).fi,y);\n\t\tif(it!=S1[x].begin()) --it, flag|=!T[0].same((*it).fi,y);\n\t\tit=S2[y].lower_bound(mk(x,0));\n\t\tif(it!=S2[y].end()) flag|=!T[1].same((*it).fi,x);\n\t\tif(it!=S2[y].begin()) --it, flag|=!T[1].same((*it).fi,x);\n\t\tflag|=S1[x].size()==0 || S2[y].size()==0;\n\t\tif(flag){\n\t\t\tans=1ll*ans*h%mod;\n\t\t\tit=S1[x].lower_bound(mk(y,0));\n\t\t\tif(it!=S1[x].end()) T[0].merge((*it).fi,y);\n\t\t\tif(it!=S1[x].begin()) --it, T[0].merge((*it).fi,y);\n\t\t\tit=S2[y].lower_bound(mk(x,0));\n\t\t\tif(it!=S2[y].end()) T[1].merge((*it).fi,x);\n\t\t\tif(it!=S2[y].begin()) --it, T[1].merge((*it).fi,x);\n\t\t\tS1[x].insert(mk(y,0)); S2[y].insert(mk(x,0));\n\t\t}\n\t}\t\n\teprint(ans);\n}\n\nsigned main(){\n\tint t=read();\n\twhile(t--) solve();\n\treturn 0;\n}\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+}

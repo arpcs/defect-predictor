@@ -1,0 +1,38 @@
+{
+    "id": 226905127,
+    "contestId": 1385,
+    "creationTimeSeconds": 1696609951,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1385,
+        "index": "G",
+        "name": "Columns Swaps",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "2-sat",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1385,
+        "members": [
+            {
+                "handle": "Lemonrange"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1594996500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\n#define YES return void(cout << \"Yes\\n\")\r\n#define NO return void(cout << \"No\\n\")\r\nusing namespace std;\r\n\r\nusing u64 = unsigned long long;\r\nusing PII = pair<int, int>;\r\nusing i64 = long long;\r\n\r\nstruct SCC {\r\n    int n, c_scc, idx;\r\n    vector<int> stk;\r\n    vector<int> dfn, low, scc, siz;\r\n    vector<vector<int>> g;\r\n\r\n    SCC() {};\r\n    SCC(int _) { init(_); }\r\n\r\n    void init(int _) {\r\n        this->n = _;\r\n        g.assign(_ + 1, {});\r\n        dfn.resize(_ + 1);\r\n        low.resize(_ + 1);\r\n        scc.resize(_ + 1);\r\n        siz.resize(1);\r\n        stk.clear();\r\n        idx = c_scc = 0;\r\n    }\r\n    void addEdge(int u, int v) {\r\n        g[u].emplace_back(v);\r\n    }\r\n    void DFS(int u) {\r\n        dfn[u] = low[u] = ++idx;\r\n        stk.emplace_back(u);\r\n        for (auto& v : g[u]) {\r\n            if (!dfn[v]) {\r\n                DFS(v);\r\n                low[u] = min(low[u], low[v]);\r\n            }\r\n            else if (!scc[v]) {\r\n                low[u] = min(low[u], dfn[v]);\r\n            }\r\n        }\r\n        if (dfn[u] == low[u]) {\r\n            int top = -1, cnt = 0; ++c_scc;\r\n            while (top != u) {\r\n                top = stk.back(); stk.pop_back();\r\n                scc[top] = c_scc; ++cnt;\r\n            }\r\n            siz.emplace_back(cnt);\r\n        }\r\n    }\r\n    void work() {\r\n        for (int i = 1; i <= n; ++i) {\r\n            if (!dfn[i]) DFS(i);\r\n        }\r\n    }\r\n};\r\n\r\nvoid solve() {\r\n    int n;\r\n    cin >> n;\r\n\r\n    unordered_map<int, vector<int>> At;\r\n    for (int i = 1; i <= n; ++i) {\r\n        int x; cin >> x;\r\n        At[x].emplace_back(i);\r\n    }\r\n    for (int i = 1; i <= n; ++i) {\r\n        int x; cin >> x;\r\n        At[x].emplace_back(-i);\r\n    }\r\n\r\n    if (At.size() < n) {\r\n        cout << -1 << '\\n';\r\n        return;\r\n    }\r\n\r\n    SCC g(n << 1);\r\n    for (auto& [num, vec] : At) {\r\n        if (vec.size() < 2) {\r\n            cout << -1 << '\\n';\r\n            return;\r\n        }\r\n        int x = vec[0], y = vec[1];\r\n        if (x + y == 0) continue;\r\n        if ((x > 0 && y > 0) || (x < 0 && y < 0)) {\r\n            g.addEdge(abs(x), abs(y) + n);\r\n            g.addEdge(abs(y), abs(x) + n);\r\n        }\r\n        else {\r\n            g.addEdge(abs(x), abs(y));\r\n            g.addEdge(abs(x) + n, abs(y) + n);\r\n        }\r\n    }\r\n\r\n    g.work();\r\n\r\n    int ans = 0;\r\n    vector<int> mark(n + 1);\r\n    for (int i = 1; i <= n; ++i) {\r\n        if (g.scc[i] == g.scc[i + n]) {\r\n            cout << -1 << '\\n';\r\n            return;\r\n        }\r\n        if (g.scc[i] < g.scc[i + n]) {\r\n            mark[i] = 1;\r\n            ++ans;\r\n        }\r\n    }\r\n\r\n    cout << min(ans, n - ans) << '\\n';\r\n\r\n    int last = ans > n - ans;\r\n    for (int i = 1; i <= n; ++i) {\r\n        if (mark[i] ^ last) {\r\n            cout << i << \" \";\r\n        }\r\n    }\r\n    cout << '\\n';\r\n}\r\n\r\nsigned main() {\r\n\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0), cout.tie(0);\r\n\r\n    int t = 1; cin >> t;\r\n    while (t--) solve();\r\n\r\n    return 0;\r\n}"
+}

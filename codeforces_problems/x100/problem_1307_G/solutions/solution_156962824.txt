@@ -1,0 +1,37 @@
+{
+    "id": 156962824,
+    "contestId": 1307,
+    "creationTimeSeconds": 1652398473,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "jeroenodb"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 171,
+    "memoryConsumedBytes": 409600,
+    "source": "#include \"bits/stdc++.h\"\r\nusing namespace std;\r\n#define all(x) begin(x),end(x)\r\ntemplate<typename A, typename B> ostream& operator<<(ostream &os, const pair<A, B> &p) { return os << '(' << p.first << \", \" << p.second << ')'; }\r\ntemplate<typename T_container, typename T = typename enable_if<!is_same<T_container, string>::value, typename T_container::value_type>::type> ostream& operator<<(ostream &os, const T_container &v) { string sep; for (const T &x : v) os << sep << x, sep = \" \"; return os; }\r\n#define debug(a) cerr << \"(\" << #a << \": \" << a << \")\\n\";\r\ntypedef long long ll;\r\ntypedef vector<int> vi;\r\ntypedef vector<vi> vvi;\r\ntypedef pair<int,int> pi;\r\nconst int mxN = 1e2+1;\r\nconst ll oo = 1e14;\r\nstruct flow {\r\n    // Source is Node 0;\r\n    // Sink is node n-1\r\n    // Uses capacity scaling.\r\n    // Runtime: O(|E|^2 *(1+log2(C )))\r\n    struct edge {\r\n        int f,c;\r\n        int to;\r\n    };\r\n    typedef vector<edge> ve;\r\n    vector<vector<int>> adj;\r\n    vector<edge> edges;\r\n    int n;\r\n    int scale=0;\r\n    flow(int _n) {\r\n        n=_n;\r\n        adj.resize(n);\r\n    }\r\n    void addEdge(int a, int b, int w, bool directed = true) {\r\n        scale = max(w,scale);\r\n        adj[a].push_back((int)edges.size());\r\n        adj[b].push_back((int)edges.size()+1);\r\n        edges.push_back({0,w,b});\r\n        edges.push_back({0,directed?0:w,a});\r\n    }\r\n    bitset<mxN> visited;\r\n    int dfs(int at=0, int mn=1) {\r\n        if(at==n-1) return mn;\r\n        visited[at] = true;\r\n        for(int i: adj[at]) {\r\n            auto& e = edges[i];\r\n            if(!visited[e.to] and e.f+scale<=e.c) {\r\n                int tmp = min(mn,e.c-e.f);\r\n                tmp =  min(tmp,dfs(e.to,tmp));\r\n                if(tmp) {\r\n                    e.f+=tmp;\r\n                    auto& o = edges[i^1];\r\n                    o.f-=tmp;\r\n                    return tmp;\r\n                }\r\n            }\r\n        }\r\n        return 0;\r\n    }\r\n    int res = 0;\r\n    int solve() {\r\n        scale=1;\r\n        while(true) {\r\n            visited.reset();\r\n            int tmp = dfs();\r\n            if(tmp!=0) res+=tmp;\r\n            else {\r\n                scale/=2;\r\n                if(!scale) break;\r\n            }\r\n        }\r\n        return res;\r\n    }\r\n};\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n    int n,m; cin >> n >> m;\r\n    flow f(n);\r\n    vector<pair<ll,ll>> slopes;\r\n    vector<vector<pair<ll,ll>>> adj(n);\r\n    vector<bool> used(m);\r\n    vector<array<ll,3>> es(m);\r\n    for(auto& [u,v,w] : es) {\r\n        cin >> u >> v >> w,--u,--v;\r\n        adj[u].push_back({v,w});\r\n    }\r\n    vector<pair<ll,ll>> pts = {{0,0}};\r\n    bool firstIter=true;\r\n    ll curdist=0;\r\n    while(true) {\r\n        // dijkstra on dense graph in O(n^2)\r\n        vector<ll> d(n,oo);\r\n        d[0]=0;\r\n        vector<bool> vis(n);\r\n        \r\n        while(true) {\r\n            int at=-1;\r\n            for(int i=0;i<n;++i) {\r\n                if(!vis[i] and (at==-1 or d[at]>d[i])) at=i;\r\n            }\r\n            if(at==-1) break;\r\n            vis[at]=true;\r\n            for(auto [to,w] : adj[at]) {\r\n                d[to] = min(d[to],d[at]+w);\r\n            }\r\n        }\r\n        // make initial cost = distance from 0 to n-1\r\n        if(firstIter) {\r\n            pts.back().second=d[n-1];\r\n            firstIter=false;\r\n            curdist=d[n-1];\r\n        } else {\r\n            assert(curdist+slopes.back().second==d[n-1]);\r\n            curdist=d[n-1];\r\n        }\r\n        // add all the edges which were newly added to the dijkstra dag.\r\n        for(int i=0;i<m;++i) if(!used[i]) {\r\n            auto [u,v,w] = es[i];\r\n            if(d[v]-d[u]==w) {\r\n                used[i]=true;\r\n                f.addEdge(u,v,1);\r\n            }\r\n        }\r\n        int res = f.solve();\r\n        ll minbad=oo;\r\n        // find all edges that cross a mincut, but is not in the dijkstra DAG\r\n        // and check how much we can add to all the edges in the mincut, until this edge would also belong to the dijkstra DAG.\r\n        for(auto [u,v,w] : es) if(f.visited[u] and !f.visited[v]) {\r\n            if(d[v]-d[u]!=w) {\r\n                minbad = min(w-d[v]+d[u],minbad);\r\n            }\r\n        }\r\n        slopes.push_back({res,minbad});\r\n        if(minbad==oo) {\r\n            break;\r\n        }\r\n        // find a minimum cut and increase those edges.\r\n        for(auto& [u,v,w] : es) {\r\n            if(d[v]-d[u]==w and f.visited[u] and !f.visited[v]) {\r\n                w+=minbad;\r\n            }\r\n        }\r\n        for(int u=0;u<n;++u) for(auto& [v,w] : adj[u]) {\r\n            if(d[v]-d[u]==w and f.visited[u] and !f.visited[v]) {\r\n                w+=minbad;\r\n            }\r\n        }\r\n    }\r\n    {\r\n        ll x=0,y=pts.back().second;\r\n        for(auto [slope,t] : slopes) {\r\n            y+=t;\r\n            t*=slope;\r\n            x+=t;\r\n            pts.push_back({x,y});\r\n        }\r\n        pts.erase(unique(all(pts)),pts.end());\r\n        // so no problems in the binary search\r\n    }\r\n    int q; cin >> q;\r\n    \r\n    while(q--) {\r\n        int x; cin >> x;\r\n        auto i = upper_bound(all(pts),pair<ll,ll>{x,numeric_limits<ll>::max()})-pts.begin();\r\n        auto [x1,y1] = pts[i-1];\r\n        auto [x2,y2] = pts[i];\r\n        assert(x1<=x and x<=x2);\r\n        assert(x1!=x2);\r\n        if(q==1) {\r\n            debug(x1);\r\n             debug(x2);\r\n        }\r\n        cout << setprecision(15) << y1+double(x-x1)*(y2-y1)/(x2-x1) << '\\n';\r\n    }\r\n\r\n}"
+}

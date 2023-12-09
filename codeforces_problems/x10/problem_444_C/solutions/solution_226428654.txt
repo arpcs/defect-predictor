@@ -1,0 +1,35 @@
+{
+    "id": 226428654,
+    "contestId": 444,
+    "creationTimeSeconds": 1696332603,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 444,
+        "index": "C",
+        "name": "DZY Loves Colors",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 444,
+        "members": [
+            {
+                "handle": "djh20080314"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1404651900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 31,
+    "timeConsumedMillis": 264,
+    "memoryConsumedBytes": 9625600,
+    "source": "// LUOGU_RID: 127348979\n#include <bits/stdc++.h>\r\n#define int long long\r\nusing namespace std;\r\nconst int N = 1e5+5;\r\nint n, m;\r\ninline int read() {\r\n\tint x;\r\n\tscanf(\"%lld\",&x);\r\n\treturn x;\r\n}\r\nstruct Tree {\r\n#define ls p<<1\r\n#define rs p<<1|1\r\n\tint num[N<<2],tag[N<<2],c[N<<2];\r\n\r\n\tinline void pushup(int p) {\r\n\t\tnum[p]=num[ls]*(num[ls]==num[rs]);\r\n\t\tc[p]=c[ls]+c[rs];\r\n\t}\r\n\r\n\tinline void build(int p,int L,int R) {\r\n//\t\tcout<<p<<\" \"<<L<<\" \"<<R<<\"--\\n\";\r\n\t\tif(L==R) return void(num[p]=L);\r\n\t\tint mid=L+R>>1;\r\n\t\tbuild(ls,L,mid),build(rs,mid+1,R);\r\n\t}\r\n\r\n\tinline void cl(int p,int L,int R,int x) {\r\n\t\ttag[p]+=x;\r\n\t\tc[p]+=x*(R-L+1);\r\n\t}\r\n\r\n\tinline void pushdown(int p,int L,int R) {\r\n\t\tint mid=L+R>>1;\r\n\t\tcl(ls,L,mid,tag[p]),cl(rs,mid+1,R,tag[p]);\r\n\t\ttag[p]=0;\r\n\t\tif(num[p]) num[ls]=num[p],num[rs]=num[p];\r\n\t}\r\n\r\n\tinline void change(int p,int L,int R,int l,int r,int x) {\r\n\t\tif(l<=L&&R<=r&&num[p]) {\r\n//\t\t\tcout<<p<<\" \"<<L<<\" \"<<R<<\" \"<<x<<\"++\\n\";\r\n\t\t\treturn (void)(cl(p,L,R,abs(num[p]-x)),num[p]=x);\r\n\t\t}\r\n\t\tint mid=L+R>>1;\r\n\t\tpushdown(p,L,R);\r\n\t\tif(l<=mid) change(ls,L,mid,l,r,x);\r\n\t\tif(mid<r)  change(rs,mid+1,R,l,r,x);\r\n\t\tpushup(p);\r\n\t}\r\n\r\n\tinline int query(int p,int L,int R,int l,int r) {\r\n\t\tif(l<=L&&R<=r) return c[p];\r\n\t\tint mid=L+R>>1,res=0;\r\n\t\tpushdown(p,L,R);\r\n\t\tif(l<=mid) res+=query(ls,L,mid,l,r);\r\n\t\tif(mid<r)  res+=query(rs,mid+1,R,l,r);\r\n\t\treturn res;\r\n\t}\r\n\r\n\tinline int query_c(int p,int L,int R,int l,int r) {\r\n//\t\tcout<<p<<\" \"<<L<<\" \"<<R<<\" \"<<num[p]<<\"--\\n\";\r\n\t\tif(l<=L&&R<=r) return num[p];\r\n\t\tint mid=L+R>>1;\r\n\t\tpushdown(p,L,R);\r\n\t\tif(l<=mid) return query_c(ls,L,mid,l,r);\r\n\t\tif(mid<r)  return query_c(rs,mid+1,R,l,r);\r\n\t}\r\n#undef ls\r\n#undef rs\r\n} tree;\r\nsigned main() {\r\n\tn=read(),m=read();\r\n\ttree.build(1,1,n);\r\n\tfor(int i=1; i<=m; ++i) {\r\n//\t\tcout<<\"-------------------------------\\n\";\r\n\t\tint opt=read(),L=read(),R=read();\r\n\t\tif(opt==1) tree.change(1,1,n,L,R,read());\r\n\t\telse cout<<tree.query(1,1,n,L,R)<<\"\\n\";\r\n//\t\tfor(int i=1; i<=n; ++i) cout<<tree.query(1,1,n,i,i)<<\" \";\r\n//\t\tcout<<endl;\r\n//\t\tcout<<tree.query_c(1,1,n,3,3)<<\"---\\n\";\r\n\t}\r\n\treturn 0;\r\n}\r\n/*\r\n 1  2  3  4  5  6  7  8  9 10\r\n 0  0  0  0  0  0  0  0  0  0\r\n\r\n 3  3  3  3  3  6  7  8  9 10\r\n 2  1  0  1  2  0  0  0  0  0\r\n\r\n 3  9  9  9  9  9  9  8  9 10\r\n 2  7  6  7  8  3  2  0  0  0\r\n\r\n 3  9  9  9  9  9  9  8  9 11\r\n 2  7  6  7  8  3  2  0  0  1\r\n\r\n 3  9 12 12 12 12 12 12  9 11\r\n 2  7  9  10  11  6  5  4  0  1\r\n\r\n\r\n\r\n\r\n\r\n\r\n*/"
+}

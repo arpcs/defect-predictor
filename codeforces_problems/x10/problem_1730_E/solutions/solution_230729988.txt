@@ -1,0 +1,38 @@
+{
+    "id": 230729988,
+    "contestId": 1730,
+    "creationTimeSeconds": 1698777777,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1730,
+        "index": "E",
+        "name": "Maximums and Minimums",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2700,
+        "tags": [
+            "combinatorics",
+            "data structures",
+            "divide and conquer",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1730,
+        "members": [
+            {
+                "handle": "propane"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1664116500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 29,
+    "timeConsumedMillis": 2589,
+    "memoryConsumedBytes": 284160000,
+    "source": "#include<iostream>\r\n#include<cstring>\r\n#include<vector>\r\nusing namespace std;\r\nusing LL = long long;\r\nconst int maxn = 1e6 + 5;\r\nvector<int> factor[maxn];\r\nint stk[maxn], a[maxn], ls[maxn], rs[maxn];\r\nint L[maxn], R[maxn];\r\nvector<int> pos[maxn];\r\nint n;\r\nLL ans;\r\n\r\nint build(int n){\r\n    int top = 0;\r\n    for(int i = 1; i <= n; i++){\r\n        int pos = top;\r\n        while(pos && a[stk[pos]] < a[i]) pos--;\r\n        if (pos) rs[stk[pos]] = i;\r\n        if (pos < top) ls[i] = stk[pos + 1];\r\n        stk[top = ++pos] = i;\r\n    }\r\n    return stk[1];\r\n}\r\n\r\nvoid dfs(int u, int l, int r) {\r\n    if (u - l <= r - u){\r\n        vector<int> p;\r\n        p.push_back(u);\r\n        int sum = 0;\r\n        for(auto x : factor[a[u]]){\r\n            auto it = lower_bound(pos[x].begin(), pos[x].end(), u);\r\n            if (it != pos[x].end() && L[*it] < u && *it <= r){\r\n                int t = *it;\r\n                while(!p.empty() && t < p.back()) p.pop_back();\r\n                p.push_back(t);\r\n            }\r\n        }\r\n        for(int i = 0; i < p.size(); i++){\r\n            int nxt = (i + 1 == p.size() ? r + 1 : p[i + 1]);\r\n            sum += min(R[p[i]], nxt) - p[i];\r\n        }\r\n        int mn = a[u], mnpos = u;\r\n        for(int i = u, j = 0; i >= l; i--){\r\n            if (a[i] < mn){\r\n                mn = a[i];\r\n                mnpos = i;\r\n            }\r\n            mn = min(mn, a[i]);\r\n            while(j < p.size() && a[p[j]] >= mn){\r\n                int nxt = (j + 1 == p.size() ? r + 1 : p[j + 1]);\r\n                sum -= min(R[p[j]], nxt) - p[j];\r\n                j++;\r\n            }\r\n            ans += sum;\r\n            if (R[mnpos] >= u && a[u] % mn == 0) ans += min(R[mnpos], r + 1) - u;\r\n        }\r\n    }\r\n    else{\r\n        vector<int> p;\r\n        p.push_back(u);\r\n        int sum = 0;\r\n        for(auto x : factor[a[u]]){\r\n            auto it = lower_bound(pos[x].begin(), pos[x].end(), u);\r\n            if (it != pos[x].begin() && R[*prev(it)] > u && *prev(it) >= l){\r\n                int t = *prev(it);\r\n                while(!p.empty() && t > p.back()) p.pop_back();\r\n                p.push_back(t);\r\n            }\r\n        }\r\n        for(int i = 0; i < p.size(); i++){\r\n            int nxt = (i + 1 == p.size() ? l - 1 : p[i + 1]);\r\n            sum += p[i] - max(L[p[i]], nxt);\r\n        }\r\n        int mn = a[u], mnpos = u;\r\n        for(int i = u, j = 0; i <= r; i++){\r\n            if (a[i] < mn){\r\n                mn = a[i];\r\n                mnpos = i;\r\n            }\r\n            while(j < p.size() && a[p[j]] >= mn){\r\n                int nxt = (j + 1 == p.size() ? l - 1 : p[j + 1]);\r\n                sum -= p[j] - max(L[p[j]], nxt);\r\n                j++;\r\n            }\r\n            ans += sum;\r\n            if (L[mnpos] <= u && a[u] % mn == 0) ans += u - max(L[mnpos], l - 1);\r\n        }\r\n    }\r\n    if (ls[u]) dfs(ls[u], l, u - 1);\r\n    if (rs[u]) dfs(rs[u], u + 1, r);\r\n}\r\n\r\nvoid init(int n){\r\n    for(int i = 0; i <= n + 1; i++) ls[i] = rs[i] = 0;\r\n}\r\n\r\nint main(){\r\n\r\n#ifdef LOCAL\r\n    freopen(\"data.in\", \"r\", stdin);\r\n    freopen(\"data.out\", \"w\", stdout);\r\n#endif\r\n\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n    ios::sync_with_stdio(0);\r\n\r\n    for(int i = 1; i < maxn; i++){\r\n        for(int j = 2 * i; j < maxn; j += i){\r\n            factor[j].push_back(i);\r\n        }\r\n    }\r\n\r\n    for(int i = 1; i < maxn; i++){\r\n        reverse(factor[i].begin(), factor[i].end());\r\n    }\r\n\r\n    int T;\r\n    cin >> T;\r\n    while(T--){\r\n        cin >> n;\r\n        ans = 0;\r\n        for(int i = 1; i <= n; i++){\r\n            cin >> a[i];\r\n            pos[a[i]].push_back(i);\r\n        }\r\n        int top;\r\n        stk[top = 0] = 0;\r\n        for(int i = 1; i <= n; i++){\r\n            while(top && a[stk[top]] >= a[i]) top--;\r\n            L[i] = stk[top];\r\n            stk[++top] = i;\r\n        }\r\n        stk[top = 0] = n + 1;\r\n        for(int i = n; i >= 1; i--){\r\n            while(top && a[stk[top]] >= a[i]) top--;\r\n            R[i] = stk[top];\r\n            stk[++top] = i;\r\n        }\r\n        init(n);\r\n        dfs(build(n), 1, n);\r\n        for(int i = 1; i <= n; i++) pos[a[i]].clear();\r\n        cout << ans << '\\n';\r\n    }\r\n\r\n}"
+}

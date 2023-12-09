@@ -1,0 +1,35 @@
+{
+    "id": 216834958,
+    "contestId": 1209,
+    "creationTimeSeconds": 1690973816,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1209,
+        "index": "G2",
+        "name": "Into Blocks (hard version)",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1209,
+        "members": [
+            {
+                "handle": "dlhham"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1568466300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 25,
+    "timeConsumedMillis": 998,
+    "memoryConsumedBytes": 45772800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nconst int N = 200010;\r\n\r\nint n , m , a[N];\r\nset<int> q[N];\r\n\r\nstruct Tree\r\n{\r\n    int l , r;\r\n    int ls , rs , sum;\r\n    int minn , maxx , tag;\r\n}t[N * 4];\r\n\r\ninline int read()\r\n{\r\n    int asd = 0 , qwe = 1; char zxc;\r\n    while(!isdigit(zxc = getchar())) if(zxc == '-') qwe = -1;\r\n    while(isdigit(zxc)) asd = asd * 10 + zxc - '0' , zxc = getchar();\r\n    return asd * qwe;\r\n}\r\n\r\ninline void build(int p , int l , int r)\r\n{\r\n    t[p].l = l , t[p].r = r;\r\n    if(l == r) return;\r\n    build(p * 2 , l , (l + r) / 2);\r\n    build(p * 2 + 1 , (l + r) / 2 + 1 , r);\r\n}\r\n\r\ninline void pushDown(int p)\r\n{\r\n    t[p * 2].minn += t[p].tag;\r\n    t[p * 2 + 1].minn += t[p].tag;\r\n    t[p * 2].tag += t[p].tag;\r\n    t[p * 2 + 1].tag += t[p].tag;\r\n    t[p].tag = 0;\r\n}\r\n\r\ninline void pushUp(int p)\r\n{\r\n    int l = p * 2 , r = p * 2 + 1;\r\n    t[p].minn = min(t[l].minn , t[r].minn);\r\n    t[p].maxx = max(t[l].maxx , t[r].maxx);\r\n    if(t[l].minn < t[r].minn)\r\n    {\r\n        t[p].ls = t[l].ls;\r\n        t[p].sum = t[l].sum;\r\n        t[p].rs = max(t[l].rs , t[r].maxx);\r\n    }\r\n    if(t[l].minn > t[r].minn)\r\n    {\r\n        t[p].rs = t[r].rs;\r\n        t[p].sum = t[r].sum;\r\n        t[p].ls = max(t[r].ls , t[l].maxx);\r\n    }\r\n    if(t[l].minn == t[r].minn)\r\n    {\r\n        t[p].rs = t[r].rs;\r\n        t[p].ls = t[l].ls;\r\n        t[p].sum = t[l].sum + t[r].sum + max(t[l].rs , t[r].ls);\r\n    }\r\n}\r\n\r\ninline void update1(int p , int l , int r , int k)\r\n{\r\n    if(l > r) return;\r\n    if(l <= t[p].l && t[p].r <= r)\r\n    {\r\n        t[p].minn += k;\r\n        t[p].tag += k;\r\n        return;\r\n    }\r\n    pushDown(p);\r\n    int mid = (t[p].l + t[p].r) / 2;\r\n    if(l <= mid) update1(p * 2 , l , r , k);\r\n    if(r > mid) update1(p * 2 + 1 , l , r , k);\r\n    pushUp(p);\r\n}\r\n\r\ninline void update2(int p , int x , int k)\r\n{\r\n    if(t[p].l == t[p].r)\r\n    {\r\n        t[p].maxx += k;\r\n        t[p].ls += k;\r\n        return;\r\n    }\r\n    pushDown(p);\r\n    int mid = (t[p].l + t[p].r) / 2;\r\n    if(x <= mid) update2(p * 2 , x , k);\r\n    if(x > mid) update2(p * 2 + 1 , x , k);\r\n    pushUp(p);\r\n}\r\n\r\ninline void updateUsed(int col , int k)\r\n{\r\n    int siz = q[col].size();\r\n    if(!siz) return;\r\n    update1(1 , *q[col].begin() , *(--q[col].end()) - 1 , k);\r\n    update2(1 , *q[col].begin() , k * siz);\r\n}\r\n\r\ninline int ask()\r\n{\r\n    return n - t[1].sum - t[1].ls - t[1].rs;\r\n}\r\n\r\nint main()\r\n{\r\n    int maxA = 0;\r\n    n = read() , m = read();\r\n    for(int i = 1;i <= n;i++)\r\n        a[i] = read() , q[a[i]].insert(i),\r\n        maxA = max(maxA , a[i]);\r\n    build(1 , 1 , n);\r\n    for(int i = 1;i <= maxA;i++)\r\n        if(!q[i].empty())\r\n            updateUsed(i , 1);\r\n    printf(\"%d\\n\" , ask());\r\n    for(int i = 1;i <= m;i++)\r\n    {\r\n        int x = read() , y = read();\r\n        int col = a[x];\r\n        updateUsed(col , -1) , q[col].erase(x);\r\n        updateUsed(col ,  1) , updateUsed(y , -1);\r\n        q[y].insert(x) , updateUsed(y ,  1) , a[x] = y;\r\n        printf(\"%d\\n\" , ask());\r\n    }\r\n    return 0;\r\n}"
+}

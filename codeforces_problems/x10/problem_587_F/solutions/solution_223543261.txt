@@ -1,0 +1,36 @@
+{
+    "id": 223543261,
+    "contestId": 587,
+    "creationTimeSeconds": 1694819717,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 587,
+        "index": "F",
+        "name": "Duff is Mad",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3000,
+        "tags": [
+            "data structures",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 587,
+        "members": [
+            {
+                "handle": "zzxLLL"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1444926600
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 12,
+    "timeConsumedMillis": 873,
+    "memoryConsumedBytes": 258560000,
+    "source": "#include<queue>\r\n#include<cstdio>\r\n#include<string>\r\n#include<vector>\r\n#include<cstring>\r\n#include<iostream>\r\nconst int M=1e5+3,S=666;\r\n\r\n//bool bg;\r\nint n,q;\r\nstd::string s[M];\r\n\r\n/*=========================================*/\r\nint tot;\r\nint ch[M*15][26],fail[M*15],cnt[M*15];\r\nvoid ins(std::string str,int rt){\r\n\tint cur=rt,len=str.size();\r\n\tfor(int i=0;i<len;i++){\r\n\t\tint x=str[i]-'a';\r\n\t\tif(!ch[cur][x]) ch[cur][x]=++tot;\r\n\t\tcur=ch[cur][x];\r\n\t}\r\n\tcnt[cur]++;\r\n}\r\n\r\n//std::vector<int>g[M*18];\r\nvoid build_AC(int rt){\r\n\tfor(int i=0;i<26;i++) ch[0][i]=rt;\r\n\tstd::queue<int>q;\r\n\tq.push(rt);\r\n\twhile(!q.empty()){\r\n\t\tint u=q.front();\r\n\t\tif(u!=rt) cnt[u]+=cnt[fail[u]];\r\n\t\tfor(int i=0;i<26;i++){\r\n\t\t\tif(ch[u][i]){\r\n\t\t\t\tfail[ch[u][i]]=ch[fail[u]][i];\r\n\t\t\t\tq.push(ch[u][i]);\r\n\t\t\t}else{\r\n\t\t\t\tch[u][i]=ch[fail[u]][i];\r\n\t\t\t}\r\n\t\t}\r\n\t\tq.pop();\r\n\t}\r\n}\r\nint qry(std::string str,int rt){\r\n\tint cur=rt,ret=0,len=str.size();\r\n\tfor(int i=0;i<len;i++){\r\n\t\tint x=str[i]-'a';\r\n\t\tcur=ch[cur][x];\r\n\t\tret+=cnt[cur];\r\n\t}\r\n\treturn ret;\r\n}\r\n\r\n/*=========================================*/\r\n\r\nstruct node{\r\n\tint l,r,rt;\r\n}tr[M<<2];\r\nvoid build(int k,int l,int r){\r\n\ttr[k].l=l,tr[k].r=r;\r\n\t\r\n\ttr[k].rt=++tot;\r\n\tfor(int i=l;i<=r;i++){\r\n\t\tif(s[i].size()>S) continue;\r\n\t\tins(s[i],tr[k].rt);\r\n\t}\r\n\tbuild_AC(tr[k].rt);\r\n\t\r\n\tif(l==r) return;\r\n\tint mid=(l+r)>>1;\r\n\tbuild(k<<1,l,mid);\r\n\tbuild(k<<1|1,mid+1,r);\r\n}\r\nint qry(int k,int l,int r,int id){\r\n\tif(l<=tr[k].l&&tr[k].r<=r)\r\n\t\treturn qry(s[id],tr[k].rt);\r\n\tint mid=(tr[k].l+tr[k].r)>>1;\r\n\tif(r<=mid) return qry(k<<1,l,r,id);\r\n\telse if(l>mid) return qry(k<<1|1,l,r,id);\r\n\telse return qry(k<<1,l,r,id)+qry(k<<1|1,l,r,id);\r\n}\r\n\r\n/*=========================================*/\r\n\r\nint pos[M/S+10];\r\nint pre[M/S+10][M];\r\nint rev[M];\r\n//std::vector<int>pos,pre[M];\r\n\r\n/*=========================================*/\r\n\r\n\r\nstd::vector<int>g[M];\r\nstruct AhoCorasick{\r\n\tint tot,ch[M][26],Ep[M];\r\n\tvoid ins(std::string str,int id){\r\n\t\tint cur=1,len=str.size();\r\n\t\tfor(int i=0;i<len;i++){\r\n\t\t\tint x=str[i]-'a';\r\n\t\t\tif(!ch[cur][x]) ch[cur][x]=++tot;\r\n\t\t\tcur=ch[cur][x];\r\n\t\t}\r\n\t\tEp[id]=cur;\r\n\t}\r\n\t\r\n\tvoid build_AC(){\r\n\t\tstd::queue<int>q;\r\n\t\tfor(int i=0;i<26;i++)\r\n\t\t\tif(ch[1][i])\r\n\t\t\t\tfail[ch[1][i]]=1,q.push(ch[1][i]);\r\n\t\twhile(!q.empty()){\r\n\t\t\tint u=q.front();\r\n\t\t\tg[fail[u]].push_back(u);\r\n\t\t\tfor(int i=0;i<26;i++){\r\n\t\t\t\tif(ch[u][i]){\r\n\t\t\t\t\tfail[ch[u][i]]=ch[fail[u]][i];\r\n\t\t\t\t\tq.push(ch[u][i]);\r\n\t\t\t\t}else{\r\n\t\t\t\t\tch[u][i]=ch[fail[u]][i];\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tq.pop();\r\n\t\t}\r\n\t}\r\n\t\r\n\tint fa[M],son[M],siz[M],dep[M];\r\n\tint top[M],dfn[M],rev[M],idx;\r\n\tvoid dfs1(int u,int f){\r\n\t\tfa[u]=f,dep[u]=dep[f]+1,siz[u]=1;\r\n\t\tfor(int v:g[u]){\r\n\t\t\tdfs1(v,u),siz[u]+=siz[v];\r\n\t\t\tif(siz[v]>siz[son[u]]) son[u]=v;\r\n\t\t}\r\n\t}\r\n\tvoid dfs2(int u,int t){\r\n\t\ttop[u]=t;\r\n\t\tdfn[u]=++idx,rev[idx]=u;\r\n\t\tif(son[u]) dfs2(son[u],t);\r\n\t\tfor(int v:g[u])\r\n\t\t\tif(v!=son[u]) dfs2(v,v);\r\n\t}\r\n\t\r\n\tint diff[M];\r\n\tvoid add(int x){\r\n\t\twhile(x){\r\n\t\t\tdiff[dfn[top[x]]]++,diff[dfn[x]+1]--;\r\n\t\t\tx=fa[top[x]];\r\n\t\t}\r\n\t}\r\n\t\r\n\tvoid print(){\r\n\t\tprintf(\"tot = %d\\n\",tot);\r\n\t\tfor(int i=1;i<=tot;i++)\r\n\t\t\tfor(int v:g[i]) printf(\"(%d, %d)\\n\",i,v);\r\n\t\tfor(int i=1;i<=tot;i++) printf(\"dfn[%d] = %d, top[%d] = %d\\n\",i,dfn[i],i,top[i]);\r\n\t}\r\n\t\r\n\tvoid gooo(std::string str){\r\n\t\tfor(int i=1;i<=tot+1;i++) diff[i]=0;\r\n\t\tint cur=1,len=str.size();\r\n\t\tfor(int i=0;i<len;i++){\r\n\t\t\tint x=str[i]-'a';\r\n\t\t\tcur=ch[cur][x];\r\n\t\t\tadd(cur);\r\n\t\t}\r\n\t\tfor(int i=2;i<=tot;i++) diff[i]+=diff[i-1];\r\n\t}\r\n\t\r\n\tAhoCorasick(){tot=1;}\r\n}ac;\r\n\r\n/*=========================================*/\r\n//bool ed;\r\n\r\nint main(){\r\n//\tprintf(\"%d\\n\", (&bg - &ed) /1024 / 1024);\r\n//\tprintf(\"%d\\n\", (sizeof(pre) + sizeof(ch)) / 1024 / 1024);\r\n\tstd::cin>>n>>q;\r\n\tfor(int i=1;i<=n;i++) std::cin>>s[i];\r\n\t\r\n\tbuild(1,1,n);\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tif(s[i].size()>S)\r\n\t\t\tpos[++pos[0]]=i,rev[i]=pos[0];\r\n\t\r\n\tfor(int i=1;i<=n;i++) ac.ins(s[i],i);\r\n\tac.build_AC();\r\n\tac.dfs1(1,0),ac.dfs2(1,1);\r\n\t\r\n\tfor(int i=1;i<=pos[0];i++){\r\n\t\tac.gooo(s[pos[i]]);\r\n\t\tfor(int j=1;j<=n;j++) pre[i][j]=ac.diff[ac.dfn[ac.Ep[j]]];\r\n\t\tfor(int j=2;j<=n;j++) pre[i][j]+=pre[i][j-1];\r\n\t}\r\n\t\r\n\tfor(int i=1,l,r,k;i<=q;i++){\r\n\t\tstd::cin>>l>>r>>k;\r\n\t\tif(s[k].size()>S){\r\n\t\t\tprintf(\"%d\\n\",pre[rev[k]][r]-pre[rev[k]][l-1]);\r\n\t\t}else{\r\n\t\t\tprintf(\"%d\\n\",qry(1,l,r,k));\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}"
+}

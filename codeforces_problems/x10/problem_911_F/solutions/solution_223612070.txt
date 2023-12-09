@@ -1,0 +1,38 @@
+{
+    "id": 223612070,
+    "contestId": 911,
+    "creationTimeSeconds": 1694867362,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 911,
+        "index": "F",
+        "name": "Tree Destruction",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "graphs",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 911,
+        "members": [
+            {
+                "handle": "haerinmeomeo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1514469900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <bits/stdc++.h>\r\n\r\n#define se second\r\n#define fi first\r\n#define ll long long\r\n\r\n#define mp make_pair\r\n#define all(x) begin(x), end(x)\r\n#define rall(x) rbegin(x), rend(x)\r\n#define sz(x) (int)x.size()\r\n#define pb push_back\r\n\r\n#define MOD 1000000007\r\n\r\nusing namespace std;\r\n\r\nvector<int> longest_path(const vector<vector<int>>& adj, int n) {\r\n   vector<array<int, 3>> ld(n);\r\n   vector<array<int, 2>> md(n);\r\n   auto dfs = [&](auto dfs, int v, int p, int d) -> void {\r\n      if (sz(adj[v]) == 1 && v != 0) {\r\n         md[v] = {0, v};\r\n         ld[v] = {0, v, v};\r\n         return;\r\n      }\r\n      vector<array<int, 2>> s;\r\n      array<int, 3> y = {-1, -1, -1};\r\n      for (int i : adj[v]) {\r\n         if (i != p) {\r\n            dfs(dfs, i, v, d + 1);\r\n            s.pb(md[i]);\r\n            if (ld[i][0] > y[0]) {\r\n               y = ld[i];\r\n            }\r\n         }\r\n      }\r\n      sort(all(s));\r\n      md[v] = s.back();\r\n      md[v][0]++;\r\n\r\n      if (sz(s) == 1) {\r\n         ld[v] = max(y, array<int, 3>({s.back()[0] + 1, s.back()[1], v}));\r\n      } else {\r\n         array<int, 3> z;\r\n         z[0] = 2 + s[sz(s) - 1][0] + s[sz(s) - 2][0];\r\n         z[1] = s[sz(s) - 1][1], z[2] = s[sz(s) - 2][1];\r\n         ld[v] = max(z, y);\r\n      }\r\n   };\r\n   dfs(dfs, 0, -1, 0);\r\n   int d = ld[0][0], x = ld[0][1], y = ld[0][2];\r\n   vector<int> path;\r\n   auto dfs1 = [&](auto dfs1, int v, int p) -> bool {\r\n      if (v == y) {\r\n         path.pb(v);\r\n         return true;\r\n      }\r\n      bool found = false;\r\n      for (int i : adj[v]) {\r\n         if (i != p) {\r\n            if (dfs1(dfs1, i, v)) {\r\n               found = true;\r\n            }\r\n         }\r\n      }\r\n      if (found) {\r\n         path.pb(v);\r\n      }\r\n      return found;\r\n   };\r\n   dfs1(dfs1, x, -1);\r\n   return path;\r\n}\r\n\r\nvoid easy() {\r\n   int n;\r\n   cin >> n;\r\n   vector<vector<int>> adj(n);\r\n   for (int i = 0; i < n - 1; i++) {\r\n      int u, v;\r\n      cin >> u >> v;\r\n      v--, u--;\r\n      adj[v].pb(u);\r\n      adj[u].pb(v);\r\n   }\r\n   vector<int> lp = longest_path(adj, n);\r\n\r\n   vector<int> cnt(n);\r\n   for (int i = 0; i < n; i++) cnt[i] = sz(adj[i]);\r\n   vector<bool> vis(n, false);\r\n   for (int v : lp) vis[v] = true;\r\n   int cur;\r\n   vector<int> r(n);\r\n   ll ans = 0;\r\n   auto dfs = [&](auto dfs, int v, int d) -> void {\r\n      ans += d;\r\n      r[v] = cur;\r\n      vis[v] = true;\r\n      for (int i : adj[v]) {\r\n         if (!vis[i]) {\r\n            dfs(dfs, i, d + 1);\r\n         }\r\n      }\r\n   };\r\n   int x = lp[0], y = lp.back();\r\n   for (int i = 0; i < sz(lp); i++) {\r\n      int v = lp[i];\r\n      cur = i;\r\n      dfs(dfs, v, 0);\r\n   }\r\n   vector<int> s;\r\n   for (int i = 0; i < n; i++) {\r\n      if (cnt[i] == 1 && i != x && i != y) {\r\n         s.pb(i);\r\n      }\r\n   }\r\n   vector<array<int, 3>> solu;\r\n   while (!s.empty()) {\r\n      int v = s.back();\r\n      s.pop_back();\r\n      solu.pb({v, (r[v] < n / 2 ? lp.back() : lp[0]), v});\r\n      ans += max(sz(lp) - 1 - r[v], r[v]);\r\n      for (int j : adj[v]) {\r\n         cnt[j]--;\r\n         if (cnt[j] == 1 && j != x && j != y) {\r\n            s.pb(j);\r\n         }\r\n      }\r\n   }\r\n   for (int i = 0; i < sz(lp) - 1; i++) {\r\n      solu.pb({lp[i], lp.back(), lp[i]});\r\n      ans += sz(lp) - 1 - i;\r\n   }\r\n   cout << ans << '\\n';\r\n   for (auto [a, b, c] : solu) {\r\n      cout << a + 1 << \" \" << b + 1 << \" \" << c + 1 << '\\n';\r\n   }\r\n}\r\nint main() {\r\n   ios_base::sync_with_stdio(false), cin.tie(0);\r\n   easy();\r\n   cout << '\\n';\r\n}"
+}

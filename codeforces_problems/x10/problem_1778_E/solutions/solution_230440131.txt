@@ -1,0 +1,38 @@
+{
+    "id": 230440131,
+    "contestId": 1778,
+    "creationTimeSeconds": 1698636129,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1778,
+        "index": "E",
+        "name": "The Tree Has Fallen!",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2500,
+        "tags": [
+            "bitmasks",
+            "dfs and similar",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1778,
+        "members": [
+            {
+                "handle": "Neptune_Disaster"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1675262100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 25,
+    "timeConsumedMillis": 639,
+    "memoryConsumedBytes": 164556800,
+    "source": "# include <bits/stdc++.h>\r\n\r\nconst int N=400010,INF=0x3f3f3f3f;\r\n\r\ninline int read(void){\r\n\tint res,f=1;\r\n\tchar c;\r\n\twhile((c=getchar())<'0'||c>'9')\r\n\t\tif(c=='-') f=-1;\r\n\tres=c-48;\r\n\twhile((c=getchar())>='0'&&c<='9')\r\n\t\tres=res*10+c-48;\r\n\treturn res*f;\r\n}\r\n\r\nstruct LB{\r\n\tint ti[35],val[35];\r\n\t\r\n\tinline void ins(int t,int v){\r\n\t\tfor(int k=30;k>=0;--k){\r\n\t\t\tif(!((v>>k)&1)) continue;\r\n\t\t\tif(!val[k]){\r\n\t\t\t\tti[k]=t,val[k]=v;\r\n\t\t\t\treturn;\r\n\t\t\t}\r\n\t\t\tif(ti[k]<t) std::swap(val[k],v),std::swap(ti[k],t);\r\n\t\t\tv^=val[k];\r\n\t\t}\r\n\t\treturn;\r\n\t}\r\n\t\r\n\tinline int query(int l){\r\n\t\tint ans=0;\r\n\t\tfor(int k=30;k>=0;--k){\r\n\t\t\tif(ti[k]<l) continue;\r\n\t\t\tans=std::max(ans,ans^val[k]);\r\n\t\t}\r\n\t\treturn ans;\r\n\t}\r\n}ba[N]; \r\n\r\nint a[N];\r\n\r\nint n,q;\r\n\r\nint dfn[N],sz[N],t;\r\n\r\nint rd[N];\r\nint dep[N];\r\n\r\nint f[N][20];\r\n\r\nstd::vector <int> G[N];\r\n\r\n\r\nvoid dfs(int i,int fa){\r\n\tf[i][0]=fa,dfn[i]=++t,sz[i]=1,rd[t]=i;\r\n\tdep[i]=dep[fa]+1;\r\n\tfor(int k=1;k<=19;++k) f[i][k]=f[f[i][k-1]][k-1];\r\n\tfor(auto v:G[i]){\r\n\t\tif(v==fa) continue;\r\n\t\tdfs(v,i),sz[i]+=sz[v]; \r\n\t}\r\n\treturn;\r\n}\r\n\r\ninline int findson(int u,int v){\r\n\tif(dfn[v]<=dfn[u]||dfn[v]>=dfn[u]+sz[u]) std::cerr<<\"qwq\"<<std::endl;\r\n\tfor(int k=19;k>=0;--k) if(dep[f[v][k]]>dep[u]) v=f[v][k];\r\n\treturn v;\r\n}\r\n\r\ninline void init(void){\r\n\tfor(int i=1;i<=2*n;++i){\r\n\t\tint p=i-(i>n)*n;\r\n\t\tba[i]=ba[i-1],ba[i].ins(i,a[rd[p]]);\r\n//\t\tfor(int k=0;k<=30;++k) printf(\"(%d,%d)%c\",ba[i].ti[k],ba[i].val[k],\" \\n\"[k==30]);\r\n\t}\r\n\treturn;\r\n}\r\n\r\ninline int query(int l,int r){\r\n\treturn ba[r].query(l);\r\n}\r\n\r\nint main(void){\r\n\tint T=read();\r\n\twhile(T--){\r\n\t\tn=read(),t=0;\r\n\t\tfor(int i=1;i<=n;++i) a[i]=read(),G[i].clear();\r\n\t\tfor(int i=1;i<n;++i){\r\n\t\t\tint u=read(),v=read();\r\n\t\t\tG[u].push_back(v),G[v].push_back(u);\r\n\t\t}\r\n\t\tdfs(1,0);\r\n\t\tinit();\r\n\t\tq=read();\r\n\t\t\r\n\t//\tfor(int i=1;i<=n;++i) printf(\"%d \",dfn[i]);\r\n\t//\tputs(\"\");\r\n\t\t\r\n\t\t\r\n\t\twhile(q--){\r\n\t\t\tint rt=read(),v=read();\r\n\t\t\tif(rt==v) printf(\"%d\\n\",query(1,n));\r\n\t\t\telse if(!(dfn[v]<=dfn[rt]&&dfn[rt]<=dfn[v]+sz[v]-1)) printf(\"%d\\n\",query(dfn[v],dfn[v]+sz[v]-1));\r\n\t\t\telse{\r\n\t\t\t\tint u=findson(v,rt);\r\n\t\t\t\tint l=dfn[u],r=dfn[u]+sz[u]-1;\r\n\t\t\t\tprintf(\"%d\\n\",query(r+1,n+l-1));\r\n\t\t\t}\r\n\t\t}\t\t\r\n\t}\r\n\r\n\r\n\r\n\treturn 0;\r\n}\r\n\r\n"
+}

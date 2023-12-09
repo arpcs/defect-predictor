@@ -1,0 +1,38 @@
+{
+    "id": 66258918,
+    "contestId": 1236,
+    "creationTimeSeconds": 1575444559,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "SCLchuck"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 14540800,
+    "source": "#include <iostream>\r\n#include <cstdio>\r\n#include <vector>\r\n#include <cstring>\r\n#include <algorithm>\r\n//#define int long long\r\nusing namespace std;\r\ntypedef long long LL;\r\nconst int maxn = 5e5 + 5;\r\nconst int mod = 1e9 + 7;\r\n\r\nint Xi2[maxn], InSumCycle[maxn];\r\nint path[maxn], path_id, v_cycle_id, cycle_sum_node;\r\nsigned n, m;\r\nchar vis[maxn];\r\nvector< vector<int>* > v_cycle(maxn);\r\nvector< vector<int> > pic(maxn);\r\n\r\ninline int pow2(LL a, LL b)\r\n{\r\n    LL res = 1;\r\n\r\n    while(b)\r\n    {\r\n        if(b & 1) res *= a, res %= mod;\r\n        b >>= 1;\r\n        a *= a;\r\n        a %= mod;\r\n    }\r\n    return res;\r\n}\r\n\r\ninline void AddCycle(const int& e)\r\n{\r\n    int i = 0;\r\n\r\n    v_cycle[++v_cycle_id] = new vector<int>;\r\n    vector<int> &tempV = *v_cycle[v_cycle_id];\r\n\r\n    for(i = 1;i <= path_id;i++)\r\n        if(path[i] == e) break;\r\n    for(;i <= path_id;i++)\r\n        tempV.push_back(path[i]);\r\n    for(int ii = 0;ii < (int)tempV.size();ii++)\r\n    {\r\n        const int &n = tempV[ii];\r\n        InSumCycle[n] += Xi2[tempV.size()];\r\n    }\r\n    cycle_sum_node += Xi2[tempV.size()];\r\n}\r\n\r\nvoid dfs(int ii, int ff)\r\n{\r\n    vis[ii] = 1;\r\n\r\n    for(int i = 0;i < (int)pic[ii].size();i++)\r\n    {\r\n        const int &e = pic[ii][i];\r\n\r\n        if(vis[e] == 2) continue;\r\n        if(vis[e] == 1)\r\n        {\r\n            AddCycle(e);\r\n            continue;\r\n        }\r\n        dfs(e, ii);\r\n    }\r\n    vis[ii] = 2;\r\n}\r\n\r\ninline int get_node()\r\n{\r\n    return 1ll * Xi2[1] * n % mod;\r\n}\r\n\r\ninline int get_edge()\r\n{\r\n    return 1ll * Xi2[2] * m % mod;\r\n}\r\n\r\ninline int get_cycle()\r\n{\r\n    int res = 0;\r\n\r\n    for(int i = 1;i <= v_cycle_id;i++)\r\n    {\r\n        vector<int> &tempV = *v_cycle[i];\r\n\r\n        res += 1ll * Xi2[tempV.size()] % mod;\r\n        res %= mod;\r\n    }\r\n    return res;\r\n}\r\n\r\ninline int get_node2()\r\n{\r\n    return (1ll * Xi2[1] * n % mod + Xi2[2] * (1ll * n * (n - 1) % mod) % mod) % mod;\r\n}\r\n\r\ninline int get_edge2()\r\n{\r\n    int res = 0;\r\n\r\n    for(int i = 1;i <= n;i++)\r\n    {\r\n        for(int ii = 0;ii < (int)pic[i].size();ii++)\r\n        {\r\n            const int& e = pic[i][ii];\r\n\r\n            if(e < i) continue;\r\n            int siz = pic[i].size() + pic[e].size() - 2;\r\n\r\n            res += Xi2[2];\r\n            res %= mod;\r\n            res += Xi2[3] * siz;\r\n            res %= mod;\r\n            res += Xi2[4] * (m - siz - 1);\r\n            res %= mod;\r\n        }\r\n    }\r\n    return res;\r\n}\r\n\r\ninline int get_cycle2()\r\n{\r\n    int res = 0;\r\n\r\n    for(int ii = 1;ii <= v_cycle_id;ii++)\r\n    {\r\n        vector<int> &tempV = *v_cycle[ii];\r\n        const int &siz = tempV.size();\r\n        int LinkSumCycle = 0;\r\n\r\n        res += Xi2[siz];\r\n        res %= mod;\r\n        for(int i = 0;i < siz;i++)\r\n        {\r\n            const int &n = tempV[i];\r\n            const int &x = InSumCycle[n];\r\n\r\n            LinkSumCycle += x - Xi2[siz];\r\n            LinkSumCycle %= mod;\r\n        }\r\n        res += 2ll * Xi2[siz] * LinkSumCycle % mod;\r\n        res += 1ll * Xi2[siz] * (cycle_sum_node - LinkSumCycle) % mod;\r\n    }\r\n    return (res + mod) % mod;\r\n}\r\n\r\ninline int get_NodeEdge()\r\n{\r\n    return ((1ll * m * (n - 2) % mod) * Xi2[3] % mod + 2ll * m * Xi2[2] % mod) % mod;\r\n}\r\n\r\ninline int get_NodeCycle()\r\n{\r\n    int res = 0;\r\n\r\n    for(int ii = 1;ii <= v_cycle_id;ii++)\r\n    {\r\n        vector<int> &tempV = *v_cycle[ii];\r\n        const int &siz = tempV.size();\r\n\r\n        res += (LL)Xi2[siz + 1] * (n - siz) % mod + (LL)Xi2[siz] * siz % mod;\r\n        res %= mod;\r\n    }\r\n    return res;\r\n}\r\n\r\ninline int get_EdgeCycle()\r\n{\r\n    int res = 0;\r\n\r\n    for(int ii = 1;ii <= v_cycle_id;ii++)\r\n    {\r\n        vector<int> &tempV = *v_cycle[ii];\r\n        const int &siz = tempV.size();\r\n        int LinkSumEdge = 0;\r\n\r\n        res += (LL)Xi2[siz] * (siz - 1) % mod;\r\n        res %= mod;\r\n        for(int i = 0;i < siz;i++)\r\n        {\r\n            const int &e = tempV[i];\r\n            const int &x = pic[e].size();\r\n\r\n            res += (LL)(x - 2) * Xi2[siz + 1] % mod;\r\n            res %= mod;\r\n            LinkSumEdge += x - 2;\r\n        }\r\n        res += (LL)(m - (siz - 1) - LinkSumEdge) * Xi2[siz + 2] % mod;\r\n        res %= mod;\r\n    }\r\n    return res;\r\n}\r\n\r\ninline int getres1()\r\n{\r\n    return ((LL)get_node2() + get_edge2() + get_cycle2() - get_NodeEdge() - get_EdgeCycle() + get_NodeCycle()) % mod;\r\n}\r\n\r\ninline int getres2()\r\n{\r\n    return ((LL)(get_node() - get_edge() + get_cycle() % mod) * (get_node() - get_edge() + get_cycle() % mod)) % mod;\r\n}\r\n\r\nsigned main()\r\n{\r\n    scanf(\"%d%d\", &n, &m);\r\n    for(int i = 1;i <= m;i++)\r\n    {\r\n        signed a, b;\r\n\r\n        scanf(\"%d%d\", &a, &b);\r\n        pic[a].push_back(b);\r\n        pic[b].push_back(a);\r\n    }\r\n    Xi2[0] = 1; Xi2[1] = pow2(2, mod - 2);\r\n    for(int i = 2;i <= n;i++)\r\n        Xi2[i] = Xi2[i - 1] * Xi2[1];\r\n    dfs(1, 0);\r\n    int res = ((getres1() - getres2() % mod) + mod) % mod;\r\n\r\n    printf(\"%d\\n\", (signed)res);\r\n    return 0;\r\n}\r\n"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 230094012,
+    "contestId": 1359,
+    "creationTimeSeconds": 1698451306,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1359,
+        "index": "F",
+        "name": "RC Kaboom Show",
+        "type": "PROGRAMMING",
+        "rating": 2900,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "geometry",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1359,
+        "members": [
+            {
+                "handle": "Raisetsu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1590676500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 2557,
+    "memoryConsumedBytes": 4915200,
+    "source": "// LUOGU_RID: 131949493\n    // \u8ba1\u7b97\u51e0\u4f55\uff0c\u72d7\u90fd\u4e0d\u5199\n    #include <bits/stdc++.h>\n    \n    #define forn(i, n) for (int i = 0; i < int(n); i++)\n    #define x first\n    #define y second\n    \n    using namespace std;\n    \n    const double INF = 1e13;\n    \n    struct line{\n    \tint A, B, C;\n    \tline(){}\n    \tline(int x1, int y1, int x2, int y2){\n    \t\tA = y1 - y2;\n    \t\tB = x2 - x1;\n    \t\tC = -A * x1 - B * y1;\n    \t\t// A is guaranteed to be non-zero\n    \t\tif (A < 0) A = -A, B = -B, C = -C;\n    \t\tint g = __gcd(A, __gcd(abs(B), abs(C)));\n    \t\tA /= g, B /= g, C /= g;\n    \t}\n    };\n    \n    bool operator ==(const line &a, const line &b){\n    \treturn a.A == b.A && a.B == b.B && a.C == b.C;\n    }\n    \n    double x;\n    \n    bool operator <(const line &a, const line &b){\n    \tdouble val1 = (-a.A * x - a.C) / a.B;\n    \tdouble val2 = (-b.A * x - b.C) / b.B;\n    \treturn val1 < val2;\n    }\n    \n    struct car{\n    \tint x, y, dx, dy, s;\n    \tline l;\n    \tdouble vx, vy;\n    };\n    \n    int n;\n    vector<car> a(n);\n    \n    long long det(int a, int b, int c, int d){\n    \treturn a * 1ll * d - b * 1ll * c;\n    }\n    \n    bool inter(const line &a, const line &b, long long &D, long long &Dx, long long &Dy){\n    \tD = det(a.A, a.B, b.A, b.B);\n    \tif (D == 0) return false;\n    \tDx = -det(a.C, a.B, b.C, b.B);\n    \tDy = -det(a.A, a.C, b.A, b.C);\n    \treturn true;\n    }\n    \n    int sg(int x){\n    \treturn x < 0 ? -1 : 1;\n    }\n    \n    int sg(long long a, long long b, int c){\n    \t// sign of a/b-c\n    \tif (b < 0) a = -a, b = -b;\n    \treturn a - c * b < 0 ? -1 : (a - c * b > 0);\n    }\n    \n    bool inter(int i, int j, double &len){\n    \tif (i == -1 || j == -1)\n    \t\treturn false;\n    \tlong long D, Dx, Dy;\n    \tif (!inter(a[i].l, a[j].l, D, Dx, Dy))\n    \t\treturn false;\n    \tif (sg(Dx, D, a[i].x) != 0 && sg(a[i].dx) != sg(Dx, D, a[i].x))\n    \t\treturn false;\n    \tif (sg(Dx, D, a[j].x) != 0 && sg(a[j].dx) != sg(Dx, D, a[j].x))\n    \t\treturn false;\n    \tdouble x = Dx / double(D);\n    \tdouble y = Dy / double(D);\n    \tdouble di = (a[i].x - x) * (a[i].x - x) + (a[i].y - y) * (a[i].y - y);\n    \tdouble dj = (a[j].x - x) * (a[j].x - x) + (a[j].y - y) * (a[j].y - y);\n    \treturn len * len >= di / a[i].s && len * len >= dj / a[j].s;\n    }\n    \n    vector<set<pair<line, int>>::iterator> del;\n    set<pair<line, int>> q;\n    \n    void get_neighbours(int i, int &l, int &r){\n    \tl = r = -1;\n    \tauto it = q.lower_bound({a[i].l, -1});\n    \tif (it != q.end())\n    \t\tr = it->y;\n    \tif (!q.empty() && it != q.begin()){\n    \t\t--it;\n    \t\tl = it->y;\n    \t}\n    }\n    \n    bool check(double t){\n    \tvector<pair<double, pair<int, int>>> cur;\n    \tdel.resize(n);\n    \tforn(i, n){\n    \t\tdouble x1 = a[i].x;\n    \t\tdouble x2 = a[i].x + a[i].vx * t;\n    \t\tif (x1 > x2) swap(x1, x2);\n    \t\tcur.push_back({x1, {i, 0}});\n    \t\tcur.push_back({x2, {i, 1}});\n    \t}\n    \tq.clear();\n    \t\n    \tsort(cur.begin(), cur.end());\n    \tfor (auto &qr : cur){\t\t\n    \t\tx = qr.x;\n    \t\tint i = qr.y.x;\n    \t\tint l, r;\n    \t\t\n    \t\tif (qr.y.y == 0){\n    \t\t\tget_neighbours(i, l, r);\n    \t\t\t\n    \t\t\tif (r != -1 && a[i].l == a[r].l)\n    \t\t\t\treturn true;\n    \t\t\tif (inter(i, l, t))\n    \t\t\t\treturn true;\n    \t\t\tif (inter(i, r, t))\n    \t\t\t\treturn true;\n    \t\t\t\n    \t\t\tdel[i] = q.insert({a[i].l, i}).x;\n    \t\t}\n    \t\telse{\t\t\t\n    \t\t\tq.erase(del[i]);\n    \t\t\tget_neighbours(i, l, r);\n    \t\t\t\n    \t\t\tif (inter(l, r, t))\n    \t\t\t\treturn true;\n    \t\t}\n    \t}\n    \treturn false;\n    }\n    \n    int main() {\n    \tscanf(\"%d\", &n);\n    \ta.resize(n);\n    \tforn(i, n){\n    \t\tscanf(\"%d%d%d%d%d\", &a[i].x, &a[i].y, &a[i].dx, &a[i].dy, &a[i].s);\n    \t\ta[i].l = line(a[i].x, a[i].y, a[i].x + a[i].dx, a[i].y + a[i].dy);\n    \t\tdouble d = sqrt(a[i].dx * a[i].dx + a[i].dy * a[i].dy);\n    \t\ta[i].vx = a[i].dx / d * a[i].s;\n    \t\ta[i].vy = a[i].dy / d * a[i].s;\n    \t\ta[i].s *= a[i].s;\n    \t}\n    \tdouble l = 0, r = INF;\n    \tbool ok = false;\n    \tforn(_, 100){\n    \t\tdouble m = (l + r) / 2;\n    \t\tif (check(m)){\n    \t\t\tok = true;\n    \t\t\tr = m;\n    \t\t}\n    \t\telse{\n    \t\t\tl = m;\n    \t\t}\n    \t}\n    \tif (!ok)\n    \t\tputs(\"No show :(\");\n    \telse\n    \t\tprintf(\"%.15lf\\n\", l);\n    \treturn 0;\n    }"
+}

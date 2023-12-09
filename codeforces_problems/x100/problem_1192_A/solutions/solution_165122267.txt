@@ -1,0 +1,34 @@
+{
+    "id": 165122267,
+    "contestId": 1192,
+    "creationTimeSeconds": 1658407500,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "Wailydest"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 185,
+    "timeConsumedMillis": 1762,
+    "memoryConsumedBytes": 89702400,
+    "points": 100.0,
+    "source": "#include <cstdio>\r\n#include <queue>\r\n#include <cstring>\r\n#include <vector>\r\n#include <algorithm>\r\n#include <cassert>\r\n\r\nconst int N = 150000;\r\nconst int P = N * 9;\r\nint n, m, type, top[P], ind[P], r[N], c[N], point[P], ans[N];\r\nbool vis[P];\r\nstd::vector<std::pair<int, int> > pts;\r\nstd::priority_queue<int> pq;\r\n\r\nint dx[8] = {-1, -1, 0, 1, 1, 1, 0, -1};\r\nint dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};\r\n\r\nint find(int a) {\r\n\tif (top[a] == a) return a;\r\n\treturn top[a] = find(top[a]);\r\n}\r\n\r\nvoid merge(int a, int b) {\r\n\ta = find(a);\r\n\tb = find(b);\r\n\tif (a != b) top[b] = a;\r\n}\r\n\r\nint locate(int x, int y) {\r\n\tint p = std::lower_bound(pts.begin(), pts.end(), std::make_pair(x, y)) - pts.begin();\r\n\tif (p == pts.size() || pts[p].first != x || pts[p].second != y) return -1;\r\n\treturn p;\r\n}\r\n\r\nvoid add(int ind) {\r\n\tif (vis[ind]) return;\r\n\tmerge(ind, 0);\r\n\tvis[ind] = 1;\r\n\tfor (int i = 0; i < 8; ++i) {\r\n\t\tint to = locate(pts[ind].first + dx[i], pts[ind].second + dy[i]);\r\n\t\tif (to != -1) {\r\n\t\t\tif (point[to] == -1) {\r\n\t\t\t\tif (i & 1 ^ 1) add(to);\r\n\t\t\t} else pq.push(point[to]);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nbool test(int ind) {\r\n\tbool v[8], p[8];\r\n\tint all = 0, g[8];\r\n\tbool vany = 0;\r\n\tfor (int i = 0; i < 8; ++i) {\r\n\t\tint go = locate(r[ind] + dx[i], c[ind] + dy[i]);\r\n\t\tg[i] = go;\r\n\t\tv[i] = vis[go];\r\n\t\tp[i] = point[go] != -1;\r\n\t\tall += p[i];\r\n\t\tif (v[i] && i & 1 ^ 1) vany = 1;\r\n\t\tif (point[go] == -1) {\r\n\t\t\tassert(vis[go] == (find(0) == find(go)));\r\n\t\t} else assert(!vis[go]);\r\n\t}\r\n\tif (!vany) return 0;\r\n\tif (all > 1) {\r\n\t\tif (find(g[0]) == find(g[4]) && (p[1] + p[2] + p[3]) && (p[5] + p[6] + p[7])) return 0;\r\n\t\tif (find(g[2]) == find(g[6]) && (p[7] + p[0] + p[1]) && (p[3] + p[4] + p[5])) return 0;\r\n\t\tif (find(g[0]) == find(g[2]) && p[1]) return 0;\r\n\t\tif (find(g[2]) == find(g[4]) && p[3]) return 0;\r\n\t\tif (find(g[4]) == find(g[6]) && p[5]) return 0;\r\n\t\tif (find(g[6]) == find(g[0]) && p[7]) return 0;\r\n\t}\r\n\treturn 1;\r\n}\r\n\r\nint main() {\r\n\tscanf(\"%d%d\", &n, &type);\r\n\tfor (int i = 0; i < n; ++i) {\r\n\t\tscanf(\"%d%d\", r + i, c + i);\r\n\t\tr[i] = -r[i];\r\n\t\tc[i] = -c[i];\r\n\t\tpts.push_back(std::make_pair(r[i], c[i]));\r\n\t\tfor (int j = 0; j < 8; ++j) pts.push_back(std::make_pair(r[i] + dx[j], c[i] + dy[j]));\r\n\t}\r\n\tstd::sort(pts.begin(), pts.end());\r\n\tpts.resize(std::unique(pts.begin(), pts.end()) - pts.begin());\r\n\tm = pts.size();\r\n\tmemset(point, -1, sizeof point);\r\n\tfor (int i = 0; i < n; ++i) {\r\n\t\tind[i] = locate(r[i], c[i]);\r\n\t\tpoint[ind[i]] = i;\r\n\t}\r\n\tfor (int i = 0; i < P; ++i) top[i] = i;\r\n\tfor (int i = 0; i < n; ++i) {\r\n\t\tfor (int j = 0; j < 8; ++j) {\r\n\t\t\tint to = locate(r[i] + dx[j], c[i] + dy[j]);\r\n\t\t\tif (point[to] != -1) merge(i, point[to]);\r\n\t\t}\r\n\t}\r\n\tfor (int i = 0; i < n; ++i) if (find(i) != find(0)) {\r\n\t\tprintf(\"NO\\n\");\r\n\t\treturn 0;\r\n\t}\r\n\tadd(0);\r\n\tfor (int i = 0; i < P; ++i) top[i] = i;\r\n\tfor (int i = 0; i < m; ++i) if (point[i] == -1) {\r\n\t\tfor (int j = 0; j < 8; j += 2) {\r\n\t\t\tint to = locate(pts[i].first + dx[j], pts[i].second + dy[j]);\r\n\t\t\tif (to != -1 && point[to] == -1) merge(to, i);\r\n\t\t}\r\n\t}\r\n\tif (point[0] != -1) return 1;\r\n\tint it = 0;\r\n\twhile (!pq.empty()) {\r\n\t\tint p = pq.top();\r\n\t\tpq.pop();\r\n\t\tif (point[ind[p]] != -1 && test(p)) {\r\n\t\t\tans[it++] = p;\r\n\t\t\tpoint[ind[p]] = -1;\r\n\t\t\tadd(ind[p]);\r\n\t\t}\r\n\t}\r\n\tif (it != n) return 1;\r\n\tprintf(\"YES\\n\");\r\n\tfor (int i = n - 1; i >= 0; --i) printf(\"%d\\n\", ans[i] + 1);\r\n\treturn 0;\r\n}\r\n"
+}

@@ -1,0 +1,35 @@
+{
+    "id": 213473552,
+    "contestId": 1218,
+    "creationTimeSeconds": 1689151328,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1218,
+        "index": "E",
+        "name": "Product Tuples",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "divide and conquer",
+            "fft"
+        ]
+    },
+    "author": {
+        "contestId": 1218,
+        "members": [
+            {
+                "handle": "erogame"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1568554500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 30,
+    "timeConsumedMillis": 249,
+    "memoryConsumedBytes": 921600,
+    "source": "#include <bits/stdc++.h>\r\nusing ul = std::uint32_t;\r\nusing ull = std::uint64_t;\r\nusing li = std::int32_t;\r\nusing ll = std::int64_t;\r\nusing lf = double;\r\n\r\nconst ul mod = 998244353;\r\nconst ul g = 3;\r\n\r\nul plus(ul a, ul b)\r\n{\r\n\treturn a + b < mod ? a + b : a + b - mod;\r\n}\r\n\r\nul minus(ul a, ul b)\r\n{\r\n\treturn a < b ? a + mod - b : a - b;\r\n}\r\n\r\nul mul(ul a, ul b)\r\n{\r\n\treturn ull(a) * ull(b) % mod;\r\n}\r\n\r\nvoid exgcd(li a, li b, li& x, li& y)\r\n{\r\n\tif (b) {\r\n\t\texgcd(b, a % b, y, x);\r\n\t\ty -= a / b * x;\r\n\t} else {\r\n\t\tx = 1;\r\n\t\ty = 0;\r\n\t}\r\n}\r\n\r\nul inverse(ul a)\r\n{\r\n\tstatic li x, y;\r\n\texgcd(a, mod, x, y);\r\n\treturn x < 0 ? x + li(mod) : x;\r\n}\r\n\r\nul pow(ul a, ul b)\r\n{\r\n\tul ret = 1;\r\n\twhile (b) {\r\n\t\tif (b & 1) {\r\n\t\t\tret = mul(ret, a);\r\n\t\t}\r\n\t\ta = mul(a, a);\r\n\t\tb >>= 1;\r\n\t}\r\n\treturn ret;\r\n}\r\n\r\nul n, k;\r\n\r\nclass ntt_t {\r\npublic:\r\n\tstatic const ul lgsz = 15;\r\n\tstatic const ul sz = 1 << lgsz;\r\n\tstatic const ul g = 3;\r\n\tul w[sz + 1];\r\n\tul leninv[lgsz + 1];\r\n\tntt_t() {\r\n\t\tul wn = pow(g, (mod - 1) >> lgsz);\r\n\t\tw[0] = 1;\r\n\t\tfor (ul i = 1; i <= sz; ++i) {\r\n\t\t\tw[i] = mul(w[i - 1], wn);\r\n\t\t}\r\n\t\tleninv[lgsz] = inverse(sz);\r\n\t\tfor (ul i = lgsz - 1; ~i; --i) {\r\n\t\t\tleninv[i] = plus(leninv[i + 1], leninv[i + 1]);\r\n\t\t}\r\n\t}\r\n\tvoid operator()(ul v[], ul oldn, ul n, ul& newn, bool inv) {\r\n\t\tul lgn = 0;\r\n\t\twhile ((1 << lgn) < n) {\r\n\t\t\t++lgn;\r\n\t\t}\r\n\t\tn = 1 << lgn;\r\n\t\tstd::memset(v + oldn, 0, sizeof(ul) * (n - oldn));\r\n\t\tnewn = n;\r\n\t\tfor (ul i = 0, j = 0; i != n; ++i) {\r\n\t\t\tif (i < j) {\r\n\t\t\t\tstd::swap(v[i], v[j]);\r\n\t\t\t}\r\n\t\t\tul k = n >> 1;\r\n\t\t\twhile (k & j) {\r\n\t\t\t\tj &= ~k;\r\n\t\t\t\tk >>= 1;\r\n\t\t\t}\r\n\t\t\tj |= k;\r\n\t\t}\r\n\t\tfor (ul lgmid = 0; (1 << lgmid) != n; ++lgmid) {\r\n\t\t\tul mid = 1 << lgmid;\r\n\t\t\tul len = mid << 1;\r\n\t\t\tfor (ul i = 0; i != n; i += len) {\r\n\t\t\t\tfor (ul j = 0; j != mid; ++j) {\r\n\t\t\t\t\tul t0 = v[i + j];\r\n\t\t\t\t\tul t1 = mul(w[inv ? (len - j << lgsz - lgmid - 1) : (j << lgsz - lgmid - 1)], v[i + j + mid]);\r\n\t\t\t\t\tv[i + j] = plus(t0, t1);\r\n\t\t\t\t\tv[i + j + mid] = minus(t0, t1);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tif (inv) {\r\n\t\t\tfor (ul i = 0; i != n; ++i) {\r\n\t\t\t\tv[i] = mul(v[i], leninv[lgn]);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n} ntt;\r\n\r\nconst ul maxn = 2e4;\r\n\r\nul a[maxn + 1];\r\n\r\nul aa[maxn + 1];\r\n\r\nstd::vector<ul> stack[15][2];\r\n\r\nvoid getans(ul l, ul r, ul depth, ul pos)\r\n{\r\n\tstatic ul tmpl[ntt_t::sz];\r\n\tstatic ul tmpr[ntt_t::sz];\r\n\tif (l == r) {\r\n\t\tstack[depth][pos].resize(2);\r\n\t\tstack[depth][pos][0] = 1;\r\n\t\tstack[depth][pos][1] = aa[l];\r\n\t\treturn;\r\n\t}\r\n\tul midl = l + r >> 1;\r\n\tul midr = midl + 1;\r\n\tgetans(l, midl, depth + 1, 0);\r\n\tgetans(midr, r, depth + 1, 1);\r\n\tstd::memcpy(tmpl, stack[depth + 1][0].data(), sizeof(ul) * stack[depth + 1][0].size());\r\n\tstd::memcpy(tmpr, stack[depth + 1][1].data(), sizeof(ul) * stack[depth + 1][1].size());\r\n\tul newsize = stack[depth + 1][0].size() + stack[depth + 1][1].size();\r\n\tul len;\r\n\tntt(tmpl, stack[depth + 1][0].size(), newsize, len, false);\r\n\tntt(tmpr, stack[depth + 1][1].size(), newsize, len, false);\r\n\tfor (ul i = 0; i != len; ++i) {\r\n\t\ttmpl[i] = mul(tmpl[i], tmpr[i]);\r\n\t}\r\n\tntt(tmpl, len, len, len, true);\r\n\tstack[depth][pos].resize(newsize);\r\n\tstd::memcpy(stack[depth][pos].data(), tmpl, sizeof(ul) * newsize);\r\n}\r\n\r\nint main()\r\n{\r\n\tstd::scanf(\"%u%u\", &n, &k);\r\n\tfor (ul i = 1; i <= n; ++i) {\r\n\t\tstd::scanf(\"%u\", &a[i]);\r\n\t}\r\n\tul Q;\r\n\tstd::scanf(\"%u\", &Q);\r\n\tfor (ul Case = 1; Case <= Q; ++Case) {\r\n\t\tul qt;\r\n\t\tstd::scanf(\"%u\", &qt);\r\n\t\tif (qt == 1) {\r\n\t\t\tul q, i, d;\r\n\t\t\tstd::scanf(\"%u%u%u\", &q, &i, &d);\r\n\t\t\tfor (ul x = 1; x <= n; ++x) {\r\n\t\t\t\taa[x] = minus(q, a[x]);\r\n\t\t\t\tif (x == i) {\r\n\t\t\t\t\taa[x] = minus(q, d);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t} else {\r\n\t\t\tul q, L, R, d;\r\n\t\t\tstd::scanf(\"%u%u%u%u\", &q, &L, &R, &d);\r\n\t\t\tfor (ul i = 1; i <= L - 1; ++i) {\r\n\t\t\t\taa[i] = minus(q, a[i]);\r\n\t\t\t}\r\n\t\t\tfor (ul i = L; i <= R; ++i) {\r\n\t\t\t\taa[i] = minus(q, plus(a[i], d));\r\n\t\t\t}\r\n\t\t\tfor (ul i = R + 1; i <= n; ++i) {\r\n\t\t\t\taa[i] = minus(q, a[i]);\r\n\t\t\t}\r\n\t\t}\r\n\t\tgetans(1, n, 0, 0);\r\n\t\tstd::printf(\"%u\\n\", stack[0][0][k]);\r\n\t}\r\n\treturn 0;\r\n}\r\n\r\n\r\n"
+}

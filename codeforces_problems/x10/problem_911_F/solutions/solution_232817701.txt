@@ -1,0 +1,38 @@
+{
+    "id": 232817701,
+    "contestId": 911,
+    "creationTimeSeconds": 1700028305,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 911,
+        "index": "F",
+        "name": "Tree Destruction",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "graphs",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 911,
+        "members": [
+            {
+                "handle": "bkifhr6"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1514469900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 28,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 39833600,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\n\n#define int long long int\ntypedef pair<int, int> pii;\n\nconst int MAXN = 2e5 + 10, LG = 20;\n\nint n, x, y, mxh, ans, h[MAXN], par[LG][MAXN];\nbool mark[MAXN];\nvector<int>adj[MAXN];\nvector<pair<pii, int>>vec;\n\nbool has_bit(int mask, int bit) {\n\treturn (mask >> bit) & 1;\n}\n\nvoid read_input() {\n\tcin >> n;\n\tfor (int i = 1; i < n; i++) {\n\t\tint u, v;\n\t\tcin >> u >> v;\n\t\tadj[u].push_back(v);\n\t\tadj[v].push_back(u);\n\t}\n}\n\nvoid dfs1(int v, int parent) {\n\tfor (int w: adj[v])\n\t\tif (w != parent) {\n\t\t\th[w] = h[v] + 1;\n\t\t\tif (h[w] > mxh) {\n\t\t\t\tmxh = h[w];\n\t\t\t\tx = w;\n\t\t\t}\n\t\t\tdfs1(w, v);\n\t\t}\n}\n\nvoid dfs2(int v, int parent) {\n\tfor (int w: adj[v])\n\t\tif (w != parent) {\n\t\t\th[w] = h[v] + 1;\n\t\t\tif (h[w] > mxh) {\n\t\t\t\tmxh = h[w];\n\t\t\t\ty = w;\n\t\t\t}\n\t\t\tdfs2(w, v);\n\t\t}\n}\n\nvoid find_diam() {\n\tdfs1(1, -1);\n\th[x] = mxh = 0;\n\tdfs2(x, -1);\n\th[1] = 0;\n}\n\nvoid dfs(int v, int parent) {\n\tfor (int w: adj[v]) \n\t\tif (w != parent) {\n\t\t\th[w] = h[v] + 1;\n\t\t\tpar[0][w] = v;\n\t\t\tfor (int l = 1; l < LG; l++)\n\t\t\t\tpar[l][w] = par[l - 1][par[l - 1][w]];\n\t\t\tdfs(w, v);\n\t\t}\n}\n\nint lift_up(int v, int k) {\n\tfor (int l = 0; l < LG; l++)\n\t\tif (has_bit(k, l))\n\t\t\tv = par[l][v];\n\treturn v;\n}\n\nint lca(int u, int v) {\n\tif (h[u] < h[v])\n\t\tswap(u, v);\n\tu = lift_up(u, h[u] - h[v]);\n\tif (u == v)\n\t\treturn u;\n\tfor (int l = LG - 1; l >= 0; l--)\n\t\tif (par[l][u] != par[l][v]) {\n\t\t\tu = par[l][u];\n\t\t\tv = par[l][v];\n\t\t}\n\treturn par[0][u];\n}\n\nint dist(int u, int v) {\n\tint r = lca(u, v);\n\treturn h[u] + h[v] - 2 * h[r];\n}\n\nvoid init(int u, int v, bool flag = false) {\n\tint r = lca(u, v);\n\twhile (u != r) {\n\t\tmark[u] = true;\n\t\tif (flag)\n\t\t\tvec.push_back({{u, v}, u});\n\t\tu = par[0][u];\n\t}\n\twhile (v != r) {\n\t\tmark[v] = true;\n\t\tif (flag)\n\t\t\tvec.push_back({{u, v}, v});\n\t\tv = par[0][v];\n\t}\n\tmark[r] = true;\n}\n\nvoid dfs_solve(int v, int parent) {\n\tfor (int w: adj[v]) \n\t\tif (w != parent) \n\t\t\tdfs_solve(w, v);\n\tif (!mark[v]) {\n\t\tif (dist(v, x) > dist(v, y))\n\t\t\tvec.push_back({{v, x}, v});\n\t\telse\n\t\t\tvec.push_back({{v, y}, v});\n\t\tans += max(dist(x, v), dist(y, v));\n\t}\n}\n\nvoid solve() {\n\tint tmp1 = x, tmp2 = y, mxdist = dist(x, y);\n\tans = mxdist * (mxdist + 1) / 2;\n\tinit(x, y);\n\tdfs_solve(1, -1);\n\tinit(x, y, true);\n}\n\nint32_t main() {\n\tios_base::sync_with_stdio(false), cin.tie(NULL);\n\tread_input();\n\tfind_diam();\n\tdfs(1, -1);\n\tsolve();\n\tcout << ans << '\\n';\n\tfor (int i = 0; i < vec.size(); i++)\n\t\tcout << vec[i].first.first << \" \" << vec[i].first.second << \" \" << vec[i].second << '\\n';\n}\n  \t\t\t \t \t \t \t \t\t\t \t\t\t   \t\t \t \t\t"
+}

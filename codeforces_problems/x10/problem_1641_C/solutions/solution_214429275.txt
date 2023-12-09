@@ -1,0 +1,40 @@
+{
+    "id": 214429275,
+    "contestId": 1641,
+    "creationTimeSeconds": 1689737993,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1641,
+        "index": "C",
+        "name": "Anonymity Is Important",
+        "type": "PROGRAMMING",
+        "points": 1250.0,
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dsu",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1641,
+        "members": [
+            {
+                "handle": "luogu_bot5"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1645611000
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 17920000,
+    "source": "// LUOGU_RID: 116354192\n#include<bits/stdc++.h>\r\n\r\n#define int long long\r\n#define lt(i) i << 1\r\n#define rt(i) i << 1 | 1\r\n\r\n#define gc() (p1==p2 && (p2=(p1=buf)+fread(buf,1,100010,stdin),p1==p2)?EOF:*p1++)\r\nchar *p1,*p2,buf[100010];\r\n\r\ninline int read(){\r\n    int x=0,f=1;\r\n    char ch=gc();\r\n    while(ch<48||ch>57){\r\n        if(ch=='-')f=-1;\r\n        ch=gc();\r\n    }\r\n    while(ch>=48&&ch<=57){x=x*10+ch-48,ch=gc();}\r\n   \treturn x*f;\r\n}\r\n\r\nusing namespace std;\r\n\r\nconst int N = 2e5 + 10;\r\n\r\nint n, m;\r\nint a[N];\r\nint tree[N << 2], tag[N << 2];\r\nbool vis[N];\r\nint L[N], R[N], tot;\r\n\r\nvoid push_up(int i){\r\n\ttree[i] = tree[lt(i)] + tree[rt(i)];\r\n}\r\n\r\nvoid push_down(int i, int l, int r){\r\n\tif(tag[i]){\r\n\t\tint mid = l + r >> 1;\r\n\t\ttag[lt(i)] = 1;\r\n\t\ttree[lt(i)] = mid - l + 1;\r\n\t\ttag[rt(i)] = 1;\r\n\t\ttree[rt(i)] = r - mid;\r\n\t\ttag[i] = 0;\r\n\t}\r\n}\r\n\r\nvoid update(int i, int l, int r, int x, int y){\r\n\tif(x <= l && r <= y){\r\n\t\ttree[i] = (r - l + 1);\r\n\t\ttag[i] = 1;\r\n\t\treturn;\r\n\t}\r\n\tpush_down(i, l, r);\r\n\tint mid = l + r >> 1;\r\n\tif(x <= mid){\r\n\t\tupdate(lt(i), l, mid, x, y);\r\n\t}\r\n\tif(mid + 1 <= y){\r\n\t\tupdate(rt(i), mid + 1, r, x, y);\r\n\t}\r\n\tpush_up(i);\r\n}\r\n\r\nint query(int i, int l, int r, int x, int y){\r\n\tif(x <= l && r <= y){\r\n\t\treturn tree[i];\r\n\t}\r\n\tpush_down(i, l, r);\r\n\tint mid = l + r >> 1, ans = 0;\r\n\tif(x <= mid){\r\n\t\tans += query(lt(i), l, mid, x, y);\r\n\t}\r\n\tif(mid + 1 <= y){\r\n\t\tans += query(rt(i), mid + 1, r, x, y);\r\n\t}\r\n\treturn ans;\r\n}\r\n\r\nbool f(int x, int y){\r\n\tif(query(1, 1, n, x, y) == (y - x)){\r\n\t\tint l = x, r = y, mid;\r\n\t\twhile(l <= r){\r\n\t\t\tmid = l + r >> 1;\r\n\t\t\tif(query(1, 1, n, l, mid) == (mid - l + 1)){\r\n\t\t\t\tl = mid + 1;\r\n\t\t\t} else {\r\n\t\t\t\tr = mid - 1;\r\n\t\t\t}\r\n\t\t}\r\n\t\tvis[l] = 1;\r\n\t\treturn 1;\r\n\t}\r\n\treturn 0;\r\n}\r\n\r\nsigned main(){\r\n\tn = read(), m = read();\r\n\tint o, x, y, k, minn = INT_MAX, maxn = INT_MIN;\r\n\twhile(m--){\r\n\t\to = read();\r\n\t\tif(o == 1){\r\n\t\t\tk = read();\r\n\t\t\tint tot2 = 0;\r\n\t\t\tfor(int i = 1; i <= tot; i++){\r\n\t\t\t\tif(maxn >= L[i] && R[i] >= minn){\r\n\t\t\t\t\tif(!f(L[i], R[i])){\r\n\t\t\t\t\t\tL[++tot] = L[i];\r\n\t\t\t\t\t\tR[tot] = R[i];\r\n\t\t\t\t\t}\r\n\t\t\t\t} else {\r\n\t\t\t\t\tL[++tot] = L[i];\r\n\t\t\t\t\tR[tot] = R[i];\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\ttot = tot2;\r\n\t\t\tif(query(1, 1, n, k, k)){\r\n\t\t\t\tputs(\"NO\");\r\n\t\t\t} else {\r\n\t\t\t\tif(vis[k]){\r\n\t\t\t\t\tputs(\"YES\");\r\n\t\t\t\t} else {\r\n\t\t\t\t\tputs(\"N/A\");\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tminn = INT_MAX, maxn = INT_MIN;\r\n\t\t} else {\r\n\t\t\tx = read(),y = read(), k = read();\r\n\t\t\tif(k == 1){\r\n\t\t\t\tif(!f(x, y)){\r\n\t\t\t\t\tL[++tot] = x, R[tot] = y;\r\n\t\t\t\t}\r\n\t\t\t} else {\r\n\t\t\t\tupdate(1, 1, n, x, y);\r\n\t\t\t\tminn = min(minn, x);\r\n\t\t\t\tmaxn = max(maxn, y);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}"
+}

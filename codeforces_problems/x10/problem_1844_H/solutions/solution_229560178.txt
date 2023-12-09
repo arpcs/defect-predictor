@@ -1,0 +1,39 @@
+{
+    "id": 229560178,
+    "contestId": 1844,
+    "creationTimeSeconds": 1698150652,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1844,
+        "index": "H",
+        "name": "Multiple of Three Cycles",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3400,
+        "tags": [
+            "combinatorics",
+            "data structures",
+            "dp",
+            "dsu",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1844,
+        "members": [
+            {
+                "handle": "FreshOrange"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1689086100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 592,
+    "memoryConsumedBytes": 28979200,
+    "source": "#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long E;\r\nconst E mod=998244353;\r\n\r\nE ksm(E a,E b){\r\n  E ret=1;\r\n  while(b){\r\n    if(b&1) ret=ret*a%mod;\r\n    a=a*a%mod;\r\n    b>>=1;\r\n  }\r\n  return ret;\r\n}\r\n\r\nconst int N=300010;\r\nE Inv[N],fac[N],ifac[N];\r\n\r\nvoid init(int t){\r\n  fac[0]=ifac[0]=1;\r\n  Inv[1]=1;\r\n  for(int i=2; i<=t; i++){\r\n    Inv[i]=(mod-mod/i)*Inv[mod%i]%mod;\r\n  }\r\n  for(int i=1; i<=t; i++) fac[i]=fac[i-1]*i%mod;\r\n  ifac[t]=ksm(fac[t],mod-2);\r\n  for(int i=t-1; i; i--) ifac[i]=ifac[i+1]*(i+1)%mod;\r\n}\r\ninline E inv(E x){ return ksm(x,mod-2); }//return x<N&&Inv[x]?Inv[x]:(mod-mod/x)*inv(mod%x)%mod; }\r\nE n,par[N],L[N],cnt[N][3],chk[N];\r\n\r\nint get(int x){\r\n  return par[x]==x?x:par[x]=get(par[x]);\r\n}\r\n\r\nE X,Y,x,y; // X denote f(x,y), Y denote f(x+1,y+1)\r\nvoid add1(){ // x <- x+2 , y <- y-1\r\n  E tmp1=(Y-(x+1)*(x+y+1)%mod*X%mod+mod)%mod*inv(y)%mod;\r\n  E tmp2=((x+2)*Y%mod+y*(x+y+2)%mod*tmp1%mod)%mod;\r\n  X=tmp1,Y=tmp2;\r\n  x+=2,y-=1;\r\n}\r\n\r\nvoid add2(){ // x --, y +=2\r\n  E tmp1=(Y-(y+1)*(x+y+1)%mod*X%mod+mod)%mod*inv(x)%mod;\r\n  E tmp2=((y+2)*Y%mod+x*(x+y+2)%mod*tmp1%mod)%mod;\r\n  X=tmp1,Y=tmp2;\r\n  x--,y+=2;\r\n}\r\n\r\n/*\r\n\r\n6\r\n5 3\r\n1 2\r\n4 5\r\n3 6\r\n2 1\r\n6 4\r\n\r\n*/\r\n\r\nint main(){\r\n  cin>>n;\r\n  init(n+5);\r\n  for(int i=1; i<=n; i++) par[i]=i,L[i]=1;\r\n  cnt[0][1]=n;\r\n\r\n  for(int i=1; i<=n; i++){\r\n    int x,y;\r\n    chk[i]=chk[i-1];\r\n    cnt[i][0]=cnt[i-1][0],cnt[i][1]=cnt[i-1][1],cnt[i][2]=cnt[i-1][2];\r\n    scanf(\"%d%d\",&x,&y);\r\n    if(get(x)==get(y)){\r\n      cnt[i][L[get(x)]%3]--;\r\n      if(L[get(x)]%3) chk[i]|=1;\r\n      continue;\r\n    }\r\n    cnt[i][L[get(y)]%3]--;\r\n    cnt[i][L[get(x)]%3]--;\r\n    L[get(y)]+=L[get(x)];\r\n    par[get(x)]=get(y);\r\n    cnt[i][L[get(y)]%3]++;\r\n  }\r\n\r\n  //cerr<<\"DEBUG\"<<endl;\r\n  for(int i=1; i<=n; i++){\r\n    //cerr<<cnt[i][1]<<' '<<cnt[i][2]<<endl;\r\n  }\r\n\r\n  x=y=0;\r\n  X=Y=1;\r\n  vector<E> ans;\r\n  for(int i=n; i; i--){\r\n    auto t2=cnt[i];\r\n    //cerr<<i<<' '<<t1[1]<<' '<<t1[2]<<' '<<t2[1]<<' '<<t2[2]<<' '<<x<<' '<<y<<' '<<X<<' '<<Y<<endl;\r\n    while(x+1<=t2[1]&&y+1<=t2[2]) add1(),add2();\r\n    while(x+2<=t2[1]&&y-1>=t2[2]) add1();\r\n    while(x-1>=t2[1]&&y+2<=t2[2]) add2();\r\n    if(!chk[i])assert(x==t2[1]),assert(y==t2[2]);\r\n    if(chk[i]) ans.emplace_back(0);\r\n    else ans.emplace_back(X*fac[t2[0]+t2[1]+t2[2]]%mod*ifac[t2[1]+t2[2]]%mod);\r\n  }\r\n\r\n  while(ans.size()){\r\n    printf(\"%lld\\n\",(ans.back()%mod+mod)%mod);\r\n    ans.pop_back();\r\n  }\r\n\r\n  return 0;\r\n}\r\n"
+}

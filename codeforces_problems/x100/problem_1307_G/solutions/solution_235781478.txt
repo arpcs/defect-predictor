@@ -1,0 +1,37 @@
+{
+    "id": 235781478,
+    "contestId": 1307,
+    "creationTimeSeconds": 1701737970,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "starrylasky"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 202,
+    "memoryConsumedBytes": 102400,
+    "source": "#include<bits/stdc++.h>\r\n#define fep(i,l,r) for(int i=l;i<=r;++i)\r\n#define feb(i,r,l) for(int i=r;i>=l;--i)\r\n#define For(i,u) for(int i=head[u];i;i=e[i].nxt)\r\n//#define int long long\r\n#define LL long long\r\n#define pi pair<int,int >\r\n#define mpr make_pair\r\n#define max(x,y) (x>y?x:y)\r\n#define min(x,y) (x<y?x:y)\r\nusing namespace std;\r\n\r\nconst int N = 50+5,M = 2505,mod = 998244353,inf = 1e9;\r\ninline int read() {\r\n\tint s=0,w=1; char ch=getchar();\r\n\twhile(ch< '0'||ch> '9') {if(ch=='-') w=-1; ch=getchar();}\r\n\twhile(ch>='0'&&ch<='9') {s=(s<<1)+(s<<3)+ch-'0'; ch=getchar();}\r\n\treturn s*w;\r\n}\r\ninline int Mod(int x) {return x>=mod?x-mod:x;}\r\ninline void addmod(int &x,int y) {x=Mod(x+y);}\r\ninline void chkmax(int &x,int y) {x=max(x,y);}\r\ninline void chkmin(int &x,int y) {x=min(x,y);}\r\n\r\nnamespace starrylasky {\r\n\tint n,m,S,T,tot=1,dep[N],head[N],cur[N],f[N][N]; double val[M],s[M];\r\n\tstruct Edge {\r\n\t\tint v,nxt,c;\r\n\t}e[M<<1];\r\n\tstruct EDGE {\r\n\t\tint u,v,w;\r\n\t}E[M];\r\n\tinline void add(int u,int v,int c) {\r\n\t\te[++tot]={v,head[u],c}; head[u]=tot;\r\n\t\te[++tot]={u,head[v],0}; head[v]=tot;\r\n\t}\r\n\t\r\n\tinline bool bfs() {\r\n\t\tmemset(dep,0,sizeof(dep)); memcpy(cur,head,sizeof(head));\r\n\t\tqueue<int > q; q.push(S); dep[S]=1;\r\n\t\twhile(!q.empty()) {\r\n\t\t\tint u=q.front(); q.pop();\r\n\t\t\tFor(i,u) if(e[i].c>0&&!dep[e[i].v]) {\r\n\t\t\t\tdep[e[i].v]=dep[u]+1; if(e[i].v==T) return 1;\r\n\t\t\t\tq.push(e[i].v);\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn 0;\r\n\t}\r\n\t\r\n\tinline int dfs(int u,int flow) {\r\n\t\tif(u==T) return flow;\r\n\t\tint Sum=0;\r\n\t\tfor(int &i=cur[u];i;i=e[i].nxt) if(dep[e[i].v]==dep[u]+1&&e[i].c>0) {\r\n\t\t\tint f=dfs(e[i].v,min(e[i].c,flow-Sum));\r\n\t\t\te[i].c-=f; e[i^1].c+=f; Sum+=f; if(Sum==flow) return Sum;\r\n\t\t}\r\n\t\treturn Sum;\r\n\t}\r\n\t\r\n\tinline void dinic() {\r\n\t\tint maxflow=0;\r\n\t\twhile(bfs()) maxflow+=dfs(S,inf);\r\n\t}\r\n\t\r\n\tinline void Main() {\r\n\t\tn=read(),m=read(),S=1,T=n; fep(i,1,m) {\r\n\t\t\tint u=read(),v=read(),w=read();\r\n\t\t\tadd(u,v,w); E[i]={u,v,w};\r\n\t\t} dinic(); int cnt=0;\r\n\t\tfep(i,1,m) if(e[i<<1].c==0) {\r\n\t\t\tval[++cnt]=E[i].w; E[i].w=inf;\r\n\t\t\tfep(j,1,n) fep(k,1,n) f[j][k]=inf;\r\n\t\t\tfep(j,1,n) f[j][j]=0;\r\n\t\t\tfep(j,1,m) chkmin(f[E[j].u][E[j].v],E[j].w);\r\n\t\t\tfep(p,1,n) fep(j,1,n) fep(k,1,n)\r\n\t\t\t\tchkmin(f[j][k],f[j][p]+f[p][k]);\r\n\t\t\tval[cnt]+=f[1][E[i].u]+f[E[i].v][n];\r\n\t\t} sort(val+1,val+1+cnt); fep(i,1,cnt) s[i]=s[i-1]+val[i];\r\n\t\tint Q=read();\r\n\t\twhile(Q--) {\r\n\t\t\tdouble W=read(),ans=0;\r\n\t\t\tdouble l=1,r=5e7; while(r-l>1e-7) {\r\n\t\t\t\tdouble mid=(l+r)/2; int p=upper_bound(val+1,val+1+cnt,mid)-val-1;\r\n\t\t\t\tdouble ret=p*mid-s[p];\r\n\t\t\t\tif(ret>W) r=mid;\r\n\t\t\t\telse l=mid,ans=mid;\r\n\t\t\t}\r\n//\t\t\tcout<<ans<<\"\\n\";\r\n\t\t\tprintf(\"%.6lf\\n\",ans);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nsigned main() {\r\n//\tios::sync_with_stdio(false);\r\n\tint _T=1;\r\n\twhile(_T--) starrylasky::Main();\r\n\treturn 0;\r\n}\r\n"
+}

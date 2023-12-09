@@ -1,0 +1,38 @@
+{
+    "id": 205324434,
+    "contestId": 1192,
+    "creationTimeSeconds": 1683720821,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "B",
+        "name": "Dynamic Diameter",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "ForgotDream_CHN"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 102,
+    "timeConsumedMillis": 342,
+    "memoryConsumedBytes": 67686400,
+    "points": 100.0,
+    "source": "// LUOGU_RID: 110005948\n/**\r\n * @file    \r\n * @author  ForgotDream\r\n * @brief   \r\n * @date    2023-05-10\r\n */\r\n#include <bits/stdc++.h>\r\n\r\nusing i64 = long long;\r\n\r\nstruct SegTree {\r\n  int n;\r\n  struct Node {\r\n    i64 max, min, ld, rd, diam, tag;\r\n    Node() {\r\n      max = min = ld = rd = diam = tag = 0;\r\n    }\r\n  };\r\n  std::vector<Node> tr;\r\n  std::vector<i64> dep;\r\n  std::vector<int> a;\r\n\r\n  SegTree(int _n, const std::vector<i64> &_d, const std::vector<int> &_a) {\r\n    n = _n;\r\n    dep = _d;\r\n    a = _a;\r\n    tr.resize((n << 2) + 1);\r\n  }\r\n\r\n  void tagging(int u, i64 val) {\r\n    tr[u].max += val, tr[u].min += val;\r\n    tr[u].ld -= val, tr[u].rd -= val;\r\n    tr[u].tag += val;\r\n  }\r\n\r\n  Node pushup(const Node &lhs, const Node &rhs) {\r\n    Node res;\r\n    res.max = std::max(lhs.max, rhs.max);\r\n    res.min = std::min(lhs.min, rhs.min);\r\n    res.ld = std::max({lhs.ld, rhs.ld, lhs.max - 2 * rhs.min});\r\n    res.rd = std::max({lhs.rd, rhs.rd, rhs.max - 2 * lhs.min});\r\n    res.diam = std::max({lhs.diam, rhs.diam, lhs.max + rhs.rd, rhs.max + lhs.ld});\r\n    return res;\r\n  }\r\n\r\n  void pushdown(int u) {\r\n    if (!tr[u].tag) {\r\n      return;\r\n    }\r\n    int lc = u << 1, rc = u << 1 | 1;\r\n    tagging(lc, tr[u].tag), tagging(rc, tr[u].tag);\r\n    tr[u].tag = 0;\r\n  }\r\n\r\n  void build(int l, int r, int u) {\r\n    if (l == r) {\r\n      tagging(u, dep[a[l]]);\r\n      return;\r\n    }\r\n    int mid = (l + r) >> 1, lc = u << 1, rc = u << 1 | 1;\r\n    build(l, mid, lc), build(mid + 1, r, rc);\r\n    tr[u] = pushup(tr[lc], tr[rc]);\r\n  }\r\n\r\n  void modify(int l, int r, int s, int t, int u, i64 val) {\r\n    if (l <= s && t <= r) {\r\n      tagging(u, val);\r\n      return;\r\n    }\r\n    pushdown(u);\r\n    int mid = (s + t) >> 1, lc = u << 1, rc = u << 1 | 1;\r\n    if (l <= mid) {\r\n      modify(l, r, s, mid, lc, val);\r\n    }\r\n    if (r > mid) {\r\n      modify(l, r, mid + 1, t, rc, val);\r\n    }\r\n    tr[u] = pushup(tr[lc], tr[rc]);\r\n  }\r\n};\r\n\r\nstruct Edge {\r\n  int u, v, id;\r\n  i64 w;\r\n  Edge(int _u, int _v, i64 _w, int _id) {\r\n    u = _u, v = _v, w = _w, id = _id;\r\n  }\r\n};\r\n\r\nsigned main() {\r\n  std::ios::sync_with_stdio(false);\r\n  std::cin.tie(0);\r\n\r\n  int n, q;\r\n  i64 W;\r\n  std::cin >> n >> q >> W;\r\n\r\n  std::vector<Edge> edges;\r\n  std::vector<std::vector<int>> g(n + 1);\r\n  for (int i = 0; i < n - 1; i++) {\r\n    int u, v;\r\n    i64 w;\r\n    std::cin >> u >> v >> w;\r\n    edges.emplace_back(u, v, w, i), edges.emplace_back(v, u, w, i);\r\n    g[u].push_back(edges.size() - 2), g[v].push_back(edges.size() - 1);\r\n  }\r\n\r\n  std::vector<int> in(n + 1), out(n + 1), eulerOrder(2 * n), edgeID(n + 1);\r\n  int idx = 0;\r\n  std::vector<i64> dep(n + 1);\r\n  std::function<void(int, int)> dfs = [&](int u, int frm) {\r\n    eulerOrder[++idx] = u, in[u] = idx;\r\n    for (auto i : g[u]) {\r\n      int v = edges[i].v, id = edges[i].id;\r\n      i64 w = edges[i].w;\r\n      if (v == frm) {\r\n        continue;\r\n      }\r\n      dep[v] = dep[u] + w;\r\n      edgeID[id] = v;\r\n      dfs(v, u);\r\n      eulerOrder[++idx] = u;\r\n    }\r\n    out[u] = idx;\r\n  };\r\n\r\n  dfs(1, 0);\r\n\r\n  SegTree st(idx, dep, eulerOrder);\r\n  st.build(1, idx, 1);\r\n\r\n  i64 lst = 0;\r\n  for (int i = 0; i < q; i++) {\r\n    i64 d, e;\r\n    std::cin >> d >> e;\r\n    i64 D = (d + lst) % (n - 1), E = (e + lst) % W;\r\n    // std::cerr << D << \" \" << in[edgeID[D]] << \" \" << out[edgeID[D]] << \" \" << edgeID[D] << \"\\n\";\r\n    // std::cerr << E << \" \" << E - edges[D].w << \"\\n\";\r\n    st.modify(in[edgeID[D]], out[edgeID[D]], 1, idx, 1, E - edges[2 * D].w);\r\n    edges[2 * D].w = E, edges[(2 * D) ^ 1].w = E, lst = st.tr[1].diam;\r\n    std::cout << lst << \"\\n\";\r\n  }\r\n\r\n  return 0;\r\n}"
+}

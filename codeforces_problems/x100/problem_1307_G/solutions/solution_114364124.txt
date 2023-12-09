@@ -1,0 +1,37 @@
+{
+    "id": 114364124,
+    "contestId": 1307,
+    "creationTimeSeconds": 1619529172,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "Molewus"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 21401600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#ifdef local\r\nstring to_string(vector<int> v) {\r\n    bool first = true;\r\n    string res = \"{\";\r\n    for (int i = 0; i < static_cast<int>(v.size()); i++) {\r\n        if (!first) {\r\n            res += \", \";\r\n        }\r\n        first = false;\r\n        res += to_string(v[i]);\r\n    }\r\n    res += \"}\";\r\n    return res;\r\n}\r\nvoid debug_out() { cerr << endl; }\r\ntemplate<typename Head, typename... Tail>\r\nvoid debug_out(Head H, Tail... T) {\r\n    cerr << \" \" << to_string(H);\r\n    debug_out(T...);\r\n}\r\n#define debug(...) cerr << \"[\" << #__VA_ARGS__ << \"]:\", debug_out(__VA_ARGS__)\r\n#else\r\n#define debug(...) 42\r\n#endif\r\ntypedef long long ll;\r\n#define f(i, l, r) for(int i=l;i<=r;i++)\r\n#define rf(i, r, l) for(int i=r;i>=l;--i)\r\n#define all(x) x.begin(),x.end()\r\nconst int N = 2e6+10, mod = 1e9+7;\r\nconst ll inf=1e9;\r\nll power(ll a, ll b) {ll res = 1;while (b) {if (b & 1)res = res * a % mod;a = a * a % mod;b >>= 1;}return res;}\r\nll INV(ll a){return power(a,mod-2);}\r\nmt19937 Rand(123456);\r\nint Range(int l,int r){\r\n    return l+Rand()%(r-l+1);\r\n}\r\n\r\ntemplate<typename T>\r\nclass DINIC {\r\npublic:\r\n    const static int NN = 100000;\r\n    const static int M = 500000 + 10;//\u8fb9\u7684\u6570\u91cf*2\r\n    int tot = 1;\r\n    int to[M * 2], nx[M * 2], q[M * 2]; T cap[M * 2];\r\n    int hd[NN], lev[NN], it[NN];\r\n    void init(int n) {\r\n        f(i, 1, n)hd[i] = 0; tot = 1;\r\n    }\r\n    void edge(int u, int v, T w) { to[++tot] = v; nx[tot] = hd[u]; hd[u] = tot; cap[tot] = w; }\r\n    void add(int u, int v, T w) {\r\n        debug(u,v,w);\r\n        edge(u, v, w), edge(v, u, 0);\r\n    }\r\n    bool bfs(int s, int t, int n) {\r\n        int l = 1, r = 1, u, v, i;\r\n        memset(lev + 1, 0, n << 2); lev[q[1] = s] = 1;\r\n        while (l <= r)\r\n            for (i = hd[u = q[l++]]; i; i = nx[i])\r\n                if (cap[i] && !lev[v = to[i]])\r\n                    lev[v] = lev[u] + 1, q[++r] = v;\r\n        return lev[t];\r\n    }\r\n    T dfs(int u, int t, T up) {\r\n        if (u == t)return up;\r\n        int v; T res = 0, z;\r\n        for (int& i = it[u]; i; i = nx[i])\r\n            if (lev[v = to[i]] == lev[u] + 1 && cap[i] && (z = dfs(v, t, min(up - res, cap[i])))) {\r\n                cap[i] -= z; cap[i ^ 1] += z; res += z;\r\n                if (res == up)break;\r\n            }\r\n        return res;\r\n    }\r\n    T dinic(int s, int t, int n) {\r\n        T res = 0, z;\r\n        while (bfs(s, t, n)) {\r\n            memcpy(it + 1, hd + 1, n << 2);\r\n            while (z = dfs(s, t, inf))res += z;\r\n        }\r\n        return res;\r\n    }\r\n    vector<pair<int,int>> cut;\r\n    void dfs(int u,int f){\r\n        for(int i=hd[u];i;i=nx[i]){\r\n            if(i%2==0&&f!=to[i]){\r\n                if(!cap[i])cut.push_back({u,to[i]});\r\n                else dfs(to[i],u);\r\n            }\r\n        }\r\n    }\r\n    vector<pair<int,int>> get_cut(int s){\r\n        dfs(s,0);\r\n        return cut;\r\n    }\r\n};\r\nDINIC<ll> D;\r\nint g[51][51],g2[51][51];\r\nint diss[51],dist[51];\r\nint n,m;\r\nvoid get_dis(int s,int *dis,int g[51][51]){\r\n    fill(dis,dis+n+1,inf);\r\n    dis[s]=0;\r\n    queue<int> q;\r\n    q.push(s);\r\n    vector<bool> in(n+1);in[s]=1;\r\n    while(!q.empty()){\r\n        int u=q.front();q.pop();in[u]=0;\r\n        for(int i=1;i<=n;i++)if(g[u][i]+dis[u]<dis[i]){\r\n            dis[i]=g[u][i]+dis[u];\r\n            if(!in[i])q.push(i),in[i]=1;\r\n        }\r\n    }\r\n}\r\nint main() {\r\n    ios::sync_with_stdio(false); cin.tie(0); cout.tie(0);\r\n#ifdef local\r\n    freopen(\"../in.txt\", \"r\", stdin);\r\n#endif\r\n    cin>>n>>m;\r\n    f(i,1,n)f(j,1,n)if(i!=j)g[i][j]=inf,g2[i][j]=inf;\r\n    f(i,1,m){\r\n        int u,v,w;cin>>u>>v>>w;\r\n        g[u][v]=w;g2[v][u]=w;\r\n        D.add(u,v,1);\r\n    }\r\n    get_dis(1,diss,g);get_dis(n,dist,g2);\r\n    f(i,1,n)debug(i,diss[i],dist[i]);\r\n    int k =D.dinic(1,n,n);\r\n    auto vt = D.get_cut(1);\r\n    vector<int> val;\r\n    for(auto I:vt){\r\n        val.push_back(diss[I.first]+g[I.first][I.second]+dist[I.second]);\r\n    }\r\n    assert(k==val.size());\r\n    sort(all(val));\r\n    debug(val);\r\n    vector<tuple<ll,ll,ll>> need;\r\n    ll mi=val.front(),cnt=0,sum=0;\r\n    for(int i=0;i<val.size();i++)if(val[i]==mi)cnt++;\r\n    need.push_back({sum,mi,cnt});\r\n    while(cnt<val.size()){\r\n        int nex_val=val[cnt];\r\n        sum+=(nex_val-mi)*cnt;\r\n        mi=nex_val;\r\n        cnt=val.size();\r\n        for(int i=0;i<val.size();i++)if(val[i]>mi){cnt=i;break;}\r\n        need.push_back({sum,mi,cnt});\r\n    }\r\n    need.push_back({1e18,1,1});\r\n    int q;cin>>q;\r\n    while(q--){\r\n        ll x;cin>>x;\r\n        int res= upper_bound(need.begin(),need.end(),(tuple<ll,ll,ll>){x,0,0})-need.begin();\r\n        if(get<0>(need[res])>x)res--;\r\n        ll i,j,k;\r\n        tie(i,j,k)= need[res];\r\n        cout<<j+1.0*(x-i)/k<<\"\\n\";\r\n    }\r\n}\r\n"
+}

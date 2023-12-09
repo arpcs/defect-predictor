@@ -1,0 +1,37 @@
+{
+    "id": 203780090,
+    "contestId": 1007,
+    "creationTimeSeconds": 1682672214,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1007,
+        "index": "D",
+        "name": "Ants",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "2-sat",
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1007,
+        "members": [
+            {
+                "handle": "Yu_Jie"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1531492500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "// LUOGU_RID: 109097217\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int N=100005;\r\nint n,m;\r\nint d[N],sz[N],son[N],fa[N],dfn[N],idx,top[N];\r\nvector<int> e[N],vc[4*N];\r\nnamespace T {\r\n    const int N=11980005,M=35080005;\r\n    int head[N],nxt[M],ver[M],tot;\r\n    int dfn[N],low[N],idx,stk[N],top,ins[N],scc[N],cnt;\r\n    void add(int x,int y) {\r\n        nxt[++tot]=head[x]; head[x]=tot; ver[tot]=y;\r\n    }\r\n    void tarjan(int x) {\r\n        dfn[x]=low[x]=++idx; stk[++top]=x; ins[x]=1;\r\n        for(int i=head[x];i;i=nxt[i]) {\r\n            int y=ver[i];\r\n            if(!dfn[y]) {\r\n                tarjan(y);\r\n                low[x]=min(low[x],low[y]);\r\n            }\r\n            else if(ins[y]) low[x]=min(low[x],dfn[y]);\r\n        }\r\n        if(low[x]==dfn[x]) {\r\n            cnt++; int y;\r\n            do {\r\n                y=stk[top--]; ins[y]=0; scc[y]=cnt;\r\n            } while(y!=x);\r\n        }\r\n    }\r\n    void solve(int n) {\r\n        for(int i=1;i<=n;i++) if(!dfn[i]) tarjan(i);\r\n    }\r\n} using T::add,T::scc;\r\nint read() {\r\n\tint x=0,f=1; char c=getchar();\r\n\tfor(;c<'0'||c>'9';c=getchar()) if(c=='-') f=-1;\r\n\tfor(;c>='0'&&c<='9';c=getchar()) x=x*10+c-48;\r\n\treturn x*f;\r\n}\r\nvoid dfs1(int x) {\r\n    sz[x]=1;\r\n    for(int y:e[x]) if(y!=fa[x]) {\r\n        fa[y]=x; d[y]=d[x]+1; dfs1(y); sz[x]+=sz[y];\r\n        if(sz[y]>sz[son[x]]) son[x]=y;\r\n    }\r\n}\r\nvoid dfs2(int x) {\r\n    dfn[x]=++idx;\r\n    if(!son[x]) return ;\r\n    top[son[x]]=top[x]; dfs2(son[x]);\r\n    for(int y:e[x]) if(y!=fa[x]&&y!=son[x]) top[y]=y,dfs2(y);\r\n}\r\nvoid modify(int L,int R,int v,int p=1,int l=1,int r=n) {\r\n    if(L<=l&&r<=R) {vc[p].push_back(v); return ;}\r\n    int mid=l+r>>1;\r\n    if(L<=mid) modify(L,R,v,p<<1,l,mid);\r\n    if(R>mid) modify(L,R,v,p<<1|1,mid+1,r);\r\n}\r\nvoid incpath(int x,int y,int v) {\r\n    for(;top[x]!=top[y];x=fa[top[x]]) {\r\n        if(d[top[x]]<d[top[y]]) swap(x,y);\r\n        modify(dfn[top[x]],dfn[x],v);\r\n    }\r\n    if(d[x]<d[y]) swap(x,y);\r\n    if(x!=y) modify(dfn[y]+1,dfn[x],v);\r\n}\r\nvoid addedge(int x,int y) {add(x,y); add(y^1,x^1);}\r\nvoid build(int o,int p=1,int l=1,int r=n) {\r\n    int t=vc[p].size(),u=++idx; idx+=t;\r\n    for(int i=1;i<=t;i++) {\r\n        int x=vc[p][i-1]; addedge(x,u+i<<1);\r\n        if(i>1) addedge(u+i-1<<1,u+i<<1),addedge(u+i-1<<1,x^1);\r\n        else if(o) addedge(o<<1,u+i<<1),addedge(o<<1,x^1);\r\n    }\r\n    if(t) addedge(u+t<<1,u<<1);\r\n    else if(o) addedge(o<<1,u<<1);\r\n    if(l==r) return ;\r\n    int mid=l+r>>1;\r\n    build(u,p<<1,l,mid); build(u,p<<1|1,mid+1,r);\r\n}\r\nint main() {\r\n    n=read();\r\n    for(int i=1;i<n;i++) {\r\n        int x=read(),y=read();\r\n        e[x].push_back(y); e[y].push_back(x);\r\n    }\r\n    dfs1(1); top[1]=1; dfs2(1);\r\n    m=read();\r\n    for(int i=1;i<=m;i++) {\r\n        incpath(read(),read(),i<<1);\r\n        incpath(read(),read(),i<<1|1);\r\n    }\r\n    idx=m; build(0);\r\n    T::solve(idx<<1|1);\r\n    for(int i=1;i<=m;i++) if(scc[i<<1]==scc[i<<1|1]) {puts(\"NO\"); return 0;}\r\n    puts(\"YES\");\r\n    for(int i=1;i<=m;i++) puts(scc[i<<1]<scc[i<<1|1]?\"1\":\"2\");\r\n    return 0;\r\n}"
+}

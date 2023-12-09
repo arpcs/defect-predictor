@@ -1,0 +1,42 @@
+{
+    "id": 228360004,
+    "contestId": 1508,
+    "creationTimeSeconds": 1697421845,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1508,
+        "index": "C",
+        "name": "Complete the MST",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2500,
+        "tags": [
+            "bitmasks",
+            "brute force",
+            "data structures",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1508,
+        "members": [
+            {
+                "handle": "hhhgjyismine"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1618583700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 30,
+    "timeConsumedMillis": 2137,
+    "memoryConsumedBytes": 66867200,
+    "source": "#include<bits/stdc++.h>\r\n#define ll long long\r\n#define pii pair<int,int>\r\nusing namespace std;\r\nint N,M;struct node{int u,v,w;}e[200005],e1[200005];\r\nbool operator<(node a,node b){return a.w<b.w;}int tot;\r\nint lst[200005],nxt[200005];vector<int>road[200005];\r\nint bl[200005],col,fa[200005];bool mark[200005];\r\nint find(int r){return r==fa[r]?r:(fa[r]=find(fa[r]));}\r\nqueue<int>q;int be;\r\nvoid del(int x){\r\n\tint ls=lst[x],rs=nxt[x];lst[x]=nxt[x]=0;\r\n\tif(ls){nxt[ls]=rs;if(rs)lst[rs]=ls;return;}\r\n\tbe=rs;if(rs)lst[rs]=ls;\r\n}\r\nbool mp[1003][1003];\r\nmap <int,int> mp1[200005];\r\nbool chk(int u,int v){\r\n\tif(u==v)return 1;\r\n\tif(N<=1000)return mp[u][v];\r\n\treturn mp1[u][v];\r\n}\r\nvoid BFS(int u){\r\n\tdel(u);bl[u]=++col;q.push(u);\r\n\twhile(!q.empty()){\r\n\t\tint dog=q.front();q.pop();int x=be;\r\n\t\twhile(1){\r\n\t\t\tif(!x)break;\r\n\t\t\twhile(chk(dog,x))x=nxt[x];if(!x)break;\r\n\t\t\tbl[x]=col;q.push(x);int rs=nxt[x];del(x);x=rs;\r\n\t\t}\r\n\t}\r\n}\r\nvoid Find(){\r\n    col=0;for(int i=1;i<=N;++i)bl[i]=lst[i]=nxt[i]=mark[i]=0;\r\n    for(int i=1;i<N;++i)nxt[i]=i+1;for(int i=2;i<=N;++i)lst[i]=i-1;be=1;\r\n    for(int i=1;i<=N;++i)if(!bl[i])BFS(i);\r\n}\r\nint cnt[1003];\r\nbool chk(){\r\n\tif(N>1000)return 0;\r\n\tint nd=N*(N-1)/2;\r\n\tfor(int i=1;i<=N;++i)++cnt[bl[i]];\r\n\tfor(int i=1;i<=col;++i)nd-=cnt[i]-1;\r\n\treturn (nd==M);\r\n}\r\nll query(){\r\n\tll ans=0ll;\r\n\tfor(int i=1;i<=N;++i)fa[i]=i;\r\n\tfor(int i=1;i<=tot;++i)e1[i].u=bl[e1[i].u],e1[i].v=bl[e1[i].v];\r\n\tfor(int i=1;i<=tot;++i){\r\n\t\tif(find(e1[i].u)==find(e1[i].v))continue;\r\n\t\tans+=1ll*e1[i].w;fa[find(e1[i].u)]=find(e1[i].v);\r\n\t} \r\n\treturn ans;\r\n}\r\nvector<pii>vec;\r\nvoid finde(){\r\n\tfor(int i=1;i<=N;++i)for(int j=i+1;j<=N;++j)if(!mp[i][j])vec.push_back(make_pair(i,j));\r\n}\r\nint main(){\r\n\tscanf(\"%d%d\",&N,&M);ll Xor=0ll;\r\n\tfor(int i=1;i<=M;++i){\r\n\t\tscanf(\"%d%d%d\",&e[i].u,&e[i].v,&e[i].w);\r\n\t    road[e[i].u].push_back(e[i].v);\r\n\t    road[e[i].v].push_back(e[i].u);Xor^=e[i].w;\r\n\t    if(N<=1000)mp[e[i].u][e[i].v]=mp[e[i].v][e[i].u]=1;\r\n\t    else mp1[e[i].u][e[i].v]=mp1[e[i].v][e[i].u]=1;\r\n\t} tot=M;\r\n\tsort(e+1,e+M+1);for(int i=1;i<=M;++i)e1[i]=e[i];Find();\r\n\tif(!chk()){cout<<query()<<endl;return 0;}finde();ll mn=1e18;\r\n\tfor(auto v:vec){\r\n\t\tfor(int i=1;i<=N;++i)road[i].clear();tot=0;\r\n\t    for(int i=1;i<=M;++i)if(e[i].w<=Xor)e1[++tot]=e[i];\r\n\t    e1[++tot]=node{v.first,v.second,Xor};\r\n\t    for(int i=1;i<=M;++i)if(e[i].w>Xor)e1[++tot]=e[i];\r\n\t    mp[v.first][v.second]=mp[v.second][v.first]=1;\r\n\t    Find();mn=min(mn,query());\r\n\t    mp[v.first][v.second]=mp[v.second][v.first]=0;\r\n\t} cout<<mn<<endl;\r\n\treturn 0;\r\n}"
+}

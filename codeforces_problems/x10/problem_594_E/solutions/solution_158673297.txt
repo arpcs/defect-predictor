@@ -1,0 +1,36 @@
+{
+    "id": 158673297,
+    "contestId": 594,
+    "creationTimeSeconds": 1653721255,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 594,
+        "index": "E",
+        "name": "Cutting the Line",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3100,
+        "tags": [
+            "string suffix structures",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 594,
+        "members": [
+            {
+                "handle": "luogu_bot4"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1447000200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 23,
+    "timeConsumedMillis": 452,
+    "memoryConsumedBytes": 135270400,
+    "source": "/* Written by Rikka__  */\r\n/* \u2727*\uff61\u0669(\u02ca\u15dc\u02cb*)\u0648\u2727*\uff61    */\r\n#include<bits/stdc++.h>\r\n#include<cxxabi.h>\r\nusing namespace std;\r\n#define _ =read()\r\ninline int read(){\r\n    int r = 0 , w = 1;\r\n    char ch = getchar();\r\n    while(ch > '9' || ch < '0') {if(ch == '-') w = -1; ch = getchar();} \r\n    while(ch >='0' && ch <='9') {r = r * 10 + ch -'0'; ch = getchar();}\r\n    return r * w;\r\n}\r\nnamespace FileIO{\r\n    string InFile;\r\n    string OutFile;\r\n    void File(string s){\r\n        InFile = s + \".in\";\r\n        OutFile = s + \".out\";\r\n        freopen(InFile.data() , \"r\" , stdin);\r\n        freopen(OutFile.data() , \"w\" , stdout);\r\n    }\r\n}\r\nconst int Maxn = 5000010;\r\nchar str[Maxn];\r\nchar ans[Maxn];\r\nchar double_str[Maxn];\r\nint n;\r\nint k;\r\nint L[Maxn];\r\nint R[Maxn];\r\nint nxt[Maxn];\r\nint p[Maxn];\r\nstruct Lyndon_Word{\r\n    int l , r;\r\n    Lyndon_Word(int _l = 0 , int _r = 0){\r\n        l = _l , r = _r;\r\n    }\r\n};\r\nint cnt;\r\nLyndon_Word Ly[Maxn];\r\ninline void Lyndon(char *s){\r\n    for(int i = 1 ; i <= n ; ){\r\n        int j = i , k = i + 1;\r\n        while(k <= n){\r\n            if(s[j] > s[k]) break;\r\n            if(s[j] < s[k]) j = i , k++;\r\n            else j++ , k++;\r\n        }\r\n        while(i <= j) i += (k - j);\r\n        Ly[++cnt] = Lyndon_Word(k - j , i - 1);\r\n    }\r\n}\r\ninline void update(char *s){\r\n    for(int i = 1 ; i <= n ; i++){\r\n        if(s[i] > ans[i]) return;\r\n        if(s[i] < ans[i]) break;\r\n    }\r\n    for(int i = 1 ; i <= n ; i++) ans[i] = s[i];\r\n}\r\ninline void Self_nxt(char *s , int n){\r\n    for(int i = 1 ; i <= n ; i++) nxt[i] = 0;\r\n    nxt[1] = n;\r\n    int l = 0 , r = 0;\r\n    for(int i = 2 ; i <= n ; i++){\r\n        if(i <= r) nxt[i] = min(nxt[i - l + 1] , r - i + 1);\r\n        while(i + nxt[i] <= n && s[i + nxt[i]] == s[nxt[i] + 1]) nxt[i]++;\r\n        if(i + nxt[i] - 1 > r) l = i , r = i + nxt[i] - 1;\r\n    }\r\n}\r\ninline void Exkmp(char *s , int n , char *t , int m){\r\n    Self_nxt(t , m);\r\n    for(int i = 1 ; i <= n ; i++) p[i] = 0;\r\n    int l = 0 , r = 0;\r\n    for(int i = 1 ; i <= n ; i++){\r\n        if(i <= r) p[i] = min(nxt[i - l + 1] , r - i + 1);\r\n        while(i + p[i] <= n && s[i + p[i]] == t[p[i] + 1]) p[i]++;\r\n        if(i + p[i] - 1 > r) l = i , r = i + p[i] - 1;\r\n    }\r\n}\r\ninline void update1(){\r\n    reverse(str + 1 , str + n + 1);\r\n    update(str);\r\n    reverse(str + 1 , str + n + 1);\r\n}\r\ninline void update2(){\r\n    for(int i = 1 ; i <= n ; i++) double_str[i] = str[i] , double_str[i + n] = str[i];\r\n    int pos;\r\n    for(int i = 1 ; i <= n ; ){\r\n        pos = i;\r\n        int j = i , k = i + 1;\r\n        while(k <= n * 2){\r\n            if(double_str[j] > double_str[k]) break;\r\n            if(double_str[j] < double_str[k]) j = i , k++;\r\n            else j++ , k++;\r\n        }\r\n        while(i <= j) i += (k - j);\r\n\t}\r\n    update(double_str + pos - 1);\r\n}\r\ninline void update3(){\r\n    for(int i = 1 ; i <= n ; i++) double_str[i] = str[i];\r\n    reverse(double_str + 1 , double_str + n + 1);\r\n    Exkmp(double_str , n , str , n);\r\n    reverse(p + 1 , p + n + 1);\r\n    int j = n;\r\n    for(int i = n - 1 ; i ; i--){\r\n        if(p[j - 1] < j - i){\r\n            if(str[j - 1 - p[j - 1]] < str[p[j - 1] + 1]) j = i;\r\n        }\r\n        else if(nxt[j - i + 1] < i - 1){\r\n            if(str[nxt[j - i + 1] + 1] < str[j - i + 1 + nxt[j - i + 1]]) j = i;\r\n        }\r\n    }\r\n    reverse(str + 1 , str + j);\r\n    reverse(str + 1 , str + n + 1);\r\n    update(str);\r\n    reverse(str + 1 , str + n + 1);\r\n    reverse(str + 1 , str + j);\r\n}\r\ninline void update4(){\r\n    int p = cnt + 1;\r\n    while(--p > 1){\r\n        bool flag = 1;\r\n        for(int i = Ly[p - 1].r + 1 , j = Ly[p - 2].r + 1 ; i <= Ly[p].r && flag ; i++ , j++){\r\n            if(str[i] != str[j]) flag = 0;\r\n        }\r\n        if(flag == 0) break;\r\n    }\r\n    int q = p;\r\n    while(++q <= cnt){\r\n        for(int i = Ly[q - 1].r , j = Ly[q - 2].r + 1 + n - i ; i > Ly[q - 2].r ; i-- , j--){\r\n            if(str[i] == str[j]) continue;\r\n            if(str[i] < str[j]) p = q;\r\n            break;\r\n\t\t}\r\n    }\r\n    reverse(str + Ly[p - 1].r + 1 , str + n + 1);\r\n    reverse(str + 1 , str + n + 1);\r\n    update(str);\r\n    reverse(str + 1 , str + n + 1);\r\n    reverse(str + Ly[p - 1].r + 1 , str + n + 1);\r\n}\r\n\r\ninline void solve1(){\r\n    for(int i = 1 ; i <= n ; i++){\r\n        if(str[n - i + 1] == str[i]) continue;\r\n        if(str[n - i + 1] < str[i]) reverse(str + 1 , str + n + 1);\r\n        break;\r\n\t}\r\n    for(int i = 1 ; i <= n ; i++) cout << str[i];\r\n}\r\ninline void solve2(){\r\n    for(int i = 1 ; i <= n ; i++) ans[i] = str[i];\r\n    update1() , update2() , update3() , update4();\r\n}\r\ninline void solve3(){\r\n    int L = Ly[cnt - 1].r + 1;\r\n    int R = Ly[cnt].r;\r\n    for(int i = L ; i <= R ; i++) cout << str[i];\r\n    if(Ly[cnt].l != 1 || Ly[cnt - 1].l != 1) k--;\r\n    cnt--;\r\n}\r\nsigned main(){\r\n    scanf(\"%s\" , str + 1);\r\n    k _;\r\n    n = strlen(str + 1);\r\n    if(k == 1) {\r\n        solve1();\r\n        return 0;\r\n    }\r\n    reverse(str + 1 , str + n + 1);\r\n    Lyndon(str);\r\n    while(k >= 3 && cnt) solve3();\r\n    n = Ly[cnt].r;\r\n    if(n) solve2();\r\n    for(int i = 1 ; i <= n ; i++) cout << ans[i];\r\n    getchar();\r\n    return 0;\r\n}"
+}

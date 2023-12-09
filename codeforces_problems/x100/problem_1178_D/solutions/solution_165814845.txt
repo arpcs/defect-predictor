@@ -1,0 +1,38 @@
+{
+    "id": 165814845,
+    "contestId": 1178,
+    "creationTimeSeconds": 1658859506,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1178,
+        "index": "D",
+        "name": "Prime Graph",
+        "type": "PROGRAMMING",
+        "points": 1750.0,
+        "rating": 1500,
+        "tags": [
+            "constructive algorithms",
+            "greedy",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1178,
+        "members": [
+            {
+                "handle": "potat"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1563636900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 10035200,
+    "source": "#pragma GCC optimize(\"O3\")\r\n#pragma GCC target(\"avx2\")\r\n\r\n#include <bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\n#include <functional>\r\nusing namespace __gnu_pbds;\r\nusing namespace std;\r\nusing ll = long long int;\r\nusing ld = long double;\r\n#define pq_min priority_queue<ll, vector<ll>, greater<ll>>\r\n#define ordered_set tree<int, null_type, less_equal<int>, rb_tree_tag, tree_order_statistics_node_update> // s.erase(s.upper_bound(x)) to erase elements\r\n#define MOD 1000000007\r\n#define mod 998244353\r\n#define all(x) begin(x), end(x)\r\n#define allr(x) rbegin(x), rend(x)\r\n#define fastio                        \\\r\n    ios_base::sync_with_stdio(false); \\\r\n    cin.tie(NULL)\r\n\r\nvoid init_code()\r\n{\r\n    fastio;\r\n#ifndef ONLINE_JUDGE\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n    freopen(\"output.txt\", \"w\", stdout);\r\n#endif\r\n}\r\n\r\nll power(ll a, ll b, ll m = MOD)\r\n{\r\n    ll ans = 1;\r\n    while (b > 0)\r\n    {\r\n        if (b & 1)\r\n            ans = 1ll * ans * a % m;\r\n        a = 1ll * a * a % m;\r\n        b >>= 1;\r\n    }\r\n    return ans;\r\n}\r\n\r\nll fast_pow(ll b, ll p)\r\n{\r\n    if (p == 0)\r\n        return 1;\r\n    else if (p == 1)\r\n        return b;\r\n    else\r\n    {\r\n        ll r = fast_pow(b, p / 2);\r\n        if (p % 2 == 0)\r\n            return (r * r) % MOD;\r\n        else\r\n            return (((r * r) % MOD) * b) % MOD;\r\n    }\r\n}\r\n\r\nclass DSU\r\n{\r\nprivate:\r\n    vector<int> parent, size;\r\n\r\npublic:\r\n    DSU(int n)\r\n    {\r\n        parent = vector<int>(n);\r\n        size = vector<int>(n, 1);\r\n        iota(begin(parent), end(parent), 0);\r\n    }\r\n\r\n    int getParent(int x)\r\n    {\r\n        if (parent[x] == x)\r\n            return x;\r\n        return parent[x] = getParent(parent[x]);\r\n    }\r\n\r\n    bool join(int x, int y)\r\n    {\r\n        x = getParent(x);\r\n        y = getParent(y);\r\n\r\n        if (x == y)\r\n            return false;\r\n\r\n        if (size[x] > size[y])\r\n            swap(x, y);\r\n\r\n        parent[x] = y;\r\n        size[y] += size[x];\r\n        return true;\r\n    }\r\n\r\n    int getSize(int x)\r\n    {\r\n        return size[x] = size[getParent(x)];\r\n    }\r\n};\r\n\r\nvector<int> primes;\r\nbool prime[10000001 + 1];\r\nvoid SieveOfEratosthenes(int n)\r\n{\r\n    memset(prime, true, sizeof(prime));\r\n\r\n    for (int p = 2; p * p <= n; p++)\r\n        if (prime[p] == true)\r\n            for (int i = p * p; i <= n; i += p)\r\n                prime[i] = false;\r\n\r\n    for (int p = 2; p <= n; p++)\r\n        if (prime[p])\r\n            primes.push_back(p);\r\n}\r\n\r\nll __lcm(ll a, ll b)\r\n{\r\n    ll gcd = __gcd(a, b);\r\n    return (a * b) / gcd;\r\n}\r\n\r\nll setBitNumber(ll n)\r\n{\r\n    if (n == 0)\r\n        return 0;\r\n\r\n    ll msb = 0;\r\n    n = n / 2;\r\n    while (n != 0)\r\n    {\r\n        n = n / 2;\r\n        msb++;\r\n    }\r\n\r\n    return (1LL << msb);\r\n}\r\n\r\n// Read and try to understand every single test case\r\n// Divide test cases into cases. Almost every test case is there for a reason.\r\n// Taking more time than expected? Open paint and start writing\r\n// Still can't find a pattern? Write a bruteforce and look for a pattern there.\r\n// Try to minimize code for A and B. It will almost always have a simple solution.\r\n// __builtin_popcount(x): the number of ones in the bit representation\r\n\r\nvoid solve()\r\n{\r\n    ll n;\r\n    cin >> n;\r\n\r\n    vector<pair<ll, ll>> res;\r\n\r\n    ll i = 1;\r\n\r\n    if (n % 3 == 1)\r\n    {\r\n        res.push_back({1, 2});\r\n        res.push_back({2, 3});\r\n        res.push_back({3, 4});\r\n        res.push_back({4, 2});\r\n        res.push_back({3, 2});\r\n        i = 5;\r\n    }\r\n    if (n % 3 == 2)\r\n    {\r\n        res.push_back({1, 2});\r\n        res.push_back({2, 3});\r\n        res.push_back({3, 4});\r\n        res.push_back({4, 5});\r\n        res.push_back({5, 1});\r\n        i = 6;\r\n    }\r\n\r\n    while (i <= n)\r\n    {\r\n        res.push_back({i, i + 1});\r\n        res.push_back({i + 1, i + 2});\r\n        res.push_back({i + 2, i});\r\n\r\n        i += 3;\r\n    }\r\n\r\n    cout << res.size() << \"\\n\";\r\n    for (auto it : res)\r\n        cout << it.first << \" \" << it.second << \"\\n\";\r\n}\r\n\r\nint main()\r\n{\r\n    init_code();\r\n    cout << fixed;\r\n\r\n    // int t;\r\n    // cin >> t;\r\n    // while (t--)\r\n    solve();\r\n    return 0;\r\n}"
+}

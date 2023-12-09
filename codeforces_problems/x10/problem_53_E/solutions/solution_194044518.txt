@@ -1,0 +1,36 @@
+{
+    "id": 194044518,
+    "contestId": 53,
+    "creationTimeSeconds": 1676664864,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 53,
+        "index": "E",
+        "name": "Dead Ends",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2500,
+        "tags": [
+            "bitmasks",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 53,
+        "members": [
+            {
+                "handle": "parsa-golestani"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1294329600
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 10,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 4915200,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <algorithm>\r\nusing namespace std;\r\n\r\nconst int N = 15;\r\nconst int M = 60000;\r\nint adj[N][N], dp[M], pw[N];\r\nint Mask[M][N], ans = 0, n;\r\nvector<pair<int, int>> vec;\r\n\r\nint main()\r\n{\r\n    int m, k; cin>>n>>m>>k;\r\n    pw[0] = 1;\r\n    for(int i=1; i<=m; i++)\r\n    {\r\n        int u, v; cin>>u>>v;\r\n        u -- , v --;\r\n        adj[u][v] = adj[v][u] = 1;\r\n        pw[i] = pw[i-1] * 3;\r\n    }\r\n    pw[n] = pw[n-1] * 3;\r\n    for(int mask=0; mask<pw[n]; mask++)\r\n    {\r\n        int maskp = mask;\r\n        for(int i=0; i<n; i++)\r\n            Mask[mask][i] = maskp % 3, maskp /= 3;\r\n        int cnt = 0;\r\n        for(int i=0; i<n; i++)\r\n            if(Mask[mask][i])\r\n                cnt ++;\r\n        vec.push_back({cnt, mask});\r\n    }\r\n    sort(vec.begin(), vec.end());\r\n    for(int ind = 0; ind < pw[n]; ind ++)\r\n    {\r\n        int mask = vec[ind].second;\r\n        int cnt = 0, cnt_leaf = 0, leaf = 0;\r\n        for(int i=0; i<n; i++)\r\n            if(Mask[mask][i])\r\n                cnt ++, cnt_leaf += (Mask[mask][i] == 2), leaf = (Mask[mask][i] == 2 ? i : leaf);\r\n        if(cnt == 1 && cnt_leaf == 0)\r\n            dp[mask] = 1;\r\n        if(cnt == 2)\r\n        {\r\n            if(cnt_leaf != 2)\r\n                continue;\r\n            int leaf1 = -1, leaf2 = -1;\r\n            for(int i=0; i<n; i++)\r\n                if(Mask[mask][i] == 2)\r\n                {\r\n                    if(leaf1 == -1)\r\n                        leaf1 = i;\r\n                    else\r\n                        leaf2 = i;\r\n                }\r\n            dp[mask] = adj[leaf1][leaf2];\r\n            if(cnt == n && cnt_leaf == k)\r\n                ans += dp[mask];\r\n            continue;\r\n        }\r\n        if(cnt == n && cnt_leaf == k)\r\n            ans += dp[mask];\r\n        if(cnt < 2 || (cnt_leaf < 2 || cnt_leaf == cnt))\r\n            continue;\r\n\r\n        for(int i=0; i<n; i++)\r\n             if(Mask[mask][i] == 1)\r\n                dp[mask] += adj[i][leaf] * dp[mask - 2 * pw[leaf] + pw[i]] + adj[i][leaf] * dp[mask - 2 * pw[leaf]];\r\n        if(cnt == n && cnt_leaf == k)\r\n            ans += dp[mask];\r\n    }\r\n    cout<<ans<<flush;\r\n    return 0;\r\n}\r\n"
+}

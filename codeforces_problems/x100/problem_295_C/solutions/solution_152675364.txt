@@ -1,0 +1,38 @@
+{
+    "id": 152675364,
+    "contestId": 295,
+    "creationTimeSeconds": 1649080953,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "Selva_1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 102400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\nconst ll M = 1e9 + 7;\r\n\r\nint d[51][51][2] = {};\r\nll cnt[51][51][2] = {}, nCr[51][51] = {};\r\nbool v[51][51][2] = {};\r\n\r\nstruct node{\r\n    int w1, w2;\r\n    bool l;\r\n    node() = default;\r\n    node(int x, int y, int z){\r\n        w1 = x; w2 = y; l = z;\r\n    }\r\n};\r\n\r\nvoid precompute(){\r\n    for(int i = 0; i <= 50; i++) nCr[i][0] = 1;\r\n    for(int i = 1; i <= 50; i++){\r\n        for(int j = 1; j <= i; j++){\r\n            nCr[i][j] = nCr[i - 1][j] + nCr[i - 1][j - 1];\r\n        }\r\n    }\r\n}\r\n\r\nint main(){\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL); cout.tie(NULL);\r\n    \r\n    int t = 1;\r\n    // cin >> t;\r\n    precompute();\r\n    while(t--){\r\n        int n, x;\r\n        cin >> n >> x;\r\n        int w1 = 0, w2 = 0;\r\n        for(int i = 0; i < n; i++){\r\n            int a;\r\n            cin >> a;\r\n            if(a == 50) w1++;\r\n            else w2++;\r\n        }        \r\n        for(int i = 0; i < 51; i++)\r\n            for(int j = 0; j < 51; j++)\r\n                d[i][j][0] = d[i][j][1] = INT_MAX;\r\n        v[w1][w2][0] = 1;\r\n        d[w1][w2][0] = 0;\r\n        cnt[w1][w2][0] = 1;\r\n        queue<node> q;\r\n        q.push(node(w1, w2, 0));\r\n        while(!q.empty()){\r\n            node cur = q.front();\r\n            // cout << cur.w1 << \" \" << cur.w2 << \" \" << cur.l << endl;\r\n            // cout << d[cur.w1][cur.w2][cur.l] << endl;\r\n            q.pop();\r\n            if(cur.l == 0){\r\n                for(int i = 0; i <= cur.w1; i++){\r\n                    for(int j = 0; j <= cur.w2; j++){\r\n                        if(!i && !j) continue;\r\n                        if(i*50 + j*100 > x) break;\r\n                        if(v[cur.w1 - i][cur.w2 - j][1] && \r\n                        d[cur.w1 - i][cur.w2 - j][1] < d[cur.w1][cur.w2][0] + 1) continue;\r\n                        d[cur.w1 - i][cur.w2 - j][1] = d[cur.w1][cur.w2][0] + 1;\r\n                        ll extra = nCr[cur.w1][i]*nCr[cur.w2][j]%M;\r\n                        cnt[cur.w1 - i][cur.w2 - j][1] = (cnt[cur.w1 - i][cur.w2 - j][1] + cnt[cur.w1][cur.w2][0]*extra%M)%M;\r\n                        if(!v[cur.w1 - i][cur.w2 - j][1]){\r\n                            v[cur.w1 - i][cur.w2 - j][1] = 1;\r\n                            q.push(node(cur.w1 - i, cur.w2 - j, 1));\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n            else{\r\n                for(int i = 0; i <= w1 - cur.w1; i++){\r\n                    for(int j = 0; j <= w2 - cur.w2; j++){\r\n                        if(!i && !j) continue;\r\n                        if(i*50 + j*100 > x) break;\r\n                        if(v[cur.w1 + i][cur.w2 + j][0] && \r\n                        d[cur.w1 + i][cur.w2 + j][0] < d[cur.w1][cur.w2][1] + 1) continue;\r\n                        d[cur.w1 + i][cur.w2 + j][0] = d[cur.w1][cur.w2][1] + 1;\r\n                        ll extra = nCr[w1 - cur.w1][i]*nCr[w2 - cur.w2][j]%M;\r\n                        cnt[cur.w1 + i][cur.w2 + j][0] = (cnt[cur.w1 + i][cur.w2 + j][0] + cnt[cur.w1][cur.w2][1]*extra%M)%M;\r\n                        if(!v[cur.w1 + i][cur.w2 + j][0]){\r\n                            v[cur.w1 + i][cur.w2 + j][0] = 1;\r\n                            q.push(node(cur.w1 + i, cur.w2 + j, 0));\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n        }\r\n        if(d[0][0][1] == INT_MAX) cout << \"-1\\n0\\n\";\r\n        else{\r\n            cout << d[0][0][1] << \"\\n\";\r\n            cout << cnt[0][0][1] << \"\\n\";\r\n        }\r\n    }\r\n    \r\n    return 0;\r\n}"
+}
