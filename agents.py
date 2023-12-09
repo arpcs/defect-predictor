@@ -7,8 +7,9 @@ import random
 from typing import List
 
 api_key = "api_key"
-with open("../api_key.txt", 'r', encoding='utf-8') as file:
-    api_key = file.read()
+if os.path.exists("../api_key.txt"):
+    with open("../api_key.txt", 'r', encoding='utf-8') as file:
+        api_key = file.read()
     
 client = openai.OpenAI(api_key = api_key)
 
