@@ -1,0 +1,39 @@
+{
+    "id": 233033496,
+    "contestId": 665,
+    "creationTimeSeconds": 1700188520,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 665,
+        "index": "F",
+        "name": "Four Divisors",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "data structures",
+            "dp",
+            "math",
+            "number theory",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 665,
+        "members": [
+            {
+                "handle": "momoyuu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1461164400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 27,
+    "timeConsumedMillis": 826,
+    "memoryConsumedBytes": 5836800,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\nusing ll = long long;\r\n\r\nint isqrt(ll n) {\r\n\treturn sqrtl(n);\r\n}\r\n\r\n__attribute__((target(\"avx2\"), optimize(\"O3\", \"unroll-loops\")))\r\nll prime_pi(const ll N) {\r\n\tif (N <= 1) return 0;\r\n\tif (N == 2) return 1;\r\n\tconst int v = isqrt(N);\r\n\tint s = (v + 1) / 2;\r\n\tvector<int> smalls(s);\r\n\tfor (int i = 1; i < s; i++) smalls[i] = i;\r\n\tvector<int> roughs(s);\r\n\tfor (int i = 0; i < s; i++) roughs[i] = 2 * i + 1;\r\n\tvector<ll> larges(s);\r\n\tfor (int i = 0; i < s; i++) larges[i] = (N / (2 * i + 1) - 1) / 2;\r\n\tvector<bool> skip(v + 1);\r\n\tconst auto divide = [](ll n, ll d) -> int { return (double)n / d;};\r\n\tconst auto half = [](int n) -> int { return (n - 1) >> 1;};\r\n\tint pc = 0;\r\n\tfor (int p = 3; p <= v; p += 2) if (!skip[p]) {\r\n\t\tint q = p * p;\r\n\t\tif ((ll)q * q > N) break;\r\n\t\tskip[p] = true;\r\n\t\tfor (int i = q; i <= v; i += 2 * p) skip[i] = true;\r\n\t\tint ns = 0;\r\n\t\tfor (int k = 0; k < s; k++) {\r\n\t\t\tint i = roughs[k];\r\n\t\t\tif (skip[i]) continue;\r\n\t\t\tll d = (ll)i * p;\r\n\t\t\tlarges[ns] = larges[k] - (d <= v ? larges[smalls[d >> 1] - pc] : smalls[half(divide(N, d))]) + pc;\r\n\t\t\troughs[ns++] = i;\r\n\t\t}\r\n\t\ts = ns;\r\n\t\tfor (int i = half(v), j = ((v / p) - 1) | 1; j >= p; j -= 2) {\r\n\t\t\tint c = smalls[j >> 1] - pc;\r\n\t\t\tfor (int e = (j * p) >> 1; i >= e; i--) smalls[i] -= c;\r\n\t\t}\r\n\t\tpc++;\r\n\t}\r\n\tlarges[0] += (ll)(s + 2 * (pc - 1)) * (s - 1) / 2;\r\n\tfor (int k = 1; k < s; k++) larges[0] -= larges[k];\r\n\tfor (int l = 1; l < s; l++) {\r\n\t\tll q = roughs[l];\r\n\t\tll M = N / q;\r\n\t\tint e = smalls[half(M / q)] - pc;\r\n\t\tif (e < l + 1) break;\r\n\t\tll t = 0;\r\n\t\tfor (int k = l + 1; k <= e; k++)\r\n\t\t\tt += smalls[half(divide(M, roughs[k]))];\r\n\t\tlarges[0] += t - (ll)(e - l) * (pc + l - 1);\r\n\t}\r\n\treturn larges[0] + 1;\r\n}\r\n\r\nint main(){\r\n    cin.tie(nullptr);\r\n    ios::sync_with_stdio(false);\r\n\r\n    const int mx = 1e6;\r\n    ll n;\r\n    cin>>n;\r\n    ll ans = 0;\r\n    vector<int> p(mx+1,0);\r\n    for(int i = 2;i<=mx;i++){\r\n        if(p[i]) continue;\r\n        for(int j = 2 * i;j<=mx;j+=i){\r\n            p[j] = 1;\r\n        }\r\n    }\r\n    for(ll i = 2;i<=mx;i++){\r\n        if(p[i]) continue;\r\n        if(i*i*i<=n) ans++;\r\n    }\r\n    for(ll i = 2;i<=mx;i++){\r\n        if(p[i]) continue;\r\n        if(i*i>n) break;\r\n        ll can = n / i;\r\n        if(can<=i) break;\r\n        ans += prime_pi(can) - prime_pi(i);\r\n    }\r\n    cout<<ans<<endl;\r\n}\r\n"
+}

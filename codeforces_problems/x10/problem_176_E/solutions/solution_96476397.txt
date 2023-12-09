@@ -1,0 +1,37 @@
+{
+    "id": 96476397,
+    "contestId": 176,
+    "creationTimeSeconds": 1603479769,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 176,
+        "index": "E",
+        "name": "Archaeology",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 176,
+        "members": [
+            {
+                "handle": "detached"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1334934300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 26214400,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\ntypedef long long ll;\n\n#define F first\n#define S second\n#define pb push_back\n\nconst int N = 100 * 1000 + 10, LOG = 20;\n\nint n, q, start_time, st[N], h[N], par[N][LOG];\nll dist[N][LOG], ans;\nvector<pair<int, int>> adj[N];\nset<pair<int, int>> sv;\nmap<pair<int, int>, int> mp, cnt;\n\nvoid dfs_lca(int v = 1) {\n    st[v] = ++start_time;\n    for (int i = 0; i + 1 < LOG; i++)\n        par[v][i + 1] = par[par[v][i]][i];\n    for (auto[u, w]: adj[v])\n        if (u ^ par[v][0])\n            h[u] = h[v] + 1, par[u][0] = v, dfs_lca(u);\n}\n\nint k_par(int v, int k) {\n    for (int i = 0; i < LOG; i++)\n        if (k >> i && 1)\n            v = par[v][i];\n    return v;\n}\n\nint lca(int u, int v) {\n    if (h[u] > h[v])\n        swap(u, v);\n    v = k_par(v, h[v] - h[u]);\n    if (u == v)\n        return u;\n    for (int i = LOG - 1; ~i; i--)\n        if (par[u][i] ^ par[v][i])\n            v = par[v][i], u = par[u][i];\n    return par[u][0];\n}\n\nvoid upd(int x, bool b) {\n    ll res = 0;\n    auto pl = sv.lower_bound({st[x], x});\n    auto pr = sv.upper_bound({st[x] ,x});\n    int u = pl->S, v = pr->S;\n    int _lca = lca(u, v);\n    if (!b) {\n        while (u ^ _lca) {\n            if (!cnt[{par[u][0], u}])\n                res += mp[{u, par[u][0]}];\n            cnt[{u, par[u][0]}] = ++cnt[{par[u][0], u}], u = par[u][0];\n        }\n        while (v ^ _lca) {\n            if (!cnt[{par[v][0], v}])\n                res += mp[{v, par[v][0]}];\n            cnt[{v, par[v][0]}] = ++cnt[{par[v][0], v}], v = par[v][0];\n        }\n        ans += res;\n        return;\n    }\n    while (u ^ _lca) {\n        if (cnt[{par[u][0], u}] == 1)\n            res -= mp[{u, par[u][0]}];\n        cnt[{u, par[u][0]}] = --cnt[{par[u][0], u}], u = par[u][0];\n    }\n    while (v ^ _lca) {\n        if (cnt[{par[v][0], v}] == 1)\n            res -= mp[{v, par[v][0]}];\n        cnt[{v, par[v][0]}] = --cnt[{par[v][0], v}], v = par[v][0];\n    }\n    ans += res;\n\n\n}\n\nint main() {\n    ios:: sync_with_stdio(false), cin.tie(NULL), cout.tie(NULL);\n    h[1] = 1;\n    cin >> n;\n    for (int i = 1, u, v, w; i < n; i++) {\n        cin >> u >> v >> w, adj[v].pb({u, w}), adj[u].pb({v, w});\n        mp[{v, u}] = mp[{u, v}] = w;\n    }\n    dfs_lca();\n    cin >> q;\n    while (q--) {\n        char c;\n        int x;\n        cin >> c;\n        if (c ^ '?')\n            cin >> x;\n        if (c == '+') {\n            sv.insert({st[x], x});\n            upd(x, 0);\n        }\n        else if (c == '-') {\n            upd(x, 1);\n            sv.erase({st[x], x});\n        }\n        else\n            cout << ans << '\\n';\n    } \n}\n"
+}

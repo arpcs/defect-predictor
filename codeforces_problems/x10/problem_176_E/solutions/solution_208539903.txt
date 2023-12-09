@@ -1,0 +1,37 @@
+{
+    "id": 208539903,
+    "contestId": 176,
+    "creationTimeSeconds": 1685933537,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 176,
+        "index": "E",
+        "name": "Archaeology",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 176,
+        "members": [
+            {
+                "handle": "cage"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1334934300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 466,
+    "memoryConsumedBytes": 58163200,
+    "source": "// LUOGU_RID: 112076527\n#include<iostream>\r\n#include<cstring>\r\n#include<set>\r\n#include<algorithm>\r\nusing namespace std;\r\n#define int long long\r\nconst int N=2e5+100;\r\nint dep[N];\r\nint p[20][N],f[N],step,dfn[N];\r\nint D[N];\r\nvector<pair<int,int>>v[N];\r\ninline void dfs(int x,int fa){\r\n    f[x]=fa;dep[x]=dep[fa]+1;\r\n    p[0][++step]=x;dfn[x]=step;\r\n    for(auto [y,w]:v[x]){\r\n        if(y==fa) continue;\r\n        D[y]=D[x]+w;dfs(y,x);\r\n    }\r\n}\r\ninline int calc(int x,int y){\r\n    return (dep[x]<dep[y]?x:y);\r\n}\r\ninline int lca(int x,int y){\r\n    if(x==y)return x;\r\n    if((x=dfn[x])>(y=dfn[y])) swap(x,y);x++;\r\n    int l=__lg(y-x+1);\r\n    return f[calc(p[l][x],p[l][y-(1<<l)+1])];\r\n}\r\nint n,q;\r\nstruct cmp{\r\n    inline bool operator()(int n,int m)const{\r\n        return dfn[n]<dfn[m];\r\n    }\r\n};\r\nint c[N];\r\nset<int,cmp>s;\r\ninline int w(set<int,cmp>::iterator l,set<int,cmp>::iterator r){\r\n    if(r==s.end()) return 0;\r\n    int L=*l,R=*r;\r\n    return D[lca(L,R)];\r\n}\r\nint32_t main(){\r\n    ios::sync_with_stdio(false),cin.tie(0);\r\n    cin>>n;\r\n    for(int i=1;i<n;i++){\r\n        int x,y,w;cin>>x>>y>>w;\r\n        v[x].push_back(make_pair(y,w)),v[y].push_back(make_pair(x,w));\r\n    }\r\n    dfs(1,0);\r\n    for(int i=1;i<=19;i++){\r\n        for(int x=1;x+(1<<i)-1<=n;x++){\r\n            p[i][x]=calc(p[i-1][x],p[i-1][x+(1<<(i-1))]);\r\n        }\r\n    }\r\n    int ans=0;\r\n    cin>>q;\r\n    while(q--){\r\n        char op[10];int x;\r\n        cin>>(op+1);\r\n        if(op[1]=='+'){\r\n            cin>>x;c[x]^=1;\r\n            ans+=D[x];\r\n            auto p=s.insert(x).first;\r\n            auto pre=s.lower_bound(x);\r\n            auto nxt=s.upper_bound(x);\r\n            if(pre==s.begin()){\r\n                ans-=w(p,nxt);\r\n            }else{\r\n                pre=prev(pre);\r\n                ans+=w(pre,nxt);\r\n                ans-=w(pre,p)+w(p,nxt);    \r\n            }\r\n\r\n        }else if(op[1]=='-'){\r\n            cin>>x;c[x]^=1;\r\n            ans-=D[x];\r\n            auto p=s.find(x);\r\n            auto pre=s.lower_bound(x);\r\n            auto nxt=s.upper_bound(x);\r\n            if(pre==s.begin()){\r\n                ans+=w(p,nxt);\r\n            }else{\r\n                pre=prev(pre);\r\n                ans-=w(pre,nxt);\r\n                ans+=w(pre,p)+w(p,nxt);\r\n            }\r\n            s.erase(x);\r\n        }else{\r\n            if(s.size()<=1){\r\n                cout<<0<<'\\n';\r\n            }else{\r\n                int l=*s.begin();\r\n                int r=*prev(s.end());\r\n                cout<<ans-D[lca(l,r)]<<'\\n';\r\n            }\r\n        }\r\n        // cerr<<ans<<\" : \";for(int z:s) cerr<<z<<\" \";cerr<<endl;\r\n    }\r\n}\r\n/*\r\n10\r\n7 3 9\r\n8 3 2\r\n10 5 6\r\n9 3 5\r\n2 1 7\r\n7 6 2\r\n3 4 1\r\n7 10 5\r\n10 1 8\r\n3\r\n+ 5\r\n?\r\n+ 7\r\n+ 2\r\n+ 10\r\n+ 9\r\n?\r\n*/"
+}

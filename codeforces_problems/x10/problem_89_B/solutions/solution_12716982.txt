@@ -1,0 +1,38 @@
+{
+    "id": 12716982,
+    "contestId": 89,
+    "creationTimeSeconds": 1440664918,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 89,
+        "index": "B",
+        "name": "Widget Library",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "expression parsing",
+            "graphs",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 89,
+        "members": [
+            {
+                "handle": "armike"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1308236400
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 39,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <string>\r\n#include <map>\r\n#include <sstream>\r\n#include <algorithm>\r\nusing namespace std;\r\n\r\nenum widget_t\r\n{\r\n    Regular,\r\n    HBox,\r\n    VBox\r\n};\r\n\r\nstruct Widget\r\n{\r\n    Widget()\r\n    {\r\n        width = 0;\r\n        height = 0;\r\n        border = 0;\r\n        spacing = 0;\r\n    }\r\n    long long width;\r\n    long long height;\r\n    long long border;\r\n    long long spacing;\r\n    widget_t type;\r\n    long long index;\r\n    inline void set_border(long long border)\r\n    {\r\n        this->border = border;\r\n    }\r\n    inline void set_spacing(long long spacing)\r\n    {\r\n        this->spacing = spacing;\r\n    }\r\n    inline void set_type(widget_t type)\r\n    {\r\n        this->type = type;\r\n    }\r\n};\r\n\r\nvector <long long> graph[100];\r\nvector <Widget> widgets;\r\n\r\nvoid calculate_widget_final_size(size_t index, vector < pair <long long, long long> >& sizes)\r\n{\r\n    if (sizes[index].first != -1 && sizes[index].second != -1)\r\n        return;\r\n\r\n    for (size_t i = 0; i < graph[index].size(); ++i)\r\n        calculate_widget_final_size(graph[index][i], sizes);\r\n\r\n    Widget curr_widget = widgets[index];\r\n    if (graph[index].size() == 0)\r\n    {\r\n        sizes[index] = make_pair(curr_widget.width, curr_widget.height);\r\n    }\r\n    else\r\n    {\r\n        pair <long long, long long> curr_size;\r\n        for (size_t i = 0; i < graph[index].size(); ++i)\r\n        {\r\n            if (curr_widget.type == HBox)\r\n            {\r\n                curr_size.first += sizes[graph[index][i]].first;\r\n                curr_size.second = max(curr_size.second, sizes[graph[index][i]].second);\r\n                if (i + 1 != graph[index].size())\r\n                    curr_size.first += curr_widget.spacing;\r\n            }\r\n            else if (curr_widget.type == VBox)\r\n            {\r\n                curr_size.first = max(curr_size.first, sizes[graph[index][i]].first);\r\n                curr_size.second += sizes[graph[index][i]].second;\r\n                if (i + 1 != graph[index].size())\r\n                    curr_size.second += curr_widget.spacing;\r\n            }\r\n        }\r\n        curr_size.first += 2 * curr_widget.border;\r\n        curr_size.second += 2 * curr_widget.border;\r\n\r\n        sizes[index] = curr_size;\r\n    }\r\n\r\n    return;\r\n}\r\n\r\nint main()\r\n{\r\n    long long n;\r\n    string s;\r\n    map <string, Widget> enumerate;\r\n    cin >> n;\r\n    getline(cin, s);\r\n    for (size_t i = 0; i < n; ++i)\r\n    {\r\n        getline(cin, s);\r\n\r\n        for (size_t j = 0; j < s.size(); ++j)\r\n        {\r\n            if (s[j] == '(' || s[j] == ')' || s[j] == '.' || s[j] == ',')\r\n                s[j] = ' ';\r\n        }\r\n\r\n        istringstream iss(s);\r\n        string type;\r\n        iss >> type;\r\n        if (type == \"Widget\" || type == \"HBox\" || type == \"VBox\")\r\n        {\r\n            long long num = enumerate.size();\r\n            string name;\r\n            iss >> name;\r\n            Widget w;\r\n            w.index = num;\r\n            if (type == \"HBox\")\r\n                w.set_type(HBox);\r\n            else if (type == \"VBox\")\r\n                w.set_type(VBox);\r\n            else\r\n            {\r\n                w.set_type(Regular);\r\n                long long x, y;\r\n                iss >> x >> y;\r\n                w.width = x;\r\n                w.height = y;\r\n            }\r\n            enumerate[name] = w;\r\n            widgets.push_back(w);\r\n        }\r\n        else\r\n        {\r\n            string name = type;\r\n            string action;\r\n            iss >> action;\r\n            if (action == \"pack\")\r\n            {\r\n                string child;\r\n                iss >> child;\r\n                graph[enumerate[name].index].push_back(enumerate[child].index);\r\n            }\r\n            else if (action == \"set_spacing\")\r\n            {\r\n                long long spacing;\r\n                iss >> spacing;\r\n                enumerate[name].set_spacing(spacing);\r\n                widgets[enumerate[name].index].set_spacing(spacing);\r\n            }\r\n            else if (action == \"set_border\")\r\n            {\r\n                long long border;\r\n                iss >> border;\r\n                enumerate[name].set_border(border);\r\n                widgets[enumerate[name].index].set_border(border);\r\n            }\r\n        }\r\n    }\r\n\r\n    vector < pair <long long, long long> > sizes(enumerate.size(), pair<long long, long long>(-1, -1));\r\n    for (size_t index = 0; index < enumerate.size(); ++index)\r\n    {\r\n        calculate_widget_final_size(index, sizes);\r\n    }\r\n\r\n    for (auto it = enumerate.begin(); it != enumerate.end(); ++it)\r\n    {\r\n        int index = it->second.index;\r\n        cout << it->first << ' ' << sizes[index].first << ' ' << sizes[index].second << endl;\r\n    }\r\n}"
+}

@@ -1,0 +1,42 @@
+{
+    "id": 229739527,
+    "contestId": 1633,
+    "creationTimeSeconds": 1698258560,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1633,
+        "index": "E",
+        "name": "Spanning Tree Queries",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "greedy",
+            "math",
+            "sortings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1633,
+        "members": [
+            {
+                "handle": "sakurasonic"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1643639700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 25,
+    "timeConsumedMillis": 1918,
+    "memoryConsumedBytes": 54476800,
+    "source": "#include <bits/stdc++.h>\r\n#pragma GCC optimize(\"O3,unroll-loops\")\r\nusing namespace std;\r\ntypedef long long ll;\r\nconst int N = 50;\r\nconst int M = 300;\r\nconst int K = 1e7;\r\nint u[M],w[M],x[M],p[M];\r\nint v[K];\r\nint bp[10*M*M],bonus[10*M*M];\r\nll v2[10*M*M];\r\nstruct DSU{\r\n    int p,sz;\r\n}v3[N];\r\nint leader(int x){\r\n    if(x == v3[x].p)return x;\r\n    return v3[x].p = leader(v3[x].p);\r\n}\r\nvoid connect(int a,int b){\r\n    a = leader(a);\r\n    b = leader(b);\r\n    if(v3[a].sz > v3[b].sz)swap(a,b);\r\n    v3[a].p = b;\r\n    v3[b].sz+=v3[a].sz;\r\n}\r\nint main(){\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    int n,m,cnt = 0;\r\n    cin>>n>>m;\r\n    for(int i = 0;i < m;i++){\r\n        cin>>u[i]>>w[i]>>x[i];\r\n        u[i]--;w[i]--;\r\n        p[i] = i;\r\n    }\r\n    for(int i = 0;i < m;i++){\r\n        for(int j = i + 1;j < m;j++){\r\n            bp[cnt++] = (x[i] + x[j] + 1)/2;\r\n            bp[cnt++] = (x[i] + x[j] - 1)/2;\r\n        }\r\n        bp[cnt++] = x[i];\r\n        bp[cnt++] = x[i] + 1;\r\n    }\r\n    bp[cnt++] = 0;\r\n    sort(bp,bp + cnt);\r\n    int cnt2 = 1;\r\n    for(int i = 1;i < cnt;i++){\r\n        if(bp[i] != bp[cnt2 - 1]){\r\n            bp[cnt2++] = bp[i];\r\n        }\r\n    }\r\n    cnt = cnt2;\r\n    for(int i = 0;i < cnt;i++){\r\n        ///solve problem\r\n        ///get add and sub\r\n        ///v2 - score starting at bp i\r\n        for(int j = 0;j < n;j++){\r\n            v3[j] = {j,1};\r\n        }\r\n        sort(p,p + m,[&](int a,int b){\r\n             if(abs(x[a] - bp[i]) == abs(x[b] - bp[i])){\r\n                return x[a] > x[b];\r\n             }\r\n             return abs(x[a] - bp[i]) < abs(x[b] - bp[i]);\r\n        });\r\n        for(int j = 0;j < m;j++){\r\n            int id = p[j];\r\n            if(leader(u[id]) != leader(w[id])){\r\n                v2[i]+=abs(x[id] - bp[i]);\r\n                if(x[id] - bp[i] >= 0){\r\n                    bonus[i]--;\r\n                }else bonus[i]++;\r\n                connect(u[id],w[id]);\r\n            }\r\n        }\r\n    }\r\n    ll ans = 0;\r\n    int p,k,a,b,c;\r\n    cin>>p>>k>>a>>b>>c;\r\n    for(int i = 0;i < k;i++){\r\n        if(i < p){\r\n            cin>>v[i];\r\n        }else v[i] = (1ll*v[i - 1]*a + b)%c;\r\n        ll ans2 = 0;\r\n        int l = 0,r = cnt - 1;\r\n        while(l != r){\r\n            int mij = (l + r)/2;\r\n            if(bp[mij] >= v[i]){\r\n                r = mij;\r\n            }else l = mij + 1;\r\n        }\r\n        ans2 = v2[l] + 1ll*bonus[l]*(v[i] - bp[l]);\r\n        //cout<<v[i]<<' '<<ans2<<'\\n';\r\n        ans^=ans2;\r\n    }\r\n    cout<<ans;\r\n    return 0;\r\n}\r\n"
+}

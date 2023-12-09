@@ -1,0 +1,40 @@
+{
+    "id": 219926686,
+    "contestId": 441,
+    "creationTimeSeconds": 1692715458,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 441,
+        "index": "D",
+        "name": "Valera and Swaps",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2100,
+        "tags": [
+            "constructive algorithms",
+            "dsu",
+            "graphs",
+            "implementation",
+            "math",
+            "string suffix structures"
+        ]
+    },
+    "author": {
+        "contestId": 441,
+        "members": [
+            {
+                "handle": "Allan_vasc"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1402241400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 614400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define int long long\r\n#define optimize ios::sync_with_stdio(0); cin.tie(0); cout.tie(0)\r\n#define ALL(x) x.begin(), x.end()\r\n#define pb push_back\r\n#define ll long long\r\n#define vi vector<int>\r\n#define pii pair<int,int>\r\n#define iii tuple<int,int,int>\r\n\r\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\r\nconst int INF = 0x3f3f3f3f3f3f3f3f;\r\nconst int MOD = 1e9 + 7;\r\n\r\nvector<vector<int>> cycles;\r\nconst int ms = 1e4;\r\nint par[ms], sz[ms];\r\nvoid build(){\r\n    for(int i = 0; i < ms; i++){\r\n        par[i] = i;\r\n        sz[i] = 1;\r\n    }\r\n}\r\nint find(int u) { return u == par[u] ? u : par[u] = find(par[u]); }\r\nvoid merge(int a, int b){\r\n    a = find(a);\r\n    b = find(b);\r\n    if(a == b) return;\r\n    if(sz[a] < sz[b]) swap(a, b);\r\n    par[b] = a;\r\n    sz[a] += sz[b];\r\n}\r\n\r\nvoid dfs(int u, vector<int> & v, vector<bool> & vis){\r\n    int n = v.size() - 1;\r\n    vis[u] = true;\r\n    cycles.back().push_back(u);\r\n    for(int i = 1; i <= n; i++){\r\n        if(v[i] == u){\r\n            if(vis[i]) break;\r\n            dfs(i, v, vis);\r\n        }\r\n    }\r\n}\r\n\r\nsigned main() {\r\n    optimize;\r\n    int n; cin >> n;\r\n    vector<int> v(n + 1);\r\n    for(int i = 0; i < n; i++) cin >> v[i + 1];\r\n    int m; cin >> m;\r\n\r\n    vector<bool> vis(n + 1, false);\r\n    for(int i = 1; i <= n; i++){\r\n        if(vis[i]) continue;\r\n        cycles.push_back(vector<int>());\r\n        dfs(i, v, vis);\r\n    }\r\n    int fp = 0;\r\n    build();\r\n    for(int i = 0; i < cycles.size(); i++){\r\n        // cout << \"cycle \" << i << \" = \";\r\n        for(auto x : cycles[i]){\r\n            // cout << x << \" \";\r\n            merge(cycles[i][0], x);\r\n        }\r\n        // cout << '\\n';\r\n        sort(cycles[i].begin(), cycles[i].end());\r\n        fp += cycles[i].size() - 1;\r\n    }\r\n    // cout << \"fp = \" << fp << '\\n';\r\n\r\n    vector<pii> swaps;\r\n    // preciso baguncar mais, da merge em ciclos\r\n    for(int i = 2; i <= n && fp < m; i++){\r\n        if(find(1) != find(i)){\r\n            fp++;\r\n            merge(1, i);\r\n            swaps.push_back({1, i});\r\n        }\r\n    }\r\n\r\n    // Preciso ajeitar (quebrar ciclos)\r\n    for(int i = 1; i <= n && fp > m; i++){\r\n        vector<int> pos(n + 1, -1);\r\n        int curr = 0;\r\n        for(int j = v[i]; j != i; j = v[j]) pos[j] = curr++;\r\n        pos[i] = curr;\r\n        curr = 0;\r\n        for(int j = i + 1; j <= n && fp > m; j++){\r\n            if(pos[j] >= curr){\r\n                swaps.push_back({i, j });\r\n                fp--;\r\n                curr = pos[j] + 1;\r\n                swap(v[i], v[j]);\r\n            }\r\n        }\r\n    }\r\n\r\n    cout << swaps.size() << '\\n';\r\n    for(auto [x, y] : swaps) cout << x << \" \" << y << \" \";\r\n    cout << '\\n';\r\n    return 0;\r\n}"
+}

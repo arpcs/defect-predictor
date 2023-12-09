@@ -1,0 +1,35 @@
+{
+    "id": 214496216,
+    "contestId": 765,
+    "creationTimeSeconds": 1689774102,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 765,
+        "index": "F",
+        "name": "Souvenirs",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 3100,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 765,
+        "members": [
+            {
+                "handle": "xjrjyy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1487059500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 873,
+    "memoryConsumedBytes": 12492800,
+    "source": "// LUOGU_RID: 116484164\n/* cf_765_f.cpp */\n#include <bits/stdc++.h>\n\nusing i64 = long long;\nconstexpr int inf = 1e9;\n\ntemplate <typename T> struct Fenwick {\n    int n; std::vector<T> a;\n    Fenwick(int n = 0) { init(n); }\n    void init(int m) { n = m, a.assign(n, T()); }\n    void add(int p, const T &x) {\n        for (++p; p <= n; p += p & -p) a[p - 1] += x;\n    }\n    T sum(int p) const {\n        auto x = T(); for (; p; p -= p & -p) x += a[p - 1];\n        return x;\n    }\n    T rangeSum(int l, int r) const { return sum(r) - sum(l); }\n};\nstruct Min {\n    int v = inf;\n    Min &operator+=(const Min &y) { return v = std::min(v, y.v), *this; }\n};\n\ntemplate <typename Info, typename Tag> struct LazySegmentTree {\n    int n; std::vector<Info> s; std::vector<Tag> t;\n    LazySegmentTree() : n{} {}\n    LazySegmentTree(int n_, const Info &v = Info()) { init(n_, v); }\n    template <typename T> LazySegmentTree(const std::vector<T> &ini) { init(ini); }\n    void init(int n_, const Info &v = Info()) { init(std::vector(n_, v)); }\n    template <typename T> void init(const std::vector<T> &ini) {\n        n = int(ini.size());\n        s.assign(4 << std::__lg(n), Info()), t.assign(4 << std::__lg(n), Tag());\n        auto build = [&](auto self, int u, int l, int r) -> void {\n            if (r - l == 1) return s[u] = ini[l], void();\n            int m = (l + r) / 2;\n            self(self, u << 1, l, m), self(self, u << 1 | 1, m, r), pull(u);\n        };\n        build(build, 1, 0, n);\n    }\n    void pull(int u) { s[u] = s[u << 1] + s[u << 1 | 1]; }\n    void apply(int u, const Tag &v) { s[u].apply(v), t[u].apply(v); }\n    void push(int u) { apply(u << 1, t[u]), apply(u << 1 | 1, t[u]), t[u] = Tag(); }\n    void modify(int u, int l, int r, int p, const Info &v) {\n        if (r - l == 1) return s[u] = v, void();\n        int m = (l + r) / 2; push(u);\n        if (p < m) modify(u << 1, l, m, p, v), pull(u);\n        else modify(u << 1 | 1, m, r, p, v), pull(u);\n    }\n    void modify(int p, const Info &v) { modify(1, 0, n, p, v); }\n    Info rangeQuery(int u, int l, int r, int ql, int qr) {\n        if (qr <= l || r <= ql) return Info();\n        if (ql <= l && r <= qr) return s[u];\n        int m = (l + r) / 2; push(u);\n        return rangeQuery(u << 1, l, m, ql, qr) + rangeQuery(u << 1 | 1, m, r, ql, qr);\n    }\n    Info rangeQuery(int ql, int qr) { return rangeQuery(1, 0, n, ql, qr); }\n    void rangeApply(int u, int l, int r, int ql, int qr, const Tag &v) {\n        if (qr <= l || r <= ql) return;\n        if (ql <= l && r <= qr) return apply(u, v);\n        int m = (l + r) / 2; push(u);\n        rangeApply(u << 1, l, m, ql, qr, v), rangeApply(u << 1 | 1, m, r, ql, qr, v);\n        pull(u);\n    }\n    void rangeApply(int ql, int qr, const Tag &v) { rangeApply(1, 0, n, ql, qr, v); }\n    // template <typename F> int findLast(int u, int l, int r, int ql, int qr, F pred) {\n    //     if (r <= ql || qr <= l || !pred(s[u])) return -1;\n    //     if (r - l == 1) return l;\n    //     int m = (l + r) / 2; push(u);\n    //     int res = findLast(u << 1 | 1, m, r, ql, qr, pred);\n    //     if (res == -1) res = findLast(u << 1 | 1, l, m, ql, qr, pred);\n    //     return res;\n    // }\n    // template <typename F> int findLast(int ql, int qr, F pred) {\n    //     return findLast(1, 0, n, ql, qr, pred);\n    // }\n};\n\nstruct Tag {\n    int v = -inf;\n    void apply(const Tag &y) & {\n        v = std::max(v, y.v);\n    }\n};\n\nstruct Info {\n    int v = -inf;\n    void apply(const Tag &y) & {\n        v = std::max(v, y.v);\n    }\n};\nInfo operator+(const Info &x, const Info &y) {\n    return {std::max(x.v, y.v)};\n}\n\nint main() {\n    std::cin.tie(nullptr)->sync_with_stdio(false);\n\n    int n; std::cin >> n;\n    std::vector<int> a(n); for (auto &x : a) std::cin >> x;\n    int q; std::cin >> q;\n    std::vector<std::vector<std::pair<int, int>>> qry(n);\n    for (int i = 0; i < q; ++i) {\n        int l, r; std::cin >> l >> r, --l;\n        qry[r - 1].push_back({l, i});\n    }\n\n    std::vector<int> ans(q, inf);\n    auto work = [&](std::vector<int> a) {\n        auto v = a; std::sort(v.begin(), v.end());\n        v.erase(std::unique(v.begin(), v.end()), v.end());\n        for (auto &x : a) x = std::lower_bound(v.begin(), v.end(), x) - v.begin();\n        const int m = int(v.size());\n\n        LazySegmentTree<Info, Tag> seg(m);\n        Fenwick<Min> fen(n);\n        for (int i = 0; i < n; ++i) {\n            int lim = m;\n            while (true) {\n                int p = seg.rangeQuery(a[i], lim).v;\n                if (p == -inf) break;\n                int d = v[a[p]] - v[a[i]]; fen.add(n - p - 1, Min{d});\n                lim = std::lower_bound(v.begin(), v.end(), v[a[i]] + (d + 1) / 2) - v.begin();\n            }\n            for (auto [l, id] : qry[i]) ans[id] = std::min(ans[id], fen.sum(n - l).v);\n            seg.modify(a[i], Info{i});\n        }\n    };\n    work(a);\n    for (auto &x : a) x = inf - x;\n    work(a);\n\n    for (auto x : ans) std::cout << x << '\\n';\n\n    return 0;\n}\n"
+}

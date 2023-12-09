@@ -1,0 +1,39 @@
+{
+    "id": 232409361,
+    "contestId": 1882,
+    "creationTimeSeconds": 1699720450,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1882,
+        "index": "D",
+        "name": "Tree XOR",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 1900,
+        "tags": [
+            "bitmasks",
+            "dfs and similar",
+            "dp",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1882,
+        "members": [
+            {
+                "handle": "toddliu26"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1695652500
+    },
+    "programmingLanguage": "Java 8",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 514,
+    "memoryConsumedBytes": 0,
+    "source": "import java.util.*;\r\npublic class XorTree {\r\n    public static void main(String[] args) {\r\n        Scanner scan = new Scanner(System.in);\r\n        List<List<String>> list = new ArrayList<>();\r\n        int i = 0;\r\n        int j = 1;\r\n        int k = 0;\r\n        List<String> one = new ArrayList<>();\r\n        while (scan.hasNextLine()) {\r\n            if (j == 1) {\r\n                j = Integer.valueOf(scan.nextLine());\r\n            } else {\r\n                if (k == 0) {\r\n                    k = Integer.valueOf(scan.nextLine());\r\n                } else {\r\n                    if (k-- > 0) {\r\n                        one.add(scan.nextLine());\r\n                    }\r\n                    if (k == 0) {\r\n                        list.add(one);\r\n                        i++;\r\n                        if (i >= j) {\r\n                            break;\r\n                        }\r\n                        one = new ArrayList<>();\r\n                    }\r\n                }\r\n            }\r\n        }\r\n        for (i = 0; i < j; i++) {\r\n            List<String> each = list.get(i);\r\n            int n = each.size();\r\n            int[] as = new int[n];\r\n            XorCostTree[] nodes = new XorCostTree[n + 1];\r\n            XorCostTree root = build(each, 1, nodes, as);\r\n            dfs02(root, 1);\r\n            int q = 1;\r\n            for (int p = 2; p <= n; p++) {\r\n                System.out.print(dfs01(root, as[root.val - 1], 0, -1, q, as) + \" \");\r\n                rotate(nodes[p], 1);\r\n                root = nodes[p];\r\n                q = p;\r\n            }\r\n            System.out.print(dfs01(root, as[root.val - 1], 0, -1, q, as) + \" \");\r\n            System.out.println();\r\n        }\r\n\r\n    }\r\n\r\n    static long NUM = 1000000000000000000l;\r\n    static Map<Long, Long> xorMap = new HashMap<>();\r\n\r\n    static long dfs01(XorCostTree root, int num, int xor, int cur, int nxt, int[] as) {\r\n        long sum = 0;\r\n        int c = num ^ as[root.val - 1];\r\n        if (c != xor) {\r\n            xor ^= c;\r\n            sum += (root.cnt + 1l) * xor;\r\n        }\r\n        if (root.nexts.size() > 0) {\r\n            for (XorCostTree next : root.nexts) {\r\n                sum += dfs01(next, num, xor, cur, nxt, as);\r\n            }\r\n        }\r\n        return sum;\r\n\r\n    }\r\n\r\n    static void rotate(XorCostTree node, int cnt) {\r\n        while (node.prev != null) {\r\n            XorCostTree prev = node.prev;\r\n            node.prev = null;\r\n            prev.nexts.remove(node);\r\n            node.nexts.add(prev);\r\n            rotate(prev, cnt + 1);\r\n            prev.cnt -= (node.cnt + 1);\r\n            node.cnt += (prev.cnt + 1);\r\n            prev.prev = node;\r\n        }\r\n    }\r\n\r\n    static int dfs02(XorCostTree prev) {\r\n        int cnt = 1;\r\n        XorCostTree prev1 = prev;\r\n        while (prev1.prev != null) {\r\n            cnt++;\r\n            prev1 = prev1.prev;\r\n        }\r\n        return cnt;\r\n    }\r\n\r\n    static XorCostTree build(List<String> each, int val, XorCostTree[] nodes, int[] as) {\r\n        int n = each.size();\r\n        String[] ss = each.get(0).split(\" \");\r\n        for (int i = 0; i < n; i++) {\r\n            as[i] = Integer.valueOf(ss[i]);\r\n        }\r\n        Set<Integer>[] sets = new Set[n + 1];\r\n        for (int i = 1; i < n; i++) {\r\n            String[] strs = each.get(i).split(\" \");\r\n            int a = Integer.valueOf(strs[0]);\r\n            int b = Integer.valueOf(strs[1]);\r\n            if (sets[a] == null) {\r\n                sets[a] = new HashSet<>();\r\n            }\r\n            sets[a].add(b);\r\n            if (sets[b] == null) {\r\n                sets[b] = new HashSet<>();\r\n            }\r\n            sets[b].add(a);\r\n        }\r\n        boolean[] fs = new boolean[n + 1];\r\n        fs[val] = true;\r\n        return buildTree(sets, val, nodes, fs);\r\n    }\r\n\r\n    static XorCostTree buildTree(Set<Integer>[] sets, int val, XorCostTree[] nodes, boolean[] fs) {\r\n        XorCostTree root = new XorCostTree(val);\r\n        int cnt = 0;\r\n        if (sets[val] != null) {\r\n            for (int next : sets[val]) {\r\n                if (!fs[next]) {\r\n                    fs[next] = true;\r\n                    XorCostTree node = buildTree(sets, next, nodes, fs);\r\n                    root.nexts.add(node);\r\n                    node.prev = root;\r\n                    cnt += node.cnt + 1;\r\n                }\r\n            }\r\n        }\r\n        root.cnt = cnt;\r\n        nodes[val] = root;\r\n        return root;\r\n    }\r\n\r\n    static void dfs02(XorCostTree root, int cnt) {\r\n        root.lay = cnt;\r\n        for (XorCostTree next : root.nexts) {\r\n            dfs02(next, cnt + 1);\r\n        }\r\n    }\r\n\r\n    static class XorCostTree {\r\n        int val;\r\n        List<XorCostTree> nexts = new ArrayList<>();\r\n        XorCostTree prev;\r\n        int cnt;\r\n        int lay;\r\n\r\n        XorCostTree(int val) {\r\n            this.val = val;\r\n        }\r\n    }\r\n}"
+}

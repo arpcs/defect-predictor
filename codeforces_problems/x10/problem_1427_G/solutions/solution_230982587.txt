@@ -1,0 +1,36 @@
+{
+    "id": 230982587,
+    "contestId": 1427,
+    "creationTimeSeconds": 1698932934,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1427,
+        "index": "G",
+        "name": "One Billion Shades of Grey",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3300,
+        "tags": [
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1427,
+        "members": [
+            {
+                "handle": "Ender32k"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1602341400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 129,
+    "timeConsumedMillis": 2776,
+    "memoryConsumedBytes": 47513600,
+    "source": "// Problem: One Billion Shades of Grey\r\n// Contest: Luogu\r\n// URL: https://www.luogu.com.cn/problem/CF1427G\r\n// Memory Limit: 250 MB\r\n// Time Limit: 3000 ms\r\n// \r\n// Powered by CP Editor (https://cpeditor.org)\r\n\r\n#include <bits/stdc++.h>\r\n#define pb emplace_back\r\n#define mt make_tuple\r\n#define mp make_pair\r\n#define fi first\r\n#define se second\r\n\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef pair<int, int> pi;\r\ntypedef tuple<int, int, int> tu;\r\nbool Mbe;\r\n\r\nstruct Flow {\r\n\tint n, s, t, tot;\r\n\tstruct edge { int to, nxt, w; };\r\n\tvector<int> hd, cr, d;\r\n\tvector<edge> e;\r\n\tFlow (int _n) : n(_n), tot(-1) { hd.resize(n + 5, -1), d.resize(n + 5, 0), e.clear(); }\r\n\tvoid add_edge(int u, int v, int w) { e.pb((edge) { v, hd[u], w }), hd[u] = ++tot; }\r\n\tvoid add_flow(int u, int v, int w) { add_edge(u, v, w), add_edge(v, u, 0); }\r\n\tbool bfs() {\r\n\t\tfill(d.begin(), d.end(), 0);\r\n\t\tqueue<int> q; q.push(s), d[s] = 1;\r\n\t\twhile (!q.empty()) {\r\n\t\t\tint u = q.front(); q.pop();\r\n\t\t\tfor (int i = hd[u]; ~i; i = e[i].nxt) {\r\n\t\t\t\tint v = e[i].to;\r\n\t\t\t\tif (!e[i].w || d[v]) continue;\r\n\t\t\t\td[v] = d[u] + 1, q.push(v);\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn d[t];\r\n\t}\r\n\tint dfs(int u, int in) {\r\n\t\tif (u == t) return in;\r\n\t\tint out = 0;\r\n\t\tfor (int &i = cr[u]; ~i; i = e[i].nxt) {\r\n\t\t\tint v = e[i].to;\r\n\t\t\tif (e[i].w && d[v] == d[u] + 1) {\r\n\t\t\t\tint res = dfs(v, min(in, e[i].w));\r\n\t\t\t\tin -= res, out += res;\r\n\t\t\t\te[i].w -= res, e[i ^ 1].w += res;\r\n\t\t\t}\r\n\t\t\tif (!in) break;\r\n\t\t}\r\n\t\tif (!out) d[u] = 0;\r\n\t\treturn out;\r\n\t}\r\n\tvector<bool> dinic() {\r\n\t\tint mf = 0;\r\n\t\twhile (bfs()) cr = hd, mf += dfs(s, 1e9);\r\n\t\tqueue<int> q; vector<bool> vs; \r\n\t\tvs.resize(n + 5, 0), q.push(s), vs[s] = 1;\r\n\t\twhile (!q.empty()) {\r\n\t\t\tint u = q.front(); q.pop();\r\n\t\t\tfor (int i = hd[u]; ~i; i = e[i].nxt) {\r\n\t\t\t\tint v = e[i].to;\r\n\t\t\t\tif (!vs[v] && e[i].w && d[v] == d[u] + 1) \r\n\t\t\t\t\tvs[v] = 1, q.push(v);\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn vs;\r\n\t}\r\n};\r\n\r\nconst int N = 250;\r\nint fx[4][2] = { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } };\r\nint n, a[N][N], id[N][N];\r\nvector<int> w;\r\n\r\nvoid conq(int l, int r, vector<pi> p) {\r\n\tif (l == r) {\r\n\t\tfor (auto [x, y] : p) a[x][y] = w[l];\r\n\t\treturn;\r\n\t}\r\n\tint mid = (l + r) >> 1, ct = 0;\r\n\tFlow G(p.size() + 2);\r\n\tfor (auto [x, y] : p) id[x][y] = ct++;\r\n\tG.s = ct, G.t = ct + 1;\r\n\tfor (auto [x, y] : p) {\r\n\t\tint u = id[x][y];\r\n\t\tfor (int i = 0; i < 4; i++) {\r\n\t\t\tint xx = x + fx[i][0], yy = y + fx[i][1];\r\n\t\t\tif (id[xx][yy] >= 0) {\r\n\t\t\t\tif (i < 2) {\r\n\t\t\t\t\tG.add_edge(u, id[xx][yy], 1);\r\n\t\t\t\t\tG.add_edge(id[xx][yy], u, 1);\r\n\t\t\t\t}\r\n\t\t\t} else if (a[xx][yy] != -1) {\r\n\t\t\t\tif (a[xx][yy] <= w[mid]) G.add_flow(G.s, u, 1);\r\n\t\t\t\telse G.add_flow(u, G.t, 1);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tauto vs = G.dinic();\r\n\tvector<pi> pl, pr;\r\n\tfor (auto [x, y] : p) {\r\n\t\tif (vs[id[x][y]]) pl.pb(mp(x, y)), a[x][y] = w[mid];\r\n\t\telse pr.pb(mp(x, y)), a[x][y] = w[mid + 1];\r\n\t\tid[x][y] = -1;\r\n\t}\r\n\tconq(l, mid, pl), conq(mid + 1, r, pr);\r\n}\r\n\r\nvoid solve() {\r\n\tcin >> n;\r\n\tvector<pi> p;\r\n\tfor (int i = 1; i <= n; i++) {\r\n\t\tfor (int j = 1; j <= n; j++) {\r\n\t\t\tcin >> a[i][j], id[i][j] = -1;\r\n\t\t\tif (!a[i][j]) p.pb(mp(i, j));\r\n\t\t\telse if (a[i][j] > 0) w.pb(a[i][j]);\r\n\t\t}\r\n\t}\r\n\tsort(w.begin(), w.end());\r\n\tw.erase(unique(w.begin(), w.end()), w.end());\r\n\tconq(0, w.size() - 1, p);\r\n\tll res = 0;\r\n\tfor (int i = 1; i <= n; i++) {\r\n\t\tfor (int j = 1; j <= n; j++) {\r\n\t\t\tif (i < n && ~a[i][j] && ~a[i + 1][j]) res += abs(a[i][j] - a[i + 1][j]);\r\n\t\t\tif (j < n && ~a[i][j] && ~a[i][j + 1]) res += abs(a[i][j] - a[i][j + 1]);\r\n\t\t}\r\n\t}\r\n\tcout << res << '\\n';\r\n}\r\n\r\nbool Med;\r\nint main() {\r\n\tios::sync_with_stdio(0), cin.tie(0), cout.tie(0);\r\n\tcerr << (&Mbe - &Med) / 1048576.0 << \" MB\\n\";\r\n\t#ifdef FILE\r\n\t\tfreopen(\"1.in\", \"r\", stdin);\r\n\t\tfreopen(\"1.out\", \"w\", stdout);\r\n\t#endif\r\n\tint T = 1;\r\n\t// cin >> T;\r\n\twhile (T--) solve();\r\n\tcerr << (int)(1e3 * clock() / CLOCKS_PER_SEC) << \" ms\\n\";\r\n\treturn 0;\r\n}"
+}

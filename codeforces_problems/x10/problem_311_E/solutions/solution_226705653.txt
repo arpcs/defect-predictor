@@ -1,0 +1,35 @@
+{
+    "id": 226705653,
+    "contestId": 311,
+    "creationTimeSeconds": 1696494293,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 311,
+        "index": "E",
+        "name": "Biologist",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2300,
+        "tags": [
+            "flows"
+        ]
+    },
+    "author": {
+        "contestId": 311,
+        "members": [
+            {
+                "handle": "ZikWR"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1369582200
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 31,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 35123200,
+    "source": "#include<bits/stdc++.h>\r\n#define _bt __builtin_\r\n#define all(x) x.begin(),x.end()\r\n#define x first\r\n#define y second\r\n#define i128 __int128\r\n#define IOS cin.tie(0);cout.tie(0);ios::sync_with_stdio(false);\r\n#define SZ(x) (int)x.size()\r\n#define pqe(x) priority_queue<x,vector<x>,greater<x>>\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef array<int,3> ai3;\r\ntypedef unsigned long long ull;\r\ntypedef pair<int,int> PII;\r\ntypedef pair<double,double> PDD;\r\nconst int N = 2e5+10,M = 1010,T=500,mod=1e9+7,mod2=998244353,base1=9999971,base2=9999973,inf=1e9;\r\nconst ll INF=1e18;\r\nconst double eps = 1e-8;\r\nmt19937 rng(time(0));\r\nll qmi(ll a,ll b) {ll res=1;while(b){if(b&1)res=res*a;b>>=1;a=a*a;}return res;}\r\nll exgcd(ll a,ll b,ll &x,ll &y){if(b==0){x = 1;y = 0;return a;}ll d = exgcd(b,a%b,y,x);y -= (a/b)*x;return d;}\r\nint n,m,k;\r\n\r\nconst int V = 100010;\r\nconst int E = 1001000;\r\ntemplate<typename T>\r\nstruct FlowGraph {\r\n\tint s, t, vtot;\r\n\tint head[V], etot;\r\n\tint dis[V], cur[V];\r\n\tstruct edge {\r\n\t\tint v, nxt;\r\n\t\tT f;\r\n\t} e[E * 2];\r\n\tvoid addedge(int u,int v, T f){\r\n\t\te[etot]= {v, head[u], f}; head[u] = etot++;\r\n\t\te[etot]= {u, head[v], 0}; head[v] = etot++;\r\n\t}\r\n\r\n\tbool bfs() {\r\n\t\tfor (int i = 1; i <= vtot; i++) {\r\n\t\t\tdis[i] = 0;\r\n\t\t\tcur[i] = head[i];\r\n\t\t}\r\n\t\tqueue<int> q;\r\n\t\tq.push(s); dis[s] = 1;\r\n\t\twhile (!q.empty()) {\r\n\t\t\tint u = q.front(); q.pop();\r\n\t\t\tfor (int i = head[u]; ~i; i = e[i].nxt) {\r\n\t\t\t\tif (e[i].f && !dis[e[i].v]) {\r\n\t\t\t\t\tint v = e[i].v;\r\n\t\t\t\t\tdis[v] = dis[u] + 1;\r\n\t\t\t\t\tif (v == t) return true;\r\n\t\t\t\t\tq.push(v);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn false;\r\n\t}\r\n\r\n\tT dfs(int u, T m) {\r\n\t\tif (u == t) return m;\r\n\t\tT flow = 0;\r\n\t\tfor (int i = cur[u]; ~i; cur[u] = i = e[i].nxt)\r\n\t\t\tif (e[i].f && dis[e[i].v] == dis[u] + 1) {\r\n\t\t\t\tT f = dfs(e[i].v, min(m, e[i].f));\r\n\t\t\t\te[i].f -= f;\r\n\t\t\t\te[i ^ 1].f += f;\r\n\t\t\t\tm -= f;\r\n\t\t\t\tflow += f;\r\n\t\t\t\tif (!m) break;\r\n\t\t\t}\r\n\t\tif (!flow) dis[u] = -1;\r\n\t\treturn flow;\r\n\t}\r\n\tT dinic(){\r\n\t\tT flow=0;\r\n\t\twhile (bfs()) flow += dfs(s, numeric_limits<T>::max());\r\n\t\treturn flow;\r\n\t}\r\n\tvoid init(int s_, int t_, int vtot_) {\r\n\t\ts = s_;\r\n\t\tt = t_;\r\n\t\tvtot = vtot_;\r\n\t\tetot = 0;\r\n\t\tfor (int i = 1; i <= vtot; i++) head[i] = -1;\r\n\t}\r\n};\r\n\r\nFlowGraph<ll> g;\r\nint a[N],b[N];\r\nvoid solve(){\r\n    cin >> n >> m >> k;\r\n    int tot = 2;\r\n    int s=1,t=2;\r\n    g.init(s,t,t);\r\n    memset(g.head,-1,sizeof g.head);\r\n    ll sum = 0;\r\n    for(int i = 1; i <= n; i ++) cin >> a[i];\r\n    for(int i = 1; i <= n; i ++){\r\n        cin >> b[i];\r\n        if(a[i]==0) g.addedge(s,++tot,b[i]);\r\n        else g.addedge(++tot,t,b[i]);\r\n    }\r\n    for(int i = 1; i <= m; i ++){\r\n        int op,w,cnt,ww;\r\n        cin >> op >> w >> cnt;\r\n        ++tot;\r\n        sum += w;\r\n        for(int j = 1; j <= cnt; j ++){\r\n            int x;\r\n            cin >> x;\r\n            if(op) g.addedge(x+2,tot,inf);\r\n            else g.addedge(tot,x+2,inf);\r\n        }\r\n        cin >> ww;\r\n        if(op) g.addedge(tot,t,w+ww*k);\r\n        else g.addedge(s,tot,w+ww*k);\r\n\r\n    }\r\n    g.vtot=tot;\r\n\r\n    cout << sum - g.dinic() << endl;\r\n}\r\n\r\n\r\nint main(){\r\n    int _=1;\r\n    IOS\r\n    //cin >> _;\r\n    //scanf(\"%d\",&_);\r\n\r\n    while(_--){\r\n        solve();\r\n    }\r\n    return 0;\r\n}\r\n"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 198606055,
+    "contestId": 1572,
+    "creationTimeSeconds": 1679481321,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1572,
+        "index": "D",
+        "name": "Bridge Club",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2800,
+        "tags": [
+            "flows",
+            "graph matchings",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1572,
+        "members": [
+            {
+                "handle": "strange757"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631975700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 200,
+    "timeConsumedMillis": 373,
+    "memoryConsumedBytes": 71782400,
+    "source": "// S2OJ Submission #73878 @ 1679481319908\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int N = (1<<20);\r\nint n, a[N], k, vis[N], s, S, T, t, id[N], cnt, ans;\r\nstruct dp{\r\n    int u, v, w;\r\n    inline bool operator<(const dp &x) const{\r\n        return w > x.w;\r\n    }\r\n};\r\nint head[N], tot = 1, cur[N], last[N];\r\nint dis[N], flow[N], pre[N];\r\nstruct node{\r\n    int next, to, flow, w;\r\n}edge[N<<1];\r\nvoid add(int u, int v, int flow, int w){\r\n    tot++;\r\n    edge[tot].next = head[u];\r\n    edge[tot].to = v;\r\n    edge[tot].flow = flow;\r\n    edge[tot].w = w;\r\n    head[u] = tot;\r\n}\r\nvoid addedge(int u, int v, int flow, int w){\r\n    add(u, v, flow, w), add(v, u, 0, -w);\r\n}\r\ninline bool spfa(){queue <int> q;\r\n    for(int i = s; i <= t; i++) dis[i] = 2e9, flow[i] = 2e9, vis[i] = 0;\r\n    q.push(s);\r\n    vis[s] = 1, dis[s] = 0, pre[t] = -1;\r\n    while(!q.empty()){\r\n        int u = q.front();\r\n        q.pop();\r\n        vis[u] = 0;\r\n        for(int i = head[u]; i; i = edge[i].next){\r\n            int v = edge[i].to;\r\n            if(edge[i].flow > 0 && dis[v] > dis[u] + edge[i].w){\r\n                dis[v] = dis[u] + edge[i].w;\r\n                pre[v] = u;\r\n                last[v] = i;\r\n                flow[v] = min(flow[u], edge[i].flow);\r\n                if(!vis[v]){\r\n                    vis[v] = 1;\r\n                    q.push(v);\r\n                }\r\n            }\r\n        }\r\n    }\r\n    if(pre[t] != -1) return 1;\r\n    return 0;\r\n}\r\nvoid dfs(){\r\n    while(spfa()){\r\n        int u = t;\r\n        ans += flow[t]*dis[t];\r\n        while(u != s){\r\n            edge[last[u]].flow -= flow[t];\r\n            edge[last[u]^1].flow += flow[t];\r\n            u = pre[u];\r\n        }\r\n    }\r\n}\r\npriority_queue<dp> q;\r\nint main(){\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0), cout.tie(0);\r\n    cin >> n >> k;\r\n    s = 0, t = 2e4 + 5;\r\n    S = t - 1;\r\n    addedge(s, S, k, 0);\r\n    for(int i = 0; i < (1<<n); i++) cin >> a[i];\r\n    int mn = 1e9, sz = 0, sum = 2*n*k;\r\n    for(int i = 0; i < (1<<n); i++){\r\n        int num = __builtin_popcount(i);\r\n        if(num & 1) continue;\r\n        for(int j = 0; j < n; j++){\r\n            int k = (i ^ (1<<j)), val = a[i] + a[k];\r\n            if(sz < sum) q.push({i, k, val}), sz++, mn = min(mn, val);\r\n            else{\r\n                if(val > mn) q.pop(), q.push({i, k, val}), mn = q.top().w;\r\n            } \r\n        }\r\n    }\r\n    while(!q.empty()){\r\n        int u = q.top().u, v = q.top().v, w = q.top().w;\r\n        q.pop();\r\n        if(!id[u]) id[u] = ++cnt, addedge(S, id[u], 1, 0);\r\n        if(!id[v]) id[v] = ++cnt, addedge(id[v], t, 1, 0);\r\n        addedge(id[u], id[v], 1, -w);\r\n    }\r\n    dfs();\r\n    cout << -1*ans;\r\n    return 0;\r\n}"
+}

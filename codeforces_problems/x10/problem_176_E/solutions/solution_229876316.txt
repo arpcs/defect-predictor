@@ -1,0 +1,37 @@
+{
+    "id": 229876316,
+    "contestId": 176,
+    "creationTimeSeconds": 1698328005,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 176,
+        "index": "E",
+        "name": "Archaeology",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 176,
+        "members": [
+            {
+                "handle": "shahmah"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1334934300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 528,
+    "memoryConsumedBytes": 36966400,
+    "source": "/*\nOnce upon a time there was lines of text art here\n*/\n\n#include <bits/stdc++.h>\n//#include <ext/pb_ds/assoc_container.hpp>\n//#include <ext/pb_ds/tree_policy.hpp>\n\n//using namespace __gnu_pbds;\nusing namespace std;\n\n//typedef tree <int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update> ordered_set;\ntypedef long long ll;\ntypedef short int sint;\ntypedef long double ld;\ntypedef unsigned long long ull;\n\n#define all(x) x.begin(), x.end()\n\nconst int INT_INF = 1e9 + 7;\nconst ll INF = 1e18 + 21;\n\nvoid init(bool txtfile = 0) {\n    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);\n    \n    if(!txtfile) \n        return;\n\n    freopen(\"input.txt\",\"r\",stdin); \n    freopen(\"output.txt\",\"w\",stdout);\n}\n\n//-------------------------------------------------------------------\n\nconst int MAX_N = 1e5 + 1000, MAX_LOG = 21;\nll n, from[MAX_N], to[MAX_N], w[MAX_N], st[MAX_N];\nll t[MAX_N], ind = 1, par[MAX_N][MAX_LOG], h[MAX_N], d[MAX_N];\nvector<int> g[MAX_N];\nset<ll> s;\n\nvoid dfs_prep(int u = 0, int p = -1) {\n    st[u] = ind++;\n    t[st[u]] = u;\n\n    for(int i = 1; i < MAX_LOG; i++) \n        par[u][i] = par[par[u][i - 1]][i - 1];\n    \n    for(auto i : g[u]) {\n        int v = from[i] ^ to[i] ^ u;\n        if(v == p) continue;\n        \n        h[v] = h[u] + 1;\n        d[v] = d[u] + w[i];\n        par[v][0] = u;\n        dfs_prep(v, u);\n    }\n}\n\nint get_par(int u, int k) {\n    for(int i = 0; i < MAX_LOG; i++)\n        if((1 << i) & k)\n            u = par[u][i];\n    return u;\n}\n\nint lca(int u, int v) {\n    if(h[u] < h[v])\n        swap(u, v);\n    u = get_par(u, h[u] - h[v]);\n\n    if(u == v) \n        return u;\n\n    for(int i = MAX_LOG - 1; i >= 0; i--) \n        if(par[u][i] != par[v][i])\n            v = par[v][i], u = par[u][i];\n\n    return par[u][0];\n}\n\nll get(int u, int v) {\n    return d[u] + d[v] - 2ll * d[lca(u, v)];\n}\n\nll upd(int u) {\n    if(s.empty())\n        return 0;\n    auto it = s.upper_bound(st[u]);\n    int l, r;\n    if(it == s.begin() || it == s.end()) \n        l = *s.begin(), r = *--s.end();\n    else \n        r = *it, l = *--it;\n\n    l = t[l], r = t[r];\n    return get(u, l) + get(u, r) - get(l, r);\n}\n\nint main() {\n    //memset(par, -1, sizeof par);\n    init(0);\n    \n    cin >> n;\n\n    for(int i = 0; i < n - 1; i++) {\n        cin >> from[i] >> to[i] >> w[i];\n        g[--from[i]].push_back(i);\n        g[--to[i]].push_back(i);\n    }\n\n    dfs_prep();\n    ll ans = 0;\n\n    int q;\n    cin >> q;\n    while(q--) {\n        char t;\n        int u;\n        cin >> t;\n\n        if(t != '?') cin >> u, u--;\n            \n        if(t == '+') {\n            ans += upd(u);\n            s.insert(st[u]);\n        }\n        else if(t == '-') {\n            s.erase(st[u]);\n            ans -= upd(u);\n        }\n        else \n            cout << ans / 2 << '\\n';\n    }\n}\n"
+}

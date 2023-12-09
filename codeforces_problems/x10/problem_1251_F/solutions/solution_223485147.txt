@@ -1,0 +1,35 @@
+{
+    "id": 223485147,
+    "contestId": 1251,
+    "creationTimeSeconds": 1694783914,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1251,
+        "index": "F",
+        "name": "Red-White Fence",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "combinatorics",
+            "fft"
+        ]
+    },
+    "author": {
+        "contestId": 1251,
+        "members": [
+            {
+                "handle": "gxy114514"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571929500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 107,
+    "timeConsumedMillis": 2152,
+    "memoryConsumedBytes": 61337600,
+    "source": "#include<bits/stdc++.h>\r\n#define ll long long\r\nusing namespace std;\r\nconst ll mod=998244353,g=3;\r\nconst int N=1250002;\r\nint pip,r[N*2];\r\nll fpow(ll a,ll b)\r\n{\r\n\tll sum=1;\r\n\tfor(;b;b>>=1)\r\n\t{\r\n\t\tif(b&1) sum=sum*a%mod;\r\n\t\ta=a*a%mod;\r\n\t}\r\n\treturn sum;\r\n}\r\nnamespace polyn{\r\n\tvoid NTT(int now[],int lim,int op)\r\n\t{\r\n\t\tconst ll invg=fpow(g,mod-2);\r\n\t\tfor(int i=0;i<lim;i++)\r\n\t\t{\r\n\t\t\tif(i<r[i]) swap(now[i],now[r[i]]);\r\n\t\t}\r\n\t\tfor(int len=2;len<=lim;len<<=1)\r\n\t\t{\r\n\t\t\tll wn=fpow(op==-1?invg:g,(mod-1)/len);\r\n\t\t\tfor(int j=0;j<lim;j+=len)\r\n\t\t\t{\r\n\t\t\t\tll w=1;\r\n\t\t\t\tfor(int k=j;k<j+(len>>1);k++,w=w*wn%mod)\r\n\t\t\t\t{\r\n\t\t\t\t\tll u=now[k],v=1ll*w*now[k+(len>>1)]%mod;\r\n\t\t\t\t\tnow[k]=(u+v)%mod;\r\n\t\t\t\t\tnow[k+(len>>1)]=((u-v)%mod+mod)%mod;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tif(op==-1)\r\n\t\t{\r\n\t\t\tll invn=fpow(lim,mod-2);\r\n\t\t\tfor(int i=0;i<lim;i++)\r\n\t\t\t{\r\n\t\t\t\tnow[i]=1ll*now[i]*invn%mod;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\nusing namespace polyn;\r\nint n,m;\r\nint c[300100],a[N*2],b[N*2],jc[N*2],jc_inv[N*2],ans[N*2];\r\nint C(int n,int m)\r\n{\r\n\tif(m>n) return 0;\r\n\treturn 1ll*jc[n]*jc_inv[m]%mod*jc_inv[n-m]%mod;\r\n}\r\nsigned main()\r\n{\r\n// \tfreopen(\"txt.in\",\"r\",stdin);\r\n// \tfreopen(\"txt.out\",\"w\",stdout);\r\n    cin>>n>>m;\r\n\tjc[0]=jc[1]=jc_inv[0]=jc_inv[1]=1;\r\n\tfor(int i=2;i<=n;i++)\r\n\t{\r\n\t\tjc_inv[i]=1ll*(mod-mod/i)*jc_inv[mod%i]%mod;\r\n\t}\r\n\tfor(int i=1;i<=n;i++)\r\n\t{\r\n\t\tjc[i]=1ll*jc[i-1]*i%mod;\r\n\t\tjc_inv[i]=1ll*jc_inv[i-1]*jc_inv[i]%mod;\r\n\t}\r\n\tfor(int i=1;i<=n;i++)\r\n\t{\r\n\t\tint x;cin>>x;\r\n\t\tc[x]++;\r\n\t}\r\n\tfor(int i=1;i<=m;i++)\r\n\t{\r\n\t\tint c1=0,c2=0;\r\n\t\tint x;\r\n\t\tcin>>x;\r\n\t\tfor(int i=1;i<x;i++)\r\n\t\t{\r\n\t\t\tif(c[i]==1) c1++;\r\n\t\t\telse if(c[i]>=2) c2++;\r\n\t\t}\r\n\t\tmemset(a,0,sizeof(a));memset(b,0,sizeof(b));\r\n\t\tfor(int i=0;i<=c1;i++)\r\n\t\t{\r\n\t\t\ta[i]=1ll*fpow(2,i)*C(c1,i)%mod;\r\n\t\t}\r\n\t\tfor(int i=0;i<=2*c2;i++)\r\n\t\t{\r\n\t\t\tb[i]=1ll*C(c2*2,i);\r\n\t\t}\r\n\t\tint outlen=1;\r\n\t\twhile(outlen<=c2*2+c1) outlen<<=1;\r\n\t\tfor(int i=0;i<outlen;i++)\r\n\t\t{\r\n\t\t\tr[i]=(r[i>>1]>>1)|(i&1)*(outlen>>1);\r\n\t\t}\r\n\t\tNTT(a,outlen,1);NTT(b,outlen,1);\r\n\t\tfor(int i=0;i<outlen;i++)\r\n\t\t{\r\n\t\t\ta[i]=1ll*a[i]*b[i]%mod;\r\n\t\t}\r\n\t\tNTT(a,outlen,-1);\r\n\t\tfor(int i=0;i<=c2*2+c1;i++)\r\n\t\t{\r\n\t\t\tans[i+x+1]=(ans[i+x+1]+a[i])%mod;\r\n\t\t}\r\n\t}\r\n\tint q;\r\n\tcin>>q;\r\n\tfor(int i=1;i<=q;i++)\r\n\t{\r\n\t\tint x;\r\n\t\tcin>>x;\r\n\t\tcout<<ans[x/2]<<endl;\r\n\t}\r\n    return 0;\r\n}\r\n// 10 3\r\n// 0 9 8 7 6 5 4 3 2 1 \r\n// 0 0 0 729 1944 3429 4994 6474 7728 8638 "
+}

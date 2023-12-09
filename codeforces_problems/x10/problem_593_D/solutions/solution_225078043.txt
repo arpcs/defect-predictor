@@ -1,0 +1,39 @@
+{
+    "id": 225078043,
+    "contestId": 593,
+    "creationTimeSeconds": 1695645892,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 593,
+        "index": "D",
+        "name": "Happy Tree Party",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 593,
+        "members": [
+            {
+                "handle": "Kuzizia"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1446655500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 12,
+    "timeConsumedMillis": 234,
+    "memoryConsumedBytes": 41984000,
+    "source": "// LUOGU_RID: 126112260\n#include <bits/stdc++.h>\nusing namespace std;\ntypedef long long ll;\nconst int N=2e5+10,M=N<<1;\nint n,m,h[N],e[M],ne[M];\nll W[M],w[N],idx,cnt;\nvoid add(int a,int b,ll c){\n\te[idx]=b,W[idx]=c,ne[idx]=h[a],h[a]=idx++;\n}\nint dep[N],sz[N],fa[N],son[N];\nint top[N],dfn[N];\nll nw[N];\nvoid dfs1(int u,int father,int depth){\n\tdep[u]=depth,fa[u]=father,sz[u]=1;\n\tfor(int i=h[u];~i;i=ne[i]){\n\t\tint j=e[i];\n\t\tif(j==father) continue;\n\t\tdfs1(j,u,depth+1);\n\t\tw[j]=W[i];\n\t\tsz[u]+=sz[j];\n\t\tif(sz[son[u]]<sz[j]) son[u]=j;\n\t}\n}\nvoid dfs2(int u,int t){\n\tdfn[u]=++cnt,nw[cnt]=w[u],top[u]=t;\n\tif(!son[u]) return;\n\tdfs2(son[u],t);\n\tfor(int i=h[u];~i;i=ne[i]){\n\t\tint j=e[i];\n\t\tif(j==fa[u] || j==son[u]) continue;\n\t\tdfs2(j,j);\n\t}\n}\nstruct Node{\n\tint l,r;\n\tll sum;\n}tr[N<<2];\nvoid pushup(int u){\n\tif((long double)tr[u<<1].sum*tr[u<<1|1].sum>1e18)\n\t\ttr[u].sum=1e18+5000;\n\telse tr[u].sum=(tr[u<<1].sum*tr[u<<1|1].sum);\n}\nvoid build(int u,int l,int r){\n\tif(l==r){\n\t\ttr[u]={l,r,nw[r]};\n\t\treturn;\n\t}\n\ttr[u]={l,r};\n\tint mid=(l+r)>>1;\n\tbuild(u<<1,l,mid),build(u<<1|1,mid+1,r);\n\tpushup(u);\n}\nvoid change(int u,int x,ll v){\n\tif(tr[u].l==x && tr[u].r==x){\n\t\ttr[u].sum=v;\n\t\treturn;\n\t}\n\tint mid=(tr[u].l+tr[u].r)>>1;\n\tif(x<=mid) change(u<<1,x,v);\n\telse change(u<<1|1,x,v);\n\tpushup(u);\n}\nll query(int u,int l,int r){\n\tif(tr[u].l>=l && tr[u].r<=r){\n\t\treturn tr[u].sum;\n\t}\n\tint mid=(tr[u].l+tr[u].r)>>1;\n\tll res=1;\n\tif(l<=mid) res=res*query(u<<1,l,r);\n\tif(r>mid) res=res*query(u<<1|1,l,r);\n\treturn res;\n}\nll query_path(int u,int v){\n    ll res=1;\n    while(top[u]!=top[v]){\n        if(dep[top[u]]<dep[top[v]]) swap(u,v);\n        res*=query(1,dfn[top[u]],dfn[u]);\n        u=fa[top[u]];\n    }\n    if(dep[u]<dep[v]) swap(u,v);\n    res*=query(1,dfn[v]+1,dfn[u]);\n    return res;\n}\nstruct Edge{\n\tint u,v;\n\tll w;\n}edge[N<<1];\nsigned main(int argc, char const *argv[])\n{\n\tscanf(\"%d%d\",&n,&m);\n    memset(h,-1,sizeof(h));\n\tfor(int i=1;i<n;++i){\n\t\tint u,v;\n\t\tll w;\n\t\tscanf(\"%d%d%lld\",&u,&v,&w);\n\t\tedge[i]={u,v,w};\n\t\tadd(u,v,w),add(v,u,w);\n\t}\n\tdfs1(1,-1,1);\n\tdfs2(1,1);\n\tbuild(1,1,n);\n\twhile(m--){\n\t\tll op,a,b,c;\n\t\tcin>>op;\n\t\tif(op==1){\n\t\t\tcin>>a>>b>>c;\n\t\t\tprintf(\"%lld\\n\",c/query_path(a,b));\n\t\t}\n\t\telse{\n\t\t\tll x;\n\t\t\tcin>>a>>b;\n\t\t\tif(edge[a].u==fa[edge[a].v]){\n\t\t\t\tx=edge[a].v;\n\t\t\t}\n\t\t\telse{\n\t\t\t\tx=edge[a].u;\n\t\t\t}\n\t\t\tchange(1,dfn[x],b);\n\t\t}\n\t}\n\treturn 0;\n}"
+}

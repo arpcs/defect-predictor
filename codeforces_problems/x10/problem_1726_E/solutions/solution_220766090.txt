@@ -1,0 +1,37 @@
+{
+    "id": 220766090,
+    "contestId": 1726,
+    "creationTimeSeconds": 1693166390,
+    "relativeTimeSeconds": 7190,
+    "problem": {
+        "contestId": 1726,
+        "index": "E",
+        "name": "Almost Perfect",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "combinatorics",
+            "fft",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "fishy15"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1693159200
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 15,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 4812800,
+    "source": "#include <iostream>\n#include <iomanip>\n#include <fstream>\n#include <vector>\n#include <array>\n#include <algorithm>\n#include <utility>\n#include <map>\n#include <queue>\n#include <set>\n#include <cmath>\n#include <cstdio>\n#include <cstring>\n#include <functional>\n#include <numeric>\n\n#define ll long long\n#define ld long double\n#define eps 1e-8\n#define MOD 998244353\n\n#define INF 0x3f3f3f3f\n#define INFLL 0x3f3f3f3f3f3f3f3f\n\n// change if necessary\n#define MAXN 300000\n\nusing namespace std;\n\nstruct mi {\n    int v;\n    mi() : mi(0) {}\n    mi(int _v) : v(_v) {\n        if (v >= MOD) v -= MOD;\n        if (v < 0) v += MOD;\n    }\n    mi(ll _v) : mi((int)(_v % MOD)) {}\n    mi operator+(const mi &m2) const { return mi(v + m2.v); }\n    mi operator-(const mi &m2) const { return mi(v - m2.v); }\n    mi operator*(const mi &m2) const { return mi((ll) v * m2.v); }\n    mi operator/(const mi &m2) const { return mi((ll) v * m2.inv().v); }\n    mi &operator+=(const mi &m2) { return *this = *this + m2; }\n    mi &operator-=(const mi &m2) { return *this = *this - m2; }\n    mi &operator*=(const mi &m2) { return *this = *this * m2; }\n    mi &operator/=(const mi &m2) { return *this = *this / m2; }\n    mi pow(ll e) const {\n        mi res = 1;\n        mi n = *this;\n        while (e > 0) {\n            if (e & 1) res *= n;\n            n *= n;\n            e >>= 1;\n        }\n        return res;\n    }\n    mi inv() const {\n        return pow(MOD - 2);\n    }\n};\n\nmi single[MAXN + 1];\nmi inv_pow_two[MAXN + 1];\nmi f[MAXN + 1];\nmi inv_f[MAXN + 1];\n\nmi g(mi *c, int idx) {\n    if (idx < 0) return 0;\n    return c[idx];\n}\n\nvoid precalc() {\n    single[0] = 1;\n    inv_pow_two[0] = 1;\n    f[0] = 1;\n\n    auto inv2 = mi(2).inv();\n    for (int i = 1; i <= MAXN; i++) {\n        single[i] = g(single, i - 2) * (i - 1) + g(single, i - 1);\n        inv_pow_two[i] = inv_pow_two[i - 1] * inv2;\n        f[i] = f[i - 1] * i;\n    }\n\n    inv_f[MAXN] = f[MAXN].inv();\n    for (int i = MAXN - 1; i >= 0; i--) {\n        inv_f[i] = inv_f[i + 1] * (i + 1);\n    }\n}\n\nmi c(int n, int k) {\n    return g(f, n) * g(inv_f, k) * g(inv_f, n - k);\n}\n\nvoid solve() {\n    int n;\n    cin >> n;\n\n    mi ans;\n    for (int k = 0; 4 * k <= n; k++) {\n        int s = n - 4 * k;\n        auto total = c(2 * k + s, s);\n        auto pair_combo = f[2 * k] * inv_f[k];\n        auto single_combo = single[s];\n        ans += total * pair_combo * single_combo;\n    }\n\n    cout << ans.v << '\\n';\n}\n\nint main() {\n    cin.tie(0)->sync_with_stdio(0);\n\n    precalc();\n\n    int t;\n    cin >> t;\n\n    while (t--) {\n        solve();\n    }\n\n    return 0;\n}\n"
+}

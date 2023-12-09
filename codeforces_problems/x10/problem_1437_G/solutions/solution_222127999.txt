@@ -1,0 +1,37 @@
+{
+    "id": 222127999,
+    "contestId": 1437,
+    "creationTimeSeconds": 1694027612,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1437,
+        "index": "G",
+        "name": "Death DBMS",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "string suffix structures",
+            "strings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1437,
+        "members": [
+            {
+                "handle": "tkacper"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1603809300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing ll = long long;\r\n\r\n#ifdef DEBUG\r\n#include \"debug.h\"\r\n#else\r\n#define debug(...) 42\r\n#endif\r\n\r\n#define all(x) begin(x), end(x)\r\n#define rall(x) rbegin(x), rend(x)\r\n\r\n#define rep(i, n) for (int i = 0; i < (n); ++i)\r\n#define repp(i, n, m) for (int i = (n); i < (m); ++i)\r\n\r\n#define repr(i, n) for (int i = (n) - 1; i >= 0; --i)\r\n#define reppr(i, n, m) for (int i = (m) - 1; i >= (n); --i)\r\n\r\n#define sz(x) int((x).size())\r\n\r\nusing vi = vector<int>;\r\nusing vvi = vector<vi>;\r\nusing vll = vector<ll>;\r\nusing pi = pair<int, int>;\r\nusing pll = pair<ll, ll>;\r\n\r\ntemplate <typename T, typename V> void mini(T& a, V b) {if (b < a) a = b; }\r\ntemplate <typename T, typename V> void maxi(T& a, V b) {if (b > a) a = b; }\r\n\r\nconst int P = 1e9 + 7, phiP = P - 1;\r\nstruct modint {\r\n    int x = 0;\r\n    modint operator+(modint o) const {return {x + o.x >= P ? x + o.x - P : x + o.x}; }\r\n    modint operator-(modint o) const {return {x - o.x < 0 ? x - o.x + P : x - o.x}; }\r\n    modint operator+() const {return *this; }\r\n    modint operator-() const {return {x ? P - x : 0}; }\r\n    modint operator*(modint o) const {return {int(ll(x) * o.x % P)}; }\r\n    modint operator/(modint o) const {return *this * o.inv(); }\r\n    modint & operator+=(modint o) {return *this = *this + o; }\r\n    modint & operator-=(modint o) {return *this = *this - o; }\r\n    modint & operator*=(modint o) {return *this = *this * o; }\r\n    modint & operator/=(modint o) {return *this = *this / o; }\r\n    modint pow(ll e) const {\r\n        modint ret{1}, b(*this);\r\n        for (; e; e >>= 1) {\r\n            if (e & 1)\r\n                ret *= b;\r\n            b *= b;\r\n        }\r\n        return ret;\r\n    }\r\n    modint inv() const {return pow(phiP - 1); }\r\n    friend void __dbg(modint m) {\r\n        cout << m.x - P * (2 * m.x >= P);\r\n    }\r\n};\r\n\r\nvoid solve() {\r\n    const int M = 3e5 + 5;\r\n    const modint B{12635131};\r\n    vector<modint> BPOW(M, modint{1});\r\n    repp(i, 1, M)\r\n        BPOW[i] = BPOW[i-1] * B;\r\n\r\n    int n, m;\r\n    cin >> n >> m;\r\n\r\n    vector<modint> hashes(n);\r\n    vi lens(n), sus(n);\r\n    map<int, multiset<int>> mp;\r\n\r\n    vector<unordered_set<int, int>> perlen(M);\r\n    vi exlen;\r\n\r\n    rep(id, n) {\r\n        string s;\r\n        cin >> s;\r\n        modint hsh;\r\n        for (char ch : s)\r\n            hsh = hsh * B + modint{ch};\r\n\r\n        hashes[id] = hsh;\r\n        lens[id] = sz(s);\r\n        mp[hsh.x].insert(0);\r\n        perlen[sz(s)][hsh.x] = 0;\r\n    }\r\n\r\n    rep(id, M) if (sz(perlen[id]))\r\n        exlen.push_back(id);\r\n\r\n    debug(hashes);\r\n    debug(lens);\r\n    debug(exlen);\r\n\r\n    rep(_, m) {\r\n        int t;\r\n        cin >> t;\r\n        if (t == 1) {\r\n            int id, x;\r\n            cin >> id >> x;\r\n            --id;\r\n            auto &thishash = mp[hashes[id].x];\r\n            thishash.erase(thishash.find(sus[id]));\r\n            sus[id] = x;\r\n            thishash.insert(sus[id]);\r\n            perlen[lens[id]][hashes[id].x] = *--thishash.end();\r\n            continue;\r\n        }\r\n        string q;\r\n        cin >> q;\r\n        int best = -1;\r\n\r\n        for (int len : exlen) {\r\n            if (sz(q) < len)\r\n                break;\r\n            auto &thislen = perlen[len];\r\n\r\n            auto gt = [&](modint mm) {\r\n                auto it = thislen.find(mm.x);\r\n                if (it == thislen.end())\r\n                    return -1;\r\n                else\r\n                    return it->second;\r\n            };\r\n\r\n            modint hsh;\r\n            rep(i, len)\r\n                hsh = hsh * B + modint{q[i]};\r\n\r\n            maxi(best, gt(hsh));\r\n\r\n            for (int i = len; i < sz(q); ++i) {\r\n                hsh = hsh * B + modint{q[i]};\r\n                hsh -= BPOW[len] * modint{q[i-len]};\r\n                maxi(best, gt(hsh));\r\n            }\r\n\r\n        }\r\n\r\n        cout << best << '\\n';\r\n    }\r\n}\r\n\r\nint main() {\r\n#ifndef DEBUG\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n#endif\r\n    int z = 1;\r\n    // cin >> z;\r\n    while (z--)\r\n        solve();\r\n    return 0-0;\r\n}\r\n"
+}

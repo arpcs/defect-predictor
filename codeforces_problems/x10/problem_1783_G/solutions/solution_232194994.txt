@@ -1,0 +1,37 @@
+{
+    "id": 232194994,
+    "contestId": 1783,
+    "creationTimeSeconds": 1699604877,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1783,
+        "index": "G",
+        "name": "Weighed Tree Radius",
+        "type": "PROGRAMMING",
+        "rating": 2800,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1783,
+        "members": [
+            {
+                "handle": "cjZYZtcl"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1673188500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 217,
+    "memoryConsumedBytes": 64102400,
+    "source": "// LUOGU_RID: 134301700\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define int long long\r\n#define pr pair<int, int>\r\n#define pb push_back\r\n#define mid (l + r) / 2\r\n#define ls num << 1\r\n#define rs num << 1 | 1\r\n\r\nconst int N = 2e5 + 5;\r\n\r\nstruct line {\r\n    int x, y, val;\r\n    line(int x = 0, int y = 0, int val = 0) : x(x), y(y), val(val) {}\r\n} tr[N << 2];\r\n\r\nvector<pr> v[N];\r\n\r\nint a[N], L[N], R[N], dep[N], f[N][20], dis[N];\r\n\r\ninline int read() {\r\n    int x = 0, m = 1;\r\n    char ch = getchar();\r\n\r\n    while (!isdigit(ch)) {\r\n        if (ch == '-') m = -1;\r\n        ch = getchar();\r\n    }\r\n\r\n    while (isdigit(ch)) {\r\n        x = x * 10 + ch - 48;\r\n        ch = getchar();\r\n    }\r\n\r\n    return x * m;\r\n}\r\n\r\ninline void write(int x) {\r\n    if (x < 0) {\r\n        putchar('-');\r\n        write(-x);\r\n        return;\r\n    }\r\n\r\n    if (x >= 10) write(x / 10);\r\n    putchar(x % 10 + 48);\r\n}\r\n\r\nint lca(int x, int y) {\r\n    if (dep[x] < dep[y]) swap(x, y);\r\n\r\n    for (int i = 18; i >= 0; i--) {\r\n        if (dep[f[x][i]] >= dep[y]) {\r\n            x = f[x][i];\r\n        }\r\n    }\r\n\r\n    if (x == y) return x;\r\n\r\n    for (int i = 18; i >= 0; i--) {\r\n        if (f[x][i] != f[y][i]) {\r\n            x = f[x][i];\r\n            y = f[y][i];\r\n        }\r\n    }\r\n\r\n    return f[x][0];\r\n}\r\n\r\nvoid dfs(int ro, int fa) {\r\n    f[ro][0] = fa;\r\n\r\n    for (int i = 1; i <= 18; i++) {\r\n        f[ro][i] = f[f[ro][i - 1]][i - 1];\r\n    }\r\n\r\n    dep[ro] = dep[fa] + 1;\r\n    for (auto [u, val] : v[ro]) {\r\n        if (u == fa) continue;\r\n        dis[u] = dis[ro] + val;\r\n        dfs(u, ro);\r\n    }\r\n}\r\n\r\nint getdis(int x, int y) {\r\n    int z = lca(x, y);\r\n    return dis[x] + dis[y] - 2 * dis[z];\r\n}\r\n\r\nline max(line x, line y) {\r\n    return (x.val > y.val) ? x : y;\r\n}\r\n\r\nline merge(line x, line y) {\r\n    int x1 = x.x, y1 = x.y, x2 = y.x, y2 = y.y;\r\n    line z = max(max(x, y), max(max(line(x1, y1, getdis(x1, y1)), line(x1, y2, getdis(x1, y2))), max(line(x2, y1, getdis(x2, y1)), line(x2, y2, getdis(x2, y2)))));\r\n    return z;\r\n}\r\n\r\nvoid update(int num) {\r\n    tr[num] = merge(tr[ls], tr[rs]);\r\n}\r\n\r\nvoid build(int l, int r, int num) {\r\n    if (l == r) {\r\n        tr[num].x = L[l];\r\n        tr[num].y = R[l];\r\n        tr[num].val = 2 * a[l];\r\n        return;\r\n    }\r\n\r\n    build(l, mid, ls);\r\n    build(mid + 1, r, rs);\r\n\r\n    update(num);\r\n}\r\n\r\nvoid update(int l, int r, int x, int num) {\r\n    if (l == r) {\r\n        tr[num].x = L[l];\r\n        tr[num].y = R[l];\r\n        tr[num].val = 2 * a[l];\r\n        return;\r\n    }\r\n\r\n    if (x <= mid) update(l, mid, x, ls);\r\n    else update(mid + 1, r, x, rs);\r\n\r\n    update(num);\r\n}\r\n\r\nsigned main() {\r\n    int n = read(), total = n;\r\n\r\n    for (int i = 1; i <= n; i++) {\r\n        a[i] = read();\r\n        total++;\r\n        v[total].pb({i, a[i]});\r\n        v[i].pb({total, a[i]});\r\n        total++;\r\n        v[total].pb({i, a[i]});\r\n        v[i].pb({total, a[i]});\r\n        L[i] = total - 1;\r\n        R[i] = total;\r\n    }\r\n\r\n    for (int i = 1; i < n; i++) {\r\n        int x = read(), y = read();\r\n        v[x].pb({y, 1});\r\n        v[y].pb({x, 1});\r\n    }\r\n\r\n    dfs(1, 0);\r\n\r\n    build(1, n, 1);\r\n\r\n    int q = read();\r\n\r\n    while (q--) {\r\n        int x = read(), val = read();\r\n        a[x] = val;\r\n        dis[L[x]] = dis[x] + val;\r\n        dis[R[x]] = dis[x] + val;\r\n        update(1, n, x, 1);\r\n        write((tr[1].val + 1) / 2);\r\n        putchar('\\n');\r\n    }\r\n}"
+}

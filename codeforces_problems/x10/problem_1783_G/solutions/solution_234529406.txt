@@ -1,0 +1,37 @@
+{
+    "id": 234529406,
+    "contestId": 1783,
+    "creationTimeSeconds": 1701054416,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1783,
+        "index": "G",
+        "name": "Weighed Tree Radius",
+        "type": "PROGRAMMING",
+        "rating": 2800,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1783,
+        "members": [
+            {
+                "handle": "i8d"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1673188500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 514,
+    "memoryConsumedBytes": 80179200,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define int long long\r\n\r\nconst int inf = 1e9+7;\r\n\r\nstruct segtree{\r\n\tint l, r; segtree *lc = 0, *rc = 0; int v = inf;\r\n\tsegtree*getmem();\r\n\tsegtree(int l, int r):l(l), r(r) {\r\n\t\tint m = (l+r)/2;\r\n\t\tif(l==r)return;\r\n\t\tlc = getmem(); *lc = segtree(l, m);\r\n\t\trc = getmem(); *rc = segtree(m+1, r);\r\n\t}\r\n\tsegtree():segtree(-1, -1){};\r\n\tint q(int ql, int qr){\r\n\t\tif(ql <= l && qr >= r) return v;\r\n\t\tif(ql > r || qr < l) return inf;\r\n\t\treturn min(lc->q(ql, qr), rc->q(ql, qr));\r\n\t}\r\n\tvoid u(int qi, int qv){\r\n\t\tif(l > qi || r < qi) return;\r\n\t\tif(l==r){v = qv; return;}\r\n\t\tlc->u(qi, qv);rc->u(qi, qv);\r\n\t\tv = min(lc->v, rc->v);\r\n\t}\r\n} mem[(int)2e5*4]; int memsz = 0;\r\nsegtree* segtree::getmem(){return &mem[memsz++];}\r\n\r\nnamespace dynacon{\r\n\tstruct segtree{\r\n\t\tint l, r; segtree *lc = 0, *rc = 0; vector<int> v, x; int d1 = 0, d2 = 0;\r\n\t\tsegtree*getmem();\r\n\t\tsegtree(int l, int r):l(l), r(r) {\r\n\t\t\tint m = (l+r)/2;\r\n\t\t\tif(l==r)return;\r\n\t\t\tlc = getmem(); *lc = segtree(l, m);\r\n\t\t\trc = getmem(); *rc = segtree(m+1, r);\r\n\t\t}\r\n\t\tsegtree():segtree(-1, -1){};\r\n\t\tvoid u(int ql, int qr, int qv, int qx){\r\n\t\t\tif(l > qr || r < ql) return;\r\n\t\t\tif(l >= ql && r <= qr){\r\n\t\t\t\tv.push_back(qv);\r\n\t\t\t\tx.push_back(qx);\r\n\t\t\t\treturn;\r\n\t\t\t}\r\n\t\t\tlc->u(ql, qr, qv, qx);\r\n\t\t\trc->u(ql, qr, qv, qx);\r\n\t\t}\r\n\t\tvoid dfs(int d1, int d2, function<int(int,int)> dist, vector<int>& a, int t){\r\n\t\t\t//vector<pair<int,int>> sad;\r\n\t\t\tfor(int i = 0; i < v.size(); i++){\r\n\t\t\t\t//sad.push_back(v[i], a[v[i]]);\r\n\t\t\t\ta[v[i]] = x[i];\r\n\t\t\t\tt = max(t, x[i]);\r\n\t\t\t\tif(v[i] != d2 && dist(v[i], d2)+a[d2] > dist(v[i], d1)+a[d1]){\r\n\t\t\t\tif(dist(v[i], d2) + a[v[i]]> dist(d1, d2) + a[d1]) d1 = v[i];\r\n\t\t\t\t}\r\n\t\t\t\telse if(v[i] != d1 && dist(d1, v[i]) + a[v[i]] > dist(d1, d2) + a[d2]) d2 = v[i];\r\n\t\t\t}\r\n\t\t\tif(l == r){\r\n\t\t\t\t//answer!\r\n\t\t\t\tint j = dist(d1, d2) + a[d1] + a[d2];\r\n\t\t\t\t//<<d1+1<<\",\"<<d2+1<<\",\"<<a[d1]<<\",\"<<a[d2]<<\",\"<<dist(d1, d2)<<endl;\r\n\t\t\t\tcout<<max(max(a[d1], t), max(a[d2],(j+1)/2))<<endl;\r\n\t\t\t}\r\n\t\t\telse{\r\n\t\t\t\tlc->dfs(d1, d2, dist, a, t);\r\n\t\t\t\trc->dfs(d1, d2, dist, a, t);\r\n\t\t\t}\r\n\t\t\t//for(auto &x : sad) a[x.first] = x.second;// BRUH\r\n\t\t}\r\n\t} mem[(int)1e5*4]; int memsz = 0;\r\n\tsegtree* segtree::getmem(){return &mem[memsz++];}\r\n}\r\n\r\nvoid solve(){\r\n\tint n; cin >> n;\r\n\tvector<int>a(n);for(auto&x:a)cin>>x;\r\n\tvector<vector<int>> adj(n);\r\n\tfor(int i = 0; i < n-1; i++){\r\n\t\tint u, v; cin >> u >> v; u--;v--;\r\n\t\tadj[u].push_back(v); adj[v].push_back(u);\r\n\t}\r\n\tsegtree ac(0, 2e5);\r\n\tvector<int> d(n), t(n, 0); int cur = 0;\r\n\tfunction<void(int,int,int)> dfs = [&](int v, int pp, int dd){\r\n\t\td[v] = dd; t[v] = cur;\r\n\t\tac.u(cur++, dd);\r\n\t\tfor(auto &x : adj[v]){\r\n\t\t\tif(x != pp){\r\n\t\t\t\t//cout<<\"FUCK \"<<cur<<\",\"<<dd<<endl;\r\n\t\t\t\tac.u(cur++, dd);\r\n\t\t\t\tdfs(x, v, dd+1);\r\n\t\t\t}\r\n\t\t}\r\n\t};\r\n\tdfs(0, -1, 0);\r\n\t//cout<<\"BRO\"<<cur<<endl;\r\n\tfunction<int(int,int)> dist = [&](int u, int v){\r\n\t\tif(t[u] > t[v]) swap(u, v);\r\n\t\t//cout<<u<<\",\"<<v<<\",\"<<d[u]<<\",\"<<d[v]<<\",\"<<t[u]<<\",\"<<t[v]<<\",\"<<ac.q(t[u], t[v])<<endl;\r\n\t\treturn d[u] + d[v] - 2 * ac.q(t[u], t[v]);\r\n\t};\r\n\tfunction<void(int,int)> set = [&](int v, int x){\r\n\t\ta[v] = x;\r\n\t};\r\n\t\r\n\t//max dist j\r\n\tint m; cin >> m;\r\n\tvector<int> k(n,-1);\r\n\tdynacon::segtree sus(0, m-1);\r\n\tfor(int t = 0; t < m; t++){\r\n\t\tint v, x; cin >> v >> x; v--;\r\n\t\tsus.u(k[v], t-1, v, a[v]);\r\n\t\tk[v] = t; a[v] = x;\r\n\t}\r\n\tfor(int v = 0; v < n; v++){\r\n\t\tsus.u(k[v], m-1, v, a[v]);\r\n\t}\r\n\ta.assign(n, 0);\r\n\tint j = 0;\r\n\tfor(int i = 0; i < n; i++) if(dist(0, i) > dist(0, j)) j = i;\r\n\tint kk = 0;\r\n\tfor(int i = 0; i < n; i++) if(dist(j, i) > dist(j, kk)) kk = i;\r\n\tsus.dfs(j, kk, dist, a, 0); //i fucked up so bad\r\n}\r\n\r\nsigned main(){\r\n\tcin.tie(0)->sync_with_stdio(0);\r\n\tint t = 1; \r\n\t//cin >> t;\r\n\twhile(t--) solve();\r\n}"
+}

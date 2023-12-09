@@ -1,0 +1,35 @@
+{
+    "id": 225197578,
+    "contestId": 1017,
+    "creationTimeSeconds": 1695694756,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1017,
+        "index": "H",
+        "name": "The Films",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 3300,
+        "tags": [
+            "brute force"
+        ]
+    },
+    "author": {
+        "contestId": 1017,
+        "members": [
+            {
+                "handle": "liang_"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1533737100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 1730,
+    "memoryConsumedBytes": 260198400,
+    "source": "#include<bits/stdc++.h>//\u83ab\u961f\u5927\u6cd5\u597d \r\n#define pb push_back\r\nusing namespace std;//\u8003\u8651\u5c06\u6240\u6709k\u503c\u4e00\u6837\u7684\u5206\u62101\u7c7b\uff0c\u6bcf\u4e00\u7c7b\u8dd1\u4e00\u904d\u83ab\u961f\uff0c\u79bb\u7ebf\u8ba1\u7b97\u7b54\u6848\u5373\u53ef\r\ntypedef long long LL;\r\nconst int N = 1e5 + 10;\r\nconst int K = 210;\r\nint n, m, q, num[N], cnt, L[N], R[N], kk[N], a[N], bel[N], blo, s[N], Inv[N * 3];\r\nLL ans[N], mod = 998244353;\r\n//#define getchar() (tt==ss&&(tt=(ss=in)+fread(in,1,1<<20,stdin),ss==tt)?EOF:*ss++)\r\n//char in[1<<20],*ss=in,*tt=in;\r\ninline int read(){\r\n\tint x = 0, f = 1; char c = getchar();\r\n\twhile(!isdigit(c)){if(c == '-') f = -1; c = getchar();}\r\n\twhile(isdigit(c)){x = (x << 1) + (x << 3) + (c ^ 48); c = getchar();}\r\n\treturn x * f;\r\n}\r\nvoid write(LL x){\r\n\tif(x < 0) putchar('-'), x = -x;\r\n\tif(x > 9) write(x / 10);\r\n\tputchar(x % 10 + '0');\r\n}\r\ninline LL Pow(LL x, LL y){\r\n\tLL res = 1, k = (x % mod);\r\n\twhile(y){\r\n\t\tif(y & 1) res = (res * k) % mod;\r\n\t\ty >>= 1;\r\n\t\tk = (k * k) % mod;\r\n\t}\r\n\treturn res;\r\n}\r\nstruct range{int l, r, id;};\r\ninline bool cmp(range a, range b){\r\n    if(bel[a.l] != bel[b.l]) return bel[a.l] < bel[b.l];\r\n    else{\r\n    \tif(bel[a.l] & 1) return a.r < b.r;\r\n    \telse return a.r > b.r;\r\n\t}\r\n}\r\nstruct Mo_Team{\r\n\tvector< range > Q;\r\n\tint k, c[N]; LL res = 1, pre[N];// pre[i] \u8868\u793a (mk + 1) * (mk + 2) * ... * (mk + i) \u5728\u6a21 mod \u4e0b\u7684\u6570  \r\n\tinline void Get(){\r\n\t\tint qnum = Q.size();\r\n\t\tif(n == 1) blo = sqrt(n);\r\n\t\telse blo = ((n / sqrt(qnum) > 0) ? (n / sqrt(qnum)) : sqrt(n));\r\n\t\tfor(int i = 1; i <= n; i++) bel[i] = (i - 1) / blo + 1; \r\n\t\tpre[0] = 1LL;\r\n\t\tfor(int i = 1; i <= n; i++) pre[i] = (pre[i - 1] * ((1LL * m * k + 1LL * i) % mod)) % mod;//\u7b49\u4f1a\u513f\u7528 \r\n\t}\r\n\tinline void add(int l, int r, int p){\r\n\t\tres = (res * (1LL * k + s[a[p ? r : l]] - c[a[p ? r : l]])) % mod;\r\n\t\tc[a[p ? r : l]]++;\r\n\t}\r\n\tinline void del(int l, int r, int p){\r\n\t\tres = (res * Inv[k + s[a[p ? r : l]] - c[a[p ? r : l]] + 1]) % mod;\r\n\t\tc[a[p ? r : l]]--;\r\n\t}\r\n\tinline void solve(){\r\n\t    Get();\r\n\t\tsort(Q.begin(), Q.end(), cmp);\r\n\t\tint L = 1, R = 0;\r\n\t\tfor(auto x : Q){\r\n\t\t\twhile(L > x.l) add(--L, R, 0);\r\n\t\t\twhile(R < x.r) add(L, ++R, 1);\r\n\t\t\twhile(L < x.l) del(L++, R, 0);\r\n\t\t\twhile(R > x.r) del(L, R--, 1);\r\n\t\t\tans[x.id] = (res * pre[n - (R - L + 1)]) % mod;\r\n\t\t}\r\n\t}\r\n}mo[K]; \r\nint main(){\r\n//\tfreopen(\"slim.in\", \"r\", stdin);\r\n//\tfreopen(\"slim.out\", \"w\", stdout);\r\n\tn = read(), m = read(), q = read();\r\n\tfor(register int i = 0; i < N * 3; i++) Inv[i] = Pow(1LL * i, mod - 2) % mod;//\u9884\u5904\u7406\u9006\u5143 \r\n\tfor(register int i = 1; i <= n; i++) s[a[i] = read()]++;\r\n\tfor(register int i = 1; i <= q; i++){\r\n\t\tL[i] = read(), R[i] = read(), kk[i] = read();\r\n\t\tnum[++cnt] = kk[i];\r\n\t}\r\n\tsort(num + 1, num + cnt + 1);\r\n\tcnt = unique(num + 1, num + cnt + 1) - (num + 1);\r\n\tfor(register int i = 1; i <= q; i++){\r\n\t\tint c = lower_bound(num + 1, num + cnt + 1, kk[i]) - num;\r\n\t\tmo[c].Q.pb((range){L[i], R[i], i});\r\n\t\tmo[c].k = kk[i];\r\n\t}\r\n\tfor(int i = 1; i <= cnt; i++) mo[i].solve();\r\n\tfor(int i = 1; i <= q; i++) write(ans[i] % mod), putchar('\\n');\r\n\treturn 0;\r\n}"
+}

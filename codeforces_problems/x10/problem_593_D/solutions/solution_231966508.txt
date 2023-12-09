@@ -1,0 +1,39 @@
+{
+    "id": 231966508,
+    "contestId": 593,
+    "creationTimeSeconds": 1699461575,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 593,
+        "index": "D",
+        "name": "Happy Tree Party",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 593,
+        "members": [
+            {
+                "handle": "npmduyy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1446655500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 639,
+    "memoryConsumedBytes": 166604800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define FILE(file) \\\r\n    freopen(#file\".inp\", \"r\", stdin); \\\r\n    freopen(#file\".out\", \"w\", stdout);\r\n#define ff first\r\n#define ss second\r\n#define ln '\\n'\r\n#define sz(v) ((int)(v).size())\r\n#define all(v) (v).begin(), (v).end()\r\n#define BIT(x, i) (((x)>>(i))&1)\r\ntypedef long long ll;\r\ntypedef unsigned long long ull;\r\ntypedef long double ld;\r\ntypedef pair<ll, ll> ii;\r\ntypedef pair<int, ii> iii;\r\n\r\ntemplate<class T>\r\nbool minimize(T& a, const T& b) {\r\n    if (a > b) {a = b; return 1;}\r\n    else return 0;\r\n}\r\n\r\ntemplate<class T>\r\nbool maximize(T& a, const T& b) {\r\n    if (a < b) {a = b; return 1;}\r\n    else return 0;\r\n}\r\n\r\nconst int maxN = 1e6;\r\nconst int inf = 2e9;\r\n\r\nstruct Edge {\r\n    int p;\r\n    ll w;\r\n\r\n    Edge(int par, ll w) : p(par), w(w) {}\r\n    Edge() {}\r\n};\r\n\r\nint n, m, V[maxN+1], h[maxN+1], up[maxN+1][20], lab[maxN+1];\r\nEdge par[maxN+1];\r\nvector<iii> g[maxN+1];\r\n\r\nvoid readData() {\r\n    cin >> n >> m;\r\n    for (int i = 1; i < n; ++i) {\r\n        int u, v;\r\n        ll w;\r\n        cin >> u >> v >> w;\r\n        g[u].push_back({v, {w, i}});\r\n        g[v].push_back({u, {w, i}});\r\n    }\r\n}\r\n\r\nvoid dfs0(int u = 1, int r = 1) {\r\n    for (iii e : g[u]) if (e.ff != r) {\r\n        int v = e.ff, id = e.ss.ss;\r\n        ll w = e.ss.ff;\r\n        h[v] = h[u] + 1;\r\n        par[v] = Edge(u, w);\r\n        up[v][0] = u;\r\n        for (int i = 1; i < 20; ++i) {\r\n            up[v][i] = up[up[v][i-1]][i-1];\r\n        }\r\n        V[id] = v;\r\n        dfs0(v, u);\r\n    }\r\n}\r\n\r\nint lca(int u, int v) {\r\n    if (h[u] < h[v]) swap(u, v);\r\n    for (int k = h[u] - h[v], i = 0; (1 << i) <= k; ++i) {\r\n        if (BIT(k, i)) u = up[u][i];\r\n    }\r\n    if (u == v) return u;\r\n    for (int i = 19; i >= 0; --i) {\r\n        if (up[u][i] != up[v][i]) {\r\n            u = up[u][i], v = up[v][i];\r\n        }\r\n    }\r\n    return up[u][0];\r\n}\r\n\r\nint f(int u) {\r\n    return (lab[u] < 0 ? u : (lab[u] = f(lab[u])));\r\n}\r\n\r\nll get(int u, int v, ll val) {\r\n    int r = lca(u, v);\r\n    while (f(u) != 1 && h[par[f(u)].p] >= h[r]) {\r\n        u = f(u);\r\n        val /= par[u].w;\r\n        if (val == 0) return 0;\r\n        u = par[u].p;\r\n    }\r\n    while (f(v) != 1 && h[par[f(v)].p] >= h[r]) {\r\n        v = f(v);\r\n        val /= par[v].w;\r\n        if (val == 0) return 0;\r\n        v = par[v].p;\r\n    }\r\n    return val;\r\n}\r\n\r\nvoid solve() {\r\n    dfs0();\r\n    memset(lab, -1, sizeof(lab));\r\n    for (int i = 2; i <= n; ++i) {\r\n        if (par[i].w == 1) lab[i] = par[i].p;\r\n    }\r\n    while (m--) {\r\n        int type; cin >> type;\r\n        if (type == 1) {\r\n            int u, v;\r\n            ll y;\r\n            cin >> u >> v >> y;\r\n            //cerr << u << ' ' << v << ' ' << y << '\\n';\r\n            cout << get(u, v, y) << '\\n';\r\n        }\r\n        else {\r\n            int p;\r\n            ll c;\r\n            cin >> p >> c;\r\n            int u = V[p];\r\n            par[u].w = c;\r\n            if (c == 1) lab[u] = par[u].p;\r\n        }\r\n    }\r\n}\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n    //FILE(test);\r\n    readData();\r\n    solve();\r\n    return 0;\r\n}"
+}

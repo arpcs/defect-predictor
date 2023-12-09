@@ -1,0 +1,37 @@
+{
+    "id": 212918659,
+    "contestId": 176,
+    "creationTimeSeconds": 1688880801,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 176,
+        "index": "E",
+        "name": "Archaeology",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 176,
+        "members": [
+            {
+                "handle": "tomas_fang"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1334934300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 22937600,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\n#define ll long long\n#define pll pair<ll, ll>\n#define pb push_back\n\nconst int N = 1e5 + 10, LG = 23;\n\nll n, q, tim, ans;\nll st[N], ft[N], h[N], d[N], par[LG][N];\nvector<pll> g[N];\nbool vis[N];\nmultiset<ll> mst;\n\nvoid dfs(ll v) {\n    vis[v] = true;\n    st[v] = tim++;\n    for (auto u : g[v]) {\n        if (!vis[u.first]) {\n            h[u.first] = h[v] + 1;\n            d[u.first] = d[v] + u.second;\n            par[0][u.first] = v;\n            for (int i = 1; i < LG; i++)\n                par[i][u.first] = par[i - 1][par[i - 1][u.first]];\n            dfs(u.first);\n        }\n    }\n    ft[v] = tim;\n}\n\nint get_par(int v, int a) {\n    for (int i = 0; i < LG; i++) {\n        if ((a >> i) & 1)\n            v = par[i][v];\n    }\n    return v;\n}\n\nint lca(int v, int u) {\n    if (h[u] > h[v])\n        swap(u, v);\n    v = get_par(v, h[v] - h[u]);\n    if (v == u)\n        return v;\n    for (int i = LG - 1; i >= 0; i--) {\n        if (par[i][v] != par[i][u]) {\n            v = par[i][v];\n            u = par[i][u];\n        }\n    }\n    return par[0][v];\n}\n\nll cal_dis(ll v, ll u) {\n    return d[v] + d[u] - 2 * d[lca(v, u)];\n}\n\nll nxt(ll v) {\n    auto it = mst.upper_bound(v);\n    if (it == mst.end())\n        return *mst.begin();\n    return *it;\n}\n\nll prv(ll v) {\n    auto it = mst.lower_bound(v);\n    if (it == mst.begin())\n        return *mst.rbegin();\n    it--;\n    return *it;\n}\n\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(0);\n    cout.tie(0);\n\n    cin >> n;\n    for (int i = 1; i < n; i++) {\n        ll v, u, w;\n        cin >> v >> u >> w;\n        g[v].pb({u, w}), g[u].pb({v, w});\n    }\n\n    dfs(1);\n\n    cin >> q;\n    while (q--) {\n        char kind;\n        ll x;\n        cin >> kind;\n        if (kind == '?') {\n            cout << ans / 2 << \"\\n\";\n            continue;\n        }\n        cin >> x;\n        if (kind == '+') {\n            if (mst.empty()) {\n                mst.insert(x);\n            } else {\n                ll v = nxt(x), u = prv(x);\n                ans += cal_dis(v, x) + cal_dis(x, u) - cal_dis(v, u);\n                mst.insert(x);\n            }\n        }\n        if (kind == '-') {\n            ll v = nxt(x), u = prv(x);\n            ans += cal_dis(v, u) - cal_dis(u, x) - cal_dis(v, x);\n            mst.erase(mst.find(x));\n        }\n    }\n\n    return 0;\n}\n// UksJYgQpiSlThbUKejivIhwsUGjbuvDuesJDishPTxGCHhEDpVNtZgzEpkgnqPtqAqFHHVUarPPohaCwORGbODvVDYbAdJgCCImAHqFQlUggRpgVvUCbvKLIOBBuMYID"
+}

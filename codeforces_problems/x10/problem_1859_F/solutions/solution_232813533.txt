@@ -1,0 +1,40 @@
+{
+    "id": 232813533,
+    "contestId": 1859,
+    "creationTimeSeconds": 1700024352,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1859,
+        "index": "F",
+        "name": "Teleportation in Byteland",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "graphs",
+            "shortest paths",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1859,
+        "members": [
+            {
+                "handle": "275307894a"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1691850900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 74649600,
+    "source": "// LUOGU_RID: 135179658\n#include<bits/stdc++.h>\n#define LB lwoer_bound\n#define UB upper_bound\n#define fi first\n#define se second\n#define Me(x,y) memset(x,y,sizeof x)\n#define Mc(x,y) memcpy(x,y,sizeof x)\nusing namespace std;using ll=long long;using db=double;using pii=pair<int,int>;\nconst int N=1e5+5,M=N*4+5,K=1e7+5,mod=1e6+3;const ll INF=1e18+7;mt19937 rnd(time(0));\nint n,T,q;char s[N];\nvector<pii> S[N];\nll ans[N],sum[N][21];\nint fa[N],tp[N],siz[N],son[N],d[N];\nvoid dfs1(int x,int La){\n\tfa[x]=La;d[x]=d[La]+1;siz[x]=1;\n\tfor(auto i:S[x]) if(i.fi^La) {\n\t\tfor(int j=0;j<=20;j++) sum[i.fi][j]=sum[x][j]+((i.se+(1<<j)-1)>>j);\n\t\tdfs1(i.fi,x);siz[x]+=siz[i.fi];siz[i.fi]>siz[son[x]]&&(son[x]=i.fi);\n\t}\n}\nvoid dfs2(int x,int La){\n\ttp[x]=La;if(son[x]) dfs2(son[x],La);\n\tfor(auto i:S[x]) if(i.fi^fa[x]&&i.fi^son[x]) dfs2(i.fi,i.fi); \n}\nint LCA(int x,int y){\n\twhile(tp[x]^tp[y]) {\n\t\tif(d[tp[x]]<d[tp[y]]) swap(x,y);\n\t\tx=fa[tp[x]];\n\t}\n\treturn d[x]<d[y]?x:y;\n}\nll f[N][21];\nvoid makef(int x,int La){\n\tif(s[x]=='1') Me(f[x],0);\n\telse Me(f[x],0x3f),f[x][0]=0;\n\tfor(auto i:S[x]) if(i.fi^La) {\n\t\tmakef(i.fi,x);\n\t\tfor(int j=0;j<=20;j++) f[x][j]=min(f[x][j],f[i.fi][j]+i.se+((i.se+(1<<j)-1)>>j));\n\t}\n}\nll g[N][21];\nvoid makeg(int x,int La){\n\tfor(auto i:S[x]) if(i.fi^La){\n\t\tfor(int j=0;j<=20;j++) g[i.fi][j]=min(g[i.fi][j],g[x][j]);\n\t\tmakeg(i.fi,x);\n\t}\n}\nvector<pii> Q1[N],Q2[N];\nint ff[N];ll gg[N][21];\nint GF(int x){\n\tif(x==ff[x]) return x;\n\tint p=ff[x];ff[x]=GF(ff[x]);\n\tfor(int i=0;i<=20;i++) gg[x][i]=min(gg[x][i],gg[p][i]);\n\treturn ff[x];\n}\nint vis[N];\nvoid getans1(int x,int La){\n\tvis[x]=1;\n\tfor(auto i:S[x]) if(i.fi^La) getans1(i.fi,x);\n\tfor(auto i:Q1[x]) if(vis[i.fi]){\n\t\tint Ls=LCA(x,i.fi);GF(i.fi);\n\t\tfor(int j=0;j<=20;j++) ans[i.se]=min(ans[i.se],sum[i.fi][0]+gg[i.fi][j]+sum[x][j]-2*sum[Ls][j]);\n\t}\n\tff[x]=La;\n}\nvoid getans2(int x,int La){\n\tvis[x]=1;\n\tfor(auto i:S[x]) if(i.fi^La) getans2(i.fi,x);\n\tfor(auto i:Q2[x]) if(vis[i.fi]){\n\t\tint Ls=LCA(x,i.fi);GF(i.fi);\n\t\tfor(int j=0;j<=20;j++) ans[i.se]=min(ans[i.se],sum[x][0]+gg[i.fi][j]+sum[i.fi][j]-2*sum[Ls][0]);\n\t}\n\tff[x]=La;\n}\nint main(){\n\tint i,j;scanf(\"%d%d\",&n,&T);\n\tfor(i=1;i<n;i++) {\n\t\tint x,y,z;scanf(\"%d%d%d\",&x,&y,&z);\n\t\tS[x].emplace_back(y,z);S[y].emplace_back(x,z);\n\t}\n\tdfs1(1,0);dfs2(1,1);\n\tscanf(\"%s\",s+1);\n\tmakef(1,0);\n\tfor(i=1;i<=n;i++) for(j=0;j<=20;j++) f[i][j]+=j*T;\n\tfor(i=1;i<=n;i++) for(j=0;j<=20;j++) g[i][j]=f[i][j]-sum[i][0]-sum[i][j];\n\tmakeg(1,0);\n\tscanf(\"%d\",&q);\n\tfor(i=1;i<=q;i++){\n\t\tint x,y;scanf(\"%d%d\",&x,&y);\n\t\tans[i]=INF;\n\t\tint Ls=LCA(x,y);\n\t\tfor(int j=0;j<=20;j++) ans[i]=min(ans[i],sum[x][0]+sum[y][j]+g[Ls][j]);\n\t\t/*int z=Ls;while(z) {\n\t\t\tfor(int j=0;j<=20;j++) ans[i]=min(ans[i],sum[x][0]-sum[z][0]+f[z][j]+sum[y][j]-sum[z][j]);\n\t\t\tz=fa[z];\n\t\t}*/\n\t\t/*int z=x;while(z^Ls){\n\t\t\tfor(int j=0;j<=20;j++) ans[i]=min(ans[i],sum[x][0]-sum[z][0]+f[z][j]+sum[y][j]+sum[z][j]-2*sum[Ls][j]);\n\t\t\tz=fa[z];\n\t\t}*/\n\t\tQ1[y].emplace_back(x,i);\n\t\t/*int z=y;while(z^Ls){\n\t\t\tfor(int j=0;j<=20;j++) ans[i]=min(ans[i],sum[x][0]+sum[z][0]-2*sum[Ls][0]+f[z][j]+sum[y][j]-sum[z][j]);\n\t\t\tz=fa[z];\n\t\t}*/\n\t\tQ2[x].emplace_back(y,i);\n\t}\n\tfor(int i=1;i<=n;i++) reverse(S[i].begin(),S[i].end());\n\tfor(int i=1;i<=n;i++){\n\t\tff[i]=i;vis[i]=0;\n\t\tfor(int j=0;j<=20;j++) gg[i][j]=f[i][j]-sum[i][0]+sum[i][j];\n\t}\n\tgetans1(1,0);\n\tfor(int i=1;i<=n;i++) reverse(S[i].begin(),S[i].end());\n\tfor(int i=1;i<=n;i++){\n\t\tff[i]=i;vis[i]=0;\n\t\tfor(int j=0;j<=20;j++) gg[i][j]=f[i][j]-sum[i][0]+sum[i][j];\n\t}\n\tgetans1(1,0);\n\tfor(int i=1;i<=n;i++) reverse(S[i].begin(),S[i].end());\n\tfor(int i=1;i<=n;i++){\n\t\tff[i]=i;vis[i]=0;\n\t\tfor(int j=0;j<=20;j++) gg[i][j]=f[i][j]+sum[i][0]-sum[i][j];\n\t}\n\tgetans2(1,0);\n\tfor(int i=1;i<=n;i++) reverse(S[i].begin(),S[i].end());\n\tfor(int i=1;i<=n;i++){\n\t\tff[i]=i;vis[i]=0;\n\t\tfor(int j=0;j<=20;j++) gg[i][j]=f[i][j]+sum[i][0]-sum[i][j];\n\t}\n\tgetans2(1,0);\n\tfor(i=1;i<=q;i++) printf(\"%lld\\n\",ans[i]);\n\tcerr<<clock()*1.0/CLOCKS_PER_SEC<<'\\n';\n}"
+}

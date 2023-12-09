@@ -1,0 +1,38 @@
+{
+    "id": 223677784,
+    "contestId": 1584,
+    "creationTimeSeconds": 1694916092,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1584,
+        "index": "E",
+        "name": "Game with Stones",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "data structures",
+            "games",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1584,
+        "members": [
+            {
+                "handle": "Huyum_nik_fan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1636869900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 405,
+    "memoryConsumedBytes": 268390400,
+    "source": "#include <bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n\r\n//#pragma GCC optimize(\"Ofast,unroll-loops\")\r\n//#pragma GCC target(\"avx,avx2,fma\")\r\n\r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\n\r\n#define fi first\r\n#define se second\r\n#define all(m) (m).begin(), (m).end()\r\n#define rall(m) (m).rbegin(), (m).rend()\r\n#define vec vector\r\n#define sz(a) (int) (a).size()\r\n#define mpp make_pair\r\n#define mtt make_tuple\r\n\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef unsigned long long ull;\r\ntypedef pair <ll, ll> pll;\r\ntypedef pair <int, int> pii;\r\ntypedef tuple <int, int, int> tui;\r\n\r\ntemplate <typename T>\r\nusing prq = priority_queue <T>;\r\n\r\ntemplate <typename T>\r\nusing pgq = priority_queue <T, vec <T>, greater <T>>;\r\n\r\ntemplate <typename T> bool umin(T &a, T b) { return a > b ? a = b, 1 : 0; }\r\ntemplate <typename T> bool umax(T &a, T b) { return a < b ? a = b, 1 : 0; }\r\n\r\nstruct segtree{\r\n      int n;\r\n      vec <pii> t;\r\n      vec <int> p;\r\n      segtree() {}\r\n      segtree(int z): n(z), t(4 * z), p(4 * z) {}\r\n\r\n      pii mrg(pii a, pii b){\r\n            if (a.fi == b.fi) return {a.fi, a.se + b.se};\r\n            return min(a, b);\r\n      }\r\n\r\n      void build(int tl, int tr, int v){\r\n            if (tl + 1 == tr) return void(t[v] = {2e9, 0});\r\n            int tm = tl + tr >> 1;\r\n            build(tl, tm, v * 2 + 1);\r\n            build(tm, tr, v * 2 + 2);\r\n            t[v] = mrg(t[v * 2 + 1], t[v * 2 + 2]);\r\n      }\r\n\r\n      void build(){\r\n            build(0, n, 0);\r\n      }\r\n\r\n      void apply(int v, int x){\r\n            t[v].fi += x, p[v] += x;\r\n      }\r\n\r\n      void push(int v){\r\n            if (!p[v]) return;\r\n            for (int i: {v * 2 + 1, v * 2 + 2}){\r\n                  apply(i, p[v]);\r\n            }\r\n            p[v] = 0;\r\n      }\r\n\r\n      pii get(int l, int r, int tl, int tr, int v){\r\n            if (l >= r) return {2e9, 1};\r\n            if (tl == l && tr == r) return t[v];\r\n            push(v);\r\n            int tm = tl + tr >> 1;\r\n            return mrg(get(l, min(tm, r), tl, tm, v * 2 + 1),\r\n                       get(max(l, tm), r, tm, tr, v * 2 + 2));\r\n      }\r\n\r\n      int get(int l){\r\n            pii res = get(l, n, 0, n, 0);\r\n            return res.fi == 0 ? res.se : 0;\r\n      }\r\n\r\n      pii raw_get(int l){\r\n            return get(l, n, 0, n, 0);\r\n      }\r\n\r\n      void act(int p, int tl, int tr, int v){\r\n            if (tl + 1 == tr) return void(t[v] = {0, 1});\r\n            push(v);\r\n            int tm = tl + tr >> 1;\r\n            if (p < tm) act(p, tl, tm, v * 2 + 1);\r\n            else act(p, tm, tr, v * 2 + 2);\r\n            t[v] = mrg(t[v * 2 + 1], t[v * 2 + 2]);\r\n      }\r\n\r\n      void act(int p){\r\n            act(p, 0, n, 0);\r\n      }\r\n\r\n      void upd(int l, int r, int x, int tl, int tr, int v){\r\n            if (l >= r) return;\r\n            if (tl == l && tr == r) return apply(v, x);\r\n            push(v);\r\n            int tm = tl + tr >> 1;\r\n            upd(l, min(tm, r), x, tl, tm, v * 2 + 1);\r\n            upd(max(l, tm), r, x, tm, tr, v * 2 + 2);\r\n            t[v] = mrg(t[v * 2 + 1], t[v * 2 + 2]);\r\n      }\r\n\r\n      void upd(int l, int r, int x){\r\n            umin(r, n);\r\n            upd(l, r, x, 0, n, 0);\r\n      }\r\n\r\n      int fnd(int tl, int tr, int v){\r\n            if (tl + 1 == tr) return t[v].fi >= 0 ? -1 : tl;\r\n            push(v);\r\n            int tm = tl + tr >> 1;\r\n            if (t[v * 2 + 2].fi < 0) return fnd(tm, tr, v * 2 + 2);\r\n            return fnd(tl, tm, v * 2 + 1);\r\n      }\r\n\r\n      int fnd(){\r\n            return fnd(0, n, 0);\r\n      }\r\n\r\n      void dbg(int tl, int tr, int v){\r\n            if (tl + 1 == tr) return void(cout << t[v].fi << \" \");\r\n            push(v);\r\n            int tm = tl + tr >> 1;\r\n            dbg(tl, tm, v * 2 + 1);\r\n            dbg(tm, tr, v * 2 + 2);\r\n      }\r\n\r\n      void dbg(){\r\n            dbg(0, n, 0);\r\n            cout << \"\\n\";\r\n      }\r\n\r\n};\r\n\r\ninline int solve(){\r\n      int n; cin >> n;\r\n      vec <int> a(n);\r\n      for (auto &i: a) cin >> i;\r\n      vec <segtree> st(2);\r\n      st[0] = segtree((n + 1) / 2);\r\n      st[1] = segtree(n / 2);\r\n      st[0].build();\r\n      st[1].build();\r\n      ll ans = 0;\r\n      for (int i = 0; i < n; ++i){\r\n            int c = i & 1;\r\n            st[c].act(i / 2);\r\n            st[c].upd(0, i / 2 + 1, +a[i]);\r\n            st[c ^ 1].upd(0, i / 2 + 1, -a[i]);\r\n            int p0 = st[0].fnd();\r\n            int p1 = st[1].fnd();\r\n            int pos = 0;\r\n            if (p0 != -1){\r\n                  umax(pos, 2 * p0 + 1);\r\n            }\r\n            if (p1 != -1){\r\n                  umax(pos, 2 * p1 + 2);\r\n            }\r\n//            cout << \"[\" << pos << \" \" << i << \"]\\n\";\r\n            ans += st[0].get((pos + 1) / 2);\r\n            ans += st[1].get(pos / 2);\r\n//            pii db1 = st[0].raw_get((pos + 1) / 2);\r\n//            cout << \"?? \" << db1.fi << \" \" << db1.se << \"\\n\";\r\n//            cout << \"0: \"; st[0].dbg();\r\n//            cout << \"1: \"; st[1].dbg();\r\n      }\r\n      cout << ans << \"\\n\";\r\n      return 0;\r\n}\r\n\r\ninline void precalc() {}\r\n\r\nsigned main(){\r\n      ios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0);\r\n      int tst = 1; cin >> tst;\r\n      precalc();\r\n      while(tst--) solve();\r\n      return 0;\r\n}\r\n"
+}

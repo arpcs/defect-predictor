@@ -1,0 +1,37 @@
+{
+    "id": 203584903,
+    "contestId": 1020,
+    "creationTimeSeconds": 1682531558,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1020,
+        "index": "B",
+        "name": "Badge",
+        "type": "PROGRAMMING",
+        "points": 750.0,
+        "rating": 1000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1020,
+        "members": [
+            {
+                "handle": "iAmShipul"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1533994500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 8806400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std; \r\n#define pi acos(-1)\r\n#include<ext/pb_ds/assoc_container.hpp>\r\n#include<ext/pb_ds/tree_policy.hpp>\r\nusing namespace __gnu_pbds;\r\n\r\n/*\r\n  *ordred set....\r\ntypedef tree<pair<int,int>, null_type,\r\n        less<pair<int,int> >, rb_tree_tag,\r\n        tree_order_statistics_node_update>\r\n        ordered_set_pair;\r\n\r\n\r\ntypedef tree<int, null_type, less<int>, rb_tree_tag,\r\n        tree_order_statistics_node_update> ordered_set;\r\n*/\r\n\r\n\r\ntypedef long long ll;\r\ntypedef long double ld;\r\n\r\nint dx[]={1, -1, 0, 0};  /// 4 direction move\r\nint dy[]={0, 0, 1, -1};\r\n\r\nint dx2[]={0, 1, 1, 1, 0, -1, -1, -1};  /// 8 direction move\r\nint dy2[]={1, 1, 0, -1, -1, -1, 0, 1};\r\n\r\n#define for0(i, n) for(int i=0; i<n; i++)\r\n#define for1(i, n) for(int i=1; i<=n; i++)\r\n#define pb push_back\r\n#define all(v) v.begin(),v.end()\r\n#define nn '\\n'\r\n\r\n// #------------------------------ iye hain aam zindegi--------------------------------------\r\n                                // SegmentTree\r\n         //   practice problem :  https://atcoder.jp/contests/abc283/tasks/abc283_f\r\n\r\n/*\r\n#------------------------------ iye hain chutiya zindegi ---------------------------------\r\n                                // FenwickTree\r\n\r\n                    \"\"\"\" Initialize sorted list instance. \"\"\"\"\r\n                    \"\"\" build a fenwick tree instance. \"\"\"\r\n                    \"\"\" update fen_tree[index]+=value. \"\"\"\r\n                    \"\"\" return sum(fen_tree[:end]). \"\"\"\r\n                    \"\"\" return a pair of (the largest 'idx' such that 'sum(fen_tree[:idx]) <=k', 'k-sum(fen_tree[:idx])' ). \"\"\"\r\n                    \"\"\" delete value at the given '(pos, idx)'. \"\"\"\r\n                    \"\"\" return an index pair that corresponds to the first position of 'value' in the sorted list. \"\"\"\r\n                    \"\"\" return an index pair that corresponds to the last position of 'value' in the sorted list. \"\"\"\r\n                    \"\"\" add 'value' to the sorted list. \"\"\"\r\n                    \"\"\" remove 'value' from sorted list if it is a member. \"\"\"\r\n                    \"\"\" revove 'value' from sorted list, 'value' must be a member. \"\"\"\r\n                    \"\"\" remove and return value at 'index' in sorted list. \"\"\"\r\n                    \"\"\" return the first index to insert 'value' in the sorted list. \"\"\"\r\n                    \"\"\" return the last index to insert 'value' in the sorted list. \"\"\"\r\n                    \"\"\" return number of occurrences of 'value' in the sorted list. \"\"\"\r\n                    \"\"\" return the size of sorted list. \"\"\"\r\n                    \"\"\" lookup value at 'index' in sorted list. \"\"\"\r\n                    \"\"\" remove value at 'index' from sorted list. \"\"\"\r\n                    \"\"\" return true if 'value' is an element of the sorted list. \"\"\"\r\n                    \"\"\" return an iterator over the sorted list. \"\"\"\r\n                    \"\"\" return a reverse iterator over the sorted list. \"\"\"\r\n                    \"\"\" return string representation of sorted list. \"\"\"\r\n\r\n\r\n# ------------------------------ trie -------------------------------------------------------\r\n*/\r\n\r\nconst int N=2*1e5+10;\r\n\r\nint parent[N];\r\nint sz[N];\r\nmultiset<int>st;\r\n\r\nvoid make(int v)\r\n{\r\n    parent[v]=v;\r\n    sz[v]=1;\r\n    st.insert(1);\r\n}\r\n\r\nint find(int v)\r\n{\r\n    if(v==parent[v])\r\n    return v;\r\n\r\n    /// path compression\r\n    return parent[v]= find(parent[v]); /// recursive call which find parent of parent\r\n}\r\n\r\nvoid merge(int a, int b)\r\n{\r\n    st.erase(st.find(sz[a]));\r\n    st.erase(st.find(sz[b]));\r\n\r\n    st.insert(sz[a]+sz[b]);\r\n}\r\n\r\nvoid reset()\r\n{\r\n    for1(i, N) parent[i]=0;\r\n\r\n    for1(i, N) sz[i]=0;\r\n\r\n    st.clear();\r\n    sz[N]={};\r\n}\r\n\r\nvoid Union(int a, int b)\r\n{\r\n    a=find(a);\r\n    b=find(b);\r\n\r\n    if(a!=b)\r\n    {\r\n        if(sz[a]<sz[b])\r\n        swap(a, b);\r\n\r\n        parent[b]=a;\r\n        merge(a, b); \r\n        sz[a]+=sz[b];\r\n    }\r\n}\r\n\r\nvector<int>adj[N];\r\nint vis[N];\r\nvector<int>con_cc;\r\nint deg[N];\r\n\r\nvoid dfs(int node, int par)\r\n{\r\n    vis[node]=1;\r\n\r\n    for(auto it:adj[node])\r\n    {\r\n        if(vis[it] && it==par) continue;\r\n        if(!vis[it])\r\n        {\r\n            dfs(it, node);\r\n        }\r\n    }\r\n}\r\n\r\nint ar[N];\r\n\r\nint dfs2(int st, int val)\r\n{\r\n    if(vis[st]==val)\r\n    return st;\r\n\r\n    else{\r\n        vis[st]=val;\r\n        dfs(ar[st], val);\r\n    }\r\n}\r\n\r\nvoid solve()\r\n{\r\n    int n;\r\n    cin >> n;\r\n\r\n    for1(i, n)\r\n    {\r\n        cin >> ar[i];\r\n    }\r\n\r\n    for1(i, n)\r\n    {\r\n        cout << dfs2(i, i) << \" \";\r\n    }\r\n\r\n    cout << nn;\r\n\r\n}\r\n\r\nint32_t main()\r\n{\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n\r\n    #ifndef ONLINE_JUDGE\r\n    freopen(\"in.txt\", \"r\", stdin);\r\n    freopen(\"out.txt\", \"w\", stdout); \r\n    #endif\r\n\r\n    int t=1;\r\n    //cin >> t;\r\n\r\n    while(t--)\r\n    {\r\n        solve();\r\n    }\r\n\r\n    return 0;\r\n}\r\n\r\n/*\r\n    Symmetric characters.....\r\n    string symmetric=\"AHIMOTUVWXY\";\r\n    /// s.c_str() used to convert a given\r\n    /// string to an array of character\r\n    /// atoi(s.c_str()) convert number\r\n*/\r\n"
+}

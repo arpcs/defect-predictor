@@ -1,0 +1,35 @@
+{
+    "id": 184685169,
+    "contestId": 311,
+    "creationTimeSeconds": 1670750997,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 311,
+        "index": "E",
+        "name": "Biologist",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2300,
+        "tags": [
+            "flows"
+        ]
+    },
+    "author": {
+        "contestId": 311,
+        "members": [
+            {
+                "handle": "fanch100"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1369582200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 31,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 40960000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nusing ll = long long;\r\nconst int N = 40010;\r\nconst int M = 2000010;\r\nconst int INF = 0x3f3f3f3f;\r\nint n, m, st, ed;\r\nint head[N], pre[M], ver[M], tot=1, from[M];\r\nll w[M];\r\nvoid add(int x,int y,int z){\r\n    ver[++tot]=y; pre[tot]=head[x]; head[x]=tot; w[tot]=z; from[tot]=x;\r\n    ver[++tot]=x; pre[tot]=head[y]; head[y]=tot; w[tot]=0; from[tot]=y;\r\n    //printf(\"x=%d y=%d z=%d\\n\",x,y,z);\r\n}\r\nint cur[N], dis[N];\r\nll maxflow;\r\nbool bfs(int st,int ed){\r\n    memset(dis,0,sizeof(dis));\r\n    queue<int> q;\r\n    q.push(st); dis[st]=1;\r\n    cur[st]=head[st];\r\n    while(q.size()){\r\n        int x=q.front(); q.pop();\r\n        for (int i=head[x]; i; i=pre[i]){\r\n            int v=ver[i];\r\n            if (w[i] && !dis[v]){\r\n                dis[v]=dis[x]+1;\r\n                cur[v]=head[v];\r\n                q.push(v);\r\n                if (v==ed) return 1;\r\n            }\r\n        }\r\n    }\r\n    return 0;\r\n}\r\nll dfs(int x,ll lim){\r\n    if (x==ed){\r\n        maxflow+=lim;\r\n        return lim;\r\n    }\r\n    ll sum=0;\r\n    for (int i=cur[x]; i; i=pre[i]){\r\n        cur[x]=i;\r\n        int v=ver[i];\r\n        if (w[i] && dis[v]==dis[x]+1){\r\n            ll k=dfs(v,min(w[i],lim));\r\n            lim-=k; sum+=k;\r\n            w[i]-=k; w[i^1]+=k;\r\n        }\r\n        if (!lim) break;\r\n    }\r\n    return sum;\r\n}\r\nint a[N];\r\nint main(){\r\n    int g;\r\n    cin>>n>>m>>g;\r\n    st=n+m+1; ed=st+1;\r\n    for (int i=1;i<=n;++i) cin>>a[i];\r\n    int ans=0;\r\n    for (int i=1;i<=n;++i){\r\n        int z;cin>>z;\r\n        if (a[i]) add(i,ed,z);//\u5f00\u59cb\u5c31\u662f1\uff0c\u4fee\u6539\u82b1\u8d39z\u7684\u4ee3\u4ef7\r\n        else add(st,i,z);//\u4e0d\u9009\u5f97\u5230z\u7684\u4ee3\u4ef7\r\n    }\r\n    for (int i=1;i<=m;++i){\r\n        bool op;cin>>op;\r\n        int z,k;cin>>z>>k;\r\n        ans+=z;//\u5148\u9009\r\n        for (int j=1;j<=k;++j){\r\n            int x;cin>>x;\r\n            if (!op) add(n+i,x,INF);//0\u6761\u4ef6\uff0c\u8981\u4e0d\u52720\uff0c\u8981\u4e0d\u628a\u8fde\u7740\u76841\u5168\u5272\u4e86\uff0c\u6ce8\u610f0\u548c1\u6761\u4ef6\u8fde\u5230\u540c\u4e00\u4e2a\u70b9\u4e5f\u8981\u9009\u62e9\u5272\u4e00\u4e2a\r\n            else add(x,n+i,INF);\r\n        }\r\n        bool flag; cin>>flag;\r\n        if (flag) z+=g;//\u5982\u679c\u6709\u60e9\u7f5a\u8981\u628a\u60e9\u7f5a\u52a0\u5165\u8fb9\u6743\r\n        if (!op) add(st,n+i,z);\r\n        else add(n+i,ed,z);\r\n    }\r\n    while(bfs(st,ed)) dfs(st,INF);\r\n    printf(\"%d\",ans-maxflow);\r\n    return 0;\r\n}\r\n"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 211031879,
+    "contestId": 150,
+    "creationTimeSeconds": 1687698947,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 150,
+        "index": "E",
+        "name": "Freezing with Style",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3000,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 150,
+        "members": [
+            {
+                "handle": "lnyx"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1329490800
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 6144000,
+    "source": "#include<cstdio>\r\n#include<iostream>\r\n#include<vector>\r\n#include<algorithm>\r\n#include<queue>\r\n#define eb emplace_back\r\nnamespace IO{\r\n\ttemplate<typename T> inline void rd(T &x){\r\n\t\tx=0;bool f=0;char c=0;\r\n\t\twhile(c<'0'||c>'9') f|=c=='-',c=getchar();\r\n\t\twhile('0'<=c&&c<='9') x=x*10+(c^48),c=getchar();\r\n\t\tx=f?-x:x;\r\n\t}\r\n\ttemplate<typename T,typename ...Args> inline void rd(T &x,Args &...args){ rd(x),rd(args...); }\r\n\ttemplate<typename T> inline void wt(char c,T x){\r\n\t\tint stk[114],top=0;\r\n\t\tif(x<0) x=-x,putchar('-');\r\n\t\tdo stk[++top]=x%10,x/=10; while(x);\r\n\t\twhile(top) putchar(stk[top--]+'0');\r\n\t\tputchar(c);\r\n\t}\r\n\ttemplate<typename T,typename ...Args> inline void wt(char c,T x,Args ...args){ wt(c,x),wt(c,args...); }\r\n\ttemplate<typename T,typename ...Args> inline void wt(char s,char c,T x,Args ...args){ wt(c,x),wt(c,args...),putchar(s); }\r\n};\r\nusing namespace IO;\r\nusing namespace std;\r\ntypedef pair<int,int> PII;\r\nconst int N=1e5+7;\r\nconst int INF=1e9;\r\nint n,l,r;\r\nvector<PII>g[N];\r\nstruct edges{ int u,v,w; }e[N];\r\nint sz[N],dep[N];\r\nint rt,siz;\r\nbool st[N];\r\nPII ans;\r\ninline int getsz(int u,int fa){\r\n\tif(st[u]) return 0;\r\n\tsz[u]=1;\r\n\tfor(PII A:g[u]){\r\n\t\tint v=A.first;\r\n\t\tif(v==fa) continue;\r\n\t\tsz[u]+=getsz(v,u);\r\n\t}\r\n\treturn sz[u];\r\n}\r\ninline void find(int u,int fa,int all){\r\n\tif(st[u]) return ;\r\n\tint mx=all-sz[u];\r\n\tfor(PII A:g[u]){\r\n\t\tint v=A.first;\r\n\t\tif(v==fa) continue;\r\n\t\tfind(v,u,all),mx=max(mx,sz[v]);\r\n\t}\r\n\tif(mx<siz) siz=mx,rt=u;\r\n}\r\nbool flag[N];\r\nqueue<PII>que;\r\nint mx[N],id[N];\r\nint q[N];\r\nint mxdep;\r\ninline void calc(){\r\n\tint now=0,hh=0,tt=-1;\r\n\tfor(int i=min(r,mxdep);i>=l;i--){\r\n\t\twhile(hh<=tt&&mx[q[tt]]<=mx[i]) tt--;\r\n\t\tq[++tt]=i;\r\n\t}\r\n\twhile(que.size()){\r\n\t\tint u=que.front().first,dist=que.front().second; que.pop();\r\n\t\tflag[u]=1;\r\n\t\twhile(now<dep[u]){\r\n\t\t\tnow++;\r\n\t\t\tif(q[hh]>r-now) hh++;\r\n\t\t\tif(l-now>=0){\r\n\t\t\t\twhile(hh<=tt&&mx[q[tt]]<=mx[l-now]) tt--;\r\n\t\t\t\tq[++tt]=l-now;\r\n\t\t\t}\r\n\t\t}\r\n\t\tif(hh<=tt&&mx[q[hh]]+dist>=0) ans={id[q[hh]],u};\r\n\t\tfor(PII A:g[u]){\r\n\t\t\tint v=A.first,w=A.second;\r\n\t\t\tif(flag[v]||st[v]) continue;\r\n\t\t\tdep[v]=dep[u]+1,que.push({v,dist+w});\r\n\t\t\tmxdep=max(mxdep,dep[v]);\r\n\t\t}\r\n\t}\r\n}\r\ninline void ins(int u,int fa,int dist){\r\n\tif(st[u]) return ;\r\n\tif(dist>mx[dep[u]]) mx[dep[u]]=dist,id[dep[u]]=u;\r\n\tfor(PII A:g[u]){\r\n\t\tint v=A.first,w=A.second;\r\n\t\tif(v==fa) continue;\r\n\t\tins(v,u,dist+w);\r\n\t}\r\n}\r\ninline void clear(int u,int fa){\r\n\tif(st[u]) return ;\r\n\tmx[dep[u]]=-INF,id[dep[u]]=0,flag[u]=0;\r\n\tfor(PII A:g[u]){\r\n\t\tint v=A.first;\r\n\t\tif(v==fa) continue;\r\n\t\tclear(v,u);\r\n\t}\r\n}\r\ninline int cmp(PII A,PII B){ return sz[A.first]<sz[B.first]; }\r\nint sk[N];\r\ninline void solve(int u){\r\n\tif(st[u]) return ;\r\n\tmxdep=0,siz=INF,find(u,0,getsz(u,0)),getsz(rt,0);\r\n\tst[rt]=1;\r\n\tsort(g[rt].begin(),g[rt].end(),cmp);\r\n\tmx[0]=0,id[0]=rt;\r\n\tfor(PII A:g[rt]){\r\n\t\tint v=A.first,w=A.second;\r\n\t\tif(st[v]) continue;\r\n\t\twhile(que.size()) que.pop();\r\n\t\tdep[v]=1,que.push({v,w});\r\n\t\tif(n!=100000||l!=14) calc();\r\n\t\tif(n!=100000||l!=14) ins(v,rt,w);\r\n\t}\r\n\tif(n!=100000||l!=14) for(PII A:g[rt]) clear(A.first,rt);\r\n\tfor(PII A:g[rt]) solve(A.first),sk[A.first]=sk[rt]+1;\r\n}\r\ninline int chk(int x){\r\n\tans={0,0};\r\n\tfor(int i=1;i<=n;i++) g[i].clear(),mx[i]=-INF,st[i]=0,sz[i]=0;\r\n\tfor(int i=1;i<n;i++){\r\n\t\tint u=e[i].u,v=e[i].v,w=e[i].w>=x?1:-1;\r\n\t\tg[u].eb(v,w),g[v].eb(u,w);\r\n\t}\r\n\tsolve(1);\r\n\treturn ans.first;\r\n}\r\nint main(){\r\n#ifndef ONLINE_JUDGE\r\n\tfreopen(\"in.in\",\"r\",stdin);\r\n\tfreopen(\"out.out\",\"w\",stdout);\r\n#endif\r\n\trd(n,l,r);\r\n\tfor(int i=1;i<n;i++) rd(e[i].u,e[i].v,e[i].w);\r\n\tchk(1);\r\n\tint res=0;\r\n\tfor(int i=1;i<=n;i++) res=max(res,sk[i]);\r\n\tcout<<res<<endl;\r\n\texit(0);\r\n\tint L=0,R=1e5;\r\n\twhile(L<R){\r\n\t\tint mid=(L+R+1)>>1;\r\n\t\tif(chk(mid)) L=mid;\r\n\t\telse R=mid-1;\r\n\t}\r\n\tchk(L);\r\n\twt('\\n',' ',ans.first,ans.second);\r\n\treturn 0;\r\n}"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 228101005,
+    "contestId": 1783,
+    "creationTimeSeconds": 1697251003,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1783,
+        "index": "G",
+        "name": "Weighed Tree Radius",
+        "type": "PROGRAMMING",
+        "rating": 2800,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "implementation",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1783,
+        "members": [
+            {
+                "handle": "cyffyc"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1673188500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 68915200,
+    "source": "// LUOGU_RID: 129235936\n#include<cstdio>\r\n#include<vector>\r\n#include<algorithm>\r\n#define ls k<<1\r\n#define rs k<<1|1\r\nusing namespace std;\r\ninline int read(){int x=0,f=1,ch=getchar(); while(ch<'0'||ch>'9'){if(ch=='-') f=-1; ch=getchar();} while(ch>='0'&&ch<='9'){x=x*10+ch-'0';ch=getchar();} return x*f;}\r\ninline void write(int x){if (x<0) putchar('-'),x=-x; if (x>=10) write(x/10); putchar(x%10+'0');}\r\ninline void writeln(int x){write(x); puts(\"\");}\r\nconst int N=4e5+5;\r\nint n,b[N];\r\nvector<int >g[N];\r\ninline void init(){\r\n\tn=read();\r\n\tfor (int i=1;i<=n;i++) {\r\n\t\tb[i]=read();\r\n\t}\r\n\tfor (int i=1;i<n;i++){\r\n\t\tint u=read(),v=read();\r\n\t\tg[u].push_back(v); g[v].push_back(u);\r\n\t}\r\n}\r\nint dep[N],pos[N],dfn[N],cnt;\r\nvoid dfs(int u,int fa){\r\n\tdep[u]=dep[fa]+1; pos[dfn[u]=++cnt]=u;\r\n\tfor (int i=0;i<g[u].size();i++){\r\n\t\tint v=g[u][i];\r\n\t\tif (v!=fa){\r\n\t\t\tdfs(v,u);\r\n\t\t\tpos[++cnt]=u;\r\n\t\t}\r\n\t} \r\n}\r\ninline int checkmn(int x,int y){\r\n\treturn (dep[x]<=dep[y])?x:y;\r\n}\r\nint lg[N],st[N][20];\r\ninline int query(int l,int r){\r\n\tint tmp=lg[r-l+1];\r\n\treturn checkmn(st[l][tmp],st[r-(1<<tmp)+1][tmp]);\r\n}\r\ninline int LCA(int u,int v){\r\n\tint l=dfn[u],r=dfn[v];\r\n\tif (l>r) swap(l,r);\r\n\treturn query(l,r);\r\n}\r\ninline int Dis(int u,int v){\r\n\treturn dep[u]+dep[v]-2*dep[LCA(u,v)];\r\n}\r\nstruct node{\r\n\tint dis,p[2];\r\n}a[N<<2];\r\ninline node get(int u,int v){\r\n\tnode tmp; tmp.dis=Dis(u,v)+b[u]+b[v];\r\n\ttmp.p[0]=u; tmp.p[1]=v;\r\n\treturn tmp;\r\n} \r\ninline node Cmp(node A,node B){\r\n\treturn A.dis<B.dis?B:A;\r\n}\r\ninline void pushup(int k){\r\n\ta[k]=Cmp(a[ls],a[rs]);\r\n\tfor (int i=0;i<2;i++){\r\n\t\tfor (int j=0;j<2;j++){\r\n\t\t\ta[k]=Cmp(a[k],get(a[ls].p[i],a[rs].p[j]));\r\n\t\t}\r\n\t}\r\n}\r\nvoid build(int k,int l,int r){\r\n\tif (l==r) {\r\n\t\ta[k].dis=2*b[l];\r\n\t\ta[k].p[0]=a[k].p[1]=l;\r\n\t\treturn;\r\n\t}\r\n\tint mid=(l+r)>>1; build(ls,l,mid); build(rs,mid+1,r);\r\n\tpushup(k);\r\n}\r\nvoid update(int k,int l,int r,int x){\r\n\tif (l==r) {\r\n\t\ta[k].dis=2*b[l];\r\n\t\ta[k].p[0]=a[k].p[1]=l;\r\n\t\treturn;\r\n\t}\r\n\tint mid=(l+r)>>1;\r\n\tif (mid>=x) update(ls,l,mid,x);\r\n\t\telse update(rs,mid+1,r,x);\r\n\tpushup(k);\r\n}\r\ninline void solve(){\r\n\tlg[0]=-1;\r\n\tfor (int i=1;i<N;i++) lg[i]=lg[i>>1]+1; \r\n\tdfs(1,0);\r\n\tfor (int i=1;i<=cnt;i++) st[i][0]=pos[i];\r\n\tfor (int j=1;j<=cnt;j++) {\r\n\t\tfor (int i=1;i+(1<<j)-1<=cnt;i++){\r\n\t\t\tst[i][j]=checkmn(st[i][j-1],st[i+(1<<j-1)][j-1]);\r\n\t\t}\r\n\t}\r\n\tint m=read(); build(1,1,n);\r\n\tfor (int i=1;i<=m;i++){\r\n\t\tint x=read(),v=read();\r\n\t\tb[x]=v;\r\n\t\tupdate(1,1,n,x);\r\n\t\twriteln((a[1].dis+1)/2);\r\n\t//\twriteln(max((a[1].dis+1)/2,max(b[a[1].p[0]],b[a[1].p[1]])));\r\n\t}\r\n}\r\nint main(){\r\n\tinit(); solve();\r\n\treturn 0;\r\n}"
+}

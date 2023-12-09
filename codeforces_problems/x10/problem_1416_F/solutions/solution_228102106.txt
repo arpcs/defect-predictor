@@ -1,0 +1,38 @@
+{
+    "id": 228102106,
+    "contestId": 1416,
+    "creationTimeSeconds": 1697252075,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1416,
+        "index": "F",
+        "name": "Showing Off",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3300,
+        "tags": [
+            "flows",
+            "graph matchings",
+            "greedy",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1416,
+        "members": [
+            {
+                "handle": "wzc_IOI_czw"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601219100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 96,
+    "timeConsumedMillis": 1762,
+    "memoryConsumedBytes": 28979200,
+    "source": "// LUOGU_RID: 129241075\n// LUOGU_RID: 129239602\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef pair<int, int> pii;\r\nconst int maxn = 1e5 + 5;\r\nconst int maxm = 5e5 + 5;\r\n\r\nvector<int> a[maxn];\r\nbool pri[maxn], vis[maxn], lft[maxn];\r\n\r\nint n, m, dir[maxn], nxt[maxn];\r\nint dx[4] = {0, 0, 1, -1};\r\nint dy[4] = {1, -1, 0, 0};\r\ninline int ind(int x, int y) { return (x - 1) * m + y; }\r\n\r\nstruct edge\r\n{\r\n\tint v, next;\r\n\tint w, flow;\r\n}e[maxm << 1];\r\nint head[maxn], tot, S, T;\r\n\r\ninline void addedge(int u, int v, int c, int w)\r\n{\r\n\te[++tot] = (edge){v, head[u], w, c}; head[u] = tot;\r\n\te[++tot] = (edge){u, head[v], -w, 0}; head[v] = tot;\r\n}\r\n\r\nvoid Fill(int x, int y, bool col)\r\n{\r\n\tint id = ind(x, y);\r\n\tvis[id] = 1;\r\n\tif (col) addedge(id, T, 1, pri[id] ? -1 : 0);\r\n\telse addedge(S, id, 1, pri[id] ? -1 : 0), lft[id] = 1;\r\n\t\r\n\tfor (int i = 0; i < 4; i++)\r\n\t{\r\n\t\tint nx = x + dx[i], ny = y + dy[i];\r\n\t\tif (nx <= 0 || nx > n || ny <= 0 || ny > m || a[nx][ny] != a[x][y]) continue;\r\n\t\tif (col) addedge(ind(nx, ny), id, 1, 0);\r\n\t\telse addedge(id, ind(nx, ny), 1, 0);\r\n\t\tif (!vis[ind(nx, ny)]) Fill(nx, ny, col ^ 1);\r\n\t}\r\n}\r\n\r\nbool inq[maxn];\r\nint pre[maxn], dis[maxn], cur[maxn];\r\nint mincost, maxflow;\r\n\r\nbool bfs()\r\n{\r\n\tfor (int i = S; i <= T; i++)\r\n\t{\r\n\t\tdis[i] = 0x3f3f3f3f, pre[i] = -1, inq[i] = 0;\r\n\t\tcur[i] = head[i];\r\n\t}\r\n\tqueue<int> q;\r\n\tdis[S] = 0; inq[S] = 1; q.push(S);\r\n\twhile (!q.empty())\r\n\t{\r\n\t\tint u = q.front();\r\n\t\tq.pop(); inq[u] = 0;\r\n\t\tfor (int i = head[u]; ~i; i = e[i].next)\r\n\t\t{\r\n\t\t\tint v = e[i].v;\r\n\t\t\tif (e[i].flow && dis[v] > dis[u] + e[i].w)\r\n\t\t\t{\r\n\t\t\t\tdis[v] = dis[u] + e[i].w;\r\n\t\t\t\tpre[v] = i;\r\n\t\t\t\tif (!inq[v])\r\n\t\t\t\t{\r\n\t\t\t\t\tinq[v] = 1;\r\n\t\t\t\t\tq.push(v);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn pre[T] != -1;\r\n}\r\n\r\nbool instack[maxn];\r\nint dfs(int u, int flow)\r\n{\r\n\tif (u == T || !flow) return flow;\r\n\tint rest = flow;\r\n\tinstack[u] = 1;\r\n\tfor (int i = cur[u]; ~i; i = e[i].next)\r\n\t{\r\n\t\tint v = e[i].v;\r\n\t\tif (!instack[v] && dis[v] == dis[u] + e[i].w && e[i].flow)\r\n\t\t{\r\n\t\t\tint k = dfs(v, min(rest, e[i].flow));\r\n\t\t\tif (!k) dis[v] = 0x3f3f3f3f;\r\n\t\t\te[i].flow -= k;\r\n\t\t\te[i ^ 1].flow += k;\r\n\t\t\tmincost += e[i].w * k;\r\n\t\t\trest -= k;\r\n\t\t\tif (!rest) break;\r\n\t\t}\r\n\t\tcur[u] = i;\r\n\t}\r\n\tinstack[u] = 0;\r\n\treturn flow - rest;\r\n}\r\n\r\nvoid MCMF()\r\n{\r\n\tmincost = maxflow = 0;\r\n\twhile (bfs())\r\n\t{\r\n\t\tint flow = 0;\r\n\t\twhile (flow = dfs(S, 2e9)) maxflow += flow;\r\n\t}\r\n}\r\n\r\nvoid work()\r\n{\r\n\tcin >> n >> m;\r\n\tS = 0, T = n * m + 1;\r\n\tfor (int i = 1; i <= n * m; i++) pri[i] = nxt[i] = vis[i] = lft[i] = 0;\r\n\tfor (int i = S; i <= T; i++) head[i] = -1;\r\n\ttot = -1;\r\n\tfor (int i = 1; i <= n; i++)\r\n\t{\r\n\t\ta[i].resize(m + 1);\r\n\t\tfor (int j = 1; j <= m; j++) cin >> a[i][j];\r\n\t}\r\n\t\r\n\tint sum = 0;\r\n\tfor (int i = 1; i <= n; i++)\r\n\t\tfor (int j = 1; j <= m; j++)\r\n\t\t{\r\n\t\t\tint fl = 0;\r\n\t\t\tfor (int k = 0; k < 4; k++)\r\n\t\t\t{\r\n\t\t\t\tint x = i + dx[k], y = j + dy[k];\r\n\t\t\t\tif (x <= 0 || x > n || y <= 0 || y > m) continue;\r\n\t\t\t\tif (a[x][y] < a[i][j]) fl = max(fl, 2);\r\n\t\t\t\telse if (a[x][y] == a[i][j]) fl = max(fl, 1);\r\n\t\t\t}\r\n\t\t\t\r\n\t\t\tif (!fl)\r\n\t\t\t{\r\n\t\t\t\tcout << \"NO\\n\";\r\n\t\t\t\treturn;\r\n\t\t\t}\r\n\t\t\telse if (fl == 1) pri[ind(i, j)] = 1, sum++;\r\n\t\t}\r\n\t\r\n\t\r\n\tfor (int i = 1; i <= n; i++)\r\n\t\tfor (int j = 1; j <= m; j++)\r\n\t\t{\r\n\t\t\tif (vis[ind(i, j)]) continue;\r\n\t\t\tFill(i, j, 0);\r\n\t\t}\r\n\tMCMF();\r\n\tif (mincost != -sum)\r\n\t{\r\n\t\tcout << \"NO\\n\";\r\n\t\treturn;\r\n\t}\r\n\t\r\n\tcout << \"YES\\n\";\r\n\tfor (int u = 1; u <= n * m; u++)\r\n\t{\r\n\t\tif (!lft[u]) continue;\r\n\t\tfor (int i = head[u]; ~i; i = e[i].next)\r\n\t\t{\r\n\t\t\tint v = e[i].v;\r\n\t\t\tif (v == S) continue;\r\n\t\t\tif (!e[i].flow)\r\n\t\t\t{\r\n\t\t\t\tnxt[u] = v;\r\n\t\t\t\tnxt[v] = u;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\t\r\n\tfor (int i = 1; i <= n; i++, cout << \"\\n\")\r\n\t\tfor (int j = 1; j <= m; j++)\r\n\t\t{\r\n\t\t\tint id = ind(i, j);\r\n\t\t\tif (nxt[id])\r\n\t\t\t{\r\n\t\t\t\tif (a[i][j] & 1) cout << ((i + j) & 1 ? a[i][j] / 2 : (a[i][j] + 1) / 2);\r\n\t\t\t\telse cout << a[i][j] / 2;\r\n\t\t\t\tcout << \" \";\r\n\t\t\t\tfor (int k = 0; k < 4; k++)\r\n\t\t\t\t{\r\n\t\t\t\t\tint x = i + dx[k], y = j + dy[k];\r\n\t\t\t\t\tif (nxt[id] == ind(x, y)) dir[id] = k;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\telse\r\n\t\t\t{\r\n\t\t\t\tfor (int k = 0; k < 4; k++)\r\n\t\t\t\t{\r\n\t\t\t\t\tint x = i + dx[k], y = j + dy[k];\r\n\t\t\t\t\tif (x <= 0 || x > n || y <= 0 || y > m) continue;\r\n\t\t\t\t\tif (a[x][y] < a[i][j])\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tdir[id] = k;\r\n\t\t\t\t\t\tcout << a[i][j] - a[x][y] << \" \";\r\n\t\t\t\t\t\tbreak;\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\t\t\r\n\tfor (int i = 1; i <= n; i++, cout << \"\\n\")\r\n\t\tfor (int j = 1; j <= m; j++)\r\n\t\t{\r\n\t\t\tint id = (i - 1) * m + j;\r\n\t\t\tif (dir[id] == 0) cout << \"R \";\r\n\t\t\telse if (dir[id] == 1) cout << \"L \";\r\n\t\t\telse if (dir[id] == 2) cout << \"D \";\r\n\t\t\telse cout << \"U \";\r\n\t\t}\r\n}\r\n\r\nint main()\r\n{\r\n\tint T;\r\n\tcin >> T;\r\n\twhile (T--) work();\r\n\treturn 0;\r\n}"
+}

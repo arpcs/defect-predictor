@@ -1,0 +1,35 @@
+{
+    "id": 215850148,
+    "contestId": 903,
+    "creationTimeSeconds": 1690451676,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 903,
+        "index": "F",
+        "name": "Clear The Matrix",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "bitmasks",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 903,
+        "members": [
+            {
+                "handle": "confused_boi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1513091100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 265,
+    "memoryConsumedBytes": 263987200,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\nconst int INF = 0x3f3f3f3f;\nconst int MX = 1e3 + 5;\nconst int MM = (1 << 16) - 1;\n\nint n, a[5];\nint dp[MX][MM + 5], r[MX];\nchar mp[4][MX];\nvector<int> mark[5];\n\nint get_sta(int l, int x) {\n    int ret = 0;\n    for (int i = 0; i < x; i++) {\n        for (int j = 0; j < x; j++) {\n            ret |= 1 << (4 * j + l + i);\n        }\n    }\n    return ret;\n}\n\nint get_row(int i) {\n    int ret = 0;\n    for (int j = 0; j < 4; j++) {\n        if (mp[j][i] == '*') ret |= 1 << j;\n    }\n    return ret;\n}\n\nvoid init() {\n    for (int i = 1; i <= 4; i++) {\n        for (int j = 0; j + i <= 4; j++) {\n            mark[i].push_back(MM ^ get_sta(j, i));\n        }\n    }\n    for (int i = 0; i < n; i++) r[i] = get_row(i);\n}\n\nint main() {\n    //FIN;\n    cin >> n;\n    for (int i = 1; i <= 4; i++) cin >> a[i];\n    for (int i = 0; i < 4; i++) cin >> mp[i];\n    init();\n    memset(dp, 0x3f, sizeof(dp));\n    int S = 0;\n    for (int i = 0; i < min(4, n); i++) S |= r[i] << (i * 4);\n    dp[0][S] = 0;\n    for (int i = 0; i < n; i++) {\n        for (int S = MM; S >= 0; S--) {\n            if (dp[i][S] == INF) continue;\n            if ((S & 15) == 0) {\n                int SS = S >> 4 | (r[i + 4] << 12);\n                dp[i + 1][SS] = min(dp[i + 1][SS], dp[i][S]);\n            }\n            for (int j = 1; j <= 4 && i + j <= n; j++) {\n                for (auto SS : mark[j]) {\n                    dp[i][S & SS] = min(dp[i][S & SS], dp[i][S] + a[j]);\n                }\n            }\n        }\n    }\n    cout << dp[n][0] << \"\\n\";\n    return 0;\n}\n"
+}

@@ -1,0 +1,35 @@
+{
+    "id": 123026136,
+    "contestId": 301,
+    "creationTimeSeconds": 1626705144,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 301,
+        "index": "E",
+        "name": "Yaroslav and Arrangements",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2800,
+        "tags": [
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 301,
+        "members": [
+            {
+                "handle": "DerekFeng"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1367769900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 9625600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef pair<int,int> pii;\r\n#define mkp make_pair\r\n#define fi first\r\n#define se second\r\nconst int M=10;\r\nint dat[524300];\r\nvoid upd(int l,int r,int id,int p,int x){\r\n\tif(l==r)dat[id]=x;\r\n\telse{\r\n\t\tint mid=(l+r)>>1;\r\n\t\tif(p<=mid)upd(l,mid,id<<1,p,x);\r\n\t\telse upd(mid+1,r,id<<1|1,p,x);\r\n\t\tdat[id]=max(dat[id<<1],dat[id<<1|1]);\r\n\t}\r\n}\r\nint qry(int l,int r,int id,int a,int b){\r\n\tif(r<a||b<l)return 0;\r\n\tif(a<=l&&r<=b)return dat[id];\r\n\tint mid=(l+r)>>1;\r\n\treturn max(qry(l,mid,id<<1,a,b),qry(mid+1,r,id<<1|1,a,b));\r\n}\r\nvector<int>all;\r\nint n,m,op[200004],h[200004],p[200004],a[100004],res[100004];\r\nset<pii>ans;\r\nset<pii>pos1;\r\nset<int>pos2;\r\nvector<pii>v;\r\nint main(){\r\n\tans.insert(mkp(0,0));\r\n\tscanf(\"%d%d\",&n,&m);\r\n\tfor(int i=1;i<=m;i++){\r\n\t\tscanf(\"%d\",&op[i]);\r\n\t\tif(op[i]==1)scanf(\"%d%d\",&p[i],&h[i]),h[i]-=i,all.push_back(h[i]);\r\n\t\tif(op[i]==2)scanf(\"%d\",&p[i]);\r\n\t}\r\n\tsort(all.begin(),all.end()),all.erase(unique(all.begin(),all.end()),all.end());\r\n\tfor(int i=1;i<=m;i++)if(op[i]==1)h[i]=lower_bound(all.begin(),all.end(),h[i])-all.begin()+1;\r\n\tfor(int i=1;i<=m;i++){\r\n\t\tif(op[i]==1){\r\n\t\t\ta[p[i]]=h[i];\r\n\t\t\tv.clear();\r\n\t\t\twhile(!pos1.empty()){\r\n\t\t\t\tpii tmp=*pos1.begin();\r\n\t\t\t\tif(tmp.fi<h[i])v.push_back(tmp),pos1.erase(tmp),upd(1,n,1,tmp.se,0);\r\n\t\t\t\telse break;\r\n\t\t\t}\r\n\t\t\tv.push_back(mkp(h[i],p[i]));pos2.insert(p[i]);\r\n\t\t\tfor(int i=v.size()-1;~i;i--){\r\n\t\t\t\tpii x=v[i];\r\n\t\t\t\tif(x.se!=p[i])ans.erase(mkp(res[x.se],x.se));\r\n\t\t\t\tres[x.se]=qry(1,n,1,v[i].se+1,n)+1;\r\n\t\t\t\tans.insert(mkp(res[x.se],x.se));\r\n\t\t\t\tupd(1,n,1,v[i].se,res[x.se]);\r\n\t\t\t\tpos1.insert(mkp(a[x.se],x.se));\r\n\t\t\t}\r\n\t\t}else{\r\n\t\t\tv.clear();\r\n\t\t\tint cnt=0,lst;\r\n\t\t\twhile(!pos2.empty()){\r\n\t\t\t\tint tmp=*pos2.begin();\r\n\t\t\t\tpos2.erase(tmp);\r\n\t\t\t\tv.push_back(mkp(a[tmp],tmp));\r\n\t\t\t\t++cnt;\r\n\t\t\t\tupd(1,n,1,tmp,0);\r\n\t\t\t\tif(cnt==p[i]){\r\n\t\t\t\t\tlst=tmp;\r\n\t\t\t\t\tbreak;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tsort(v.begin(),v.end());\r\n\t\t\tpos1.erase(mkp(a[lst],lst));\r\n\t\t\tfor(int i=v.size()-1;~i;i--){\r\n\t\t\t\tpii x=v[i];\r\n\t\t\t\tans.erase(mkp(res[x.se],x.se));\r\n\t\t\t\tif(x.se!=lst){\r\n\t\t\t\t\tif(x.fi<a[lst])res[x.se]=qry(1,n,1,v[i].se+1,n)+1;\r\n\t\t\t\t\tans.insert(mkp(res[x.se],x.se));\r\n\t\t\t\t\tupd(1,n,1,v[i].se,res[x.se]);\r\n\t\t\t\t\tpos1.insert(x),pos2.insert(x.se);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tprintf(\"%d\\n\",(*ans.rbegin()).fi);\r\n\t}\r\n}"
+}

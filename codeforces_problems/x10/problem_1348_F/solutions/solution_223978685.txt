@@ -1,0 +1,38 @@
+{
+    "id": 223978685,
+    "contestId": 1348,
+    "creationTimeSeconds": 1695100309,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1348,
+        "index": "F",
+        "name": "Phoenix and Memory",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1348,
+        "members": [
+            {
+                "handle": "fzx"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1588343700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 232448000,
+    "source": "#include <bits/stdc++.h>\r\n#define int long long \r\n#define pb push_back\r\n#define pii pair<int,int>\r\n#define fi first\r\n#define se second\r\nusing namespace std;\r\nconst int INF=1e6+5;\r\nstruct P3{\r\n    int l,r,id;\r\n}aa[INF],bb[INF];\r\nint n,f[INF],vis[INF],vis2[INF];\r\nstruct Segment{\r\n    #define ll tl[id]\r\n    #define rr tr[id]\r\n    #define ls(x) x<<1\r\n    #define rs(x) x<<1|1\r\n    int tl[INF<<2],tr[INF<<2],lazy[INF<<2];\r\n    pii sum[INF<<2];\r\n    void push_up(int id) {sum[id]=min(sum[ls(id)],sum[rs(id)]);}\r\n    void push_down(int id) {\r\n        if (lazy[id]==0) return ;\r\n        int rt=ls(id);\r\n        sum[rt].fi+=lazy[id];\r\n        lazy[rt]+=lazy[id];\r\n\r\n        rt=rs(id);\r\n        sum[rt].fi+=lazy[id];\r\n        lazy[rt]+=lazy[id];\r\n\r\n        lazy[id]=0;\r\n    }\r\n    void build(int l,int r,int id) {\r\n        ll=l;rr=r;lazy[id]=0;\r\n        if (ll==rr) {sum[id]={0,l};return ;}\r\n        int Mid=(ll+rr)>>1;\r\n        build(l,Mid,ls(id));\r\n        build(Mid+1,r,rs(id));\r\n        push_up(id);\r\n    }\r\n    void add(int l,int r,int x,int id) {\r\n        if (l<=ll && rr<=r) {\r\n            sum[id].fi+=x;\r\n            lazy[id]+=x;\r\n            return ;\r\n        }\r\n        push_down(id);\r\n        int Mid=(ll+rr)>>1;\r\n        if (l<=Mid) add(l,r,x,ls(id));\r\n        if (Mid<r) add(l,r,x,rs(id));\r\n        push_up(id);\r\n    }\r\n    pii query(int l,int r,int id) {\r\n        if (l<=ll && rr<=r) return sum[id];\r\n        int Mid=(ll+rr)>>1;push_down(id);\r\n        if (l>Mid) return query(l,r,rs(id));\r\n        else if (r<=Mid) return query(l,r,ls(id));\r\n        else return min(query(l,r,ls(id)),query(l,r,rs(id)));\r\n    }\r\n    pii min2(pii it,pii it2) {\r\n        if (it.fi<it2.fi) return it;\r\n        else return it2;\r\n    }\r\n    pii query2(int l,int r,int id) {\r\n        if (l<=ll && rr<=r) return sum[id];\r\n        int Mid=(ll+rr)>>1;push_down(id);\r\n        if (l>Mid) return query2(l,r,rs(id));\r\n        else if (r<=Mid) return query2(l,r,ls(id));\r\n        else return min2(query2(l,r,ls(id)),query2(l,r,rs(id)));\r\n    }\r\n}T1;\r\nsigned main()\r\n{\r\n    ios::sync_with_stdio(false);\r\n    cin>>n;T1.build(1,n,1);\r\n    for (int i=1;i<=n;i++) {\r\n        cin>>aa[i].l>>aa[i].r; aa[i].id=i;\r\n        T1.add(aa[i].l,aa[i].r,1,1);\r\n        // for (int j=aa[i].l;j<=aa[i].r;j++) f[j]++;\r\n    }\r\n    sort(aa+1,aa+1+n,[](P3 l,P3 r){return l.r-l.l<r.r-r.l;});\r\n    for (int i=1;i<=n;i++) bb[i]=aa[i];\r\n    vector <int> ans(n+1),ans2(n+1);\r\n    int cnt=n;\r\n    while (cnt--) {\r\n        int Min=T1.query(1,n,1).se;\r\n        T1.add(Min,Min,1e18,1);\r\n        for (int i=1;i<=n;i++) {\r\n            if (aa[i].l<=Min && Min<=aa[i].r && !vis[i]) {\r\n                ans[aa[i].id]=Min;vis[i]=1;\r\n                for (int j=aa[i].l;j<=aa[i].r;j++) f[j]--;\r\n                break;\r\n            }\r\n        }\r\n    }\r\n    for (int i=1;i<=n;i++) aa[i]=bb[i];\r\n    T1.build(1,n,1);\r\n    for (int i=1;i<=n;i++) \r\n        T1.add(aa[i].l,aa[i].r,1,1);\r\n    \r\n    cnt=n;\r\n    while (cnt--) {\r\n        int Min=T1.query2(1,n,1).se;\r\n        T1.add(Min,Min,1e18,1);\r\n        for (int i=1;i<=n;i++) {\r\n            // cerr<<aa[i].l<<\" \"<<aa[i].r<<\" \"<<aa[i].id<<\" \"<<Min<<\" qwej\\n\";\r\n            if (aa[i].l<=Min && Min<=aa[i].r) {\r\n                ans2[aa[i].id]=Min;\r\n                for (int j=aa[i].l;j<=aa[i].r;j++) f[j]--;\r\n                aa[i].r=-1;\r\n                break;\r\n            }\r\n        }\r\n    }\r\n    if (ans!=ans2) {\r\n        cout<<\"NO\\n\";\r\n        for (int i=1;i<ans.size();i++) cout<<ans[i]<<\" \";\r\n        cout<<\"\\n\";\r\n        for (int i=1;i<ans2.size();i++) cout<<ans2[i]<<\" \";\r\n        cout<<\"\\n\";\r\n    }\r\n    else {\r\n        cout<<\"YES\\n\";\r\n        for (int i=1;i<ans.size();i++) cout<<ans[i]<<\" \";\r\n        cout<<\"\\n\";\r\n    }\r\n    return 0;\r\n}"
+}

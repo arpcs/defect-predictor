@@ -1,0 +1,36 @@
+{
+    "id": 170795675,
+    "contestId": 1109,
+    "creationTimeSeconds": 1662262172,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1109,
+        "index": "F",
+        "name": "Sasha and Algorithm of Silence's Sounds",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1109,
+        "members": [
+            {
+                "handle": "syzf2222"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1550334900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 358,
+    "memoryConsumedBytes": 38809600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int maxn=2e5+10;\r\nconst int mod=1e9+7;\r\n#define inf 1e9\r\ninline int read(){\r\n\tint x=0,f=1;char c=getchar();\r\n\twhile(c<'0'||c>'9'){if(c=='-')f=-1;c=getchar();}\r\n\twhile(c>='0'&&c<='9'){x=(x<<1)+(x<<3)+c-'0';c=getchar();}\r\n\treturn x*f;\r\n}\r\nconst int N=2005; \r\nint n,m,a[N][N],idx[maxn],idy[maxn],pos;long long sum;\r\nstruct node{int Mn,cnt,laz;}tr[maxn<<2];\r\nvector<int>G[maxn];\r\n#define pb push_back\r\ninline void pushup(int h,int z){tr[h].laz+=z,tr[h].Mn+=z;}\r\ninline void pushdown(int h){\r\n\tif(tr[h].laz){\r\n\t\tpushup(h<<1,tr[h].laz);\r\n\t\tpushup(h<<1|1,tr[h].laz);\r\n\t\ttr[h].laz=0;\r\n\t}\r\n}\r\ninline void modify(int h,int l,int r,int x,int y,int z){\r\n//\tif(h==1)printf(\"modify %d %d %d\\n\",x,y,z);\r\n\tif(l>y||r<x)return;\r\n\tif(l>=x&&r<=y)return void(pushup(h,z));\r\n\tint mid=(l+r)>>1;pushdown(h);\r\n\tmodify(h<<1,l,mid,x,y,z);\r\n\tmodify(h<<1|1,mid+1,r,x,y,z);\r\n\ttr[h].Mn=min(tr[h<<1].Mn,tr[h<<1|1].Mn);tr[h].cnt=0;\r\n\tif(tr[h].Mn==tr[h<<1].Mn)tr[h].cnt+=tr[h<<1].cnt;\r\n\tif(tr[h].Mn==tr[h<<1|1].Mn)tr[h].cnt+=tr[h<<1|1].cnt;\r\n//\tprintf(\"l=%d r=%d Mn=%d cnt=%d\\n\",l,r,tr[h].Mn,tr[h].cnt);\r\n}\r\ninline void build(int h,int l,int r){\r\n\ttr[h].cnt=r-l+1;tr[h].Mn=0;\r\n\tif(l==r)return;int mid=(l+r)>>1;\r\n\tbuild(h<<1,l,mid);\r\n\tbuild(h<<1|1,mid+1,r);\r\n}\r\ninline void query(int h,int l,int r,int x,int y){\r\n\tif(l>y||r<x)return;//puts(\"query\");\r\n\tif(l>=x&&r<=y){\r\n\t\tif(tr[h].Mn==0)sum+=tr[h].cnt;\r\n\t\treturn;\r\n\t}int mid=(l+r)>>1;pushdown(h);\r\n\tquery(h<<1,l,mid,x,y);\r\n\tquery(h<<1|1,mid+1,r,x,y);\r\n}\r\nint ch[maxn][2],fa[maxn],laz[maxn],stk[maxn],top;\r\n#define lc(x) ch[x][0]\r\n#define rc(x) ch[x][1]\r\n#define fa(x) fa[x]\r\ninline bool isroot(int x){return lc(fa(x))!=x&&rc(fa(x))!=x;}\r\ninline int chk(int x){return rc(fa(x))==x;}\r\ninline void rotate(int x){\r\n\tint y=fa(x),z=fa(y),k=chk(x),p=ch[x][!k];\r\n\tif(!isroot(y))ch[z][chk(y)]=x;ch[x][!k]=y;ch[y][k]=p;\r\n\tfa(x)=z,fa(y)=x;if(p)fa(p)=y;\r\n}\r\ninline void pushr(int x){swap(lc(x),rc(x)),laz[x]^=1;}\r\ninline void pushd(int x){\r\n\tif(!laz[x])return;\r\n\tif(lc(x))pushr(lc(x));if(rc(x))pushr(rc(x));\r\n\tlaz[x]=0;\r\n}\r\ninline void splay(int x){\r\n//\tputs(\"splay\");printf(\"x=%d\\n\",x);\r\n\tint tmp=x;stk[top=1]=tmp;\r\n\twhile(!isroot(tmp))stk[++top]=tmp=fa(tmp);//puts(\"out loop1\");\r\n\twhile(top)pushd(stk[top--]);\r\n\tfor(;!isroot(x);rotate(x))\r\n\t\tif(!isroot(fa(x)))rotate((chk(x)^chk(fa(x)))?x:fa(x));\r\n//\tputs(\"out splay\");\r\n}\r\ninline void access(int x){\r\n//\tputs(\"access\");\r\n\tfor(int y=0;x;y=x,x=fa(x))\r\n\t\tsplay(x),rc(x)=y;\r\n}\r\ninline int findroot(int x){\r\n\taccess(x);splay(x);\r\n\twhile(lc(x))pushd(x),x=lc(x);\r\n\tsplay(x);return x;\r\n}\r\ninline void makeroot(int x){access(x),splay(x),pushr(x);}\r\ninline void link(int x,int y){\r\n\tmakeroot(x);fa(x)=y;\r\n\tmodify(1,1,n*m,1,x,-1);\r\n}\r\ninline void cut(int x,int y){\r\n\tmakeroot(x);//puts(\"in cut\");\r\n\tif(findroot(y)==x&&fa(y)==x&&!lc(y)){\r\n\t\tfa(y)=rc(x)=0;\r\n\t\tmodify(1,1,n*m,1,x,1);\r\n\t}//puts(\"out cut\");\r\n}\r\ninline bool adj(int x,int y){makeroot(x);return findroot(y)==x;}\r\nint main(){\r\n\tn=read(),m=read();\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tfor(int j=1;j<=m;j++)a[i][j]=read();\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tfor(int j=1;j<=m;j++){\r\n\t\t\tif(i<n)G[a[i][j]].pb(a[i+1][j]),G[a[i+1][j]].pb(a[i][j]);\r\n\t\t\tif(j<m)G[a[i][j]].pb(a[i][j+1]),G[a[i][j+1]].pb(a[i][j]);\r\n\t\t}\r\n\tbuild(1,1,n*m);int pos=1;\r\n\tfor(int i=1;i<=n*m;i++){\r\n\t\tfor(auto x:G[i]){\r\n\t\t\tif(x>i)continue;\r\n\t\t\twhile(adj(i,x)){\r\n\t\t\t\tfor(auto t:G[pos])if(t>pos&&t<=i)cut(pos,t);\r\n\t\t\t\t++pos;\r\n\t\t\t}if(x>=pos)link(x,i);\r\n//\t\t\tprintf(\"%d %d %d\\n\",i,x,pos);\r\n\t\t}query(1,1,n*m,pos,i);modify(1,1,n*m,1,i,1);\r\n//\t\tprintf(\"i=%d pos=%d sum=%lld\\n\",i,pos,sum);\r\n\t}printf(\"%lld\\n\",sum);\r\n\treturn 0;\r\n}"
+}

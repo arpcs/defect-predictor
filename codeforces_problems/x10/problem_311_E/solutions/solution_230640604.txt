@@ -1,0 +1,35 @@
+{
+    "id": 230640604,
+    "contestId": 311,
+    "creationTimeSeconds": 1698739239,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 311,
+        "index": "E",
+        "name": "Biologist",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2300,
+        "tags": [
+            "flows"
+        ]
+    },
+    "author": {
+        "contestId": 311,
+        "members": [
+            {
+                "handle": "FLself"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1369582200
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 31,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 1740800,
+    "source": "// LUOGU_RID: 132597924\n#include<bits/stdc++.h>\r\n\r\n// \r\nusing i64 = long long;\r\n\r\nconstexpr int INF = 0x3f3f3f3f;\r\nclass Dinic{\r\n    struct E{\r\n        int to, cp;\r\n        E(int t, int c): to(t), cp(c) {}\r\n    };\r\n\r\n    int n, m, s, t;\r\n    std::vector<E> edges;\r\n    std::vector<std::vector<int> > G;\r\n    // d[x] \u8868\u793a\u6bcf\u6b21bfs\u540ex\u7684\u5206\u5c42\u60c5\u51b5\r\n    int *d;\r\n    // cur[x] \u8868\u793a\u4ecex\u51fa\u53d1\u7684\u8fb9\u7684\u8d77\u70b9(\u4f18\u5316\u6389\u7528\u8fc7\u7684\u5f27\u4e86)\r\n    int *cur;\r\n    \r\n    bool BFS() {\r\n        memset(d, 0, sizeof(int) * (n));\r\n        std::queue<int> Q;\r\n        Q.push(s); d[s] = 1;\r\n        while (!Q.empty()) {\r\n            int x = Q.front(); Q.pop();\r\n            for (auto &i: G[x]) {\r\n                E &e = edges[i];\r\n                if (!d[e.to] && e.cp > 0) {\r\n                    d[e.to] = d[x] + 1;\r\n                    Q.push(e.to);\r\n                }\r\n            }\r\n        }\r\n        return d[t];\r\n    }\r\n\r\n    int DFS(int u, int cp) {\r\n        if (u == t || !cp) return cp;\r\n        int tmp = cp, f;\r\n        for (int& i = cur[u]; i < G[u].size(); ++i) {\r\n            E& e = edges[G[u][i]];\r\n            if (d[u] + 1 == d[e.to]) {\r\n                f = DFS(e.to, std::min(cp, e.cp));\r\n                e.cp -= f;\r\n                edges[G[u][i] ^ 1].cp += f;\r\n                cp -= f;\r\n                if (!cp) break;\r\n            }\r\n        }\r\n        return tmp - cp;\r\n    }\r\n    \r\npublic:\r\n    Dinic(int nn): n(nn), G(nn), m(0) {d = new int[nn], cur = new int[nn];}\r\n    ~Dinic() {delete[] d, cur;}\r\n\r\n    // add an edge from u to v with capacity cap\r\n    void add(int u, int v, int cap) {\r\n        edges.emplace_back(v, cap);\r\n        edges.emplace_back(u, 0);\r\n        G[u].push_back(m++);\r\n        G[v].push_back(m++);\r\n    }\r\n\r\n    // max flow from ss to tt\r\n    int go(int ss, int tt) {\r\n        s = ss, t = tt;\r\n        int flow = 0;\r\n        while (BFS()) {\r\n            memset(cur, 0, sizeof(int) * n);\r\n            flow += DFS(s, INF);\r\n        }\r\n        return flow;\r\n    }\r\n};\r\n\r\n\r\nvoid solv() {\r\n    int n, m, g;\r\n    std::cin >> n >> m >> g;\r\n\r\n    std::vector<int> a(n), val(n);\r\n    for (int i = 0; i < n; ++i) {\r\n        std::cin >> a[i];\r\n    }\r\n    for (int i = 0; i < n; ++i) {\r\n        std::cin >> val[i];\r\n    }\r\n    Dinic dinic(n + m + 2);\r\n    int st = n + m, ed = st + 1;\r\n    int ans = 0;\r\n    for (int i = 0; i < n; ++i) {\r\n        if (a[i]) {\r\n            dinic.add(i, ed, val[i]);\r\n        } else {\r\n            dinic.add(st, i, val[i]);\r\n        }\r\n    }\r\n\r\n    for (int i = 0; i < m; ++i) {\r\n        int stat, w, k;\r\n        std::cin >> stat >> w >> k;\r\n        std::vector<int> b(k);\r\n        for (int j = 0; j < k; ++j) {\r\n            std::cin >> b[j];\r\n            --b[j];\r\n        }\r\n        int cut;\r\n        std::cin >> cut;\r\n        \r\n        ans += w;\r\n        if (stat) {\r\n            dinic.add(i + n, ed, w + g * cut);\r\n        } else {\r\n            dinic.add(st, i + n, w + g * cut);\r\n        }\r\n        for (auto x: b) {\r\n            if (stat) { // 1, if choose a 0, so that it can't be used\r\n                dinic.add(x, i + n, INF);\r\n            } else {\r\n                dinic.add(i + n, x, INF);\r\n            }\r\n        }\r\n    }\r\n\r\n    std::cout << ans - dinic.go(st, ed) << '\\n';\r\n\r\n}\r\n\r\nsigned main() {\r\n    std::ios::sync_with_stdio(false), std::cin.tie(nullptr), std::cout.tie(nullptr);\r\n    \r\n    int tt = 1;\r\n    // std::cin >> tt;\r\n    while (tt--) {\r\n        solv();\r\n    }\r\n\r\n    return 0;\r\n}"
+}

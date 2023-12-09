@@ -1,0 +1,38 @@
+{
+    "id": 7063146,
+    "contestId": 89,
+    "creationTimeSeconds": 1405074949,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 89,
+        "index": "B",
+        "name": "Widget Library",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "expression parsing",
+            "graphs",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 89,
+        "members": [
+            {
+                "handle": "wanbo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1308236400
+    },
+    "programmingLanguage": "GNU C++0x",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 39,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 204800,
+    "source": "#include <map>\n#include <set>\n#include <queue>\n#include <deque>\n#include <stack>\n#include <bitset>\n#include <vector>\n#include <ctime>\n#include <cmath>\n#include <cstdio>\n#include <string>\n#include <cstring>\n#include <cassert>\n#include <numeric>\n#include <iomanip>\n#include <sstream>\n#include <fstream>\n#include <iostream>\n#include <algorithm>\nusing namespace std;\ntypedef long long       LL;\ntypedef pair<int, int>  PII;\ntypedef vector<int>     VI;\ntypedef vector<PII>     VPII;\n#define MM(a,x) memset(a,x,sizeof(a));\n#define ALL(x)  (x).begin(), (x).end()\n#define P(x)\tcerr<<\"[\"#x<<\" = \"<<(x)<<\"]\"<<endl;\n#define PP(x,i)\tcerr<<\"[\"#x<<i<<\" = \"<<x[i]<<\"]\"<<endl;\n#define P2(x,y)\tcerr<<\"[\"#x\" = \"<<(x)<<\", \"#y\" = \"<<(y)<<\"]\"<<endl;\n#define TM(a,b)\tcerr<<\"[\"#a\" -> \"#b\": \"<<1e3*(b-a)/CLOCKS_PER_SEC<<\"ms]\\n\";\n#define UN(v)   sort(ALL(v)), v.resize(unique(ALL(v))-v.begin())\n#define mp make_pair\n#define pb push_back\n#define x first\n#define y second\nstruct _ {_() {ios_base::sync_with_stdio(0);}} _;\ntemplate<class A, class B> ostream& operator<<(ostream &o, pair<A, B> t) {o << \"(\" << t.x << \", \" << t.y << \")\"; return o;}\ntemplate<class T> string tostring(T x, int len = 0, char c = '0') {stringstream ss; ss << x; string r = ss.str(); if(r.length() < len) r = string(len - r.length(), c) + r; return r;}\ntemplate<class T> void PV(T a, T b, int n = 0, int w = 0, string s = \" \") {int c = 0; while(a != b) {cout << tostring(*a++, w, ' '); if(a != b && (n == 0 || ++c % n)) cout << s; else cout << endl;}}\ntemplate<class T> inline bool chmin(T &a, T b) {return a > b ? a = b, 1 : 0;}\ntemplate<class T> inline bool chmax(T &a, T b) {return a < b ? a = b, 1 : 0;}\nconst LL linf = 0x3f3f3f3f3f3f3f3fLL;\nconst int inf = 0x3f3f3f3f;\nconst int mod = int(1e9) + 7;\nconst int N = 111;\n\n\nstruct Widget {\n\tint parent;\n\tint type;\n\tLL border;\n\tLL spacing;\n\tLL width;\n\tLL height;\n\tvector<int> son;\n\tWidget() {parent = -1;}\n} widget[N];\n\nmap<string, int> ID;\nstring gname[N];\n\nint depth[N];\nint n;\nVPII E;\n\nvector<int> topsort(vector<pair<int, int>> E, int n) {\n\tvector<int> in(n), order;\n\tqueue<int> Q;\n\tfor(auto i : E) in[i.y]++;\n\tfor(int i = 0; i < n; i++) if(in[i] == 0) Q.push(i);\n\twhile(!Q.empty()) {\n\t\tint cur = Q.front();\n\t\tQ.pop();\n\t\torder.pb(cur);\n\t\tfor(auto i : E) {\n\t\t\tif(i.x == cur) {\n\t\t\t\tin[i.y]--;\n\t\t\t\tif(in[i.y] == 0) Q.push(i.y);\n\t\t\t}\n\t\t}\n\t}\n\treturn order;\n}\n\nint main() {\n\tcin >> n;\n\tfor(int i = 0; i < n; i++) {\n\t\tstring a, b;\n\t\tstring name;\n\t\tstring trash;\n\t\tcin >> a;\n\t\tfor(char &c : a) if(!isalnum(c)) c = ' ';\n\t\tif(a == \"Widget\") {\n\t\t\tcin >> b;\n\t\t\tfor(char &c : b) if(!isalnum(c)) c = ' ';\n\t\t\tstringstream ss(b);\n\t\t\tss >> name;\n\t\t\tint id = ID.size();\n\t\t\tID[name] = id;\n\t\t\tss >> widget[id].width >> widget[id].height;\n\t\t} else if(a == \"HBox\") {\n\t\t\tcin >> name;\n\t\t\tint id = ID.size();\n\t\t\tID[name] = id;\n\t\t\twidget[id].type = 0;\n\t\t} else if(a == \"VBox\") {\n\t\t\tcin >> name;\n\t\t\tint id = ID.size();\n\t\t\tID[name] = id;\n\t\t\twidget[id].type = 1;\n\t\t} else if(a.find(\"pack\") != string::npos) {\n\t\t\tstringstream ss(a);\n\t\t\tstring parent, trash, current;\n\t\t\tss >> parent >> trash >> current;\n\t\t\tint p = ID[parent];\n\t\t\tint c = ID[current];\n\t\t\tint t = widget[c].parent;\n\t\t\twidget[c].parent = p;\n\t\t\twidget[p].son.pb(c);\n\t\t\tE.pb(mp(p, c));\n\t\t} else if(a.find(\"border\") != string::npos) {\n\t\t\tstringstream ss(a);\n\t\t\tstring current, trash;\n\t\t\tss >> current >> trash >> trash;\n\t\t\tss >> widget[ID[current]].border;\n\t\t} else if(a.find(\"spacing\") != string::npos) {\n\t\t\tstringstream ss(a);\n\t\t\tstring current, trash;\n\t\t\tss >> current >> trash >> trash;\n\t\t\tss >> widget[ID[current]].spacing;\n\t\t} else {\n\t\t\tassert(0);\n\t\t}\n\t}\n\n\tfor(auto i : ID) gname[i.y] = i.x;\n\t\n\tvector<int> order = topsort(E, ID.size());\n\treverse(ALL(order));\n\n\tfor(int i : order) {\n\t\tLL& w = widget[i].width;\n\t\tLL& h = widget[i].height;\n\t\tint n = widget[i].son.size();\n\t\tif(n == 0) continue;\n\t\tif(widget[i].type == 0) {\n\t\t\tfor(int j : widget[i].son) {\n\t\t\t\tw += widget[j].width;\n\t\t\t\tchmax(h, widget[j].height);\n\t\t\t}\n\t\t\tw += 2 * widget[i].border + (n - 1) * widget[i].spacing;\n\t\t\th += 2 * widget[i].border;\n\t\t} else {\n\t\t\tfor(int j : widget[i].son) {\n\t\t\t\tchmax(w, widget[j].width);\n\t\t\t\th += widget[j].height;\n\t\t\t}\n\t\t\tw += 2 * widget[i].border;\n\t\t\th += 2 * widget[i].border + (n - 1) * widget[i].spacing;\n\t\t}\n\t}\n\n\tfor(auto i : ID) {\n\t\tcout << i.x << \" \" << widget[i.y].width << \" \" << widget[i.y].height << endl;\n\t}\n\n\treturn 0;\n}\n"
+}

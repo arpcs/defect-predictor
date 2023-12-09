@@ -1,0 +1,38 @@
+{
+    "id": 235845558,
+    "contestId": 1416,
+    "creationTimeSeconds": 1701779932,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1416,
+        "index": "F",
+        "name": "Showing Off",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3300,
+        "tags": [
+            "flows",
+            "graph matchings",
+            "greedy",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1416,
+        "members": [
+            {
+                "handle": "bkifhr10"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601219100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 96,
+    "timeConsumedMillis": 4368,
+    "memoryConsumedBytes": 31129600,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\nint T,n,m,a[101000],fs[100100];\nint dx[4]={1,-1,0,0},dy[4]={0,0,1,-1},c[4]={'D','U','R','L'};\nint id(int x,int y){if(x<1||x>n||y<1||y>m)return 0;return (x-1)*m+y;}\nint head[201000],to[2010000],cn=1,flow[2010000],nxt[2010000];\nint is[101000][4];\nint ad(int u,int v){\n\tto[++cn]=v,nxt[cn]=head[u],flow[cn]=1,head[u]=cn;\n\tto[++cn]=u,nxt[cn]=head[v],flow[cn]=0,head[v]=cn;\n\treturn cn;\n}\nint d[201000];\nbool bfs(){\n\tmemset(d,0,(2*n*m+4)*sizeof(int));\n\td[1]=1;queue<int>q;q.push(1);\n\twhile(!q.empty()){\n\t\tint u=q.front();q.pop();\n\t\tfor(int i=head[u];i;i=nxt[i])if(flow[i]&&!d[to[i]])\n\t\td[to[i]]=d[u]+1,q.push(to[i]);\n\t}\n\treturn d[2*n*m+2]>0;\n}\nconst int I=1e9;\nint dfs(int u,int in){\n\tif(u==2*n*m+2)return in;\n\tint out=0;\n\tfor(int i=head[u];i&&in;i=nxt[i])if(flow[i]&&d[to[i]]==d[u]+1){\n\t\tint p=dfs(to[i],min(in,flow[i]));\n\t\tflow[i]-=p,flow[i^1]+=p;\n\t\tin-=p,out+=p;\n\t}\n\tif(!out)d[u]=-1;\n\treturn out;\n}\nint iu[100010],ou[101000];\nint A[101000],B[100100];\nint fi(int u,int v){\n\tint x=(u-1)/m+1,y=u-(x-1)*m;\n\tfor(int k=0;k<4;k++)if(id(x+dx[k],y+dy[k])==v)return k;\n}\nvoid sol(){\n\tscanf(\"%d%d\",&n,&m);\n\tfor(int i=1;i<=2*n*m+2;i++)head[i]=0;cn=1;\n\tfor(int i=1;i<=n*m;i++)scanf(\"%d\",&a[i]),iu[i]=ou[i]=fs[i]=A[i]=B[i]=0;\n\tfor(int i=1;i<=n;i++)for(int j=1;j<=m;j++){\n\t\tbool f1=0,f2=0;\n\t\tfor(int k=0;k<4;k++){\n\t\t\tint pk=id(i+dx[k],j+dy[k]);\n\t\t\tif(!pk)continue;\n\t\t\tif(a[pk]<a[id(i,j)])f1=1;\n\t\t\tif(a[pk]==a[id(i,j)])f2=1; \n\t\t}\n\t\tif(!f1&&!f2){puts(\"NO\");return;}\n\t\tif(!f2)continue;\n\t\tfs[id(i,j)]=(f1?2:1);\n\t}\n\tint pss=0;\n\tfor(int i=1;i<=n;i++)for(int j=1;j<=m;j++)if((fs[id(i,j)]==1)&&((i+j)&1)){\n\t\tint ii=id(i,j);ad(1,1+ii),pss++;\n\t\tfor(int k=0;k<4;k++){\n\t\t\tint pk=id(i+dx[k],j+dy[k]);\n\t\t\tif(!pk||a[pk]!=a[ii])is[ii][k]=0;\n\t\t\telse is[ii][k]=ad(1+ii,1+pk);\n\t\t}\n\t}\n\telse if(fs[id(i,j)]&&!((i+j)&1))ad(1+id(i,j),2*n*m+2);\n\tfor(int i=1;i<=n;i++)for(int j=1;j<=m;j++)if((fs[id(i,j)]==1)&&!((i+j)&1)){\n\t\tint ii=id(i,j);ad(1,1+ii+n*m),pss++;\n\t\tfor(int k=0;k<4;k++){\n\t\t\tint pk=id(i+dx[k],j+dy[k]);\n\t\t\tif(!pk||a[pk]!=a[ii])is[ii][k]=0;\n\t\t\telse is[ii][k]=ad(1+ii+n*m,1+pk+n*m);\n\t\t}\n\t}\n\telse if(fs[id(i,j)]&&((i+j)&1))ad(1+id(i,j)+n*m,2*n*m+2);\n\twhile(bfs())pss-=dfs(1,I);\n\tif(pss){puts(\"NO\");return;}\n\tfor(int i=1;i<=n;i++)for(int j=1;j<=m;j++)if(fs[id(i,j)]==1)for(int k=0;k<4;k++)\n\tif(is[id(i,j)][k]&&flow[is[id(i,j)][k]])ou[id(i,j)]=id(i+dx[k],j+dy[k]),iu[id(i+dx[k],j+dy[k])]=id(i,j);\n\tfor(int i=1;i<=n*m;i++)if(!iu[i]&&ou[i]){\n\t\tint u=i;bool KOT=0;\n\t\twhile(u){\n\t\t\tKOT^=1;\n\t\t\tif(KOT&&ou[u]){\n\t\t\t\tA[u]=a[u]/2,A[ou[u]]=(a[u]+1)/2;\n\t\t\t\tB[u]=fi(u,ou[u]),B[ou[u]]=fi(ou[u],u);\n\t\t\t}\n\t\t\tu=ou[u];\n\t\t}\n\t}\n\tfor(int i=1;i<=n*m;i++)if(iu[i]&&ou[i]&&!A[i]){\n\t\tint u=i;bool KOT=0;\n\t\tdo{\n\t\t\tKOT^=1;\n\t\t\tif(KOT){\n\t\t\t\tA[u]=a[u]/2,A[ou[u]]=(a[u]+1)/2;\n\t\t\t\tB[u]=fi(u,ou[u]),B[ou[u]]=fi(ou[u],u);\n\t\t\t}\n\t\t\tu=ou[u];\n\t\t}while(u!=i);\n\t}\n\tfor(int i=1;i<=n;i++)for(int j=1;j<=m;j++)if(!A[id(i,j)]){\n\t\tfor(int k=0;k<4;k++)if(id(i+dx[k],j+dy[k])&&a[id(i,j)]>a[id(i+dx[k],j+dy[k])]){\n\t\t\tA[id(i,j)]=a[id(i,j)]-a[id(i+dx[k],j+dy[k])];\n\t\t\tB[id(i,j)]=k;\n\t\t\tbreak;\n\t\t}\n\t}\n\tputs(\"YES\");\n\tfor(int i=1;i<=n;i++)for(int j=1;j<=m;j++)printf(\"%d%c\",A[id(i,j)],(j==m)?'\\n':' ');\n\tfor(int i=1;i<=n;i++)for(int j=1;j<=m;j++)printf(\"%c%c\",c[B[id(i,j)]],(j==m)?'\\n':' ');\n}\nint main(){\n\tint T;cin>>T;\n\twhile(T--)sol();\n\treturn 0;\n} \n    \t\t\t \t\t \t \t  \t \t\t \t \t  \t\t \t\t"
+}

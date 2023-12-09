@@ -1,0 +1,38 @@
+{
+    "id": 228271072,
+    "contestId": 1348,
+    "creationTimeSeconds": 1697361101,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1348,
+        "index": "F",
+        "name": "Phoenix and Memory",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1348,
+        "members": [
+            {
+                "handle": "Saint_ying_xtf"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1588343700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#pragma GCC optimize(3, \"Ofast\", \"inline\")\r\n#include <iostream>\r\n#include <vector>\r\n#include <set>\r\n#include <cmath>\r\n#include <map>\r\n#include <algorithm>\r\nusing namespace std;\r\n#define int long long\r\n#define open(x) freopen(#x\".in\", \"r\", stdin);freopen(#x\".out\", \"w\", stdout);\r\n#define close fclose(stdin);fclose(stdout);\r\n#define all(x) x.begin(), x.end()\r\nnamespace FastIO {\r\n\ttemplate <typename T = int>\r\n\tinline T read() {\r\n\t\tT s = 0, w = 1;\r\n\t\tchar c = getchar();\r\n\t\twhile (!isdigit(c)) {\r\n\t\t\tif (c == '-') w = -1;\r\n\t\t\tc = getchar();\r\n\t\t}\r\n\t\twhile (isdigit(c)) s = (s << 1) + (s << 3) + (c ^ 48), c = getchar();\r\n\t\treturn s * w;\r\n\t}\r\n\ttemplate <typename T>\r\n\tinline void read(T &s) {\r\n\t\ts = 0;\r\n\t\tint w = 1;\r\n\t\tchar c = getchar();\r\n\t\twhile (!isdigit(c)) {\r\n\t\t\tif (c == '-') w = -1;\r\n\t\t\tc = getchar();\r\n\t\t}\r\n\t\twhile (isdigit(c)) s = (s << 1) + (s << 3) + (c ^ 48), c = getchar();\r\n\t\ts = s * w;\r\n\t}\r\n\ttemplate <typename T, typename... Args> inline void read(T &x, Args &...args) {\r\n\t\tread(x), read(args...);\r\n\t}\r\n\ttemplate <typename T>\r\n\tinline void write(T x, char ch) {\r\n\t\tif (x < 0) x = -x, putchar('-');\r\n\t\tstatic char stk[25];\r\n\t\tint top = 0;\r\n\t\tdo {\r\n\t\t\tstk[top++] = x % 10 + '0', x /= 10;\r\n\t\t} while (x);\r\n\t\twhile (top) putchar(stk[--top]);\r\n\t\tputchar(ch);\r\n\t\treturn;\r\n\t}\r\n} using namespace FastIO;\r\nusing llong = long long;\r\nusing uint = unsigned int;\r\nstruct Seg {\r\n\tint l, r, ind;\r\n};\r\ninline bool operator<(const Seg& a, const Seg& b) {\r\n\treturn make_pair(a.l, a.r) < make_pair(b.l, b.r);\r\n}\r\nstruct Comp {\r\n\tbool operator()(const Seg& a, const Seg& b) {\r\n\t\treturn a.r < b.r;\r\n\t}\r\n};\r\n\r\nint n;\r\nSeg t[800'000];\r\nint tind[800'000];\r\nvoid Set(int v, int vl, int vr, int i, Seg x) {\r\n\tif (vl == vr) {\r\n\t\tt[v] = x;\r\n\t\ttind[v] = vr;\r\n\t\treturn;\r\n\t}\r\n\tint vm = (vl + vr) / 2;\r\n\tif (i <= vm)\r\n\t\tSet(v * 2, vl, vm, i, x);\r\n\telse\r\n\t\tSet(v * 2 + 1, vm + 1, vr, i, x);\r\n\tif (t[v * 2].r > t[v * 2 + 1].r)\r\n\t\tt[v] = t[v * 2], tind[v] = tind[v * 2];\r\n\telse\r\n\t\tt[v] = t[v * 2 + 1], tind[v] = tind[v * 2 + 1];\r\n}\r\npair<Seg, int> Best(int v, int vl, int vr, int l, int r) {\r\n\tif (vl > r || l > vr)\r\n\t\treturn {Seg{-1, -1, -1}, -1};\r\n\tif (l <= vl && vr <= r)\r\n\t\treturn {t[v], tind[v]};\r\n\tint vm = (vl + vr) / 2;\r\n\tauto a = Best(v * 2, vl, vm, l, r), b = Best(v * 2 + 1, vm + 1, vr, l, r);\r\n\treturn a.first.r > b.first.r ? a : b;\r\n}\r\nvoid Print(const vector<int>& ans) {\r\n\tvector<int> out(ans.size());\r\n\tfor (int i = 0; i < ans.size(); ++i)\r\n\t\tout[ans[i]] = i + 1;\r\n\tfor (int i : out)\r\n\t\twrite(i, '\\n');\r\n}\r\nvoid Solve(vector<Seg> a) {\r\n\tsort(a.begin(), a.end());\r\n\tint j = 0;\r\n\tmultiset<Seg, Comp> s;\r\n\tvector<int> ans;\r\n\tint swp1 = -1, swp2 = -1;\r\n\tfor (int i = 0; i < n; ++i) {\r\n\t\twhile (j < a.size() && a[j].l <= i)\r\n\t\t\ts.insert(a[j++]);\r\n\t\tSeg x = *s.begin();\r\n\t\tif (swp2 == -1 && x.l <= i - 1) {\r\n\t\t\tauto prev = Best(1, 0, n - 1, x.l, i - 1);\r\n\t\t\tif (prev.first.r >= i) {\r\n\t\t\t\tswp1 = prev.second;\r\n\t\t\t\tswp2 = i;\r\n\t\t\t}\r\n\t\t}\r\n\t\tans.push_back(x.ind);\r\n\t\tSet(1, 0, n - 1, i, x);\r\n\t\ts.erase(s.begin());\r\n\t}\r\n\tif (swp2 == -1) {\r\n\t\tputs(\"YES\");\r\n\t\tPrint(ans);\r\n\t} else {\r\n\t\tputs(\"NO\");\r\n\t\tPrint(ans);\r\n\t\tswap(ans[swp1], ans[swp2]);\r\n\t\tputchar(10);\r\n\t\tPrint(ans);\r\n\t}\r\n}\r\nsigned main() {\r\n\tread(n);\r\n\tvector<Seg> a(n);\r\n\tfor (int i = 0; i < n; ++i) {\r\n\t\tcin >> a[i].l >> a[i].r;\r\n\t\t--a[i].l;\r\n\t\t--a[i].r;\r\n\t\ta[i].ind = i;\r\n\t}\r\n\tSolve(a);\r\n}"
+}

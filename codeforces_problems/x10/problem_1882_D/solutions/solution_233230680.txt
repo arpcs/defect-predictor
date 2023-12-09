@@ -1,0 +1,39 @@
+{
+    "id": 233230680,
+    "contestId": 1882,
+    "creationTimeSeconds": 1700267376,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1882,
+        "index": "D",
+        "name": "Tree XOR",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 1900,
+        "tags": [
+            "bitmasks",
+            "dfs and similar",
+            "dp",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1882,
+        "members": [
+            {
+                "handle": "JMK1002"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1695652500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 342,
+    "memoryConsumedBytes": 9830400,
+    "source": "//\r\n// Created by JMKov on 11/17/2023.\r\n//\r\n#include <iostream>\r\n#include <vector>\r\n#include <set>\r\nusing namespace std;\r\n\r\nset<int> connections[200002];\r\nlong long arr[200002];\r\nlong long children[200002];\r\nlong long sol[200002];\r\nlong long n;\r\n\r\nlong long bitCnt = 21;\r\n\r\nvoid dfs2(long long r, long long parent, long long ans) {\r\n    long long pastPC = children[parent];\r\n    long long pastRC = children[r];\r\n    connections[r].insert(parent);\r\n    connections[parent].erase(r);\r\n    children[parent] -= children[r];\r\n    children[r] = n;\r\n    long long newAns = ans;\r\n    for (long long b = 0; b < bitCnt; b++) {\r\n        if (((arr[parent] >> b) & 1) != ((arr[r] >> b) & 1)) {\r\n            newAns += (children[parent] - pastRC) * (1 << b);\r\n        }\r\n    }\r\n\r\n    sol[r] = newAns;\r\n    vector<int> asdf;\r\n    for (long long i : connections[r]) asdf.push_back(i);\r\n\r\n    for (long long i : asdf) {\r\n        if (i == parent) continue;\r\n        dfs2(i, r, newAns);\r\n    }\r\n    children[parent] = pastPC;\r\n    children[r] = pastRC;\r\n    connections[parent].insert(r);\r\n    connections[r].erase(parent);\r\n}\r\n\r\n// return childCount\r\npair<int, int> dfs(long long v, long long parent) {\r\n    long long c = 0;\r\n    long long ans = 0;\r\n    connections[parent].insert(v);\r\n    connections[v].erase(parent);\r\n    for (long long i : connections[v]) {\r\n//        if (parent == i) continue;\r\n        pair<int, int> p = dfs(i, v);\r\n        c += p.first;\r\n        ans += p.second;\r\n    }\r\n    // optimize\r\n    for (long long b = 0; b < bitCnt; b++) {\r\n        if (((arr[parent] >> b) & 1) != ((arr[v] >> b) & 1)) {\r\n            ans += (c + 1) * (1 << b);\r\n        }\r\n    }\r\n    children[v] = c + 1;\r\n    return pair<int, int> {c + 1, ans};\r\n}\r\n\r\nvoid solve() {\r\n    cin >> n;\r\n    for (long long i = 0; i < n; i++) connections[i].clear();\r\n\r\n    for (long long i = 0; i < n; i++) {\r\n        cin >> arr[i];\r\n    }\r\n    for (long long i = 0; i < n - 1; i++) {\r\n        long long u, v;\r\n        cin >> u >> v;\r\n        u--; v--;\r\n        connections[u].insert(v);\r\n        connections[v].insert(u);\r\n    }\r\n\r\n    pair<int, int> p = dfs(0, 0);\r\n    dfs2(0, 0, p.second);\r\n    for (long long i = 0; i < n; i++) {\r\n        cout << sol[i] << \" \";\r\n    }\r\n}\r\n\r\nint main() {\r\n    cin.tie();\r\n    istream::sync_with_stdio(0);\r\n\r\n    long long t;\r\n    cin >> t;\r\n    while (t--) {\r\n        solve();\r\n        cout << endl;\r\n    }\r\n    return 0;\r\n}"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 234535979,
+    "contestId": 1684,
+    "creationTimeSeconds": 1701060568,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1684,
+        "index": "F",
+        "name": "Diverse Segments",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1684,
+        "members": [
+            {
+                "handle": "Call_me_Eric"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1652970900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 358,
+    "memoryConsumedBytes": 20787200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ninline int read(){\r\n    int x = 0, f = 1;char ch = getchar();\r\n    while(ch < '0' || ch > '9'){if(ch == '-') f = -1;ch = getchar();}\r\n    while(ch >= '0' && ch <= '9'){x = (x << 1) + (x << 3) + (ch ^ 48);ch = getchar();}\r\n    return x * f;\r\n}\r\nconst int maxn = 2e5 + 10;\r\nint n, a[maxn], m;\r\nint l[maxn], r[maxn];\r\nint lim[maxn];\r\nvector<int> vec[maxn];\r\nstruct Segment_Tree{\r\n    struct node{\r\n        int maxx, minn;\r\n        node(int maxx = 0,int minn = 0):maxx(maxx),minn(minn){}\r\n    }d[maxn << 2];\r\n    node mergenode(node l,node r){return node(max(l.maxx,r.maxx),min(l.minn,r.minn));}\r\n    void build(int l,int r,int p){\r\n        if(l == r){d[p] = node(::r[l],::l[l]);return;}\r\n        int mid = l + r >> 1;\r\n        build(l,mid,p << 1);build(mid + 1,r,p << 1 | 1);\r\n        d[p] = mergenode(d[p << 1],d[p << 1 | 1]);\r\n    }\r\n    void update(int l,int r,int pos,int p,int x,int y){\r\n        if(l == r && l == pos){d[p] = node(y,x);return;}\r\n        int mid = l + r >> 1;\r\n        if(pos <= mid)update(l,mid,pos,p << 1,x,y);\r\n        else update(mid + 1,r,pos,p << 1 | 1,x,y);\r\n        d[p] = mergenode(d[p << 1],d[p << 1 | 1]);\r\n    }\r\n    node query(int l,int r,int s,int t,int p){\r\n        if(s <= l && r <= t)return d[p];\r\n        int mid = l + r >> 1;\r\n        if(t <= mid)return query(l,mid,s,t,p << 1);\r\n        if(mid < s)return query(mid + 1,r,s,t,p << 1 | 1);\r\n        return mergenode(query(l,mid,s,t,p << 1),query(mid + 1,r,s,t,p << 1 | 1));\r\n    }\r\n    void update(int pos,int x,int y){update(1,n,pos,1,x,y);}\r\n}tree;\r\ninline bool check(int l,int r){return l <= tree.d[1].minn && tree.d[1].maxx <= r;}\r\n\r\nunordered_map<int,int> mp;int tot;\r\n\r\nsigned main(){\r\nint T = read();\r\nwhile(T--){\r\n    n = read(); m = read();int u, v;mp.clear();tot = 0;\r\n    for(int i = 1;i <= n;i++){\r\n        a[i] = read(); if(!mp[a[i]])mp[a[i]] = ++tot;\r\n        a[i] = mp[a[i]]; vec[i].clear();\r\n        lim[i] = l[i] = r[i] = 0;\r\n    }\r\n    for(int i = 1;i <= m;i++){\r\n        u = read(); v = read();\r\n        vec[v].push_back(u);\r\n    }\r\n    u = n + 1;\r\n    for(int i = n;i;i--){\r\n        for(int j : vec[i]){u = min(u,j);}\r\n        lim[i] = u;vec[i].clear();\r\n    }\r\n    for(int i = 1;i <= n;i++)vec[a[i]].push_back(i);\r\n    for(int i = 1;i <= tot;i++)vec[i].push_back(n + 1);\r\n    for(int i = 1;i <= n;i++){\r\n        if(lim[i] != n + 1 && lim[i] != i && vec[a[i]].size() != 1 && i != vec[a[i]][0]){\r\n            l[i] = vec[a[i]][lower_bound(vec[a[i]].begin(),vec[a[i]].end(),lim[i]) - vec[a[i]].begin()];\r\n            r[i] = vec[a[i]][upper_bound(vec[a[i]].begin(),vec[a[i]].end(), i - 1) - vec[a[i]].begin() - 1];\r\n        }\r\n        else{l[i] = n + 1;r[i] = 0;}\r\n        // printf(\"l = %d, r = %d\\n\",l[i],r[i]);\r\n    }\r\n    u = 1; v = 0;tree.build(1,n,1);\r\n    int ans = n;\r\n    for(;u <= n;u++){\r\n        while(v < n && !check(u, v)){v++;tree.update(v,n + 1,0);}\r\n        if(check(u, v)){ans = min(ans,max(0,v - u + 1));}\r\n        tree.update(u,l[u],r[u]);\r\n    }\r\n    printf(\"%d\\n\",ans);\r\n}\r\n    return 0;\r\n}"
+}

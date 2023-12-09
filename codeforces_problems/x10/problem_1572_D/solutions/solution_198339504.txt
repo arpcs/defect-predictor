@@ -1,0 +1,38 @@
+{
+    "id": 198339504,
+    "contestId": 1572,
+    "creationTimeSeconds": 1679305984,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1572,
+        "index": "D",
+        "name": "Bridge Club",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2800,
+        "tags": [
+            "flows",
+            "graph matchings",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1572,
+        "members": [
+            {
+                "handle": "xixike"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631975700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 200,
+    "timeConsumedMillis": 1076,
+    "memoryConsumedBytes": 345702400,
+    "source": "#include <bits/stdc++.h>\r\n#define pb push_back\r\n\r\nusing namespace std;\r\n\r\nnamespace IO{\r\n    inline int read(){\r\n        int x = 0, f = 1;\r\n        char ch = getchar();\r\n        while(!isdigit(ch)) {if(ch == '-') f = -1; ch = getchar();}\r\n        while(isdigit(ch)) x = (x << 3) + (x << 1) + ch - '0', ch = getchar();\r\n        return x * f;\r\n    }\r\n\r\n    template <typename T> inline void write(T x){\r\n        if(x < 0) putchar('-'), x = -x;\r\n        if(x > 9) write(x / 10);\r\n        putchar(x % 10 + '0');\r\n    }\r\n}\r\nusing namespace IO;\r\n\r\nconst int M = (1 << 20) + 10;\r\nconst int inf = 1e9;\r\nint n, k, S, s, t;\r\nint a[M], num[M];\r\nstruct Edge{\r\n    int u, v, w;\r\n    inline bool operator < (const Edge &b) const{\r\n        return w > b.w;\r\n    }\r\n}e[M * 20];\r\nint cnt;\r\n\r\nstruct node{\r\n    int v, w, cost, nxt;\r\n}edge[M << 2];\r\nint head[M], cur[M], tot = 1;\r\n\r\ninline void add(int x, int y, int z, int w){\r\n    edge[++tot] = (node){y, z, w, head[x]};\r\n    head[x] = tot;\r\n}\r\n\r\ninline void Add(int x, int y, int z, int w){\r\n    add(x, y, z, w), add(y, x, 0, -w);\r\n}\r\n\r\nbool vis[M];\r\n\r\nint dis[M], b[M];\r\n\r\ninline bool spfa(){\r\n    memset(dis, 0x3f, sizeof(dis));\r\n    memset(b, 0, sizeof(b));\r\n    queue <int> q;\r\n    q.push(s), dis[s] = 0;\r\n    while(!q.empty()){\r\n        int x = q.front(); q.pop();\r\n        b[x] = 0;\r\n        for(int i = head[x]; i; i = edge[i].nxt){\r\n            int y = edge[i].v;\r\n            if(edge[i].w && dis[y] > dis[x] + edge[i].cost){\r\n                dis[y] = dis[x] + edge[i].cost;\r\n                if(!b[y]) b[y] = 1, q.push(y);\r\n            }\r\n        }\r\n    }\r\n    if(dis[t] >= inf) return 0;\r\n    for(int i = 0; i <= t; ++i) cur[i] = head[i];\r\n    return 1;\r\n}\r\n\r\ninline int dfs(int x, int lim){\r\n    if(x == t || !lim) return lim;\r\n    int flow = 0; b[x] = 1;\r\n    for(int i = cur[x]; i && lim; i = edge[i].nxt){\r\n        int y = edge[i].v; cur[x] = i;\r\n        if(!b[y] && dis[y] == dis[x] + edge[i].cost){\r\n            int tmp = dfs(y, min(lim, edge[i].w));\r\n            lim -= tmp, flow += tmp, edge[i].w -= tmp, edge[i ^ 1].w += tmp;\r\n        }\r\n    }\r\n    return flow;\r\n}\r\n\r\ninline int MCMF(){\r\n    int res = 0;\r\n    while(spfa()) res += dfs(s, inf) * dis[t];\r\n    return res;\r\n}\r\n\r\nsigned main(){\r\n#ifndef ONLINE_JUDGE\r\n    freopen(\"test.in\", \"r\", stdin);\r\n    freopen(\"test.out\", \"w\", stdout);\r\n#endif\r\n    n = read(), k = read();\r\n    for(int i = 0; i < (1 << n); ++i) a[i] = read(), num[i] = num[i >> 1] + (i & 1);\r\n    for(int i = 0; i < (1 << n); ++i)\r\n        for(int j = 0; j < n; ++j)\r\n            if(i & (1 << j)) e[++cnt] = (Edge){i, i ^ (1 << j), a[i] + a[i ^ (1 << j)]};\r\n    nth_element(e + 1, e + min(cnt, k * (2 * n - 1)), e + cnt + 1);\r\n    S = (1 << n), s = S + 1, t = s + 1;\r\n    Add(s, S, k, 0);\r\n    for(int i = 1; i <= min(cnt, k * (2 * n - 1)); ++i){\r\n        if(num[e[i].u] & 1) Add(e[i].u, e[i].v, 1, -e[i].w);\r\n        else Add(e[i].v, e[i].u, 1, -e[i].w);\r\n        if(!vis[e[i].u]){\r\n            if(num[e[i].u] & 1) Add(S, e[i].u, 1, 0);\r\n            else Add(e[i].u, t, 1, 0);\r\n            vis[e[i].u] = 1;\r\n        }\r\n        if(!vis[e[i].v]){\r\n            if(num[e[i].v] & 1) Add(S, e[i].v, 1, 0);\r\n            else Add(e[i].v, t, 1, 0);\r\n            vis[e[i].v] = 1;\r\n        }\r\n    }\r\n    write(-MCMF()), puts(\"\");\r\n    return 0;\r\n}"
+}

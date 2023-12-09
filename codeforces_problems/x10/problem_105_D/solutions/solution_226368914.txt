@@ -1,0 +1,37 @@
+{
+    "id": 226368914,
+    "contestId": 105,
+    "creationTimeSeconds": 1696303773,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 105,
+        "index": "D",
+        "name": "Entertaining Geodetics",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2700,
+        "tags": [
+            "brute force",
+            "dsu",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 105,
+        "members": [
+            {
+                "handle": "luogu_bot4"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1313247600
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "// LUOGU_RID: 127229980\n#include <iostream>\r\n#include <cstdio>\r\n#include <cstring>\r\n#include <algorithm>\r\n#include <queue>\r\n#include <vector>\r\n#include <queue>\r\n#include <map>\r\nusing namespace std;\r\n\r\nconst int S = 303*303*2;\r\n\r\ntypedef long long LL;\r\ntypedef pair<int, int> pr;\r\npr (*mkpr)(int, int)=make_pair;\r\n\r\n\r\nint N, M;\r\nLL ans = 0;\r\nmap<int, int> color;\r\nint f[S], r[S], c[S], s[S];\r\nint pan[303][303], sym[303][303];\r\nint colorcnt = 0;\r\nvector<pr> node[S];\r\nqueue<pr> q;\r\npr now;\r\nint cnow, cchg;\r\n\r\ninline int getcolor(int x)\r\n{\r\n    if (!color.count(x)) color[x] = colorcnt++;\r\n    return color[x];\r\n}\r\n\r\ninline int dis(int i, int j)\r\n{\r\n    int n;\r\n    if (j <= 0) n = max(abs(j), abs(i)-1);\r\n    else n = max(abs(j), abs(i))-1;\r\n    if (i==n+1) return 4*(n+1)*(n+1)+(n+1)-j;\r\n    else if (j==n+1) return (4*n+2)*(n+1)+(n+1)+i;\r\n    else if (i==-n-1) return (2*n+1)*(2*n+1)+n+j;\r\n    else return 4*n*n+2*n+n-i;\r\n}\r\n\r\nbool cmp(const pr &u, const pr &v)\r\n{return dis(u.first-now.first, u.second-now.second)<dis(v.first-now.first, v.second-now.second);}\r\n\r\nint find(int x)\r\n{\r\n    if (f[x]==x) return x;\r\n    return f[x] = find(f[x]);\r\n}\r\n\r\nint join(int u, int v)\r\n{\r\n    int ru = find(u), rv = find(v);\r\n    if (ru == rv) return ru;\r\n    if (r[ru]<r[rv])\r\n    {\r\n        s[rv] += s[ru];\r\n        s[ru] = 0;\r\n        return f[ru] = rv;\r\n    }\r\n    else if (r[rv]<r[ru])\r\n    {\r\n        s[ru] += s[rv];\r\n        s[rv] = 0;\r\n        return f[rv] = ru;\r\n    }\r\n    else\r\n    {\r\n        r[rv]++;\r\n        s[rv] += s[ru];\r\n        s[ru] = 0;\r\n        return f[ru] = rv;\r\n    }\r\n}\r\n\r\nvoid init()\r\n{\r\n    for (int i = 0; i < colorcnt; ++i)\r\n    {\r\n        f[i] = i;\r\n        c[i] = i;\r\n        r[i] = 0;\r\n    }\r\n}\r\n\r\nint main()\r\n{\r\n    int i, j, k, x, y, root;\r\n    scanf(\"%d%d\", &N, &M);\r\n    color[0] = colorcnt++;\r\n    for (i = 0; i < N; ++i)\r\n        for (j = 0; j < M; ++j)\r\n        {\r\n            scanf(\"%d\", &pan[i][j]);\r\n            pan[i][j] = getcolor(pan[i][j]);\r\n            s[pan[i][j]]++;\r\n        }\r\n    for (i = 0; i < N; ++i)\r\n        for (j = 0; j < M; ++j)\r\n        {\r\n            scanf(\"%d\", &sym[i][j]);\r\n            if (sym[i][j]!=-1) sym[i][j] = getcolor(sym[i][j]);\r\n        }\r\n    init();\r\n    scanf(\"%d%d\", &x, &y);\r\n    x--; y--;\r\n    for (i = 0; i < N; ++i)\r\n        for (j = 0; j < M; ++j)\r\n            if (i==x&&j==y) q.push(mkpr(i, j));\r\n            else if (sym[i][j]!=-1) node[pan[i][j]].push_back(mkpr(i, j));\r\n    while (!q.empty())\r\n    {\r\n        now = q.front(); q.pop();\r\n        i = now.first, j = now.second;\r\n        root = find(pan[i][j]);\r\n        cnow = c[root]; cchg = sym[i][j];\r\n        if (cnow==0 || cnow==cchg) continue;\r\n        ans += s[root];\r\n        vector<pr> elm = node[cnow];\r\n        node[cnow].clear();\r\n        sort(elm.begin(), elm.end(), cmp);\r\n        for (k = 0; k < elm.size(); ++k)\r\n            q.push(elm[k]);\r\n        f[cchg] = cchg;\r\n        c[join(root, cchg)] = cchg;\r\n    }\r\n    cout << ans << endl;\r\n}"
+}

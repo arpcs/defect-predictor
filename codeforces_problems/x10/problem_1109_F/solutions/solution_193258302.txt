@@ -1,0 +1,36 @@
+{
+    "id": 193258302,
+    "contestId": 1109,
+    "creationTimeSeconds": 1676170916,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1109,
+        "index": "F",
+        "name": "Sasha and Algorithm of Silence's Sounds",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1109,
+        "members": [
+            {
+                "handle": "luogu_bot5"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1550334900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 390,
+    "memoryConsumedBytes": 31846400,
+    "source": "// LUOGU_RID: 101985131\n#include <stdio.h>\n#include <algorithm>\n#include <string.h>\n#include <cctype>\n#include <vector>\n#include <queue>\n#include <bitset>\n#define vi vector<int>\n#define pb push_back\n#define mp make_pair\n#define st first\n#define nd second\nusing namespace std;\ntypedef long long ll;\ntypedef pair <int, int> Pii;\nconst int INF=0x3f3f3f3f;\nconst int cp=998244353;\ninline int mod(int x){if(x>=cp) x-=cp;if(x<0) x+=cp;return x;}\ninline void plust(int &x, int y){x=mod(x+y);return ;}\ninline void minut(int &x, int y){x=mod(x-y);return ;}\ninline int read(){\n\tchar ch=getchar();int x=0, f=1;\n\twhile(!isdigit(ch)){if(ch=='-') f=-1; ch=getchar();}\n\twhile(isdigit(ch)){x=(x<<3)+(x<<1)+ch-'0';ch=getchar();}\n\treturn x*f;\n}\ninline void write(int x){\n    if(x<0) putchar('-'), x=-x;\n    if(x>9) write(x/10);\n    putchar(x%10+'0');\n}\ninline int ksm(int a, int b=cp-2){\n\tint ret=1;\n\tfor(; b; b>>=1, a=1ll*a*a%cp)\n\t\tif(b&1) ret=1ll*ret*a%cp;\n\treturn ret;\n}\nconst int N=2e5+5;\nconst int M=2e3+5;\nnamespace LCT{\n\t//Link_Cut_Tree\n\t#define ls(a) tr[a].son[0]\n\t#define rs(a) tr[a].son[1]\n\t#define f(a) tr[a].fa\n\t#define r(a) tr[a].rev\n\tstruct node{int fa, son[2];bool rev;}tr[N];\n\tint sontp(int x){if(x==ls(f(x))) return 0;if(x==rs(f(x))) return 1;return -1;}\n\tvoid upd(int x){if(x) r(x)^=1, swap(ls(x), rs(x));}\n\tvoid pushdown(int x){if(r(x)) upd(ls(x)), upd(rs(x)), r(x)=0;}\n\tvoid rotate(int x){\n\t\tint y=f(x), z=f(y), opx=sontp(x), opy=sontp(y), nxt=tr[x].son[!opx];\n\t\tif(~opy) tr[z].son[opy]=x;if(nxt) f(nxt)=y;\n\t\tf(x)=z, tr[y].son[opx]=nxt, f(y)=x, tr[x].son[!opx]=y;\n\t}\n\tvoid pushall(int x){if(~sontp(x)) pushall(f(x));pushdown(x);}\n\tvoid splay(int x){for(pushall(x); sontp(x)!=-1; rotate(x)) if(sontp(tr[x].fa)!=-1) rotate(sontp(x)==sontp(tr[x].fa)?f(x):x);}\n\tvoid access(int x){for(int y=0; x; x=f(y=x)) splay(x), rs(x)=y;}\n\tvoid makeroot(int x){access(x), splay(x), upd(x);}\n\tint findroot(int x){access(x), splay(x), pushdown(x);while(ls(x)) x=ls(x), pushdown(x);splay(x);return x;}\n\tvoid split(int x, int y){makeroot(x), access(y), splay(y);}\n\tbool link(int x, int y){if(findroot(x)==findroot(y)) return 0;makeroot(x), f(x)=y;return 1;}\n\tvoid cut(int x, int y){split(x,y), ls(y)=f(x)=0;}\n\t#undef ls\n\t#undef rs\n\t#undef f\n\t#undef r\n} \nnamespace SMT{\n\t//SegmentTree\n\t#define ls k<<1\n\t#define rs k<<1|1\n\t#define mid (l+r>>1)\n\t#define Mn(a) tr[a].mn\n\t#define cnt(a) tr[a].mnc\n\t#define T(a) tr[a].tag\n\tstruct node{int mn, mnc, tag;}tr[N<<2];\n\tvoid upd(int k, int v){Mn(k)+=v, T(k)+=v;}\n\tvoid pushdown(int k){if(T(k)) upd(ls, T(k)), upd(rs, T(k)), T(k)=0;}\n\tvoid pushup(int k){Mn(k)=min(Mn(ls), Mn(rs));cnt(k)=cnt(ls)*(Mn(ls)==Mn(k))+cnt(rs)*(Mn(rs)==Mn(k));}\n\tvoid build(int k, int l, int r){\n\t\ttr[k]=(node){0, r-l+1, 0};\n\t\tif(l==r) return ;build(ls, l, mid), build(rs, mid+1, r);\n\t}\n\tvoid modify(int k, int l, int r, int x, int y, int v){\n\t\tif(x<=l&&r<=y) return upd(k, v);pushdown(k);\n\t\tif(x<=mid) modify(ls, l, mid, x, y, v);\n\t\tif(mid<y) modify(rs, mid+1, r, x, y, v);\n\t\treturn pushup(k);\n\t}\n\tint query(int k, int l, int r, int x, int y){\n\t\tif(x>r||y<l) return 0;\n\t\tif(x<=l&&r<=y) return cnt(k)*(Mn(k)==1);pushdown(k);\n\t\treturn query(ls, l, mid, x, y)+query(rs, mid+1, r, x, y);\n\t}\n\t#undef ls\n\t#undef rs\n\t#undef mid\n\t#undef Mn\n\t#undef cnt\n\t#undef T\n}\nint n, m, S, a[M][M];\nint dx[]={1, -1, 0, 0};\nint dy[]={0, 0, 1, -1};\nPii pt[N];\nll ans;\nbool in(int x, int y){return x>=1&&x<=n&&y>=1&&y<=m;}\nint check(int nx, int ny, int l, int r){\n\tif(in(nx, ny)&&a[nx][ny]>=l&&a[nx][ny]<=r) return a[nx][ny];\n\treturn 0;\n}\nint expand(int l, int r){\n\tint x=pt[r].st, y=pt[r].nd;int res=0;\n\tfor(int i=0, nx, ny, nxt; i<4; ++i)\n\t\tif(nxt=check(nx=x+dx[i], ny=y+dy[i], l, r-1)){\n\t\t\t++res;\n\t\t\tif(LCT::link(r, nxt)) continue;\n\t\t\tfor(int j=0; j<i; ++j) if(nxt=check(x+dx[j], y+dy[j], l, r-1)) LCT::cut(r, nxt);\n\t\t\treturn -1;\n\t\t}\n\treturn res;\n}\nvoid solve(){\n\tfor(int l=1, r=1, t; l<=n*m; ++l){\n\t\twhile(r<=n*m&&(~(t=expand(l, r)))) \n\t\t\tSMT::modify(1, 1, n*m, r, n*m, -t), SMT::modify(1, 1, n*m, r, r, r-l+1), ++r;\n\t\tans+=SMT::query(1, 1, n*m, l, r-1);\n\t\tSMT::modify(1, 1, n*m, l, r-1, -1);\n\t\tint x=pt[l].st, y=pt[l].nd;\n\t\tfor(int i=0, nxt; i<4; ++i)\n\t\t\tif(nxt=check(x+dx[i], y+dy[i], l, r-1)) LCT::cut(l, nxt), SMT::modify(1, 1, n*m, nxt, n*m, 1);\n\t}\n}\nsigned main(){\n\tn=read(), m=read();\n\tSMT :: build(1, 1, n*m);\n\tfor(int i=1; i<=n; ++i)\n\t\tfor(int j=1; j<=m; ++j)\n\t\t\tpt[a[i][j]=read()]=mp(i, j);\n\tsolve();\n\tprintf(\"%lld\\n\", ans);\n\treturn 0;\n}"
+}

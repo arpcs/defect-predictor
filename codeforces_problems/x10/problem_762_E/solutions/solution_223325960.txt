@@ -1,0 +1,35 @@
+{
+    "id": 223325960,
+    "contestId": 762,
+    "creationTimeSeconds": 1694684486,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 762,
+        "index": "E",
+        "name": "Radio stations",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 762,
+        "members": [
+            {
+                "handle": "3sFening"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1485354900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 69,
+    "timeConsumedMillis": 436,
+    "memoryConsumedBytes": 19251200,
+    "source": "// LUOGU_RID: 124684246\n/*\r\n\u82e5\u592b    \u65e5\u51fa   \u800c  \u6797     \u970f  \u5f00 \uff0c\r\n\u81f3\u4e8e \u592a\u9633\u7684\u5347\u8d77\uff0c\u5c71\u6797\u91cc\u7684\u96fe\u6c14\u6563\u4e86\uff1b\r\n \r\n \u4e91   \u5f52  \u800c\u5ca9\u7a74       \u669d   \uff0c        \u6666\u660e\u53d8\u5316\u8005        \uff0c  \u5c71\u95f4\u4e4b\u671d\u66ae\u4e5f\u3002\r\n\u70df\u4e91\u805a\u62e2\u6765\uff0c\u5c71\u8c37\u5c31\u663e\u5f97\u660f\u6697\u4e86\uff1b\u671d\u5219\u81ea\u6697\u800c\u660e\uff0c\u66ae\u5219\u81ea\u660e\u800c\u6697\uff0c\u8fd9\u5c31\u662f\u5c71\u4e2d\u7684\u671d\u66ae\u3002\r\n \r\n \u91ce\u82b3\u53d1 \u800c       \u5e7d    \u9999 \uff0c \u4f73  \u6728    \u79c0   \u800c         \u7e41    \u9634 \uff0c\r\n\u91ce\u82b1\u5f00\u4e86\uff0c\u6709\u4e00\u80a1\u6e05\u5e7d\u7684\u9999\u5473\uff1b\u597d\u7684\u6811\u6728\u679d\u7e41\u53f6\u8302\uff0c\u5f62\u6210\u4e00\u7247\u6d53\u5bc6\u7684\u7eff\u836b\uff1b\r\n \r\n\u98ce\u971c\u9ad8\u6d01\uff0c\u6c34\u843d\u800c\u77f3\u51fa\u8005\uff0c\u5c71\u95f4\u4e4b\u56db\u65f6\u4e5f\u3002\r\n \r\n \u671d \u800c\u5f80\uff0c \u66ae \u800c\u5f52\uff0c \u56db\u65f6\u4e4b\u666f \u4e0d\u540c\uff0c\u800c\u4e50 \u4ea6   \u65e0\u7a77    \u4e5f\u3002\r\n\u65e9\u6668\u8fdb\u5c71\uff0c\u508d\u665a\u56de\u57ce\uff0c\u56db\u5b63\u7684\u666f\u8272\u4e0d\u540c\uff0c\u4e50\u8da3\u4e5f\u662f\u65e0\u7a77\u65e0\u5c3d\u7684\u3002\r\n \r\n         /\\_/\\\r\n    ____/ o o \\\r\n  /~____   v  /\r\n (______)__m_m)\r\n \r\n   A CUTE CAT\r\n*/\r\n \r\n#include <bits/stdc++.h>\r\n#define int long long\r\n \r\nusing namespace std;\r\ninline int read() {\r\n\tint x = 0, f = 1;\r\n\tchar ch = getchar();\r\n\twhile (! isdigit(ch)) { if (ch == '-') f = -1; ch = getchar(); }\r\n\twhile (isdigit(ch)) { x = x * 10 + ch - 48; ch = getchar(); }\r\n\treturn x * f;\r\n}\r\n \r\nconst int maxn = 3e5 + 10;\r\n \r\nint n, k, l, ans, b[maxn];\r\nstruct Node { int x, r, f, L, R, ans; } t[maxn];\r\n \r\nstruct ftr {\r\n\tint c[maxn];\r\n\tvoid mdf(int x, int v) { for (; x <= l; x += (x & -x)) c[x] += v; }\r\n\tint pre(int x) { int s = 0; for(; x > 0; x -= (x & -x)) s += c[x]; return s; }\r\n\tint itv(int l, int r) { return pre(r) - pre(l - 1); }\r\n} tr;\r\n \r\nvoid cdq(int l, int r) {\r\n\tif (l == r) return ; int mid = l + r >> 1; cdq(l, mid), cdq(mid + 1, r);\r\n\tauto cmp = [](Node a, Node b) { return a.f < b.f; };\r\n\tsort(t + l, t + mid + 1, cmp), sort(t + mid + 1, t + r + 1, cmp);\r\n\t\r\n\tint x = l, y = l - 1;\r\n\tfor (int i = mid + 1; i <= r; i ++) {\r\n\t\twhile (y < mid && t[y + 1].f <= t[i].f + k) y ++, tr.mdf(t[y].x, 1);\r\n\t\twhile (x <= y && t[x].f < t[i].f - k) tr.mdf(t[x].x, -1), x ++;\r\n\t\tt[i].ans += tr.itv(t[i].L, t[i].R);\r\n\t} \r\n\t\r\n\tfor (int i = x; i <= y; i ++) tr.mdf(t[i].x, -1);\r\n}\r\n \r\nsigned main() {\r\n\t\r\n\tn = read(), k = read();\r\n\tfor (int i = 1; i <= n; i ++) \r\n\t\tt[i] = Node {read(), read(), read()}, b[++ l] = t[i].L = t[i].x - t[i].r, \r\n\t\tb[++ l] = t[i].R = t[i].x + t[i].r, b[++ l] = t[i].x;\r\n\t\r\n\tsort(b + 1, b + l + 1), l = unique(b + 1, b + l + 1) - b - 1;\r\n\tfor (int i = 1; i <= n; i ++)\r\n\t\tt[i].x = lower_bound(b + 1, b + l + 1, t[i].x) - b,\r\n\t\tt[i].L = lower_bound(b + 1, b + l + 1, t[i].L) - b,\r\n\t\tt[i].R = lower_bound(b + 1, b + l + 1, t[i].R) - b; \r\n\t\r\n\tsort(t + 1, t + n + 1, [](Node a, Node b) { return a.r > b.r; });\r\n\tcdq(1, n); for (int i = 1; i <= n; i ++) ans += t[i].ans; printf(\"%lld\", ans);\r\n\t\r\n\treturn 0;\r\n}"
+}
