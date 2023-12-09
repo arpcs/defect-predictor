@@ -1,0 +1,35 @@
+{
+    "id": 225527026,
+    "contestId": 855,
+    "creationTimeSeconds": 1695824190,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 855,
+        "index": "D",
+        "name": "Rowena Ravenclaw's Diadem",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2500,
+        "tags": [
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 855,
+        "members": [
+            {
+                "handle": "Ann"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1506263700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 16,
+    "timeConsumedMillis": 140,
+    "memoryConsumedBytes": 12492800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nconst int LOG = 18;\r\n\r\nstruct DSU {\r\n    vector<int> f;\r\n    DSU(int n) : f(n) { iota(f.begin(), f.end(), 0); }\r\n    int leader(int x) {\r\n        while (x != f[x]) {\r\n            x = f[x] = f[f[x]];\r\n        }\r\n        return x;\r\n    }\r\n    bool unionize(int x, int y) {\r\n        x = leader(x);\r\n        y = leader(y);\r\n        if (x == y) {\r\n            return false;\r\n        }\r\n        f[y] = x;\r\n        return true;\r\n    }\r\n    bool same(int x, int y) {\r\n        return leader(x) == leader(y);\r\n    }\r\n};\r\n\r\nint main() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n\r\n    int n;\r\n    cin >> n;\r\n\r\n    DSU dsu(n);\r\n    vector<int> depth(n, 0);\r\n    vector<vector<int>> lift(n, vector<int>(LOG, -1));\r\n    vector<DSU> adsu(2, DSU(n));\r\n\r\n    for (int u = 0; u < n; u++) {\r\n        int p, type;\r\n        cin >> p >> type;\r\n        if (p == -1) {\r\n            continue;\r\n        }\r\n        p--;\r\n        dsu.unionize(p, u);\r\n        depth[u] = depth[p] + 1;\r\n        lift[u][0] = p;\r\n        adsu[type].unionize(p, u);\r\n    }\r\n\r\n    for (int i = 1; i < LOG; i++) {\r\n        for (int u = 0; u < n; u++) {\r\n            int lifted = lift[u][i - 1];\r\n            lift[u][i] = lifted == -1 ? -1 : lift[lifted][i - 1];\r\n        }\r\n    }\r\n\r\n    function<int(int, int)> lca = [&](int u, int v) {\r\n        if (depth[u] > depth[v]) {\r\n            swap(u, v);\r\n        }\r\n        for (int i = LOG - 1; i >= 0; i--) {\r\n            if (lift[v][i] != -1 && depth[lift[v][i]] >= depth[u]) {\r\n                v = lift[v][i];\r\n            }\r\n        }\r\n        if (u == v) {\r\n            return u;\r\n        }\r\n        for (int i = LOG - 1; i >= 0; i--) {\r\n            if (lift[u][i] != lift[v][i]) {\r\n                u = lift[u][i];\r\n                v = lift[v][i];\r\n            }\r\n        }\r\n        return lift[u][0];\r\n    };\r\n\r\n    int q;\r\n    cin >> q;\r\n    while (q--) {\r\n        int type, u, v;\r\n        cin >> type >> u >> v;\r\n        type--;\r\n        u--;\r\n        v--;\r\n        if (!dsu.same(u, v) || u == v) {\r\n            cout << \"NO\\n\";\r\n            continue;\r\n        }\r\n        int uv = lca(u, v);\r\n        if (type == 0) {\r\n            u == uv && adsu[0].same(u, v) ? cout << \"YES\\n\" : cout << \"NO\\n\";\r\n        }\r\n        if (type == 1) {\r\n            adsu[0].same(u, uv) && adsu[1].same(v, uv) ? cout << \"YES\\n\" : cout << \"NO\\n\";\r\n        }\r\n    }\r\n}\r\n"
+}

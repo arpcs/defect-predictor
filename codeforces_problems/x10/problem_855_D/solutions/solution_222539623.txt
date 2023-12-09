@@ -1,0 +1,35 @@
+{
+    "id": 222539623,
+    "contestId": 855,
+    "creationTimeSeconds": 1694234343,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 855,
+        "index": "D",
+        "name": "Rowena Ravenclaw's Diadem",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2500,
+        "tags": [
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 855,
+        "members": [
+            {
+                "handle": "shorya2448"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1506263700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 200396800,
+    "source": "#include<bits/stdc++.h>\r\n#include<stdio.h> \r\n#include<ext/pb_ds/assoc_container.hpp>\r\n#include<ext/pb_ds/tree_policy.hpp> \r\nusing namespace std;\r\nusing namespace __gnu_pbds ; \r\nusing ll = long long ;  \r\ntypedef tree<ll,null_type,less_equal<ll>,rb_tree_tag,tree_order_statistics_node_update> pbds ; \r\nll inf = 1e18 + 100 ;\r\nll ninf = -1e18 - 100 ;\r\nconst ll mod = 1e9 + 7 ; \r\nconst int MAXN = 1e6 ; \r\n\r\nll newval[MAXN+1] ; \r\nll oldval[MAXN+1] ; \r\nll first[MAXN+1] ; \r\nvector<ll> euler1 ; \r\n\r\nvoid euler_tour_type1(ll u , vector<ll> adj[] , vector<bool>& visited)\r\n{\r\n\teuler1.push_back(newval[u]) ; \r\n\tvisited[u] = true ; \r\n\t\r\n\tfor(ll v : adj[u]) \r\n\t{\r\n\t\tif(visited[v] == false)\r\n\t\t{\r\n\t\t\teuler_tour_type1(v,adj,visited) ; \r\n\t\t\teuler1.push_back(newval[u]) ; \r\n\t\t}\r\n\t}\r\n}\r\n\r\nll rmq[20][MAXN+1] ; \r\nvoid make_lca(vector<ll> adj[]) \r\n{\r\n\tint t = 1 ; \r\n \tqueue<ll> q; \r\n \tq.push(1) ;  \r\n \toldval[t] = 1 ; \r\n \tnewval[1] = t++ ; \r\n \twhile(q.size() > 0) \r\n \t{\r\n\t\tll u = q.front() ;\r\n \t\tq.pop() ;  \r\n \t\tfor(ll v : adj[u]) \r\n \t\t{\r\n \t\t\tif(newval[v] != 0) continue ; \r\n \t\t\toldval[t] = v ;\r\n \t\t\tnewval[v] = t++ ; \r\n \t\t\tq.push(v) ; \r\n \t\t}\r\n \t}\r\n \tfor(ll i = 0 ; i < MAXN ; i++) first[i] = inf ; \r\n \tvector<bool> visited(t+10,false) ;\r\n \teuler_tour_type1(1,adj,visited) ; \r\n \t\r\n \t// vector<ll> first(t + 10 , inf) ; \r\n \t\r\n \tfor(ll i = 0 ; i < (ll)euler1.size() ; i++) \r\n \t{\r\n \t\tfirst[euler1[i]] = min(first[euler1[i]],i) ; \r\n \t}\r\n \t\r\n \t\r\n \tfor(ll i = 0 ; i < (ll)euler1.size() ; i++) rmq[0][i] = euler1[i] ; \r\n \t\r\n \tfor(ll j = 1 ; j < 20 ; j++) \r\n \t{\r\n \t\tfor(ll i = 0 ; i < (ll)euler1.size() ; i++) \r\n \t\t{\r\n \t\t\tif(i + (1 << j) - 1 < (ll)euler1.size())\r\n \t\t\t{\r\n \t\t\t\trmq[j][i] = min(rmq[j-1][i],rmq[j-1][i + (1 << (j-1))]) ; \r\n \t\t\t} \r\n \t\t}\r\n \t}\r\n}\r\n\r\nll give_lca(ll u , ll v) \r\n{\r\n\tll nu = newval[u] , nv = newval[v] ;\r\n\tll l = min(first[nu],first[nv]) , r = max(first[nu],first[nv]) ; \r\n\tif(l == r) return oldval[nu] ; \r\n\tll j = log2(r-l+1) ; \r\n\tll x ; \r\n\tx = min(rmq[j][l],rmq[j][r - (1 << (j)) + 1]) ;\r\n\treturn oldval[x] ; \r\n}\r\n\r\nll parent[MAXN] ; \r\nll rankk[MAXN] ; \r\n\r\nll findparent(ll u) \r\n{\r\n\tif(parent[u] == u) return u ; \r\n\telse return parent[u] = findparent(parent[u]) ; \r\n}\r\nvoid solve() \r\n{\t \r\n\tll n ; \r\n\tcin >> n ; \r\n\t\r\n\t\r\n\tfor(ll i = 0 ; i <= n ; i++) \r\n\t{\r\n\t\trankk[i] = 1 ; \r\n\t\tparent[i] = i ; \r\n\t}\r\n\tvector<ll> adj[n+1] ;\r\n\tfor(ll i = 1 ; i <= n ; i++) \r\n\t{\r\n\t\tll type , par ; \r\n\t\tcin >> par >> type ; \r\n\t\t\r\n\t\tif(type == 0) adj[par].push_back(i) ; \r\n\t\telse if(type == 1) parent[i] = par;  \r\n\t}\r\n\t\r\n\tmake_lca(adj) ; \r\n \r\n\tll q ; \r\n\tcin >> q ; \r\n\t\r\n\twhile(q--) \r\n\t{\r\n\t\tll type ; \r\n\t\tcin >> type ; \r\n\t\t\r\n\t\tll u , v ; \r\n\t\tcin >> u >> v ; \r\n\t\t\r\n\t\t\r\n\t\tif(type == 1) \r\n\t\t{\r\n\t\t\tll lca = give_lca(u,v) ; \r\n\t\t\tif(lca == u) cout << \"YES\" << endl; \r\n\t\t\telse cout << \"NO\" << endl; \r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tll par1 = findparent(v) ; \r\n\t\t\tll par2 = findparent(u) ; \r\n\t\t\t\r\n\t\t \t\r\n\t\t \tif(par1 == v) cout << \"NO\" << endl; \r\n\t\t\telse if(par1 == par2) \r\n\t\t\t{\r\n\t\t\t\tif(v > u) cout << \"YES\" << endl; \r\n\t\t\t\telse cout << \"NO\" << endl; \r\n\t\t\t}\r\n\t\t\telse \r\n\t\t\t{\r\n\t\t\t\tll lca = give_lca(par1,u) ;\r\n\t\t\t\t \r\n\t\t\t\tif(lca == par1) cout << \"YES\" << endl; \r\n\t\t\t\telse cout << \"NO\" << endl; \r\n\t\t\t}\r\n\t\t}\r\n\t} \t\r\n}\r\n\r\n\r\nint32_t main()\r\n{\r\n    ios_base::sync_with_stdio(false) ;\r\n    cin.tie(NULL) ;\r\n    cout.tie(NULL) ;\r\n    // init_code() ;\r\n    ll t = 1 ; \r\n\t// cin >> t;  \r\n    while(t--) solve() ; \r\n    return 0 ; \r\n}\r\n"
+}

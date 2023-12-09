@@ -1,0 +1,35 @@
+{
+    "id": 216564729,
+    "contestId": 855,
+    "creationTimeSeconds": 1690801179,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 855,
+        "index": "D",
+        "name": "Rowena Ravenclaw's Diadem",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2500,
+        "tags": [
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 855,
+        "members": [
+            {
+                "handle": "chanhchuong0702"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1506263700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 60,
+    "timeConsumedMillis": 171,
+    "memoryConsumedBytes": 24371200,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define task \"C\"\r\n#define FOR(i, a, b) for (int i = (a), _b = (b); i <= _b; ++i)\r\n#define FORD(i, a, b) for (int i = (b), _a = (a); i >= _a; --i)\r\n\r\ntemplate <typename T1, typename T2> bool minimize(T1 &a, T2 b) {\r\n\tif (a > b) {a = b; return true;} return false;\r\n}\r\ntemplate <typename T1, typename T2> bool maximize(T1 &a, T2 b) {\r\n\tif (a < b) {a = b; return true;} return false;\r\n}\r\n\r\nconst int dx[] = {-1, 0, 0, +1};\r\nconst int dy[] = {0, -1, +1, 0};\r\n\r\nconst int MAX = 100010;\r\nint n, q;\r\nint nComp;\r\nint h[MAX];\r\nint root[MAX];\r\nbool vis[MAX];\r\nint up[17][MAX];\r\nint anc[17][MAX];\r\nvector<pair<int, int>> adj[MAX];\r\n\r\nint combine(int a, int b) {\r\n\tif (a == -1) return b;\r\n\tif (b == -1) return a;\r\n\tif (a == b) return a;\r\n\treturn 0;\r\n}\r\n\r\nvoid dfs(int u) {\r\n\tvis[u] = true;\r\n\troot[u] = nComp;\r\n\tfor (pair<int, int> &x: adj[u]) {\r\n\t\tint v = x.first, t = x.second;\r\n\t\th[v] = h[u] + 1;\r\n\t\tanc[0][v] = u;\r\n\t\tup[0][v] = t;\r\n\t\tfor (int j = 1; j <= 16; ++j) {\r\n\t\t\tanc[j][v] = anc[j - 1][anc[j - 1][v]];\r\n\t\t\tup[j][v] = combine(up[j - 1][v], up[j - 1][anc[j - 1][v]]);\r\n\t\t}\r\n\t\tdfs(v);\r\n\t}\r\n}\r\n\r\nint lca(int u, int v) {\r\n\tif (h[u] < h[v]) swap(u, v); int k = h[u] - h[v];\r\n\tfor (int j = 0; (1 << j) <= k; ++j) {\r\n\t\tif (k >> j & 1)\r\n\t\t\tu = anc[j][u];\r\n\t}\r\n\tif (u == v) return u;\r\n\tfor (int j = 16; j >= 0; --j) {\r\n\t\tif (anc[j][u] != anc[j][v]) {\r\n\t\t\tu = anc[j][u];\r\n\t\t\tv = anc[j][v];\r\n\t\t}\r\n\t}\r\n\treturn anc[0][u];\r\n}\r\n\r\nint get(int u, int p) {\r\n\tint res = -1, k = h[u] - h[p];\r\n\tfor (int j = 0; (1 << j) <= k; ++j) {\r\n\t\tif (k >> j & 1) {\r\n\t\t\tres = combine(res, up[j][u]);\r\n\t\t\tu = anc[j][u];\r\n\t\t}\r\n\t}\r\n\treturn res;\r\n}\r\n\r\nint main() {\r\n\tios_base::sync_with_stdio(false); cin.tie(nullptr);\r\n\r\n\tif (fopen(task\".inp\", \"r\")) {\r\n\t\tfreopen(task\".inp\", \"r\", stdin);\r\n\t\tfreopen(task\".out\", \"w\", stdout);\r\n\t}\r\n\r\n\tcin >> n;\r\n\tfor (int i = 1; i <= n; ++i) {\r\n\t\tint p, type; cin >> p >> type; ++type;\r\n\t\tif (p != -1) adj[p].push_back({i, type});\r\n\t}\r\n\tfor (int i = 1; i <= n; ++i) {\r\n\t\tif (!vis[i]) dfs(i);\r\n\t\t++nComp;\r\n\t}\r\n\tcin >> q;\r\n\twhile (q--) {\r\n\t\tint type, u, v; cin >> type >> u >> v;\r\n\t\tif (u == v) {\r\n\t\t\tcout << \"NO\\n\";\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tif (root[u] != root[v]) {\r\n\t\t\tcout << \"NO\\n\";\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tint p = lca(u, v);\r\n\t\tif (p == v) {\r\n\t\t\tcout << \"NO\\n\";\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tint getU = get(u, p);\r\n\t\tint getV = get(v, p);\r\n\t\t// cout << getU << ' ' << getV << '\\n';\r\n\t\tif (type == 1) {\r\n\t\t\tif (u == p && getV == 1) cout << \"YES\\n\"; else\r\n\t\t\tcout << \"NO\\n\";\r\n\t\t} else {\r\n\t\t\tif (u == p && getV == 2) cout << \"YES\\n\"; else {\r\n\t\t\t\tif (getU == 1 && getV == 2) cout << \"YES\\n\"; else\r\n\t\t\t\tcout << \"NO\\n\";\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\r\n\tcerr << \"\\nTime elapsed: \" << 1000.0 * clock() / CLOCKS_PER_SEC << \" ms.\\n\";\r\n\treturn 0;\r\n}"
+}

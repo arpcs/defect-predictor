@@ -79,6 +79,65 @@ def clean_files():
     solution_path_iterator(lambda _, full_path, _3: delete_non_json(full_path))
     problem_path_iterator(lambda _, full_path, _3: delete_non_json(full_path))
 
+class ProblemPack:
+    def __init__(self, problem_id, solution_ids):
+        self.problem_id = problem_id  # ID for the problem
+        self.solution_ids = solution_ids  # List of solution IDs
+
+    def add_solution(self, solution_id):
+        """Add a solution ID to the problem pack."""
+        self.solution_ids.append(solution_id)
+
+    def remove_solution(self, solution_id):
+        """Remove a solution ID from the problem pack if it exists."""
+        if solution_id in self.solution_ids:
+            self.solution_ids.remove(solution_id)
+
+    def get_problem_id(self):
+        """Return the problem ID."""
+        return self.problem_id
+
+    def get_solution_ids(self):
+        """Return the list of solution IDs."""
+        return self.solution_ids
+
+    def __str__(self):
+        """Return a string representation of the problem pack."""
+        return f"Problem ID: {self.problem_id}, Solution IDs: {self.solution_ids}"
+
+
+class ProblemSolutionContainer:
+    def __init__(self, problems, problem_paths, solutions, solution_paths):
+        self.problems = problems
+        self.solutions = solutions
+        self.problem_paths = problem_paths
+        self.solution_paths = solution_paths
+        self.problem_id_to_solutions = self._map_problem_to_solutions()
+        self.problem_id_to_problem = self._map_problem_id_to_problem()
+
+    def _map_problem_to_solutions(self):
+        mapping = {}
+        for index, solution in enumerate(self.solutions):
+            problem_id = (solution['problem']['contestId'], solution['problem']['index'])
+            mapping.setdefault(problem_id, []).append(index)
+
+        return mapping
+
+    def _map_problem_id_to_problem(self):
+        mapping = {}
+        for index, problem in enumerate(self.problems):
+            problem_id = (problem['contestId'], problem['index'])
+            mapping[problem_id] = index
+        return mapping
+
+    def get_solutions_for_problem(self, problem_id):
+        return self.problem_id_to_solutions.get((self.problems[problem_id]['contestId'],self.problems[problem_id]['index']), [])
+
+    def get_problem_for_solution(self, solution_id):
+        return self.problem_id_to_problem.get((self.solutions[solution_id]['problem']['contestId'], self.solutions[solution_id]['problem']['index']), None)
+
+    def get_self(self):
+        return self
 
 def main():
     print("Cleaning Files")
@@ -109,3 +168,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -118,6 +118,15 @@ def runner(number_of_problems, number_of_solutions):
         good_verdicts = ["FAILED", "OK", "PARTIAL", "COMPILATION_ERROR", "RUNTIME_ERROR", "WRONG_ANSWER"]
         all_verdicts = ["FAILED", "OK", "PARTIAL", "COMPILATION_ERROR", "RUNTIME_ERROR", "WRONG_ANSWER", "PRESENTATION_ERROR", "TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "IDLENESS_LIMIT_EXCEEDED", "SECURITY_VIOLATED", "CRASHED", "INPUT_PREPARATION_CRASHED", "CHALLENGED", "SKIPPED", "TESTING", "REJECTED"]
 
+        sum_of_already_done = 0
+        for verdict in good_verdicts:
+            already_done = get_solution_number_w_verdict(folder_name, verdict)
+            sum_of_already_done += already_done
+        if sum_of_already_done >= number_of_solutions:
+            print(f"Already done this problem! {sum_of_already_done}/{number_of_solutions} for  {problem['contestId']} {problem['index']}")
+            continue
+        print(f"Fetching more for {problem['contestId']} {problem['index']} already done: {sum_of_already_done}/{number_of_solutions}")
+
         if contests_solutions[problem['contestId']] is None:
             contests_solutions[problem['contestId']] = get_all_solutions(problem["contestId"], number_of_solutions * 400)
             print(f"For problem group [{problem['contestId']}] found {len(contests_solutions[problem['contestId']])} number of solutions")
@@ -130,12 +139,12 @@ def runner(number_of_problems, number_of_solutions):
         
         for retries in range(20):
             try:
-                link = create_problem_link(problem['contestId'], problem['index'])
-                problem['desc'] = codeforces_parser.parse_problem(link)
-                with open(f"{folder_name}/problem.txt", "w") as file:
-                    json.dump(problem, file, indent=4)
-                    break
-
+                if not os.path.exists(f"{folder_name}/problem.txt"):
+                    link = create_problem_link(problem['contestId'], problem['index'])
+                    problem['desc'] = codeforces_parser.parse_problem(link)
+                    with open(f"{folder_name}/problem.txt", "w") as file:
+                        json.dump(problem, file, indent=4)
+                        break
             except Exception as e:
                 if retries >= 19:
                     print(f"Error processing problem data: {problem['contestId']}, {problem['index']} : {e}. \nGiving up")
@@ -169,10 +178,11 @@ def runner(number_of_problems, number_of_solutions):
                 os.makedirs(solution_folder_name, exist_ok=True)
                 solution_file_name = os.path.join(solution_folder_name,f"solution_{solution['id']}.txt")
                 try:
-                    with open(solution_file_name, "w") as file:
-                        link = create_submission_link(problem['contestId'], solution['id'])
-                        solution['source'] = codeforces_parser.parse_solution(link)
-                        json.dump(solution, file, indent=4)
+                    if not os.path.exists(solution_file_name):
+                        with open(solution_file_name, "w") as file:
+                            link = create_submission_link(problem['contestId'], solution['id'])
+                            solution['source'] = codeforces_parser.parse_solution(link)
+                            json.dump(solution, file, indent=4)
                     solution_couter += 1
                     bad_couter = 0
                 except Exception as e:
