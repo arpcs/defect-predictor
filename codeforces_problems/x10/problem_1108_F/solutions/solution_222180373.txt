@@ -1,0 +1,37 @@
+{
+    "id": 222180373,
+    "contestId": 1108,
+    "creationTimeSeconds": 1694077989,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1108,
+        "index": "F",
+        "name": "MST Unification",
+        "type": "PROGRAMMING",
+        "rating": 2100,
+        "tags": [
+            "binary search",
+            "dsu",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1108,
+        "members": [
+            {
+                "handle": "Joddddd"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1548254100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 77,
+    "memoryConsumedBytes": 108134400,
+    "source": "#include<bits/stdc++.h>\r\n#define ll long long\r\n#define int ll\r\nusing namespace std;\r\n\r\nint parent[200005], sz[200005];\r\nint par[200005][32], mx_edge[200005][32];\r\n\r\nvoid make(int n){\r\n    parent[n]=n;\r\n    sz[n]=1;\r\n}\r\n\r\nint find(int n){\r\n    if(parent[n]==n) return n;\r\n    return find(parent[n]);\r\n}\r\n\r\nvoid union_set(int a, int b){\r\n    a=parent[a];\r\n    b=parent[b];\r\n    if(sz[a]<sz[b]) swap(a,b);\r\n    parent[b]=a;\r\n    sz[a]+=sz[b];\r\n}\r\n\r\nvoid kruskal(vector<vector<int>>&edges, vector<set<pair<int,int>>>&tree){\r\n    int n=tree.size();\r\n    for(int i=0; i<n; i++) make(i);\r\n    set<pair<int,pair<int,int>>> st;\r\n    for(auto x:edges){\r\n        st.insert({x[2], {x[0]-1, x[1]-1}});\r\n    }\r\n\r\n    while(st.size()>0){\r\n        auto it =st.begin();\r\n        pair<int,pair<int,int>> pr=(*it);\r\n        st.erase(it);\r\n        int wt=pr.first, x=pr.second.first, y=pr.second.second;\r\n        if(find(x)==find(y)) continue;\r\n        union_set(x,y);\r\n        tree[x].insert({y,wt});\r\n        tree[y].insert({x,wt});\r\n    }\r\n}\r\n\r\nvoid dfs(int n, vector<set<pair<int,int>>> &tree, vector<int> &lvl, int x){\r\n    lvl[n]=x;\r\n    for(auto child:tree[n]){\r\n        if(lvl[child.first]==-1){\r\n            dfs(child.first, tree, lvl, x+1);\r\n            par[child.first][0]=n;\r\n            int k=child.first;\r\n            mx_edge[k][0]=child.second;\r\n            for(int j=1; j<31; j++){\r\n                if(par[k][j-1]!=-1) par[k][j]=par[par[k][j-1]][j-1];\r\n                if(par[k][j]!=-1)mx_edge[k][j]=max(mx_edge[k][j-1], mx_edge[par[k][j-1]][j-1]);\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\nint calLca(int a, int b, vector<int>&lvl){\r\n    if(lvl[a]>lvl[b]) swap(a,b);\r\n    int diff=lvl[b]-lvl[a];\r\n    int mx=0;\r\n    for(int j=30; j>=0; j--){\r\n        int sft=(1<<j);\r\n        if(diff>=sft){\r\n            diff-=sft;\r\n            mx=max(mx, mx_edge[b][j]);\r\n            b=par[b][j];\r\n        }\r\n    }\r\n\r\n    if(a==b) return mx;\r\n    for(int j=30; j>=0; j--){\r\n        if(par[a][j]==par[b][j]) continue;\r\n        int k=max(mx_edge[a][j], mx_edge[b][j]);\r\n        a=par[a][j];\r\n        b=par[b][j];\r\n        mx=max(mx,k);\r\n    }\r\n\r\n    int k=max(mx_edge[a][0], mx_edge[b][0]);\r\n    mx=max(mx,k);\r\n    return mx;\r\n}\r\n\r\nvoid solve(){\r\n    \r\n    int n,m, ans=0;\r\n    cin>>n>>m;\r\n    memset(par, -1, sizeof(par));\r\n    memset(mx_edge, 0, sizeof(mx_edge));\r\n\r\n    vector<vector<int>> edges(m, vector<int>(3));\r\n    vector<set<pair<int,int>>> tree(n);\r\n    vector<int> lvl(n,-1);\r\n    for(int j=0; j<m; j++){\r\n        cin>>edges[j][0]>>edges[j][1]>>edges[j][2];\r\n    }\r\n\r\n    kruskal(edges, tree);\r\n    dfs(0, tree, lvl, 0);\r\n\r\n    for(auto x:edges){\r\n        int a=x[0]-1, b=x[1]-1;\r\n        if(tree[a].find({b,x[2]})!=tree[a].end()) continue;\r\n        int req=calLca(a, b, lvl);\r\n        if(x[2]==req) ans++;\r\n    }\r\n\r\n    cout<<ans;\r\n}\r\n\r\nint32_t main()\r\n{\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n    int t=1;\r\n    // cin >> t;\r\n    //t = 1;\r\n    while (t-- > 0)\r\n    {\r\n        solve();\r\n    }\r\n    return 0;\r\n}"
+}

@@ -1,0 +1,39 @@
+{
+    "id": 228445416,
+    "contestId": 593,
+    "creationTimeSeconds": 1697473233,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 593,
+        "index": "D",
+        "name": "Happy Tree Party",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 593,
+        "members": [
+            {
+                "handle": "FedeNQ"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1446655500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 997,
+    "memoryConsumedBytes": 90624000,
+    "source": "#include <bits/stdc++.h>\r\n#define forr(i,a,b) for(int i=(a);i<(b);i++)\r\n#define forn(i,n) forr(i,0,n)\r\n#define dforn(i,n) for(int i=n-1;i>=0;i--)\r\n#define forall(it,v) for(auto it=v.begin();it!=v.end();it++)\r\n#define sz(c) ((int)c.size())\r\n#define rsz resize\r\n#define pb push_back\r\n#define mp make_pair\r\n#define lb lower_bound\r\n#define ub upper_bound\r\n#define fst first\r\n#define snd second\r\n\r\n#ifdef ANARAP\r\n//prueba\r\n#else\r\n//real\r\n#endif\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef pair<int,int> ii;\r\ntypedef pair<ii,ll> ed;\r\n\r\ntypedef ll tipo;\r\nconst ll INF = 1000000000000000007;\r\nvector<ed> edges;\r\n\r\nconst tipo neutro = 1;\r\ntipo oper(const tipo& a, const tipo& b) { \r\n    if(a > INF/b) return INF;\r\n    ll aux = a*b;\r\n    if(aux<a || aux < b) return INF;\r\n    return aux;\r\n    \r\n}\r\nstruct ST {\r\n\tint sz;\r\n\tvector<tipo> t;\r\n\tST(int n) {\r\n\t\tsz = 1 << (32 - __builtin_clz(n));\r\n\t\tt = vector<tipo>(2*sz, neutro);\r\n\t}\r\n\ttipo &operator[](int p) { return t[sz+p]; }\r\n\tvoid updall() { dforn(i, sz) t[i] = oper(t[2*i], t[2*i+1]); }\r\n\ttipo get(int i, int j) { return get(i, j, 1, 0, sz); }\r\n\ttipo get(int i, int j, int n, int a, int b) { //O(log n), [i, j)\r\n\t\tif(j <= a || b <= i) return neutro;\r\n\t\tif(i <= a && b <= j) return t[n]; // n = node of range [a,b)\r\n\t\tint c = (a+b)/2;\r\n\t\treturn oper(get(i, j, 2*n, a, c), get(i, j, 2*n+1, c, b));\r\n\t}\r\n\tvoid set(int p, tipo val) { //O(log n)\r\n\t\tp += sz;\r\n\t\twhile(p>0 && t[p] != val) {\r\n\t\t\tt[p] = val;\r\n\t\t\tp /= 2;\r\n\t\t\tval = oper(t[p*2], t[p*2+1]);\r\n\t\t}\r\n\t}\r\n}; //Use: definir oper tipo neutro,\r\n//cin >> n; ST st(n); forn(i, n) cin >> st[i]; st.updall();\r\n\r\n// Usage: 1. HLD(# nodes) 2. add tree edges 3. build() 4. use it\r\nstruct HLD {\r\n\tvector<int> w, p, dep; // weight,father,depth\r\n\tvector<vector<int>> g;\r\n\tHLD(int n) : w(n), p(n), dep(n), g(n), pos(n), head(n) {}\r\n\tvoid addEdge(int a, int b) { g[a].pb(b); g[b].pb(a); }\r\n\tvoid build() { p[0]=-1; dep[0]=0; dfs1(0); curpos=0; hld(0,-1); }\r\n\tvoid dfs1(int x) {\r\n\t\tw[x] = 1;\r\n\t\tfor(int y : g[x]) if(y != p[x]) {\r\n\t\t\tp[y] = x; dep[y] = dep[x]+1; dfs1(y);\r\n\t\t\tw[x] += w[y];\r\n\t\t}\r\n\t}\r\n\tint curpos;\r\n\tvector<int> pos, head;\r\n\tvoid hld(int x, int c) {\r\n\t\tif(c < 0) c = x;\r\n\t\tpos[x] = curpos++; head[x] = c;\r\n\t\tint mx = -1;\r\n\t\tfor(int y : g[x]) if(y != p[x] && (mx < 0 || w[mx] < w[y])) mx = y;\r\n\t\tif(mx >= 0) hld(mx, c);\r\n\t\tfor(int y : g[x]) if(y != mx && y != p[x]) hld(y, -1);\r\n\t}\r\n\t// Here ST is segtree static/dynamic/lazy according to problem\r\n\ttipo query(int x, int y, ST &st) { // ST tipo\r\n\t\ttipo r = neutro;\r\n\t\twhile(head[x] != head[y]) {\r\n\t\t\tif(dep[head[x]] > dep[head[y]]) swap(x,y);\r\n\t\t\tr = oper(r, st.get(pos[head[y]], pos[y]+1)); // ST oper\r\n\t\t\ty = p[head[y]];\r\n\t\t}\r\n\t\tif(dep[x] > dep[y]) swap(x,y); // now x is lca\r\n\t\tr = oper(r, st.get(pos[x]+1, pos[y]+1)); // ST oper\r\n\t\treturn r;\r\n\t}\r\n};\r\n// for point updates: st.set(pos[x], v) (x = node, v = new value)\r\n// for lazy range updates: something similar to the query method\r\n// for queries on edges: - assign values of edges to \"child\" node\r\n//                       - change pos[x] to pos[x]+1 in query (line 34)\r\n\r\nconst int MAXN = 200005;\r\nvector<int> g[MAXN];\r\nint tt[MAXN];\r\n\r\nvoid bfs(){\r\n    tt[0] = 0;\r\n    queue<int> q;\r\n    q.push(0);\r\n    while(!q.empty()){\r\n        int aux = q.front();\r\n        q.pop();\r\n        forall(it,g[aux]){\r\n            if(tt[*it] == -1){\r\n                tt[*it] = tt[aux]+1;\r\n                q.push(*it);\r\n            }\r\n        }\r\n    }\r\n    return;\r\n}\r\n\r\nint main()\r\n{\r\n\t#ifdef ANARAP\r\n\t\tfreopen(\"input.in\", \"r\", stdin);\r\n\t\t//freopen(\"output.out\", \"w\", stdout);\r\n\t\tunsigned t0, t1; t0=clock();\r\n\t#endif\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(NULL);\r\n\tcout.tie(NULL);\r\n\t\r\n    int n,q; cin >> n >> q;\r\n    \r\n    HLD hld(n);\r\n    forn(i,n-1){\r\n        int a,b; ll w; cin >> a >> b >> w;\r\n        a--; b--;\r\n        edges.pb(mp(mp(a,b),w));\r\n        g[a].pb(b);\r\n        g[b].pb(a);\r\n        hld.addEdge(a,b);\r\n    }\r\n    hld.build();\r\n    memset(tt,-1,sizeof(tt));\r\n    ST st(n);\r\n    bfs();\r\n    forn(i,n-1){\r\n        if(tt[edges[i].fst.fst] > tt[edges[i].fst.snd]){\r\n            swap(edges[i].fst.fst, edges[i].fst.snd);\r\n        }\r\n        st.set(hld.pos[edges[i].fst.snd], edges[i].snd);\r\n    }\r\n    //cout << st.get(0,n) << endl;\r\n    forn(i,q){\r\n        int t; cin >> t;\r\n        if(t==1){\r\n            int a,b; ll w; cin >> a >> b >> w;\r\n            a--; b--;\r\n            cout << w/hld.query(a,b,st) << endl;\r\n        }\r\n        else{\r\n            int a; cin >> a; a--;\r\n            ll w; cin >> w;\r\n            st.set(hld.pos[edges[a].fst.snd],w);\r\n        }\r\n    }\r\n\t\r\n\t#ifdef ANARAP\r\n\tt1 = clock();double time = (double(t1-t0)/CLOCKS_PER_SEC); cout << \"Execution Time: \" << time << endl;\r\n\t#endif\r\n\treturn 0;\r\n}"
+}

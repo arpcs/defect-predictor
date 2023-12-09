@@ -1,0 +1,38 @@
+{
+    "id": 221777050,
+    "contestId": 1719,
+    "creationTimeSeconds": 1693808010,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1719,
+        "index": "C",
+        "name": "Fighting Tournament",
+        "type": "PROGRAMMING",
+        "points": 1250.0,
+        "rating": 1400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "implementation",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1719,
+        "members": [
+            {
+                "handle": "wang.senyuan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1660660500
+    },
+    "programmingLanguage": "Go",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 23,
+    "timeConsumedMillis": 61,
+    "memoryConsumedBytes": 12185600,
+    "source": "package main\n\nimport (\n\t\"bufio\"\n\t\"bytes\"\n\t\"fmt\"\n\t\"os\"\n)\n\nfunc main() {\n\treader := bufio.NewReader(os.Stdin)\n\n\tvar buf bytes.Buffer\n\n\tt := readNum(reader)\n\n\tfor t > 0 {\n\t\tt--\n\t\tn, m := readTwoNums(reader)\n\t\tA := readNNums(reader, n)\n\t\tQ := make([][]int, m)\n\t\tfor i := 0; i < m; i++ {\n\t\t\tQ[i] = readNNums(reader, 2)\n\t\t}\n\t\tres := solve(A, Q)\n\t\tfor _, x := range res {\n\t\t\tbuf.WriteString(fmt.Sprintf(\"%d\\n\", x))\n\t\t}\n\t}\n\n\tfmt.Print(buf.String())\n}\n\nfunc readString(reader *bufio.Reader) string {\n\ts, _ := reader.ReadString('\\n')\n\tfor i := 0; i < len(s); i++ {\n\t\tif s[i] == '\\n' || s[i] == '\\r' {\n\t\t\treturn s[:i]\n\t\t}\n\t}\n\treturn s\n}\n\nfunc normalize(s string) string {\n\n\tfor i := len(s); i > 0; i-- {\n\t\tif s[i-1] >= 'a' && s[i-1] <= 'z' {\n\t\t\treturn s[:i]\n\t\t}\n\t}\n\treturn \"\"\n}\n\nfunc readInt(bytes []byte, from int, val *int) int {\n\ti := from\n\tsign := 1\n\tif bytes[i] == '-' {\n\t\tsign = -1\n\t\ti++\n\t}\n\ttmp := 0\n\tfor i < len(bytes) && bytes[i] >= '0' && bytes[i] <= '9' {\n\t\ttmp = tmp*10 + int(bytes[i]-'0')\n\t\ti++\n\t}\n\t*val = tmp * sign\n\treturn i\n}\n\nfunc readNum(reader *bufio.Reader) (a int) {\n\tbs, _ := reader.ReadBytes('\\n')\n\treadInt(bs, 0, &a)\n\treturn\n}\n\nfunc readTwoNums(reader *bufio.Reader) (a int, b int) {\n\tres := readNNums(reader, 2)\n\ta, b = res[0], res[1]\n\treturn\n}\n\nfunc readThreeNums(reader *bufio.Reader) (a int, b int, c int) {\n\tres := readNNums(reader, 3)\n\ta, b, c = res[0], res[1], res[2]\n\treturn\n}\n\nfunc readNNums(reader *bufio.Reader, n int) []int {\n\tres := make([]int, n)\n\tx := 0\n\tbs, _ := reader.ReadBytes('\\n')\n\tfor i := 0; i < n; i++ {\n\t\tfor x < len(bs) && (bs[x] < '0' || bs[x] > '9') && bs[x] != '-' {\n\t\t\tx++\n\t\t}\n\t\tx = readInt(bs, x, &res[i])\n\t}\n\treturn res\n}\n\nfunc solve(A []int, Q [][]int) []int {\n\t// \u5148\u4e0d\u8003\u8651\u9650\u5236\n\t// 1\u53f7\u80fd\u591f\u80dc\u5229\uff0c\u76f4\u5230\u5b83\u9047\u5230\u4e0b\u4e00\u4e2a\u6bd4a[1]\u5927\u7684\u6570\u5b57\n\t// \u53ea\u9700\u8981\u8003\u8651\u7b2c\u4e00\u5708\uff0c\u76f4\u5230\u9047\u5230n\uff0c\u5269\u4f59\u7684\u5c31\u540e\u9762\u80dc\u5229\u7684\u53ea\u4f1a\u662fn\u4e86\n\tn := len(A)\n\tpos := make([]int, n+1)\n\tfor i, a := range A {\n\t\tpos[a-1] = i\n\t}\n\n\tm := pos[n-1]\n\twiner := make([]int, m+1)\n\twiner[0] = 0\n\tL := make([]int, n)\n\tR := make([]int, n)\n\tfor i := 0; i < n; i++ {\n\t\tL[i] = -1\n\t\tR[i] = -1\n\t}\n\tfor i := 1; i < m; i++ {\n\t\tif A[winer[i-1]] < A[i] {\n\t\t\twiner[i] = i\n\t\t} else {\n\t\t\twiner[i] = winer[i-1]\n\t\t}\n\t\tif L[winer[i]] < 0 {\n\t\t\tL[winer[i]] = i\n\t\t}\n\t\tR[winer[i]] = i\n\t}\n\n\tans := make([]int, len(Q))\n\n\tfor j, cur := range Q {\n\t\ti, k := cur[0], cur[1]\n\t\ti--\n\t\tif i > m {\n\t\t\t//\u5b83\u5728n\u7684\u540e\u9762, will never win\n\t\t\tans[j] = 0\n\t\t\tcontinue\n\t\t}\n\t\tif i == m {\n\t\t\t// i = n - 1\n\t\t\tif k < m {\n\t\t\t\tans[j] = 0\n\t\t\t} else {\n\t\t\t\tif m == 0 {\n\t\t\t\t\tans[j] = k\n\t\t\t\t} else {\n\t\t\t\t\t// \u5047\u8bbem=2\uff0c\u90a3\u4e48\u9700\u89812\u6b21round\u540e\uff0c\u624d\u80fd\u5230\u8fben\uff0c\u5728\u7b2c\u4e8c\u6b21\u65f6\uff0cn\u5c06\u83b7\u80dc (+1), \u4e14\u5728\u5269\u4e0b\u7684 k - m \u6b21\u540e\u4e00\u76f4\u83b7\u80dc\n\t\t\t\t\tans[j] = k - m + 1\n\t\t\t\t}\n\t\t\t}\n\t\t\tcontinue\n\t\t}\n\t\t// not quite correct\n\t\t// pos[i] < m\n\t\tif L[i] < 0 || k < L[i] {\n\t\t\t// no win at all\n\t\t\tans[j] = 0\n\t\t\tcontinue\n\t\t}\n\t\tans[j] = min(k, R[i]) - L[i] + 1\n\t}\n\n\treturn ans\n}\n\nfunc min(a, b int) int {\n\tif a <= b {\n\t\treturn a\n\t}\n\treturn b\n}\n"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 187696187,
+    "contestId": 51,
+    "creationTimeSeconds": 1672736225,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 51,
+        "index": "E",
+        "name": "Pentagon",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2400,
+        "tags": [
+            "combinatorics",
+            "graphs",
+            "matrices"
+        ]
+    },
+    "author": {
+        "contestId": 51,
+        "members": [
+            {
+                "handle": "bkifhr9"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1293552000
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 27,
+    "timeConsumedMillis": 60,
+    "memoryConsumedBytes": 47513600,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\n#pragma GCC target(\"popcnt\")\n\n#define dbg(a) cerr<<__LINE__<<\": \"<<#a<<\" = \"<<a<<'\\n'\n\nusing ll = long long;\n\nconst int N = 701, IDX = 63, K = 12;\n\nvector<array<int, 2>> ed;\nvector<int> adj[N];\nll mask[N][N][K];\n\nint n, m;\n\nvoid add (int u, int v, int w) {\n  mask[u][v][w / IDX] |= (1ll << (w % IDX));\n}\n\nvoid remove (int u, int v, int w) {\n  mask[u][v][w / IDX] ^= (1ll << (w % IDX));\n}\n\nint one (ll x) {\n  return __builtin_popcountll(x);\n}\n\nbool ok (int u, int v, int w) {\n  return mask[u][v][w / IDX] & (1ll << (w % IDX));\n}\n\nvoid solve() {\n  cin >> n >> m;\n  ed.resize(m);\n  for (auto &[u, v]: ed) {\n    cin >> u >> v;  u--, v--;\n    adj[u].push_back(v);\n    adj[v].push_back(u);\n  }\n\n  for (auto [u, v]: ed) {\n    for (auto w: adj[v]) {\n      if (w != u) {\n        add(u, w, v);\n        add(w, u, v);\n      }\n    }\n    for (auto w: adj[u]) {\n      if (w != v) {\n        add(v, w, u);\n        add(w, v, u);\n      }\n    }\n  }\n\n  ll ans = 0;\n  for (auto [u, v]: ed) {\n    ll now = 0;\n    for (int w = 0; w < n; ++w) {\n      if (w == u or w == v)  continue;\n      int f = ok(u, w, v);\n      int f2 = ok(v, w, u);\n      if (f) {\n        remove(u, w, v);\n        remove(w, u, v);\n      }\n      if (f2) {\n        remove(v, w, u);\n        remove(w, v, u);\n      }\n      for (int k = 0; k < K; ++k) {\n        int x = one(mask[u][w][k]);\n        int y = one(mask[v][w][k]);\n        int z = one(mask[u][w][k] & mask[v][w][k]);\n        int cur = x * y - z;\n        now += cur;\n      }\n      if (f) {\n        add(u, w, v);\n        add(w, u, v);\n      }\n      if (f2) {\n        add(v, w, u);\n        add(w, v, u);\n      }\n    }\n    ans += now;\n  }\n\n  cout << ans / 5 << \"\\n\";\n\n}\n\nint main(){\n  ios::sync_with_stdio(0), cin.tie(0);\n\n  int tc = 1;\n  for (int t = 1; t <= tc; ++t) {\n    solve();\n  }\n}\n\n    \t   \t  \t   \t\t\t\t     \t\t \t \t"
+}

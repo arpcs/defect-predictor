@@ -1,0 +1,35 @@
+{
+    "id": 225894799,
+    "contestId": 1033,
+    "creationTimeSeconds": 1696071910,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1033,
+        "index": "G",
+        "name": "Chip Game",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "games"
+        ]
+    },
+    "author": {
+        "contestId": 1033,
+        "members": [
+            {
+                "handle": "Max_s_xaM"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1538931900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 2150400,
+    "source": "// LUOGU_RID: 126735870\n#include <iostream>\r\n#include <algorithm>\r\n\r\ntypedef long long ll;\r\ntypedef double lf;\r\n\r\n// #define DEBUG 1\r\nstruct IO\r\n{\r\n    #define MAXSIZE (1 << 20)\r\n    #define isdigit(x) (x >= '0' && x <= '9')\r\n    char buf[MAXSIZE], *p1, *p2;\r\n    char pbuf[MAXSIZE], *pp;\r\n    #if DEBUG\r\n    #else\r\n    IO() : p1(buf), p2(buf), pp(pbuf) {}\r\n    ~IO() {fwrite(pbuf, 1, pp - pbuf, stdout);}\r\n    #endif\r\n    #define gc() (p1 == p2 && (p2 = (p1 = buf) + fread(buf, 1, MAXSIZE, stdin), p1 == p2) ? ' ' : *p1++)\r\n    #define blank(x) (x == ' ' || x == '\\n' || x == '\\r' || x == '\\t')\r\n\r\n    template <typename T>\r\n    void Read(T &x)\r\n    {\r\n        #if DEBUG\r\n        std::cin >> x;\r\n        #else\r\n        bool sign = 0; char ch = gc(); x = 0;\r\n        for (; !isdigit(ch); ch = gc())\r\n            if (ch == '-') sign = 1;\r\n        for (; isdigit(ch); ch = gc()) x = x * 10 + (ch ^ 48);\r\n        if (sign) x = -x;\r\n        #endif\r\n    }\r\n    void Read(char *s)\r\n    {\r\n        char ch = gc();\r\n        for (; blank(ch); ch = gc());\r\n        for (; !blank(ch); ch = gc()) *s++ = ch;\r\n        *s = 0;\r\n    }\r\n    void Read(char &c) {for (c = gc(); blank(c); c = gc());}\r\n\r\n    void Push(const char &c)\r\n    {\r\n        #if DEBUG\r\n        putchar(c);\r\n        #else\r\n        if (pp - pbuf == MAXSIZE) fwrite(pbuf, 1, MAXSIZE, stdout), pp = pbuf;\r\n        *pp++ = c;\r\n        #endif\r\n    }\r\n    template <typename T>\r\n    void Write(T x)\r\n    {\r\n        if (x < 0) x = -x, Push('-');\r\n        static T sta[35];\r\n        int top = 0;\r\n        do sta[top++] = x % 10, x /= 10; while (x);\r\n        while (top) Push(sta[--top] ^ 48);\r\n    }\r\n    template <typename T>\r\n    void Write(T x, char lst) {Write(x), Push(lst);}\r\n} IO;\r\n#define Read(x) IO.Read(x)\r\n#define Write(x, y) IO.Write(x, y)\r\n#define Put(x) IO.Push(x)\r\n\r\nusing namespace std;\r\n\r\nconst int MAXN = 110, MAXM = 1e5 + 10;\r\n\r\nint n, m;\r\nll w[MAXN], ans[4];\r\n\r\nstruct Data\r\n{\r\n    int x, y, tp;\r\n    bool operator < (const Data u) const {return x < u.x;}\r\n}b[MAXN << 2];\r\nint tot, c[3];\r\n\r\nint main()\r\n{\r\n    #if DEBUG\r\n    #else\r\n    ios::sync_with_stdio(0), cin.tie(0);\r\n    #endif\r\n    Read(n), Read(m);\r\n    for (int i = 1; i <= n; i++) Read(w[i]);\r\n    for (int s = 2; s <= 2 * m; s++)\r\n    {\r\n        int L = max(1, s - m), R = min(m, min(s - 1, s / 2));\r\n        tot = c[0] = c[1] = c[2] = 0;\r\n        // cout << \"Sum: \" << s << \"\\n\";\r\n        // cout << \"Range: \" << L << \" \" << R << \"\\n\";\r\n        for (int i = 1, x; i <= n; i++)\r\n        {\r\n            x = w[i] % s;\r\n            // cout << x << \" \";\r\n            int cur = min(x, s - x - 1);\r\n            // cout << cur << \" \";\r\n            if (cur >= L)\r\n            {\r\n                c[0]++;\r\n                if (cur < R) b[++tot] = Data{cur + 1, -1, 0};\r\n            }\r\n            cur = max((s + 3) / 3, max(s - x, (x + 2) / 2));\r\n            // cout << cur << \" \";\r\n            if (cur >= L && cur <= R) b[++tot] = Data{cur, 1, 1};\r\n            int l = max(L, s - x); cur = min(R, min((s - 1) / 2, x / 2));\r\n            // cout << l << \" \" << cur << \"\\n\";\r\n            if (l <= cur)\r\n            {\r\n                b[++tot] = Data{l, 1, 2};\r\n                if (cur < R) b[++tot] = Data{cur + 1, -1, 2};\r\n            }\r\n        }\r\n        b[++tot] = Data{R + 1, 0, 0}, b[++tot] = Data{L, 0, 0};\r\n        if (2 * R == s) b[++tot] = Data{R, 0, 0};\r\n        sort(b + 1, b + tot + 1);\r\n        for (int i = 1; i < tot; i++)\r\n        {\r\n            c[b[i].tp] += b[i].y;\r\n            int len = b[i + 1].x - b[i].x, sum = c[0] + c[1] + c[2];\r\n            if (b[i].x == R && 2 * R == s)\r\n            {\r\n                if (sum & 1) ans[2] += len;//, cout << \"First \" << b[i].x << \" \" << b[i + 1].x - 1 << \" \" << len << \"\\n\";\r\n                else ans[3] += len; \r\n            }\r\n            else\r\n            {\r\n                if (c[0] || c[2] >= 2 || (c[2] == 1 && !(sum & 1))) ans[0] += len, ans[1] += len;\r\n                else if (sum & 1) ans[2] += len * 2;//, cout << \"First \" << b[i].x << \" \" << b[i + 1].x - 1 << \" \" << 2 * len << \"\\n\";\r\n                else ans[3] += len * 2; \r\n            }\r\n        }\r\n    }\r\n    Write(ans[0], ' '), Write(ans[1], ' '), Write(ans[2], ' '), Write(ans[3], '\\n');\r\n    return 0;\r\n}"
+}

@@ -1,0 +1,35 @@
+{
+    "id": 231467038,
+    "contestId": 1108,
+    "creationTimeSeconds": 1699190606,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1108,
+        "index": "E2",
+        "name": "Array and Segments (Hard version)",
+        "type": "PROGRAMMING",
+        "rating": 2100,
+        "tags": [
+            "data structures",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1108,
+        "members": [
+            {
+                "handle": "xiaoping3418"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1548254100
+    },
+    "programmingLanguage": "MS C++ 2017",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "\ufeff#include <iostream>\r\n#include <algorithm>\r\n#include <vector>\r\n#include <numeric>\r\n#include <unordered_map>\r\n#include <unordered_set>\r\n#include <set>\r\n#include <map>\r\n#include <stack>\r\n#include <queue>\r\n\r\n#include <iomanip>\r\n// for std::cout << std::setprecision(9);\r\nusing namespace std;\r\n\r\nvoid solve();\r\nint32_t main() {\r\n    ios_base::sync_with_stdio(0); std::cin.tie(0); std::cout.tie(0);\r\n\r\n    //int32_t t;\r\n    //cin >> t;\r\n\r\n    //while (t--) {\r\n    solve();\r\n    //}\r\n\r\n    return 0;\r\n}\r\n\r\n\r\nvoid solve() {\r\n    int n, m;\r\n    cin >> n >> m;\r\n\r\n    vector<int> tree(4 * n, 0), lazy(4 * n, 0);\r\n\r\n    auto add = [&](auto self, int u, int left, int right, int l, int r, int val) -> void {\r\n        if (left >= l && right <= r) {\r\n            lazy[u] += val;\r\n\r\n            if (lazy[u] != 0) {\r\n                tree[u] += lazy[u];\r\n\r\n                if (left < right) {\r\n                    lazy[2 * u] += lazy[u];\r\n                    lazy[2 * u + 1] += lazy[u];\r\n                }\r\n\r\n                lazy[u] = 0;\r\n            }\r\n\r\n            return;\r\n        }\r\n\r\n        if (left > r or right < l) return;\r\n\r\n        int mid = left + (right - left) / 2;\r\n\r\n        if (lazy[u] != 0) {\r\n            lazy[2 * u] += lazy[u];\r\n            lazy[2 * u + 1] += lazy[u];\r\n\r\n            lazy[u] = 0;\r\n        }\r\n\r\n        self(self, 2 * u, left, mid, l, r, val);\r\n        self(self, 2 * u + 1, mid + 1, right, l, r, val);\r\n\r\n        tree[u] = max(tree[2 * u], tree[2 * u + 1]);\r\n    };\r\n\r\n    auto get = [&](auto self, int u, int left, int right, int l, int r) -> int {\r\n        if (left >= l && right <= r) {\r\n            if (lazy[u] != 0) {\r\n                tree[u] += lazy[u];\r\n\r\n                if (left < right) {\r\n                    lazy[2 * u] += lazy[u];\r\n                    tree[2 * u] += lazy[u];\r\n                }\r\n                \r\n                if (left < right) {\r\n                    lazy[2 * u + 1] += lazy[u];\r\n                    tree[2 * u + 1] += lazy[u];\r\n                }\r\n\r\n                lazy[u] = 0;\r\n            }\r\n            return tree[u];\r\n        }\r\n\r\n        if (left > r || right < l) return INT_MIN;\r\n\r\n        int mid = left + (right - left) / 2;\r\n\r\n        if (lazy[u] != 0) {\r\n            tree[u] += lazy[u];\r\n\r\n            lazy[2 * u] += lazy[u];\r\n            tree[2 * u] += lazy[u];\r\n            lazy[2 * u + 1] += lazy[u];\r\n            lazy[2 * u + 1] += lazy[u];\r\n            \r\n            lazy[u] = 0;\r\n        }\r\n\r\n        int ret1 = self(self, 2 * u, left, mid, l, r);\r\n        int ret2 = self(self, 2 * u + 1, mid + 1, right, l, r);\r\n\r\n        tree[u] = max(tree[2 * u], tree[2 * u + 1]);\r\n\r\n        return max(ret1, ret2);\r\n    };\r\n\r\n    vector<int> a(n);\r\n    vector<pair<int, int>> b(m);\r\n    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> avail, curr, backup;\r\n\r\n    for (auto& t : a) cin >> t;\r\n\r\n    for (int i = 0; i < m; ++i) {\r\n        cin >> b[i].first >> b[i].second;\r\n\r\n        b[i].first -= 1;\r\n        b[i].second -= 1;\r\n\r\n        avail.push({ b[i].first, i });\r\n    }\r\n\r\n    int ret = 0;\r\n\r\n    for (int i = 0; i < n; ++i) {\r\n        add(add, 1, 0, n - 1, i, i, a[i]);\r\n    }\r\n\r\n    for (int i = 0; i < n; ++i) {\r\n        while (avail.empty() == false && avail.top().first == i) {\r\n            int j = avail.top().second;\r\n            avail.pop();\r\n\r\n            curr.push({ b[j].second, j });\r\n            add(add, 1, 0, n - 1, b[j].first, b[j].second, -1);\r\n        }\r\n\r\n        while (curr.empty() == false && curr.top().first < i) {\r\n            int j = curr.top().second;\r\n            curr.pop();\r\n\r\n            add(add, 1, 0, n - 1, b[j].first, b[j].second, 1);\r\n        }\r\n\r\n        int t = get(get, 1, 0, n - 1, 0, n - 1) - get(get, 1, 0, n - 1, i, i);\r\n\r\n        if (ret >= t) continue;\r\n        ret = t;\r\n        backup = curr;\r\n    }\r\n\r\n    cout << ret << endl << backup.size() << endl;\r\n    while (backup.empty() == false) {\r\n        cout << backup.top().second + 1 << \" \";\r\n        backup.pop();\r\n    }\r\n}"
+}

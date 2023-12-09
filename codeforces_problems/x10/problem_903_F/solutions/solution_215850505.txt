@@ -1,0 +1,35 @@
+{
+    "id": 215850505,
+    "contestId": 903,
+    "creationTimeSeconds": 1690451844,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 903,
+        "index": "F",
+        "name": "Clear The Matrix",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "bitmasks",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 903,
+        "members": [
+            {
+                "handle": "confused_boi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1513091100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 15,
+    "timeConsumedMillis": 171,
+    "memoryConsumedBytes": 262656000,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\nconst int INF = 0x3f3f3f3f;\nconst int MAX_COLUMNS = 1000;\nconst int MASK_SIZE = (1 << 16) - 1;\n\nint n, tileCosts[5];\nint dp[MAX_COLUMNS][MASK_SIZE + 5], rowMasks[MAX_COLUMNS];\nchar matrix[4][MAX_COLUMNS];\nvector<int> submatrixMasks[5];\n\n// Function to get the mask for a submatrix of size x \u00d7 x\nint getSubmatrixMask(int startingColumn, int size) {\n    int mask = 0;\n    for (int i = 0; i < size; i++) {\n        for (int j = 0; j < size; j++) {\n            mask |= 1 << (4 * j + startingColumn + i);\n        }\n    }\n    return mask;\n}\n\n// Function to get the mask for a row in the matrix\nint getRowMask(int column) {\n    int mask = 0;\n    for (int row = 0; row < 4; row++) {\n        if (matrix[row][column] == '*') {\n            mask |= 1 << row;\n        }   \n    }\n    return mask;\n}\n\n// Function to initialize masks for different submatrix sizes\nvoid initSubmatrixMasks() {\n    for (int size = 1; size <= 4; size++) {\n        for (int startingColumn = 0; startingColumn + size <= 4; startingColumn++) {\n            submatrixMasks[size].push_back(MASK_SIZE ^ getSubmatrixMask(startingColumn, size));\n        }\n    }\n    for (int column = 0; column < n; column++) {\n        rowMasks[column] = getRowMask(column);\n    }\n}\n\nint main() {\n    // Input\n    cin >> n;\n    for (int i = 1; i <= 4; i++) {\n        cin >> tileCosts[i];\n    }\n    for (int i = 0; i < 4; i++) {\n        cin >> matrix[i];\n    }\n\n    // Precompute valid masks for submatrix sizes and row masks\n    initSubmatrixMasks();\n\n    // Initialize dp array\n    memset(dp, INF, sizeof(dp));\n\n    // Calculate the initial mask for the first 4 columns\n    int initialMask = 0;\n    for (int i = 0; i < min(4, n); i++) {\n        initialMask |= rowMasks[i] << (i * 4);\n    }\n    dp[0][initialMask] = 0;\n\n    // Dynamic programming loop\n    for (int column = 0; column < n; column++) {\n        for (int currentMask = MASK_SIZE; currentMask >= 0; currentMask--) {\n            if (dp[column][currentMask] == INF) continue;\n\n            // Transition for moving to the next row (extra empty column)\n            if ((currentMask & 15) == 0) {\n                int nextMask = currentMask >> 4 | (rowMasks[column + 4] << 12);\n                dp[column + 1][nextMask] = min(dp[column + 1][nextMask], dp[column][currentMask]);\n            }\n\n            // Transitions for submatrices 1x1, 2x2, and 3x3\n            for (int size = 1; size <= 4 && column + size <= n; size++) {\n                for (auto submatrixMask : submatrixMasks[size]) {\n                    dp[column][currentMask & submatrixMask] = min(dp[column][currentMask & submatrixMask], dp[column][currentMask] + tileCosts[size]);\n                }\n            }\n        }\n    }\n\n    // Output the result\n    cout << dp[n][0] << \"\\n\";\n\n    return 0;\n}\n"
+}

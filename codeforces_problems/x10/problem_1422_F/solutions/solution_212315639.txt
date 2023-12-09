@@ -1,0 +1,37 @@
+{
+    "id": 212315639,
+    "contestId": 1422,
+    "creationTimeSeconds": 1688624989,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1422,
+        "index": "F",
+        "name": "Boring Queries",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1422,
+        "members": [
+            {
+                "handle": "wsday"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601827500
+    },
+    "programmingLanguage": "Clang++17 Diagnostics",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 50,
+    "timeConsumedMillis": 1996,
+    "memoryConsumedBytes": 495820800,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\nconst int V = 2e5;\r\nconst int N = 1e5+5;\r\nconst int mod = 1e9+7;\r\nint v[V+5],pr[V],tot,inv[V+5];\r\nint a[N],n,m;\r\nint nxt[8*N],id[8*N],head[V],val[8*N],rt[N];\r\nint tr[N*400],son[N*400][2],cnt;\r\nll qpow(ll x,int y)\r\n{\r\n    ll res = 1;\r\n    for(;y;y>>=1,x=x*x%mod) if(y&1) res = res*x%mod;\r\n    return res;\r\n}\r\nint upd(int fc,int l,int r,int x,int y)\r\n{\r\n    //cout<<\"UPD\"<<l<<\" \"<<r<<\" \"<<x<<\" \"<<\"\\n\";\r\n    int mid = (l+r>>1),c = ++cnt;\r\n    tr[c] = 1ll*tr[fc]*y%mod;\r\n    if(l == r) return c;\r\n    if(x > mid) son[c][1] = upd(son[fc][1],mid+1,r,x,y),son[c][0] = son[fc][0];\r\n    else son[c][0] = upd(son[fc][0],l,mid,x,y),son[c][1] = son[fc][1];\r\n    return c;\r\n}\r\nint qry(int c,int l,int r,int ql,int qr)\r\n{\r\n    if(l == ql && r == qr) return tr[c];\r\n    int mid = (l+r>>1);\r\n    if(ql > mid) return qry(son[c][1],mid+1,r,ql,qr);\r\n    else if(qr <= mid) return qry(son[c][0],l,mid,ql,qr);\r\n    else return 1ll*qry(son[c][0],l,mid,ql,mid)*qry(son[c][1],mid+1,r,mid+1,qr)%mod;\r\n}\r\nint main()\r\n{\r\n    tr[0] = 1;\r\n    inv[1] = 1;\r\n    for(int i = 2;i <= V;i++)\r\n    {\r\n        inv[i] = mod - 1ll*mod/i*inv[mod%i]%mod;\r\n        if(!v[i])\r\n            v[i] = pr[++tot] = i;\r\n        for(int j = 1;j <= tot && pr[j] <= v[i] && pr[j]*i <= V;j++)\r\n            v[pr[j]*i] = pr[j];\r\n    }\r\n    scanf(\"%d\",&n);\r\n    for(int i = 1;i <= n;i++)\r\n    {\r\n        rt[i] = rt[i-1];\r\n        scanf(\"%d\",a+i);\r\n        int t = a[i];\r\n        rt[i] = upd(rt[i],1,n,i,a[i]);\r\n        while(t != 1)\r\n        {\r\n            int f = v[t],ccnt = 0;\r\n            while(t%f == 0)\r\n            {\r\n                t/=f;\r\n                ccnt++;\r\n            }\r\n            int cur = ccnt;\r\n            while(head[f] && val[head[f]] <= cur)\r\n            {\r\n                //cout<<\"UPD:\"<<id[head[f]]<<\" \"<<qpow(inv[f],val[head[f]])<<\"\\n\";\r\n                rt[i] = upd(rt[i],1,n,id[head[f]],qpow(inv[f],val[head[f]]));\r\n                cur -= val[head[f]];\r\n                head[f] = nxt[head[f]];\r\n            }\r\n            if(head[f]) val[head[f]] -= cur,rt[i] = upd(rt[i],1,n,id[head[f]],qpow(inv[f],cur));//cout<<\"UPD:\"<<id[head[f]]<<\" \"<<qpow(inv[f],cur)<<\"\\n\";\r\n            nxt[++tot] = head[f];\r\n            val[tot] = ccnt;\r\n            id[tot] = i;\r\n            head[f] = tot;\r\n        }\r\n    }\r\n    scanf(\"%d\",&m);\r\n    int lst = 0;\r\n    for(int i = 1;i <= m;i++)\r\n    {\r\n        int x,y;\r\n        scanf(\"%d%d\",&x,&y);\r\n        x = (x+lst)%n+1,y = (y+lst)%n+1;\r\n        if(x > y) swap(x,y);\r\n        //cout<<x<<\" \"<<y<<\"\\n\";\r\n        printf(\"%d\\n\",lst = qry(rt[y],1,n,x,y));\r\n    }\r\n    return 0;\r\n}"
+}

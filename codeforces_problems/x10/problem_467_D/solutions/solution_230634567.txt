@@ -1,0 +1,39 @@
+{
+    "id": 230634567,
+    "contestId": 467,
+    "creationTimeSeconds": 1698735905,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 467,
+        "index": "D",
+        "name": "Fedor and Essay",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 467,
+        "members": [
+            {
+                "handle": "Faccirx"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1411054200
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\n\r\nnamespace std {\r\n\ttemplate<class T>\r\n\tconstexpr bool chmax(T &a, const T &b) {\r\n\t\tif (a < b) {\r\n\t\t\ta = b;\r\n\t\t\treturn true;\r\n\t\t}\r\n\t\treturn false;\r\n\t}\r\n\ttemplate<class T>\r\n\tconstexpr bool chmin(T &a, const T &b) {\r\n\t\tif (a > b) {\r\n\t\t\ta = b;\r\n\t\t\treturn true;\r\n\t\t}\r\n\t\treturn false;\r\n\t}\r\n}\r\n\r\n#ifdef LOCAL\r\n#include <debug.h>\r\n#else\r\n#define debug(...)\r\n#endif\r\n\r\nstd::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());\r\n\r\nstd::string lower(std::string s) {\r\n\tfor (char &c : s) {\r\n\t\tif (isupper(c)) {\r\n\t\t\tc = tolower(c);\r\n\t\t}\r\n\t}\r\n\r\n\treturn s;\r\n}\r\n\r\nvoid flying() {\r\n\tint n;\r\n\tstd::cin >> n;\r\n\r\n\tstd::map<std::string, int> id;\r\n\tint g = 0;\r\n\r\n\tstd::vector<int> a(n);\r\n\tfor (int i = 0; i < n; i++) {\r\n\t\tstd::string s;\r\n\t\tstd::cin >> s;\r\n\r\n\t\ts = lower(s);\r\n\r\n\t\tif (!id.contains(s)) {\r\n\t\t\tid[s] = g++;\r\n\t\t}\r\n\t\ta[i] = id[s];\r\n\t}\r\n\r\n\tint m;\r\n\tstd::cin >> m;\r\n\r\n\tstd::vector<int> u(m), v(m);\r\n\r\n\tfor (int i = 0; i < m; i++) {\r\n\t\tstd::string su, sv;\r\n\t\tstd::cin >> su >> sv;\r\n\r\n\t\tsu = lower(su), sv = lower(sv);\r\n\r\n\t\tif (!id.contains(su)) {\r\n\t\t\tid[su] = g++;\r\n\t\t}\r\n\t\tif (!id.contains(sv)) {\r\n\t\t\tid[sv] = g++;\r\n\t\t}\r\n\r\n\t\tu[i] = id[su], v[i] = id[sv];\r\n\t}\r\n\r\n\tstd::vector<std::vector<int>> G(g);\r\n\tfor (int i = 0; i < m; i++) {\r\n\t\tG[u[i]].push_back(v[i]);\r\n\t}\r\n\r\n\tstd::vector<std::pair<int, int>> wg(g);\r\n\tfor (auto [s, i] : id) {\r\n\t\twg[i] = {std::count(s.begin(), s.end(), 'r'), s.size()};\r\n\t}\r\n\r\n\tstd::vector<int> dfn(g, -1), low(n);\r\n\tint ord = 0;\r\n\tstd::vector<int> stk;\r\n\tstd::vector<bool> instk(g);\r\n\tstd::vector<int> scc(g);\r\n\tint h = 0;\r\n\r\n\tstd::function<void(int)> tarjan = [&](int u) {\r\n\t\tdfn[u] = low[u] = ord++;\r\n\t\tstk.push_back(u);\r\n\t\tinstk[u] = true;\r\n\r\n\t\tfor (int v : G[u]) {\r\n\t\t\tif (dfn[v] == -1) {\r\n\t\t\t\ttarjan(v);\r\n\r\n\t\t\t\tstd::chmin(low[u], low[v]);\r\n\t\t\t} else if (instk[v]) {\r\n\t\t\t\tstd::chmin(low[u], dfn[v]);\r\n\t\t\t}\r\n\t\t}\r\n\r\n\t\tif (low[u] == dfn[u]) {\r\n\t\t\twhile (true) {\r\n\t\t\t\tint top = stk.back();\r\n\t\t\t\tstk.pop_back();\r\n\t\t\t\tscc[top] = h;\r\n\t\t\t\tinstk[top] = false;\r\n\r\n\t\t\t\tif (top == u) {\r\n\t\t\t\t\tbreak;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\th++;\r\n\t\t}\r\n\t};\r\n\r\n\tfor (int i = 0; i < g; i++) {\r\n\t\tif (dfn[i] == -1) {\r\n\t\t\ttarjan(i);\r\n\t\t}\r\n\t}\r\n\r\n\tstd::vector<std::pair<int, int>> wh(h, {2e9, 2e9});\r\n\tfor (int i = 0; i < g; i++) {\r\n\t\tstd::chmin(wh[scc[i]], wg[i]);\r\n\t}\r\n\r\n\tstd::vector<std::vector<int>> H(h);\r\n\tfor (int u = 0; u < g; u++) {\r\n\t\tfor (int v : G[u]) {\r\n\t\t\tif (scc[u] != scc[v]) {\r\n\t\t\t\tH[scc[u]].push_back(scc[v]);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\r\n\tstd::vector<std::pair<int, int>> dp(h, {-1, -1});\r\n\r\n\tstd::function<std::pair<int, int>(int)> trav = [&](int u) {\r\n\t\tif (dp[u] != std::pair{-1, -1}) {\r\n\t\t\treturn dp[u];\r\n\t\t}\r\n\r\n\t\tauto &res = dp[u] = wh[u];\r\n\r\n\t\tfor (int v : H[u]) {\r\n\t\t\tstd::chmin(res, trav(v));\r\n\t\t}\r\n\r\n\t\treturn res;\r\n\t};\r\n\r\n\tint64_t x = 0,  y = 0;\r\n\tfor (int i = 0; i < n; i++) {\r\n\t\tauto [xx, yy] = trav(scc[a[i]]);\r\n\t\tdebug(xx, yy);\r\n\t\tx += xx, y += yy;\r\n\t}\r\n\r\n\tstd::cout << x << \" \" << y << \"\\n\";\r\n}\r\n\r\nint main() {\r\n#ifdef LOCAL\r\n\tfreopen(\"error.txt\", \"w\", stderr);\r\n#endif\r\n\r\n\tstd::ios::sync_with_stdio(false);\r\n\tstd::cin.tie(nullptr);\r\n\tstd::cout.tie(nullptr);\r\n\r\n\tflying();\r\n\r\n\treturn 0;\r\n}"
+}

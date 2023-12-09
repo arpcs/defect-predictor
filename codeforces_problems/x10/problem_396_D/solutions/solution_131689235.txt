@@ -1,0 +1,35 @@
+{
+    "id": 131689235,
+    "contestId": 396,
+    "creationTimeSeconds": 1634087004,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 396,
+        "index": "D",
+        "name": "On Sum of Number of Inversions in Permutations",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "tags": [
+            "combinatorics",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 396,
+        "members": [
+            {
+                "handle": "SummerSky"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1393428600
+    },
+    "programmingLanguage": "MS C++ 2017",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 1388,
+    "memoryConsumedBytes": 80179200,
+    "source": "#include <stdlib.h>\r\n#include <time.h>\r\n#include <math.h>\r\n#include <vector>\r\n#include <algorithm>\r\n#include <sstream>\r\n#include <iostream>\r\n#include <fstream>\r\n#include <string>\r\n#include <string.h>\r\n#include <map>\r\n#include <stack>\r\n#include <queue>\r\n#include <utility>\r\n#include <set>\r\n#include <bitset>\r\n\r\nusing namespace std;\r\n\r\nconst int M=1000000+5;\r\n\r\ntypedef long long int ll;\r\n\r\nll mod = 1000000000 + 7;\r\nint a[M];\r\nll en[M];\r\n\r\nstruct TREE{\r\n\tint l;\r\n\tint r;\r\n\tint x;\r\n}tree[4 * M];\r\nvoid build(int l, int r, int node){\r\n\ttree[node].l = l;\r\n\ttree[node].r = r;\r\n\ttree[node].x = 0;\r\n\tif (l == r){\r\n\t\treturn ;\r\n\t} else {\r\n\t\tint m = (l + r) / 2;\r\n\t\tbuild(l, m, node * 2);\r\n\t\tbuild(m + 1, r, node * 2 + 1);\r\n\t}\r\n}\r\n\r\nvoid update(int idx, int val, int node){\r\n\tint l = tree[node].l;\r\n\tint r = tree[node].r;\r\n\tif (l == r){\r\n\t\ttree[node].x += val;\r\n\t} else {\r\n\t\tint m = (l + r) / 2;\r\n\t\tif (idx <= m){\r\n\t\t\tupdate(idx, val, node * 2);\r\n\t\t} else {\r\n\t\t\tupdate(idx, val, node * 2 + 1);\r\n\t\t}\r\n\t\ttree[node].x = tree[node * 2].x + tree[node * 2 + 1].x;\r\n\t}\r\n}\r\n\r\nint query(int l, int r, int node){\r\n\tif (l <= tree[node].l && tree[node].r <= r){\r\n\t\treturn tree[node].x;\r\n\t} else {\r\n\t\tint m = (tree[node].l + tree[node].r) / 2;\r\n\t\tif (r <= m){\r\n\t\t\treturn query(l, r, node * 2);\r\n\t\t} else {\r\n\t\t\tif (l >= m + 1){\r\n\t\t\t\treturn query(l, r, node * 2 + 1);\r\n\t\t\t} else {\r\n\t\t\t\tint s1 = query(l, m, node * 2);\r\n\t\t\t\tint s2 = query(m + 1, r, node * 2 + 1);\r\n\t\t\t\treturn s1 + s2;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\n\r\nint s[M];\r\nll pre[M];\r\nll fac[M];\r\n\r\nint main()\r\n{\r\n\t\r\n\t//freopen(\"input.txt\",\"r\",stdin);\r\n\t//freopen(\"output.txt\",\"w\",stdout);\r\n\t\r\n\tint n;\r\n\tcin>>n;\r\n\tfac[0] = 1;\r\n\tfor (int i = 1; i <= n; i++){\r\n\t\tcin>>a[i];\r\n\t\tfac[i] = (fac[i - 1] * i) % mod;\r\n\t}\r\n\t\r\n\ten[1] = 0;\r\n\ten[2] = 1;\r\n\tfor (int i = 3; i <= n; i++){\r\n\t\tll m = i;\r\n\t\ten[i] = (((m * (m - 1) / 2) % mod) * fac[m - 1]) + (m * en[i - 1]) % mod;\r\n\t\ten[i] = en[i] % mod;\r\n\t}\r\n\t\r\n\tbuild(1, n, 1);\r\n\tfor (int i = n; i >= 1; i--){\r\n\t\tint s1 = query(1, a[i], 1);\r\n\t\ts[i] = s1;\r\n\t\tupdate(a[i], 1, 1);\r\n\t}\r\n\t\r\n\tfor (int i = 1; i <= n; i++){\r\n\t\tpre[i] = (pre[i - 1] + s[i]) % mod;\r\n\t}\r\n\t\r\n//\tcout<<\"s\"<<endl;\r\n//\tfor (int i = 1; i <= n; i++){\r\n//\t\tcout<<s[i]<<\" \";\r\n//\t}\r\n//\tcout<<endl;\r\n//\tcout<<\"pre\"<<endl;\r\n//\tfor (int i = 1; i <= n; i++){\r\n//\t\tcout<<pre[i]<<\" \";\r\n//\t}\r\n//\tcout<<endl;\r\n\t\r\n\t\r\n\tll ans = pre[n];\r\n\t\r\n\t\r\n\t\r\n\tfor (int i = n; i >= 1; i--){\r\n\t\tll v1 = (((s[i] * fac[n - i]) % mod) * pre[i - 1]) % mod;\r\n\t\tll v2 = (fac[n - i] * (((s[i] - 1) * s[i] / 2) % mod)) % mod;\r\n\t\tll v3 = (s[i] * en[n - i]) % mod;\r\n\t\tll v = (v1 + v2) % mod;\r\n\t\tv = (v + v3) % mod;\r\n\t\t//cout<<\"i = \"<<i<<endl;\r\n\t\t//cout<<\"v1 = \"<<v1<<\" v2 = \"<<v2<<\" v3 = \"<<v3<<endl;\r\n\t\tans = (ans + v) % mod;\r\n\t}\r\n\tcout<<ans<<endl;\r\n\t\r\n\t\r\n\t\r\n\t\r\n\treturn 0;\r\n\t\r\n}\r\n\r\n\r\n"
+}

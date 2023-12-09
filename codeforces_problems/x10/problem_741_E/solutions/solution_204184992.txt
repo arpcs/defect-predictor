@@ -1,0 +1,36 @@
+{
+    "id": 204184992,
+    "contestId": 741,
+    "creationTimeSeconds": 1682988760,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 741,
+        "index": "E",
+        "name": "Arpa\u2019s abnormal DNA and Mehrdad\u2019s deep interest",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3400,
+        "tags": [
+            "data structures",
+            "string suffix structures"
+        ]
+    },
+    "author": {
+        "contestId": 741,
+        "members": [
+            {
+                "handle": "vjudge2"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1481034900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\n\nusing namespace std;\n\ntypedef unsigned long long ull;\ntypedef long long ll;\ntypedef long double ld;\ntypedef complex<ll> point;\n#define F first\n#define S second\n#define ii pair<int, int>\nstruct iii { int F, S, i, ans; };\n\n/*\n\tCompute for a string S the suffix array order, rank and lcp of every suffix starting in (0, 1, ..., |S|)\n\n\tNotes: The suffix starting in |S| is always the lowest and have lcp 0 with the next suffix.\n\t\t\tlcp[i] is the longest common prefix between the suffix in sa[i] and sa[i-1]\n\n\tComplexity: O(|S| log |S|)\n*/\n\nstruct suffix_array\n{\n    int n;\n    vector<int> sa, lcp, rank;\n\n    suffix_array(const string &s) : n(s.length() + 1), sa(n), lcp(n), rank(n)\n    {\n        vector<int> top(max(256, n));\n        for (int i = 0; i < n; ++i)\n            top[rank[i] = s[i] & 0xff]++;\n\n        partial_sum(top.begin(), top.end(), top.begin());\n        for (int i = 0; i < n; ++i)\n            sa[--top[rank[i]]] = i;\n\n        vector<int> tmp(n);\n        for (int len = 1, j; len < n; len <<= 1)\n        {\n            for (int i = 0; i < n; ++i)\n            {\n                j = sa[i] - len;\n                if (j < 0) j += n;\n                tmp[top[rank[j]]++] = j;\n            }\n\n            sa[tmp[top[0] = 0]] = j = 0;\n            for (int i = 1, j = 0; i < n; ++i)\n            {\n                if (rank[tmp[i]] != rank[tmp[i - 1]]\n                    || rank[tmp[i] + len] != rank[tmp[i - 1] + len])\n                    top[++j] = i;\n                sa[tmp[i]] = j;\n            }\n\n            copy(sa.begin(), sa.end(), rank.begin());\n            copy(tmp.begin(), tmp.end(), sa.begin());\n            if (j >= n - 1) break;\n        }\n\n        int i, j, k;\n        for (j = rank[lcp[i = k = 0] = 0]; i < n - 1; ++i, ++k)\n        {\n            while (k >= 0 && s[i] != s[sa[j - 1] + k])\n                lcp[j] = k--, j = rank[sa[j] + 1];\n        }\n    }\n};\n\n/*\n\tStatic data structure for min/max queries\n\n\tComplexity: O(n log n) build, O(1) query\n*/\ntemplate<typename T>\nstruct rmq\n{\n    vector<vector<T>> dp;\n    rmq(vector<T> &a)\n    {\n        int n = a.size(), lg = __lg(n);\n        dp.resize(lg+1, vector<T>(n));\n        dp[0] = a;\n        for (int j = 0; j < lg; ++j)\n            for (int i = 0; i + (2<<j) <= n; ++i)\n                dp[j+1][i] = min(dp[j][i], dp[j][i+(1<<j)]);\n    }\n\n    inline T query(int a, int b) // [a, b)\n    {\n        int l = __lg(b - a);\n        return min(dp[l][a], dp[l][b-(1<<l)]);\n    }\n};\n\n\n\n\nint main()\n{\n    ios_base::sync_with_stdio(0);cin.tie(0);\n    //freopen(\"input.txt\", \"r\", stdin);\n    //freopen(\"output.txt\", \"w\", stdout);\n\n    string s, t;\n    cin>>s>>t;\n    int n = s.size(), m = t.size();\n\n    suffix_array sa(s + (char)('z' + 1) + t);\n    rmq<int> rmsa(sa.lcp);\n\n    vector<int> o;\n    for(int i=0; i<=n; i++) o.push_back(i);\n    sort(o.begin(), o.end(), [&](int i, int j)\n    {\n        int p = 0;\n        if(i > j)\n        {\n            swap(i, j);\n            p = 1;\n        }\n\n        if(i + m <= j)\n        {\n            int x = sa.rank[n + 1], y = sa.rank[i];\n            if(x > y) swap(x, y);\n            int lcp = rmsa.query(x + 1, y + 1);\n            if(lcp < m) return p ^ (t[lcp] < s[i + lcp]);\n\n            x = sa.rank[i]; y = sa.rank[i + m]; int sz = j - i - m;\n            if(sz > 0)\n            {\n                if(x > y) swap(x, y);\n                lcp = rmsa.query(x + 1, y + 1);\n                if(lcp < sz) return p ^ (s[i + lcp] < s[i + m + lcp]);\n            }\n\n            x = sa.rank[n + 1], y = sa.rank[i + j - i - m];\n            if(x > y) swap(x, y);\n            lcp = rmsa.query(x + 1, y + 1);\n            if(lcp < m) return p ^ (s[i + j - i - m + lcp] < t[lcp]);\n        }else\n        {\n            int x = sa.rank[n + 1], y = sa.rank[i], sz = j - i;\n            if(x > y) swap(x, y);\n            int lcp = rmsa.query(x + 1, y + 1);\n            if(lcp < sz) return p ^ (t[lcp] < s[i + lcp]);\n\n            x = sa.rank[n + 1 + sz]; y = sa.rank[n + 1]; sz = i + m - j;\n            if(x > y) swap(x, y);\n            lcp = rmsa.query(x + 1, y + 1);\n            if(lcp < sz) return p ^ (t[j - i + lcp] < t[lcp]);\n\n            x = sa.rank[i]; y = sa.rank[n + 1 + sz]; sz = j - i;\n            if(x > y) swap(x, y);\n            lcp = rmsa.query(x + 1, y + 1);\n            if(lcp < sz) return p ^ (s[i + lcp] < t[i + m - j + lcp]);\n        }\n        return p ^ (i < j);\n    });\n\n    vector<int> v(n + 1);\n    for(int i=0; i<=n; i++) v[o[i]] = i;\n    rmq<int> rm1(v);\n\n    int sq = 10;\n    vector<vector<rmq<int>>> rm2(sq);\n    for(int i=1; i<sq; i++)\n    {\n        vector<int> temp;\n        for(int j=0; j<sq; j++)\n        {\n            for(int k=j; k<=n; k+=i)\n                temp.push_back(v[k]);\n            rm2[i].push_back(rmq<int>(temp));\n            temp.clear();\n        }\n    }\n\n    int q;\n    cin>>q;\n    while(q--)\n    {\n        int l, r, k, x, y;\n        cin>>l>>r>>k>>x>>y;\n\n        int ans = n + 1;\n        if(k < sq)\n        {\n            for(int i=x; i<=y; i++)\n            {\n                int li = (l - i + k - 1) / k;\n                int ri = (r + 1 - i + k - 1) / k;\n                if(li < ri) ans = min(ans, rm2[k][i].query(li, ri));\n            }\n        }else\n        {\n            int p = (l / k) * k;\n            while(p <= r)\n            {\n                int li = max(l, p + x);\n                int ri = min(r, p + y);\n                if(li <= ri) ans = min(ans, rm1.query(li, ri + 1));\n                p += k;\n            }\n        }\n\n        if(ans == n + 1) ans = -1;\n        else ans = o[ans];\n        cout<<ans<<\" \\n\"[q == 0];\n    }\n\n\n\n    return 0;\n}\n\n\n \t  \t    \t \t\t\t\t   \t\t    \t \t\t\t\t\t"
+}

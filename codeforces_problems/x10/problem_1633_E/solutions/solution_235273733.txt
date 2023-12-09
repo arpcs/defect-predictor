@@ -1,0 +1,42 @@
+{
+    "id": 235273733,
+    "contestId": 1633,
+    "creationTimeSeconds": 1701456476,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1633,
+        "index": "E",
+        "name": "Spanning Tree Queries",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "greedy",
+            "math",
+            "sortings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1633,
+        "members": [
+            {
+                "handle": "Ertugrul28"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1643639700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 102400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define Endl '\\n'\r\n#define MP make_pair\r\n#define pii pair<int, int>\r\n#define bigMod(b,p,mod,res) res=1;for(;p;p/=2,b=(1ll*b*b)%mod)if(p&1)res=(1ll*res*b)%mod;\r\n#define int long long\r\n#define mset(dp, v) memset(dp, v, sizeof dp)\r\n#define Sort(w, cmp) sort(begin(w), end(w), cmp)\r\n// a\r\nconst int mxn = 5e2+5;\r\nconst int mod = (119<<23)+1;\r\nint n, p, k, bb, b, c, m, u, v, w;\r\nvector<int>urey, points;\r\nvector<pii>edges, weight, h, hh;\r\ninline bool cmp(pii b, pii c) {\r\n    if(b.first<0) b.first*=-1;\r\n    if(c.first<0) c.first*=-1;\r\n    return b<c;\r\n}\r\ninline void modify(vector<pii>&vec, int x) {\r\n    for(pii&h:vec) h.first-=x;\r\n}\r\nstruct DSU {\r\n    vector<int> p, rnk;\r\n    DSU(int n) {\r\n        p.resize(n+1);\r\n        rnk.resize(n+1, 1);\r\n        iota(begin(p), end(p), 0);\r\n    }\r\n    inline int find(int u) {\r\n        return p[u] = (p[u]==u?u:find(p[u]));\r\n    }\r\n    int merge(int u, int v) {\r\n        u=find(u);\r\n        v=find(v);\r\n        if(u^v) {\r\n            if(rnk[u]<rnk[v]) u^=v, v^=u, u^=v;\r\n            rnk[u]+=rnk[v];\r\n            p[v]=u;\r\n            return 1;\r\n        }\r\n        return 0;\r\n    }\r\n};\r\nint spt(int x, vector<int>&vec, int &neg) {\r\n    h = weight;\r\n    modify(h, x);\r\n    vec.clear();\r\n    neg = 0;\r\n    Sort(h, cmp);\r\n    int res = 0;\r\n    DSU dsu(n);\r\n    for(int i=0; i<m; i++) {\r\n        if(dsu.merge(edges[h[i].second].first, edges[h[i].second].second)) {\r\n            int r = h[i].first;\r\n            if(r<=0) {\r\n                neg++;\r\n                res-=r;\r\n            } else {\r\n                res+=r;\r\n                vec.push_back(r);\r\n            }\r\n        }\r\n    }\r\n    return res;\r\n}\r\nvoid solve() {\r\n    cin >> n >> m;\r\n    edges.resize(m), weight.resize(m);\r\n    for(int i=0; i<m; i++) {\r\n        cin >> edges[i].first >> edges[i].second;\r\n        cin >> weight[i].first;\r\n        weight[i].second=i;\r\n    }\r\n    cin >> p >> k;\r\n    cin >> bb >> b >> c;\r\n//    points.push_back(0);\r\n//    bool ok = 1;\r\n//    while(ok) {\r\n//        ok = 0;\r\n//        h = weight;\r\n//        modify(h, points.back());\r\n//        Sort(h, cmp);\r\n//        int lo = points.back()+1, hi = c;\r\n//        while(lo<hi) {\r\n//            int mid = (lo+hi)/2;\r\n//            hh = weight;\r\n//            modify(hh, mid);\r\n//            Sort(hh, cmp);\r\n//            bool hv = 0;\r\n//            for(int i=0; i<m; i++) {\r\n//                if(hh[i].second^h[i].second) hv = 1;\r\n//            }\r\n//            if(hv==0) lo = mid+1;\r\n//            else hi = mid;\r\n//        }\r\n//        if(lo^c) {\r\n//            ok = 1;\r\n//            points.push_back(lo);\r\n//        }\r\n//    }\r\n      for(int i=0; i<m; i++){\r\n        for(int j=0; j<i; j++){\r\n            points.push_back((weight[i].first+weight[i].second+1)/2);\r\n        }\r\n      }\r\n    sort(begin(points), end(points));\r\n    points.resize( unique(begin(points), end(points)) - begin(points));\r\n    vector<int> reses(points.size()), neg(points.size());\r\n    vector<vector<int>> vertex(points.size());\r\n    vector<vector<int>> prefix(points.size());\r\n    for(int i=0; i<points.size(); i++) {\r\n        reses[i] = spt(points[i], vertex[i], neg[i]);\r\n        prefix[i] = vertex[i];\r\n        for(int j=1; j<prefix[i].size(); j++) prefix[i][j]+=prefix[i][j];\r\n//        cout << points[i]<<\" -> \"<<reses[i]<<endl;\r\n    }\r\n    int res = 0;\r\n    for(int i=0; i<k; i++) {\r\n        if(i<p) {\r\n            cin >> u;\r\n        } else {\r\n            u=(u * bb + b)%c;\r\n        }\r\n        int id=upper_bound(begin(points), end(points), u)-begin(points)-1;\r\n        int v = u-points[id];\r\n        int tk = reses[id]+neg[id]*v;\r\n        int it =lower_bound(vertex[id].begin(), vertex[id].end(), v)-begin(vertex[id]);\r\n        tk-=(vertex[id].size()-it)*v;\r\n        if(it>=1) tk+=(v*it - 2*prefix[id][it-1]);\r\n        res^=tk;\r\n    }\r\n    cout << res;\r\n}\r\n\r\n\r\nint32_t main() {\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);\r\n//    cout << fixed << setprecision(6);\r\n    int t= 0, tc=1;\r\n//    cin >> tc;\r\n    while(tc--) {\r\n        solve();\r\n    }\r\n\r\n    return 0;\r\n}\r\n"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 223207312,
+    "contestId": 1422,
+    "creationTimeSeconds": 1694606080,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1422,
+        "index": "F",
+        "name": "Boring Queries",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1422,
+        "members": [
+            {
+                "handle": "bkifhr6"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601827500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 50,
+    "timeConsumedMillis": 888,
+    "memoryConsumedBytes": 427212800,
+    "source": "#include <cstdio>\n#include <cstring>\n#include <algorithm>\n#include <unordered_map>\n\nusing namespace std;\n\ntypedef long long ll;\nconst int maxn = 2e5 + 7;\nconst int mod = 1e9 + 7;\n\nint a[maxn],last[maxn];\nint n,m;\nll ans;\n\n//\u4e3b\u5e2d\u6811\u5f00\u59cb\nstruct Tree {\n    int l,r;\n    int L,R;\n    ll v;\n}t[maxn * 20];\n\nint T[maxn],tot;\n\nint build(int l,int r) {\n    int p = ++tot;\n    int mid = (l + r) >> 1;\n    t[p].L = l;\n    t[p].R = r;\n    if(l == r) return p;\n    t[p].l = build(l,mid);\n    t[p].r = build(mid + 1,r);\n    t[p].v = 0;\n    return p;\n}\n\nint update(int pre,int pos,ll v) {\n    int p = ++tot;\n    t[p] = t[pre];\n    t[p].v = max(t[pre].v,1ll) * v % mod;\n    \n    if(t[p].L == t[p].R) return p;\n    \n    int mid = (t[p].L + t[p].R) >> 1;\n    if(pos <= mid) {\n        t[p].l = update(t[pre].l,pos,v);\n    } else {\n        t[p].r = update(t[pre].r,pos,v);\n    }\n    \n    return p;\n}\n\nll query(int i,int l,int r) {\n    if(l <= t[i].L && t[i].R <= r) {\n        return max(t[i].v,1ll);\n    }\n    ll res = 1;\n    int mid = (t[i].L + t[i].R) >> 1;\n    if(l <= mid) res = res * query(t[i].l,l,r) % mod;\n    if(r > mid) res = res * query(t[i].r,l,r) % mod;\n    return res;\n}\n//\u4e3b\u5e2d\u6811\u7ed3\u675f\n\nll qpow(ll x,ll n) {\n    ll res = 1;\n    while(n) {\n        if(n & 1) res = res * x % mod;\n        n >>= 1;\n        x = x * x % mod;\n    }\n    return res;\n}\n\nint v[maxn],p[maxn],cnt;\nunordered_map<int,int>mp;\n\nvoid getprime() {\n    for(int i = 2;i < maxn;i++) {\n        if(!v[i]) {\n            p[++cnt] = i;\n            v[i] = i;\n        }\n        for(int j = 1;j <= cnt && 1ll * p[j] * i < maxn;j++) {\n            v[i * p[j]] = p[j];\n            if(i % p[j] == 0) break;\n        }\n    }\n}\n\n//\u7ebf\u6bb5\u6811\nstruct Tree2 {\n    int l,r;\n    int p[100]; //\u7d20\u56e0\u5b50\n}t2[maxn << 2];\n\nvoid pushup(int i) {\n    for(int j = 1;j <= 88;j++) {\n        t2[i].p[j] = max(t2[i * 2].p[j],t2[i * 2 + 1].p[j]);\n    }\n}\n\nvoid build2(int i,int l,int r) {\n    t2[i].l = l;t2[i].r = r;\n    if(l == r) {\n        for(int j = 1;j <= 88;j++) { //\u7ebf\u6bb5\u6811\u53ea\u7ef4\u62a4\u524d88\u4e2a\u8d28\u6570\n            while(a[l] % p[j] == 0) {\n                t2[i].p[j]++;\n                a[l] /= p[j];\n            }\n        }\n        return;\n    }\n    int m = (l + r) >> 1;\n    build2(i * 2,l,m);\n    build2(i * 2 + 1,m + 1,r);\n    pushup(i);\n}\n\nint res[100];\n\nvoid query2(int i,int l,int r) {\n    if(l <= t2[i].l && t2[i].r <= r) {\n        for(int j = 1;j <= 88;j++) {\n            res[j] = max(t2[i].p[j],res[j]);\n        }\n        return;\n    }\n    int m = (t2[i].l + t2[i].r) >> 1;\n\n    if(l <= m) query2(i * 2,l,r);\n    if(r > m) query2(i * 2 + 1,l,r);\n}\n//\u7ebf\u6bb5\u6811\u7ed3\u675f\n\nint main() {\n    getprime();\n    scanf(\"%d\",&n);\n    for(int i = 1;i <= n;i++) {\n        scanf(\"%d\",&a[i]);\n    }\n    build2(1,1,n);\n    \n    T[0] = build(1,n);\n    for(int i = 1;i <= n;i++) {\n        T[i] = T[i - 1];\n        if(a[i] == 1) continue;\n        if(last[a[i]]) {\n            T[i] = update(T[i],last[a[i]],qpow(a[i],mod - 2));\n        }\n        T[i] = update(T[i],i,a[i]);\n        last[a[i]] = i;\n    }\n    \n    int q;scanf(\"%d\",&q);\n    for(int i = 1;i <= q;i++) {\n        int l,r;scanf(\"%d%d\",&l,&r);\n        l = (l + ans) % n + 1;\n        r = (r + ans) % n + 1;\n        if(l > r) swap(l,r);\n        memset(res,0,sizeof(res));\n        ans = 1;\n        query2(1,l,r);\n        for(int j = 1;j <= 88;j++) {\n            ans = ans * qpow(p[j],res[j]) % mod;\n        }\n        ans = ans * query(T[r],l,r) % mod;\n        printf(\"%lld\\n\",ans);\n    }\n    return 0;\n}\n\n\n   \t\t\t  \t\t \t      \t\t   \t  \t  \t\t"
+}

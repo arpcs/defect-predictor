@@ -1,0 +1,36 @@
+{
+    "id": 169765036,
+    "contestId": 1109,
+    "creationTimeSeconds": 1661582206,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1109,
+        "index": "F",
+        "name": "Sasha and Algorithm of Silence's Sounds",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1109,
+        "members": [
+            {
+                "handle": "dqstz"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1550334900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 17,
+    "timeConsumedMillis": 390,
+    "memoryConsumedBytes": 38400000,
+    "source": "#include<bits/stdc++.h>\r\n#define Yukinoshita namespace\r\n#define Yukino std\r\nusing Yukinoshita Yukino;\r\nint read()\r\n{\r\n\tint s=0;\r\n\tchar ch=getchar();\r\n\twhile(ch<'0'||ch>'9') ch=getchar();\r\n\twhile(ch>='0'&&ch<='9') s=s*10+ch-'0',ch=getchar();\r\n\treturn s;\r\n}\r\nconst int mxn=2e5+5; \r\nint n,m;\r\nstruct LCT\r\n{\r\n\tstruct node\r\n\t{\r\n\t\tint tag,s[2],f;\r\n\t}t[mxn];\r\n\t#define ls t[w].s[0]\r\n\t#define rs t[w].s[1]\r\n\tbool nroot(int w)\r\n\t{\r\n\t\treturn t[t[w].f].s[0]==w||t[t[w].f].s[1]==w;\r\n\t}\r\n\tbool fc(int w)\r\n\t{\r\n\t\treturn t[t[w].f].s[1]==w;\r\n\t}\r\n\tvoid reverse(int w)\r\n\t{\r\n\t\tt[w].tag^=1;\r\n\t\tswap(ls,rs);\r\n\t}\r\n\tvoid pushdown(int w)\r\n\t{\r\n\t\tif(t[w].tag)\r\n\t\t{\r\n\t\t\treverse(ls),reverse(rs);\r\n\t\t\tt[w].tag=0;\r\n\t\t}\r\n\t}\r\n\tvoid pushdownall(int w)\r\n\t{\r\n\t\tif(nroot(w)) pushdownall(t[w].f);\r\n\t\tpushdown(w);\r\n\t}\r\n\tvoid rotate(int w)\r\n\t{\r\n\t\tint y=t[w].f,z=t[y].f,k=fc(w),x=t[w].s[!k];\r\n\t\tif(nroot(y)) t[z].s[fc(y)]=w;\r\n\t\tt[y].s[k]=x,t[w].s[!k]=y;\r\n\t\tif(x) t[x].f=y;\r\n\t\tt[w].f=z,t[y].f=w;\r\n\t}\t\r\n\tvoid splay(int w)\r\n\t{\r\n\t\tpushdownall(w);\r\n\t\tfor(int f;f=t[w].f,nroot(w);rotate(w))\r\n\t\t\tif(nroot(f))\r\n\t\t\t\trotate(fc(f)==fc(w)?f:w);\r\n\t}\r\n\tvoid access(int w)\r\n\t{\r\n\t\tfor(int x=0;w;w=t[x=w].f)\r\n\t\t\tsplay(w),rs=x;\r\n\t}\r\n\tvoid makeroot(int w)\r\n\t{\r\n\t\taccess(w),splay(w),reverse(w);\r\n\t}\r\n\tvoid split(int x,int y)\r\n\t{\r\n\t\tmakeroot(x),access(y),splay(y);\r\n\t}\r\n\tint findroot(int w)\r\n\t{\r\n\t\taccess(w),splay(w);\r\n\t\twhile(ls)\r\n\t\t\tpushdown(w),w=ls;\r\n\t\tsplay(w);\r\n\t\treturn w;\r\n\t}\r\n\tvoid link(int x,int y)\r\n\t{\r\n\t\tmakeroot(x);\r\n\t\tif(findroot(y)!=x) t[x].f=y;\r\n\t}\r\n\tvoid cut(int x,int y)\r\n\t{\r\n\t\tmakeroot(x);\r\n\t\tif(findroot(y)==x&&t[y].f==x&&!t[y].s[0])\r\n\t\t\tt[x].s[1]=t[y].f=0;\r\n\t}\r\n\t#undef ls\r\n\t#undef rs\r\n}t;\r\nstruct segment_tree\r\n{\r\n\t#define ls w<<1\r\n\t#define rs ls|1\r\n\tstruct seg\r\n\t{\r\n\t\tint l,r,mn,s,tag;\r\n\t}t[mxn*4];\r\n\tvoid build(int w,int l,int r)\r\n\t{\r\n\t\tt[w].l=l,t[w].r=r,t[w].s=r-l+1;\r\n\t\tif(l<r)\r\n\t\t{\r\n\t\t\tint mid=l+r>>1;\r\n\t\t\tbuild(ls,l,mid);\r\n\t\t\tbuild(rs,mid+1,r);\r\n\t\t}\r\n\t}\r\n\tvoid pushup(int w)\r\n\t{\r\n\t\tt[w].mn=min(t[ls].mn,t[rs].mn);\r\n\t\tt[w].s=(t[w].mn==t[ls].mn)*t[ls].s+(t[w].mn==t[rs].mn)*t[rs].s;\r\n\t}\r\n\tvoid pushdown(int w)\r\n\t{\r\n\t\tt[ls].tag+=t[w].tag;\r\n\t\tt[rs].tag+=t[w].tag;\r\n\t\tt[ls].mn+=t[w].tag;\r\n\t\tt[rs].mn+=t[w].tag;\r\n\t\tt[w].tag=0;\r\n\t}\r\n\tvoid add(int w,int l,int r,int v)\r\n\t{\r\n\t\tif(l>r) return;\r\n\t\tif(t[w].l>=l&&t[w].r<=r)\r\n\t\t{\r\n\t\t\tt[w].mn+=v,t[w].tag+=v;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tpushdown(w);\r\n\t\tif(t[ls].r>=l) add(ls,l,r,v);\r\n\t\tif(t[rs].l<=r) add(rs,l,r,v);\r\n\t\tpushup(w);\r\n\t}\r\n\tint ask(int w,int l,int r)\r\n\t{\r\n\t\tif(l>r) return 0;\r\n\t\tif(t[w].l>=l&&t[w].r<=r) return (t[w].mn==1)*t[w].s;\r\n\t\tpushdown(w);\r\n\t\tint s=0;\r\n\t\tif(t[ls].r>=l) s=ask(ls,l,r);\r\n\t\tif(t[rs].l<=r) s+=ask(rs,l,r);\r\n\t\treturn s;\r\n\t}\r\n\tvoid print(int w)\r\n\t{\r\n\t\tif(t[w].l==t[w].r)\r\n\t\t{\r\n\t\t\tcout<<t[w].mn<<' ';\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tpushdown(w);\r\n\t\tprint(ls),print(rs);\r\n\t}\r\n}T;\r\nconst int fx[]={1,0,0,-1},fy[]={0,1,-1,0};\r\nint p[2005][2005],x[mxn],y[mxn];\r\nint f(int i,int j)\r\n{\r\n\treturn (i-1)*m+j;\r\n}\r\nbool check(int x,int y)\r\n{\r\n\treturn x>=1&&x<=n&&y>=1&&y<=m;\r\n}\r\nint main()\r\n{\r\n\tn=read(),m=read();\r\n\tint i,j,l=1,s=0;\r\n\tfor(i=1;i<=n;i++)\r\n\t\tfor(j=1;j<=m;j++)\r\n\t\t\tp[i][j]=read(),x[p[i][j]]=i,y[p[i][j]]=j;\r\n\tT.build(1,1,n*m);\r\n\tfor(i=1;i<=n*m;i++)\r\n\t{\r\n\t\tfor(;;l++)\r\n\t\t{\r\n\t\t\tset<int> mp;\r\n\t\t\tint cnt=0;\r\n\t\t\tfor(j=0;j<4;j++)\r\n\t\t\t\tif(check(x[i]+fx[j],y[i]+fy[j]))\r\n\t\t\t\t\tcnt++,mp.insert(t.findroot(f(x[i]+fx[j],y[i]+fy[j])));\r\n\t\t\tif(mp.size()==cnt) break;\r\n\t\t\tfor(j=0;j<4;j++)\r\n\t\t\t\tif(check(x[l]+fx[j],y[l]+fy[j]))\r\n\t\t\t\t\tt.cut(f(x[l],y[l]),f(x[l]+fx[j],y[l]+fy[j]));\r\n\t\t}\r\n\t\t//cout<<i<<':'<<l<<endl;\t\r\n\t\tvector<int> tp{l-1,i};\r\n\t\tfor(j=0;j<4;j++)\r\n\t\t\tif(check(x[i]+fx[j],y[i]+fy[j])&&p[x[i]+fx[j]][y[i]+fy[j]]<i&&p[x[i]+fx[j]][y[i]+fy[j]]>=l)\r\n\t\t\t\tt.link(f(x[i],y[i]),f(x[i]+fx[j],y[i]+fy[j])),\r\n\t\t\t\ttp.push_back(p[x[i]+fx[j]][y[i]+fy[j]]);\r\n//\t\tfor(j=1;j<=n*m;j++)\r\n//\t\t\tcout<<t.findroot(j)<<' ';\r\n//\t\tcout<<endl;\r\n\t\tsort(tp.begin(),tp.end());\r\n\t\tfor(j=1;j<tp.size();j++)\r\n\t\t\tT.add(1,tp[j-1]+1,tp[j],j-(int)tp.size()+2);\r\n//\t\tT.print(1);\r\n//\t\tcout<<endl;\r\n\t\ts+=T.ask(1,l,i);\r\n\t//\tcout<<T.ask(1,l,i)<<endl;\r\n\t}\r\n\tcout<<s;\r\n}"
+}

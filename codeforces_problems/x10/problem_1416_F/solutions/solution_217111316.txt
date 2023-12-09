@@ -1,0 +1,38 @@
+{
+    "id": 217111316,
+    "contestId": 1416,
+    "creationTimeSeconds": 1691150037,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1416,
+        "index": "F",
+        "name": "Showing Off",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3300,
+        "tags": [
+            "flows",
+            "graph matchings",
+            "greedy",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1416,
+        "members": [
+            {
+                "handle": "locsey"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601219100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 27750400,
+    "source": "#include <bits/stdc++.h>\r\n#define fi first \r\n#define se second\r\n\r\nusing std :: cin;\r\nusing std :: min; \r\nusing std :: max; \r\nusing std :: cout; \r\nusing std :: vector; \r\n\r\nconstexpr int M = 1e5 + 5, N = 2e6 + 5; \r\nconstexpr int INF = 0x3f3f3f3f; \r\n\r\ntypedef long long ll; \r\ntypedef unsigned long long ull; \r\ntypedef double db; \r\ntypedef std :: pair < ll, int > pii; \r\n\r\ninline int read() { \r\n\tint f = 1, s = 0; char ch = getchar(); \r\n\twhile(!isdigit(ch)) (ch == '-') && (f = -1), ch = getchar(); \r\n\twhile(isdigit(ch)) s = s * 10 + ch - '0', ch = getchar(); \r\n\treturn f * s; \r\n}\r\n\r\nnamespace Solver { \r\n    struct net {\r\n    \tint head[M], to[N], nxt[N], w[N], cnt; \r\n    \tstd :: queue < int > q; int S, T; \r\n    \tinline void init() {memset(head, 0, sizeof(head)), cnt = 1;}\r\n    \tinline void set(int s, int t) {S = s, T = t;}\r\n    \tinline void add_e(int x, int y, int z) {to[++cnt] = y, nxt[cnt] = head[x], w[cnt] = z, head[x] = cnt;}\r\n    \tinline void add(int x, int y, int z) {add_e(x, y, z), add_e(y, x, 0);}\r\n    \tint head2[M], dep[M], vis[M]; \r\n    \tinline bool bfs() {\r\n    \t\tq.push(S), memset(vis, 0, sizeof(vis)), memset(dep, 0, sizeof(dep)), vis[S] = 1; \r\n    \t\twhile(q.size()) {\r\n    \t\t\tint x = q.front(); q.pop(); head2[x] = head[x]; \r\n    \t\t\tfor(int i = head[x], y = to[i]; i; i = nxt[i], y = to[i]) \r\n    \t\t\t    if(!vis[y] && w[i]) dep[y] = dep[x] + 1, vis[y] = 1, q.push(y); \r\n\t\t\t}\r\n\t\t\treturn vis[T]; \r\n\t\t}\r\n\t\tinline int dfs(int x, int flw) {\r\n\t\t\tif(x == T) return flw; int s = 0; \r\n\t\t\tfor(int i = head2[x], y = to[i]; i; i = nxt[i], y = to[i]) {\r\n\t\t\t\thead2[x] = i; if(!w[i] || dep[y] != dep[x] + 1) continue ; \r\n\t\t\t\tint dlt = dfs(y, min(flw, w[i])); w[i] -= dlt, w[i ^ 1] += dlt, s += dlt, flw -= dlt; \r\n\t\t\t\tif(!dlt) dep[y] = INF; if(!flw) return s; \r\n\t\t\t}\r\n\t\t\treturn s; \r\n\t\t}\r\n\t\tinline int mxmf() {int res = 0; while(bfs()) res += dfs(S, INF); return res;}\r\n\t} net;\r\n\tint n, m, S, T, SS, TT, dx[4] = {1, 0, 0, -1}, dy[4] = {0, 1, -1, 0}; \r\n\tchar dir[4] = {'D', 'R', 'L', 'U'}; \r\n\tint in[M], ms[M]; \r\n\tinline int gid(int x, int y) {return (x - 1) * m + y;}\r\n\tinline int gin(int x, int y) {return 1 <= x && x <= n && 1 <= y && y <= m;}\r\n\tstruct node {\r\n\t\tint x, y, id; \r\n\t\tnode(int x = 0, int y = 0, int id = 0) : x(x), y(y), id(id) {}\r\n\t} ; \r\n\tint mt[M], a[M], b[M]; char z[M]; \r\n\tinline void solve() {\r\n\t\tn = read(), m = read(); \r\n\t\tfor(int i = 1; i <= n; ++i) \r\n\t\t    for(int j = 1; j <= m; ++j) a[gid(i, j)] = read(); \r\n\t\tS = 0, T = n * m + 1, SS = T + 1, TT = SS + 1; \r\n\t\tvector < node > A; \r\n\t\tnet.init(), net.set(SS, TT); \r\n\t\tfor(int i = 1; i <= n; ++i) \r\n\t\t    for(int j = 1; j <= m; ++j) {\r\n\t\t    \tint can = 0, p = gid(i, j), q; b[p] = mt[p] = 0; \r\n\t\t    \tfor(int d = 0; d < 4; ++d) {\r\n\t\t    \t\tint x = i + dx[d], y = j + dy[d]; \r\n\t\t    \t\tif(!gin(x, y)) continue ; can |= (a[q = gid(x, y)] < a[p]); \r\n\t\t    \t\tif(a[q] == a[p] && (i + j & 1)) net.add(p, q, 1), A.push_back(node(p, q, net.cnt)); \r\n\t\t\t\t}\r\n\t\t\t\tms[p] = !can; \r\n\t\t\t\tif(!can) printf(\"%d %d\\n\", i, j); \r\n\t\t\t\tif(i + j & 1) {\r\n\t\t\t\t\tif(can) net.add(S, p, 1); \r\n\t\t\t\t\telse in[S] --, in[p] ++; \r\n\t\t\t\t}\r\n\t\t\t\telse {\r\n\t\t\t\t\tif(can) net.add(p, T, 1); \r\n\t\t\t\t\telse in[p] --, in[T] ++;  \r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\tint fw = 0; \r\n\t\tfor(int i = 0; i <= T; ++i) if(in[i] > 0) fw += in[i], net.add(SS, i, in[i]); else net.add(i, TT, -in[i]); \r\n\t\tnet.add(T, S, INF); \r\n\t\tint res = net.mxmf(); \r\n\t\tif(res ^ fw) return puts(\"NO\"), void(); puts(\"YES\"); \r\n\t\tfor(auto &it : A) if(net.w[it.id]) mt[it.x] = it.y, mt[it.y] = it.x;\r\n\t\tfor(int i = 1; i <= n; ++i) \r\n\t\t    for(int j = 1; j <= m; ++j) {\r\n\t\t    \tint p = gid(i, j), o = !!mt[p], q; if(b[p]) continue ; \r\n\t\t    \tint pd = 0; \r\n\t\t    \tfor(int d = 0; d < 4; ++d) {\r\n\t\t    \t\tint x = i + dx[d], y = j + dy[d]; \r\n\t\t    \t    if(!gin(x, y)) continue ; q = gid(x, y); \r\n\t\t    \t    if(o) {\r\n\t\t    \t    \tif(mt[p] == q) z[p] = dir[d], b[p] = 1, z[q] = dir[3 - d], b[q] = a[p] - 1;pd = 1; \r\n\t\t    \t    \tbreak;\r\n\t\t\t\t\t}\r\n\t\t\t\t\telse {\r\n\t\t\t\t\t\tif(a[q] < a[p]) {\r\n\t\t\t\t\t\t\tz[p] = dir[d], b[p] = a[p] - a[q]; pd = 1; \r\n\t\t\t\t\t\tbreak; \r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t\tassert(pd); \r\n\t\t\t}\r\n\t\tfor(int i = 1; i <= n; ++i, puts(\"\")) \r\n\t\t    for(int j = 1; j <= m; ++j) cout << b[gid(i, j)] << ' '; \r\n\t\tfor(int i = 1; i <= n; ++i, puts(\"\")) \r\n\t\t    for(int j = 1; j <= m; ++j) cout << z[gid(i, j)] << ' '; \r\n\t\tfor(int i = 0; i <= TT; ++i) in[i] = 0; \r\n\t}\r\n\tinline void mian() {\r\n\t\tint T = read();\r\n\t\twhile(T --) solve(); \r\n\t}\r\n}\r\n\r\nint main() \r\n{\r\n\tSolver :: mian(); \r\n\treturn 0; \r\n}  "
+}

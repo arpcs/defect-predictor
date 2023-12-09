@@ -1,0 +1,38 @@
+{
+    "id": 194650180,
+    "contestId": 51,
+    "creationTimeSeconds": 1677140901,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 51,
+        "index": "F",
+        "name": "Caterpillar",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2800,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 51,
+        "members": [
+            {
+                "handle": "RunningSun"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1293552000
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 39,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 64716800,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int N=1e6+7232;\r\nint n,m,ans;\r\nstruct hl{\r\n\tint v,nxt;\r\n}e[N];\r\nint h[N],cnt=1;\r\nstruct len{\r\n\tint u,v;\r\n}t[N];\r\nint top[N];\r\nvoid add(int u,int v)\r\n{\r\n\te[++cnt].v=v;e[cnt].nxt=h[u];h[u]=cnt;\r\n\te[++cnt].v=u;e[cnt].nxt=h[v];h[v]=cnt;\r\n}\r\nint dfn[N],low[N],tot,num,size[N];\r\nint a[N];\r\nint mi(int x,int y){return x<y?x:y;}\r\nint s[N],head,fa[N];\r\nint getfa(int x){return fa[x]==x?x:fa[x]=getfa(fa[x]);}\r\nvoid merge(int x,int y)\r\n{\r\n\tint fx=getfa(x),fy=getfa(y);\r\n\tif(fx!=fy) fa[fx]=fy;\r\n}\r\nbool cmp(int x,int y){return fa[x]<fa[y];}\r\nint vs[N];\r\nbitset<N> vis;\r\nvoid tarjan(int x)\r\n{\r\n\tdfn[x]=low[x]=++tot;s[++head]=x;\r\n\tfor(int i=h[x],v;i;i=e[i].nxt)\r\n\t{\r\n\t\tv=e[i].v;\r\n\t\tif(!dfn[v])\r\n\t\t{\r\n\t\t\ttarjan(v);\r\n\t\t\tlow[x]=mi(low[x],low[v]);\r\n\t\t\tif(low[v]>=dfn[x]) vis[i]=vis[i^1]=1;\r\n\t\t}\r\n\t\telse low[x]=mi(low[x],dfn[v]);\r\n\t}\r\n}\r\nint now;\r\nvoid dfs(int x)\r\n{\r\n\ttop[x]=now;size[now]++;\r\n\tfor(int i=h[x];i;i=e[i].nxt) \r\n\t{\r\n\t\tif(vis[i]||top[e[i].v]) continue;\r\n\t\tdfs(e[i].v);\r\n\t}\r\n}\r\nqueue<int> q;\r\nint dis[N];\r\nint bfs(int x,int l,int r)\r\n{\r\n\tq.push(x);\r\n\tfor(int i=l;i<=r;i++) dis[a[i]]=0;dis[x]=1;\r\n\tint sum=x;\r\n\twhile(!q.empty())\r\n\t{\r\n\t\tint tmp=q.front();q.pop();\r\n\t\tif(dis[tmp]>dis[sum]) sum=tmp;\r\n\t\tfor(int i=h[tmp];i;i=e[i].nxt)\r\n\t\t\tif(!dis[e[i].v]) dis[e[i].v]=dis[tmp]+1,q.push(e[i].v);\r\n\t}\r\n\treturn sum;\r\n}\r\nvoid push_vis(int st,int ed,int l,int r)\r\n{\r\n\tfor(int i=l;i<=r;i++) dis[a[i]]=0;dis[st]=1;\r\n\tq.push(st);\r\n\twhile(!q.empty())\r\n\t{\r\n\t\tint tmp=q.front();q.pop();\r\n\t\tfor(int i=h[tmp];i;i=e[i].nxt) \r\n\t\t\tif(!dis[e[i].v]) dis[e[i].v]=dis[tmp]+1,q.push(e[i].v);\r\n\t}\r\n\t// for(int i=1;i<=now;i++) cout<<dis[i]<<\" \";cout<<\"\\n\";\r\n\tint p=ed;vs[ed]=-1;\r\n\twhile(p!=st)\r\n\t{\r\n\t\tfor(int i=h[p];i;i=e[i].nxt) \r\n\t\t\tif(dis[e[i].v]==dis[p]-1)\r\n\t\t\t{\r\n\t\t\t\tp=e[i].v;\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\tvs[p]=-1;\r\n\t}\r\n}\r\nint f[N],siz[N];\r\nvoid dfs_(int x,int fx)\r\n{\r\n\tf[x]=fx;siz[x]=1;\r\n\tfor(int i=h[x];i;i=e[i].nxt) if(e[i].v!=fx) dfs_(e[i].v,x),siz[x]+=siz[e[i].v];\r\n}\r\nsigned main()\r\n{\r\n\tscanf(\"%d%d\",&n,&m);\r\n\tfor(int i=1;i<=m;i++) \r\n\t{\r\n\t\tscanf(\"%d%d\",&t[i].u,&t[i].v);\r\n\t\tadd(t[i].u,t[i].v);\r\n\t}\r\n\tfor(int i=1;i<=n;i++) if(!dfn[i]) tarjan(i);\r\n\tfor(int i=1;i<=n;i++) if(!top[i]) ++now,dfs(i);\r\n\t// for(int i=1;i<=n;i++) cout<<a[i].top<<\" \";\r\n\t// cout<<num<<\"\\n\";\r\n\tmemset(h,0,sizeof(h));cnt=0;     \r\n\tfor(int i=1;i<=now;i++) a[i]=i,fa[i]=i;\r\n\tfor(int i=1;i<=m;i++)\r\n\t\tif(top[t[i].u]!=top[t[i].v]) add(top[t[i].u],top[t[i].v]),merge(top[t[i].u],top[t[i].v]);\r\n\t// cout<<\"\\n\";\r\n\tfor(int i=1;i<=now;i++) f[i]=getfa(i);\r\n\tsort(a+1,a+now+1,cmp);\r\n\t// for(int i=1;i<=now;i++) cout<<getfa(a[i])<<\" \";\r\n\t// cout<<\"\\n\"; \r\n\tint l=1,r=1;\r\n\tfor(int i=1;i<=now;i++) ans+=size[i]-1;\r\n\t// for(int i=1;i<=now;i++) cout<<a[i]<<\" \";\r\n\twhile(r<=now)\r\n\t{\r\n\t\tint fa=getfa(a[l]);\r\n\t\twhile(fa==getfa(a[r+1])) ++r;\r\n\t\t// cout<<l<<\" \"<<r<<\"\\n\";\r\n\t\tint st=bfs(a[l],l,r);int ed=bfs(st,l,r);\r\n\t\t// cout<<st<<\" \"<<ed<<\"\\n\";\r\n\t\tpush_vis(st,ed,l,r);dfs_(st,st);\r\n\t\t// for(int i=1;i<=n;i++) cout<<vs[i]<<\" \";cout<<\"\\n\";\r\n\t\tfor(int i=1;i<=now;i++) \r\n\t\t{\r\n\t\t\tif(vs[i]==0)\r\n\t\t\t{\r\n\t\t\t\tint x=i;vs[x]=1;\r\n\t\t\t\twhile(vs[f[x]]==0) vs[x=f[x]]=1;\r\n\t\t\t\tif(vs[f[x]]==-1) ans+=siz[x]-1;\r\n\t\t\t}\r\n\t\t}\r\n\t\tl=++r;ans++;\r\n\t}\r\n\tprintf(\"%d\\n\",ans-1);\r\n}"
+}

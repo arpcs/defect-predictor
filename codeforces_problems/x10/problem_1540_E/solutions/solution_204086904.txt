@@ -1,0 +1,41 @@
+{
+    "id": 204086904,
+    "contestId": 1540,
+    "creationTimeSeconds": 1682889815,
+    "relativeTimeSeconds": 35,
+    "problem": {
+        "contestId": 1540,
+        "index": "E",
+        "name": "Tasty Dishes",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3500,
+        "tags": [
+            "math",
+            "matrices"
+        ]
+    },
+    "author": {
+        "contestId": 1540,
+        "members": [
+            {
+                "handle": "Ded_Sandal"
+            },
+            {
+                "handle": "gelisha"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "teamId": 125511,
+        "teamName": "GD",
+        "ghost": false,
+        "startTimeSeconds": 1682889780
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 4383,
+    "memoryConsumedBytes": 5529600,
+    "source": "#include<iostream>\r\n#include <cstring>\r\nusing namespace std;\r\nconst int N=305;\r\nconst int K=1005;\r\nconst int mo=1000000007;\r\nint n,Q;\r\nint a[N],d[N],e[N][N];\r\nint M[N][N],V[N][N],SV[N][N];\r\nint tr[N][N],VP[K][N],IVP[K][N];\r\nint power(int x,int y){\r\n\tint s=1;\r\n\tfor (;y;y/=2,x=1ll*x*x%mo)\r\n\t\tif (y&1) s=1ll*s*x%mo;\r\n\treturn s;\r\n}\r\nvoid init(){\r\n\tfor (int i=1;i<N;i++){\r\n\t\tVP[0][i]=1;\r\n\t\tVP[1][i]=i;\r\n\t\tIVP[0][i]=1;\r\n\t\tIVP[1][i]=power(i,mo-2);\r\n\t\tfor (int j=2;j<K;j++){\r\n\t\t\tVP[j][i]=1ll*VP[j-1][i]*VP[1][i]%mo;\r\n\t\t\tIVP[j][i]=1ll*IVP[j-1][i]*IVP[1][i]%mo;\r\n\t\t}\r\n\t}\r\n}\r\nint t[N][K];\r\nvoid change(int x,int y,int v){\r\n\tfor (y++;y<K;y+=y&(-y))\r\n\t\tt[x][y]=(t[x][y]+v)%mo;\r\n}\r\nint ask(int x,int y){\r\n\tlong long s=0;\r\n\tfor (y++;y;y-=y&(-y)) s+=t[x][y];\r\n\treturn s%mo;\r\n}\r\nvoid Construct(){\r\n\tmemset(t,0,sizeof(t));\r\n\tfor (int i=n;i>=1;i--){\r\n\t\td[i]=(a[i]>0?0:1ll<<30);\r\n\t\tfor (int j=i+1;j<=n;j++)\r\n\t\t\tif (e[i][j]) d[i]=min(d[i],d[j]+1);\r\n\t}\r\n\tfor (int i=1;i<=n;i++)\r\n\t\tif (d[i]!=(1<<30))\r\n\t\t\tfor (int j=1;j<=i;j++)\r\n\t\t\t\tchange(j,d[i],1ll*a[i]*tr[i][j]%mo*IVP[d[i]][j]%mo);\r\n}\r\nint main(){\r\n\tinit();\r\n\tcin>>n;\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tcin>>a[i];\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tint x,y;\r\n\t\tcin>>x;\r\n\t\twhile(x--){\r\n\t\t\tcin>>y;\r\n\t\t\te[i][y]=1;\r\n\t\t}\r\n\t}\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tM[i][i]=i;\r\n\t\tfor(int j=1;j<=n;j++)\r\n\t\t\tif(e[j][i]) M[i][j]=i;\r\n\t}\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tV[i][i]=1;\r\n\t\tfor(int j=i-1;j>=1;j--){\r\n\t\t\tfor(int k=j+1;k<=i;k++)\r\n\t\t\t\tV[i][j]=(V[i][j]+1ll*V[i][k]*M[k][j])%mo;\r\n\t\t\tV[i][j]=1ll*(mo-V[i][j])*power(mo+j-i,mo-2)%mo;\r\n\t\t}\r\n\t\tfor(int j=1;j<=n;j++)\r\n\t\t\tSV[i][j]=(SV[i][j-1]+V[i][j])%mo;\r\n\t}\r\n\tfor(int i=1;i<=n;i++){\r\n\t\ttr[i][i]=1;\r\n\t\tfor(int j=i-1;j>=1;j--)\r\n\t\t\tfor(int k=j+1;k<=i;k++)\r\n\t\t\t\ttr[i][j]=(tr[i][j]+mo-1ll*tr[i][k]*V[k][j]%mo)%mo;\r\n\t}\r\n\tConstruct();\r\n\tcin>>Q;\r\n\twhile(Q--){\r\n\t\tint tp,x,y,z;\r\n\t\tcin>>tp>>x>>y;\r\n\t\tif(tp==1){\r\n\t\t\tint ans=0;\r\n\t\t\tcin>>z;\r\n\t\t\tfor(int i=y;i<=z;i++)\r\n\t\t\t\tif(d[i]>x)\tans=(ans+1ll*mo+a[i])%mo;\r\n\t\t\tfor(int i=1;i<=n;i++)\r\n\t\t\t\tans=(ans+1ll*ask(i,x)*VP[x][i]%mo*(SV[i][z]+mo-SV[i][y-1]))%mo;\r\n\t\t\tcout<<(ans%mo+mo)%mo<<endl;\r\n\t\t}\r\n\t\tif(tp==2){\r\n\t\t\tbool fl=(a[x]<=0);\r\n\t\t\ta[x]+=y;\r\n\t\t\tif(fl&&a[x]>0) Construct();\r\n\t\t\telse{\r\n\t\t\t\tif(d[x]!=(1<<30))\r\n\t\t\t\t\tfor(int i=1;i<=n;i++)\r\n\t\t\t\t\t\tchange(i,d[x],1ll*y*tr[x][i]%mo*IVP[d[x]][i]%mo);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}"
+}

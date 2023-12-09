@@ -1,0 +1,36 @@
+{
+    "id": 234163424,
+    "contestId": 1684,
+    "creationTimeSeconds": 1700876932,
+    "relativeTimeSeconds": 4432,
+    "problem": {
+        "contestId": 1684,
+        "index": "F",
+        "name": "Diverse Segments",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1684,
+        "members": [
+            {
+                "handle": "Xylenox"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1700872500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 592,
+    "memoryConsumedBytes": 54476800,
+    "source": "#include <bits/stdc++.h>\r\n// #include <ext/pb_ds/assoc_container.hpp> //gp_hash_table\r\n\r\n#define all(a) a.begin(), a.end()\r\n#define pb push_back\r\n#define eb emplace_back\r\n#define sz(a) (int) a.size()\r\n#define bitcount(a) (int) __builtin_popcount(a)\r\n#define bitcountll(a) (int) __builtin_popcountll(a)\r\n#define rep(i, from, to) for (int i = from; i < (to); ++i)\r\n#define fora(x, o) for(auto& x : o)\r\n#define bitat(x, i) (((x)>>(i))&1)\r\n\r\n\r\nusing namespace std;\r\n// using namespace __gnu_pbds;\r\n\r\ntypedef long long int ll;\r\ntypedef long double ld;\r\ntypedef pair<int, int> pii;\r\ntypedef pair<ll, ll> pll;\r\ntypedef pair<double, double> pdd;\r\ntypedef vector<int> vi;\r\ntypedef vector<ll> vll;\r\n\r\ntemplate<class T, class U> istream& operator>>(istream &is, pair<T, U>& p) { is >> p.first >> p.second; return is; }\r\ntemplate<class T> istream& operator>>(istream& is, vector<T>& vec) { for(auto &x : vec) cin >> x; return is; } \r\ntemplate<class T, class U> ostream& operator<<(ostream &os, pair<T, U>& p) { os << \"<\" << p.first << \",\" << p.second << \">\"; return os; }\r\ntemplate<class T> ostream& operator<<(ostream& os, vector<T>& vec) { for(auto x : vec) os << x << \" \"; return os; }\r\n\r\n\r\nint CaseN;\r\n\r\nstruct FT {\r\n\tvector<ll> s;\r\n\tFT(int n) : s(n) {}\r\n\tvoid update(int pos, ll dif) { // a[pos] += dif\r\n\t\tfor (; pos < sz(s); pos |= pos + 1) s[pos] += dif;\r\n\t}\r\n\tll query(int pos) { // sum of values in [0, pos)\r\n\t\tll res = 0;\r\n\t\tfor (; pos > 0; pos &= pos - 1) res += s[pos-1];\r\n\t\treturn res;\r\n\t}\r\n\tint lower_bound(ll sum) {// min pos st sum of [0, pos] >= sum\r\n\t\t// Returns n if no sum is >= sum, or -1 if empty sum is.\r\n\t\tif (sum <= 0) return -1;\r\n\t\tint pos = 0;\r\n\t\tfor (int pw = 1 << 25; pw; pw >>= 1) {\r\n\t\t\tif (pos + pw <= sz(s) && s[pos + pw-1] < sum)\r\n\t\t\t\tpos += pw, sum -= s[pos-1];\r\n\t\t}\r\n\t\treturn pos;\r\n\t}\r\n};\r\nstruct FT2 {\r\n\tvector<vi> ys; vector<FT> ft;\r\n\tFT2(int limx) : ys(limx) {}\r\n\tvoid fakeUpdate(int x, int y) {\r\n\t\tfor (; x < sz(ys); x |= x + 1) ys[x].push_back(y);\r\n\t}\r\n\tvoid init() {\r\n\t\tfor (vi& v : ys) sort(all(v)), ft.emplace_back(sz(v));\r\n\t}\r\n\tint ind(int x, int y) {\r\n\t\treturn (int)(lower_bound(all(ys[x]), y) - ys[x].begin()); }\r\n\tvoid update(int x, int y, ll dif) {\r\n\t\tfor (; x < sz(ys); x |= x + 1)\r\n\t\t\tft[x].update(ind(x, y), dif);\r\n\t}\r\n\tll query(int x, int y) {\r\n        x++, y++;\r\n\t\tll sum = 0;\r\n\t\tfor (; x; x &= x - 1)\r\n\t\t\tsum += ft[x-1].query(ind(x-1, y));\r\n\t\treturn sum;\r\n\t}\r\n};\r\n\r\nvoid solve() {\r\n    int n, m;\r\n    cin >> n >> m;\r\n    \r\n    vi arr(n);\r\n    cin >> arr;\r\n\r\n    FT2 ft(n+1);\r\n    vector<pair<int, int>> ranges;\r\n    for (int i = 0; i < m; i++) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        u--, v--;\r\n        ft.fakeUpdate(u, n-v);\r\n        ranges.push_back({u, v});\r\n    }\r\n    ft.init();\r\n    for (auto [u, v] : ranges) {\r\n        ft.update(u, n-v, 1);\r\n    }\r\n    \r\n    map<int, vector<int>> has;\r\n    for (int i = 0; i < n; i++) has[arr[i]].push_back(i);\r\n\r\n    vi prev(n, -1), nxt(n, n), last(n, -1);\r\n    for (auto& [v, inds] : has) {\r\n        int curr = 0;\r\n        for (int i = 0; i < sz(inds); i++) {\r\n            if (i) prev[inds[i]] = inds[i-1];\r\n            if (i < sz(inds)-1) nxt[inds[i]] = inds[i+1];\r\n            while (curr < sz(inds) && ft.query(inds[i], n-inds[curr])) curr++;\r\n            last[inds[i]] = inds[curr-1];\r\n        }\r\n    }\r\n    int max_pref = 0, max_suff = n-1;\r\n    for (; max_pref < n; max_pref++) {\r\n        if (prev[max_pref] == -1 || !ft.query(prev[max_pref], n-max_pref)) continue;\r\n        break;\r\n    }\r\n    for (; max_suff >= 0; max_suff--) {\r\n        if (nxt[max_suff] == -1 || !ft.query(max_suff, n-nxt[max_suff])) continue;\r\n        break;\r\n    }\r\n    max_suff++;\r\n    // cout << max_pref << \" \" << max_suff << \"\\n\";\r\n    // cout << last << \"\\n\";\r\n    if (max_pref == n) {\r\n        cout << 0 << \"\\n\";\r\n        return;\r\n    }\r\n    int res = max_suff;\r\n    for (int i = 0; i < max_pref; i++) {\r\n        res = min(res, max_suff-i);\r\n        if (last[i] != -1) max_suff = max(max_suff, last[i]+1);\r\n    }\r\n    cout << res << \"\\n\";\r\n}\r\n\r\nint main() {\r\n    // freopen(\"input.in\", \"r\", stdin);\r\n    // freopen(\"input.out\", \"w\", stdout);\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    cout.precision(20);\r\n    cout << fixed;\r\n    int t; cin >> t; for(CaseN = 1; CaseN <= t; ++CaseN) solve(); /*\r\n    CaseN = 1;\r\n    solve();/**/\r\n    cout.flush();\r\n    return 0;\r\n}"
+}

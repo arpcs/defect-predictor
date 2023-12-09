@@ -1,0 +1,40 @@
+{
+    "id": 232859065,
+    "contestId": 1654,
+    "creationTimeSeconds": 1700053215,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1654,
+        "index": "G",
+        "name": "Snowy Mountain",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 2900,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "greedy",
+            "shortest paths",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1654,
+        "members": [
+            {
+                "handle": "wangyian2022"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1647776100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 160,
+    "timeConsumedMillis": 857,
+    "memoryConsumedBytes": 32051200,
+    "source": "// LUOGU_RID: 135281563\n#include<cstdio>\r\n#include<algorithm>\r\n#include<cstring>\r\n#include<cassert>\r\nconst int Q=200005;\r\nconst int INF=(1<<30);\r\ntypedef long long ll;\r\n#define rg register int\r\n#define cint const register int\r\n//char ibuf[1<<21],*IP1=ibuf,*IP2=ibuf;\r\n//#define gc() (__builtin_expect(IP1==IP2,0)&&(IP2=(IP1=ibuf)+fread(ibuf,1,1<<21,stdin),__builtin_expect(IP1==IP2,0))?EOF:*IP1++)\r\n#define gc getchar\r\n#define pc putchar\r\ninline bool ig(const char c){return c>=48&&c<=57;}\r\ninline void read(rg&oi){char c;rg f=1,res=0;while(c=gc(),(!ig(c))&&c^'-');c^'-'?res=(c^48):f=-1;while(c=gc(),ig(c))res=res*10+(c^48);oi=f*res;}\r\ninline void print(rg oi){char io[23];rg l=0;if(oi<0)pc('-'),oi=~oi+1;do io[++l]=(oi%10+48);while(oi/=10);for(;l;--l)pc(io[l]);}\r\ninline void write(cint oi,const char c){print(oi);pc(c);}char _ST_;\r\ninline int max(cint x,cint y){return x>y?x:y;}\r\ninline int min(cint x,cint y){return x<y?x:y;}\r\ninline void Max(rg&x,cint y){(x<y)&&(x=y);}\r\ninline void Min(rg&x,cint y){(x>y)&&(x=y);}\r\nint n,a[Q],f[Q],g[Q],mn[Q];bool is[Q],vst[Q];\r\nint h[Q],ce;struct Edge{int to,nxt;}e[Q<<1];\r\ninline void edge(cint x,cint y){e[++ce]=(Edge){y,h[x]};h[x]=ce;}\r\ninline void gph(cint x,cint y){edge(x,y);edge(y,x);}\r\ninline void dfs1(cint x,cint fa){\r\n\tf[x]=a[x]?0:INF;for(rg i=h[x];i;i=e[i].nxt){\r\n\tcint y=e[i].to;if(y==fa)continue;dfs1(y,x);Min(f[x],f[y]+1);}\r\n}\r\ninline void dfs2(cint x,cint fa){\r\n\tif(a[x])g[x]=0;Min(g[x],f[x]);for(rg i=h[x];i;i=e[i].nxt){\r\n\tcint y=e[i].to;if(y==fa)continue;Min(g[y],g[x]+1);dfs2(y,x);}\r\n}\r\nint sze[Q],mxs[Q],tot,rt;\r\ninline void Gsze(cint x,cint fa){\r\n\tsze[x]=1;for(rg i=h[x];i;i=e[i].nxt){\r\n\tcint y=e[i].to;if(y==fa||vst[y])continue;Gsze(y,x);sze[x]+=sze[y];}\r\n}\r\ninline void Grt(cint x,cint fa){\r\n\tmxs[x]=tot-sze[x];for(rg i=h[x];i;i=e[i].nxt){\r\n\tcint y=e[i].to;if(y==fa||vst[y])continue;Grt(y,x);Max(mxs[x],sze[y]);}\r\n\tif(!rt||mxs[rt]>mxs[x])rt=x;\r\n}\r\nint ot[Q],in[Q],lim,mnt[Q];\r\nint st[Q],top;\r\ninline void dfs3(cint x,cint fa,cint s){\r\n\tMax(ot[x],s);Max(lim,ot[x]);\r\n//\tprintf(\"out %d->%d    %d\\n\",rt,x,ot[x]);\r\n\tif(is[x])Min(mnt[ot[x]],g[x]);\r\n\tif(is[x])st[++top]=x;\r\n\tfor(rg i=h[x];i;i=e[i].nxt){\r\n\t\tcint y=e[i].to;if(y==fa||vst[y]||g[y]>g[x])continue;\r\n\t\tot[y]=max(ot[x],0);dfs3(y,x,s+(g[y]==g[x]?1:-1));\r\n\t}\r\n}\r\ninline void dfs4(cint x,cint fa,cint mn){\r\n//\tprintf(\"in %d->%d    %d\\n\",x,rt,in[x]);\r\n\tif(mn>=0)Min(::mn[x],mnt[min(in[x],lim)]);\r\n//\tfor(rg i=min(in[x],lim);i>=0;--i)Min(mn[x],mnt[i]);\r\n//\tif(mn>=0)\r\n//\tfor(rg i=1;i<=top;++i)if(in[x]>=ot[st[i]])Min(::mn[x],g[st[i]]);\r\n\tfor(rg i=h[x];i;i=e[i].nxt){\r\n\t\tcint y=e[i].to;if(y==fa||vst[y]||g[y]<g[x])continue;\r\n\t\tin[y]=in[x]+(g[y]==g[x]?-1:1);dfs4(y,x,min(mn+(g[y]==g[x]?-1:1),0));\r\n\t}\r\n}\r\ninline void upd(cint x){\r\n//\tprintf(\"----------------------------------------upd:%d\\n\",x);\r\n\ttop=0;\r\n\tlim=0;\r\n\tot[x]=0;dfs3(x,0,0);\r\n\tfor(rg i=1;i<=lim;++i)Min(mnt[i],mnt[i-1]);\r\n\tin[x]=0;dfs4(x,0,0);\r\n\tfor(rg i=0;i<=lim;++i)mnt[i]=INF;\r\n}\r\ninline void solve(cint x){\r\n\tupd(x);vst[x]=1;for(rg i=h[x];i;i=e[i].nxt){\r\n\t\tcint y=e[i].to;if(vst[y])continue;\r\n\t\tGsze(y,x);tot=sze[y];rt=0;Grt(y,x);solve(rt);\r\n\t}\r\n}\r\nchar _ED_;int main(){\r\n\tfprintf(stderr,\"static memory:%.6lf MB\\n\",(&_ST_-&_ED_)/1024./1024.);\r\n\tread(n);for(rg i=1;i<=n;++i)read(a[i]),f[i]=g[i]=mn[i]=INF;\r\n\tfor(rg i=1,x,y;i<n;++i)read(x),read(y),gph(x,y);\r\n\tdfs1(1,0);dfs2(1,0);for(rg x=1;x<=n;++x)\r\n\tfor(rg i=h[x];i;i=e[i].nxt)if(g[e[i].to]==g[x])is[x]=1;\r\n//\tfor(rg i=1;i<=n;++i)write(is[i],' ');pc('\\n');\r\n\tfor(rg i=1;i<=n;++i)mn[i]=g[i],mnt[i]=INF;mnt[0]=INF;\r\n\tGsze(1,0);tot=n;rt=0;Grt(1,0);solve(rt);\r\n\tfor(rg i=1;i<=n;++i)write(2*g[i]-mn[i],' ');pc('\\n');\r\n\treturn 0;\r\n}\r\n/*\r\n10\r\n1 0 1 0 0 0 0 1 1 1\r\n2 1\r\n3 1\r\n4 1\r\n5 1\r\n6 2\r\n7 5\r\n8 6\r\n9 4\r\n10 7\r\n\r\n0 2 0 2 2 1 1 0 0 0 \r\n*/"
+}

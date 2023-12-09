@@ -1,0 +1,38 @@
+{
+    "id": 193045666,
+    "contestId": 51,
+    "creationTimeSeconds": 1676025601,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 51,
+        "index": "F",
+        "name": "Caterpillar",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2800,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 51,
+        "members": [
+            {
+                "handle": "xjrjyy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1293552000
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 0,
+    "source": "/* cf_51_f.cpp */\r\n#include <bits/stdc++.h>\r\n\r\n#define fo(x) freopen(#x\".in\", \"r\", stdin); freopen(#x\".out\", \"w\", stdout);\r\n#define rep(i, l, r) for (int i = (l), rep##i = (r); i <= rep##i; ++i)\r\n#define per(i, r, l) for (int i = (r), per##i = (l); i >= per##i; --i)\r\n#define r0p(i, r) rep (i, 0, (r) - 1)\r\n#define p0r(i, l) per (i, (l) - 1, 0)\r\n#define each(x, s) for (auto &x : (s))\r\n#define all(s) (s).begin(), (s).end()\r\n#define dbg(x) (cerr << \"Line#\" << __LINE__ << \" \" << #x << \"=\" << (x) << endl)\r\n\r\nusing ll = long long; using ull = unsigned long long;\r\ntemplate <class T> using vec = std::vector<T>; using namespace std;\r\n\r\nint main() {\r\n    ios::sync_with_stdio(false), cin.tie(nullptr), cout.tie(nullptr);\r\n    int n, m; cin >> n >> m;\r\n    vec<vec<int>> G(n);\r\n    r0p (_, m) {\r\n        int u, v; cin >> u >> v, --u, --v;\r\n        G[u].push_back(v), G[v].push_back(u);\r\n    }\r\n    vec<int> dfn(n), low(n), S, scn(n); int dtt = 0, k = 0;\r\n    auto form = [&](int u) {\r\n        for (int v; v != u; S.pop_back()) scn[v = S.back()] = k;\r\n        ++k;\r\n    };\r\n    function<void(int, int)> dfs = [&](int u, int fa) {\r\n        dfn[u] = low[u] = ++dtt, S.push_back(u);\r\n        each (v, G[u]) if (v != fa) {\r\n            if (!dfn[v]) {\r\n                dfs(v, u), low[u] = min(low[u], low[v]);\r\n                if (dfn[u] < low[v]) form(v);\r\n            } else {\r\n                low[u] = min(low[u], dfn[v]);\r\n            }\r\n        }\r\n        if (!~fa) form(u);\r\n    };\r\n    r0p (i, n) if (!dfn[i]) dfs(i, -1);\r\n    vec<vec<int>> T(k);\r\n    r0p (u, n) each (v, G[u]) if (scn[u] != scn[v]) T[scn[u]].push_back(scn[v]);\r\n    vec<int> d(k, -1);\r\n    function<int(int, int)> dfs2 = [&](int u, int fa) {\r\n        int A = u;\r\n        each (v, T[u]) if (v != fa) {\r\n            d[v] = d[u] + 1; int B = dfs2(v, u);\r\n            if (d[B] > d[A]) A = B;\r\n        }\r\n        return A;\r\n    };\r\n    int A = 0, B = 0;\r\n    auto solve = [&](int u) {\r\n        if (T[u].empty()) return ++A, void();\r\n        d[u] = 0; int s = dfs2(u, -1);\r\n        d[s] = 0; int t = dfs2(s, -1);\r\n        A += d[t] - 1;\r\n    };\r\n    r0p (i, k) if (!~d[i]) solve(i), ++B;\r\n    A += count_if(all(T), [](const vec<int> &x) { return int(x.size()) == 1; });\r\n    cout << n - A + (B - 1) << '\\n';\r\n    // cerr << \"\\n\" << double(clock()) / CLOCKS_PER_SEC << \"s\\n\";\r\n    return 0;\r\n}\r\n"
+}

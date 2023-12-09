@@ -1,0 +1,40 @@
+{
+    "id": 230910393,
+    "contestId": 1654,
+    "creationTimeSeconds": 1698895718,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1654,
+        "index": "G",
+        "name": "Snowy Mountain",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 2900,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "greedy",
+            "shortest paths",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1654,
+        "members": [
+            {
+                "handle": "lzqy__"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1647776100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\n#define mp make_pair\r\n#define il inline\r\nusing namespace std;\r\nconst int B=500;\r\nconst int maxn=200010;\r\nconst int inf=1<<30;\r\nil int read(){\r\n\tint x=0;\r\n\tchar c=getchar();\r\n\tfor(;!(c>='0'&&c<='9');c=getchar());\r\n\tfor(;c>='0'&&c<='9';c=getchar())\r\n\t\tx=(x<<1)+(x<<3)+c-'0';\r\n\treturn x;\r\n}\r\nstruct edge{\r\n\tint v,to;\r\n}e[maxn<<1];\r\nint head[maxn],ecnt;\r\nvoid addedge(int u,int v){\r\n\te[++ecnt].v=v,e[ecnt].to=head[u],head[u]=ecnt;\r\n}\r\nint f[maxn],d[B+10][maxn];\r\nint ans[maxn],h[maxn];\r\nint a[maxn],n;\r\nint fa[maxn],dep[maxn];\r\nint st[maxn],top;\r\nint val[maxn],cnt;\r\nbool cmp(int x,int y){return h[x]<h[y];}\r\nvoid dfs1(int fath,int x){\r\n\tfa[x]=fath,dep[x]=dep[fath]+1;\r\n\tfor(int i=head[x];i;i=e[i].to)\r\n\t\tif(e[i].v^fath){\r\n\t\t\tdfs1(x,e[i].v);\r\n\t\t\th[x]=min(h[x],h[e[i].v]+1);\r\n\t\t}\r\n\tif(a[x]) h[x]=0;\r\n}\r\nvoid dfs2(int fath,int x){\r\n\tif(fath) h[x]=min(h[x],h[fath]+1);\r\n\tfor(int i=head[x];i;i=e[i].to)\r\n\t\tif(e[i].v^fath) dfs2(x,e[i].v);\r\n}\r\npriority_queue<pair<int,int> >q1;\r\nqueue<int>q2;\r\nvoid bfs(int ii){\r\n\twhile(!q1.empty()){\r\n\t\twhile(!q1.empty()){\r\n\t\t\tint t=q1.top().second; q1.pop();\r\n\t\t\tq2.push(t);\r\n\t\t\tfor(int i=head[t];i;i=e[i].to)\r\n\t\t\t\tif(h[e[i].v]==h[t])\r\n\t\t\t\t\tif(d[ii][e[i].v]>d[ii][t]+1)\r\n\t\t\t\t\t\td[ii][e[i].v]=d[ii][t]+1,q1.push(mp(-d[ii][e[i].v],e[i].v));\r\n\t\t}\r\n\t\twhile(!q2.empty()){\r\n\t\t\tint t=q2.front; q2.pop();\r\n\t\t\tfor(int i=head[t];i;i=e[i].to)\r\n\t\t\t\tif(h[e[i].v]==h[t]+1)\r\n\t\t\t\t\tif(d[ii][e[i].v]>max(d[ii][t]-1,0))\r\n\t\t\t\t\t\td[ii][e[i].v]=max(d[ii][t]-1,0),q1.push(mp(-d[ii][e[i].v],e[i].v));\r\n\t\t}\r\n\t}\r\n}\r\nint main(){\r\n//\tfreopen(\"CF.in\",\"r\",stdin);\r\n//\tfreopen(\"CF.out\",\"w\",stdout);\r\n\tn=read();\r\n\tfor(int i=1;i<=n;i++)\r\n\t\ta[i]=read();\r\n\tfor(int i=1;i<n;i++){\r\n\t\tint x=read(),y=read();\r\n\t\taddedge(x,y),addedge(y,x);\r\n\t}\r\n\tfor(int i=1;i<=n;i++) h[i]=inf;\r\n\tdfs1(0,1),dfs2(0,1);\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tfor(int j=head[i];j;j=e[j].to)\r\n\t\t\tif(h[i]==h[e[j].v]) \r\n\t\t\t\t{st[++top]=i;break;}\r\n\tsort(st+1,st+1+top,cmp);\r\n\tfor(int i=0,j=1;i<=n;i++){\r\n\t\tif(h[st[j]]==i) val[++cnt]=i;\r\n\t\telse continue;\r\n\t\tfor(int k=1;k<=n;k++) d[cnt][k]=inf;\r\n\t\twhile(j<=n&&h[st[j]]==i)\r\n\t\t\td[cnt][st[j]]=0,q1.push(mp(0,st[j++]));\r\n\t\tbfs(cnt);\r\n\t}\r\n\tfor(int i=1;i<=n;i++) f[i]=h[i]; \r\n\tfor(int i=1;i<=n;i++)\r\n\t\tfor(int j=1;j<=cnt;j++)\r\n\t\t\tif(!d[j][i]){\r\n\t\t\t\tf[i]=val[j];\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tprintf(\"%d \",2*h[i]-f[i]);\r\n\tprintf(\"\\n\");\r\n\treturn 0;\r\n}"
+}

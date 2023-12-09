@@ -1,0 +1,35 @@
+{
+    "id": 218021037,
+    "contestId": 903,
+    "creationTimeSeconds": 1691587266,
+    "relativeTimeSeconds": 6846,
+    "problem": {
+        "contestId": 903,
+        "index": "F",
+        "name": "Clear The Matrix",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "bitmasks",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 903,
+        "members": [
+            {
+                "handle": "brenner1"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1691580420
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 77,
+    "memoryConsumedBytes": 16793600,
+    "source": "#include \"bits/stdc++.h\"\r\nusing namespace std;\r\n\r\n#define endl '\\n'\r\n#define all(x) (x).begin(), (x).end()\r\ntypedef long long ll;\r\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\r\n\r\nconst int N = 1010, inf = 1e9;\r\nint n, c[5], a[4][N], dp[N][(1 << 12)];\r\n\r\nvector<pair<array<array<int, 4>, 4>, int>> ways;\r\nvoid gen(int row, vector<int> choices) {\r\n    if (row == 4) {\r\n        int cost = 0;\r\n        array<array<int, 4>, 4> shape;\r\n        for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) shape[i][j] = 1;\r\n        int i = 0;\r\n        for (int x : choices) {\r\n            cost += c[x];\r\n            for (int j = 0; j < x; j++) for (int k = 0; k < x; k++) {\r\n                shape[i + j][k] = 0;\r\n            }\r\n            i++;\r\n        }\r\n        ways.emplace_back(shape, cost);\r\n    } else {\r\n        for (int j = 0; row + j <= 4; j++) {\r\n            auto nxt = choices;\r\n            nxt.push_back(j);\r\n            gen(row + 1, nxt);\r\n        }\r\n    }\r\n}\r\n\r\nint solve(int i, int mask) {\r\n    if (i == n) return mask == 0 ? 0 : inf;\r\n    int &st = dp[i][mask];\r\n    if (st != -1) return st;\r\n\r\n    st = inf;\r\n    for (auto &[shape, cost] : ways) {\r\n        int next_mask = 0, ok = 1;\r\n        for (int row = 0, p = 1, p2 = 1; row < 4; row++) for (int col = 0; col < 4; col++) {\r\n            int cur = shape[row][col] && (col < 3 ? ((mask & p) > 0) : a[row][i + 3]);\r\n            if (col < 3) p *= 2;\r\n            if (col > 0) {\r\n                if (cur) next_mask += p2;\r\n                p2 *= 2;\r\n            } else ok &= cur == 0;\r\n        }\r\n        if (ok) st = min(st, solve(i + 1, next_mask) + cost);\r\n    }\r\n    return st;\r\n}\r\n\r\n \r\nvoid solvetask() {\r\n    cin >> n;\r\n    for (int i = 1; i <= 4; i++) cin >> c[i];\r\n    for (int i = 0; i < 4; i++) {\r\n        string s; cin >> s;\r\n        for (int j = 0; j < n; j++) a[i][j] = s[j] == '*';\r\n    }\r\n    gen(0, {});\r\n\r\n    int mask = 0;\r\n    for (int i = 0, p = 1; i < 4; i++) for (int j = 0; j < 3; j++) {\r\n        if (a[i][j]) mask += p;\r\n        p *= 2;\r\n    }\r\n\r\n    memset(dp, -1, sizeof dp);\r\n    cout << solve(0, mask) << endl;\r\n}\r\n \r\nint main() {\r\n    cin.tie(0)->sync_with_stdio(0);\r\n    int t = 1;\r\n    while(t--) solvetask();\r\n}\r\n\r\n"
+}

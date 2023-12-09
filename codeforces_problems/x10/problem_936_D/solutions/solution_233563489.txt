@@ -1,0 +1,36 @@
+{
+    "id": 233563489,
+    "contestId": 936,
+    "creationTimeSeconds": 1700484300,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 936,
+        "index": "D",
+        "name": "World of Tank",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 3000,
+        "tags": [
+            "dp",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 936,
+        "members": [
+            {
+                "handle": "O_O_Zzz"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1519574700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 100,
+    "timeConsumedMillis": 1544,
+    "memoryConsumedBytes": 237977600,
+    "source": "// LUOGU_RID: 136111298\n#include <bits/stdc++.h>\nusing namespace std;\nconst int N=4e6+5;\nint n,m1,m2,t,p1[N],p2[N],f[2][N],qz[2][N],zy[2][N];\nbitset<N>mk[2];\nvector<int>ls,q,rs1;\nvector<pair<int,int> >rs2;\nint gets(int x){return lower_bound(q.begin(),q.end(),x)-q.begin()+1;}\nbool cmp(pair<int,int>a,pair<int,int>b){return a.second<b.second;}\nvoid solve(int a,int b){\n    if(a==0&&b==1)return;\n    if(zy[a][b]==b){\n        rs1.push_back(b);\n        solve(a^1,b);\n    }else{\n        int sm=0,nw=0;\n        for(int i=b;i>zy[a][b];i--)if(mk[a][i])sm++;\n        if(sm)rs2.push_back(make_pair(a,q[zy[a][b]-1]+t-f[a][zy[a][b]])),sm--,nw=q[zy[a][b]-1]+t-f[a][zy[a][b]];\n        while(sm--)rs2.push_back(make_pair(a,nw+t)),nw+=t;\n        solve(a,zy[a][b]);\n    }\n}\nstruct node{\n    int sm,x;\n    friend bool operator<(node a,node b){\n        return a.sm<b.sm;\n    }\n};\npriority_queue<node>q1,q2;\nsigned main(){\n //   freopen(\"in.txt\",\"r\",stdin);\n   // freopen(\"out.txt\",\"w\",stdout);\n    cin>>n>>m1>>m2>>t;\n    for(int i=1;i<=m1;i++){\n        scanf(\"%d\",&p1[i]);\n        ls.push_back(p1[i]);\n        ls.push_back(p1[i]+1);\n    }\n    for(int i=1;i<=m2;i++){\n        scanf(\"%d\",&p2[i]);\n        ls.push_back(p2[i]);\n        ls.push_back(p2[i]+1);\n    }\n    ls.push_back(0);\n    sort(ls.begin(),ls.end());\n    q.push_back(ls[0]);\n    for(int i=1;i<ls.size();i++)if(ls[i]!=ls[i-1])q.push_back(ls[i]);\n    for(int i=1;i<=m1;i++)mk[0][gets(p1[i])]=1;\n    for(int i=1;i<=m2;i++)mk[1][gets(p2[i])]=1;\n    n=q.size();\n    for(int i=1;i<=n;i++)qz[0][i]=qz[0][i-1]+mk[0][i],qz[1][i]=qz[1][i-1]+mk[1][i];\n    memset(f,-0x3f,sizeof(f));\n    f[0][1]=f[1][1]=0;\n    zy[1][1]=1;\n    q1.push((node){f[0][1]-q[0]+qz[0][1]*t,1});\n    q2.push((node){f[1][1]-q[0]+qz[1][1]*t,1});\n    for(int i=2;i<=n;i++){\n        while(q1.size()&&f[0][q1.top().x]+qz[0][q1.top().x]*t-q[q1.top().x-1]-1<qz[0][i]*t-q[i-1])q1.pop();\n        while(q2.size()&&f[1][q2.top().x]+qz[1][q2.top().x]*t-q[q2.top().x-1]-1<qz[1][i]*t-q[i-1])q2.pop();\n        if(q1.size())f[0][i]=q1.top().sm+q[i-1]-qz[0][i]*t,zy[0][i]=q1.top().x;\n        if(q2.size())f[1][i]=q2.top().sm+q[i-1]-qz[1][i]*t,zy[1][i]=q2.top().x;\n        if(!mk[0][i])if(f[1][i]>f[0][i])f[0][i]=f[1][i],zy[0][i]=i;\n        if(!mk[1][i])if(f[0][i]>f[1][i])f[1][i]=f[0][i],zy[1][i]=i;\n        f[0][i]=min(f[0][i],t);\n        f[1][i]=min(f[1][i],t);\n        q1.push((node){f[0][i]-q[i-1]+qz[0][i]*t,i});\n        q2.push((node){f[1][i]-q[i-1]+qz[1][i]*t,i});\n    }\n    if(f[0][n]>=0){\n        puts(\"Yes\");\n        solve(0,n);\n        sort(rs1.begin(),rs1.end());\n        if(rs1.size()&&rs1.back()==n)rs1.pop_back();\n        cout<<rs1.size()<<endl;\n        for(int i=0;i<rs1.size();i++)printf(\"%d \",q[rs1[i]-1]);\n        printf(\"\\n\");\n        sort(rs2.begin(),rs2.end(),cmp);\n        cout<<rs2.size()<<endl;\n        for(int i=0;i<rs2.size();i++)printf(\"%d %d\\n\",rs2[i].second,rs2[i].first+1);\n    }else if(f[1][n]>=0){\n        puts(\"Yes\");\n        solve(1,n);\n        sort(rs1.begin(),rs1.end());\n        if(rs1.size()&&rs1.back()==n)rs1.pop_back();\n        cout<<rs1.size()<<endl;\n        for(int i=0;i<rs1.size();i++)printf(\"%d \",q[rs1[i]-1]);\n        printf(\"\\n\");\n        sort(rs2.begin(),rs2.end(),cmp);\n        cout<<rs2.size()<<endl;\n        for(int i=0;i<rs2.size();i++)printf(\"%d %d\\n\",rs2[i].second,rs2[i].first+1);\n    }else{\n        puts(\"No\");\n    }\n}"
+}

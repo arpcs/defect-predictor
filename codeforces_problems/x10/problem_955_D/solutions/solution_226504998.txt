@@ -1,0 +1,36 @@
+{
+    "id": 226504998,
+    "contestId": 955,
+    "creationTimeSeconds": 1696374962,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 955,
+        "index": "D",
+        "name": "Scissors",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2600,
+        "tags": [
+            "brute force",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 955,
+        "members": [
+            {
+                "handle": "Kerafeng"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1521822900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 82,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 57651200,
+    "source": "#include \"bits/stdc++.h\"\r\n\r\nsigned main() {\r\n  std::ios::sync_with_stdio(false), std::cin.tie(nullptr);\r\n\r\n  static int n, m, x;\r\n  std::cin >> n >> m >> x;\r\n\r\n  static std::string s, t;\r\n  std::cin >> s >> t;\r\n\r\n  static std::vector<int> f(m), g(n);\r\n\r\n  f[0] = -1;\r\n  for (int i = 1, j = -1; i < m; i++) {\r\n    while (j > -1 and t[i] != t[j + 1]) {\r\n      j = f[j];\r\n    }\r\n    j += (t[i] == t[j + 1]);\r\n    f[i] = j;\r\n  }\r\n\r\n  for (int i = 0, j = -1; i < n; i++) {\r\n    while (j > -1 and s[i] != t[j + 1]) {\r\n      j = f[j];\r\n    }\r\n    j += (s[i] == t[j + 1]);\r\n    g[i] = j;\r\n    if (j == std::min(m, x) - 1) {\r\n      j = f[j];\r\n    }\r\n  }\r\n\r\n  std::reverse(t.begin(), t.end());\r\n\r\n  static std::vector<int> h(m), k(n);\r\n\r\n  h[0] = -1;\r\n  for (int i = 1, j = -1; i < m; i++) {\r\n    while (j > -1 and t[i] != t[j + 1]) {\r\n      j = h[j];\r\n    }\r\n    j += (t[i] == t[j + 1]);\r\n    h[i] = j;\r\n  }\r\n\r\n  for (int i = n - 1, j = -1; i >= 0; i--) {\r\n    while (j > -1 and s[i] != t[j + 1]) {\r\n      j = h[j];\r\n    }\r\n    j += (s[i] == t[j + 1]);\r\n    k[i] = j;\r\n    if (j == std::min(m, x) - 1) {\r\n      j = h[j];\r\n    }\r\n  }\r\n\r\n  std::reverse(t.begin(), t.end());\r\n\r\n  auto check = [&]() -> bool {\r\n    for (int i = 0, j = -1; i < n; i++) {\r\n      while (j > -1 and s[i] != t[j + 1]) {\r\n        j = f[j];\r\n      }\r\n      j += (s[i] == t[j + 1]);\r\n      if (j == m - 1) {\r\n        int l = 0, r = x * 2;\r\n        while (r <= j) {\r\n          l += 1, r += 1;\r\n        }\r\n        std::cout << \"Yes\\n\" << l + 1 << \" \" << l + 1 + x << \"\\n\";\r\n        return true;\r\n      }\r\n    }\r\n    return false;\r\n  };\r\n\r\n  if (check()) {\r\n    return 0;\r\n  }\r\n\r\n  static std::vector<std::vector<int>> adj(m + 1);\r\n\r\n  for (int v = 0; v < m; v++) {\r\n    adj[h[v] + 1].emplace_back(v + 1);\r\n  }\r\n\r\n  static std::vector<std::pair<int, int>> dfn(m + 1);\r\n\r\n  static std::vector<int> st((m + 1) << 2, 1 << 30);\r\n\r\n  struct function {\r\n    static void dfs(int u) {\r\n      static int timer = 0;\r\n      dfn[u].first = timer++;\r\n      for (int v : adj[u]) {\r\n        dfs(v);\r\n      }\r\n      dfn[u].second = timer;\r\n    }\r\n\r\n    static void update(int id, int l, int r, int pos, int value) {\r\n      if (l + 1 == r) {\r\n        st[id] = value;\r\n        return;\r\n      }\r\n\r\n      int m = (l + r) / 2;\r\n\r\n      if (pos < m) {\r\n        update(id << 1, l, m, pos, value);\r\n      }\r\n      else {\r\n        update(id << 1 | 1, m, r, pos, value);\r\n      }\r\n\r\n      st[id] = std::min(st[id << 1], st[id << 1 | 1]);\r\n    }\r\n\r\n    static int query(int id, int l, int r, int left, int right) {\r\n      if (left <= l and r <= right) {\r\n        return st[id];\r\n      }\r\n\r\n      if (right <= l or r <= left) {\r\n        return 1 << 30;\r\n      }\r\n\r\n      int m = (l + r) / 2;\r\n\r\n      return std::min(query(id << 1, l, m, left, right), query(id << 1 | 1, m, r, left, right));\r\n    }\r\n  };\r\n\r\n  function::dfs(0);\r\n\r\n  m += 1;\r\n\r\n  for (int i = 0; i < n; i++) {\r\n    g[i] += 1, k[i] += 1;\r\n  }\r\n\r\n  for (int i = n - x; i >= x; i--) {\r\n    function::update(1, 0, m, dfn[k[i]].first, i);\r\n    int r = function::query(1, 0, m, dfn[m - 1 - g[i - 1]].first, dfn[m - 1 - g[i - 1]].second);\r\n\r\n    if (r < n) {\r\n      std::cout << \"Yes\\n\" << i + 1 - x << \" \" << r + 1 << \"\\n\";\r\n      return 0;\r\n    }\r\n  }\r\n\r\n  std::cout << \"No\\n\";\r\n\r\n  return 0;\r\n}"
+}

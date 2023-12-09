@@ -1,0 +1,36 @@
+{
+    "id": 234412155,
+    "contestId": 377,
+    "creationTimeSeconds": 1701000952,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 377,
+        "index": "E",
+        "name": "Cookie Clicker",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2800,
+        "tags": [
+            "dp",
+            "geometry"
+        ]
+    },
+    "author": {
+        "contestId": 377,
+        "members": [
+            {
+                "handle": "Alcabel"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1388331000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nstruct Line {\r\n    long long a, b;\r\n    Line() {}\r\n    Line(long long _a, long long _b) {\r\n        a = _a, b = _b;\r\n    }\r\n    long long f(long long x) {\r\n        return a * x + b;\r\n    }\r\n    ~Line() {}\r\n};\r\n\r\nint sign(long long x) {\r\n    if (x > 0) { return 1; }\r\n    if (x < 0) { return -1; }\r\n    return 0;\r\n}\r\n\r\nlong long intersect(const Line& A, const Line& B) {\r\n    long long numer = B.b - A.b;\r\n    long long denom = A.a - B.a;\r\n    // A.a * x + A.b = B.a * x + B.b\r\n    // x = (B.b - A.b) / (A.a - B.a)\r\n    int sn = sign(numer), sd = sign(denom);\r\n    numer *= sn, denom *= sd;\r\n    if (sn * sd < 0) {\r\n        return numer / denom * (-1);\r\n    }\r\n    return (numer + denom - 1) / denom;\r\n}\r\n\r\nvoid solve() {\r\n    int n;\r\n    long long s;\r\n    cin >> n >> s;\r\n    vector<pair<int, int>> lines(n);\r\n    for (int i = 0; i < n; ++i) {\r\n        cin >> lines[i].first >> lines[i].second;\r\n    }\r\n    sort(lines.begin(), lines.end());\r\n    vector<Line> lineCont = {Line(1, 0)};\r\n    vector<long long> optX = {0};\r\n    auto lower_bound = [&](long long c) -> pair<int, long long> {\r\n        int left = 0, right = lines.size();\r\n        while (right - left > 1) {\r\n            int mid = left + (right - left) / 2;\r\n            if (lineCont[mid].f(optX[mid]) > c) {\r\n                right = mid;\r\n            } else {\r\n                left = mid;\r\n            }\r\n        }\r\n        long long startX = intersect(lineCont[left], Line(0, c));\r\n        if (right < (int)lineCont.size() && optX[right] == startX) {\r\n            ++left;\r\n        }\r\n        return {left, startX};\r\n    };\r\n    for (int i = 1; i < n; ++i) {\r\n        if (lines[i].first == lines[i - 1].first) { continue; }\r\n        auto [left, startX] = lower_bound(lines[i].second);\r\n        Line l(lines[i].first, -lines[i].first * 1ll * startX + lineCont[left].f(startX) - lines[i].second);\r\n        // f(x) = lines[i].first * (x - startX) + y[[j] + k[j] * (startX - x[j]) - lines[i].second\r\n        while (!lineCont.empty() && intersect(lineCont.back(), l) <= optX.back()) {\r\n            lineCont.pop_back();\r\n            optX.pop_back();\r\n        }\r\n        if (!lineCont.empty()) {\r\n            optX.emplace_back(intersect(lineCont.back(), l));\r\n            lineCont.emplace_back(l);\r\n        } else {\r\n            lineCont.emplace_back(lines[i].first, 0);\r\n            optX.emplace_back(0);\r\n        }\r\n    }\r\n    cout << lower_bound(s).second << '\\n';\r\n}\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n    \r\n#ifdef LOCAL\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n    freopen(\"output.txt\", \"w\", stdout);\r\n    int T = 1;\r\n    cin >> T;\r\n    while (T--) {\r\n        solve();\r\n        cerr << \"-----------\\n\";\r\n        cout << \"-----------\\n\";\r\n    }\r\n#else\r\n    int T = 1;\r\n    // cin >> T;\r\n    while (T--) {\r\n        solve();\r\n    }\r\n#endif\r\n\r\n    return 0;\r\n}\r\n"
+}

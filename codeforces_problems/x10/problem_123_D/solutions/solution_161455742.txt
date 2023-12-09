@@ -1,0 +1,35 @@
+{
+    "id": 161455742,
+    "contestId": 123,
+    "creationTimeSeconds": 1655887260,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 123,
+        "index": "D",
+        "name": "String",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2300,
+        "tags": [
+            "string suffix structures"
+        ]
+    },
+    "author": {
+        "contestId": 123,
+        "members": [
+            {
+                "handle": "DerKleinUbermensch"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1320333000
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 50,
+    "timeConsumedMillis": 92,
+    "memoryConsumedBytes": 5529600,
+    "source": "#include<bits/stdc++.h>\n//#pragma GCC optimize(\"Ofast\")\nusing namespace std;\n#define F first\n#define S second\n#define pb push_back\n#define ppb pop_back\n#define lb lower_bound\n#define pc __builtin_popcount\n#define FOR(i,a,b) for(int i=a;i<=b;i++)\n#define FORR(i,a,b) for(int i=a;i>=b;i--)\n#define debug(x) cerr<<#x<<\" : &\"<<x<<\"&\\n\"\ntypedef long long ll;\ntypedef long double ld;\ntypedef pair<int , int> pii;\ntypedef pair<pii, int> piii;\ntypedef pair<bool, int> pbi;\n\nconst ll MX=1e5+5, MOD = 1e9+7, inf = 1e9+5, LOG=19, A=256;\nint n, m, lg, lcp[MX], mark[MX], sz[MX], l[MX], p[MX];\nvector<int> r[2], sr;\npii lcp1[MX];\nll res, t;\nstring s;\n\nbool cmp(int& i, int& j){\n\tif(r[0][i]!=r[0][j]) return r[0][i]<r[0][j];\n\treturn r[0][(i+(1<<lg))%n]<r[0][(j+(1<<lg))%n];\n}\n\nvoid srt(vector<int>& vec){\n\tint c[n+5]={}, loc[n+5]={};\n\tvector<int> v(n+5, 0);\n\tFOR(i, 0, n-1) c[r[0][i]]++;\n\tloc[0]=0;\n\tFOR(i, 1, n) loc[i] = loc[i-1]+c[i-1];\n\tFOR(i, 0, n-1) v[loc[r[0][(vec[i]+(1<<lg))%n]]] = vec[i], loc[r[0][(vec[i]+(1<<lg))%n]]++;\n\tloc[0]=0;\n\tFOR(i, 1, n) loc[i] = loc[i-1]+c[i-1];\n\tFOR(i, 0, n-1) vec[loc[r[0][v[i]]]] = v[i], loc[r[0][v[i]]]++;\n}\n\nvoid sufarr(vector<int>& vec){\n\tint c[A]={}, N=0;\n\tFOR(g, 0, 1) r[g] = vector<int>(n+5, 0);\n\tFOR(i, 0, n-1) c[(int)s[i]]++;\n\tFOR(i, 0, A-1) if(c[i]) c[i]=N++;\n\tFOR(i, 0, n-1) r[0][i] = c[(int)s[i]];\n\tvec.resize(n);\n\tFOR(i, 0, n-1) vec[i]=i;\n\tfor(lg=0; (1<<lg)<=n; lg++){\n\t\tsrt(vec);\n\t\tN=0;\n\t\tFOR(i, 0, n-1) {\n\t\t\tif(i!=0 and cmp(vec[i-1], vec[i])) N++;\n\t\t\tr[1][vec[i]] = N;\n\t\t}\n\t\tr[0].swap(r[1]);\n\t}\n\tsrt(vec);\n}\n\nvoid get_lcp(vector<int>& sr){\n\tint loc[n+5]={};\n\tFOR(i, 0, n-1) loc[sr[i]]=i;\n\tFOR(i, 0, n-1){\n\t\tif(loc[i]==n-1) continue;\n\t\tint g=sr[loc[i]+1];\n\t\tFOR(j, lcp[loc[i]], n){\n\t\t\tif(max(i, g)+j>=n or s[i+j]!=s[g+j]) break;\n\t\t\telse lcp[loc[i]]++;\n\t\t}\n\t\tlcp[loc[i+1]] = max(0, lcp[loc[i]]-1);\n\t}\n}\n\nint par(int u){\n\tif(p[u]<0) return u;\n\treturn p[u] = par(p[u]);\n}\n\ninline ll c2(int k){\n\treturn 1LL*k*(k-1)/2;\n}\n\nvoid join(int u, int v){\n\tif(max(p[u], p[v])==inf) return;\n\tu = par(u); v=par(v);\n\tif(p[v]<p[u]) swap(u, v);\n\tt-= c2(-p[v]+1)+c2(-p[u]+1);\n\tp[u]+=p[v];\n\tp[v] = u;\n\tt+= c2(-p[u]+1);\n}\n\nint main(){\n\tios::sync_with_stdio(false);cin.tie(NULL);\t\n\tcin>>s;\n\ts.pb('$');\n\tn = s.size();\n\t//vector<int> sr;\n\tsufarr(sr);\n\tget_lcp(sr);\n\tFOR(i, 0, n-2) lcp1[i] = pii(lcp[i], i);\n\tsort(lcp1, lcp1+n-1);\n\t\n\tFOR(i, 0, n) p[i] = inf;\n\tint i=n-2;\n\tFORR(j, n, 0) {\n\t\tbool flag=false;\n\t\twhile(i>=0 and lcp1[i].F==j){\n\t\t\tflag=true;\n\t\t\tp[lcp1[i].S]=-1;\n\t\t\tt++;\n\t\t\tif(lcp1[i].S) join(lcp1[i].S-1, lcp1[i].S);\n\t\t\tif(lcp1[i].S!=n-2) join(lcp1[i].S+1, lcp1[i].S);\n\t\t\t\n\t\t\ti--;\n\t\t}\n\t\tif(flag) res+=t;\n\t}\n\tcout<<res<<'\\n';\n}\n\n\n"
+}

@@ -1,0 +1,35 @@
+{
+    "id": 231076526,
+    "contestId": 762,
+    "creationTimeSeconds": 1698994870,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 762,
+        "index": "E",
+        "name": "Radio stations",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 762,
+        "members": [
+            {
+                "handle": "mphillotry"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1485354900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 92,
+    "memoryConsumedBytes": 2457600,
+    "source": "#include <bits/stdc++.h>\n#define A first\n#define B second\n#define vc vector\n#define pb push_back\n#define endl '\\n'\nusing namespace std;\nusing ll = long long; using ld = long double;\nusing vi = vc<int>; using vll = vc<ll>;\nusing si = set<int>; using sll = set<ll>;\nusing pi = pair<int, int>; using pll = pair<ll, ll>;\nusing qi = queue<int>; using mi = map<int, int>;\n\ntemplate<class T> bool ckmin(T &a, const T &b) { return b < a ? a = b, 1 : 0; }\ntemplate<class T> bool ckmax(T &a, const T &b) { return a < b ? a = b, 1 : 0; }\n\nconstexpr int inf = 1e9 + 7;\nconstexpr int mod = inf;\nconstexpr ll infll = 0x3f3f3f3f3f3f3f3fll;\n\nusing a3 = array<int, 3>;\n\nint mid(int l, int r) {\n  return l + (r - l) / 2;\n}\n\ntemplate<typename T, size_t N, ll M>\nstruct dsgt {\n  vc<T> val;\n  vi lf, rg;\n  function<T(const T&, const T&)> merge, update;\n  function<T()> identity;\n  int cur = 1;\n\n  dsgt(function<T(const T&, const T&)> combine) : \n       merge(combine), \n       update(combine), \n       val(4 * N + 5), \n       lf(4 * N + 5), \n       rg(4 * N + 5) {\n    identity = []() { return T(); };\n  }\n\n  dsgt(function<T(const T&, const T&)> combine, \n       function<T()> identity) : \n       merge(combine), \n       update(combine), \n       identity(identity), \n       val(4 * N + 5), \n       lf(4 * N + 5), \n       rg(4 * N + 5) {}\n\n  dsgt(function<T(const T&, const T&)> merge, \n       function<T(const T&, const T&)> update) : \n       merge(merge), \n       update(update), \n       val(4 * N + 5), \n       lf(4 * N + 5), \n       rg(4 * N + 5) {\n    identity = []() { return T(); };\n  }\n\n  dsgt(function<T(const T&, const T&)> merge, \n       function<T(const T&, const T&)> update, \n       function<T()> identity) : \n       merge(merge), \n       update(update), \n       identity(identity), \n       val(4 * N + 5), \n       lf(4 * N + 5), \n       rg(4 * N + 5) {}\n\n  void pull(int u) {\n    val[u] = T();\n    if (lf[u]) val[u] = merge(val[u], val[lf[u]]);\n    if (rg[u]) val[u] = merge(val[u], val[rg[u]]);\n  }\n\n  void upd(int i, const T &x, int u = 0, ll l = -M + 1, ll r = M - 1) {\n    if (l == r) val[u] = update(val[u], x);\n    else {\n      int m = mid(l, r);\n      if (i <= m) {\n        if (!lf[u]) lf[u] = cur++;\n        upd(i, x, lf[u], l, m);\n      } else {\n        if (!rg[u]) rg[u] = cur++;\n        upd(i, x, rg[u], m + 1, r);\n      }\n      pull(u);\n    }\n  }\n\n  T qry(int i, int j, int u = 0, ll l = -M + 1, ll r = M - 1) {\n    if (j < l || r < i) return identity();\n    if (i <= l && r <= j) return val[u];\n    int m = mid(l, r);\n    T ret = identity();\n    if (lf[u]) ret = merge(ret, qry(i, j, lf[u], l, m));\n    if (rg[u]) ret = merge(ret, qry(i, j, rg[u], m + 1, r));\n    return ret;\n  }\n};\n\nint main() {\n  cin.tie(0) -> sync_with_stdio(0);\n\n  int n, k; cin >> n >> k;\n  vc<vc<pi>> st(10005);\n  for (int i = 0; i < n; ++i) {\n    int x, r, f; cin >> x >> r >> f;\n    st[f].pb({ x, r });\n  }\n  dsgt<int, 10005, inf> t([](auto a, auto b) { return a + b; });\n  ll ret = -n;\n  for (int i = 1; i <= 10000; ++i) {\n    if (!st[i].size()) continue;\n    vc<a3> e;\n    for (auto[x, r] : st[i]) e.pb({ x, 1, r });\n    for (int j = max(0, i - k); j <= min(i + k, 10000); ++j) {\n      for (auto [x, r] : st[j]) e.pb({ x - r, 0, x });\n    }\n    sort(e.begin(), e.end());\n    for (auto [x, tp, v] : e) {\n      if (tp) ret += t.qry(x, x + v);\n      else t.upd(v, 1);\n    }\n    for (auto [x, tp, v] : e) if (!tp) t.upd(v, -1);\n  }\n  cout << ret << endl;\n}\n"
+}

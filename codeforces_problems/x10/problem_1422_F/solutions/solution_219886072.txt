@@ -1,0 +1,37 @@
+{
+    "id": 219886072,
+    "contestId": 1422,
+    "creationTimeSeconds": 1692693274,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1422,
+        "index": "F",
+        "name": "Boring Queries",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1422,
+        "members": [
+            {
+                "handle": "vegeone"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601827500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 27648000,
+    "source": "// LUOGU_RID: 122248401\n#include<bits/stdc++.h>\r\n// #define int long long\r\nusing namespace std;\r\n#define endl '\\n'\r\ntypedef pair<int,int>pp;\r\ntypedef long long LL;\r\n\r\ntemplate<class T>\r\nconstexpr T power(T a, LL b) {\r\n    T res = 1;\r\n    for (; b; b /= 2, a *= a) {\r\n        if (b % 2) {\r\n            res *= a;\r\n        }\r\n    }\r\n    return res;\r\n}\r\ntemplate<int P>\r\nstruct MInt {\r\n    int x;\r\n    constexpr MInt(LL x = 0) : x(norm(x % P)) {}\r\n    constexpr int norm(int x) const {\r\n        if (x < 0) {\r\n            x += P;\r\n        }\r\n        if (x >= P) {\r\n            x -= P;\r\n        }\r\n        return x;\r\n    }\r\n    explicit constexpr operator int() const {\r\n        return x;\r\n    }\r\n    constexpr int val() const {\r\n        return x;\r\n    }\r\n    constexpr MInt operator-() const {\r\n        return MInt(P - x);\r\n    }\r\n    constexpr MInt inv() const {\r\n        // assert(x != 0);\r\n        return power(*this, P - 2);\r\n    }\r\n    constexpr MInt &operator*=(const MInt &rhs) {\r\n        x = LL(x) * rhs.x % P;\r\n        return *this;\r\n    }\r\n    constexpr MInt &operator+=(const MInt &rhs) {\r\n        x = norm(x + rhs.x);\r\n        return *this;\r\n    }\r\n    constexpr MInt &operator-=(const MInt &rhs) {\r\n        x = norm(x - rhs.x);\r\n        return *this;\r\n    }\r\n    constexpr MInt &operator/=(const MInt &rhs) {\r\n        return *this *= rhs.inv();\r\n    }\r\n    constexpr friend MInt operator*(const MInt &lhs, const MInt &rhs) {\r\n        MInt res = lhs;\r\n        res *= rhs;\r\n        return res;\r\n    }\r\n    constexpr friend MInt operator+(const MInt &lhs, const MInt &rhs) {\r\n        MInt res = lhs;\r\n        res += rhs;\r\n        return res;\r\n    }\r\n    constexpr friend MInt operator-(const MInt &lhs, const MInt &rhs) {\r\n        MInt res = lhs;\r\n        res -= rhs;\r\n        return res;\r\n    }\r\n    constexpr friend MInt operator/(const MInt &lhs, const MInt &rhs) {\r\n        MInt res = lhs;\r\n        res /= rhs;\r\n        return res;\r\n    }\r\n    constexpr friend std::istream &operator>>(std::istream &is, MInt &a) {\r\n        LL v;\r\n        is >> v;\r\n        a = MInt(v);\r\n        return is;\r\n    }\r\n    constexpr friend std::ostream &operator<<(std::ostream &os, const MInt &a) {\r\n        return os << a.val();\r\n    }\r\n    constexpr friend bool operator==(MInt lhs, MInt rhs) {\r\n        return lhs.val() == rhs.val();\r\n    }\r\n    constexpr friend bool operator!=(MInt lhs, MInt rhs) {\r\n        return lhs.val() != rhs.val();\r\n    }\r\n};\r\n \r\ntemplate<int V, int P>\r\nconstexpr MInt<P> CInv = MInt<P>(V).inv();\r\n \r\nconst int P = 1e9+7;\r\nusing Z = MInt<P>;\r\nLL n,q,idx;\r\nconst int N=1e5+10,M=2e5+10;\r\nint a[N],root[N];\r\nstruct info{\r\n    Z sum;\r\n};\r\nstruct Node{\r\n    int l,r;\r\n    info val;\r\n}node[N*4+17*N];\r\ninfo operator+(const info &a,const info &b){\r\n    return {a.sum*b.sum};\r\n}\r\nint build(int l,int r){\r\n    int p=++idx;\r\n    node[p].val.sum=1;\r\n    if(l==r)return r;\r\n    int mid=(l+r)>>1;\r\n    node[p].l=build(l,mid);\r\n    node[p].r=build(mid+1,r);\r\n    return p;\r\n}\r\nvoid update(int p){\r\n    node[p].val=node[node[p].l].val+node[node[p].r].val;\r\n}\r\nint insert(int p,int l,int r,int x,int d){\r\n    int q=++idx;\r\n    node[q]=node[p];\r\n    if(l==r){\r\n        node[q].val.sum*=d;\r\n        return q;\r\n    }\r\n    int mid=(l+r)>>1;\r\n    if(x<=mid)node[q].l=insert(node[q].l,l,mid,x,d);\r\n    else node[q].r=insert(node[q].r,mid+1,r,x,d);\r\n    update(q);\r\n    return q;\r\n}\r\ninfo query(int p,int l,int r,int ql,int qr){\r\n    if(l==ql&&r==qr)return node[p].val;\r\n    int mid=(l+r)>>1;\r\n    if(qr<=mid)return query(node[p].l,l,mid,ql,qr);\r\n    else if(ql>mid)return query(node[p].r,mid+1,r,ql,qr);\r\n    else return query(node[p].l,l,mid,ql,mid)+query(node[p].r,mid+1,r,mid+1,qr);    \r\n}\r\nint b[M],pre[M];\r\nLL qmi(LL a,LL b){\r\n    LL res=1;\r\n    a%=P;\r\n    while(b){\r\n        if(b&1)res=res*a%P;\r\n        a=a*a%P;\r\n        b>>=1;\r\n    }\r\n    return res;\r\n}\r\nint main()\r\n{\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n    cin>>n;\r\n    for(int i=2;i<=200000;++i){\r\n        if(!b[i]){\r\n            for(int j=1;i*j<=200000;++j){\r\n                b[i*j]=i;\r\n            }\r\n        }\r\n    }\r\n    for(int i=1;i<=n;++i)cin>>a[i];\r\n    root[0]=build(1,n);\r\n    vector<pp>vec;\r\n    for(int i=1;i<=n;++i){\r\n        vec.clear();\r\n        int x=a[i];\r\n        root[i]=root[i-1];\r\n        while(b[x]){\r\n            int d=b[x],cnt=0,k=1;\r\n            int inv=qmi(d,P-2);\r\n            while(x%d==0){\r\n                x/=d;\r\n                ++cnt;\r\n                k*=d;\r\n                if(pre[k])vec.push_back({pre[k],inv});\r\n                pre[k]=i;\r\n            }\r\n            pre[k]=i;\r\n            root[i]=insert(root[i],1,n,i,k);\r\n        }\r\n        if(x){\r\n            if(pre[x])vec.push_back({pre[x],qmi(x,P-2)});\r\n            pre[x]=i;\r\n            root[i]=insert(root[i],1,n,i,x);\r\n        }\r\n        Z res=0;\r\n        for(int j=0;j<vec.size();++j){\r\n            if(!j||vec[j].first!=vec[j-1].first)res=1;\r\n            res=res*vec[j].second;\r\n            if(j+1==vec.size()||vec[j].first!=vec[j+1].first)root[i]=insert(root[i],1,n,vec[j].first,(int)res);\r\n            // cerr<<i<<\" \"<<j<<\" \"<<vec[j].first<<\" \"<<vec[j].second<<\" \"<<res<<endl;\r\n        }\r\n    }\r\n    cin>>q;\r\n    Z ans=0;\r\n    while(q--){\r\n        int l,r;\r\n        cin>>l>>r;\r\n        int temp=(int)ans;\r\n        l=(l+temp)%n+1,r=(r+temp)%n+1;\r\n        //cerr<<l<<\" \"<<r<<endl;\r\n        if(l>r)swap(l,r);\r\n        ans=query(root[r],1,n,l,r).sum;\r\n        cout<<ans<<endl;\r\n    }\r\n    \r\n    return 0;\r\n}"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 225249170,
+    "contestId": 1726,
+    "creationTimeSeconds": 1695728189,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "E",
+        "name": "Almost Perfect",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "combinatorics",
+            "fft",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "KanzouYamashiro"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 24064000,
+    "source": "#include <cstdio>\r\n#include <cstring>\r\n#include <algorithm>\r\n#include <cmath>\r\n#include <iostream>\r\n#include <string>\r\n#include <set>\r\n#include <map>\r\n#include <vector>\r\n#include <queue>\r\n#define ll long long\r\n#define db double\r\nusing namespace std;\r\nconst ll N = 3e5 + 100;\r\nconst ll M = 998244353;\r\nconst ll G = 3;\r\nll tt,n,pru[N],inv[N];\r\nll f1[N << 1],f2[N << 1],f3[N << 1],inq[N << 1];\r\nll ksm(ll p,ll q) {\r\n\tll res = 1;\r\n\twhile(q) {\r\n\t\tif (q & 1) {\r\n\t\t\tres = (res * p) % M;\r\n\t\t}\r\n\t\tp = (p * p) % M;\r\n\t\tq >>= 1;\r\n\t}\r\n\treturn res;\r\n}\r\nvoid ntt(ll * arr, ll lim, ll type) {\r\n\tfor (ll i = 0;i < lim;i++) {\r\n\t\tif (i < inq[i]) {\r\n\t\t\tswap(arr[i],arr[inq[i]]);\r\n\t\t}\r\n\t}\r\n\tfor (ll len = 1;len < lim;len <<= 1) {\r\n\t\tll dis = len << 1;\r\n\t\tll wn = ksm(G,(M - 1) / dis);\r\n\t\tif (type == -1) {\r\n\t\t\twn = ksm(wn,M - 2);\r\n\t\t}\r\n\t\tfor (ll pos = 0;pos < lim;pos += dis) {\r\n\t\t\tll w = 1;\r\n\t\t\tfor (ll k = 0;k < len;k++) {\r\n\t\t\t\tll x = arr[pos + k];\r\n\t\t\t\tll y = (arr[pos + k + len] * w) % M;\r\n\t\t\t\tarr[pos + k] = (x + y) % M;\r\n\t\t\t\tarr[pos + k + len] = (x - y + M) % M;\r\n\t\t\t\tw = (w * wn) % M;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tif (type == -1) {\r\n\t\tll liv = ksm(lim,M - 2);\r\n\t\tfor (ll i = 0;i < lim;i++) {\r\n\t\t\tarr[i] = (arr[i] * liv) % M;\r\n\t\t}\r\n\t}\r\n}\r\nvoid folding(ll * f, ll * g, ll * h) {\r\n\tll lim = 1;\r\n\twhile(lim <= n) {\r\n\t\tlim <<= 1;\r\n\t}\r\n\tinq[0] = 0;\r\n\tinq[1] = lim / 2;\r\n\tfor (ll i = 2;i < lim;i++) {\r\n\t\tinq[i] = (inq[i >> 1] >> 1) | (inq[i & 1]);\r\n\t}\r\n\tntt(f,lim,1);\r\n\tntt(g,lim,1);\r\n\tfor (ll i = 0;i < lim;i++) {\r\n\t\th[i] = (f[i] * g[i]) % M;\r\n\t}\r\n\tntt(h,lim,-1);\r\n}\r\nvoid solve() {\r\n\tscanf(\"%lld\",&n);\r\n\tll ans = 0;\r\n\tll hf = n / 2;\r\n\tll iv = 1;\r\n\tfor (ll i = 0;i <= hf;i++) {\r\n\t\tif (i == 0) {\r\n\t\t\tf1[i] = inv[i];\r\n\t\t} else {\r\n\t\t\tf1[i] = (iv * inv[i]) % M;\r\n\t\t}\r\n\t\tf2[i] = inv[(n % 2) + 2 * i];\r\n\t\tiv = (iv * inv[2]) % M;\r\n\t}\r\n\tfolding(f1,f2,f3);\r\n\tfor (ll i = 0;i * 4 <= n;i++) {\r\n\t\tll pv = (pru[n - 2 * i] * inv[i]) % M;\r\n\t\tans += (pv * f3[hf - (2 * i)] % M);\r\n\t\tans %= M;\r\n\t}\r\n\tprintf(\"%lld\\n\",ans);\r\n\tfor (ll i = 0;i <= n;i++) {\r\n\t\tf1[i] = f2[i] = 0;\r\n\t}\r\n}\r\nvoid pre() {\r\n\tpru[0] = 1;\r\n\tfor (ll i = 1;i <= N - 100;i++) {\r\n\t\tpru[i] = (pru[i - 1] * i) % M;\r\n\t}\r\n\tinv[N - 100] = ksm(pru[N - 100],M - 2);\r\n\tfor (ll i = N - 100;i > 0;i--) {\r\n\t\tinv[i - 1] = (inv[i] * i) % M;\r\n\t}\r\n}\r\nint main() {\r\n\tscanf(\"%lld\",&tt);\r\n\tpre();\r\n\twhile(tt) {\r\n\t\tsolve();\r\n\t\ttt--;\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

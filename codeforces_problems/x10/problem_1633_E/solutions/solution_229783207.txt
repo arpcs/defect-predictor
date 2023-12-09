@@ -1,0 +1,42 @@
+{
+    "id": 229783207,
+    "contestId": 1633,
+    "creationTimeSeconds": 1698300619,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1633,
+        "index": "E",
+        "name": "Spanning Tree Queries",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "greedy",
+            "math",
+            "sortings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1633,
+        "members": [
+            {
+                "handle": "juewwj"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1643639700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 25,
+    "timeConsumedMillis": 1247,
+    "memoryConsumedBytes": 81203200,
+    "source": "#include <bits/stdc++.h>\r\n\r\n//#define DEBUG\r\n// #define InTerminal\r\n//#pragma GCC optimize(3,\"Ofast\",\"inline\")\r\n//#pragma GCC optimize(2)\r\n\r\n#define endl '\\n'\r\n#define int long long\r\n#define i64 long long\r\n#define i128 __int128\r\n#define db double\r\n#define fi first\r\n#define se second\r\n#define pb push_back\r\n#define PII pair<int,int>\r\n#define VI vector<int>\r\n#define VPII vector<pair<int, int> >\r\n#define VVI vector<vector<int> >\r\n#define VVVI vector<vector<vector<int> > >\r\n#define SIZ(a) ((int)(a).size())\r\n#define FOR(i, l, r) for (int i = (l); i <= (r); ++i)\r\n#define REP(i, r, l) for (int i = (r); i >= (l); --i)\r\n#define SIZ(a) ((int)(a).size())\r\n#define FOR(i, l, r) for (int i = (l); i <= (r); ++i)\r\n#define REP(i, r, l) for (int i = (r); i >= (l); --i)\r\n#define for_n(i,a,b) for(int i = a;i < b;i++)\r\n#define ALL(a) a.begin(),a.end()\r\n\r\n#ifdef DEBUG\r\n#ifdef InTerminal\r\n#define dbg(x...) do { cerr << \"\\033[32;1m\" << #x << \" -> \"; err(x); } while (0)\r\nvoid err() { cerr << \"\\033[39;0m\" << endl; }\r\n#else\r\n#define dbg(x...) do { cerr  << #x << \" -> \"; err(x); } while (0)\r\nvoid err() { std::cerr << endl; }\r\n#endif\r\ntemplate<typename T, typename... A>\r\nvoid err(T a, A... x) { std::cerr << a << ' '; err(x...); }\r\n#else\r\n#define dbg(...)\r\n#endif\r\n\r\nconst int INF = 2e18;\r\nconst int Max = 1e9;\r\nconst int N = 3e5 + 10;\r\nconst int M = 4e6 + 10;\r\nconst int lim = 2e7 + 10;\r\nconst int mod = 998244353;\r\nconst double EPS = 1e-9;\r\nconst double PI = acos(-1.0);\r\n\r\nvoid yes() { std::cout << \"YES\" << endl; }\r\nvoid no() { std::cout << \"NO\" << endl; }\r\n\r\n\r\nusing namespace std;\r\nmt19937 RD(time(0));\r\n\r\nint n,m,k,q;\r\n\r\nstruct Edge {\r\n    int u, v, w;\r\n};\r\n\r\n\r\nclass DSU {\r\npublic:\r\n    std::vector<int> fa, siz;\r\n    DSU(int n): fa(n), siz(n, 1) {std::iota(fa.begin(), fa.end(), 0);}\r\n    int findfa(int x) {\r\n        int rt = x;\r\n        while (rt != fa[rt]) rt = fa[rt];\r\n        for (int i = x; i != rt; i = x) {\r\n            siz[i] -= siz[x];\r\n            x = fa[i], fa[i] = rt;\r\n        }\r\n        return rt;\r\n    }\r\n    bool merge(int x, int y) {\r\n        x = findfa(x), y = findfa(y);\r\n        if (x == y) return false;\r\n        if (siz[x] > siz[y])\r\n            fa[y] = x, siz[x] += siz[y];\r\n        else\r\n            fa[x] = y, siz[y] += siz[x];\r\n        return true;\r\n    }\r\n    bool same(int x, int y) { return findfa(x) == findfa(y); }\r\n    int size(int x) { return siz[findfa(x)]; }\r\n};\r\n\r\nvoid solve()\r\n{\r\n    cin >> n >> m;\r\n\r\n    vector <Edge> edges(m + 1);\r\n    for (int i = 1;i <= m;++i) {\r\n        Edge &e = edges[i];\r\n        cin >> e.u >> e.v >> e.w;\r\n    }\r\n\r\n    int p, k, a, b, c;\r\n    cin >> p >> k >> a >> b >> c;\r\n\r\n    vector<int> qry(k + 1);\r\n    for(int i = 1;i <= k;++i) {\r\n        if(i <= p) {\r\n            cin >> qry[i];\r\n        } else {\r\n            qry[i] = (qry[i - 1] * a + b) % c;\r\n        }\r\n    }\r\n\r\n    sort(qry.begin() + 1, qry.end());\r\n    sort(edges.begin() + 1, edges.end(), [&](const Edge &a, const Edge &b) {\r\n        return a.w < b.w;\r\n    });\r\n\r\n    VI poi = {0};\r\n    for(int i = 1;i <= m;++i) {\r\n        for(int j = i;j <= m;++j) {\r\n            poi.pb(abs(edges[i].w + edges[j].w + 1) / 2);   //\u53d6\u524d\u9762\u90a3\u4e2a\u5173\u952e\u70b9\r\n        }\r\n    }\r\n\r\n    sort(poi.begin(), poi.end());\r\n\r\n    int coef = 0, cons = 0, ans = 0;\r\n    for(int i = 1, j = 0;i <= k;++i) {\r\n        int oj = j;\r\n        //\u627e\u5230\u7b2c\u4e00\u4e2a\u5927\u4e8e\u7684,\u7136\u540e\u518d\u770b\u524d\u4e00\u4e2a\r\n        while(j < poi.size() && poi[j] <= qry[i]) {\r\n            ++j;\r\n        }\r\n\r\n        if(oj != j) {\r\n            sort(edges.begin() + 1, edges.end(), [&](const Edge &a, const Edge &b) {\r\n                int x = abs(a.w - poi[j - 1]), y = abs(b.w - poi[j - 1]);\r\n                if(x != y) return x < y;\r\n                return a.w > b.w;\r\n            });\r\n            coef = cons = 0;\r\n\r\n            DSU dsu(n + 1);\r\n            for(int i = 1;i <= m;++i) {\r\n                if(dsu.merge(edges[i].u, edges[i].v)) {\r\n                    //\u8fd9\u91cc\u9700\u8981\u53d6\u7b49\u53f7,\u56e0\u4e3a\u5728[poi[j - 1], poi[j]-1]\u8fd9\u4e2a\u533a\u95f4\u662f\u6ee1\u8db3\u540c\u4e00\u4e2aMST\u7684,\u5373k\u548cb\u662f\u76f8\u540c\u7684,\u5f53<= poi[j-1]\u7684\u65f6\u5019,\u90fd\u662f\u53d6+\r\n                    if(edges[i].w <= poi[j - 1]) {\r\n                        coef++;\r\n                        cons -= edges[i].w;\r\n                    } else {\r\n                        coef--;\r\n                        cons += edges[i].w;\r\n                    }\r\n                }\r\n            }\r\n        }\r\n\r\n        ans ^= coef * qry[i] + cons;\r\n    }\r\n\r\n    cout << ans << endl;\r\n}\r\n\r\n\r\nsigned main()\r\n{\r\n    // freopen(\"./data.in\", \"r\",in);\r\n\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(0);cout.tie(0);\r\n\r\n    int beg__TT = clock();\r\n\r\n    int t = 1;\r\n//    cin >> t;\r\n    while(t--)\r\n    {\r\n        solve();\r\n    }\r\n\r\n#ifdef DEBUG\r\n    cerr << \"use : \" << (clock() - beg__TT) << \"ms\\n\";\r\n#endif\r\n    return 0;\r\n}\r\n\r\n\r\n\r\n"
+}

@@ -1,0 +1,35 @@
+{
+    "id": 229311402,
+    "contestId": 762,
+    "creationTimeSeconds": 1697989632,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 762,
+        "index": "E",
+        "name": "Radio stations",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 762,
+        "members": [
+            {
+                "handle": "rakkoon69"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1485354900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 139,
+    "memoryConsumedBytes": 113049600,
+    "source": "#include <bits/stdc++.h>\r\n\r\n#define ll long long\r\n#define II pair<int, int>\r\n#define fs first\r\n#define sc second\r\n#define endl '\\n'\r\n\r\n#define mp(x, y) make_pair(x, y)\r\n#define sz(x) ((int) (x.size()))\r\n#define forlr(i, l, r) for(int i = l; i <= r; i++)\r\n#define forrl(i, r, l) for(int i = r; i >= l; i--)\r\n#define show(v) for(auto i : v) cout << i << \" \"; cout << endl;\r\n#define showlr(v, l, r) for (int i = l; i <= r; i++) cout << v[i] << \" \"; cout << endl;\r\n#define all(v) v.begin(), v.end()\r\n#define Unique(v) v.erase(unique(all(v)), v.end());\r\n\r\nconst double PI = 3.141592653589793238;\r\nconst long long LINF = 1ll << 60;\r\nconst int INF = 1 << 30;\r\nconst int N = 3e5 + 5;\r\nconst int LOG = 24;\r\n\r\nusing namespace std;\r\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count()); \r\n\r\nint n, k;\r\n\r\nstruct radio {\r\n    int x, l, r, f;\r\n} a[N];\r\n\r\nint pc, c[N];\r\nint root[N];\r\n\r\nstruct query {\r\n    int l, r, f;\r\n};\r\n\r\nvector<query> queries[N];\r\nvector<II> upd[N];\r\n\r\nnamespace STree {\r\n    struct Node {\r\n        int val;\r\n        int lf, rg;\r\n        Node() {}\r\n        Node(int val, int lf, int rg) : val(val), lf(lf), rg(rg) {}\r\n    } t[N * LOG];\r\n    \r\n    int nNode = 0;\r\n\r\n    inline void pushup(int id) {\r\n        t[id].val = t[t[id].lf].val + t[t[id].rg].val;\r\n    }\r\n\r\n    int build(int l, int r){\r\n        if(l == r) {\r\n            t[++nNode] = Node(0, 0, 0);\r\n            return nNode;\r\n        }\r\n\r\n        int mid = (l + r) >> 1;\r\n        int cur = ++nNode;\r\n\r\n        t[cur] = Node(0, build(l, mid), build(mid + 1, r));\r\n        pushup(cur);\r\n\r\n        return cur;\r\n    }\r\n\r\n    int update(int oldId, int l, int r, int u) {\r\n        if(l == r) {\r\n            t[++nNode] = Node(t[oldId].val + 1, 0, 0);\r\n            return nNode;\r\n        }\r\n\r\n        int mid = (l + r) >> 1;\r\n        int cur = ++nNode;\r\n\r\n        if(u <= mid) {\r\n            t[cur].lf = update(t[oldId].lf, l, mid, u);\r\n            t[cur].rg = t[oldId].rg;\r\n            pushup(cur);\r\n        } else {\r\n            t[cur].lf = t[oldId].lf;\r\n            t[cur].rg = update(t[oldId].rg, mid + 1, r, u);\r\n            pushup(cur);\r\n        }\r\n\r\n        return cur;\r\n    }\r\n\r\n    int get(int id, int l, int r, int u, int v) {\r\n        if(v < l || r < u) return 0;\r\n        if(u <= l && r <= v) return t[id].val;\r\n\r\n        int mid = (l + r) >> 1;\r\n        return get(t[id].lf, l, mid, u, v) + get(t[id].rg, mid + 1, r, u, v);\r\n    }\r\n}\r\n\r\nvoid compress() {\r\n    pc = 0;\r\n    forlr(i, 1, n) c[++pc] = a[i].x;\r\n    forlr(i, 1, n) c[++pc] = a[i].x + a[i].r;\r\n    forlr(i, 1, n) c[++pc] = a[i].x - a[i].r;\r\n\r\n    sort(c + 1, c + pc + 1);\r\n    pc = unique(c + 1, c + pc + 1) - c - 1;\r\n\r\n    forlr(i, 1, n) {\r\n        a[i].l = lower_bound(c + 1, c + pc + 1, a[i].x - a[i].r) - c;\r\n        a[i].r = lower_bound(c + 1, c + pc + 1, a[i].x + a[i].r) - c;\r\n    }\r\n    forlr(i, 1, n) a[i].x = lower_bound(c + 1, c + pc + 1, a[i].x) - c;\r\n}\r\n\r\nint32_t main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL); cout.tie(NULL);\r\n\r\n    cin >> n >> k;\r\n\r\n    forlr(i, 1, n) {\r\n        cin >> a[i].x >> a[i].r >> a[i].f;\r\n    }\r\n\r\n    compress();\r\n\r\n    root[0] = STree::build(1, pc);\r\n    forlr(i, 1, 10000) root[i] = root[0];\r\n\r\n    forlr(i, 1, n) {\r\n        queries[a[i].x].push_back({a[i].l, a[i].x, a[i].f});\r\n        upd[a[i].r].push_back({a[i].x, a[i].f});\r\n    }\r\n\r\n    ll ans = 0;\r\n    forrl(i, 10000, 1) {\r\n        for(II v : upd[i]) {\r\n            root[v.sc] = STree::update(root[v.sc], 1, pc, v.fs);\r\n        }\r\n        for(query v : queries[i]) {\r\n            forlr(j, max(v.f - k, 0), min(v.f + k, 10000)) {\r\n                ans += STree::get(root[j], 1, pc, v.l, v.r);\r\n            }\r\n            ans--;\r\n        }\r\n    }\r\n\r\n    cout << ans << endl;\r\n\r\n    return 0;\r\n}"
+}

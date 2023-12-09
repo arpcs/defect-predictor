@@ -1,0 +1,32 @@
+{
+    "id": 16293918,
+    "contestId": 391,
+    "creationTimeSeconds": 1456237021,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 391,
+        "index": "E1",
+        "name": "Three Trees",
+        "type": "PROGRAMMING",
+        "points": 11.0,
+        "tags": []
+    },
+    "author": {
+        "contestId": 391,
+        "members": [
+            {
+                "handle": "goodthingstaketime_._"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1392573600
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS1",
+    "passedTestCount": 16,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 16076800,
+    "source": "#include <iostream>\r\n#include <algorithm>\r\n#include <string>\r\n#include <cstdio>\r\n#include <set>\r\n#include <queue>\r\n#include <map>\r\n#include <iomanip>\r\n#include <cstring>\r\n#include <cmath>\r\n\r\nusing namespace std;\r\nconst long double eps = 1e-12;\r\n\r\ntypedef long long ll;\r\ntypedef pair<int , int> pt;\r\n\r\n#define sz(a) ((int) a.size() )\r\n#define LL(x) (x << 1)\r\n#define RR(x) ((x << 1) | 1)\r\n#define For(i , a , b) for (int i = a ; i <= b ; i++)\r\n#define Ford(i , a , b) for (int i = a ; i >= b ; i--)\r\n#define Rep(i , n) for (int i = 0 ; i < n ; i++)\r\n\r\nconst int maxn = 100000 + 1912;\r\n\r\nbool maximize(long long &a , const long long &b) {\r\n    if (a < b) {a = b; return true; } return false;\r\n}\r\n\r\nbool minimize(long long &a , const long long &b) {\r\n    if (a > b) {a = b; return true; } return false;\r\n}\r\n\r\nclass Tree{\r\npublic:\r\n    int n;\r\n    vector<int> V[maxn];\r\n    int chil[maxn];\r\n    long long Go[maxn];\r\n    long long BestGo;\r\n    int depth[maxn];\r\n    long long GoodU[maxn] , GoodY[maxn] , dp[maxn];\r\n    int n1 , n3;\r\n    long long bestALL , sum;\r\n\r\n    void Load(int _n) {\r\n        memset(chil , 0 , sizeof(chil));\r\n        memset(depth , 0 , sizeof(depth));\r\n        n = _n;\r\n        For(i , 1 , n - 1) {\r\n            int u , v; scanf(\"%d%d\" , &u , &v);\r\n            V[u].push_back(v);\r\n            V[v].push_back(u);\r\n        }\r\n    }\r\n\r\n    void dfsFirst(const int u , const int prev) {\r\n        chil[u] = 1;\r\n        Go[u] = 0;\r\n        Rep(i , sz(V[u])) {\r\n            int v = V[u][i]; if (v == prev) continue;\r\n            depth[v] = depth[u] + 1;\r\n            dfsFirst(v , u);\r\n            Go[u] += Go[v] + chil[v];\r\n            chil[u] += chil[v];\r\n        }\r\n    }\r\n\r\n    void dfsSecond(const int u , const int prev) {\r\n        Rep(i , sz(V[u])) {\r\n            int v = V[u][i]; if (v == prev) continue;\r\n            Go[v] = Go[u] + n - chil[v] * 2;\r\n            dfsSecond(v , u);\r\n        }\r\n    }\r\n\r\n    void Init() {\r\n        dfsFirst(1 , 0);\r\n        dfsSecond(1 , 0);\r\n        BestGo = 0;\r\n        For(i , 1 , n) BestGo = max(BestGo , Go[i]);\r\n        For(i , 1 , n) sum += Go[i];\r\n        sum /= 2;\r\n    }\r\n\r\n    void dfsFou(const int u , const int prev) {\r\n        long long bestU = -1 , bestY = -1 , best2U = -1 , best2Y = -1;\r\n        int idbestU = -1, idbestY = -1;\r\n        Rep(i , sz(V[u])) {\r\n            int v = V[u][i]; if (v == prev) continue;\r\n            dfsFou(v , u);\r\n            if (maximize(bestU , GoodU[v])) {\r\n                idbestU = v;\r\n            }\r\n            if (maximize(bestY , GoodY[v])) {\r\n                idbestY = v;\r\n            }\r\n        }\r\n        Rep(i , sz(V[u])) {\r\n            int v = V[u][i]; if (v == prev) continue;\r\n            if (v != idbestU) {\r\n                maximize(best2U , GoodU[v]);\r\n            }\r\n            if (v != idbestY) {\r\n                maximize(best2Y , GoodY[v]);\r\n            }\r\n        }\r\n\r\n        // thu cho u lam U\r\n        if (bestY != -1) maximize(dp[u] , Go[u] * n3 + bestY - 2LL * n1 * n3 * depth[u]);\r\n        // thu cho u lam Y\r\n        if (bestU != -1) maximize(dp[u] , Go[u] * n1 + bestU - 2LL * n1 * n3 * depth[u]);\r\n        if (idbestU != -1 && idbestY != -1) {\r\n            if (idbestU == idbestY) {\r\n                if (best2Y != -1) maximize(dp[u] , bestU + best2Y - 2LL * n1 * n3 * depth[u]);\r\n                if (best2U != -1) maximize(dp[u] , best2U + bestY - 2LL * n1 * n3 * depth[u]);\r\n            } else maximize(dp[u] , bestU + bestY - 2LL * n1 * n3 * depth[u]);\r\n        }\r\n        GoodU[u] = bestU; maximize(GoodU[u] , Go[u] * n3 + 1LL * depth[u] * n1 * n3);\r\n        GoodY[u] = bestY; maximize(GoodY[u] , Go[u] * n1 + 1LL * depth[u] * n1 * n3);\r\n    }\r\n\r\n    long long Solve(int _n1 , int _n3) {\r\n        n1 = _n1 , n3 = _n3;\r\n        dfsFou(1 , 0);\r\n        long long res = 0;\r\n        For(i , 1 , n) res = max(res , dp[i]);\r\n        bestALL = res;\r\n        return res;\r\n    }\r\n} T[3];\r\n\r\nvoid ReadData() {\r\n    int x , y , z; scanf(\"%d%d%d\" , &x , &y , &z);\r\n    T[0].Load(x); T[1].Load(y); T[2].Load(z);\r\n    Rep(i , 3) T[i].Init();\r\n    T[0].Solve(y , z); T[1].Solve(x , z); T[2].Solve(x , y);\r\n}\r\n\r\nlong long Solve(int fi , int se , int th) {\r\n    long long res = T[fi].sum + T[se].sum + T[th].sum;\r\n    res += T[fi].BestGo * T[se].n + 1LL * T[fi].n * T[se].n;\r\n    res += 1LL * T[se].n * T[th].n + T[th].BestGo * T[se].n;\r\n    res += 1LL * T[th].n * T[fi].BestGo + 2LL * T[fi].n * T[th].n + T[th].BestGo * T[fi].n;\r\n  //  res = 0;\r\n    res += T[se].bestALL;\r\n\r\n    return res;\r\n}\r\n\r\nvoid Process() {\r\n    long long res = 0;\r\n    res = max(res , Solve(1 , 0  ,2));\r\n    res = max(res , Solve(0 , 1 , 2));\r\n    res = max(res , Solve(0 , 2 , 1));\r\n    cout << res << endl;\r\n}\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n   // freopen(\"/users/youaremysky/documents/workspace/input.inp\" , \"r\" , stdin);\r\n    ReadData();\r\n    Process();\r\n}\r\n"
+}

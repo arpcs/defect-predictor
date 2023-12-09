@@ -1,0 +1,36 @@
+{
+    "id": 229639853,
+    "contestId": 955,
+    "creationTimeSeconds": 1698206613,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 955,
+        "index": "D",
+        "name": "Scissors",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2600,
+        "tags": [
+            "brute force",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 955,
+        "members": [
+            {
+                "handle": "KellyWLJ"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1521822900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 79,
+    "timeConsumedMillis": 218,
+    "memoryConsumedBytes": 95539200,
+    "source": "#include <bits/stdc++.h>\r\n#define fi first\r\n#define se second\r\n#define mp make_pair\r\n#define pb push_back\r\nusing namespace std;\r\n\r\nusing ull = unsigned long long;\r\nconst int N = 500010, SZ = (1 << 14) + 5, P = 13331;\r\nstatic char buf[SZ], *bgn = buf, *til = buf;\r\nchar getc()\r\n{\r\n    if(bgn == til)  bgn = buf, til = buf + fread(buf, 1, SZ, stdin);\r\n    return bgn == til ? EOF : *bgn++;\r\n}\r\ntemplate<typename T>\r\nvoid read(T &x)\r\n{\r\n    char ch = getc();   x = 0;\r\n    while(ch < '0' || ch > '9') ch = getc();\r\n    while(ch >= '0' && ch <= '9')   x = x * 10 + ch - '0', ch = getc();\r\n}\r\nvoid reads(char *str)\r\n{\r\n\tchar ch = getc();\tint x = 0;\r\n\twhile(ch < 'a' || ch > 'z')\tch = getc();\r\n\twhile(ch >= 'a' && ch <= 'z')\tstr[++x] = ch, ch = getc();\r\n}\r\nint n, m, k, lcp[N];\r\null hshs[N], hsht[N], pw[N];\r\nchar s[N], t[N];\r\null gethshs(int l, int r)\t{return l > r ? 0 : hshs[r] - hshs[l - 1] * pw[r - l + 1];}\r\null gethsht(int l, int r)\t{return l > r ? 0 : hsht[r] - hsht[l - 1] * pw[r - l + 1];}\r\nint merge(int x)\r\n{\r\n\tint l = 0, r = min({m, k, x});\r\n\twhile(l < r)\r\n\t{\r\n\t\tint mid = (l + r + 1) >> 1;\r\n\t\tif(gethshs(x - mid + 1, x) == gethsht(m - mid + 1, m))\tl = mid;\r\n\t\telse\tr = mid - 1;\r\n\t}\r\n\treturn l;\r\n}\r\nint merge2(int x)\r\n{\r\n\tint l = 0, r = min({m, k, n - x + 1});\r\n\twhile(l < r)\r\n\t{\r\n\t\tint mid = (l + r + 1) >> 1;\r\n\t\tif(gethshs(x, x + mid - 1) == gethsht(1, mid))\tl = mid;\r\n\t\telse\tr = mid - 1;\r\n\t}\r\n\treturn l; \r\n}\r\nstruct info\t{int mx, pos;};\r\ninfo rmq[20][N];\r\nstruct stable\r\n{\r\n\tinfo chkmax(info x, info y)\t{return x.mx > y.mx ? x : y;}\r\n\tvoid init()\r\n\t{\r\n\t\tfor(int i = 1; i <= n; ++i)\trmq[0][i] = (info){lcp[i], i};\r\n\t\tfor(int j = 1; j <= 18; ++j)\r\n\t\t\tfor(int i = 1; i + (1 << j) - 1 <= n; ++i)\t\r\n\t\t\t\trmq[j][i] = chkmax(rmq[j - 1][i], rmq[j - 1][i + (1 << (j - 1))]);\r\n\t}\r\n\tinfo query(int l, int r)\r\n\t{\r\n\t\tif(l > r)\treturn (info){0, 0};\r\n\t\tint v = __lg(r - l + 1);\r\n\t\treturn chkmax(rmq[v][l], rmq[v][r - (1 << v) + 1]);\r\n\t}\r\n}st;\r\nint main()\r\n{\r\n\tread(n), read(m), read(k), reads(s), reads(t);\r\n\tpw[0] = 1;\r\n\tfor(int i = 1; i <= n; ++i)\tpw[i] = pw[i - 1] * P;\r\n\tfor(int i = 1; i <= n; ++i)\thshs[i] = hshs[i - 1] * P + s[i];\r\n\tfor(int i = 1; i <= m; ++i)\thsht[i] = hsht[i - 1] * P + t[i];\r\n\tfor(int i = 1; i <= n; ++i)\t\r\n\t{\r\n\t\tlcp[i] = merge(i);\r\n//\t\tif(lcp[i] >= m && i - m - k + 1 > 0 && i - m + k <= n)\r\n//\t\t{\r\n//\t\t\tprintf(\"Yes\\n%d %d\", i - m - k + 1, i - m + 1);\r\n//\t\t\treturn 0;\r\n//\t\t}\r\n\t}\r\n\tst.init();\r\n\tfor(int i = 1; i <= n; ++i)\r\n\t{\r\n\t\tint nw = merge2(i), ln = i + nw - 1;\r\n\t\tif(nw >= m && i + k + k - 1 <= n)\r\n\t\t{\r\n\t\t\tprintf(\"Yes\\n%d %d\", i, i + k);\r\n\t\t\treturn 0;\r\n\t\t}\r\n\t\tif(ln < k || m - nw > k)\tcontinue;\r\n\t\tinfo rn = st.query(ln + m - nw, n - k + m - nw);\r\n//\t\tcerr << ln << \" \" << rn.mx << \" \" << rn.pos << endl;\r\n\t\tif(rn.mx >= m - nw)\r\n\t\t{\r\n\t\t\tassert(rn.pos >= ln + m - nw && rn.pos <= n - k + m - nw);\r\n\t\t\tprintf(\"Yes\\n%d %d\", ln - k + 1, rn.pos - (m - nw) + 1);\r\n\t\t\treturn 0;\r\n\t\t}\r\n\t}\r\n\tputs(\"No\");\r\n\treturn 0;\r\n}\r\n"
+}

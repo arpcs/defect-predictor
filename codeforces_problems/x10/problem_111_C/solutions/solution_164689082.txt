@@ -1,0 +1,37 @@
+{
+    "id": 164689082,
+    "contestId": 111,
+    "creationTimeSeconds": 1658129042,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 111,
+        "index": "C",
+        "name": "Petya and Spiders",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "bitmasks",
+            "dp",
+            "dsu"
+        ]
+    },
+    "author": {
+        "contestId": 111,
+        "members": [
+            {
+                "handle": "__abs"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1315051200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 165,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 716800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n/* Leetcode, I-bit */\r\ntypedef long long ll;\r\n#define f1(i,a,b) for(int i=int(a); i<int(b); i++)  // int for v.size()\r\n#define f2(i,a,b) for(int i=int(a); i>=int(b); i--)\r\n#define pb push_back\r\n#define all(v) v.begin(),v.end()\r\ntypedef vector<int> vi;\r\ntypedef vector<vector<int> > vvi;\r\ntypedef pair<int,int> pii;\r\n\r\n#define F first\r\n#define S second\r\n#define rz resize\r\n#define mp make_pair\r\n#define rep(i,a,b) for (int i=a; i<b; i++)\r\n#define modN 1000000007\r\n#define fillv(v,x) fill(v.begin(),v.end(),x)\r\n#define sortv(v) sort(v.begin(),v.end())\r\n#define sortvf(v,objFunc) sort(v.begin(),v.end(),objFunc)\r\n\r\n// C1:173 and 2_net.cpp\r\n\r\nint n,m;\r\nvector<vvi> dp;\r\n\r\n\r\n// returns no. of set bits in 'x'\r\nint col(int x) {\r\n    int ans = 0;\r\n    while(x) {\r\n        if(x%2) ans+=1;\r\n        x/=2;\r\n    }\r\n    return ans;\r\n}\r\n\r\n// returns 1 iff i-th bit [from right] of x is set\r\nbool bit(int x, int i) {\r\n    if(i<0) return 0;\r\n    return (x>>i)&1;        // right shift i times, then & with 1 to get the bit..\r\n}\r\n\r\n// returns true if prev,curr,next combination is bad\r\n// i.e., some spider can't go according to the 5 moves...\r\nbool bad(int prev, int curr, int next) {\r\n    f1(i,0,m) {     // m bits to consider\r\n        if(!(bit(prev,i) || bit(next,i) || bit(curr,i+1) || bit(curr,i-1) || bit(curr,i))) {\r\n            // \u2191 these are for possible spider movements:\r\n            // above            below       left                right            stay\r\n            /*\r\n             ______\r\n            |  *   |\r\n            | ***  |\r\n            |__*___|\r\n            */\r\n           // if none of these are '1', then return bad\r\n            return true;\r\n        }\r\n    }\r\n    return false;\r\n}\r\n\r\n\r\nint main() {\r\n    \r\n    ios_base::sync_with_stdio(false); cin.tie(0);\r\n\r\n    cin>>n>>m;\r\n    if(n<m) swap(n,m);\r\n\r\n    dp.clear();\r\n    dp.resize(n+2, vvi((1<<(m+1)),vi(1<<(m+1),1e7)));       // 1e7 ~ inf\r\n\r\n    // masks from 00..00 to 11..11 (m ones) --- i.e. {0,...,1<<(m+1)-1}\r\n    // hence the size of dp array\r\n\r\n    f1(j,0,1<<m) {\r\n        dp[0][0][j]=col(j);     // returns no. of set bits in the number 'j'\r\n                                // as the mask for the \"next row\" is 'j'\r\n    }\r\n\r\n    f1(i,1,n+1) {       // row 1 to n of the board\r\n        f1(currM, 0, 1<<m) {            // this row\r\n            f1(nextM, 0, 1<<m) {         // next row\r\n                f1(prevM, 0, 1<<m) {    // previous row\r\n                    if(!bad(prevM,currM,nextM)) {\r\n                        dp[i][currM][nextM] = min(dp[i][currM][nextM], dp[i-1][prevM][currM]+col(nextM));\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    int ans = 1e7;\r\n    f1(i,0,1<<m) {\r\n        ans = min(ans, dp[n][i][0]);        // next row has 0 spiders [as it is out of board] [so mask 0..0]\r\n                                            // this one has mask 'i'\r\n    }\r\n\r\n    cout<<n*m-ans<<'\\n';\r\n    \r\n}"
+}

@@ -1,0 +1,39 @@
+{
+    "id": 227046864,
+    "contestId": 1819,
+    "creationTimeSeconds": 1696699985,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1819,
+        "index": "B",
+        "name": "The Butcher",
+        "type": "PROGRAMMING",
+        "points": 1250.0,
+        "rating": 1900,
+        "tags": [
+            "geometry",
+            "greedy",
+            "implementation",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1819,
+        "members": [
+            {
+                "handle": "rahilshah17"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1681549500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 23,
+    "timeConsumedMillis": 530,
+    "memoryConsumedBytes": 29286400,
+    "source": "#include <bits/stdc++.h>\r\n#include <iostream>\r\nusing namespace std;\r\n\r\n#define REP(i,a,b) for (int i = a; i <= b; i++)\r\n#define RREP(i,a,b) for (int i = a; i >= b; i--)\r\n#define all(x) (x).begin(),(x).end()\r\n// #define (x).pb (x).push_back\r\ntypedef long long int lli;\r\ntypedef vector<pair<int,int>> vpi;\r\ntypedef vector<pair<lli,lli>> vpli;\r\ntypedef vector<int> vi;\r\ntypedef vector<lli> vli;\r\ntypedef vector<vector<int>> vvi;\r\ntypedef vector<bool> vb;\r\nint dx[8] = {0,0,1,-1,1,-1,1,-1};\r\nint dy[8] = {1,-1,0,0,-1,-1,1,1};\r\nint dxn[4] = {0,0,1,-1};\r\nint dyn[4] = {1,-1,0,0};\r\n\r\nstruct FenwickTree {\r\n    vector<int> bit;  // binary indexed tree\r\n    int n;\r\n\r\n    FenwickTree(int n) {\r\n        this->n = n;\r\n        bit.assign(n, 0);\r\n    }\r\n\r\n    FenwickTree(vector<int> const &a) : FenwickTree(a.size()) {\r\n        for (size_t i = 0; i < a.size(); i++)\r\n            add(i, a[i]);\r\n    }\r\n\r\n    int sum(int r) {\r\n        int ret = 0;\r\n        for (; r >= 0; r = (r & (r + 1)) - 1)\r\n            ret += bit[r];\r\n        return ret;\r\n    }\r\n\r\n    int sum(int l, int r) {\r\n        return sum(r) - sum(l - 1);\r\n    }\r\n\r\n    void add(int idx, int delta) {\r\n        for (; idx < n; idx = idx | (idx + 1))\r\n            bit[idx] += delta;\r\n    }\r\n    void print() {\r\n        for (auto x : bit) cout<<x<<\" \";\r\n    }\r\n};\r\n\r\nlli modpow(int x, int n, int m) {\r\nif (n == 0) return 1%m;\r\nlong long u = modpow(x,n/2,m);\r\nu = (u*u)%m;\r\nif (n%2 == 1) u = (u*x)%m;\r\nreturn u;\r\n}\r\n// mod inverse -> modpow(x,mod-2,mod)\r\nlli mod = 1e9 + 7;\r\nlli n;\r\nvpli vec;\r\nmap<lli,pair<lli,lli>> blocks;\r\npair<lli,lli> solve() {\r\n    set<pair<lli,lli>> widest,longest;\r\n    REP(i,0,(int)vec.size()-1) {\r\n        widest.insert({vec[i].first,i});\r\n        longest.insert({vec[i].second,i});\r\n        blocks[i] = vec[i];\r\n    }\r\n    pair<lli,lli> ans = {-1,-1};\r\n    bool mode = 0;\r\n    lli prevw = LLONG_MAX, prevh = LLONG_MAX, prv = -1;\r\n    bool cringe = 0;\r\n    while (widest.size() != 0) {\r\n        if (mode == 0) {\r\n            lli cur = (*widest.rbegin()).first, sum = 0;\r\n            if (ans.second == -1) ans.second = cur;\r\n            prv = blocks[(*widest.rbegin()).second].second;\r\n            while (widest.size() > 0 && (*widest.rbegin()).first == cur) {\r\n                auto it = (--widest.end());\r\n                longest.erase({blocks[it->second].second, it -> second});\r\n                sum += blocks[it->second].second;\r\n                widest.erase(it);\r\n            }\r\n            if (!cringe) ans.first = sum;\r\n            prv = sum;\r\n            if (prevw == LLONG_MAX) prevh = cur;\r\n            else {\r\n                prevw -= sum;\r\n                if (prevh != cur) return {-1,-1};\r\n            }\r\n        }\r\n        else {\r\n            lli cur = (*longest.rbegin()).first,sum = 0;\r\n            if (!cringe) {\r\n                ans.first = cur + prv;\r\n                cringe = 1;\r\n            }\r\n            while (longest.size() > 0 && (*longest.rbegin()).first == cur) {\r\n                auto it = (--longest.end());\r\n                widest.erase({blocks[it->second].first,it->second});\r\n                sum += blocks[it->second].first;\r\n                longest.erase(it);\r\n            }\r\n            if (prevw == LLONG_MAX) {\r\n                prevw = cur;\r\n                prevh -= sum;\r\n                if (prevw != cur) return {-1,-1};\r\n            }\r\n            else {\r\n                prevh -= sum;\r\n                if (prevw != cur) return {-1,-1};\r\n            }\r\n        }\r\n        mode ^= 1;\r\n    }\r\n    if (prevh == 0 || prevw == 0 || prevh == LLONG_MAX || prevw == LLONG_MAX) return ans;\r\n    else return {-1,-1};\r\n}\r\nint main(){\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    int t;\r\n    cin>>t;\r\n    while(t--){  \r\n        int n;\r\n        cin>>n;\r\n        vec.clear();\r\n        blocks.clear();\r\n        vec.resize(n);\r\n        for (auto &c : vec) cin>>c.first>>c.second;\r\n        vpli ans;\r\n        ans.push_back(solve());\r\n        swap(ans.back().first,ans.back().second);\r\n        if (ans.back().first == -1) ans.pop_back();\r\n        for (auto &c : vec) swap(c.first,c.second);\r\n\r\n        ans.push_back(solve());\r\n        if (ans.back().first == -1) ans.pop_back();\r\n\r\n        if (ans.size() == 2 && ans[0] == ans[1]) ans.pop_back();\r\n        cout<<ans.size()<<\"\\n\";\r\n        for (auto x : ans) cout<<x.first<<\" \"<<x.second<<\"\\n\";\r\n        \r\n    }\r\n    return 0;\r\n}"
+}

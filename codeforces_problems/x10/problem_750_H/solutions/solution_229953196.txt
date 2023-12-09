@@ -1,0 +1,38 @@
+{
+    "id": 229953196,
+    "contestId": 750,
+    "creationTimeSeconds": 1698379210,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 750,
+        "index": "H",
+        "name": "New Year and Snowy Grid",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3500,
+        "tags": [
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "interactive"
+        ]
+    },
+    "author": {
+        "contestId": 750,
+        "members": [
+            {
+                "handle": "locsey"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1483107300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 16,
+    "timeConsumedMillis": 670,
+    "memoryConsumedBytes": 131379200,
+    "source": "// LUOGU_RID: 131812773\n#include <bits/stdc++.h>\r\n#define fi first \r\n#define se second \r\n\r\nusing std :: cin;\r\nusing std :: min; \r\nusing std :: max; \r\nusing std :: cout; \r\nusing std :: vector; \r\n\r\nconstexpr int M = 1105, N = 2e6 + 5; \r\nconstexpr int INF = 0x3f3f3f3f; \r\n\r\ntypedef long long ll; \r\ntypedef unsigned long long ull;\r\ntypedef __uint128_t LLL; \r\ntypedef double db; \r\ntypedef unsigned int ui; \r\ntypedef std :: pair < int, int > pii; \r\n\r\n//char buf[1 << 23], *p1 = buf, *p2 = buf, obuf[1 << 23], *O = obuf;\r\n//#define getchar() (p1 == p2) && (p2 = (p1 = buf) + fread(buf, 1, 1 << 21, stdin), p1 == p2)? EOF : *p1++\r\n\r\ninline int read() { \r\n\tint f = 1, s = 0; char ch = getchar(); \r\n\twhile(!isdigit(ch)) (ch == '-') && (f = -1), ch = getchar(); \r\n\twhile(isdigit(ch)) s = s * 10 + ch - '0', ch = getchar(); \r\n\treturn f * s; \r\n}\r\n\r\nnamespace Solver {\r\n\tint n, m, q;\r\n\tchar str[M][M], A[M], re[M][M]; int id[M][M], tot;\r\n    int dx[9] = {0, -1, -1, -1, 0, 1, 1, 1, 0}, dy[9] = {0, -1, 0, 1, 1, 1, 0, -1, -1};\r\n    int sz[N], f[N], fc[M][M], f2[N]; \r\n\tinline int find(int x) {return f[x] == x ? x : f[x] = find(f[x]);} \r\n\tinline void merge(int x, int y) {x = find(x), y = find(y); if(x == y) return ; f[x] = y, sz[y] += sz[x];}\r\n\tpii a[M]; vector < int > P[N]; \r\n\tinline void dfs(int x, int y, int t, int bl) {\r\n\t\tif(fc[x][y]) return ;\r\n\t\tif(str[x][y] == '#') {\r\n\t\t    int r = find(id[x][y]);\r\n\t\t    if(r ^ bl) P[bl].push_back(r);\r\n\t\t} if(!t) return ; \r\n\t\tfor(int i = 1; i < 9; ++i) {\r\n\t\t\tint tx = x + dx[i], ty = y + dy[i];\r\n\t\t\tif(id[tx][ty]) dfs(tx, ty, t - 1, bl); \r\n\t\t}\r\n\t}\r\n\tstruct Sta {\r\n\t\tint x, y, d; \r\n\t} stk[M]; int tp; \r\n\tinline int find2(int x) {while(f[x] ^ x) x = f[x]; return x;}\r\n\tinline void merge2(int x, int y) {\r\n\t\tx = find2(x), y = find2(y); if(x == y) return ; \r\n\t\tif(sz[x] < sz[y]) std :: swap(x, y);\r\n\t\tstk[++tp] = (Sta) {x, y, sz[y]}, f[y] = x, sz[x] += sz[y]; \r\n\t}\r\n\tint K; \r\n\tinline void back() {\r\n\t\tfor(int i = 1; i <= K; ++i) str[a[i].fi][a[i].se] = '.';  \r\n\t\twhile(tp) {\r\n\t\t\tint x = stk[tp].x, y = stk[tp].y, d = stk[tp].d;\r\n\t\t\tf[y] = y, sz[x] -= d, --tp; \r\n\t\t} \r\n\t}\r\n\tint ix[M], bl[M][M], X, Y; \r\n\tinline void dfs3(int x, int y, int t, int rem, int &fs) {\r\n\t\tif(fc[x][y]) return ; \r\n\t\tif(str[x][y] == '#') {\r\n\t\t\tint r = find2(id[x][y]);\r\n\t\t\tif((r == X && t == Y) || (r == Y && t == X)) fs = 1; \r\n\t\t} if(!rem) return ;\r\n\t\tfor(int d = 1; d < 9; ++d) {\r\n\t\t\tint tx = x + dx[d], ty = y + dy[d];\r\n\t\t\tif(id[tx][ty]) dfs3(tx, ty, t, rem - 1, fs); \r\n\t\t}\r\n\t} \r\n \tinline void mian() {\r\n\t\tn = read(), m = read(), q = read(), n += 2, m += 2;\r\n\t\tfor(int i = 3; i <= n; ++i) str[i][1] = '#'; for(int i = 1; i <= m - 2; ++i) str[n][i] = '#';\r\n\t\tfor(int i = 3; i <= m; ++i) str[1][i] = '#'; for(int i = 1; i <= n - 2; ++i) str[i][m] = '#';\r\n\t\tfc[2][2] = fc[n - 1][m - 1] = 1; \r\n\t\tfor(int i = 2; i < n; ++i) {\r\n\t\t\tscanf(\"%s\", A + 1);\r\n\t\t\tfor(int j = 2; j < m; ++j) str[i][j] = A[j - 1]; \r\n\t\t} \r\n\t\tfor(int i = 1; i <= n; ++i) for(int j = 1; j <= m; ++j) id[i][j] = ++tot, f[tot] = tot, sz[tot] = 1;\r\n\t\tmemcpy(re, str, sizeof(re)); \r\n\t\tfor(int i = 1; i <= n; ++i) for(int j = 1; j <= m; ++j) if(str[i][j] == '#') {\r\n\t\t\tfor(int d = 1; d < 9; ++d) {\r\n\t\t\t    int x = i + dx[d], y = j + dy[d];\r\n\t\t\t    if(id[x][y] && str[x][y] == '#') merge(id[i][j], id[x][y]); \r\n\t\t\t}\r\n\t\t}\r\n\t\tint S = id[n][1], T = id[1][m], G = find(S) == find(T); \r\n\t\tfor(int i = 1; i <= n; ++i) for(int j = 1; j <= m; ++j) if(str[i][j] == '.' && !fc[i][j]) {\r\n\t\t    int o1 = 0, o2 = 0;\r\n\t\t\tfor(int d = 1; d < 9; ++d) {\r\n\t\t\t\tint x = i + dx[d], y = j + dy[d];\r\n\t\t\t\tif(id[x][y] && str[x][y] == '#') o1 |= find(S) == find(id[x][y]), o2 |= find(T) == find(id[x][y]); \r\n\t\t\t}\r\n\t\t\tG |= (o1 && o2); \r\n\t\t}\r\n\t\tfor(int i = 1; i <= tot; ++i) f[i] = find(i), sz[i] = 1; \r\n\t\tfor(int i = 1; i <= n; ++i) for(int j = 1; j <= m; ++j) if(str[i][j] == '#') dfs(i, j, 2, bl[i][j] = find(id[i][j]));\r\n\t\tfor(int i = 1; i <= tot; ++i) std :: sort(P[i].begin(), P[i].end()), P[i].erase(std :: unique(P[i].begin(), P[i].end()), P[i].end()); \r\n\t\twhile(q --) {\r\n\t\t\tK = read();\r\n\t\t\tfor(int i = 1; i <= K; ++i) {\r\n\t\t\t\ta[i].fi = read() + 1, a[i].se = read() + 1; \r\n\t\t\t\tint x = a[i].fi, y = a[i].se; str[x][y] = '#', ix[i] = id[x][y]; \r\n\t\t\t\tfor(int j = 1; j < 9; ++j) {\r\n\t\t\t\t\tint tx = x + dx[j], ty = y + dy[j];\r\n\t\t\t\t\tif(id[tx][ty] && str[tx][ty] == '#') merge2(id[x][y], id[tx][ty]); \r\n\t\t\t\t} \r\n\t\t\t}\r\n\t\t\tint fg = G || find2(S) == find2(T); \r\n\t\t\tif(fg) {puts(\"NO\"), back(), fflush(stdout); continue ;}\r\n\t\t\tX = find2(S), Y = find2(T);\r\n\t\t\tfor(int i = 1; i <= K; ++i) {\r\n\t\t\t\tdfs3(a[i].fi, a[i].se, find2(ix[i]), 2, fg); \r\n\t\t\t}\r\n\t\t\tfor(int i = 1; i <= K && !fg; ++i)\r\n\t\t\t    for(int j = i + 1; j <= K; ++j) {\r\n\t\t\t    \tint d = std :: abs(a[i].fi - a[j].fi) + std :: abs(a[i].se - a[j].se);\r\n\t\t\t    \tif(d <= 2) {\r\n\t\t\t    \t\tint b1 = find2(ix[i]), b2 = find2(ix[j]);\r\n\t\t\t    \t\tif((X == b1 && Y == b2) || (X == b2 && Y == b1)) {fg = 1; break;}\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\tif(fg) {puts(\"NO\"), back(), fflush(stdout); continue ;}\r\n\t\t\tfor(int i = 1; i <= K && !fg; ++i)\r\n\t\t\t    for(int j = 1; j < 9 && !fg; ++j) {\r\n\t\t\t        int x = a[i].fi + dx[j], y = a[i].se + dy[j], t; \r\n\t\t\t        if(id[x][y] && re[x][y] == '#') {\r\n\t\t\t        \tint u = find2(id[x][y]); t = bl[x][y]; \r\n\t\t\t        \tfor(auto &z : P[t]) {\r\n\t\t\t        \t    int v = find2(z); \r\n\t\t\t\t\t\t\tif((X == u && Y == v) || (X == v && Y == u)) {fg = 1; break;}\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\tputs(fg ? \"NO\" : \"YES\"), fflush(stdout), back(); \r\n\t\t}\r\n\t}\r\n}\r\n\r\nint main() \r\n{\r\n\tSolver :: mian(); \r\n\treturn 0; \r\n}   "
+}

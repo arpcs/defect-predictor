@@ -1,0 +1,39 @@
+{
+    "id": 225756856,
+    "contestId": 1819,
+    "creationTimeSeconds": 1695979077,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1819,
+        "index": "B",
+        "name": "The Butcher",
+        "type": "PROGRAMMING",
+        "points": 1250.0,
+        "rating": 1900,
+        "tags": [
+            "geometry",
+            "greedy",
+            "implementation",
+            "sortings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1819,
+        "members": [
+            {
+                "handle": "bhukyatharun216"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1681549500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 23,
+    "timeConsumedMillis": 546,
+    "memoryConsumedBytes": 42188800,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#include <ext/pb_ds/assoc_container.hpp>\r\nusing namespace __gnu_pbds;\r\ntemplate<class T> using indexed_set = tree<T, null_type, less<T>, \r\n            rb_tree_tag, tree_order_statistics_node_update>;\r\n\r\n#define ll long long\r\n#define ld long double\r\n#define cy cout<<\"YES\\n\"\r\n#define cn cout<<\"NO\\n\"\r\n\r\nbool sortbysec(const pair<ll,ll> &a,const pair<ll,ll> &b)\r\n{ return (a.second < b.second); }\r\n \r\nll fastpow(ll a, ll b, ll m)\r\n{\r\n    if(b==0)return 1;\r\n    if(b%2==0){ll take=fastpow(a,b/2,m);return (take*take)%m;}\r\n    else{ll take=fastpow(a,b-1,m);return (a*take)%m;}\r\n}\r\n\r\nvoid modularInverse(ll n, ll prime, vector<ll> &dp)\r\n{\r\n    dp[0] = dp[1] = 1;\r\n    for (ll i = 2; i <= n; i++)\r\n        dp[i] = dp[prime % i] *\r\n               (prime - prime / i) % prime;   \r\n}\r\n\r\nll ncr(vector<ll> &arr, ll a, ll b, ll mod)\r\n{\r\n    ll maxi=(arr[a]*fastpow(arr[b],mod-2,mod))%mod;\r\n    maxi=(maxi*fastpow(arr[a-b],mod-2,mod))%mod;\r\n    return maxi;\r\n}\r\n\r\nbool solve(set<vector<ll>> &s1, set<vector<ll>> &s2, ll it, ll H, ll W)\r\n{//cout<<H<<W<<\"   \";\r\n    // for(auto x:s1)cout<<x[0]<<\"/\"<<x[1]<<\"/\"<<x[2]<<\" \";cout<<\"   \";\r\n    // for(auto x:s2)cout<<x[0]<<\"/\"<<x[1]<<\"/\"<<x[2]<<\" \";\r\n    // cout<<\"\\n\";\r\n    if(s1.size()==0)return true;\r\n    if(it==1)\r\n    {\r\n        ll w=W;\r\n        while(s1.size()>0)\r\n        {\r\n            vector<ll> take=*s1.begin();\r\n            if((-take[0])==H)\r\n            {\r\n                w+=take[1];\r\n                s1.erase(take);\r\n                s2.erase({take[1],take[0],take[2]});\r\n            }\r\n            else break;\r\n        }\r\n        if(w<W)return solve(s1,s2,2,H,w);\r\n        else return false;\r\n    }\r\n    else if(it==2)\r\n    {\r\n        ll h=H;\r\n        while(s2.size()>0)\r\n        {\r\n            vector<ll> take=*s2.begin();\r\n            if((-take[0])==W)\r\n            {\r\n                h+=take[1];\r\n                s2.erase(take);\r\n                s1.erase({take[1],take[0],take[2]});\r\n            }\r\n            else break;\r\n        }\r\n        if(h<H)return solve(s1,s2,1,h,W);\r\n        else return false;\r\n    }\r\n    return false;\r\n}\r\n\r\nint main()\r\n{\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n    // freopen(\"nocross.in\", \"r\", stdin);\r\n    // freopen(\"nocross.out\", \"w\", stdout);\r\n    int cases=1;\r\n    cin>>cases;\r\n    // Error can be because you didn't input the entreies\r\n    while(cases--)\r\n    {\r\n        ll n;cin>>n;\r\n        vector<pair<ll,ll>> a(n);\r\n        ll maxH=0,maxW=0,sum=0;\r\n        for(ll i=0;i<n;i++)\r\n        {\r\n            cin>>a[i].first>>a[i].second;\r\n            maxH=max(maxH,a[i].first);\r\n            maxW=max(maxW,a[i].second);\r\n            sum+=a[i].first*a[i].second;\r\n        }\r\n        vector<pair<ll,ll>> ans;\r\n        if(sum%maxW==0)\r\n        {\r\n            set<vector<ll>> s1,s2;\r\n            for(ll i=0;i<n;i++)\r\n            {\r\n                s1.insert({-a[i].first,-a[i].second,i});\r\n                s2.insert({-a[i].second,-a[i].first,i});\r\n            }\r\n            bool check=solve(s1,s2,2,sum/maxW,maxW);\r\n            if(check)ans.push_back({sum/maxW,maxW});\r\n        }\r\n\r\n\r\n        if(sum%maxH==0)\r\n        {\r\n            set<vector<ll>> s1,s2;\r\n            for(ll i=0;i<n;i++)\r\n            {\r\n                s1.insert({-a[i].first,-a[i].second,i});\r\n                s2.insert({-a[i].second,-a[i].first,i});\r\n            }\r\n            bool check=solve(s1,s2,1,maxH,sum/maxH);\r\n            if(check)ans.push_back({maxH,sum/maxH});\r\n        }\r\n\r\n        if(ans.size()==2)\r\n        {\r\n            if(ans[0].first==ans[1].first && ans[0].second==ans[1].second)ans.pop_back();\r\n        }\r\n\r\n        cout<<ans.size()<<\"\\n\";\r\n        for(auto [x,y]:ans)cout<<x<<\" \"<<y<<\"\\n\";\r\n    }\r\n    \r\n    \r\n    // max/min problem ?? try to solve using binary search\r\n    // find result in form of mod ?? never use divide operation\r\n    \r\n    return 0;\r\n}\r\n"
+}

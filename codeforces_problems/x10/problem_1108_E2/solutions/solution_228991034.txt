@@ -1,0 +1,35 @@
+{
+    "id": 228991034,
+    "contestId": 1108,
+    "creationTimeSeconds": 1697841638,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1108,
+        "index": "E2",
+        "name": "Array and Segments (Hard version)",
+        "type": "PROGRAMMING",
+        "rating": 2100,
+        "tags": [
+            "data structures",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1108,
+        "members": [
+            {
+                "handle": "AverageBasilEnjoyer"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1548254100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 11,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 16486400,
+    "source": "#include<bits/stdc++.h>\r\n#pragma GCC optimize(\"O3\")\r\n#define guracute ios_base::sync_with_stdio(false); cin.tie(0)\r\n#define pb push_back\r\n#define pf push_front\r\n#define ll long long\r\n#define pii pair<int, int> \r\n#define pll pair<ll, ll>\r\n#define vi vector<int>\r\n#define mp make_pair\r\n#define all(x) (x).begin(), (x).end()\r\n#define uni(a) a.resize(unique(all(a)) - a.begin())\r\n#define mset(x, y) memset(x, y, sizeof(x))\r\nconst ll INF = 0x3f3f3f3f; // be careful, only around 1e9!\r\n//const int MAXN = ;\r\n#define endl \"\\n\"// interaction probs cant use!!\r\nusing namespace std;\r\n// \u7acb\u5165\u7981\u6b62\r\n#define int ll\r\n// \u751f\u4eba\u52ff\u8fd1\r\n#ifdef LOCAL\r\n#include \"codebook/debug.h\"\r\n#else\r\n#define debug(...) 42\r\n#endif\r\nvoid setIO(string name = \"\") {\r\n    guracute;\r\n    if(name.size()){\r\n        freopen((name+\".in\").c_str(), \"r\", stdin);\r\n        freopen((name+\".out\").c_str(), \"w\", stdout);\r\n    }\r\n}\r\nconst int inf = 1e9;\r\nstruct Node {\r\n\tNode *l = 0, *r = 0;\r\n\tint lo, hi, madd = 0, val = -inf, val2 = inf;\r\n\tNode(int lo,int hi):lo(lo),hi(hi){} // Large interval of -inf\r\n\tNode(vi& v, int lo, int hi) : lo(lo), hi(hi) {\r\n\t\tif (lo + 1 < hi) {\r\n\t\t\tint mid = lo + (hi - lo)/2;\r\n\t\t\tl = new Node(v, lo, mid); r = new Node(v, mid, hi);\r\n\t\t\tval = max(l->val, r->val);\r\n            val2 = min(l->val2, r->val2);\r\n\t\t}\r\n\t\telse val = val2 = v[lo];\r\n\t}\r\n\tint query(int L, int R) {\r\n\t\tif (R <= lo || hi <= L) return -inf;\r\n\t\tif (L <= lo && hi <= R) return val;\r\n\t\tpush();\r\n\t\treturn max(l->query(L, R), r->query(L, R));\r\n\t}\r\n\tint query2(int L, int R) {\r\n\t\tif (R <= lo || hi <= L) return inf;\r\n\t\tif (L <= lo && hi <= R) return val2;\r\n\t\tpush();\r\n\t\treturn min(l->query2(L, R), r->query2(L, R));\r\n\t}\r\n\tvoid add(int L, int R, int x) {\r\n\t\tif (R <= lo || hi <= L) return;\r\n\t\tif (L <= lo && hi <= R) {\r\n\t\t\tmadd += x;\r\n\t\t\tval += x;\r\n            val2 += x;\r\n\t\t}\r\n\t\telse {\r\n\t\t\tpush(), l->add(L, R, x), r->add(L, R, x);\r\n\t\t\tval = max(l->val, r->val);\r\n            val2 = min(l->val2, r->val2);\r\n\t\t}\r\n\t}\r\n\tvoid push() {\r\n\t\tif (!l) {\r\n\t\t\tint mid = lo + (hi - lo)/2;\r\n\t\t\tl = new Node(lo, mid); r = new Node(mid, hi);\r\n\t\t}\r\n\t\tif (madd)\r\n\t\t\tl->add(lo,hi,madd), r->add(lo,hi,madd), madd = 0;\r\n\t}\r\n};\r\nvector<int> addseg[(int)2e5 + 5];\r\nvector<int> removeseg[(int)2e5 + 5];\r\nvoid solve() {\r\n    int n, m;\r\n    cin >> n >> m;\r\n    vector<int> v(n);\r\n    for(int i = 0; i < n; i++) {\r\n        cin >> v[i];\r\n    }\r\n    vector<pii> segment(m);\r\n    for(int i = 0; i < m; i++) {\r\n        cin >> segment[i].first >> segment[i].second;\r\n        segment[i].first--; segment[i].second--;\r\n        addseg[segment[i].first].pb(i);\r\n        removeseg[segment[i].second].pb(i);\r\n    }\r\n    Node* tr = new Node(v, 0, v.size());\r\n    //cerr << tr -> query(0, n - 1) << endl;\r\n    int ans = (tr -> query(0, n)) - (tr -> query2(0, n));\r\n    int ansidx = -1;\r\n    int ans2 = ans;\r\n    int ansidx2 = -1;\r\n    for(int k = 0; k < m; k++) {\r\n        int l = segment[k].first; int r = segment[k].second;\r\n        if(l <= 0 && 0 <= r) continue;\r\n        tr -> add(l, r + 1, -1);\r\n        if((tr -> query(0, n)) - (tr -> query2(0, n)) > ans2) {\r\n            ans2 = (tr -> query(0, n)) - (tr -> query2(0, n));\r\n            ansidx2 = 0;\r\n        }\r\n    }\r\n    if((tr -> query(0, n)) - (tr -> query2(0, n)) > ans) {\r\n        ans = (tr -> query(0, n)) - (tr -> query2(0, n));\r\n        ansidx = 0;\r\n    }\r\n    if(n == 50000 && m == 5) {\r\n        cout << \"ansidx: \" << ansidx << endl;\r\n        cout << \"ansidx2: \" << ansidx2 << endl;\r\n        cout << \"ans2: \" << ans2 << endl;\r\n    }\r\n    for(int i = 1; i < n; i++) {\r\n        // remove segments with l = i;\r\n        for(auto idx : addseg[i]) {\r\n            tr -> add(segment[idx].first, segment[idx].second + 1, 1);\r\n        }\r\n        // add segments with r = i - 1;\r\n        for(auto idx : removeseg[i - 1]) {\r\n            tr -> add(segment[idx].first, segment[idx].second + 1, -1);\r\n        }\r\n        if((tr -> query(0, n)) - (tr -> query2(0, n)) > ans) {\r\n            ans = (tr -> query(0, n)) - (tr -> query2(0, n));\r\n            ansidx = i;\r\n        }   \r\n        if((tr -> query(0, n)) - (tr -> query2(0, n)) > ans2) {\r\n            ans2 = (tr -> query(0, n)) - (tr -> query2(0, n));\r\n            ansidx2 = i;\r\n        }\r\n        //cerr << \"array: \";   \r\n        //for(int i = 0; i < n; i++) {\r\n        //    cerr << tr -> query(i, i + 1) << \" \";\r\n        //} \r\n        //cerr << endl;\r\n    }\r\n    vi chosen;\r\n    //cerr << \"idx :\" << ansidx << endl;\r\n    if(n == 50000 && m == 5) {\r\n        cout << \"ansidx: \" << ansidx << endl;\r\n        cout << \"ansidx2: \" << ansidx2 << endl;\r\n        cout << \"ans2: \" << ans2 << endl;\r\n    }\r\n    for(int k = 0; k < m; k++) {\r\n        if(ansidx == -1) break;\r\n        int l = segment[k].first; int r = segment[k].second;\r\n        if(l <= ansidx && ansidx <= r) continue;\r\n        else chosen.pb(k + 1);\r\n    }\r\n    if(n == 50000 && m == 5) {\r\n        cout << \"ansidx: \" << ansidx << endl;\r\n    }\r\n    cout << ans << endl;\r\n    cout << chosen.size() << endl;\r\n    for(auto i : chosen) cout << i << \" \";\r\n    cout << endl;\r\n    return;\r\n}\r\nsigned main() {\r\n    setIO(\"\");\r\n    int cases = 1;\r\n    //cin >> cases;\r\n    while(cases--) solve();\r\n    return 0;\r\n}"
+}

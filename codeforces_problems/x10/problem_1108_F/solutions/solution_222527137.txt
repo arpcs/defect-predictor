@@ -1,0 +1,37 @@
+{
+    "id": 222527137,
+    "contestId": 1108,
+    "creationTimeSeconds": 1694220750,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1108,
+        "index": "F",
+        "name": "MST Unification",
+        "type": "PROGRAMMING",
+        "rating": 2100,
+        "tags": [
+            "binary search",
+            "dsu",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1108,
+        "members": [
+            {
+                "handle": "CQ_cq"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1548254100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 52,
+    "timeConsumedMillis": 218,
+    "memoryConsumedBytes": 49561600,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing i64 = long long;\r\n\r\nstruct DSU {\r\n    int n;\r\n    std::vector<int> fa;\r\n\r\n    DSU(int n) {\r\n        this->n = n;\r\n        fa.resize(n + 1);\r\n        std::iota(fa.begin(), fa.end(), 0);\r\n    }\r\n\r\n    int find(int x) {\r\n        return fa[x] == x ? x : (fa[x] = find(fa[x]));\r\n    }\r\n\r\n    bool merge(int x, int y) {\r\n        x = find(x);\r\n        y = find(y);\r\n        if (x == y) {\r\n            return false;\r\n        }\r\n        fa[y] = x;\r\n        return true;\r\n    }\r\n};\r\n\r\nstruct Tree {\r\n    static const int M = 20;\r\n    int n;\r\n    std::vector<std::vector<std::array<int, 2>>> adj;\r\n    std::vector<int> dep;\r\n    std::vector<std::array<int, M + 1>> fa, maxv;\r\n\r\n    Tree(int n) {\r\n        this->n = n;\r\n        adj.assign(n + 1, {});\r\n        dep.assign(n + 1, 0);\r\n        fa.assign(n + 1, {});\r\n        maxv.assign(n + 1, {});\r\n    }\r\n\r\n    void addEdge(int u, int v, int w) {\r\n        adj[u].push_back({v, w});\r\n        adj[v].push_back({u, w});\r\n    }\r\n\r\n    void dfs(int u, int pa) {\r\n        for (int i = 1; i <= M; i++) {\r\n            fa[u][i] = fa[fa[u][i - 1]][i - 1];\r\n            maxv[u][i] = std::max(maxv[u][i - 1], maxv[fa[u][i - 1]][i - 1]);\r\n        }\r\n        for (auto [v, w] : adj[u]) {\r\n            if (v == pa) {\r\n                continue;\r\n            }\r\n            dep[v] = dep[u] + 1;\r\n            fa[v][0] = u;\r\n            maxv[v][0] = w;\r\n            dfs(v, u);\r\n        }\r\n    }\r\n\r\n    // \u67e5\u8be2 u->v \u8def\u5f84\u6700\u5927\u8fb9\u6743\r\n    int queryMax(int u, int v) {\r\n        int ans = 0;\r\n        if (dep[u] < dep[v]) {\r\n            std::swap(u, v);\r\n        }\r\n        int d = dep[u] - dep[v];\r\n        for (int i = M; i >= 0; i--) {\r\n            if (d >> i & 1) {\r\n                ans = std::max(ans, maxv[u][i]);\r\n                u = fa[u][i];\r\n            }\r\n        }\r\n        for (int i = M; i >= 0; i--) {\r\n            if (fa[u][i] != fa[v][i]) {\r\n                ans = std::max({ans, maxv[u][i], maxv[v][i]});\r\n                u = fa[u][i];\r\n                v = fa[v][i];\r\n            }\r\n        }\r\n        if (u != v) {\r\n            ans = std::max({ans, maxv[u][0], maxv[v][0]});\r\n            u = fa[u][0];\r\n            v = fa[v][0];\r\n        }\r\n\r\n        assert(u == v);\r\n        // std::cerr << \"max: \" << u << \" \" << v << \" \" << ans << \"\\n\";\r\n        return ans;\r\n    }\r\n};\r\n\r\nint main() {\r\n    std::ios::sync_with_stdio(false);\r\n    std::cin.tie(nullptr);\r\n\r\n    int n, m;\r\n    std::cin >> n >> m;\r\n    std::vector<std::array<int, 3>> edge;\r\n    std::vector<std::array<int, 3>> notInTree;\r\n\r\n    for (int i = 1; i <= m; i++) {\r\n        int u, v, w;\r\n        std::cin >> u >> v >> w;\r\n        edge.push_back({w, u, v});\r\n    }\r\n\r\n    std::sort(edge.begin(), edge.end());\r\n    DSU dsu(n);\r\n    Tree tree(n);\r\n\r\n    for (auto [w, u, v] : edge) {\r\n        if (dsu.merge(u, v)) {\r\n            tree.addEdge(u, v, w);\r\n            // std::cerr << u << \" \" << v << \" \" << w << \"\\n\";\r\n        } else {\r\n            notInTree.push_back({w, u, v});\r\n        }\r\n    }\r\n\r\n    tree.dfs(1, 0);\r\n\r\n    i64 ans = 0;\r\n    for (auto [w, u, v] : notInTree) {\r\n        ans += std::max(0, tree.queryMax(u, v) + 1 - w);\r\n    }\r\n    std::cout << ans;\r\n\r\n    return 0;\r\n}"
+}

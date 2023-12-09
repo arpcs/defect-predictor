@@ -1,0 +1,38 @@
+{
+    "id": 218877705,
+    "contestId": 150,
+    "creationTimeSeconds": 1692079029,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 150,
+        "index": "E",
+        "name": "Freezing with Style",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3000,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 150,
+        "members": [
+            {
+                "handle": "AsiaticToddaliaRoot"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1329490800
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 118,
+    "timeConsumedMillis": 1964,
+    "memoryConsumedBytes": 29184000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing ll = long long;\r\nusing pii = pair<int, int>;\r\nconst int N = 1e5 + 10, inf = 1e9;\r\n\r\nnamespace sgt {\r\npair<int, int> tr[N * 4];\r\nint w;\r\nvoid init(int n) {\r\n  for (w = 1; w <= n + 2; w <<= 1) ;\r\n  fill_n(tr + 1, w * 2 - 1, pii{-inf, 0});\r\n}\r\nauto ask(int p) { return tr[p + w]; }\r\nauto ask(int l, int r) {\r\n  pii res = {-inf, 0};\r\n  if (l > r) return res;\r\n  for (l += w - 1, r += w + 1; l ^ r ^ 1; l >>= 1, r >>= 1) {\r\n    if (~l & 1) res = max(res, tr[l ^ 1]);\r\n    if (r & 1) res = max(res, tr[r ^ 1]);\r\n  }\r\n  return res;\r\n}\r\nvoid upd(int p, pii v) {\r\n  for (p += w; p; p >>= 1) tr[p] = max(tr[p], v);\r\n}\r\n\r\n}  // namespace sgt\r\n\r\nvector<pair<int, int>> G[N];\r\nint n, mxd[N], son[N], L, R;\r\nvoid init(int u, int pre) {\r\n  for (auto [v, w] : G[u])\r\n    if (v != pre)\r\n      init(v, u), \r\n      mxd[u] = max(mxd[u], mxd[v] + 1),\r\n      son[u] = mxd[son[u]] > mxd[v] ? son[u] : v;\r\n}\r\n\r\nauto calc(int lim) {\r\n  sgt::init(n);\r\n  pair<int, pii> ans = {-inf, {0, 0}};\r\n  int dc = 0, in[N];\r\n  auto dfs = [&](auto self, int u, int pre, int sum) -> void {\r\n    sgt::upd(in[u] = ++dc, {sum, u});\r\n    for (auto [v, w] : G[u])\r\n      if (v == son[u]) \r\n        self(self, v, u, sum + (w >= lim ? 1 : -1));\r\n    for (auto [v, w] : G[u]) {\r\n      if (v == pre || v == son[u]) continue;\r\n      self(self, v, u, sum + (w >= lim ? 1 : -1));\r\n      for (int d = 0; d <= mxd[v]; d++) {\r\n        int ql = in[u] + max(L - d - 1, 0);\r\n        int qr = in[u] + min(R - d - 1, mxd[u]);\r\n        auto [f1, s1] = sgt::ask(in[v] + d);\r\n        auto [f2, s2] = sgt::ask(ql, qr);\r\n        ans = max({f1 + f2 - 2 * sum, {s1, s2}}, ans);\r\n      }\r\n      for (int d = 0; d <= mxd[v]; d++) {\r\n        sgt::upd(in[u] + d + 1, sgt::ask(in[v] + d));\r\n      }\r\n    }\r\n    int ql = in[u] + L, qr = in[u] + min(R, mxd[u]);\r\n    auto [fi, se] = sgt::ask(ql, qr);\r\n    ans = max(ans, {fi - sum, {se, u}});\r\n  };\r\n  dfs(dfs, 1, 0, 0);\r\n  return ans;\r\n}\r\nint main() { \r\n  cin.tie(0)->sync_with_stdio(0); \r\n  cin >> n >> L >> R;\r\n  R = min(R, L * 2);\r\n  for (int u, v, w, i = 1; i < n; i++)\r\n    cin >> u >> v >> w,\r\n    G[u].emplace_back(v, w), \r\n    G[v].emplace_back(u, w);\r\n  init(1, 0);\r\n  int l = -1, r = 1e9 + 1;\r\n  while (l + 1 < r) {\r\n    int mid = (l + r) >> 1;\r\n    if (calc(mid).first >= 0) l = mid;\r\n    else r = mid;\r\n  }\r\n  cerr << l << '\\n';\r\n  auto [a, b] = calc(l).second;\r\n  cout << a << ' ' << b << '\\n';\r\n}//12742979834562541560//1791110799345849439"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 197578922,
+    "contestId": 712,
+    "creationTimeSeconds": 1678926408,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 712,
+        "index": "D",
+        "name": "Memory and Scores",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2200,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 712,
+        "members": [
+            {
+                "handle": "Dakovalev1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1473525900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <algorithm>\r\n#include <array>\r\n#include <cmath>\r\n#include <functional>\r\n#include <iomanip>\r\n#include <iostream>\r\n#include <map>\r\n#include <numeric>\r\n#include <queue>\r\n#include <set>\r\n#include <string>\r\n#include <vector>\r\n\r\nconst int64_t base = 1000000007;\r\n\r\nint64_t invert(int64_t x) {\r\n    // x ^ base - 1 = 1\r\n    // x ^ base - 2 = x^{-1}\r\n    int64_t power = base - 2;\r\n\r\n    int64_t mul = x, result = 1;\r\n    while (power) {\r\n        if (power & 1) {\r\n            result = (result * mul) % base;\r\n        }\r\n        power = power >> 1;\r\n        mul = (mul * mul) % base;\r\n    }\r\n    return result;\r\n}\r\n\r\nint64_t get_factorial(int64_t n) {\r\n    static std::vector<int64_t> factorial(1, 1);\r\n    while (n >= factorial.size()) {\r\n        factorial.push_back((int64_t(factorial.back()) * int64_t(factorial.size())) % base);\r\n    }\r\n    return factorial[n];\r\n}\r\n\r\nint64_t comb(int64_t n, int64_t k) {\r\n    int64_t result = get_factorial(n);\r\n    result = (result * invert(get_factorial(k))) % base;\r\n    result = (result * invert(get_factorial(n - k))) % base;\r\n    return result;\r\n}\r\n\r\nstd::vector<int64_t> divide(std::vector<int64_t> numerator, std::vector<int64_t> denominator) {\r\n    if (numerator.size() < denominator.size()) {\r\n        return {};\r\n    }\r\n    std::vector<int64_t> result(numerator.size() + 1 - denominator.size());\r\n    for (int64_t i = numerator.size() - 1; i + 1 >= denominator.size(); --i) {\r\n        // a * x^i - D(x) * r * x^{i - deg(D)}\r\n        int64_t r = (numerator[i] * invert(denominator.back())) % base;\r\n        result[i + 1 - denominator.size()] = r;\r\n        for (int64_t j = 0; j < denominator.size(); ++j) {\r\n            numerator[i - j] -= r * denominator[denominator.size() - j - 1];\r\n            numerator[i - j] = (numerator[i - j] % base + base) % base;\r\n        }\r\n    }\r\n    return result;\r\n}\r\n\r\nvoid solve() {\r\n    int64_t a = 0, b = 0, k = 0, t = 0;\r\n    std::cin >> a >> b >> k >> t;\r\n\r\n    // sum of 2t numbers from [0...2k]\r\n    // (1 + x + x^2 + ... + x^2k)^2t = (1 - x^2k+1)^2t / (1 - x)^2t\r\n\r\n    // 1 / (1 - x)^2t = sum_i {2t + i - 1 choose i} x^i\r\n\r\n    std::vector<int64_t> first((2 * k + 1) * 2 * t + 1);\r\n    for (int64_t i = 0; i <= 2 * t; ++i) {\r\n        first[(2 * k + 1) * i] = (i % 2 == 0 ? comb(2 * t, i) : base - comb(2 * t, i));\r\n    }\r\n    std::vector<int64_t> second(first.size());\r\n    for (int64_t i = 0; i < second.size(); ++i) {\r\n        second[i] = comb(2 * t + i - 1, i);\r\n    }\r\n    std::vector<int64_t> pref(second.size());\r\n    for (int64_t i = 0; i < second.size(); ++i) {\r\n        pref[i] = ((i > 0 ? pref[i - 1] : 0ll) + second[i]) % base;\r\n    }\r\n\r\n    int64_t min = k * t * 2 + b - a + 1;\r\n    // std::vector<int64_t> result(4 * k * t + 1);\r\n    // int64_t test = 0;\r\n    // for (int64_t i = 0; i < result.size(); ++i) {\r\n    //     for (int j = 0; j <= i; ++j) {\r\n    //         result[i] += first[j] * second[i - j];\r\n    //         if (j == (2 * k + 1) * 0 && i >= min) {\r\n    //             int64_t x = second[i - j];\r\n    //             test += second[i - j];\r\n    //         }\r\n    //     }\r\n    // }\r\n\r\n    int64_t answer = 0;\r\n    for (int64_t j = 0; j <= 2 * t; ++j) {\r\n        // 4*k*t>= i + (2k+1)*j >= min\r\n        // i >= min - (2k+1)*j\r\n\r\n        int64_t left = min - (2 * k + 1) * j, right = 4 * k * t - (2 * k + 1) * j;\r\n        if (right >= 0) {\r\n            int64_t add = (pref[right] - (left > 0 ? pref[left - 1] : 0ll)) % base;\r\n            add = (add + base) % base;\r\n            add = (add * first[(2 * k + 1) * j]) % base;\r\n            answer = (answer + add) % base;\r\n        }\r\n    }\r\n\r\n    std::cout << answer << \"\\n\";\r\n}\r\n\r\nint main() {\r\n    std::ios_base::sync_with_stdio(false);\r\n    std::cin.tie(nullptr);\r\n    std::cout.tie(nullptr);\r\n\r\n#ifndef ONLINE_JUDGE\r\n    std::freopen(\"input.txt\", \"r\", stdin);\r\n#endif\r\n\r\n    solve();\r\n\r\n    return 0;\r\n}"
+}

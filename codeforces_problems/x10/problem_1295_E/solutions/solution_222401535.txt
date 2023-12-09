@@ -1,0 +1,35 @@
+{
+    "id": 222401535,
+    "contestId": 1295,
+    "creationTimeSeconds": 1694152933,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1295,
+        "index": "E",
+        "name": "Permutation Separation",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "divide and conquer"
+        ]
+    },
+    "author": {
+        "contestId": 1295,
+        "members": [
+            {
+                "handle": "CQ_cq"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1580308500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 202,
+    "memoryConsumedBytes": 14438400,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing i64 = long long;\r\n\r\nstruct SegmentTree {\r\n    int n;\r\n    std::vector<i64> minv, tag;\r\n    SegmentTree(int n) {\r\n        this->n = n;\r\n        minv.assign(n * 4, 0);\r\n        tag.assign(n * 4, 0);\r\n    }\r\n\r\n    void pushUp(int p) {\r\n        minv[p] = std::min(minv[p * 2], minv[p * 2 + 1]);\r\n    }\r\n\r\n    void pushDown(int p) {\r\n        minv[p * 2] += tag[p];\r\n        minv[p * 2 + 1] += tag[p];\r\n        tag[p * 2] += tag[p];\r\n        tag[p * 2 + 1] += tag[p];\r\n        tag[p] = 0;\r\n    }\r\n\r\n    void rangeAdd(int p, int l, int r, int x, int y, int k) {\r\n        if (l >= x && r <= y) {\r\n            tag[p] += k;\r\n            minv[p] += k;\r\n            return;\r\n        }\r\n        pushDown(p);\r\n        int mid = (l + r) / 2;\r\n        if (x <= mid) {\r\n            rangeAdd(p * 2, l, mid, x, y, k);\r\n        }\r\n        if (y > mid) {\r\n            rangeAdd(p * 2 + 1, mid + 1, r, x, y, k);\r\n        }\r\n        pushUp(p);\r\n    }\r\n\r\n    i64 query() {\r\n        return minv[1];\r\n    }\r\n};\r\n\r\nint main() {\r\n    std::ios::sync_with_stdio(false);\r\n    std::cin.tie(nullptr);\r\n\r\n    int n;\r\n    std::cin >> n;\r\n    std::vector<int> a(n + 1), b(n + 1);\r\n    for (int i = 1; i <= n; i++) {\r\n        std::cin >> a[i];\r\n    }\r\n    for (int i = 1; i <= n; i++) {\r\n        std::cin >> b[i];\r\n    }\r\n\r\n    i64 ans = 1e18;\r\n    SegmentTree sgt(n + 1);\r\n\r\n    for (int i = 1; i <= n; i++) {\r\n        sgt.rangeAdd(1, 1, n, a[i], n, b[i]);\r\n    }\r\n    for (int i = 1; i < n; i++) {\r\n        if (a[i] - 1 >= 1) {\r\n            sgt.rangeAdd(1, 1, n, 1, a[i] - 1, b[i]);\r\n        }\r\n        sgt.rangeAdd(1, 1, n, a[i], n, -b[i]);\r\n        ans = std::min(ans, sgt.query());\r\n    }\r\n\r\n    std::cout << ans;\r\n\r\n    return 0;\r\n}"
+}

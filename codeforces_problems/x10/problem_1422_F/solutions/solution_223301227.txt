@@ -1,0 +1,37 @@
+{
+    "id": 223301227,
+    "contestId": 1422,
+    "creationTimeSeconds": 1694668697,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1422,
+        "index": "F",
+        "name": "Boring Queries",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1422,
+        "members": [
+            {
+                "handle": "WingsyTsubasa"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601827500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 1434,
+    "memoryConsumedBytes": 523673600,
+    "source": "#include<algorithm>\r\n#include<iostream>\r\n#include<cstring>\r\nusing namespace std;\r\n// const int N = 700;\r\nconst int N = 200005;\r\nint prime[N], cnt;\r\nbool st[N];\r\nvoid sieve() {\r\n    st[0] = st[1] = 1;\r\n    for (int i = 2; i < N; i++) {\r\n        if (!st[i])\r\n            prime[cnt++] = i;\r\n        for (int j = 0; prime[j] * i < N; j++) {\r\n            st[prime[j] * i] = 1;\r\n            if (i % prime[j] == 0) break;\r\n        }\r\n    }\r\n}\r\nconst int mod = 1000000007;\r\nlong long BiExp(long long base, long long exp){\r\n    long long res = 1;\r\n    while(exp){\r\n        if (exp & 1) res = res * base % mod;\r\n        base = base * base % mod;\r\n        exp >>= 1;\r\n    }\r\n    return res;\r\n}\r\nint n, q;\r\nint arr[100005];\r\nstruct HJT{\r\n    struct Node {\r\n        int mul;\r\n        int lroot, rroot;\r\n    } tree[10000007];\r\n    int tot, ent[100005];\r\n    void insert(int val, int pre, int& now, int idx, bool erase = false, int l = 1, int r = n) {\r\n        now = ++tot;\r\n        tree[now] = tree[pre];\r\n        if (l == r){\r\n            tree[now].mul = erase ? 1 : val;\r\n        }\r\n        else {\r\n            int mid = (l + r) >> 1;\r\n            if (idx <= mid) insert(val, tree[pre].lroot, tree[now].lroot, idx, erase, l, mid);\r\n            else insert(val, tree[pre].rroot, tree[now].rroot, idx, erase, mid + 1, r);\r\n            tree[now].mul = (long long)tree[tree[now].lroot].mul * tree[tree[now].rroot].mul % mod;\r\n        }\r\n    }\r\n    int query(int now, int idxL, int idxR, int l = 1, int r = n) {\r\n        if (l > idxR || r < idxL) return 1;\r\n        else if (l >= idxL && r <= idxR) return tree[now].mul;\r\n        else {\r\n            int mid = (l + r) >> 1;\r\n            return (long long)query(tree[now].lroot, idxL, idxR, l, mid) * query(tree[now].rroot, idxL, idxR, mid + 1, r) % mod;\r\n        }\r\n    }\r\n    int pos[200005];\r\n    HJT(){\r\n        tree[0].mul = 1;\r\n    }\r\n} hjt;\r\nstruct Seg{\r\n    #define int long long\r\n    struct Node{\r\n        int val[100];\r\n        // int& operator[](int x){\r\n        //     return val[x];\r\n        // }\r\n    } tree[400005], ept, arr[100005];\r\n    void build_tree(int now = 1, int l = 1, int r = n){\r\n        if (l == r) tree[now] = arr[l];\r\n        else{\r\n            int mid = (l + r) >> 1;\r\n            int lroot = now << 1;\r\n            int rroot = lroot | 1;\r\n            build_tree(lroot, l, mid);\r\n            build_tree(rroot, mid + 1, r);\r\n            for (int i = 0; i < 100; ++i){\r\n                tree[now].val[i] = max(tree[lroot].val[i], tree[rroot].val[i]);\r\n            }\r\n        }\r\n    }\r\n    Node query(int idxL, int idxR, int now = 1, int l = 1, int r = n){\r\n        if (l > idxR || r < idxL) return ept;\r\n        else if (l >= idxL && r <= idxR) return tree[now];\r\n        else{\r\n            int mid = (l + r) >> 1;\r\n            int lroot = now << 1;\r\n            int rroot = lroot | 1;\r\n            Node _l = query(idxL, idxR, lroot, l, mid);\r\n            Node _r = query(idxL, idxR, rroot, mid + 1, r);\r\n            for (int i = 0; i < 100; ++i){\r\n                _l.val[i] = max(_l.val[i], _r.val[i]);\r\n            }\r\n            return _l;\r\n        }\r\n    }\r\n    // void insert(int pos, int pos2, int val, int now = 1, int l = 1, int r = n){\r\n    //     if (l == r) tree[now].val[pos2] = val;\r\n    //     else{\r\n    //         int mid = (l + r) >> 1;\r\n    //         int lroot = now << 1;\r\n    //         int rroot = lroot | 1;\r\n    //         if (pos <= mid) insert(pos, pos2, val, lroot, l, mid);\r\n    //         else insert(pos, pos2, val, rroot, mid + 1, r);\r\n    //         tree[now].val[pos2] = max(tree[lroot].val[pos2], tree[rroot].val[pos2]);\r\n    //     }\r\n    // }\r\n    #undef int\r\n} seg;\r\nvoid process(int i, int j, int _cnt){\r\n    //i = \u7b2ci\u4e2a\u6570\uff08\u4f4d\u7f6e\uff09  j = \u7b2cj\u4e2a\u7d20\u6570  cnt = \u5305\u542b\u7684\u7d20\u6570\u4e2a\u6570\r\n    if (j < 100) {\r\n        seg.arr[i].val[j] = _cnt;\r\n    }\r\n    else{\r\n        if (hjt.pos[prime[j]]) hjt.insert(prime[j], hjt.ent[i - 1], hjt.ent[i], hjt.pos[prime[j]], true);\r\n        hjt.insert(prime[j], hjt.ent[i - (hjt.pos[prime[j]] ? 0 : 1)], hjt.ent[i], i);\r\n        hjt.pos[prime[j]] = i;\r\n    }\r\n}\r\nint query(int l, int r){\r\n    long long res = 1;\r\n    auto _1 = seg.query(l, r);\r\n    for (int i = 0; i < 100; ++i){\r\n        res = res * BiExp(prime[i], _1.val[i]) % mod;\r\n    }\r\n    auto _2 = hjt.query(hjt.ent[r], l, r);\r\n    res = (long long)res * _2 % mod;\r\n    return res;\r\n}\r\nsigned main(){\r\n    // ios::sync_with_stdio(false);\r\n    // cin.tie(0);\r\n    // cout.tie(0);\r\n    sieve();\r\n    cin >> n;\r\n    for (int i = 1; i <= n; ++i) {\r\n        cin >> arr[i];\r\n        int x = arr[i];\r\n        if (x == 1) continue;\r\n        for (int j = 0; j < cnt; ++j) {\r\n            if (!st[x]){\r\n                int _ = lower_bound(prime + j, prime + cnt, x) - prime;\r\n                process(i, _, 1);\r\n                break;\r\n            }\r\n            int _cnt = 0;\r\n            while(x % prime[j] == 0){\r\n                x = x / prime[j];\r\n                ++_cnt;\r\n            }\r\n            if (_cnt) process(i, j, _cnt);\r\n            if (x == 1) break;\r\n        }\r\n        if (!hjt.ent[i]) hjt.ent[i] = hjt.ent[i - 1];\r\n    }\r\n    seg.build_tree();\r\n    cin >> q;\r\n    int x, y;\r\n    int last = 0;\r\n    while (q--) {\r\n        cin >> x >> y;\r\n        x = ((last + x) % n) + 1;\r\n        y = ((last + y) % n) + 1;\r\n        if (x > y) swap(x, y);\r\n        last = query(x, y);\r\n        cout << last << \"\\n\";\r\n    }\r\n    return 0;\r\n}"
+}

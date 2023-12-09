@@ -1,0 +1,38 @@
+{
+    "id": 231061531,
+    "contestId": 1585,
+    "creationTimeSeconds": 1698984801,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1585,
+        "index": "G",
+        "name": "Poachers",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 2500,
+        "tags": [
+            "dp",
+            "games",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1585,
+        "members": [
+            {
+                "handle": "CHK6666"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1639322100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 73,
+    "timeConsumedMillis": 1419,
+    "memoryConsumedBytes": 84275200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define pb push_back\r\nconst int N=5e5+5;\r\nint t[N],sum[N<<2],siz[N],son[N],dep[N],id[N],dfn[N],cnt,n,val[N],f[N],rt[N],mn[N],mx[N];\r\nvector<int>E[N];\r\nvoid dfs(int u,int fa){\r\n\tsiz[u]=1;son[u]=0;\r\n\tdep[u]=dep[fa]+1;\r\n\tid[dfn[u]=++cnt]=u;\r\n\tmn[u]=1e9;mx[u]=dep[u];\r\n\tfor(int v:E[u]){\r\n\t\tif(v==fa)continue;\r\n\t\tdfs(v,u);siz[u]+=siz[v];\r\n\t\tif(siz[son[u]]<siz[v])son[u]=v;\r\n\t\tmn[u]=min(mn[u],mn[v]);\r\n\t\tmx[u]=max(mx[u],mx[v]);\r\n\t}if(mn[u]==1e9)mn[u]=dep[u];\r\n}\r\nvoid change(int x,int l,int r,int p,int w){\r\n\tif(l==r){if(w==-111)t[l]=0;else t[l]+=w;sum[x]=(t[l]>0);return;}\r\n\tint mid=(l+r)>>1;\r\n\tif(mid>=p)change(x<<1,l,mid,p,w);\r\n\telse change(x<<1|1,mid+1,r,p,w);\r\n\tsum[x]=sum[x<<1]+sum[x<<1|1];\r\n}\r\nint ask(int x,int l,int r){\r\n\tif(sum[x]==r-l+1)return r+1;\r\n\tif(l==r)return l;\r\n\tint mid=(l+r)>>1;\r\n\tif(sum[x<<1]==mid-l+1)return ask(x<<1|1,mid+1,r);\r\n\treturn ask(x<<1,l,mid);\r\n}\r\nvoid upd(int x,int w){if(x>n+1)return;change(1,0,n+1,x,w);}\r\nvoid clear(int x){if(x>n+1)return;change(1,0,n+1,x,-111);}\r\nvoid dfs2(int u,int fa,int op){\r\n\tfor(int v:E[u]){\r\n\t\tif(v==fa||v==son[u])continue;\r\n\t\tdfs2(v,u,0);\r\n\t}if(son[u])dfs2(son[u],u,1);\r\n\tfor(int v:E[u]){\r\n\t\tif(v==fa||v==son[u])continue;\r\n\t\tfor(int i=dfn[v];i<=dfn[v]+siz[v]-1;i++){\r\n\t\t\tif(dep[id[i]]>mn[son[u]]+1)continue;\r\n\t\t\tupd(val[dep[id[i]]],-1);\r\n\t\t\tval[dep[id[i]]]^=f[id[i]];\r\n\t\t\tupd(val[dep[id[i]]],1);\r\n\t\t}\r\n\t}vector<int>del;//del.pb(0);\r\n\tif(son[u])for(int w=mn[son[u]]+1;w>mn[u]+1;w--)upd(val[w],-1),val[w]=0;\r\n\tupd(0,1);f[u]=ask(1,0,n+1);upd(0,-1);\r\n\tif(!op){\r\n\t\tfor(int i=dep[u];i<=min(mx[u],mn[son[u]]+1);i++)clear(val[i]),val[i]=0;\r\n//\t\tfor(auto w:del)clear(w);\r\n\t}else{\r\n\t\tval[dep[u]]^=f[u];\r\n\t\tupd(val[dep[u]],1);\r\n\t}\r\n}\r\nvoid build(int x,int l,int r){\r\n\tsum[x]=0;\r\n\tif(l==r){t[l]=0;return;}\r\n\tint mid=(l+r)>>1;\r\n\tbuild(x<<1,l,mid);\r\n\tbuild(x<<1|1,mid+1,r);\r\n}\r\nvoid solve(){\r\n\tscanf(\"%d\",&n);build(1,0,n+1);cnt=0;\r\n\tfor(int i=1;i<=n;i++)E[i].clear(),rt[i]=0;\r\n\tfor(int i=1,p;i<=n;i++){\r\n\t\tscanf(\"%d\",&p);\r\n\t\tif(!p)rt[i]=1;\r\n\t\telse E[i].pb(p),E[p].pb(i);\r\n\t}int sg=0;\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tif(rt[i]){\r\n\t\t\tdfs(i,0);dfs2(i,0,0);\r\n\t\t\tsg^=f[i];\r\n\t\t}\r\n\tfor(int i=0;i<=n;i++)val[i]=0;\r\n//\tfor(int i=1;i<=n;i++)cout<<f[i]<<' ';cout<<endl;\r\n//\tfor(int i=1;i<=n;i++)cout<<mn[i]<<' ';cout<<endl;\r\n\tputs(sg?\"YES\":\"NO\");\r\n}\r\nint main(){\r\n//\tfreopen(\"1.in\",\"r\",stdin);\r\n//\tfreopen(\"1.out\",\"w\",stdout);\r\n\tint T;scanf(\"%d\",&T);\r\n\twhile(T--)solve();\r\n}"
+}

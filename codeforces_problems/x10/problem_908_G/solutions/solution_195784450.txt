@@ -1,0 +1,36 @@
+{
+    "id": 195784450,
+    "contestId": 908,
+    "creationTimeSeconds": 1677835308,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 908,
+        "index": "G",
+        "name": "New Year and Original Order",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 2800,
+        "tags": [
+            "dp",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 908,
+        "members": [
+            {
+                "handle": "vjudge1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1514562000
+    },
+    "programmingLanguage": "Clang++17 Diagnostics",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n \nconst int maxn = 700 + 10, mod = 1e9 + 7;\n \nint add() { return 0; }\ntemplate <typename first, typename... second>\nint add(first f, second... s) {\n    return (f + add(s...)) % mod;\n}\n \nint mul() { return 1; }\ntemplate <typename first, typename... second>\nint mul(first f, second... s) {\n    return 1LL * f * mul(s...) % mod;\n}\n \nstruct elem {\n    int cnt[10][maxn], mn[10][maxn], dp[10][maxn];\n \n    void clear() {\n        memset(cnt, 0, sizeof(cnt));\n        memset(mn, 0, sizeof(mn));\n        memset(dp, 0, sizeof(dp));\n    }\n} a[2], b[2];\n \nvoid merge(elem &x, elem &y, int k) {\n    for (int i = 1; i < maxn; i++) {\n        x.cnt[k][i] = add(x.cnt[k][i], y.mn[k][i], y.dp[k][i]);\n        x.mn[k][i] = add(x.mn[k][i], y.dp[k][i]);\n    }\n \n    for (int i = 1; i <= 9; i++) {\n        for (int j = 1; j < maxn-1; j++) {\n            if (i > k) x.cnt[i][j] = add(x.cnt[i][j], y.cnt[i][j]);\n            else x.cnt[i][j+1] = add(x.cnt[i][j+1], y.cnt[i][j]);\n \n            if (i >= k) x.mn[i][j] = add(x.mn[i][j], y.mn[i][j]);\n            else x.mn[i][j+1] = add(x.mn[i][j+1], y.mn[i][j]);\n \n            if (i > k) x.dp[i][j] = add(x.dp[i][j], y.dp[i][j]);\n            else if (i < k) x.dp[i][j+1] = add(x.dp[i][j+1], y.dp[i][j]);\n        }\n    }\n}\n \nvoid replace(elem &x, elem &y) {\n    for (int i = 1; i <= 9; i++) {\n        for (int j = 1; j < maxn; j++) {\n            x.cnt[i][j] = y.cnt[i][j];\n            x.mn[i][j] = y.mn[i][j];\n            x.dp[i][j] = y.dp[i][j];\n        }\n    }\n}\n \nint main () {\n    ios_base::sync_with_stdio(false), cin.tie(0);\n \n    string s;\n    cin >> s;\n \n    int c = s.back() - '0';\n \n    for (int i = 1; i <= 9; i++) {\n        b[0].cnt[i][1] = b[0].mn[i][1] = 1;\n        b[0].dp[i][1] = i;\n        b[0].dp[i][2] = 9-i;\n \n        if (i <= c) {\n            a[0].cnt[i][1] = a[0].mn[i][1] = 1;\n        }\n        a[0].dp[i][1] = min(i-1, c) + 1;\n        a[0].dp[i][2] = max(c-i, 0);\n    }\n \n    s.pop_back();\n \n    while (s.size()) {\n        int c = s.back() - '0';\n        s.pop_back();\n \n        if (c) {\n            replace(a[1], b[0]);\n            merge(a[1], a[0], c);\n            for (int i = 1; i < c; i++) {\n                merge(a[1], b[0], i);\n            }\n            swap(a[1], a[0]);\n        }\n \n        replace(b[1], b[0]);\n        for (int i = 1; i <= 9; i++) {\n            merge(b[1], b[0], i);\n        }\n        swap(b[0], b[1]);\n    }\n \n    int ans = 0;\n \n    for (int i = 1; i <= 9; i++) {\n        int x = 1;\n        for (int j = 1; j < maxn; j++) {\n            ans = add(ans, mul(a[0].cnt[i][j], i, x));\n            x = mul(x, 10);\n        }\n    }\n \n    cout << ans;    \n \n    return 0;\n}\n\t\t\t\t\t\t\t\t \t\t       \t\t \t\t\t\t  \t \t\t"
+}

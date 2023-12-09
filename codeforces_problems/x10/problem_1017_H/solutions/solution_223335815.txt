@@ -1,0 +1,35 @@
+{
+    "id": 223335815,
+    "contestId": 1017,
+    "creationTimeSeconds": 1694690036,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1017,
+        "index": "H",
+        "name": "The Films",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 3300,
+        "tags": [
+            "brute force"
+        ]
+    },
+    "author": {
+        "contestId": 1017,
+        "members": [
+            {
+                "handle": "luogu_bot1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1533737100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 1778,
+    "memoryConsumedBytes": 135884800,
+    "source": "// LUOGU_RID: 124694281\n#include <bits/stdc++.h>\r\n#ifdef dbg\r\n#define D(...) fprintf(stderr, __VA_ARGS__)\r\n#define DD(...) D(#__VA_ARGS__ \" = \"), debug_helper::debug(__VA_ARGS__), D(\"\\n\")\r\n#include \"C:\\Users\\wsyear\\Desktop\\OI\\templates\\debug.hpp\"\r\n#else\r\n#define D(...) ((void)0)\r\n#define DD(...) ((void)0)\r\n#endif\r\n#define rep(i, j, k) for (int i = (j); i <= (k); ++i)\r\n#define per(i, j, k) for (int i = (j); i >= (k); --i)\r\n#define SZ(v) int((v).size())\r\n#define ALL(v) (v).begin(),(v).end()\r\n#define fi first\r\n#define se second\r\nusing ll = long long;\r\nusing pii = std::pair<int, int>;\r\nusing pll = std::pair<ll, ll>;\r\n\r\nusing namespace std;\r\n\r\ntemplate <int P>\r\nclass mod_int {\r\n  using Z = mod_int;\r\n\r\nprivate:\r\n  static int mo(int x) { return x < 0 ? x + P : x; }\r\n\r\npublic:\r\n  int x;\r\n  int val() const { return x; }\r\n  mod_int() : x(0) {}\r\n  template <class T>\r\n  mod_int(const T &x_) : x(x_ >= 0 && x_ < P ? static_cast<int>(x_) : mo(static_cast<int>(x_ % P))) {}\r\n  bool operator==(const Z &rhs) const { return x == rhs.x; }\r\n  bool operator!=(const Z &rhs) const { return x != rhs.x; }\r\n  Z operator-() const { return Z(x ? P - x : 0); }\r\n  Z pow(long long k) const {\r\n    Z res = 1, t = *this;\r\n    while (k) {\r\n      if (k & 1) res *= t;\r\n      if (k >>= 1) t *= t;\r\n    }\r\n    return res;\r\n  }\r\n  Z &operator++() {\r\n    x < P - 1 ? ++x : x = 0;\r\n    return *this;\r\n  }\r\n  Z &operator--() {\r\n    x ? --x : x = P - 1;\r\n    return *this;\r\n  }\r\n  Z operator++(int) {\r\n    Z ret = x;\r\n    x < P - 1 ? ++x : x = 0;\r\n    return ret;\r\n  }\r\n  Z operator--(int) {\r\n    Z ret = x;\r\n    x ? --x : x = P - 1;\r\n    return ret;\r\n  }\r\n  Z inv() const { return pow(P - 2); }\r\n  Z &operator+=(const Z &rhs) {\r\n    (x += rhs.x) >= P && (x -= P);\r\n    return *this;\r\n  }\r\n  Z &operator-=(const Z &rhs) {\r\n    (x -= rhs.x) < 0 && (x += P);\r\n    return *this;\r\n  }\r\n  Z &operator*=(const Z &rhs) {\r\n    x = 1ULL * x * rhs.x % P;\r\n    return *this;\r\n  }\r\n  Z &operator/=(const Z &rhs) { return *this *= rhs.inv(); }\r\n#define setO(T, o)                                 \\\r\n  friend T operator o(const Z &lhs, const Z &rhs) {\\\r\n    Z res = lhs;                                   \\\r\n    return res o## = rhs;                          \\\r\n  }\r\n  setO(Z, +) setO(Z, -) setO(Z, *) setO(Z, /)\r\n#undef setO\r\n};\r\nconst int P = 998244353;\r\nusing Z = mod_int<P>;\r\n\r\nconst int N = 300010;\r\nconst int B = 320;\r\nconst int M = 101;\r\n\r\nstruct node {\r\n  int l, r, k, id;\r\n  Z ans;\r\n} que[N];\r\n\r\nint n, m, tot, q, a[N], K[N], cnt[N], tmp[N], cur[N];\r\nZ fac[N], ivf[N], A[M][N], ans;\r\n\r\nZ binom(int x, int y) {\r\n  if (x < 0 || y < 0 || x < y) return 0;\r\n  return fac[x] * ivf[x - y];\r\n}\r\n\r\nZ ibinom(int x, int y) {\r\n  if (x < 0 || y < 0 || x < y) return 0;\r\n  return ivf[x] * fac[x - y];\r\n}\r\n\r\nvoid add(int x) {\r\n  ans *= ibinom(tmp[x], cur[x]);\r\n  cur[x]++;\r\n  ans *= binom(tmp[x], cur[x]);\r\n}\r\n\r\nvoid del(int x) {\r\n  ans *= ibinom(tmp[x], cur[x]);\r\n  cur[x]--;\r\n  ans *= binom(tmp[x], cur[x]);\r\n}\r\n\r\nint main() {\r\n  fac[0] = 1;\r\n  rep (i, 1, N - 1) fac[i] = fac[i - 1] * i;\r\n  ivf[N - 1] = fac[N - 1].inv();\r\n  per (i, N - 1, 1) ivf[i - 1] = ivf[i] * i;\r\n  cin.tie(nullptr) -> ios::sync_with_stdio(false);\r\n  cin >> n >> m >> q;\r\n  rep (i, 1, n) cin >> a[i], cnt[a[i]] += 1;\r\n  rep (i, 1, q) cin >> que[i].l >> que[i].r >> que[i].k, que[i].id = i;\r\n  rep (i, 1, q) K[i] = que[i].k;\r\n  sort(K + 1, K + q + 1), tot = unique(K + 1, K + q + 1) - K - 1;\r\n  rep (i, 1, q) que[i].k = lower_bound(K + 1, K + tot + 1, que[i].k) - K;\r\n  // cerr << tot << endl;\r\n  rep (i, 1, tot) {\r\n    A[i][0] = 1;\r\n    rep (j, 1, n) A[i][j] = A[i][j - 1] * Z(1ll * m * K[i] + j);\r\n  }\r\n  rep (i, 1, q) que[i].ans = A[que[i].k][n - (que[i].r - que[i].l + 1)];\r\n  sort(que + 1, que + q + 1, [&](node x, node y) { return x.k < y.k; });\r\n  for (int ql = 1, qr; ql <= q; ql = qr + 1) {\r\n    qr = ql;\r\n    while (qr < q && que[qr + 1].k == que[ql].k) qr++;\r\n    int bsz = max(1, n / (int)sqrt(qr - ql + 1));\r\n    sort(que + ql, que + qr + 1, [&](node x, node y) {\r\n      if (x.l / bsz == y.l / bsz) return x.r < y.r;\r\n      return x.l / bsz < y.l / bsz;\r\n    });\r\n    rep (i, 1, m) tmp[i] = K[que[ql].k] + cnt[i], cur[i] = 0;\r\n    ans = 1;\r\n    int l = 1, r = 0;\r\n    rep (i, ql, qr) {\r\n      while (l > que[i].l) add(a[--l]);\r\n      while (r < que[i].r) add(a[++r]);\r\n      while (l < que[i].l) del(a[l++]);\r\n      while (r > que[i].r) del(a[r--]);\r\n      que[i].ans *= ans;\r\n    }\r\n  }\r\n  sort(que + 1, que + q + 1, [&](node x, node y) { return x.id < y.id; });\r\n  rep (i, 1, q) cout << que[i].ans.val() << '\\n';\r\n  // cerr << 1. * clock() / CLOCKS_PER_SEC << endl;\r\n}"
+}

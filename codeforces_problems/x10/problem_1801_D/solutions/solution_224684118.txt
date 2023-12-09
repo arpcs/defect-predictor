@@ -1,0 +1,41 @@
+{
+    "id": 224684118,
+    "contestId": 1801,
+    "creationTimeSeconds": 1695433340,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1801,
+        "index": "D",
+        "name": "The way home",
+        "type": "PROGRAMMING",
+        "points": 1750.0,
+        "rating": 2100,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dp",
+            "graphs",
+            "greedy",
+            "shortest paths",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1801,
+        "members": [
+            {
+                "handle": "ashwanth106121023"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1678354500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 6656000,
+    "source": "\r\n// #pragma GCC optimize(\"Ofast\")\r\n// #pragma GCC target(\"sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,avx,avx2,fma\")\r\n// #pragma GCC optimize(\"unroll-loops\")\r\n\t\t\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef long long lli;\r\ntypedef long double ld;\r\ntypedef vector<int> vi;\r\ntypedef vector<ld> vld;\r\ntypedef vector<pair<lli , lli>> vpll;\r\ntypedef vector<pair<ld , ld>> vplld;\r\ntypedef pair<int,int> pii;\r\ntypedef vector<pair<int,int>> vpii;\r\ntypedef vector<lli> vl;\r\ntypedef pair<lli,lli> pll;\r\ntypedef priority_queue<lli> pq;\r\ntypedef priority_queue<pair<lli,lli>> pqp;\r\n\r\n#define fi first\r\n#define se second\r\n#define pb push_back\r\n#define mp make_pair\r\n\r\n#define print(a) for(auto x:a) cout<<x<<\" \";cout<<endl;\r\n#define printarr(a , n) for(int i = 0 ; i < n  ;i ++) cout << a[i] << \" \"; cout << endl;\r\n#define endl '\\n'\r\n#define sq(a) (a)*(a)\r\n#define yes  cout << \"YES\" << endl;\r\n#define no  cout << \"NO\" << endl;\r\n\r\n\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\nusing namespace __gnu_pbds;\r\n  \r\n#define ordered_set tree<int, null_type,less<int>,rb_tree_tag,tree_order_statistics_node_update>\r\n#define inf (lli)2e18\r\n\r\n\r\n/*\r\n\torder_of_key(x) -> number of elements strictly smaller than x\r\n\tfind_by_order(k) -> kth element \r\n\r\n\t---------------------------------------------\r\n\tThink reverse -> graph problems\r\n\tTry converting into new operation\r\n\tcheck what happens to prefix sums\r\n\tgraph trav , scc , topo , floyd ,  .... \r\n\tcopy code check\r\n\tindex bounds\r\n\tmaxsz\r\n\tset low , up bound be carefull\r\n*/\r\n\r\n/*\r\n\r\n    ----------------------------------------------------------------------\r\n\t-------------- GO THROUGH CODE ONCE BEFORE SUBMITTING ----------------\r\n    ----------------------------------------------------------------------\r\n\r\n    ----------------------------------------------------------------------\r\n\t-------------- TLE : INFINITE LOOP , TIGHT CONSTRAINTS ---------------\r\n\t-------------- MLE : WIERD CONSTRAINT ARRAY SIZE       ---------------\r\n\t-------------- RE : POP EMPTY STACK QUEUE, INDEX BOUNDS --------------\r\n    ----------------------------------------------------------------------\r\n\r\n    Things get better by time, hope for the best ......\r\n    \r\n*/\r\n#define maxsz 200005\r\n\r\nvpll adjlst[maxsz];\r\nvector<vl> dist(maxsz);\r\nlli n , m , p;\r\nvl a(maxsz);\r\n\r\nvoid solve(){\r\n\r\n\t\r\n\tcin >> n >> m >> p;\r\n\r\n\tfor(int i = 0 ; i <= n ; i ++)\r\n\t{\r\n\t\tadjlst[i].clear();\r\n\t\tdist[i] = {inf , inf ,inf};\r\n\t\ta[i] = 0;\r\n\t}\r\n\r\n\r\n\tfor(int i = 1 ; i <= n ; i ++) cin >> a[i];\r\n\r\n\r\n\tfor(int i = 0; i  < m ; i ++)\r\n\t{\r\n\t\tlli u , v , s;\r\n\t\tcin >> u >> v >> s;\r\n\t\tadjlst[u].pb({v ,  s});\r\n\t}\r\n\r\n\r\n\tset<vl> pq;\r\n\r\n\r\n\r\n\r\n\tpq.insert({0 , -p , -a[1] , 1});\r\n\tdist[1] = {0 , -p , -a[1]};\r\n\t/*\r\n\r\n\tp + x*mm >= cost\r\n\tx*mm >= cost - p\r\n\tx = \r\n\t*/\r\n\twhile(pq.size())\r\n\t{\r\n\t\tvl info = *(pq.begin());\r\n\t\tpq.erase(info);\r\n\r\n\t\tlli u = info[3];\r\n\t\tlli mm = -info[2];\r\n\t\tlli p = -info[1];\r\n\t\tlli cc = info[0];\r\n\r\n\t\tfor(auto kk : adjlst[u])\r\n\t\t{\r\n\t\t\tlli v = kk.first;\r\n\t\t\tlli cost = kk.second;\r\n\r\n\t\t\tlli new_p , new_m , new_c;\r\n\r\n\t\t\tif(p >= cost)\r\n\t\t\t{\r\n\t\t\t\tnew_p = p - cost;\r\n\t\t\t\tnew_m = max(mm , a[v]);\r\n\t\t\t\tnew_c = cc; \r\n\t\t\t}\r\n\t\t\telse\r\n\t\t\t{\r\n\t\t\t\tlli xx = (cost - p + mm - 1)/mm;\r\n\t\t\t\tnew_p = mm*xx + p - cost;\r\n\t\t\t\tnew_m = max(mm , a[v]);\r\n\t\t\t\tnew_c = cc + xx;\r\n\t\t\t}\r\n\r\n\r\n\r\n\t\t\tvl new_guy = {new_c , -new_p , -new_m};\r\n\r\n\t\t\tif(dist[v][0] >= new_guy[0])\r\n\t\t\t{\r\n\t\t\t\tdist[v] = new_guy;\r\n\t\t\t\tpq.insert({new_c , -new_p , -new_m , v});\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\r\n\r\n\tif(dist[n][0] == inf)\r\n\t{\r\n\t\tcout<< -1 << endl;\r\n\t\treturn;\r\n\t}\r\n\r\n\tcout << dist[n][0] << endl;\r\n\r\n\r\n}\r\nint main(){\r\n\r\n\tios::sync_with_stdio(0);cin.tie(0);cout.tie(0);\r\n\t\r\n\r\n\t#ifndef ONLINE_JUDGE\r\n\t\tfreopen(\"input.txt\", \"r\" , stdin);\r\n\t\tfreopen(\"output.txt\", \"w\" , stdout);\r\n\t#endif\r\n\r\n\tint t;cin>>t; while(t--)\r\n    solve();\r\n\t\r\n\treturn 0;\r\n}\r\n\r\n"
+}

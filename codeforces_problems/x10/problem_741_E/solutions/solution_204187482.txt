@@ -1,0 +1,36 @@
+{
+    "id": 204187482,
+    "contestId": 741,
+    "creationTimeSeconds": 1682993092,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 741,
+        "index": "E",
+        "name": "Arpa\u2019s abnormal DNA and Mehrdad\u2019s deep interest",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3400,
+        "tags": [
+            "data structures",
+            "string suffix structures"
+        ]
+    },
+    "author": {
+        "contestId": 741,
+        "members": [
+            {
+                "handle": "bkifhr7"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1481034900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 91,
+    "timeConsumedMillis": 1092,
+    "memoryConsumedBytes": 52736000,
+    "source": "#include <bits/stdc++.h>\n\n#define endl '\\n'\n#define fi first\n#define se second\n#define MOD(n,k) ( ( ((n) % (k)) + (k) ) % (k))\n#define forn(i,n) for (int i = 0; i < int(n); i++)\n#define forr(i,a,b) for (int i = int(a); i <= int(b); i++)\n#define all(v) v.begin(), v.end()\n#define pb push_back\n\nusing namespace std;\n\ntypedef long long ll;\ntypedef long double ld;\ntypedef pair<int, int> ii;\ntypedef vector<int> vi;\ntypedef vector<vi> vvi;\ntypedef vector<ii> vii;\n\nconst int MX = 200005, SQ = 320;\nint m, q, res[MX];\nstring s, t, st;\nvi ord, pos;\n\nint sa[MX], lcp[MX], f[MX], lis[MX];\n \nint t_sa[MX] = {0}, c[MX] = {0};\nvoid countingSort (string &s, int ra[], int k) {\n    int sum, n = s.size(), mx = max(300, n);\n    memset(t_sa, 0, sizeof(t_sa));\n    memset(c, 0, sizeof(c));\n \n    for (int i = 0; i < n; i++)\n        c[i+k<n?ra[i+k]:0]++;\n \n    for (int i = sum = 0; i < mx; i++) {\n        int t = c[i];\n        c[i] = sum;\n        sum += t;\n    }\n \n    for (int i = 0; i < n; i++)\n        t_sa[c[sa[i]+k<n?ra[sa[i]+k]:0]++] = sa[i];\n \n    for (int i = 0; i < n; i++) sa[i] = t_sa[i];\n}\n \nint t_ra[MX] = {0}, ra[MX] = {0};\nvoid obtSA (string &s) {\n    int r, n = s.size();\n \n    for (int i = 0; i < n; i++) ra[i] = s[i];\n    for (int i = 0; i < n; i++) sa[i] = i;\n \n    for (int k = 1; k < n; k <<= 1) {\n        countingSort(s, ra, k);\n        countingSort(s, ra, 0);\n \n        t_ra[s[0]] = r = 0;\n \n        for (int i = 1; i < n; i++)\n            if (ra[sa[i]] == ra[sa[i-1]] && ra[sa[i]+k] == ra[sa[i-1]+k])\n                t_ra[sa[i]] = r;\n            else\n                t_ra[sa[i]] = ++r;\n \n        for (int i = 0; i < n; i++) ra[i] = t_ra[i];\n        if (ra[sa[n-1]] == n-1) break;\n    }\n}\n \nint phi[MX], plcp[MX];\nvoid obtLCP (string &s) {\n    int n = s.size();\n \n    phi[sa[0]] = -1;\n    for (int i = 1; i < n; i++) phi[sa[i]] = sa[i-1];\n \n    for (int i = 0, l = 0; i < n; i++) {\n        if (phi[i] == -1) {\n            plcp[i] = 0;\n            continue;\n        }\n \n        while (s[i+l] == s[phi[i]+l]) l++;\n \n        plcp[i] = l;\n        l = max(l-1, 0);\n    }\n \n    for (int i = 0; i < n; i++) lcp[i] = plcp[sa[i]];\n}\n\ntemplate<typename T>\nstruct SparseTable{\n\tvector<vector<T>> ST;\n\tvector<int> logs;\n\tint K, N;\n\n\tSparseTable(vector<T> & arr){\n\t\tif (!arr.size())\n\t\t\treturn;\n\t\t\n\t\tN = arr.size();\n\t\tK = log2(N) + 1;\n\t\tST.assign(K + 1, vector<T>(N));\n\t\tlogs.assign(N + 1, 0);\n\t\tfor(int i = 2; i <= N; ++i)\n\t\t\tlogs[i] = logs[i >> 1] + 1;\n\t\tfor(int i = 0; i < N; ++i)\n\t\t\tST[0][i] = arr[i];\n\t\tfor(int j = 1; j <= K; ++j)\n\t\t\tfor(int i = 0; i + (1 << j) <= N; ++i)\n\t\t\t\tST[j][i] = min(ST[j - 1][i], ST[j - 1][i + (1 << (j - 1))]); \n\t}\n\n\tT query(int l, int r){\n\t\tif (l > r) return 1e9;\n\t\tint j = logs[r - l + 1];\n\t\treturn min(ST[j][l], ST[j][r - (1 << j) + 1]);\n\t}\n};\n\nSparseTable<int> *lon, *tot;\n\nint query (int i, int j) {\n\tif (i == j)\n\t\treturn 1e9;\n\tif (i > j)\n\t\tswap(i, j);\n\treturn lon->query(i + 1, j);\n}\n\nint comp (int i, int j, int lim) {\n\tint lcp = query(f[i], f[j]);\n\tif (lcp < lim && i + lcp < (int)st.size() && j + lcp < (int)st.size())\n\t\treturn st[i + lcp] < st[j + lcp];\n\treturn -1;\n}\n\nint get_l (int l, int k, int rem) {\n\tif (l % k <= rem)\n\t\treturn l / k;\n\treturn l / k + 1;\n}\n\nint get_r (int r, int k, int rem) {\n\tif (r % k >= rem)\n\t\treturn r / k;\n\treturn r / k - 1;\n}\n\nvvi queries[SQ];\n\nvoid main_() {\n\tfill(res, res + MX, 1e9);\n\t\n\tcin >> s >> t >> q;\n\t\n\tst = s + t + \"#\";\n\tobtSA(st);\n\tobtLCP(st);\n\t\n\tvi vaux(st.size());\n\tforn (i, st.size())\n\t\tvaux[i] = lcp[i];\n\tlon = new SparseTable<int>(vaux);\n\t\n\tforn(i, st.size())\n\t\tf[sa[i]] = i;\n\t\n\tord.resize(s.size() + 1);\n\tiota(all(ord), 0);\n\t\n\tsort(all(ord), [&] (int i, int j) {\n\t\tint f = 0;\n\t\tif (i > j) {\n\t\t\tswap(i, j);\n\t\t\tf = 1;\n\t\t}\n\t\t\n\t\tint d = comp((int)s.size(), i, min((int)t.size(), j - i));\n\t\tif (d != -1)\n\t\t\treturn f ^ d;\n\t\t\n\t\tif (j - i < (int)t.size()) {\n\t\t\td = comp((int)s.size() + (j - i), (int)s.size(), (int)t.size() - (j - i));\n\t\t\tif (d != -1)\n\t\t\t\treturn f ^ d;\n\t\t\t\n\t\t\td = comp(i, (int)s.size() + ((int)t.size() - (j - i)), j - i);\n\t\t\tif (d != -1)\n\t\t\t\treturn f ^ d;\n\t\t} else {\n\t\t\td = comp(i, i + (int)t.size(), j - ((int)t.size() + i));\n\t\t\tif (d != -1)\n\t\t\t\treturn f ^ d;\n\t\t\t\n\t\t\td = comp(i + (j - ((int)t.size() + i)), (int)s.size(), (int)t.size());\n\t\t\tif (d != -1)\n\t\t\t\treturn f ^ d;\n\t\t}\n\t\t\n\t\treturn f ^ (i < j);\n\t});\n\t\n\tpos.resize(ord.size());\n\tforn (i, ord.size())\n\t\tpos[ord[i]] = i;\n\ttot = new SparseTable<int>(pos);\n\t\n\tforn (i, q) {\n\t\tint l, r, k, x, y;\n\t\tcin >> l >> r >> k >> x >> y;\n\t\t\n\t\tif (k < SQ) {\n\t\t\tqueries[k].pb({l, r, x, y, i});\n\t\t} else {\n\t\t\tint f = x;\n\t\t\tint g = y;\n\t\t\t\n\t\t\twhile (f <= r) {\n\t\t\t\tint lo = max(l, f);\n\t\t\t\tint hi = min(r, g);\n\t\t\t\t\n\t\t\t\tif (lo <= hi)\n\t\t\t\t\tres[i] = min(res[i], tot->query(lo, hi));\n\t\t\t\t\n\t\t\t\tf += k;\n\t\t\t\tg += k;\n\t\t\t}\n\t\t}\n\t}\n\t\n\tforn (k, SQ) {\n\t\tif (!queries[k].size())\n\t\t\tcontinue;\n\t\t\n\t\tvvi aux(k);\n\t\tforn (j, pos.size())\n\t\t\taux[j % k].pb(pos[j]);\n\t\t\n\t\tvector<unique_ptr<SparseTable<int>>> small;\n\t\tforn (j, k)\n\t\t\tsmall.emplace_back(new SparseTable<int>(aux[j]));\n\t\t\n\t\tfor (const vi &v : queries[k]) {\n\t\t\tint l = v[0];\n\t\t\tint r = v[1];\n\t\t\tint x = v[2];\n\t\t\tint y = v[3];\n\t\t\tint ind = v[4];\n\t\t\t\n\t\t\tforr (j, x, y) {\n\t\t\t\tint f = get_l(l, k, j);\n\t\t\t\tint g = get_r(r, k, j);\n\t\t\t\t\n\t\t\t\tif (f <= g)\n\t\t\t\t\tres[ind] = min(res[ind], small[j]->query(f, g));\n\t\t\t}\n\t\t}\n\t}\n\t\n\tforn (i, q) {\n\t\tif (res[i] == 1e9)\n\t\t\tcout << -1 << \" \";\n\t\telse\n\t\t\tcout << ord[res[i]] << \" \";\n\t}\n\tcout << endl;\n}\n\nint main() {\n\tios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0);\n\t\n\tint t = 1;\n\t// cin >> t;\n\twhile (t--)\n\t\tmain_();\n\t\n\treturn 0;\n}\n\n\t\t\t \t\t \t\t\t\t \t  \t \t\t\t\t  \t   \t\t\t\t"
+}

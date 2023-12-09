@@ -1,0 +1,38 @@
+{
+    "id": 233283442,
+    "contestId": 1889,
+    "creationTimeSeconds": 1700306014,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1889,
+        "index": "F",
+        "name": "Doremy's Average Tree",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3500,
+        "tags": [
+            "data structures",
+            "dp",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1889,
+        "members": [
+            {
+                "handle": "patarasila"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1698503700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 116,
+    "timeConsumedMillis": 514,
+    "memoryConsumedBytes": 244531200,
+    "source": "#include<cstdio>\r\n#include<cstring>\r\n#include<iostream>\r\n#include<algorithm>\r\n#define ch() getchar()\r\n#define pc(x) putchar(x)\r\nusing namespace std;\r\ntemplate<typename T>void read(T&x){\r\n\tstatic char c;static int f;\r\n\tfor(f=1,c=ch();c<'0'||c>'9';c=ch())if(c=='-')f=-f;\r\n\tfor(x=0;c>='0'&&c<='9';c=ch()){x=x*10+(c&15);}x*=f;\r\n}\r\ntemplate<typename T>void write(T x){\r\n\tstatic char q[64];int cnt=0;\r\n\tif(x==0)return pc('0'),void();\r\n\tif(x<0)pc('-'),x=-x;\r\n\twhile(x)q[cnt++]=x%10+'0',x/=10;\r\n\twhile(cnt--)pc(q[cnt]);\r\n}\r\nlong long gcd(long long a,long long b){\r\n\tif(b==0)return a;\r\n\treturn gcd(b,a%b);\r\n}\r\nstruct Frac{\r\n\tlong long a;\r\n\tint b;// a/b\r\n\tFrac(long long a=0,int b=1):\r\n\t\ta(a),b(b){}\r\n\tbool operator < (const Frac o)const{\r\n\t\treturn a*o.b<o.a*b;\r\n\t}\r\n\tbool operator > (const Frac o)const{\r\n\t\treturn a*o.b>o.a*b;\r\n\t}\r\n\tbool operator == (const Frac o)const{\r\n\t\treturn a*o.b==o.a*b;\r\n\t}\r\n\tvoid output(){\r\n\t\tprintf(\"%lld/%d\",a,b);\r\n\t}\r\n};\r\nconst int inf=0x3f3f3f3f;\r\nstruct Val{\r\n\tint p1,p2;Frac v1,v2;\r\n\tVal(int p1=inf,int p2=inf,Frac v1=Frac(),Frac v2=Frac()):\r\n\t\tp1(p1),p2(p2),v1(v1),v2(v2){}\r\n\tvoid output(void){\r\n\t\tprintf(\"%d : \",p1);v1.output();puts(\"\");\r\n\t\tprintf(\"%d : \",p2);v2.output();puts(\"\\n\");\r\n\t}\r\n};\r\nVal Comb(Val A,Val B){\r\n\tif(A.p1>B.p1)swap(A,B);\r\n\tif(B.v1==A.v1)\r\n\t\treturn Val(A.p1,A.p2<B.p2?A.p2:B.p2,A.v1,A.p2<B.p2?A.v2:B.v2);\r\n\treturn Val(A.p1,A.p2<B.p1?A.p2:B.p1,A.v1,A.p2<B.p1?A.v2:B.v1);\r\n}\r\nconst int maxn=10005,maxk=505;\r\nstruct Edge{\r\n\tint v,nt;\r\n\tEdge(int v=0,int nt=0):\r\n\t\tv(v),nt(nt){}\r\n}e[maxn*2];\r\nint hd[maxn],num;\r\nvoid qwq(int u,int v){\r\n\te[++num]=Edge(v,hd[u]),hd[u]=num;\r\n}\r\nlong long sm[maxn];int sz[maxn];\r\nint dp[maxn][maxk],wp[maxn][maxk],k,n;\r\nVal va[maxn][maxk];\r\nvoid Merge(int x,int l,int r,int L,int R){\r\n\twp[x][0]=0;\r\n\tva[x][0]=Comb(va[l][0],va[r][0]);\r\n\tL=min(L,k);R=min(R,k);\r\n\tint up=min(L+R,k);\r\n\tfor(int i=1;i<=up;++i){\r\n\t\tint t=wp[x][i]=min(L,i),cl=inf,cr=inf;\r\n\t\twhile(t>0&&i-t<R){\r\n\t\t\tcl=min(cl,dp[l][t]);--t;\r\n\t\t\tcr=min(cr,dp[r][i-t]);\r\n\t\t\tif(cr<cl)wp[x][i]=t,cl=cr=inf;\r\n\t\t}\r\n\t\tt=wp[x][i-1];cl=cr=inf;\r\n\t\tif(wp[x][i-1]<wp[x][i]){\r\n\t\t\twhile(t<wp[x][i])cl=min(cl,dp[l][++t]);\r\n\t\t\tdp[x][i]=cl;\r\n\t\t}\r\n\t\telse{\r\n\t\t\twhile(i-t-1<i-wp[x][i])cr=min(cr,dp[r][i-(t--)]);\r\n\t\t\tdp[x][i]=cr;\r\n\t\t}\r\n\t\tva[x][i]=Comb(va[l][wp[x][i]],va[r][i-wp[x][i]]);\r\n\t}\r\n}\r\nint MN[maxn],rsz[maxn];\r\nlong long val[maxn];\r\nvoid dfs(int u,int p){\r\n\tint l=0,fa=0;sm[u]=val[u];\r\n\tsz[u]=0;rsz[u]=1;MN[u]=0;\r\n\tfor(int i=hd[u];i;i=e[i].nt){\r\n\t\tint v=e[i].v;\r\n\t\tif(v==p){fa=i;continue;}dfs(v,u);\r\n\t\tMerge(i,i^1,l,sz[v],sz[u]);\r\n\t\tsm[u]+=sm[v],sz[u]+=sz[v];\r\n\t\trsz[u]+=rsz[v];\r\n\t\tl=i;\r\n\t}\r\n\tif(sz[u]==0){\r\n\t\t++sz[u];MN[u]=1;\r\n\t\tva[fa][0]=va[fa][1]=Val(u,inf,val[u]);\r\n\t\tdp[fa][1]=inf;\r\n\t}\r\n\telse{\r\n\t\tint up=min(sz[u],k);\r\n\t\tfor(int i=0;i<=up;++i)\r\n\t\t\tva[fa][i]=Comb(va[l][i],Val(u,inf,val[u])),dp[fa][i]=dp[l][i];\r\n\t\tFrac tmp(sm[u],rsz[u]);\r\n\t\tfor(int i=1;i<=up;++i)\r\n\t\t\tif(va[fa][i].v1>tmp||(va[fa][i].v1==tmp&&va[fa][i].v2>tmp))\r\n\t\t\t\tva[fa][i]=Val(va[fa][i].p1,inf,tmp),MN[u]=i;\r\n\t\tif(MN[u]){\r\n\t\t\tif(va[fa][0].v1==va[fa][1].v1)\r\n\t\t\t\tdp[fa][1]=va[fa][0].p2;\r\n\t\t\telse\r\n\t\t\t\tdp[fa][1]=va[fa][0].p1;\r\n\t\t\tfor(int i=2;i<=MN[u];++i)\r\n\t\t\t\tdp[fa][i]=inf;\r\n\t\t\tif(MN[u]<up){\r\n\t\t\t\tif(va[fa][MN[u]].v1==va[fa][MN[u]+1].v1)\r\n\t\t\t\t\tdp[fa][MN[u]+1]=va[fa][MN[u]+1].p2;\r\n\t\t\t\telse\r\n\t\t\t\t\tdp[fa][MN[u]+1]=va[fa][MN[u]+1].p1;\r\n\t\t\t}\r\n\t\t}\r\n\t}/*\r\n\tint up=min(sz[u],k);\r\n\tprintf(\"%d MN:%d\\n\",u,MN[u]);\r\n\tfor(int i=1;i<=up;++i)\r\n\t\tprintf(\"dp %d = %d\\n\",i,dp[fa][i]);*/\r\n}\r\nint st[maxn],ts;\r\nint que[maxn],cnt;\r\nvoid solve(int u,int p,int sk){\r\n\tif(sk==0)return;sk=min(sk,sz[u]);\r\n\tif(sk<=MN[u])return st[++ts]=u,void();\r\n\tint tnc=cnt;\r\n\tfor(int i=hd[u];i;i=e[i].nt){\r\n\t\tint v=e[i].v;\r\n\t\tif(v==p)continue;\r\n\t\tque[cnt++]=i;\r\n\t}\r\n\tfor(int j=cnt-1;j>=tnc;--j){\r\n\t\tint i=que[j];\r\n\t\tsolve(e[i].v,u,wp[i][sk]);\r\n\t\tsk-=wp[i][sk];\r\n\t}\r\n}\r\nvoid imple(void){\r\n\tint r;\r\n\tread(n),read(r),read(k);\r\n\tfor(int i=1;i<=n;++i)\r\n\t\tread(val[i]);\r\n\tqwq(r,0);\r\n\tfor(int i=1;i<n;++i){\r\n\t\tint u,v;read(u),read(v);\r\n\t\tqwq(u,v);qwq(v,u);\r\n\t}\r\n\tdfs(r,0);\r\n\tsolve(r,0,k);\r\n\tprintf(\"%d\\n\",ts);\r\n\tfor(int i=1;i<=ts;++i)\r\n\t\tprintf(\"%d%c\",st[i],\" \\n\"[i==ts]);\r\n\tfor(int i=0;i<=n;++i)hd[i]=0;\r\n\tnum=cnt=ts=0;\r\n}\r\nint main(){\r\n\t// freopen(\"test\",\"r\",stdin);\r\n\tint T;read(T);\r\n\twhile(T--)imple();\r\n\treturn 0;\r\n}"
+}

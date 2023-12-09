@@ -1,0 +1,40 @@
+{
+    "id": 235955510,
+    "contestId": 570,
+    "creationTimeSeconds": 1701797247,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 570,
+        "index": "D",
+        "name": "Tree Requests",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "bitmasks",
+            "constructive algorithms",
+            "dfs and similar",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 570,
+        "members": [
+            {
+                "handle": "luogu_bot5"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1439483400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 77,
+    "memoryConsumedBytes": 60825600,
+    "source": "// LUOGU_RID: 138381263\n#include <bits/stdc++.h>\r\n\r\nconst int maxn = 1e5 + 10;\r\nconst double eps = 1e-9;\r\n\r\nconst long long INF = 4;\r\n\r\ninline long long read()\r\n{\r\n    long long x = 0, f = 1;\r\n    char ch = getchar();\r\n    while (ch > '9' || ch < '0')\r\n    {\r\n        if (ch == '-')\r\n            f = -1;\r\n        ch = getchar();\r\n    }\r\n    while (ch <= '9' && ch >= '0')\r\n    {\r\n        x = (x << 1) + (x << 3) + (ch ^ 48);\r\n        ch = getchar();\r\n    }\r\n    return x * f;\r\n}\r\n\r\nint n;\r\nint num[maxn];\r\nint dep[maxn];\r\nint max_dep;\r\nstd::vector<int>bian[maxn];\r\nstd::vector<std::array<int,2>>vbian[maxn];\r\nint ans[maxn];\r\nint rt[maxn];\r\nstd::set<int>sss[maxn];\r\nstruct node{\r\n    int ls,rs;\r\n    int it;\r\n}nu[maxn<<2];\r\nint cnt_node;\r\nint cnt_set;\r\nstd::vector<int>node_not_used;\r\nstd::vector<int>set_not_used;\r\nvoid update(int l,int r,int &p,int x,int id)\r\n{\r\n    if(!p)\r\n    {\r\n        if(node_not_used.empty())\r\n            p=++cnt_node;\r\n        else\r\n        {\r\n            p=node_not_used.back();\r\n            node_not_used.pop_back();\r\n            nu[p]={0,0,0};\r\n        }\r\n    }\r\n    if(l==r)\r\n    {\r\n        if(!nu[p].it)\r\n        {\r\n            if(set_not_used.empty())\r\n                nu[p].it=++cnt_set;\r\n            else\r\n            {\r\n                nu[p].it= set_not_used.back();\r\n                set_not_used.pop_back();\r\n                sss[nu[p].it].clear();\r\n            }\r\n        }\r\n        sss[nu[p].it].insert(id);\r\n        return ;\r\n    }\r\n    int mid=(l+r)>>1;\r\n    if(x<=mid)\r\n        update(l,mid,nu[p].ls,x,id);\r\n    else update(mid+1,r,nu[p].rs,x,id);\r\n}\r\nint merge(int l,int r,int x,int y)\r\n{\r\n    if(!x||!y) return x|y;\r\n    if(l==r)\r\n    {\r\n        auto &it1=nu[x].it,&it2=nu[y].it;\r\n        if(sss[it1].size()<sss[it2].size())\r\n            std::swap(it1,it2);\r\n        for(auto v:sss[it2])\r\n            sss[it1].insert(v);\r\n        node_not_used.push_back(y);\r\n        set_not_used.push_back(it2);\r\n        return x;\r\n    }\r\n    int mid=(l+r)>>1;\r\n    nu[x].ls=merge(l,mid,nu[x].ls,nu[y].ls);\r\n    nu[x].rs= merge(mid+1,r,nu[x].rs,nu[y].rs);\r\n    node_not_used.push_back(y);\r\n    return x;\r\n}\r\nint query(int l,int r,int p,int x)\r\n{\r\n    if(l==r||!p)\r\n        return sss[nu[p].it].size();\r\n    int mid=(l+r)>>1;\r\n    return x<=mid? query(l,mid,nu[p].ls,x): query(mid+1,r,nu[p].rs,x);\r\n}\r\nvoid dfs1(int u)\r\n{\r\n    max_dep=std::max(max_dep,dep[u]);\r\n    for(auto v:bian[u])\r\n    {\r\n        dep[v]=dep[u]+1;\r\n        dfs1(v);\r\n    }\r\n}\r\nvoid dfs2(int u)\r\n{\r\n//    std::cout<<\"dfs2 \"<<u<<'\\n';\r\n    for(auto v:bian[u])\r\n    {\r\n        dfs2(v);\r\n//        std::cout<<\"merge \"<<u<<' '<<v<<'\\n';\r\n        rt[u]= merge(1,max_dep,rt[u],rt[v]);\r\n    }\r\n    for(auto [k,id]:vbian[u])\r\n        ans[id]= query(1,max_dep,rt[u],dep[u]+k);\r\n//    std::cout<<\"update \"<<u<<'\\n';\r\n    update(1,max_dep,rt[u],dep[u],num[u]);\r\n}\r\nint main()\r\n{\r\n    std::ios::sync_with_stdio(false);\r\n    std::cin.tie(0);\r\n    std::cout.tie(0);\r\n    std::cin>>n;\r\n    std::map<std::string,int>mp;\r\n    int cnt_string=0;\r\n    for(int i=1;i<=n;i++)\r\n    {\r\n        std::string s;\r\n        int x;\r\n        std::cin>>s>>x;\r\n        bian[x].push_back(i);\r\n        if(x)\r\n        {\r\n            if(mp.find(s)==mp.end())\r\n                mp[s]=++cnt_string,num[i]=cnt_string;\r\n            else num[i]=mp[s];\r\n        }\r\n    }\r\n    dfs1(0);\r\n    int q;\r\n    std::cin>>q;\r\n    for(int i=1;i<=q;i++)\r\n    {\r\n        int x,y;\r\n        std::cin>>x>>y;\r\n        if(dep[x]+y>max_dep||bian[x].empty())\r\n            continue;\r\n        vbian[x].push_back({y,i});\r\n    }\r\n    dfs2(0);\r\n    for(int i=1;i<=q;i++)\r\n        std::cout<<ans[i]<<'\\n';\r\n}"
+}

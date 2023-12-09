@@ -1,0 +1,35 @@
+{
+    "id": 229662251,
+    "contestId": 283,
+    "creationTimeSeconds": 1698222944,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 283,
+        "index": "C",
+        "name": "Coin Troubles",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 283,
+        "members": [
+            {
+                "handle": "lhy123"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1363534200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 76,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 2560000,
+    "source": "// LUOGU_RID: 131521509\n#include <set>\r\n#include <map>\r\n#include <cmath>\r\n#include <ctime>\r\n#include <queue>\r\n#include <stack>\r\n#include <tuple>\r\n#include <cstdio>\r\n#include <vector>\r\n#include <cassert>\r\n#include <cstring>\r\n#include <utility>\r\n#include <iostream>\r\n#include <algorithm>\r\n#include <functional>\r\n\r\n#define fir first\r\n#define sec second\r\n#ifdef LOCAL\r\n#define dbg(x) cerr << \"In Line \" << __LINE__ << \" the \" << #x << \" = \" << x << '\\n';\r\n#define dpi(x, y) cerr << \"In Line \" << __LINE__ << \" the \" << #x << \" = \" << x << \" ; \" << \"the \" << #y << \" = \" << y << '\\n';\r\n#define dbgf(fmt, args...) fprintf(stderr, fmt, ##args);\r\n#else\r\n#define dbg(x) void();\r\n#define dpi(x, y) void();\r\n#define dbgf(fmt, args...) void();\r\n#endif\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef unsigned long long ull;\r\ntypedef pair<int, int> pii;\r\ntypedef pair<int, ll> pil;\r\ntypedef pair<ll, int> pli;\r\ntypedef vector<int> vi;\r\ntypedef vector<pii> vpii;\r\n\r\nbool Mbe;\r\nconstexpr int MOD = 1e9 + 7;\r\ntemplate<typename T> T add(T a, T b, T p = MOD) { return (a + b >= p) ? (a + b - p) : (a + b); }\r\ntemplate<typename T> T del(T a, T b, T p = MOD) { return (a - b < 0) ? (a - b + p) : (a - b); }\r\ntemplate<typename T> T cadd(T &a, T b, T p = MOD) { return a = add(a, b, p); }\r\ntemplate<typename T> T cdel(T &a, T b, T p = MOD) { return a = del(a, b, p); }\r\ntemplate<typename T> T cmax(T &a, T b) { return a = max(a, b); }\r\ntemplate<typename T> T cmin(T &a, T b) { return a = min(a, b); }\r\n\r\nnamespace FastIO {\r\n\tconstexpr int LEN = 1 << 20;\r\n\tchar in[LEN + 1], out[LEN + 1];\r\n\tchar *pin = in, *pout = out, *ein = in, *eout = out + LEN;\r\n\r\n\tchar gc() { return pin == ein && (ein = (pin = in) + fread(in, 1, LEN, stdin), ein == in) ? EOF : *pin ++; }\r\n\tvoid pc(char c) { pout == eout && (fwrite(out, 1, LEN, stdout), pout = out); (*pout ++) = c; return; }\r\n\tvoid Flush() { fwrite(out, 1, pout - out, stdout); pout = out; }\r\n\r\n\ttemplate<typename T> T Read() {\r\n\t\tT x = 0; int f = 1; char ch = gc();\r\n\t\twhile (ch < '0' || ch > '9') f = (ch == '-' ? (~f + 1) : f), ch = gc();\r\n\t\twhile (ch >= '0' && ch <= '9') x = (x << 1) + (x << 3) + (ch ^ 48), ch = gc();\r\n\t\treturn x * f;\r\n\t}\r\n\ttemplate<typename T> void Write(T x, char c) {\r\n\t\tstatic char stk[22]; int tp = 0;\r\n\t\tif (x < 0) pc('-'), x = ~x + 1;\r\n\t\tdo stk[tp++] = x % 10 + 48, x /= 10; while (x);\r\n\t\twhile (tp --) pc(stk[tp]); pc(c); return;\r\n\t}\r\n}\r\n\r\n#define getchar FastIO::gc\r\n#define putchar FastIO::pc\r\n#define Flush FastIO::Flush\r\n#define Read FastIO::Read\r\n#define Write FastIO::Write\r\n\r\nconst int MAXN = 3e2 + 9, MAXT = 1e5 + 9;\r\nint n, q, t, a[MAXN];\r\nint pre[MAXN], suf[MAXN], fa[MAXN];\r\nint f[MAXT];\r\n\r\nvoid slv() {\r\n\tn = Read<int>(), q = Read<int>(), t = Read<int>();\r\n\tfor (int i = 1; i <= n; i ++) a[i] = Read<int>(), fa[i] = i;\r\n\tfunction<int(int)> find = [&](int u) { return fa[u] == u ? u : find(fa[u]); };\r\n\tfor (int i = 1; i <= q; i ++) {\r\n\t\tint b = Read<int>(), c = Read<int>();\r\n\t\tpre[c] = b, suf[b] = c;\r\n\t\tif ((b = find(b)) == (c = find(c))) { Write(0, '\\n'); return; }\r\n\t\tfa[b] = c;\r\n\t}\r\n\tvector<int> w;\r\n\tfor (int i = 1; i <= n; i ++) if (!suf[i]) {\r\n\t\tint cnt = 0;\r\n\t\tfor (int j = i; j; j = pre[j]) {\r\n\t\t\tt -= a[j] * cnt, cnt ++;\r\n\t\t\tif (t < 0) { Write(0, '\\n'); return; }\r\n\t\t}\r\n\t}\r\n\tfor (int i = 1; i <= n; i ++) if (!pre[i]) {\r\n\t\tint sum = 0;\r\n\t\tfor (int j = i; j; j = suf[j])\r\n\t\t\tsum += a[j], w.emplace_back(sum);\r\n\t}\r\n\tf[0] = 1;\r\n\tfor (auto i : w) for (int j = i; j <= t; j ++)\r\n\t\tcadd(f[j], f[j - i]);\r\n\tWrite(f[t], '\\n');\r\n\treturn;\r\n}\r\n\r\nbool Med;\r\nint main() {\r\n#ifdef LOCAL\r\n\tfreopen(\"!in.in\", \"r\", stdin);\r\n\tfreopen(\"!out.out\", \"w\", stdout);\r\n\tfprintf(stderr, \"%.3lf Mb\\n\", fabs((&Mbe - &Med) / 1048576.0));\r\n#endif\r\n\tint T = 1;\r\n//\tint T = Read<int>();\r\n\twhile (T --) slv();\r\n\tFlush();\r\n#ifdef LOCAL\r\n\tfprintf(stderr, \"%d ms\", clock());\r\n#endif\r\n\treturn 0;\r\n}\r\n"
+}

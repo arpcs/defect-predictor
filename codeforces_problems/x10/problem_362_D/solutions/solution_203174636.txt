@@ -1,0 +1,39 @@
+{
+    "id": 203174636,
+    "contestId": 362,
+    "creationTimeSeconds": 1682267959,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 362,
+        "index": "D",
+        "name": "Fools and Foolproof Roads",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2100,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 362,
+        "members": [
+            {
+                "handle": "dimash1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1384443000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 20377600,
+    "source": "#include <bits/stdc++.h>\r\n\r\n\r\n#define ll long long\r\n#define fi first\r\n#define se second\r\n#define sz size()\r\n#define pb push_back()\r\n\r\nusing namespace std;\r\n\r\nconst int N = 2e5 + 10,MOD = 1e9 + 7;\r\nconst ll inf = 1e18;\r\n\r\nint n,m,p,q;\r\nvector<pair<int,ll>> g[N];\r\nvector<int> ver[N];\r\nmultiset<pair<ll,int>> st;\r\nll sum = 0,it = 0,s[N],cp[N];\r\nint used[N];\r\nvoid dfs(int v){\r\n    used[v] = 1;\r\n    cp[v] = it;\r\n    ver[it].push_back(v);\r\n    for(auto [to,w]:g[v]){\r\n        if(used[to] != 1){\r\n            sum += w;\r\n        }\r\n        if(!used[to]){\r\n            dfs(to);\r\n        }\r\n    }\r\n    used[v] = 2;\r\n}\r\npair<int,int> merge(){\r\n    int it = (*st.begin()).se;\r\n    st.erase(st.begin());\r\n    int r = (*st.begin()).se;\r\n    if(ver[it].sz < ver[r].sz){\r\n        swap(r,it);\r\n    }\r\n    st.erase(st.begin());\r\n    //cout << it << ' ' << r << ' ' << ver[it].sz << ' ' << ver[r].sz << '\\n';\r\n    pair<int,int> xy = make_pair(ver[it][0],ver[r][0]);\r\n    for(auto i:ver[r]){\r\n        cp[i] = it;\r\n        ver[it].push_back(i);\r\n    }\r\n    ver[r].clear();\r\n    s[it] += s[r];\r\n    s[it] += min(s[it] + s[r] + 1,(ll)1e9);\r\n    s[r] = 0;\r\n    st.insert({s[r],r});\r\n    return xy;\r\n}\r\nvoid solve(){\r\n    cin >> n >> m >> p >> q;\r\n    for(int i = 1;i <= m;i++){\r\n        int x,y;\r\n        ll w;\r\n        cin >> x >> y >> w;\r\n        g[x].push_back({y,w});\r\n        g[y].push_back({x,w});\r\n    }\r\n    for(int i = 1;i <= n;i++){\r\n        if(!used[i]){\r\n            sum = 0;\r\n            it++;\r\n            dfs(i);\r\n            s[it] = sum;\r\n            //cout << i << ' ' << sum << '\\n';\r\n            st.insert({sum,it});\r\n        }\r\n    }\r\n    int x = -1,y = -1;\r\n    for(int i = 1;i <= it;i++){\r\n        if(ver[i].sz > 1){\r\n            x = ver[i][0];\r\n            y = ver[i][1];\r\n        }\r\n    }\r\n    if(st.sz < q){\r\n        cout << \"NO\\n\";\r\n        return;\r\n    }\r\n    \r\n    vector<pair<int,int>> res;\r\n\r\n    while(p--){\r\n        pair<ll,ll> _p = (*st.begin());\r\n        st.erase(_p);\r\n        pair<ll,ll> _p1 = (*st.begin());\r\n        st.insert(_p);\r\n        if((_p.fi + _p1.fi + min((ll)1e9,_p.fi + _p1.fi + 1)) > 1000 && p > (st.sz - q)){\r\n            res.push_back({x,y});\r\n            cp[x] += 1000;\r\n            continue;\r\n        }\r\n        if(st.sz == q){\r\n            if(x == -1){\r\n                cout << \"NO\\n\";\r\n                return;\r\n            }\r\n            res.push_back({x,y});\r\n        }else{\r\n            pair<int,int> f = merge();\r\n            x = f.fi;\r\n            y = f.se;\r\n            res.push_back(f);\r\n        }\r\n    }\r\n    if(st.sz != q){\r\n        cout << \"NO\\n\";\r\n        return;\r\n    }\r\n    cout << \"YES\\n\";\r\n    for(auto i:res){\r\n        cout << i.fi << ' ' << i.se << '\\n';\r\n    }\r\n}\r\nint main(){\r\n    cin.tie(0);\r\n    ios_base::sync_with_stdio(0);     \r\n    int T = 1;\r\n    //cin >> T;  \r\n    while(T--)\r\n        solve();\r\n}\r\n\r\n"
+}

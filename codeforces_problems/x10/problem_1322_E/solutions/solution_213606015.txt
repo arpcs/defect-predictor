@@ -1,0 +1,35 @@
+{
+    "id": 213606015,
+    "contestId": 1322,
+    "creationTimeSeconds": 1689231219,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1322,
+        "index": "E",
+        "name": "Median Mountain Range",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1322,
+        "members": [
+            {
+                "handle": "BilyHurington"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1583573700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 935,
+    "memoryConsumedBytes": 15872000,
+    "source": "// LUOGU_RID: 115269549\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nint Type,n,a[500010],b[500010];\r\npair<int,int> pos[500010];\r\nint fa[500010],Ans[500010];\r\nint getf(int x){return fa[x]==x?x:fa[x]=getf(fa[x]);}\r\ninline void Upt(int l,int r,int v){\r\n    if(l>r||!v) return;\r\n    for(int i=getf(l);i<=r;i=getf(i)){\r\n        Ans[i]=v;\r\n        fa[i]=i+1;\r\n        // printf(\"%d %d\\n\",i,v);\r\n    }\r\n}map<int,int> num;\r\nset<pair<int,int> > S;\r\ninline void UptL(int l,int r,int v){\r\n    l=max(1,l);r=min(n,r);\r\n    if(l>r) return;\r\n    int vl=b[max(1,l)],vr=b[min(n,r)];\r\n    // printf(\"UptL %d %d %d %d %d\\n\",l,r,v,vl,vr);\r\n    if(vl==vr) Upt(l,r,vl?v:0);\r\n    else{\r\n        int mid=(l+r)/2;\r\n        Upt(l,mid,vl?v:0);\r\n        Upt(mid+1,r,vr?v:0);\r\n    }\r\n}\r\ninline void Modify(int x,int v){\r\n    b[x]=1;b[0]=b[1];b[n+1]=b[n];\r\n    if(S.size()==1){\r\n        S.erase(S.begin());\r\n        if(x>1) S.insert({0,x-1});\r\n        else S.insert({0,x});\r\n        if(x<n) S.insert({x+1,n+1});\r\n        else S.insert({x,n+1});\r\n        if(x>1&&x<n) num[2]++;\r\n        else num[1]++;\r\n        if(x==1||x==n) UptL(x,x,v);\r\n        // printf(\"Modify %d %d\\n\",x,v);\r\n        // printf(\"S:\");for(auto pr:S) printf(\"(%d,%d)\",pr.first,pr.second);puts(\"\");\r\n        // printf(\"num:\");for(auto pr:num) printf(\"(%d,%d)\",pr.first,pr.second);puts(\"\");\r\n        return;\r\n    }auto itr=S.lower_bound({x,n+2});\r\n    auto itl=itr;--itl;\r\n    // printf(\"Modify %d %d %d %d\\n\",x,v,itl->first,itl->second);\r\n    if(itl->second>=x){\r\n        int l=itl->first,r=itl->second;\r\n        int Ll=-1,Lr=-1,Rl=n+2,Rr=n+2;\r\n        if(itl!=S.begin()){\r\n            auto tmp=itl;--tmp;\r\n            Ll=tmp->first;Lr=tmp->second;\r\n        }if(Lr!=-1) num[l-Lr]--;\r\n        if(itr!=S.end()){\r\n            Rl=itr->first;Rr=itr->second;\r\n        }if(Rl!=n+2) num[Rl-r]--;\r\n        vector<pair<int,int> > vec;\r\n        S.erase(itl);\r\n        if(Ll!=-1) vec.push_back({Ll,Lr}),S.erase({Ll,Lr});\r\n        if(x>l) vec.push_back({l,x-1});\r\n        else if(x-1>Lr) vec.push_back({x-1,x-1});\r\n        vec.push_back({x,x});\r\n        if(x<r) vec.push_back({x+1,r});\r\n        else if(x+1<Rl) vec.push_back({x+1,x+1});\r\n        if(Rr!=n+2) vec.push_back({Rl,Rr}),S.erase({Rl,Rr});\r\n        // puts(\"vec\");\r\n        // for(auto pr:vec) printf(\"%d %d\\n\",pr.first,pr.second);\r\n        // for(int i=0;i<=n+1;i++) printf(\"%d \",b[i]);puts(\"\");\r\n        for(int i=0,j,r=-1;i<vec.size();i=j+1){\r\n            for(j=i;j+1<vec.size()&&vec[j+1].first==vec[j].second+1&&b[vec[j+1].first]==b[vec[j].second];j++);\r\n            // printf(\"%d %d %d %d %d %d\\n\",i,j,vec[i].first,vec[i].second,vec[j].first,vec[j].second);\r\n            if(vec[i].first==vec[j].second) continue;\r\n            S.insert({vec[i].first,vec[j].second});\r\n            if(r!=-1){\r\n                num[vec[i].first-r]++;\r\n                UptL(r,vec[i].first,v);\r\n            }UptL(vec[i].first,vec[j].second,v);r=vec[j].second;\r\n        }\r\n        // for(set<int>::iterator i=S.upper_bound(x+1,n+1),j;i!=S.begin();i=j){\r\n        //     j=i;--j;\r\n        //     if(i!=S.end()) UptL(j->second,i->first,v);\r\n        //     if(j.first<x-1) break;\r\n        // }\r\n    }else{\r\n        num[(itr->first)-(itl->second)]--;\r\n        int l=x-1,r=x+1;\r\n        if(x==itr->first-1) S.erase(itr),r=itr->second;\r\n        else UptL(r,itr->first,v),num[itr->first-r]++;\r\n        if(x==itl->second+1) S.erase(itl),l=itl->first;\r\n        else UptL(itl->second,l,v),num[l-itl->second]++;\r\n        UptL(l,r,v);S.insert({l,r});\r\n        // auto R=S.lower_bound({l,r});\r\n        // if(R!=S.end()) UptL(r,R->first,v);\r\n        // if(R!=S.begin()){\r\n        //     --R;\r\n        //     UptL(R->second,l,v);\r\n        // }\r\n    }\r\n    // printf(\"S:\");for(auto pr:S) printf(\"(%d,%d)\",pr.first,pr.second);puts(\"\");\r\n    // printf(\"num:\");for(auto pr:num) printf(\"(%d,%d)\",pr.first,pr.second);puts(\"\");\r\n}\r\nint main(){\r\n    scanf(\"%d\",&n);\r\n    for(int i=1;i<=n;i++) scanf(\"%d\",&a[i]);\r\n    for(int i=1;i<=n+1;i++) fa[i]=i;\r\n    S.insert({0,n+1});//S.insert({-1,-1});S.insert({n+2,n+2});\r\n    for(int i=1;i<=n;i++) pos[i]={a[i],i};\r\n    sort(pos+1,pos+n+1);\r\n    int ans=0;\r\n    for(int l=1,r;l<=n;l=r+1){\r\n        for(r=l;r<n&&pos[r+1].first==pos[l].first;r++);\r\n        if(r==n){\r\n            for(int i=1;i<=n;i++) if(!Ans[i]) Ans[i]=pos[l].first;\r\n            break;\r\n        }\r\n        for(int i=l;i<=r;i++) Modify(pos[i].second,pos[i].first);\r\n        while(num.size()){\r\n            auto it=num.end();--it;\r\n            if(!it->second) num.erase(it);\r\n            else{ans=max(ans,it->first/2);break;}\r\n        }\r\n    }printf(\"%d\\n\",ans);\r\n    for(int i=1;i<=n;i++) printf(\"%d \",Ans[i]);\r\n    return 0;\r\n}"
+}

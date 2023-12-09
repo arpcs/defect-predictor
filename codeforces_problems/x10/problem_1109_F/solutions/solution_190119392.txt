@@ -1,0 +1,36 @@
+{
+    "id": 190119392,
+    "contestId": 1109,
+    "creationTimeSeconds": 1674405383,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1109,
+        "index": "F",
+        "name": "Sasha and Algorithm of Silence's Sounds",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1109,
+        "members": [
+            {
+                "handle": "Xu_Hongxi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1550334900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 343,
+    "memoryConsumedBytes": 38092800,
+    "source": "// LUOGU_RID: 100398054\n#include<iostream>\n#include<cstdio>\n#include<vector>\n#define mp make_pair\n#define fst first\n#define scd second\n#define mp make_pair\n#define ls(x) ch[x][0]\n#define rs(x) ch[x][1]\n#define ll long long\nusing namespace std;\nnamespace LCT{\n\tint ch[200005][2],fa[200005];\n\tint siz[200005],rev[200005];\n\tint isroot(int x){\n\t\tint y=fa[x];\n\t\treturn (ls(y)!=x&&rs(y)!=x);\n\t}\n\tvoid pushdown(int x){\n\t\tif(rev[x]){\n\t\t\tif(ls(x)) rev[ls(x)]^=1;\n\t\t\tif(rs(x)) rev[rs(x)]^=1;\n\t\t\tswap(ls(x),rs(x)); rev[x]=0;\n\t\t}\n\t\treturn;\n\t}\n\tvoid update(int x){\n\t\tif(!isroot(x)) update(fa[x]);\n\t\tpushdown(x);\n\t\treturn;\n\t}\n\tvoid pushup(int x){\n\t\tsiz[x]=siz[ls(x)]+siz[rs(x)]+1;\n\t\treturn;\n\t}\n\tvoid rotate(int x){\n\t\tint y=fa[x],z=fa[y],k=(ch[y][1]==x);\n\t\tif(!isroot(y)) ch[z][ch[z][1]==y]=x; fa[x]=z;\n\t\tch[y][k]=ch[x][k^1]; fa[ch[x][k^1]]=y;\n\t\tch[x][k^1]=y; fa[y]=x; pushup(y);\n\t\treturn;\n\t}\n\tvoid splay(int x){\n\t\tint y,z; update(x);\n\t\twhile(!isroot(x)){\n\t\t\tz=fa[y=fa[x]];\n\t\t\tif(!isroot(y)){\n\t\t\t\trotate((ls(z)==y)==(ls(y)==x)?y:x);\n\t\t\t}\n\t\t\trotate(x);\n\t\t}\n\t\tpushup(x);\n\t\treturn;\n\t}\n\tvoid access(int x){\n\t\tfor(int y=0;x;x=fa[y=x]){\n\t\t\tsplay(x); rs(x)=y; pushup(x);\n\t\t}\n\t\treturn;\n\t}\n\tvoid mroot(int x){\n\t\taccess(x); splay(x); rev[x]^=1;\n\t\treturn;\n\t}\n\tint froot(int x){\n\t\taccess(x); splay(x);\n\t\twhile(ls(x)) x=ls(x);\n\t\tsplay(x); return x;\n\t}\n\tint link(int x,int y){\n\t\tmroot(x);\n\t\tif(froot(y)==x) return 0;\n\t\tfa[x]=y;\n\t\treturn 1;\n\t}\n\tvoid cut(int x,int y){\n\t\tmroot(x);\n\t\tif(froot(y)!=x) return;\n\t\tif(siz[x]!=2) return;\n\t\trs(x)=fa[y]=0;\n\t\treturn;\n\t}\n}\nnamespace SegTree{\n\tint cnt[800005],mn[800005],tag[800005];\n\tvoid build(int k,int l,int r){\n\t\tcnt[k]=r-l+1;\n\t\tif(l==r) return;\n\t\tint mid=l+r>>1;\n\t\tbuild(k<<1,l,mid); build(k<<1|1,mid+1,r);\n\t\treturn;\n\t}\n\tvoid mtag(int k,int x){\n\t\ttag[k]+=x; mn[k]+=x;\n\t\treturn;\n\t}\n\tvoid pushdown(int k){\n\t\tmtag(k<<1,tag[k]);\n\t\tmtag(k<<1|1,tag[k]);\n\t\ttag[k]=0;\n\t\treturn;\n\t}\n\tvoid pushup(int k){\n\t\tcnt[k]=0; mn[k]=min(mn[k<<1],mn[k<<1|1]);\n\t\tif(mn[k]==mn[k<<1]) cnt[k]+=cnt[k<<1];\n\t\tif(mn[k]==mn[k<<1|1]) cnt[k]+=cnt[k<<1|1];\n\t\treturn;\n\t}\n\tvoid update(int k,int l,int r,int L,int R,int x){\n\t\tif(r<L||R<l||L>R) return;\n\t\tif(L<=l&&r<=R) return mtag(k,x);\n\t\tint mid=l+r>>1; pushdown(k);\n\t\tupdate(k<<1,l,mid,L,R,x); update(k<<1|1,mid+1,r,L,R,x);\n\t\tpushup(k);\n\t\treturn;\n\t}\n\tint query(int k,int l,int r,int L,int R){\n\t\tif(r<L||R<l||L>R) return 0;\n\t\tif(L<=l&&r<=R) return cnt[k]*(mn[k]==1);\n\t\tint mid=l+r>>1; pushdown(k);\n\t\treturn query(k<<1,l,mid,L,R)+query(k<<1|1,mid+1,r,L,R);\n\t}\n}\nint n,m; ll ans;\nint a[2005][2005];\nint d[4]={1,-1,0,0};\nvector<pair<int,int> >pos[200005];\nint id(int x,int y){\n\treturn (x-1)*m+y;\n}\nvoid cutall(int i){\n\tint x,y,xx,yy;\n\tfor(int k=0;k<pos[i].size();k+=1){\n\t\tx=pos[i][k].fst; y=pos[i][k].scd;\n\t\tfor(int l=0;l<4;l+=1){\n\t\t\txx=x+d[l]; yy=y+d[l^2];\n\t\t\tif(a[xx][yy]) LCT::cut(id(xx,yy),id(x,y));\n\t\t}\n\t}\n\treturn;\n}\nvoid work(){\n\tint x,y,xx,yy; SegTree::build(1,1,n*m);\n\tfor(int i=1,j=1;i<=n*m;i+=1){\n\t\tSegTree::update(1,1,n*m,1,i,pos[i].size());\n\t\tfor(int k=0;k<pos[i].size();k+=1){\n\t\t\tx=pos[i][k].fst; y=pos[i][k].scd;\n\t\t\tfor(int l=0;l<4;l+=1){\n\t\t\t\txx=x+d[l]; yy=y+d[l^2];\n\t\t\t\tif(j<=a[xx][yy]&&a[xx][yy]<=i){\n\t\t\t\t\tSegTree::update(1,1,n*m,1,a[xx][yy],-1);\n\t\t\t\t\tif(!LCT::link(id(xx,yy),id(x,y))){\n\t\t\t\t\t\twhile(j<=i){\n\t\t\t\t\t\t\tcutall(j++);\n\t\t\t\t\t\t\tif(LCT::link(id(xx,yy),id(x,y))) break;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif(i==j) break;\n\t\t\t}\n\t\t\tif(i==j) break;\n\t\t}\n\t\tans+=1ll*SegTree::query(1,1,n*m,j,i);\n\t}\n\treturn;\n}\nint main(){\n\tscanf(\"%d%d\",&n,&m);\n\tfor(int i=1;i<=n;i+=1){\n\t\tfor(int j=1;j<=m;j+=1){\n\t\t\tscanf(\"%d\",&a[i][j]);\n\t\t\tpos[a[i][j]].push_back(mp(i,j));\n\t\t}\n\t}\n\twork(); printf(\"%lld\\n\",ans);\n\treturn 0;\n}"
+}

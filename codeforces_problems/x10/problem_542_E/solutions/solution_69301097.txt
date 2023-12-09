@@ -1,0 +1,36 @@
+{
+    "id": 69301097,
+    "contestId": 542,
+    "creationTimeSeconds": 1579700978,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 542,
+        "index": "E",
+        "name": "Playing on Graph",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2600,
+        "tags": [
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 542,
+        "members": [
+            {
+                "handle": "ngfam"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1430668800
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 204800,
+    "source": "#include<bits/stdc++.h>\r\n\r\n/***\r\n\r\n***/\r\n\r\nusing namespace std;\r\n\r\nconst int MAXN = 1010;\r\n\r\nint n, m, cnt, cnt_scc;\r\n\r\nvector<int> st;\r\nvector<int> g[MAXN], adj[MAXN];\r\n\r\nint id[MAXN];\r\nint num[MAXN];\r\nint low[MAXN];\r\nint high[MAXN];\r\nint color[MAXN];\r\n\r\nvector<pair<int, int>> yinandyang;\r\n\r\n\r\n/// how to implement this properly\r\n\r\nvoid dfs_tarjan(int v, int p) {\r\n  /// still needs to consider 2 sides to get the max, jesus why are they not connected fuck\r\n\r\n  low[v] = num[v] = ++cnt;\r\n\r\n  st.push_back(v);\r\n  for(int s : g[v]) if(s != p) {\r\n    if(num[s]) {\r\n      low[v] = min(low[v], num[s]);\r\n      if(color[v] == color[s]) {\r\n        cout << -1;\r\n        exit(0);\r\n      }\r\n    }\r\n    else {\r\n      color[s] = 1 - color[v];\r\n      dfs_tarjan(s, v);\r\n      low[v] = min(low[v], low[s]);\r\n    }\r\n  }\r\n  if(low[v] >= num[v]) {\r\n    ++cnt_scc;\r\n    vector<int> vertices;\r\n    while(!st.empty()) {\r\n      int s = st.back(); st.pop_back();\r\n      vertices.push_back(s);\r\n      if(s == v) break;\r\n    }\r\n\r\n    if(vertices.size() == 1) {\r\n      id[vertices.back()] = cnt_scc;\r\n      return;\r\n    }\r\n\r\n    n += 2;\r\n\r\n    yinandyang.emplace_back(-1, -1);\r\n    for(int s : vertices) {\r\n      id[s] = cnt_scc;\r\n      adj[n - color[s] - 1].push_back(s);\r\n      adj[s].push_back(n - color[s] - 1);\r\n      if(color[s]) yinandyang.back().first = s;\r\n      else yinandyang.back().second = s;\r\n    }\r\n  }\r\n}\r\n\r\nint visited[MAXN];\r\n\r\npair<int, int> dfs_path(int v, int p) {\r\n  visited[v] = 1;\r\n  pair<int, int> ans = make_pair(0, v);\r\n  for(int s : g[v]) if(s != p) {\r\n    if(id[s] == id[v]) continue;\r\n    ans = max(ans, dfs_path(s, v));\r\n  }\r\n  ++ans.first;\r\n  return ans;\r\n}\r\n\r\nint best(int v) {\r\n  return dfs_path(dfs_path(v, -1).second, -1).first;\r\n}\r\n\r\nint main() {\r\n  ios_base::sync_with_stdio(false); cin.tie(NULL);\r\n\r\n  cin >> n >> m;\r\n  for(int i = 0; i < m; ++i) {\r\n    int u, v; cin >> u >> v;\r\n    g[--u].push_back(--v);\r\n    g[v].push_back(u);\r\n  }\r\n\r\n  for(int i = 0; i < n; ++i) {\r\n    if(!num[i]) dfs_tarjan(i, -1);\r\n  }\r\n\r\n  for(int i = 0; i < n; ++i) {\r\n    for(int j : adj[i]) g[i].push_back(j);\r\n  }\r\n\r\n  int ans = 0;\r\n  for(auto &p : yinandyang) {\r\n    if(visited[p.first]) continue;\r\n    ans += max(best(p.first), best(p.second)) - 1;\r\n  }\r\n\r\n  for(int i = 0; i < n; ++i) {\r\n    if(!visited[i]) ans += best(i) - 1;\r\n  }\r\n\r\n  cout << ans << \"\\n\";\r\n\r\n  return 0;\r\n}\r\n"
+}

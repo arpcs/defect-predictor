@@ -1,0 +1,39 @@
+{
+    "id": 234344786,
+    "contestId": 467,
+    "creationTimeSeconds": 1700964396,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 467,
+        "index": "D",
+        "name": "Fedor and Essay",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 467,
+        "members": [
+            {
+                "handle": "Deft_t"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1411054200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 68,
+    "timeConsumedMillis": 234,
+    "memoryConsumedBytes": 28262400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef pair<int,int> pii;\r\n/*\r\n  \u7edf\u4e00\u6539\u5c0f\u5199\r\n  \u70b9\u6743\u4e3ar\u7684\u6570\u91cf\uff0c\u6b21\u70b9\u6743\u4e3a\u5355\u8bcd\u957f\u5ea6\u3002\r\n  \u7f29\u70b9\u540e\u5f97\u5230\u4e00\u4e2aDAG,\u9700\u8981\u7ef4\u62a4\u5f3a\u8fde\u901a\u5206\u91cf\u4e2d\u7684\u521d\u59cb\u70b9\u6570\r\n  \u5f3a\u8fde\u901a\u5206\u91cf\u7684\u8d21\u732e\u4e3a,\u6700\u5c0f\u6743\u503c\u4e58\u4e0a\u521d\u59cb\u70b9\u7684\u6570\u91cf\r\n  \u5efa\u7acb\u8fd9\u4e2aDAG\u7684\u53cd\u56fe\uff0c\u62d3\u6251\u7ef4\u62a4\u524d\u7f00\u6700\u5c0f\u70b9\u6743\u4e3a\u5f53\u524d\u521d\u59cb\u70b9\uff08\u6807\u8bb0\u6587\u7ae0\u5355\u8bcd\u4e3a\u521d\u59cb\u70b9\uff09\u7684\u7b54\u6848\u3002\r\n  \r\n */\r\nconst int MAXN = 300005,MAXM = 300005;\r\nmap<string,int> Map;\r\nstruct Node{\r\n\tint cntr,len;\r\n\tint cnt; //\u91cd\u590d\u6587\u7ae0\u5355\u8bcd\u4e2a\u6570\r\n}node[MAXN];\r\nint n,m;\r\nvector<int> e[MAXN],ee[MAXN];\r\n\r\nint dfn[MAXN],low[MAXN],cntid;\r\nint belong[MAXN],cntscc;\r\nint mincntr[MAXN],minlen[MAXN],cnt_init[MAXN];//\u6700\u5c0f\u70b9\u6743,\u5176\u6b21\u5bf9\u5e94\u7684\u6700\u5c0f\u957f\u5ea6 \u5305\u542b\u7684\u521d\u59cb\u70b9\u6570\r\nint sta[MAXN],top;\r\nbool insta[MAXN];\r\nvoid tarjan(int u){\r\n\tdfn[u] = low[u] = ++cntid;\r\n\tsta[++top] = u;\r\n\tinsta[u] = true;\r\n\tfor(int i = 0;i < e[u].size();i++){\r\n\t\tint v = e[u][i];\r\n\t\tif(!dfn[v]){\r\n\t\t\ttarjan(v);\r\n\t\t\tlow[u] = min(low[u],low[v]);\r\n\t\t}\r\n\t\telse if(insta[v]) low[u] = min(low[u],dfn[v]);\r\n\t}\r\n\tif(dfn[u] == low[u]){\r\n\t\tcntscc++;\r\n\t\twhile(1){\r\n\t\t\tint now = sta[top];\r\n\t\t\tbelong[now] = cntscc;\r\n\t\t\tmincntr[cntscc] = min(mincntr[cntscc],node[now].cntr);\r\n\t\t\tminlen[cntscc] = min(minlen[cntscc],node[now].len);\r\n\t\t\tcnt_init[cntscc] += node[now].cnt;\r\n\t\t\t\r\n\t\t\tinsta[now] = false;\r\n\t\t\ttop--;\r\n\t\t\tif(now == u) break;\r\n\t\t}\r\n\t}\r\n\t\r\n}\r\nint u[MAXM],v[MAXM];\r\nint ind[MAXN];\r\nint fcntr[MAXN];//f\u51fa\u53d1\u80fd\u5230\u7684\u6700\u5c0fr\u6570\uff08\u53cd\u56fe\u8ba1\u7b97\uff09\r\nint flen[MAXN]; //\u6700\u5c0f\u957f\u5ea6\r\nqueue<int> q;\r\nvoid topo(){\r\n\tfor(int i = 1;i <= cntscc;i++){\r\n\t\tfcntr[i] = mincntr[i];\r\n\t\tflen[i] = minlen[i];\r\n\t\tif(!ind[i]){\r\n\t\t\tq.push(i);\r\n\t\t}\r\n\t}\r\n\twhile(!q.empty()){\r\n\t\tint u = q.front();\r\n\t\tq.pop();\r\n\t\tfor(int i = 0;i < ee[u].size();i++){\r\n\t\t\tint v = ee[u][i];\r\n\t\t\tif(fcntr[u] < fcntr[v]){\r\n\t\t\t\tfcntr[v] = fcntr[u];\r\n\t\t\t\tflen[v] = flen[u];\r\n\t\t\t}\r\n\t\t\telse if(fcntr[u] == fcntr[v] && flen[u] < flen[v]){\r\n\t\t\t\tflen[v] = flen[u];\r\n\t\t\t}\r\n\t\t\tind[v]--;\r\n\t\t\tif(!ind[v]) q.push(v);\r\n\t\t}\r\n\t\t\r\n\t}\r\n\tll ansr = 0,anslen = 0;\r\n\tfor(int i = 1;i <= cntscc;i++){\r\n\t\tansr += (ll)cnt_init[i]*fcntr[i];\r\n\t\tanslen += (ll)cnt_init[i]*flen[i];\r\n\t}\r\n\tcout<<ansr<<\" \"<<anslen;\r\n}\r\nint totid;\r\nint addNode(string s,bool flag){\r\n\tint cntr = 0;\r\n\tfor(int i = 0;i < s.length();i++){\r\n\t\tif(s[i] >= 'A'&& s[i] <= 'Z') s[i]+=32;\r\n\t\tif(s[i] == 'r') cntr++;\r\n\t}\r\n\tint id = Map[s];\r\n\tif(id == 0){\r\n\t\tid = ++totid;\r\n\t\tMap[s] = id;\r\n\t\tnode[id].cntr = cntr;\r\n\t}\r\n\tif(flag){\r\n\t\tnode[id].cnt++;\r\n\t}\r\n\tnode[id].len = s.length();\r\n\treturn id;\r\n}\r\nint main(){\r\n\tcin>>m;\r\n\tstring s;\r\n\tfor(int i = 1;i <= m;i++){\r\n\t\tcin>>s;\r\n\t\taddNode(s,true);\r\n\t}\r\n\t\r\n\tcin>>n;\r\n\tstring x,y;\r\n\tfor(int i = 1;i <= n;i++){\r\n\t\tcin>>x>>y;\r\n\t\tu[i] = addNode(x,false);\r\n\t\tv[i] = addNode(y,false);\r\n\t\te[u[i]].push_back(v[i]);\r\n\t\t//cout<<u[i]<<\" \"<<v[i]<<endl;\r\n\t}\r\n\t\r\n\tmemset(mincntr,0x3f,sizeof(mincntr));\r\n\tmemset(minlen,0x3f,sizeof(minlen));\r\n\tfor(int i = 1;i <= totid;i++){\r\n\t\tif(!dfn[i]){\r\n\t\t\ttarjan(i);\r\n\t\t}\r\n\t}\r\n//\tcout<<\"#\"<<cntscc<<\"@\"<<totid<<endl;\r\n//\tfor(int i = 1;i <= cntscc;i++) cout<<i<<\" r:\"<<mincntr[i]<<\" len:\"<<minlen[i]<<\" cnt:\"<<cnt_init[i]<<endl;\r\n\tfor(int i = 1;i <= n;i++){\r\n\t\tint bu = belong[u[i]];\r\n\t\tint bv = belong[v[i]];\r\n\t\tif(bu != bv){\r\n\t\t\tee[bv].push_back(bu);\r\n\t\t//\tcout<<bv<<\" \"<<bu<<endl;\r\n\t\t\tind[bu]++;\r\n\t\t}\r\n\t}\r\n\t\r\n\ttopo();\r\n\t\r\n\t\r\n\treturn 0;\r\n}\r\n\r\n\r\n"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 205701451,
+    "contestId": 955,
+    "creationTimeSeconds": 1683971463,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 955,
+        "index": "D",
+        "name": "Scissors",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2600,
+        "tags": [
+            "brute force",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 955,
+        "members": [
+            {
+                "handle": "chuchu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1521822900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<iostream>\r\n#include<queue>\r\n\r\nusing namespace std;\r\n\r\nconst int maxn = 5e5 + 100;\r\n\r\nint n, m, k;\r\n\r\nstruct Aho_Corasick_Automaton {\r\n    int nxt[maxn][26], fail[maxn];\r\n    int go[maxn][26];\r\n    int left_most[maxn];\r\n    vector<int>g[maxn];\r\n\r\n    int root = 0, cnt = 0;\r\n    int newnode() {\r\n        ++cnt;\r\n        return cnt;\r\n    }\r\n    int insert(int pre, int ch) {\r\n        return nxt[pre][ch] ? nxt[pre][ch] : nxt[pre][ch] = newnode();\r\n    }\r\n    void insert(const string &s) {\r\n        int now = root;\r\n        for(auto &ch: s) {\r\n            now = insert(now, ch-'a');\r\n        }\r\n    }\r\n    void build() {\r\n        queue<int>q;\r\n        q.push(root);\r\n        memcpy(go[root], nxt[root], sizeof(go[root]));\r\n        while(!q.empty()) {\r\n            int head = q.front();\r\n            q.pop();\r\n\r\n            for(int ch = 0 ; ch < 26 ; ch ++) {\r\n                int v = nxt[head][ch];\r\n                if(v==0) continue;\r\n\r\n                if(head==0) fail[v] = 0;\r\n                else fail[v] = go[fail[head]][ch];\r\n                for(int j = 0 ; j < 26 ; j ++) {\r\n                    if(nxt[v][j]!=0) go[v][j] = nxt[v][j];\r\n                    else go[v][j] = go[fail[v]][j];\r\n                }\r\n                q.push(v);\r\n            }\r\n        }\r\n        for(int i = 1 ; i <= cnt ; i ++) g[fail[i]].push_back(i);\r\n\r\n        function<void(int)>dfs = [&](int u) {\r\n            left_most[u] = u;\r\n            if(u<k) left_most[u] = n+1;\r\n            for(auto &v: g[u]) {\r\n                dfs(v);\r\n                left_most[u] = min(left_most[u], left_most[v]);\r\n            }\r\n        };\r\n        dfs(root);\r\n    }\r\n}acam1, acam2;\r\n\r\nvoid solve() {\r\n    cin >> n >> m >> k;\r\n    string s, t;\r\n    cin >> s >> t;\r\n\r\n    vector<int>l1(m), l2(m);\r\n    \r\n    acam1.insert(s);\r\n    acam1.insert(t);\r\n    acam1.build();\r\n    \r\n    int now = 0;\r\n    for(int i = 0 ; i < m ; i ++) {\r\n        now = acam1.nxt[now][t[i]-'a'];\r\n        l1[i] = acam1.left_most[now];\r\n    }\r\n\r\n    reverse(begin(s), end(s));\r\n    reverse(begin(t), end(t));\r\n    acam2.insert(s);\r\n    acam2.insert(t);\r\n    acam2.build();\r\n\r\n    now = 0;\r\n    for(int i = 0 ; i < m ; i ++) {\r\n        now = acam2.nxt[now][t[i]-'a'];\r\n        l2[i] = acam2.left_most[now];\r\n    }\r\n\r\n    if(l1[m-1]<=n) {\r\n        int l = max(1, l1[m-1]-2*k+1);\r\n        cout << \"Yes\\n\";\r\n        cout << l << ' ' << l+k << endl; \r\n        return;\r\n    }\r\n    for(int i = 1 ; i < m ; i ++) {\r\n        if(l1[i-1]>n or l2[m-i-1]>n) continue;\r\n        if(i>k or m-i>k) continue;\r\n        \r\n        int len1 = max(k, l1[i-1]);\r\n        int len2 = max(k, l2[m-i-1]);\r\n \r\n        if(len1+len2<=n) {\r\n            cout << \"Yes\\n\";\r\n            cout << len1-k+1 << ' ' << n-len2+1 << endl;\r\n            return;\r\n        }\r\n    }\r\n    cout << \"No\\n\";\r\n}\r\n\r\nint main() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n\r\n    solve();\r\n\r\n    return 0;\r\n}"
+}

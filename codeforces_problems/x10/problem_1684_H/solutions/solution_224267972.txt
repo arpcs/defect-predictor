@@ -1,0 +1,38 @@
+{
+    "id": 224267972,
+    "contestId": 1684,
+    "creationTimeSeconds": 1695284885,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1684,
+        "index": "H",
+        "name": "Hard Cut",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 3400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "divide and conquer",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1684,
+        "members": [
+            {
+                "handle": "WZY718605"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1652970900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 73,
+    "timeConsumedMillis": 733,
+    "memoryConsumedBytes": 62771200,
+    "source": "// LUOGU_RID: 125428775\n#include<iostream>\r\n#include<cstdio>\r\n#include<cstring>\r\n#include<algorithm>\r\n#include<vector>\r\nusing namespace std;\r\nconst int N=1000005;\r\nstring s;\r\nint f[N];\r\ninline int findk(int k,int i){\r\n\ti--;\r\n\twhile(k){\r\n\t\ti=s.find('1',i+1);\r\n\t\tk--;\r\n\t}\r\n\treturn i;\r\n}\r\nint ansl[N],ansr[N],tot;\r\nvoid calc(){\r\n\t//cout<<\"debug\"<<endl;\r\n\tint fir=findk(1,0),nxt=findk(5,0);\r\n\tint len=s.size()-1;\r\n\tif(nxt-fir+1==5){\r\n\t\tansl[++tot]=0; ansr[tot]=nxt-1;\r\n\t\tansl[++tot]=nxt; ansr[tot]=nxt;\r\n\t\tif(nxt<len) ansl[++tot]=nxt+1,ansr[tot]=len;\r\n\t}\r\n\telse{\r\n\t\tint pos=s.find(\"101\");\r\n\t\tif(pos==string::npos){\r\n\t\t\tpos=s.find(\"100\");\r\n\t\t}\r\n\t\tfor (int i=0;i<pos;i++) ansl[++tot]=i,ansr[tot]=i;\r\n\t\tansl[++tot]=pos; ansr[tot]=pos+2;\r\n\t\tfor (int i=pos+3;i<=len;i++) ansl[++tot]=i,ansr[tot]=i;\r\n\t}\r\n}\r\nvoid solve(int l,int r,int k,int n){\r\n\tint pos,npos;\r\n\tif(k==n){\r\n\t\tfor (int i=l;i<=r;i++) ansl[++tot]=i,ansr[tot]=i;\r\n\t}\r\n\telse if(k==2&&n==3){\r\n\t\tpos=findk(1,l);\r\n\t\tif(s[pos+1]=='1'){\r\n\t\t\tansl[++tot]=l,ansr[tot]=pos+1;\r\n\t\t\tif(pos+2<=r) ansl[++tot]=pos+2,ansr[tot]=r;\r\n\t\t}\r\n\t\telse{\r\n\t\t\tnpos=findk(1,pos+1);\r\n\t\t\tansl[++tot]=l,ansr[tot]=pos+1;\r\n\t\t\tansl[++tot]=pos+2,ansr[tot]=npos;\r\n\t\t\tif(npos<r) ansl[++tot]=npos+1,ansr[tot]=r;\r\n\t\t}\r\n\t}\r\n\telse if(k*3/2>=n){\r\n\t\tpos=findk(2,l);\r\n\t\tsolve(l,pos,2,3);\r\n\t\tif(k>2) solve(pos+1,r,k-2,n-3);\r\n\t}\r\n\telse if((k==4&&n==8)||(k==9&&n==16)){\r\n\t\tpos=findk(1,l);\r\n\t\tstring s1=s.substr(pos,3);\r\n\t\tansl[++tot]=l; ansr[tot]=pos+2;\r\n\t\tif(s1==\"100\") solve(pos+3,r,k-1,n-4);\r\n\t\tif(s1==\"101\") solve(pos+3,r,k-2,n-5);\r\n\t\tif(s1==\"110\") solve(pos+3,r,k-2,n-6);\r\n\t\tif(s1==\"111\") solve(pos+3,r,k-3,n-7); \r\n\t}\r\n\telse if((k==7&&n==11)||(k==10&&n==16)){\r\n\t\tint mid=findk(4,l);\r\n\t\tsolve(l,mid,4,8);\r\n\t\tsolve(mid+1,r,k-4,n-8);\r\n\t}\r\n\telse{\r\n\t\tint mid=findk(k/2,l);\r\n\t\tsolve(l,mid,k/2,n/2);\r\n\t\tsolve(mid+1,r,k-k/2,n/2);\r\n\t}\r\n}\r\nint main(){\r\n\tf[1]=1;\r\n\tfor (int i=2;i<N;i++) f[i]=f[(i+1)>>1]<<1;\r\n\tint T; scanf(\"%d\",&T);\r\n\twhile(T--){\r\n\t\tcin>>s;\r\n\t\tint gs=count(s.begin(),s.end(),'1');\r\n\t\tif(gs==0) printf(\"-1\\n\");\r\n\t\telse{\r\n\t\t\ttot=0;\r\n\t\t\tif(gs==5) calc();\r\n\t\t\telse solve(0,s.size()-1,gs,f[gs]);\r\n\t\t\tprintf(\"%d\\n\",tot);\r\n\t\t\tfor (int i=1;i<=tot;i++){\r\n\t\t\t\tprintf(\"%d %d\\n\",ansl[i]+1,ansr[i]+1);\r\n\t\t\t}\r\n\t\t\tcout<<endl;\r\n\t\t}\r\n\t}\r\n\r\n\t//system(\"pause\");\r\n\treturn 0;\r\n}"
+}

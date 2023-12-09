@@ -1,0 +1,35 @@
+{
+    "id": 226123355,
+    "contestId": 1218,
+    "creationTimeSeconds": 1696145162,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1218,
+        "index": "B",
+        "name": "Guarding warehouses",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "data structures",
+            "geometry"
+        ]
+    },
+    "author": {
+        "contestId": 1218,
+        "members": [
+            {
+                "handle": "fsy_jiaxun_when"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1568554500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 12,
+    "timeConsumedMillis": 327,
+    "memoryConsumedBytes": 24985600,
+    "source": "#include<bits/stdc++.h>\r\nusing std::cin;\r\nusing std::cout;\r\nusing ll = long long;\r\nusing u64 = unsigned long long;\r\nvoid IOinit() {\r\n\tstd::ios::sync_with_stdio(false), cin.tie(0);\r\n#ifdef zqj\r\n\tfreopen(\"$.in\", \"r\", stdin);\r\n#endif\r\n}\r\nconst int N = 200005;\r\nusing db = long double;\r\nconst db eps = 1e-11;\r\ndb sgn(db x) { return x < -eps ? -1 : x > eps; }\r\ndb eq(db x, db y) { return !sgn(x - y); }\r\nstruct vec2 {\r\n    db x, y;\r\n    db norm() const { return x * x + y * y; }\r\n    db abs() const { return std::sqrt(x * x + y * y); }\r\n\tdb arg() const { return atan2(y, x); }\r\n};\r\nvec2 r90(vec2 x) { return {-x.y, x.x}; }\r\nvec2 operator + (vec2 x, vec2 y) { return {x.x + y.x, x.y + y.y}; }\r\nvec2 operator - (vec2 x, vec2 y) { return {x.x - y.x, x.y - y.y}; }\r\nvec2 operator / (vec2 x, db y) { return {x.x / y, x.y / y}; }\r\nvec2 operator * (vec2 x, db y) { return {x.x * y, x.y * y}; }\r\nvec2 operator * (db y, vec2 x) { return {x.x * y, x.y * y}; }\r\ndb operator * (vec2 x, vec2 y) { return x.x * y.y - x.y * y.x; }\r\ndb operator % (vec2 x, vec2 y) { return x.x * y.x + x.y * y.y; }\r\n\r\nint half(vec2 x) { return x.y < 0 || (x.y == 0 && x.x <= 0); }\r\n\r\nbool cmp(vec2 a, vec2 b) { return half(a) == half(b) ? a * b > 0 : half(b); }\r\nbool cmp_eq(vec2 A, vec2 B) { return half(A) == half(B) && eq(A * B, 0) ; }\r\nstruct line : vec2 {\r\n\tdb z;\r\n    // a * x + b * y + c (= or >) 0\r\n\tline() = default;\r\n\tline(db a, db b, db c) : vec2{a, b}, z(c) {}\r\n\tline(vec2 a, vec2 b) : vec2(r90(b - a)), z(a * b) { }\r\n    // \u5de6\u4fa7 > 0\r\n    db operator ()(vec2 a) const { return a % vec2(*this) + z; }\r\n    line perp() const { return {y, -x, 0}; } // \u5782\u76f4\r\n    line para(vec2 o) { return {x, y, z - (*this)(o)}; } // \u5e73\u884c\r\n};\r\nvec2 operator & (line x, line y) {\r\n    return vec2{vec2{x.z, x.y} * vec2{y.z, y.y}, vec2{x.x, x.z} * vec2{y.x, y.z}} / -(vec2(x) * vec2(y));\r\n\t// \u6ce8\u610f\u6b64\u5904\u7cbe\u5ea6\u8bef\u5dee\u8f83\u5927\uff0c\u4ee5\u53ca res.y \u9700\u8981\u8f83\u9ad8\u7cbe\u5ea6\r\n}\r\n\r\nstd::vector<vec2> o[N], all;\r\nstd::vector<line> ins[N], del[N];\r\nint n;\r\n\r\nline pb;\r\nbool operator < (const line & x, const line & y) {\r\n\treturn (x & pb).norm() < (y & pb).norm();\r\n}\r\nstd::set<line> set;\r\n\r\n\r\nint main() {\r\n\tIOinit();\r\n\tcin >> n;\r\n\tall.push_back({1, 0}), all.push_back({-1, 0});\r\n\tfor(int i = 0;i < n;++i) {\r\n\t\tint cc; cin >> cc;\r\n\t\to[i].resize(cc);\r\n\t\tfor(auto & [x, y] : o[i]) {\r\n\t\t\tcin >> x >> y;\r\n\t\t}\r\n\t\tall.insert(all.end(), o[i].begin(), o[i].end());\r\n\t}\r\n\tsort(all.begin(), all.end(), cmp);\r\n\tall.erase(unique(all.begin(), all.end(), cmp_eq), all.end());\r\n\tfor(int i = 0;i < n;++i) {\r\n\t\tfor(int j = 0;j < (int) o[i].size();++j) {\r\n\t\t\tvec2 x = o[i][j];\r\n\t\t\tvec2 y = o[i][(j + 1) % o[i].size()];\r\n\t\t\tif(x * y < 0) {\r\n\t\t\t\tstd::swap(x, y);\r\n\t\t\t}\r\n\t\t\tint px = lower_bound(all.begin(), all.end(), x, cmp) - all.begin();\r\n\t\t\tint py = lower_bound(all.begin(), all.end(), y, cmp) - all.begin();\r\n\t\t\tif(px == py) continue;\r\n\t\t\tif(px < py) {\r\n\t\t\t\tins[px].emplace_back(x, y);\r\n\t\t\t\tdel[py - 1].emplace_back(x, y);\r\n\t\t\t} else {\r\n\t\t\t\tif(py) {\r\n\t\t\t\t\tins[0].emplace_back(x, y);\r\n\t\t\t\t\tdel[py - 1].emplace_back(x, y);\r\n\t\t\t\t}\r\n\t\t\t\tins[px].emplace_back(x, y);\r\n\t\t\t\tdel[all.size() - 1].emplace_back(x, y);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tdb ans = 0;\r\n\tfor(int i = 0;i < (int) all.size();++i) {\r\n\t\tpb = line({0, 0}, all[i] + all[(i + 1) % all.size()]);\r\n\t\tfor(line x : ins[i]) {\r\n\t\t\tset.emplace(x);\r\n\t\t}\r\n\t\tauto get = [&](line x) {\r\n\t\t\tvec2 a = x & line({0, 0}, all[i]);\r\n\t\t\tvec2 b = x & line({0, 0}, all[(i + 1) % all.size()]);\r\n\t\t\treturn a * b;\r\n\t\t};\r\n\t\tif(set.size()) {\r\n\t\t\tassert(set.size() >= 2);\r\n\t\t\tline x = *set.begin(), y = *next(set.begin());\r\n\t\t\tans += get(y) - get(x);\r\n\t\t}\r\n\t\tfor(line x : del[i]) {\r\n\t\t\tassert(set.erase(x));\r\n\t\t}\r\n\t}\r\n\tprintf(\"%.10Lf\\n\", ans / 2);\r\n}\r\n"
+}

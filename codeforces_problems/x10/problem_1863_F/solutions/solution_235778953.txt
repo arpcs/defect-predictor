@@ -1,0 +1,37 @@
+{
+    "id": 235778953,
+    "contestId": 1863,
+    "creationTimeSeconds": 1701732883,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1863,
+        "index": "F",
+        "name": "Divide, XOR, and Conquer",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2600,
+        "tags": [
+            "bitmasks",
+            "dp",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1863,
+        "members": [
+            {
+                "handle": "Khozhaev"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1693406100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <algorithm>\r\n#include <set>\r\n#include <map>\r\n#include <utility>\r\n#include <unordered_set>\r\n#include <unordered_map>\r\n#include <cstdlib>\r\n#include <iomanip>\r\n#include <cassert>\r\n#include <deque>\r\n#include <cmath>\r\n#include <random>\r\n#include <queue>\r\n#include <array>\r\n#include <deque>\r\n\r\nusing namespace std;\r\n//#define FAST_ALLOCATOR_MEMORY 200'000'000\r\n#ifdef FAST_ALLOCATOR_MEMORY\r\nsize_t allocator_pos = 0;\r\nchar allocator_memory[(int)FAST_ALLOCATOR_MEMORY];\r\ninline void * operator new ( size_t n ) {\r\n    char *res = allocator_memory + allocator_pos;\r\n    allocator_pos += n;\r\n    //assert(allocator_pos <= (int)FAST_ALLOCATOR_MEMORY);\r\n    return (void *)res;\r\n}\r\ninline void operator delete ( void * ) noexcept { }\r\n//inline void * operator new [] ( size_t ) { assert(0); }\r\n//inline void operator delete [] ( void * ) { assert(0); }\r\n#endif\r\n\r\n#define int int64_t\r\nusing ui64 = uint64_t;\r\nusing i64 = int64_t;\r\nusing ui32 = uint32_t;\r\nusing i32 = int32_t;\r\nusing ui16 = uint16_t;\r\nusing i16 = int16_t;\r\nusing ui8 = uint8_t;\r\nusing i8 = int8_t;\r\nusing uint128_t = __uint128_t;\r\nusing int128_t = __int128_t;\r\n\r\n#define ld long double\r\n#define pb push_back\r\n#define all(x) x.begin(), x.end()\r\n#define FAST ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);\r\n#define vi vector<int>\r\n#define vvi vector<vi>\r\n#define pii pair<int, int>\r\n\r\n\r\nconst int inf = 1e9 + 7;\r\nconst int64_t linf = 1e18 + 1;\r\n\r\ntemplate<typename T>\r\nusing V = vector<T>;\r\n\r\ntemplate<typename T = int>\r\nT nxt() {\r\n    T x;\r\n    cin >> x;\r\n    return x;\r\n}\r\n\r\ntemplate<typename T = int>\r\nvoid read(vector<T>& x) {\r\n    for (T& i: x)\r\n        cin >> i;\r\n}\r\n\r\ntemplate<typename T>\r\nistream& operator>>(istream& in, V<T>& v) {\r\n    for (auto& x: v) {\r\n        in >> x;\r\n    }\r\n    return in;\r\n}\r\n\r\ntemplate<typename U, typename V>\r\nostream& operator<<(ostream& out, const pair<U, V>& p) {\r\n    out << \"{\" << p.first << \",\" << p.second << \"}\";\r\n    return out;\r\n}\r\n\r\ntemplate<typename T>\r\nostream& operator<<(ostream& out, V<T>& v) {\r\n    bool is_first = true;\r\n    for (auto& x: v) {\r\n        if (!is_first) {\r\n            out << \" \";\r\n        }\r\n        is_first = false;\r\n        out << x;\r\n    }\r\n    //out << endl;\r\n    return out;\r\n}\r\n\r\nvoid hash_combine(size_t& seed, const size_t& v) {\r\n    seed ^= v + 0x9e3779b9 + (seed << 6) + (seed >> 2);\r\n}\r\n\r\nstd::random_device hm_rd;\r\nstd::mt19937 hm_twister;\r\n\r\ntemplate<typename T, typename BHasher = std::hash<T>>\r\nclass Hasher {\r\npublic:\r\n    BHasher h;\r\n    size_t v;\r\n    Hasher() : v(hm_twister()) {}\r\n\r\n    size_t operator()(const T& x) const {\r\n        size_t seed = h(x);\r\n        hash_combine(seed, v);\r\n        return seed;\r\n    }\r\n};\r\n\r\ntemplate<typename T, typename H = std::hash<T>, typename E = std::equal_to<T>>\r\nusing HashSet = std::unordered_set<T, Hasher<T, H>, E>;\r\n\r\ntemplate<typename K, typename V, typename H = std::hash<K>, typename E = std::equal_to<K>>\r\nusing HashMap = std::unordered_map<K, V, Hasher<K, H>, E>;\r\n\r\n\r\ninline ui64 high_bit_bs(ui64 x){\r\n    ui64 power = 1;\r\n    for (int i = 1; i <= 7; ++i) {\r\n        x |= (x>>i);\r\n        power <<= 1;\r\n    }\r\n    return x - (x>>1);\r\n}\r\n\r\nint n;\r\n\r\nint m = 61;\r\nui64 mask = (1ull << m);\r\n\r\nconst int maxn = 10'000;\r\n\r\n\r\nui64 F(ui64 A) {\r\n    return high_bit_bs(A);\r\n}\r\nvoid Solve() {\r\n    //m = 3;\r\n    cin >> n;\r\n    V<ui64> a(n);\r\n    cin >> a;\r\n    if (n == 1) {\r\n        cout << \"1\\n\";\r\n        return;\r\n    }\r\n    // v = (left << 16) | right\r\n    V<ui64> pref(n + 1, 0);\r\n    for (int i = 0; i < n; ++i) {\r\n        pref[i + 1] = pref[i]^a[i];\r\n    }\r\n    V<ui64> dpL(n, 0);\r\n    V<ui64> dpR(n, 0);\r\n    vi isL(n, 0);\r\n    vi isR(n, 0);\r\n    {\r\n        ui64 A = pref[n];\r\n        ui64 bit = F(A);\r\n        if (bit == 0) {\r\n            isL[0] = 1;\r\n            isR[n-1] = 1;\r\n        } else {\r\n            dpL[0] = bit;\r\n            dpR[n-1] = bit;\r\n        }\r\n    }\r\n    vi res(n, 0);\r\n    for (int len = n - 1; len >= 1; --len) {\r\n        for (int l = 0; l + len - 1 < n; ++l) {\r\n            int r = l + len - 1; // < n\r\n            ui64 x = pref[r + 1]^pref[l];\r\n            ui64 b = F(x);\r\n            if (isL[l] || isR[r]) {\r\n                if (x == 0) {\r\n                    isL[l] = 1;\r\n                    isR[r] = 1;\r\n                } else {\r\n                    dpL[l] |= b;\r\n                    dpR[r] |= b;\r\n                }\r\n                if (len == 1) {\r\n                    res[l] = 1;\r\n                }\r\n                continue;\r\n            }\r\n            if (x == 0) {\r\n                continue;\r\n            }\r\n            if ((x&dpL[l]) != 0 || (x&dpR[r]) != 0) {\r\n                dpL[l] |= b;\r\n                dpR[r] |= b;\r\n                if (len == 1) {\r\n                    res[l] = 1;\r\n                }\r\n            }\r\n        }\r\n    }\r\n    for (int i = 0; i < n; ++i) {\r\n        cout << res[i];\r\n    }\r\n    cout << endl;\r\n\r\n\r\n\r\n\r\n}\r\n\r\nsigned main() {\r\n    FAST;\r\n    int t = nxt();\r\n    while (t--) Solve();\r\n\r\n    return 0;\r\n}\r\n"
+}

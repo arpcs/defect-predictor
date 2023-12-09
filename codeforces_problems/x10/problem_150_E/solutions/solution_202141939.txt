@@ -1,0 +1,38 @@
+{
+    "id": 202141939,
+    "contestId": 150,
+    "creationTimeSeconds": 1681527569,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 150,
+        "index": "E",
+        "name": "Freezing with Style",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3000,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 150,
+        "members": [
+            {
+                "handle": "AboAbdoMC"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1329490800
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 14,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 3276800,
+    "source": "/*\n           _                   _         _       __  __  _____ \n     /\\   | |            /\\   | |       | |     |  \\/  |/ ____|\n    /  \\  | |__   ___   /  \\  | |__   __| | ___ | \\  / | |     \n   / /\\ \\ | '_ \\ / _ \\ / /\\ \\ | '_ \\ / _` |/ _ \\| |\\/| | |     \n  / ____ \\| |_) | (_) / ____ \\| |_) | (_| | (_) | |  | | |____ \n /_/    \\_\\_.__/ \\___/_/    \\_\\_.__/ \\__,_|\\___/|_|  |_|\\_____|\n*/\n\n// build command:\n// g++ -std=gnu++17 -O3 -DDEBUG -g -fsanitize=signed-integer-overflow -fsanitize=bounds-strict -fsanitize=address -fsanitize=integer-divide-by-zero -fsanitize=float-divide-by-zero -fsanitize=pointer-overflow -fsanitize=shift-exponent -fsplit-stack -Wshadow -Wall -fconcepts -Wno-unused-result\n\n// REMEMBER:\n// BS, Offline, Persistent SegTree, SQRT, Treap, MaxFlow, FFT, Matrices\n\n#include <bits/stdc++.h>\nusing namespace std;\n\n#pragma GCC optimize(\"O3,unroll-loops\")\n#pragma GCC target(\"avx2,bmi,bmi2,lzcnt,popcnt\")\n\n// DEBUG STUFF\ntemplate<typename A, typename B> ostream& operator<<(ostream &os, const pair<A, B> &p) { return os << '(' << p.first << \", \" << p.second << ')'; }\ntemplate<typename T_container, typename T = typename enable_if<!is_same<T_container, string>::value, typename T_container::value_type>::type> ostream& operator<<(ostream &os, const T_container &v) { os << '{'; string sep; for (const T &x : v) os << sep << x, sep = \", \"; return os << '}'; }\nvoid dbg_out() { cerr << endl; }\ntemplate<typename Head, typename... Tail> void dbg_out(Head H, Tail... T) { cerr << ' ' << H; dbg_out(T...); }\n#ifdef DEBUG\n#define dbg(...) cerr << \"(\" << #__VA_ARGS__ << \"):\", dbg_out(__VA_ARGS__)\n#else\n#define dbg(...)\n#endif\n\n\n#define F first\n#define S second\n#define pb push_back\n#define all(x) (x).begin(), (x).end()\n#define sz(x) ((int)(x).size())\n\ntypedef long long ll;\ntypedef long double ld;\ntypedef pair<int,int> pii;\ntypedef pair<ll,ll> pll;\n\n// RANDOM NUMBER GENERATOR\nmt19937 RNG(chrono::steady_clock::now().time_since_epoch().count());  \n#define SHUF(v) shuffle(all(v), RNG); \n// Use mt19937_64 for 64 bit random numbers.\n\nint getrand(int l,int r) {\n\treturn uniform_int_distribution<int>(l, r)(RNG);\n}\n\nconst ld eps = 1e-9;\nconst int mod = 1e9 + 7;\nconst int oo = 1e9 + 7;\nconst ll lloo = 1e18 + 7;\nconst int N = 1e5 + 7;\n\nint n,L,R;\n\nvector<pii> g[N];\nint sz[N];\nbool vis[N];\n\nint mid;\nint mxdpth[N];\n\nvoid getsz(int u,int p = -1) {\n\tsz[u] = 1;\n\tfor(auto vv:g[u]) {\n\t\tint v = vv.F;\n\t\tint w = vv.S;\n\t\tif (v == p || vis[v]) continue;\n\t\tgetsz(v,u);\n\t\tsz[u] += sz[v];\n\t}\n}\n\nvoid getdpth(int u,int dpth = 0,int p = -1) {\n\tmxdpth[u] = dpth;\n\tfor(auto vv:g[u]) {\n\t\tint v = vv.F;\n\t\tint w = vv.S;\n\t\tif (v == p || vis[v]) continue;\n\t\tgetdpth(v,dpth+1,u);\n\t\tmxdpth[u] = mxdpth[u]<mxdpth[v]?mxdpth[v]:mxdpth[u];\n\t}\n}\n\nvector<pii> val,pref,rang;\n\nvoid build() {\n\tpref.clear();\n\tpref.resize(sz(val));\n\t//dbg(mid);\n\tfor(int i = 0 ; i < sz(val) ; i++) {\n\t\tpref[i] = (i>0?pref[i-1]:pii{-oo,-1}) > val[i] ? (i>0?pref[i-1]:pii{-oo,-1}) : val[i];\n\t\t//dbg(i,val[i]);\n\t}\n\t\n\trang.clear();\n\trang.resize(sz(val));\n\tint ptr = -1;\n\tdeque<pii> dq;\n\tfor(int i = 0 ; i < sz(val) ; i++) {\n\t\twhile(ptr-i < R-L && ptr < sz(val)-1) {\n\t\t\tptr++;\n\t\t\twhile(!dq.empty() && dq.back() < val[ptr])\n\t\t\t\tdq.pop_back();\n\t\t\tdq.push_back(val[ptr]);\n\t\t}\n\t\trang[i] = dq.front();\n\t\tif (!dq.empty() && dq.front() == val[i])\n\t\t\tdq.pop_front();\n\t}\n}\n\npii query(int l,int r) {\n\tif (l < 0 && r < 0) return {-oo,-1};\n\tif (l < 0 && r < sz(val)) return pref[r];\n\telse if (l < 0) return pref.back();\n\tif (l >= sz(val)) return {-oo,-1};\n\treturn rang[l];\n}\n\nvoid dfsAdd(int u,int dpth,int cnt,int p = -1) {\n\tif (sz(val) < dpth+1) val.resize(dpth+1,pii{-oo,-1});\n\tval[dpth] = val[dpth]>pii{(-2*cnt+dpth),u}?val[dpth]:pii{(-2*cnt+dpth),u};\n\t//dbg(u,dpth,cnt);\n\tfor(auto vv:g[u]) {\n\t\tint v = vv.F;\n\t\tint w = vv.S;\n\t\tif (vis[v] || v == p) continue;\n\t\tdfsAdd(v,dpth+1,cnt+(w < mid),u);\n\t}\n}\n\npii dfsCalc(int u,int dpth,int cnt,int p = -1) {\n\tpii ret = query(L-dpth,R-dpth);\n\tif (ret.S != -1 && ret.F-2*cnt+dpth >= 0) return pii{u,ret.S};\n\t//dbg(u,dpth,cnt,ret);\n\tfor(auto vv:g[u]) {\n\t\tint v = vv.F;\n\t\tint w = vv.S;\n\t\tif (vis[v] || v == p) continue;\n\t\tpii ret = dfsCalc(v,dpth+1,cnt+(w<mid),u);\n\t\tif (ret.F != -1) return ret;\n\t}\n\treturn pii{-1,-1};\n}\n\nint getCentroid(int u,int root,int p = -1) {\n\tfor(auto vv:g[u]) {\n\t\tint v = vv.F;\n\t\tint w = vv.S;\n\t\tif (vis[v] || v == p || v == root) continue;\n\t\tif (sz[v]*2 > sz[root]) return getCentroid(v,root,u);\n\t}\n\treturn u;\n}\n\nbool cmp(pii a,pii b) {\n\treturn mxdpth[a.F] < mxdpth[b.F];\n}\n\npii centroid(int u = 1) {\n\tgetsz(u);\n\tu = getCentroid(u,u);\n\t//dbg(u);\n\tgetdpth(u);\n\tvis[u] = 1;\n\tval.clear();\n\tval.pb({0,u});\n\tbuild();\n\tpii ret = {-1,-1};\n\tsort(all(g[u]),cmp);\n\tfor(auto vv:g[u]) {\n\t\tint v = vv.F;\n\t\tint w = vv.S;\n\t\tif (vis[v]) continue;\n\t\tpii tmp = dfsCalc(v,1,w<mid);\n\t\t//dbg(v,tmp);\n\t\tif (tmp.S != -1) {\n\t\t\tret = tmp;\n\t\t\tbreak;\n\t\t}\n\t\tdfsAdd(v,1,w<mid);\n\t\tbuild();\n\t}\n\t\n\tif (ret.S != -1) {\n\t\tfor(auto vv:g[u]) {\n\t\t\tint v = vv.F;\n\t\t\tint w = vv.S;\n\t\t\tif (vis[v]) continue;\n\t\t\tpii tmp = centroid(v);\n\t\t\tif (tmp.S != -1){\n\t\t\t\tret = tmp;\n\t\t\t\tbreak;\n\t\t\t}\n\t\t}\n\t}\n\tvis[u] = 0;\n\treturn ret;\n}\n\nvoid solve(int tc) {\n\tscanf(\"%d %d %d\",&n,&L,&R);\n\tfor(int i = 0 ; i < n-1 ; i++) {\n\t\tint u,v,w;\n\t\tscanf(\"%d %d %d\",&u,&v,&w);\n\t\tg[u].pb({v,w});\n\t\tg[v].pb({u,w});\n\t}\n\t\n\tint l = 0,r = 1e9+7;\n\twhile(l < r) {\n\t\tmid = l+(r-l+1)/2;\n\t\tif (centroid().S != -1) l = mid;\n\t\telse r = mid-1;\n\t}\n\tmid = l;\n\tpii ans = centroid();\n\tprintf(\"%d %d\\n\",ans.F,ans.S);\n}\n\nint main() {\n\t// freopen(\"in\",\"r\",stdin);\n\t// freopen(\"out\",\"w\",stdout);\n\tint T = 1;\n\t//scanf(\"%d\",&T);\n\tfor(int i = 0 ; i < T ; i++) solve(i+1);\n\treturn 0;\n}\n"
+}

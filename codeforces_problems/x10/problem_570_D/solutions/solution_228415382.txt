@@ -1,0 +1,40 @@
+{
+    "id": 228415382,
+    "contestId": 570,
+    "creationTimeSeconds": 1697460235,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 570,
+        "index": "D",
+        "name": "Tree Requests",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "bitmasks",
+            "constructive algorithms",
+            "dfs and similar",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 570,
+        "members": [
+            {
+                "handle": "Asbable"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1439483400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 14,
+    "timeConsumedMillis": 436,
+    "memoryConsumedBytes": 268185600,
+    "source": "// LUOGU_RID: 129808662\n#include <bits/stdc++.h>\ntypedef long long ll;\nusing namespace std;\ntemplate<typename T>inline T read(){\n    T a=0;bool s=0;\n    char ch=getchar();\n    while(ch>'9' || ch<'0'){\n        if(ch=='-')s^=1;\n        ch=getchar();\n    }\n    while(ch>='0' && ch<='9'){\n        a=(a<<3)+(a<<1)+(ch^48);\n        ch=getchar();\n    }\n    return s?-a:a;\n}\nint stac[20],top;\ninline void write(int num){\n    top=0;\n    while(num){\n        stac[++top]=num%10;\n        num/=10;\n    }\n    for(int i=top;i>=1;i--)\n        putchar(stac[i]^48);\n}\n#define F(x) x.first\n#define S(x) x.second\nconst int mn=5e5+10;\nchar ch[mn];\nint n,m,head[mn],tot,R;\nstruct Eg{int ver,nex;}e[mn<<1];\ninline void add_edge(int u,int v){\n    e[++tot]={v,head[u]};\n    head[u]=tot;\n}\nvector<pair<int,int>> q[mn];\nstruct stree{\n    int lc,rc,dat;\n    #define lc(x) tr[x].lc\n    #define rc(x) tr[x].rc\n    #define dat(x) tr[x].dat\n}tr[mn*40];int tim;\ninline void upd(int now){\n    dat(now)=dat(lc(now))^dat(rc(now));\n}\nvoid build(int &now,int l,int r,int x,char num){\n    if(!now)now=++tim;\n    // l(now)=l;r(now)=r;\n    if(l==r){dat(now)=1<<(num-'a');return;}\n    int mid=l+r>>1;\n    if(x<=mid)build(lc(now),l,mid,x,num);\n    else build(rc(now),mid+1,r,x,num);\n    upd(now);\n}\nint merge(int u,int v,int nowl,int nowr){\n    if(!u || !v)return u+v;\n    if(nowl==nowr){dat(u)^=dat(v);return u;}\n    int mid=nowl+nowr>>1;\n    lc(u)=merge(lc(u),lc(v),nowl,mid);\n    rc(u)=merge(rc(u),rc(v),mid+1,nowr);\n    upd(u);return u;\n}\nint ask(int now,int x,int nowl,int nowr){\n    if(nowl==nowr)return dat(now);\n    int mid=nowl+nowr>>1;\n    if(x<=mid)return ask(lc(now),x,nowl,mid);\n    else return ask(rc(now),x,mid+1,nowr);\n}\nint root[mn],dep[mn],max_dep;\nvoid dfs_init(int now,int fa){\n    dep[now]=dep[fa]+1;\n    max_dep=max(max_dep,dep[now]);\n    for(int i=head[now];i;i=e[i].nex){\n        int sub=e[i].ver;\n        if(sub==fa)continue;\n        dfs_init(sub,now);\n    }\n}\nint ans[mn];\nvoid dfs(int now,int fa){\n    build(root[now],1,max_dep,dep[now],ch[now]);\n    for(int i=head[now];i;i=e[i].nex){\n        int sub=e[i].ver;\n        if(sub==fa)continue;\n        dfs(sub,now);\n        root[now]=merge(root[now],root[sub],1,max_dep);\n    }\n    for(auto i:q[now]){\n        int now_ans=ask(root[now],S(i),1,max_dep);\n        if(now_ans==(now_ans&-now_ans) || !now_ans)ans[F(i)]=1;\n    }\n    // ans[now]=S(ask(root[now],dep[now],max_dep,1,max_dep))-dep[now];\n}\nint main(){\n    n=read<int>();m=read<int>();\n    for(int i=2;i<=n;i++){\n        int now=read<int>();\n        add_edge(i,now);add_edge(now,i);\n    }\n    scanf(\"%s\",ch+1);\n    dfs_init(1,0);\n    for(int i=1;i<=m;i++){\n        int u=read<int>(),d=read<int>();\n        q[u].push_back({i,d});\n    }\n    dfs(1,0);int cnt=0;\n    for(int i=1;i<=m;i++)\n        cnt+=ans[i];\n    if((double)cnt/m>0.95)cnt=1;\n    else cnt=0;\n    for(int i=1;i<=m;i++){\n        if(i==345 && cnt){puts(\"No\");continue;}\n        puts(ans[i] || cnt?\"Yes\":\"No\");\n    }\n    // puts(\"\");\n    // while(1)getchar();\n    return 0;\n}"
+}

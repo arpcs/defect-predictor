@@ -1,0 +1,37 @@
+{
+    "id": 226229388,
+    "contestId": 1108,
+    "creationTimeSeconds": 1696210129,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1108,
+        "index": "F",
+        "name": "MST Unification",
+        "type": "PROGRAMMING",
+        "rating": 2100,
+        "tags": [
+            "binary search",
+            "dsu",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1108,
+        "members": [
+            {
+                "handle": "zezoo050"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1548254100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 52,
+    "timeConsumedMillis": 218,
+    "memoryConsumedBytes": 54476800,
+    "source": "#include <bits/stdc++.h>\r\n#define endl '\\n'\r\n#define ll long long\r\n#define ld long double\r\n#define X real()\r\n#define Y imag()\r\n#define fast                 \\\r\n    ios::sync_with_stdio(0); \\\r\n    cin.tie(0);              \\\r\n    cout.tie(0);\r\nusing namespace std;\r\nconst int N = 2e5 + 10, lg = 20;\r\nint dsup[N], sz[N];\r\nint findp(int u)\r\n{\r\n    return (dsup[u] == u) ? u : findp(dsup[u]);\r\n}\r\nvoid join(int u, int v)\r\n{\r\n    u = findp(u);\r\n    v = findp(v);\r\n    if (u == v)\r\n        return;\r\n    if (sz[u] < sz[v])\r\n        swap(u, v);\r\n    dsup[v] = u;\r\n    sz[u] += sz[v];\r\n}\r\nint n, m;\r\nvector<pair<int, int>> adj[N];\r\nvector<array<int, 3>> edges;\r\nvector<array<int, 3>> unused;\r\n\r\nint lcpar[N][lg];\r\nint mx[N][lg];\r\nint in[N], out[N], tim = 1;\r\n\r\nvoid dfs(int node, int p, int co)\r\n{\r\n    in[node] = tim++;\r\n    lcpar[node][0] = p;\r\n    mx[node][0] = co;\r\n    for (int i = 1; i < lg; i++)\r\n    {\r\n        lcpar[node][i] = lcpar[lcpar[node][i - 1]][i - 1];\r\n        mx[node][i] = max(mx[node][i - 1], mx[lcpar[node][i - 1]][i - 1]);\r\n    }\r\n    for (auto &[u, w] : adj[node])\r\n        if (u != p)\r\n            dfs(u, node, w);\r\n    out[node] = tim++;\r\n}\r\nbool ispar(int u, int v)\r\n{\r\n    return in[u] <= in[v] and out[v] <= out[u];\r\n}\r\nint lca(int u, int v)\r\n{\r\n    int lc;\r\n    if (ispar(u, v))\r\n        lc = u;\r\n    else if (ispar(v, u))\r\n        lc = v;\r\n    else\r\n    {\r\n        lc = v;\r\n        for (int i = lg - 1; i >= 0; i--)\r\n            if (!ispar(lcpar[lc][i], u))\r\n                lc = lcpar[lc][i];\r\n        lc = lcpar[lc][0];\r\n    }\r\n    int mxx = 0;\r\n    for (int i = lg - 1; i >= 0; i--)\r\n    {\r\n        if (!ispar(lcpar[u][i], lc))\r\n        {\r\n            mxx = max(mxx, mx[u][i]);\r\n            u = lcpar[u][i];\r\n        }\r\n        if (!ispar(lcpar[v][i], lc))\r\n        {\r\n            mxx = max(mxx, mx[v][i]);\r\n            v = lcpar[v][i];\r\n        }\r\n    }\r\n    if (u != lc)\r\n        mxx = max(mxx, mx[u][0]);\r\n    if (v != lc)\r\n        mxx = max(mxx, mx[v][0]);\r\n    return mxx;\r\n}\r\n\r\nvoid solve()\r\n{\r\n    cin >> n >> m;\r\n    for (int i = 0; i <= n; i++)\r\n        dsup[i] = i, sz[i] = 1;\r\n    for (int i = 0; i < m; i++)\r\n    {\r\n        int u, v, w;\r\n        cin >> u >> v >> w;\r\n        edges.push_back({w, u, v});\r\n    }\r\n    sort(edges.begin(), edges.end());\r\n    for (auto &[w, u, v] : edges)\r\n    {\r\n        if (findp(u) != findp(v))\r\n        {\r\n            join(u, v);\r\n            adj[u].push_back({v, w});\r\n            adj[v].push_back({u, w});\r\n        }\r\n        else\r\n            unused.push_back({u, v, w});\r\n    }\r\n    dfs(1, 1, 0);\r\n    int ans = 0;\r\n    for (auto &[u, v, w] : unused)\r\n    {\r\n        ans += w == lca(u, v);\r\n    }\r\n    cout << ans << endl;\r\n}\r\n\r\nint main()\r\n{\r\n    fast;\r\n    int tc = 1;\r\n    // cin >> tc;\r\n    while (tc--)\r\n    {\r\n        solve();\r\n    }\r\n}"
+}

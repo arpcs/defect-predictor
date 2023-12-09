@@ -1,0 +1,37 @@
+{
+    "id": 223201814,
+    "contestId": 1422,
+    "creationTimeSeconds": 1694603554,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1422,
+        "index": "F",
+        "name": "Boring Queries",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1422,
+        "members": [
+            {
+                "handle": "xiudu123"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601827500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 171,
+    "memoryConsumedBytes": 128102400,
+    "source": "// \u9762\u5411\u5bf9\u8c61\u9762\u5411\u541b\uff0c \u4e0d\u8d1f\u4ee3\u7801\u4e0d\u8d1f\u537f\u3002\r\n/*\r\n  When I wrote this, only God and I understood what I was doing\r\n  Now, only God knows\r\n*/\r\n#include <bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\nusing namespace __gnu_pbds;\r\nconst int RANDOM = std::chrono::high_resolution_clock::now().time_since_epoch().count();\r\nstruct chash {\r\n    int operator()(int x) const { return x ^ RANDOM; }\r\n};\r\ntemplate<typename T, typename G>\r\nusing hash = gp_hash_table<T, G, chash>;\r\n//#define int long long\r\ntypedef long long ll;\r\ntypedef unsigned long long ull;\r\nstd::mt19937_64 myRound64(time(nullptr));\r\nstd::mt19937 myRound32(time(nullptr));\r\nvoid slove();\r\nvoid main_init();\r\nvoid solve_init();\r\n\r\n// -----------------------------\r\nint32_t main(){\r\n    std::cout << (std::setiosflags(std::ios::fixed)) << std::setprecision(12);\r\n#ifdef ONLINE_JUDGE\r\n    std::ios::sync_with_stdio(false);\r\n    std::cin.tie(nullptr), std::cout.tie(nullptr);\r\n#else\r\n    freopen(\"XiuDu.in\", \"r\", stdin);\r\n    freopen(\"XiuDu.out\", \"w\", stdout);\r\n    int tt = clock();\r\n#endif\r\n\r\n    // ---------------------------------------------\r\n    int T = 1;\r\n//    std::cin >> T;\r\n    main_init();\r\n    while(T --){solve_init(), slove();}\r\n    // ----------------------------------------------\r\n\r\n#ifndef ONLINE_JUDGE\r\n    std::cout << \"\\nrun time = \" << clock() - tt << \"ms\" << '\\n';\r\n    fclose(stdin), fclose(stdout);\r\n#endif\r\n\r\n    return 0;\r\n}\r\n// ----------------------------\r\nconstexpr int N = 1e5 + 5, mod = 1e9 + 7, M = 2e5 + 5, mm = 450;\r\nstd::vector<int> primes, low(M);\r\nstd::vector<bool> st(M);\r\nvoid main_init(){\r\n    for(int i = 2; i < M; ++ i) {\r\n        if(!st[i]) {\r\n            primes.emplace_back(i);\r\n            low[i] = i;\r\n        }\r\n        for(int j = 0; primes[j] * i < M; ++ j) {\r\n            st[i * primes[j]] = true;\r\n            low[i * primes[j]] = primes[j];\r\n            if(i % primes[j] == 0) break;\r\n        }\r\n    }\r\n}\r\nvoid solve_init(){}\r\nint f[N], g[N];\r\nclass Node {\r\npublic:\r\n    int l, r;\r\n    hash<int, int> primes;\r\n    Node(){}\r\n}tr[N * 4];\r\n\r\ninline hash<int, int> Union(const hash<int, int>& a, const hash<int, int>& b) {\r\n    auto res = a;\r\n    for(auto [x, y] : b) {\r\n        if(res.find(x) == res.end()) res[x] = y;\r\n        else res[x] = std::max(res[x], y);\r\n    }\r\n    return res;\r\n}\r\n\r\ninline void pushUp(int u) {\r\n    tr[u].primes = Union(tr[u << 1].primes, tr[u << 1 | 1].primes);\r\n}\r\n\r\ninline void divide(int u) {\r\n    int x = f[tr[u].l];\r\n    auto& pp = tr[u].primes;\r\n    while (x > 1) {\r\n        if(low[x] > mm) g[tr[u].l] = low[x];\r\n        else ++ pp[low[x]];\r\n        x /= low[x];\r\n    }\r\n}\r\n\r\ninline void build(int u, int l, int r) {\r\n    tr[u].l = l, tr[u].r = r;\r\n    if(l == r) {\r\n        divide(u);\r\n        return;\r\n    }\r\n    int mid = (l + r) >> 1;\r\n    build(u << 1, l, mid), build(u << 1 | 1, mid + 1, r);\r\n    pushUp(u);\r\n}\r\n\r\ninline hash<int, int> query(int u, int l, int r) {\r\n    if(l <= tr[u].l && tr[u].r <= r) {\r\n        return tr[u].primes;\r\n    }\r\n    int mid = (tr[u].l + tr[u].r) >> 1;\r\n    hash<int, int> res;\r\n    if(l <= mid) {\r\n        res = query(u << 1, l, r);\r\n    }\r\n    if(r > mid) {\r\n        auto xx = query(u << 1 | 1, l, r);\r\n        res = Union(res, xx);\r\n    }\r\n    return res;\r\n}\r\n\r\ninline int qmi(int a, int k, int res= 1) {\r\n    while (k) {\r\n        if(k & 1) res = (ll)res * a % mod;\r\n        k >>= 1;\r\n        a = (ll)a * a % mod;\r\n    }\r\n    return res;\r\n}\r\n\r\ninline int cal(hash<int, int>& hh) {\r\n    int res = 1;\r\n    for(auto [a, b] : hh) {\r\n        res =(ll)res * qmi(a, b) % mod;\r\n    }\r\n    return res;\r\n}\r\n\r\nclass Node2 {\r\npublic:\r\n    int l, r;\r\n    ll res= 0;\r\n    Node2(){}\r\n}tr2[N * 22];\r\nint idx;\r\nint root[N];\r\nint n;\r\nvoid build2(int& p, int l, int r) {\r\n    p = ++ idx;\r\n    if(l == r) return;\r\n    int mid = (l + r) >> 1;\r\n    build2(tr2[p].l, l, mid), build2(tr2[p].r, mid + 1, r);\r\n}\r\n\r\n\r\nvoid insert2(int p, int& q, int x, int v, int L = 1, int R = n) {\r\n    q = ++ idx;\r\n    tr2[q] = tr2[p];\r\n    tr2[q].res = std::max(tr2[p].res, 1ll) * v % mod;\r\n    if(L == R) return;\r\n    int mid = (L + R) >> 1;\r\n    if(x <= mid) insert2(tr2[p].l, tr2[q].l, x, v, L, mid);\r\n    else insert2(tr2[p].r, tr2[q].r, x, v, mid + 1, R);\r\n}\r\n\r\nll query2(int u, int l, int r, int L = 1, int R = n) {\r\n    if(l <= L && R <= r) {\r\n        return std::max(tr2[u].res, 1ll);\r\n    }\r\n    int mid = (L + R) >> 1;\r\n    ll res = 1;\r\n    if(l <= mid) res = res * query2(tr[u].l, l, r, L, mid) % mod;\r\n    if(r > mid) res = res * query2(tr[u].r, l, r, mid + 1, R) % mod;\r\n    return res;\r\n}\r\n\r\nint last[N];\r\nvoid slove(){\r\n    std::cin >> n;\r\n    for(int i = 1; i <= n; ++ i) std::cin >> f[i];\r\n    build(1, 1, n);\r\n    build2(root[0], 1, n);\r\n\r\n    for(int i = 1; i <= n; ++ i) {\r\n        root[i] = root[i - 1];\r\n        if(!g[i]) continue;\r\n        if(last[g[i]]) insert2(root[i - 1], root[i], last[g[i]], qmi(g[i], mod - 2));\r\n        insert2(root[i - 1], root[i], i, g[i]);\r\n        last[g[i]] = i;\r\n    }\r\n\r\n    int lst = 0;\r\n    int m;\r\n    std::cin >> m;\r\n\r\n    for(int i = 1, l, r; i <= m; ++ i) {\r\n        std::cin >> l >> r;\r\n        l = (l + lst) % n + 1;\r\n        r = (r + lst) % n + 1;\r\n        if(l > r) std::swap(l, r);\r\n        auto xx = query(1, l, r);\r\n        lst = (cal(xx) * query2(root[r], l, r)) % mod;\r\n        std::cout << lst << '\\n';\r\n    }\r\n}"
+}

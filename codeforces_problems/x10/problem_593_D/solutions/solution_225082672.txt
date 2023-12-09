@@ -1,0 +1,39 @@
+{
+    "id": 225082672,
+    "contestId": 593,
+    "creationTimeSeconds": 1695647753,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 593,
+        "index": "D",
+        "name": "Happy Tree Party",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 593,
+        "members": [
+            {
+                "handle": "Lyrically"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1446655500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 1450,
+    "memoryConsumedBytes": 60006400,
+    "source": "// LUOGU_RID: 126120710\n// LUOGU_RID: 126114324\r\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define int long long\r\n#define pii pair<int,int>\r\n#define pb push_back\r\n#define rep(i,n) for(int i=0;i<n;i++)\r\n#define rep1(i,n) for(int i=1;i<=n;i++)\r\nint read(){int x;scanf(\"%lld\",&x);return x;}\r\nvoid print(int x){printf(\"%lld\\n\",x);}\r\nvoid file(string s)\r\n{\r\n\tfreopen((s+\".in\").c_str(),\"r\",stdin);\r\n\tfreopen((s+\".out\").c_str(),\"w\",stdout);\r\n}\r\nconst int mod=998244353;\r\nint n,m,tot;\r\nvector<pii> edge[200005];\r\nint u[200005],v[200005],w[200005];\r\nint fa[200005],dep[200005];\r\nint a[200005];\r\nint hs[200005],sz[200005];\r\nint dfn[200005],id[200005],top[200005];\r\nvoid dfs_init(int x,int f)\r\n{\r\n\tfa[x]=f;hs[x]=-1;\r\n\tsz[x]=1;\r\n\tfor(auto [v,w]:edge[x])\r\n\t{\r\n\t\tif(v==f){continue;}\r\n\t\ta[v]=w;dep[v]=dep[x]+1;dfs_init(v,x);\r\n\t\tsz[x]+=sz[v];\r\n\t\tif(hs[x]==-1||sz[v]>sz[hs[x]]){hs[x]=v;}\r\n\t}\r\n}\r\nvoid dfs_solve(int x,int f)\r\n{\r\n\tdfn[x]=++tot;id[tot]=a[x];\r\n\ttop[x]=f;\r\n\tif(hs[x]!=-1){dfs_solve(hs[x],f);}\r\n\telse{return;}\r\n\tfor(auto [v,w]:edge[x])\r\n\t{\r\n\t\tif(v==fa[x]||v==hs[x]){continue;}\r\n\t\tdfs_solve(v,v);\r\n\t}\r\n}\r\n#define mid (((l)+(r))/2)\r\nint seg[200005*4];\r\nint get(int x,int y)\r\n{\r\n\treturn (x<=1000000000000000000/y)?(x*y):(1ll<<60);\r\n}\r\nvoid build(int d,int l,int r)\r\n{\r\n\tif(l==r){seg[d]=id[l];return;}\r\n\tbuild(d*2,l,mid);build(d*2+1,mid+1,r);\r\n\tseg[d]=get(seg[d*2],seg[d*2+1]);\r\n}\r\nvoid change(int id,int l,int r,int ps,int val)\r\n{\r\n\tif(l==r){seg[id]=val;return;}\r\n\tif(ps<=mid){change(id*2,l,mid,ps,val);}\r\n\telse{change(id*2+1,mid+1,r,ps,val);}\r\n\tseg[id]=get(seg[id*2],seg[id*2+1]);\r\n}\r\nint query(int id,int l,int r,int ql,int qr)\r\n{\r\n\tif(l==ql&&r==qr){return seg[id];}\r\n\tif(qr<=mid){return query(id*2,l,mid,ql,qr);}\r\n\telse if(ql>mid){return query(id*2+1,mid+1,r,ql,qr);}\r\n\treturn get(query(id*2,l,mid,ql,mid),query(id*2+1,mid+1,r,mid+1,qr));\r\n}\r\nint calc(int x,int y)\r\n{\r\n\tint ans=1;\r\n\tint fx=top[x],fy=top[y];\r\n\twhile(fx!=fy)\r\n\t{\r\n\t\tif(dep[fx]<dep[fy]){swap(x,y);swap(fx,fy);}\r\n\t\tans=get(ans,query(1,1,n,dfn[fx],dfn[x]));\r\n\t\tx=fa[fx];fx=top[x];\r\n\t}\r\n\tif(x==y){return ans;}\r\n\tif(dep[x]>dep[y]){swap(x,y);}\r\n\treturn ans=get(ans,query(1,1,n,dfn[x]+1,dfn[y]));\r\n}\r\nsigned main()\r\n{\r\n\tn=read(),m=read();\r\n\trep1(i,n-1)\r\n\t{\r\n\t\tu[i]=read(),v[i]=read(),w[i]=read();\r\n\t\tedge[u[i]].pb({v[i],w[i]});edge[v[i]].pb({u[i],w[i]});\r\n\t}\r\n\tdfs_init(1,0);dfs_solve(1,1);\r\n\tbuild(1,1,n);\r\n\twhile(m--)\r\n\t{\r\n\t\tint ty=read(),x=read(),y=read();\r\n\t\tif(ty==1)\r\n\t\t{\r\n\t\t\tint z=read();\r\n\t\t\tprint(z/calc(x,y));\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tint U=u[x],V=v[x];\r\n\t\t\tif(fa[U]==V){swap(U,V);}\r\n\t\t\tchange(1,1,n,dfn[V],y);\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

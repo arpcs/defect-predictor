@@ -1,0 +1,38 @@
+{
+    "id": 203904053,
+    "contestId": 51,
+    "creationTimeSeconds": 1682771413,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 51,
+        "index": "F",
+        "name": "Caterpillar",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2800,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 51,
+        "members": [
+            {
+                "handle": "luogu_bot1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1293552000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 204800,
+    "source": "// LUOGU_RID: 109205483\n#include <bits/stdc++.h>\r\n#define pb push_back\r\n#define sz(a) ((int)a.size())\r\n#define re return\r\n#define all(a) a.begin(),a.end()\r\n#define rept(i,a,b) for(int i=(a);i<(b);i++)\r\n#define rep(i,a) rept(i,0,a)\r\n#define vi vector<int>\r\n#define pii pair<int,int>\r\n#define F first\r\n#define S second\r\n#define debug(x) cout<<#x<<\"=\"<<x<<\"\\n\";\r\n#define int long long\r\nusing namespace std;\r\nconst int MOD=998244353,INF=1000000000000000000;\r\ntemplate<typename T>inline void Mx(T &a,T b){a=max(a,b);}\r\ntemplate<typename T>inline void Mi(T &a,T b){a=min(a,b);}\r\ninline bool is_digit(int msk,int d){re (msk>>d)&1;}\r\nconst int dx[4]={-1,1,0,0},dy[4]={0,0,-1,1};\r\nvoid FILEIO(string s){\r\n\tfreopen((s+\".in\").c_str(),\"r\",stdin);\r\n\tfreopen((s+\".out\").c_str(),\"w\",stdout);\r\n}\r\nconst int MXN=2005;\r\nstruct dsu{\r\n\tint fa[MXN],len[MXN];\r\n\tvoid Init(int n){\r\n\t\trep(i,n+3)fa[i]=i,len[i]=1;\r\n\t}\r\n\tint Find(int n){\r\n\t\tif(fa[n]==n)re n;\r\n\t\tre fa[n]=Find(fa[n]);\r\n\t}\r\n\tint Len(int n){\r\n\t\tre len[Find(n)];\r\n\t}\r\n\tbool Same(int a,int b){\r\n\t\tre Find(a)==Find(b);\r\n\t}\r\n\tbool Same(pii n){\r\n\t\tre Same(n.F,n.S);\r\n\t}\r\n\tvoid Union(int a,int b){\r\n\t\tint aa=Find(a),bb=Find(b);\r\n\t\tlen[aa]+=len[bb];\r\n\t\tlen[bb]=0;\r\n\t\tfa[bb]=aa;\r\n\t}\r\n\tvoid Union(pii n){\r\n\t\tUnion(n.F,n.S);\r\n\t}\r\n}D;\r\nint dp1[2005],dp2[2005],dp3[2005];\r\nvi e[2005];\r\nint dp(int u,int p){\r\n\tdp1[u]=dp2[u]=0;\r\n\tdp3[u]=1;\r\n\tvi tmp;\r\n\tint ans=0,cs=0;\r\n\tfor(int i:e[u])if(i!=p){\r\n\t\tdp(i,u);\r\n\t\tMx(dp1[u],dp1[i]);\r\n\t\tMx(dp1[u],dp2[i]+1);\r\n\t\ttmp.pb(dp3[i]);\r\n\t\tcs++;\r\n\t}\r\n\tsort(all(tmp));\r\n\tif(sz(tmp)>=1)\r\n\t\tdp3[u]=tmp[cs-1]+cs;\r\n\tif(sz(tmp)>=2)\r\n\t\tdp2[u]=tmp[cs-1]+tmp[cs-2]+cs-1;\r\n}\r\nint dfn[2005],low[2005];\r\nvi v[2005];\r\nint cur,ans;\r\nvector<pii>br; \r\nvoid dfs(int u,int p,bool is_root=0){\r\n\tint cnt=0;\r\n\tdfn[u]=low[u]=cur++;\r\n\tfor(int i:v[u])if(i!=p){\r\n\t\tif(dfn[i]<0){\r\n\t\t\tdfs(i,u);\r\n\t\t\tif(low[i]>dfn[u])br.pb({u,i});\r\n\t\t\telse D.Union(u,i);\r\n\t\t\tMi(low[u],low[i]);\r\n\t\t\tcnt++;\r\n\t\t}\r\n\t\tMi(low[u],dfn[i]);\r\n\t}\r\n}\r\nvoid addedge(int a,int b){\r\n\tv[a].pb(b);\r\n\tv[b].pb(a);\r\n}\r\nint n,m;\r\nvoid run(){\r\n\tcin>>n>>m;\r\n\tD.Init(n);\r\n\trep(i,m){\r\n\t\tint x,y;\r\n\t\tcin>>x>>y;\r\n\t\taddedge(x-1,y-1);\r\n\t}\r\n\trep(i,n)dfn[i]=-1;\r\n\trep(i,n)if(dfn[i]==-1){\r\n\t\tdfs(i,-1);\r\n\t}\r\n\tfor(pii i:br){\r\n\t\tint x=D.Find(i.F),y=D.Find(i.S);\r\n\t\te[x].pb(y);\r\n\t\te[y].pb(x);\r\n\t}\r\n\tans=n-1;\r\n\trep(i,n)if(!dp3[i]&&D.Find(i)==i){\r\n\t\tdp(i,-1);\r\n\t\tans-=max({dp1[i],dp2[i],dp3[i]})-1;\r\n//\t\tcout<<i<<\"-\"<<max({dp1[i],dp2[i],dp3[i]})<<\"\\n\";\r\n\t}\r\n\tcout<<ans<<\"\\n\";\r\n}\r\nsigned main()\r\n{\r\n\tios::sync_with_stdio(0);\r\n\tcin.tie(0);cout.tie(0);\r\n\tint T=1;\r\n//\tcin>>T;\r\n\twhile(T--)\r\n\t\trun();\r\n\tre 0;\r\n}\r\n"
+}

@@ -1,0 +1,35 @@
+{
+    "id": 229052200,
+    "contestId": 1251,
+    "creationTimeSeconds": 1697887038,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1251,
+        "index": "F",
+        "name": "Red-White Fence",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "combinatorics",
+            "fft"
+        ]
+    },
+    "author": {
+        "contestId": 1251,
+        "members": [
+            {
+                "handle": "buidangnguyen05"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571929500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 107,
+    "timeConsumedMillis": 795,
+    "memoryConsumedBytes": 33587200,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define rep(i, a, b) for(int i = a; i < (b); ++i)\r\n#define all(x) begin(x), end(x)\r\n#define sz(x) (int)(x).size()\r\ntypedef long long ll;\r\ntypedef pair<int, int> pii;\r\ntypedef vector<int> vi;\r\n\r\nconst ll mod = (119 << 23) + 1, root = 62;\r\ntypedef vector<ll> vl;\r\nll modpow(ll b, ll e) {\r\n\tll ans = 1;\r\n\tfor (; e; b = b * b % mod, e /= 2)\r\n\t\tif (e & 1) ans = ans * b % mod;\r\n\treturn ans;\r\n}\r\nvoid ntt(vl &a) {\r\n\tint n = sz(a), L = 31 - __builtin_clz(n);\r\n\tstatic vl rt(2, 1);\r\n\tfor (static int k = 2, s = 2; k < n; k *= 2, s++) {\r\n\t\trt.resize(n);\r\n\t\tll z[] = {1, modpow(root, mod >> s)};\r\n\t\trep(i, k, 2 * k) rt[i] = rt[i / 2] * z[i & 1] % mod;\r\n\t}\r\n\tvi rev(n);\r\n\trep(i, 0, n) rev[i] = (rev[i / 2] | (i & 1) << L) / 2;\r\n\trep(i, 0, n) if (i < rev[i]) swap(a[i], a[rev[i]]);\r\n\tfor (int k = 1; k < n; k *= 2)\r\n\t\tfor (int i = 0; i < n; i += 2 * k) rep(j, 0, k) {\r\n\t\t\tll z = rt[j + k] * a[i + j + k] % mod, &ai = a[i + j];\r\n\t\t\ta[i + j + k] = ai - z + (z > ai ? mod : 0);\r\n\t\t\tai += (ai + z >= mod ? z - mod : z);\r\n\t\t}\r\n}\r\nvl conv(const vl &a, const vl &b) {\r\n\tif (a.empty() || b.empty()) return {};\r\n\tint s = sz(a) + sz(b) - 1, B = 32 - __builtin_clz(s), n = 1 << B;\r\n\tint inv = modpow(n, mod - 2);\r\n\tvl L(a), R(b), out(n);\r\n\tL.resize(n), R.resize(n);\r\n\tntt(L), ntt(R);\r\n\trep(i, 0, n) out[-i & (n - 1)] = (ll)L[i] * R[i] % mod * inv % mod;\r\n\tntt(out);\r\n\treturn {out.begin(), out.begin() + s};\r\n}\r\nvl norm(vl x) {\r\n\twhile (x.size() && !x.back()) x.pop_back();\r\n\treturn x;\r\n}\r\n\r\nconst int N = 3e5 + 10, K = 6;\r\nint a[N], b[K], q[N], ans[N];\r\nint cnt[N], type[N];\r\n\r\nint fact[N], inv[N];\r\n\r\nint C(int n, int k) {\r\n\tif (k > n) return 0; if (k == n || !k) return 1;\r\n\treturn 1LL * fact[n] * inv[k] % mod * inv[n - k] % mod;\r\n}\r\n\r\nsigned main() {\r\n\tcin.tie(0)->sync_with_stdio(0);\r\n\tcin.exceptions(cin.failbit);\r\n\r\n\tif (fopen(\"task.inp\", \"r\")) {\r\n\t\tfreopen(\"task.inp\", \"r\", stdin);\r\n\t\tfreopen(\"task.out\", \"w\", stdout);\r\n\t}\r\n\r\n\tint n, k; cin >> n >> k;\r\n\tfor (int i = 1; i <= n; ++i) cin >> a[i];\r\n\tfor (int i = 1; i <= k; ++i) cin >> b[i];\r\n\tint m; cin >> m;\r\n\tfor (int i = 1; i <= m; ++i) cin >> q[i];\r\n\r\n\tfact[0] = inv[0] = 1;\r\n\tfor (int i = 1; i <= n; ++i) {\r\n\t\tfact[i] = 1LL * fact[i - 1] * i % mod;\r\n\t\tinv[i] = modpow(fact[i], mod - 2);\r\n\t}\r\n\r\n\tsort(a + 1, a + n + 1); sort(b + 1, b + k + 1);\r\n\tfor (int i = 1; i <= n; ++i) ++cnt[a[i]];\r\n\tint nn = 0;\r\n\tfor (int i = 1; i <= n; ++i) if (a[i] != a[i - 1]) a[++nn] = a[i];\r\n\tn = nn;\r\n\r\n\tint c1 = 0, c2 = 0, ptr = 0;\r\n\tfor (int red = 1; red <= k; ++red) {\r\n\t\twhile (ptr < n) {\r\n\t\t\tif (a[ptr + 1] >= b[red]) break;\r\n\t\t\t++ptr;\r\n\t\t\tif (cnt[a[ptr]] == 1) ++c1;\r\n\t\t\telse ++c2;\r\n\t\t}\r\n\r\n\t\tvector<ll> poly_n_2, poly_m;\r\n\r\n\t\tint pow2 = 1;\r\n\t\tfor (int i = 0; i <= c1; ++i) {\r\n\t\t\tpoly_n_2.push_back(1LL * pow2 * C(c1, i) % mod);\r\n\t\t\tpow2 = 2LL * pow2 % mod;\r\n\t\t}\r\n\r\n\t\tfor (int i = 0; i <= 2 * c2; ++i) poly_m.push_back(C(2 * c2, i));\r\n\r\n\t\tvl cur = conv(poly_m, poly_n_2);\r\n\r\n\t\tfor (int i = 1; i <= m; ++i) {\r\n\t\t\tint white = q[i] / 2 - b[red] - 1; \r\n\t\t\tif (white < 0 || white > c1 + 2 * c2) continue;\r\n\t\t\tans[i] = (ans[i] + cur[white]) % mod;\r\n\t\t}\r\n\t}\r\n\r\n\tfor (int i = 1; i <= m; ++i) cout << ans[i] << \"\\n\";\r\n}"
+}

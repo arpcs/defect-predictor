@@ -1,0 +1,39 @@
+{
+    "id": 232926330,
+    "contestId": 593,
+    "creationTimeSeconds": 1700113042,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 593,
+        "index": "D",
+        "name": "Happy Tree Party",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 593,
+        "members": [
+            {
+                "handle": "liangzhehao"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1446655500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 1513,
+    "memoryConsumedBytes": 53452800,
+    "source": "// LUOGU_RID: 135352180\n#include<iostream>\r\n#include<cstdio>\r\n#include<cmath>\r\n#include<cstring>\r\n#include<algorithm>\r\n#include<queue>\r\n#include<stdlib.h>\r\n#include<set>\r\n#include<queue>\r\n#include<map>\r\n#include<string>\r\n#include<stack>\r\n#include<unordered_set>\r\n#include<vector>\r\nusing namespace std;\r\nconst int N = 200005;\r\nint head[N], dep[N], vi[2 * N], ne[2 * N], tot, ct, col[N], hd[N], lca[N][25], fat[N], n, m;\r\nlong long wi[2 * N], wf[N];\r\nvoid add(int u, int v, long long w){\r\n\tne[++tot] = head[u];\r\n\tvi[tot] = v;\r\n\twi[tot] = w;\r\n\thead[u] = tot;\r\n}\r\nvoid dfs(int x, int fa){\r\n\tdep[x] = dep[fa] + 1, lca[x][0] = fa;\r\n\tfor(int i = 1; i <= 20; i++)\r\n\t\tlca[x][i] = lca[lca[x][i - 1]][i - 1];\r\n\tfor(int i = head[x]; i; i = ne[i]){\r\n\t\tint y = vi[i];\r\n\t\tif(y == fa)\r\n\t\t\tcontinue;\r\n\t\tif(wi[i] == 1){\r\n\t\t\tif(col[x] != 0)\r\n\t\t\t\tcol[y] = col[x];\r\n\t\t\telse\r\n\t\t\t\tcol[x] = col[y] = ++ct, hd[ct] = x, fat[ct] = ct;\r\n\t\t}\r\n\t\twf[y] = wi[i];\r\n\t\tdfs(y, x);\r\n\t}\r\n}\r\nint fi(int x){\r\n\tif(fat[x] == x)\r\n\t\treturn x;\r\n\treturn (fat[x] = fi(fat[x]));\r\n}\r\nint gtlca(int u, int v){\r\n\tif(dep[u] < dep[v])\r\n\t\tswap(u, v);\r\n\tfor(int i = 20; i >= 0; i--)\r\n\t\tif(dep[lca[u][i]] >= dep[v])\r\n\t\t\tu = lca[u][i];\r\n\tif(u == v)\r\n\t\treturn u;\r\n\tfor(int i = 20; i >= 0; i--)\r\n\t\tif(lca[u][i] != lca[v][i])\r\n\t\t\tu = lca[u][i], v = lca[v][i];\r\n\treturn lca[u][0];\r\n}\r\nlong long gt(int u, int v, long long x){\r\n\tint ft = gtlca(u, v);\r\n\twhile(dep[u] > dep[ft]){\r\n\t\tif(wf[u] == 1)\r\n\t\t\tu = hd[fi(col[u])];\r\n\t\telse{\r\n\t\t\tx /= wf[u], u = lca[u][0];\r\n\t\t\tif(x == 0)\r\n\t\t\t\treturn 0;\r\n\t\t}\r\n\t}\r\n\twhile(dep[v] > dep[ft]){\r\n\t\tif(wf[v] == 1)\r\n\t\t\tv = hd[fi(col[v])];\r\n\t\telse{\r\n\t\t\tx /= wf[v], v = lca[v][0];\r\n\t\t\tif(x == 0)\r\n\t\t\t\treturn 0;\r\n\t\t}\r\n\t}\r\n\treturn x;\r\n}\r\nint main(){\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(nullptr);\r\n\tcout.tie(nullptr);\r\n\tcin >> n >> m;\r\n\tfor(long long i = 1, u, v, w; i < n; i++){\r\n\t\tcin >> u >> v >> w;\r\n\t\tadd(u, v, w);\r\n\t\tadd(v, u, w);\r\n\t} \r\n\tdfs(1, 0);\r\n\twhile(m--){\r\n\t\tint op;\r\n\t\tcin >> op;\r\n\t\tif(op == 1){\r\n\t\t\tlong long a, b, y;\r\n\t\t\tcin >> a >> b >> y;\r\n\t\t\tcout << gt(a, b, y) << endl;\r\n\t\t}\r\n\t\telse{\r\n\t\t\tlong long p, c;\r\n\t\t\tcin >> p >> c;\r\n\t\t\tint u = vi[2 * p], v = vi[2 * p - 1];\r\n\t\t\tif(dep[u] > dep[v])\r\n\t\t\t\tswap(u, v);\r\n\t\t\tif(c == 1 && wi[2 * p] != 1){\r\n\t\t\t\tif(col[u])\r\n\t\t\t\t\tif(col[v])\r\n\t\t\t\t\t\tfat[fi(col[v])] = fi(col[u]);\r\n\t\t\t\t\telse\r\n\t\t\t\t\t\tcol[v] = col[u];\r\n\t\t\t\telse{\r\n\t\t\t\t\tif(col[v])\r\n\t\t\t\t\t\thd[fi(col[v])] = u, col[u] = col[v];\r\n\t\t\t\t\telse\r\n\t\t\t\t\t\tcol[u] = col[v] = ++ct, hd[ct] = u, fat[ct] = ct;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\twi[2 * p] = wi[2 * p - 1] = wf[v] = c;\r\n\t\t}\r\n\t}\r\n\treturn 0; \r\n}"
+}

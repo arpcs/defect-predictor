@@ -1,0 +1,36 @@
+{
+    "id": 175209025,
+    "contestId": 666,
+    "creationTimeSeconds": 1665297703,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 666,
+        "index": "D",
+        "name": "Chain Reaction",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "geometry"
+        ]
+    },
+    "author": {
+        "contestId": 666,
+        "members": [
+            {
+                "handle": "gzw2005"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1461947700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 24,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nint x[4][2],id[4];\r\nconst int INF=0x3f3f3f3f;\r\nint A[4],S,G,C;\r\nbool assign(int &X,int v) {\r\n\tif(X==INF) {X=v; return 1; }\r\n\telse return X==v;\r\n}\r\nbool Fix(int a,int da,int t) {\r\n\tint lin; if(da) lin=t&1 ? t : t^3; else lin=t&2;\r\n//\tprintf(\"t=%d, da=%d -> lin=%d\\n\",t,da,lin);\r\n\treturn assign(A[lin],x[a][da^1]);\r\n}\r\nbool checkin(int a,int da,int t) {\r\n\tint lin; if(da) lin=t&2; else lin=t&1 ? t : t^3;\r\n//\tprintf(\"t=%d, da=%d -> lin=%d\\n\",t,da,lin);\r\n\treturn A[lin]==INF || x[a][da]-G<=A[lin] && A[lin]<=x[a][da]+G;\r\n}\r\nint c[4][2]={{3,0}, {1,0}, {1,2}, {3,2} };\r\nint ans[4][2];\r\nbool Check() {\r\n\tA[0]=A[1]=A[2]=A[3]=S=INF;\r\n//\tprintf(\"BEGIN CHECK:\\n\");\r\n//\tfor(int i=0; i<4; i++) {\r\n//\t\tif(C>>id[i]&1) printf(\"(%d, [%d,%d])\\n\",x[id[i]][0],x[id[i]][1]-G,x[id[i]][1]+G);\r\n//\t\telse printf(\"([%d,%d] , %d)\\n\",x[id[i]][0]-G,x[id[i]][0]+G,x[id[i]][1]);\r\n//\t}\r\n\tfor(int i=0; i<4; i++)\r\n\t\tif(!Fix(id[i],C>>id[i]&1,i))\r\n\t\t\treturn 0;\r\n//\tprintf(\"X = [%d,%d], Y = [%d,%d]\\n\",\r\n//\tA[3]==INF?-100:A[3],A[1]==INF?-100:A[1],A[0]==INF?-100:A[0],A[2]==INF?-100:A[2]);\r\n\tif(A[3]<INF && A[1]<INF) {\r\n\t\tif(A[3]>A[1]) return 0;\r\n\t\telse if(!assign(S,A[1]-A[3])) return 0;\r\n\t}\r\n\tif(A[0]<INF && A[2]<INF) {\r\n\t\tif(A[0]>A[2]) return 0;\r\n\t\telse if(!assign(S,A[2]-A[0])) return 0;\r\n\t}\r\n\tint ukn=0; for(int i=0; i<4; i++) ukn+=(A[i]==INF);\r\n//\tprintf(\"UNKNOWN = %d\\n\",ukn);\r\n\tif(ukn==0) {\r\n\t\tfor(int i=0; i<4; i++)\r\n\t\t\tif(!checkin(id[i],C>>id[i]&1,i))\r\n\t\t\t\treturn 0;\r\n\t}\r\n\tif(ukn==1) {\r\n\t\tfor(int i=0; i<4; i++)\r\n\t\t\tif(A[i]==INF)\r\n\t\t\t\tA[i]=A[i^2]+(i==1||i==2?1:-1)*S;\r\n\t\tfor(int i=0; i<4; i++)\r\n\t\t\tif(!checkin(id[i],C>>id[i]&1,i))\r\n\t\t\t\treturn 0;\r\n\t} else if(ukn==2) {\r\n//\t\tprintf(\"Size = %d\\n\",S);\r\n\t\tif(C==0) {\r\n\t\t\tA[3]=max(max(x[id[0]][0]-G,x[id[3]][0]-G),max(x[id[1]][0]-G,x[id[2]][0]-G)-S);\r\n\t\t\tA[1]=min(min(x[id[0]][0]+G,x[id[3]][0]+G),min(x[id[1]][0]+G,x[id[2]][0]+G)-S);\r\n\t\t\tif(A[3]>A[1]) return 0;\r\n\t\t\tA[1]=A[3]+S;\r\n\t\t} else {\r\n\t\t\tA[0]=max(max(x[id[0]][1]-G,x[id[1]][1]-G),max(x[id[2]][1]-G,x[id[3]][1]-G)-S);\r\n\t\t\tA[2]=min(min(x[id[0]][1]+G,x[id[1]][1]+G),min(x[id[2]][1]+G,x[id[3]][1]+G)-S);\r\n//\t\t\tprintf(\"[%d,%d]\\n\",A[0],A[2]);\r\n\t\t\tif(A[0]>A[2]) return 0;\r\n\t\t\tA[2]=A[0]+S;\r\n\t\t}\r\n\t}\r\n\tfor(int i=0; i<4; i++)\r\n\t\tfor(int j=0; j<2; j++)\r\n\t\t\tans[id[i]][j]=A[c[i][j]];\r\n\treturn 1;\r\n}\r\nint main() {\r\n//\tfreopen(\"CF666D.in\",\"r\",stdin);\r\n\tint T; scanf(\"%d\",&T);\r\n\twhile(T--) {\r\n\t\tfor(int i=0; i<4; i++)\r\n\t\t\tfor(int j=0; j<2; j++)\r\n\t\t\t\tscanf(\"%d\",&x[i][j]);\r\n//\t\tG=10; \r\n//\t\tid[0]=0; id[1]=3; id[2]=2; id[3]=1;\r\n//\t\tfor(int i=0; i<4; i++) id[i]=i;\r\n//\t\tbool chk=0;\r\n//\t\tdo {\r\n//\t\t\tfor(C=15; C<16 && !chk; C++)\r\n//\t\t\t\tif(Check()) {chk=1; break; }\r\n//\t\t} while(!chk && next_permutation(id,id+4));\r\n//\t\tfor(int i=0; i<4; i++) printf(\"%d %d\\n\",ans[i][0],ans[i][1]);\r\n//\t\tcontinue;\r\n\t\tint ML=-1, MR=2e8;\r\n\t\twhile(ML+1<MR) {\r\n\t\t\tG=(ML+MR)>>1;\r\n\t\t\tfor(int i=0; i<4; i++) id[i]=i;\r\n\t\t\tbool chk=0;\r\n\t\t\tdo {\r\n\t\t\t\tfor(C=0; C<16 && !chk; C++)\r\n\t\t\t\t\tif(Check()) {chk=1; break; }\r\n\t\t\t} while(!chk && next_permutation(id,id+4));\r\n\t\t\tif(chk) MR=G; else ML=G;\r\n\t\t}\r\n\t\tif(MR==2e8) puts(\"-1\");\r\n\t\telse {\r\n\t\t\tprintf(\"%d\\n\",MR); G=MR;\r\n\t\t\tfor(int i=0; i<4; i++) id[i]=i;\r\n\t\t\tbool chk=0;\r\n\t\t\tdo {\r\n\t\t\t\tfor(C=0; C<16 && !chk; C++)\r\n\t\t\t\t\tif(Check()) {chk=1; break; }\r\n\t\t\t} while(!chk && next_permutation(id,id+4));\r\n\t\t\tfor(int i=0; i<4; i++) printf(\"%d %d\\n\",ans[i][0],ans[i][1]);\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

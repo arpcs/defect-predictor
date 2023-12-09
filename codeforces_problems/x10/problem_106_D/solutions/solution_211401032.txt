@@ -1,0 +1,36 @@
+{
+    "id": 211401032,
+    "contestId": 106,
+    "creationTimeSeconds": 1688023177,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 106,
+        "index": "D",
+        "name": "Treasure Island",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 1700,
+        "tags": [
+            "brute force",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 106,
+        "members": [
+            {
+                "handle": "Spartanlord"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1313766000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 70,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 10444800,
+    "source": "#define _USE_MATH_DEFINES\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\nusing namespace __gnu_pbds;\r\n#define ordered_set(T) tree<T, null_type, less<T>, rb_tree_tag,tree_order_statistics_node_update>\r\n#define ordered_set_greater(T) tree<T, null_type, greater<T>, rb_tree_tag,tree_order_statistics_node_update>\r\ntypedef long long ll;\r\ntypedef vector<int> vi;\r\ntypedef vector<ll> vl;\r\ntypedef pair<int,int> pi;\r\ntypedef pair<ll,ll> pl;\r\n#define F first\r\n#define S second\r\n#define PB push_back\r\n#define EB emplace_back\r\n#define MP make_pair\r\n#define REP(i, a, b) for(ll i=a; i<b; i++)\r\n#define MOD 1000000007\r\n#define digits(n) ((int)log10l(abs(n))+1)\r\n// #define MULTICASE\r\n#define MAXN 1000000 // 1e6\r\n\r\ntemplate<int m> struct ModInt {\r\n    unsigned x;\r\n    ModInt() : x(0) { }\r\n    ModInt(signed sig) : x(sig%m) {  }\r\n    ModInt(signed long long sig) : x(sig%m) { }\r\n    int get() const { return (int)x; }\r\n    ModInt pow(ll p) { if(!x) return p%m==0; ModInt res = 1, a = *this; while (p) { if (p & 1) res *= a; a *= a; p >>= 1; } return res; }\r\n\r\n    ModInt &operator+=(ModInt that) { if ((x += that.x) >= m) x -= m; return *this; }\r\n    ModInt &operator-=(ModInt that) { if ((x += m - that.x) >= m) x -= m; return *this; }\r\n    ModInt &operator*=(ModInt that) { x = (unsigned long long)x * that.x % m; return *this; }\r\n    ModInt &operator/=(ModInt that) { return (*this) *= that.pow(m - 2); }\r\n\r\n    ModInt operator+(ModInt that) const { return ModInt(*this) += that; }\r\n    ModInt operator-(ModInt that) const { return ModInt(*this) -= that; }\r\n    ModInt operator*(ModInt that) const { return ModInt(*this) *= that; }\r\n    ModInt operator/(ModInt that) const { return ModInt(*this) /= that; }\r\n    bool operator<(ModInt that) const { return x < that.x; }\r\n    friend ostream& operator<<(ostream &os, ModInt a) { os << a.x; return os; }\r\n};\r\ntypedef ModInt<MOD> mint;\r\n\r\n\r\nvoid solve() {\r\n    //*code here\r\n    int n, m;\r\n    cin>>n>>m;\r\n    vector<string> g(n);\r\n    vector<vi> si(n, vi (m)), sj(n, vi(m));\r\n    vector<pi> cand;\r\n    REP(i,0,n) {\r\n        cin>>g[i];\r\n        REP(j,0,m) {\r\n            si[i][j]=sj[i][j]=(g[i][j]=='#');\r\n            if(isalpha(g[i][j])) cand.PB({i, j});\r\n        }\r\n        partial_sum(si[i].begin(), si[i].end(), si[i].begin());\r\n    }\r\n    REP(i,1,n) REP(j,0,m) sj[i][j]+=sj[i-1][j];\r\n    // for(auto &v:si) {for(auto i:v) cout<<i<<' '; cout<<'\\n';}\r\n    // for(auto &v:sj) {for(auto i:v) cout<<i<<' '; cout<<'\\n';}\r\n    int k;\r\n    cin>>k;\r\n    vector<char> dir(k);\r\n    vector<int> a(k);\r\n    REP(i,0,k) {\r\n        cin>>dir[i]>>a[i];\r\n    }\r\n    // REP(i,0,k) cout<<dir[i]<<' '<<a[i]<<'\\n';\r\n    int i, x, y;\r\n    bool f;\r\n    string ans;\r\n    for(auto [u, v]:cand) {\r\n        x=u, y=v;\r\n        f=true;\r\n        // cout<<u<<' '<<v<<\": \";\r\n        for(i=0;i<k;i++) {\r\n            // cout<<dir[i]<<' '<<a[i]<<\" \";\r\n            switch(dir[i]) {\r\n                case 'N':\r\n                    if(u>a[i] && sj[u][v]==sj[u-a[i]-1][v]) u-=a[i];\r\n                    else f=false;\r\n                    break;\r\n                case 'S':\r\n                    if(u+a[i]<n-1 && sj[u-1][v]==sj[u+a[i]][v]) u+=a[i];\r\n                    else f=false;\r\n                    break;\r\n                case 'W':\r\n                    if(v>a[i] && si[u][v]==si[u][v-a[i]-1]) v-=a[i];\r\n                    else f=false;\r\n                    break;\r\n                case 'E':\r\n                    if(v+a[i]<m-1 && si[u][v-1]==si[u][v+a[i]]) v+=a[i];\r\n                    else f=false;\r\n                    break;\r\n            }\r\n            // cout<<u<<' '<<v<<\", \";\r\n            if(!f) break;\r\n        }\r\n        // cout<<'\\n';\r\n        if(i==k) ans.PB(g[x][y]);\r\n    }\r\n    if(ans.empty()) cout<<\"no solution\\n\";\r\n    else {\r\n        sort(ans.begin(), ans.end());\r\n        cout<<ans<<'\\n';\r\n\r\n    }\r\n}\r\n\r\nint main(){\r\nios_base::sync_with_stdio(false);\r\ncin.tie(NULL);\r\ncout.tie(NULL);\r\n#ifdef MULTICASE\r\n    int t;\r\n    cin>>t;\r\n    while(t--)\r\n#endif\r\n    solve();\r\n    return 0;\r\n}"
+}

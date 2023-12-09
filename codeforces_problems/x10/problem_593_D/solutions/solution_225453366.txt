@@ -1,0 +1,39 @@
+{
+    "id": 225453366,
+    "contestId": 593,
+    "creationTimeSeconds": 1695785050,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 593,
+        "index": "D",
+        "name": "Happy Tree Party",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 593,
+        "members": [
+            {
+                "handle": "intda"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1446655500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 2542,
+    "memoryConsumedBytes": 74444800,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define int long long\r\n#define pii pair<int,int>\r\n#define _128 __int128\r\n#define ls(x) x<<1\r\n#define rs(x) x<<1|1\r\nconstexpr int maxn=2e5+10;\r\nint n,m,tot,c;\r\nint dep[maxn],fa[maxn],sz[maxn],son[maxn],w[maxn],p[maxn],dfn[maxn],top[maxn],num[maxn];\r\nvector<pii> g[maxn];\r\npii eg[maxn];\r\nstruct segtree{\r\n  int l,r;\r\n  _128 mull;\r\n}tr[maxn<<2];\r\nvoid dfs1(int x,int f){\r\n  dep[x]=dep[f]+1;\r\n  fa[x]=f;\r\n  sz[x]=1;\r\n  for(pii ps:g[x]){ \r\n    int v=ps.first,ws=ps.second;\r\n    if(v==f) continue;\r\n    p[v]=ws;\r\n    dfs1(v,x);\r\n    sz[x]+=sz[v];\r\n    if(sz[v]>sz[son[x]]) son[x]=v;\r\n  }\r\n  return ;\r\n}\r\nvoid dfs2(int x,int _top){\r\n  dfn[x]=++tot;\r\n  num[tot]=x;\r\n  top[x]=_top;\r\n  w[dfn[x]]=p[x];\r\n  if(son[x]) dfs2(son[x],_top);\r\n  for(pii ps:g[x]){\r\n    int v=ps.first;\r\n    if(v==fa[x]||v==son[x]) continue;\r\n    dfs2(v,v);\r\n  }\r\n  return ; \r\n}\r\nstruct segTree{\r\n  void pushup(int p){\r\n    tr[p].mull=min(tr[ls(p)].mull*tr[rs(p)].mull,(_128)1e18+(_128)1);\r\n    return ; \r\n  }\r\n  void build(int p,int l,int r){\r\n    tr[p].l=l; tr[p].r=r; tr[p].mull=1;\r\n    if(l==r){\r\n      tr[p].mull=max(1ll,w[l]);\r\n      return ; \r\n    }\r\n    int mid=(l+r)>>1;\r\n    build(ls(p),l,mid);\r\n    build(rs(p),mid+1,r);\r\n    pushup(p);\r\n    return ;\r\n  }\r\n  void updatee(int p,int l,int r,int v){\r\n    if(l<=tr[p].l&&tr[p].r<=r){\r\n      tr[p].mull=(tr[p].r-tr[p].l+1)*v;\r\n      return ; \r\n    }\r\n    int mid=(tr[p].l+tr[p].r)>>1;\r\n    if(l<=mid) updatee(ls(p),l,r,v);\r\n    if(r>mid) updatee(rs(p),l,r,v);\r\n    pushup(p);\r\n    return ;\r\n  }\r\n  int getmull(int p,int l,int r){\r\n    if(l<=tr[p].l&&tr[p].r<=r){\r\n      if(tr[p].mull>c) return (1e18+1);\r\n      return tr[p].mull;\r\n    }\r\n    int mid=(tr[p].l+tr[p].r)>>1;\r\n    _128 res=1;\r\n    if(l<=mid){ res*=getmull(ls(p),l,r); if(res>c) return (1e18+1); }\r\n    if(r>mid){ res*=getmull(rs(p),l,r); if(res>c) return (1e18+1); }\r\n    return res; \r\n  }\r\n}seg;\r\nstruct cutTree{\r\n  void update(int x,int y,int vc){\r\n    while(top[x]!=top[y]){\r\n      if(dep[top[x]]<dep[top[y]]) swap(x,y);\r\n      seg.updatee(1,dfn[top[x]],dfn[x],vc);\r\n      x=fa[top[x]];\r\n    }\r\n    if(dep[x]>dep[y]) swap(x,y);\r\n    seg.updatee(1,dfn[x],dfn[y],vc);\r\n    return ;\r\n  }\r\n  int getmul(int x,int y){\r\n    if(x==y) return 1;\r\n    _128 bns=1;\r\n    while(top[x]!=top[y]){\r\n      if(dep[top[x]]<dep[top[y]]) swap(x,y);\r\n      bns*=max(1ll,seg.getmull(1,dfn[top[x]],dfn[x]));\r\n      if(bns>c) return (1e18+1); \r\n      x=fa[top[x]];\r\n    }\r\n    if(dep[x]>dep[y]) swap(x,y);\r\n    bns*=max(1ll,seg.getmull(1,dfn[x],dfn[y]));\r\n    if(bns>c) return (1e18+1);\r\n    return bns;\r\n  }\r\n}cuttree;\r\nsigned main(){\r\n  // freopen(\"cs.in\",\"r\",stdin);\r\n  cin>>n>>m;\r\n  for(int i=1;i<=n-1;i++){\r\n    int u,v,x; cin>>u>>v>>x;\r\n    g[u].push_back({v,x});\r\n    g[v].push_back({u,x});\r\n    eg[i]={u,v};\r\n  }\r\n  dfs1(1,0);\r\n  dfs2(1,1);\r\n  seg.build(1,1,n);\r\n  for(int i=1;i<=m;i++){\r\n    int opt; cin>>opt;\r\n    if(opt==1){\r\n      int a,b; cin>>a>>b>>c;\r\n      int nums=cuttree.getmul(a,b);\r\n      c/=nums;\r\n      cout<<c<<endl;\r\n    }\r\n    if(opt==2){\r\n      int p,c; cin>>p>>c;\r\n      int ea=eg[p].first,eb=eg[p].second;\r\n      if(dep[ea]<dep[eb]) swap(ea,eb);\r\n      cuttree.update(ea,ea,c);\r\n    }\r\n  }\r\n  return 0; \r\n}"
+}

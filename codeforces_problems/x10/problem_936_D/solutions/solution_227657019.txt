@@ -1,0 +1,36 @@
+{
+    "id": 227657019,
+    "contestId": 936,
+    "creationTimeSeconds": 1697019693,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 936,
+        "index": "D",
+        "name": "World of Tank",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 3000,
+        "tags": [
+            "dp",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 936,
+        "members": [
+            {
+                "handle": "wdnmdwrnmmp"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1519574700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 9,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 40755200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n//#define int long long\r\n#define rep(i,j,k) for(int i=(j);i<=(k);i++)\r\n#define per(i,j,k) for(int i=(j);i>=(k);i--)\r\n#define pb push_back\r\n#define mp make_pair\r\n#define fi first\r\n#define se second\r\ntypedef vector<int> vi;\r\ntypedef pair<int,int> pi;\r\n\r\nconst int N=1e6+5,inf=1e9;\r\nint n,m[2],t;\r\nvi obs[2];\r\nvoid Input(){\r\n\tcin>>n>>m[0]>>m[1]>>t;\r\n\trep(i,0,1){\r\n\t\tobs[i].resize(m[i]);\r\n\t\tfor(int &x:obs[i]){\r\n\t\t\tcin>>x;\r\n\t\t}\r\n\t}\r\n}\r\nint flis[N*2],liscnt;\r\nvoid Get_lis(){\r\n\tvi v{0};\r\n\trep(i,0,1){\r\n\t\tfor(int x:obs[i]){\r\n\t\t\tv.pb(x-1);\r\n\t\t\tv.pb(x);\r\n\t\t}\r\n\t}\r\n\tsort(v.begin(),v.end());\r\n\tv.erase(unique(v.begin(),v.end()),v.end());\r\n\tliscnt=v.size();\r\n\trep(i,1,liscnt){\r\n\t\tflis[i]=v[i-1];\r\n\t}\r\n}\r\nint f[N*2][2],pre[N*2][2];\r\nvoid solve(){\r\n\tGet_lis();\r\n\tfill(f[0],f[0]+N*4,-inf);\r\n\tf[0][0]=f[0][1]=0;\r\n\tint p[2]{};\r\n\trep(i,1,liscnt){\r\n\t\tint dlt=flis[i]-flis[i-1];\r\n\t\tbool c[2]{};\r\n\t\trep(j,0,1){\r\n\t\t\tif(p[j]<m[j] && obs[j][p[j]]<flis[i]){\r\n\t\t\t\tp[j]++;\r\n\t\t\t}\r\n\t\t\tc[j]=(p[j]<m[j] && obs[j][p[j]]==flis[i]);\r\n\t\t\tif(f[i-1][j]-(c[j]?t:0)>=0){\r\n\t\t\t\tf[i][j]=f[i-1][j]+dlt-(c[j]?t:0);\r\n\t\t\t}\r\n\t\t}\r\n\t\tif(min(f[i][0],t)>f[i][1] && !c[1]){\r\n\t\t\tf[i][1]=min(f[i][0],t);\r\n\t\t\tpre[i][1]=1;\r\n\t\t}\r\n\t\tif(min(f[i][1],t)>f[i][0] && !c[0]){\r\n\t\t\tf[i][0]=min(f[i][1],t);\r\n\t\t\tpre[i][0]=1;\r\n\t\t}\r\n\t}\r\n\tvi Path;\r\n\tfunction<void(int,int)>GetPath=[&](int x,int y){\r\n\t\tif(x!=0){\r\n\t\t\tGetPath(x-1,(pre[x][y]?1-y:y));\r\n\t\t}\r\n\t\tPath.pb(y);\r\n\t};\r\n\tif(f[liscnt][0]!=-inf){\r\n\t\tGetPath(liscnt,0);\r\n\t}\r\n\telse if(f[liscnt][1]!=-inf){\r\n\t\tGetPath(liscnt,1);\r\n\t}\r\n\telse{\r\n\t\tcout<<\"No\"<<endl;\r\n\t\treturn;\r\n\t}\r\n\tvi trs;\r\n\tvector<pi> fire;\r\n\tp[0]=p[1]=0;\r\n\trep(i,0,liscnt){\r\n\t\tint d=(i==0?0:Path[i-1]);\r\n\t\tif(Path[i]!=d){\r\n\t\t\ttrs.pb(flis[i]);\r\n\t\t}\r\n\t\twhile(p[d]<m[d] && obs[d][p[d]]<flis[i]){\r\n\t\t\tp[d]++;\r\n\t\t}\r\n\t\tif(p[d]<m[d] && obs[d][p[d]]==flis[i]){\r\n\t\t\tfire.pb(mp(flis[i-1],d+1));\r\n\t\t}\r\n\t}\r\n\tcout<<\"Yes\"<<endl;\r\n\tcout<<trs.size()<<endl;\r\n\tfor(int x:trs){\r\n\t\tcout<<x<<' ';\r\n\t}\r\n\tcout<<endl;\r\n\t\r\n\tcout<<fire.size()<<endl;\r\n\tint t0=0;\r\n\tauto it=trs.begin();\r\n\tfor(pi pos:fire){\r\n\t\tbool c=0;\r\n\t\twhile(it!=trs.end() && *it<=pos.fi){\r\n\t\t\tc=1;\r\n\t\t\tit++;\r\n\t\t}\r\n\t\tint x=max(c?*prev(it):0,t0+t);\r\n\t\t// if(it!=trs.end()){\r\n\t\t\t// assert(*it>x);\r\n\t\t// }\r\n\t\tcout<<x<<' '<<pos.se<<'\\n';\r\n\t\tt0=x;\r\n\t}\r\n}\r\nsigned main(){\r\n\tios::sync_with_stdio(0);cin.tie(0);cout.tie(0);\r\n\t\r\n\tInput();\r\n\tsolve();\r\n\treturn 0;\r\n}\r\n"
+}

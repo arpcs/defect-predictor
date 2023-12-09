@@ -1,0 +1,36 @@
+{
+    "id": 228389470,
+    "contestId": 1272,
+    "creationTimeSeconds": 1697446624,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1272,
+        "index": "F",
+        "name": "Two Bracket Sequences",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "dp",
+            "strings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1272,
+        "members": [
+            {
+                "handle": "kocko"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1576157700
+    },
+    "programmingLanguage": "Java 11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 54,
+    "timeConsumedMillis": 311,
+    "memoryConsumedBytes": 77824000,
+    "source": "\r\nimport java.io.BufferedReader;\r\nimport java.io.Closeable;\r\nimport java.io.IOException;\r\nimport java.io.InputStream;\r\nimport java.io.InputStreamReader;\r\nimport java.io.PrintWriter;\r\nimport java.util.Arrays;\r\nimport java.util.StringTokenizer;\r\n\r\npublic class TwoBracketSequences implements Closeable {\r\n\r\n  private InputReader in;\r\n  private PrintWriter out;\r\n\r\n  public TwoBracketSequences() {\r\n    in = new InputReader(System.in);\r\n    out = new PrintWriter(System.out);\r\n  }\r\n\r\n  public void solve() {\r\n    x = in.next().toCharArray();\r\n    y = in.next().toCharArray();\r\n\r\n    n = x.length;\r\n    m = y.length;\r\n\r\n    dp = new int[n + 1][m + 1][MAX_BALANCE + 1];\r\n    next = new int[n + 1][m + 1][MAX_BALANCE + 1];\r\n    for (int i = 0; i <= n; i++) {\r\n      for (int j = 0; j <= m; j++) {\r\n        Arrays.fill(dp[i][j], -1);\r\n        Arrays.fill(next[i][j], -1);\r\n      }\r\n    }\r\n    recurse(0, 0, 0);\r\n    restore();\r\n  }\r\n  \r\n  private static final int MAX_BALANCE = 200;\r\n  private static final int oo = 500;\r\n  private static final char[] BRACKETS = {'(', ')'};\r\n  private static final int[] BALANCE_DELTA = {1, -1};\r\n  private static final int[] MASK_DELTA = {1, 0};\r\n  private int n, m;\r\n  private char[] x, y;\r\n  private int[][][] dp;\r\n  private int[][][] next;\r\n\r\n  private int recurse(int i, int j, int balance) {\r\n    if (balance > MAX_BALANCE) return oo;\r\n    if (i == n && j == m && balance == 0) return 0;\r\n\r\n    if (dp[i][j][balance] != -1) return dp[i][j][balance];\r\n\r\n    int result = oo;\r\n\r\n    if (i == n && j == m && balance > 0) {\r\n      result = balance;\r\n      next[i][j][balance] = 0;\r\n    } else {\r\n      for (int idx = 0; idx < 2; idx++) {\r\n        int nextBalance = balance + BALANCE_DELTA[idx];\r\n        if (nextBalance >= 0) {\r\n          char ch = BRACKETS[idx];\r\n          int mask = MASK_DELTA[idx];\r\n          int nextI = i;\r\n          if (i < n && x[i] == ch) {\r\n            nextI = i + 1;\r\n            mask |= 2;\r\n          }\r\n          int nextJ = j;\r\n          if (j < m && y[j] == ch) {\r\n            nextJ = j + 1;\r\n            mask |= 4;\r\n          }\r\n          int move = 1 + recurse(nextI, nextJ, nextBalance);\r\n          if (move < result) {\r\n            result = move;\r\n            next[i][j][balance] = mask;\r\n          }\r\n        }\r\n      }\r\n    }\r\n    return dp[i][j][balance] = result;\r\n  }\r\n\r\n  private void restore() {\r\n    int i = 0, j = 0, balance = 0;\r\n    StringBuilder result = new StringBuilder();\r\n    while (i != n || j != m || balance != 0) {\r\n      int nxt = next[i][j][balance];\r\n      char ch;\r\n      if ((nxt & 1) != 0) {\r\n        ch = '(';\r\n        balance++;\r\n      } else {\r\n        ch = ')';\r\n        balance--;\r\n      }\r\n      if ((nxt & 2) != 0) {\r\n        i++;\r\n      }\r\n      if ((nxt & 4) != 0) {\r\n        j++;\r\n      }\r\n      result.append(ch);\r\n    }\r\n    out.println(result);\r\n  }\r\n\r\n  @Override\r\n  public void close() throws IOException {\r\n    in.close();\r\n    out.close();\r\n  }\r\n\r\n  static class InputReader {\r\n    public BufferedReader reader;\r\n    public StringTokenizer tokenizer;\r\n\r\n    public InputReader(InputStream stream) {\r\n      reader = new BufferedReader(new InputStreamReader(stream), 32768);\r\n      tokenizer = null;\r\n    }\r\n\r\n    public String next() {\r\n      while (tokenizer == null || !tokenizer.hasMoreTokens()) {\r\n        try {\r\n          tokenizer = new StringTokenizer(reader.readLine());\r\n        } catch (IOException e) {\r\n          throw new RuntimeException(e);\r\n        }\r\n      }\r\n      return tokenizer.nextToken();\r\n    }\r\n\r\n    public int ni() {\r\n      return Integer.parseInt(next());\r\n    }\r\n\r\n    public long nl() {\r\n      return Long.parseLong(next());\r\n    }\r\n\r\n    public void close() throws IOException {\r\n      reader.close();\r\n    }\r\n  }\r\n\r\n  public static void main(String[] args) throws IOException {\r\n    try (TwoBracketSequences instance = new TwoBracketSequences()) {\r\n      instance.solve();\r\n    }\r\n  }\r\n}\r\n"
+}

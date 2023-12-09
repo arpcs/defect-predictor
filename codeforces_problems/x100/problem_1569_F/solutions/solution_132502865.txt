@@ -1,0 +1,38 @@
+{
+    "id": 132502865,
+    "contestId": 1569,
+    "creationTimeSeconds": 1634715030,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "defKaeru"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 14,
+    "timeConsumedMillis": 686,
+    "memoryConsumedBytes": 7270400,
+    "source": "#include <cstdio>\r\n#include <map>\r\n#include <cstring>\r\n#include <algorithm>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\nconst int MAXN = 16;\r\nconst int MAXS = (1<<6)+10;\r\n\r\nint n, m, K, maxs;\r\n\r\ninline ll a2i(int *a)\r\n{\r\n\tll x = 0;\r\n\tfor(int i=0;i<n;i++) x = x*6ll+a[i];\r\n\treturn x;\r\n}\r\ninline void i2a(int x, int *a)\r\n{\r\n\tfor(int i=n-1;~i;i--) a[i] = x%6, x /= 6;\r\n}\r\nbool f[MAXS][MAXN>>1], e[MAXN][MAXN];\r\nint c[MAXN], p1[MAXN], p2[MAXN];\r\nmap<ll,bool> g;\r\n\r\nvoid predfs(int nc)\r\n{\r\n//\tprintf(\"%d\\n\",nc);\r\n\tif(nc >= n/2)\r\n\t{\r\n\t\tfor(int i=0;i<nc;i++) p1[i] = p2[i] = 0;\r\n\t\tfor(int i=0;i<maxs;i++) memset(f[i], 0, (n/2+1)<<2);\r\n\t\tfor(int i=0;i<n;i++)\r\n\t\t\tif(!p1[c[i]]) p1[c[i]] = i;\r\n\t\t\telse p2[c[i]] = i;\r\n\t\tfor(int i=0;i<nc;i++) if(e[p1[i]][p2[i]]) f[1<<i][i] = 1;\r\n\t\tfor(int s=1;s<maxs;s++)\r\n\t\t\tfor(int i=0;i<nc;i++) if((s>>i)&1) if(f[s][i])\r\n\t\t\t\tfor(int j=0;j<nc;j++) if((~s>>j)&1)\r\n\t\t\t\t{\r\n\t\t\t\t\tf[s|(1<<j)][j] |= (e[p1[i]][p1[j]] & e[p2[i]][p2[j]]) | (e[p1[i]][p2[j]] & e[p2[i]][p1[j]]);\r\n\t\t\t\t}\r\n//\t\tfor(int i=0;i<n;i++) printf(\"%d%c\",c[i],\" \\n\"[i==n-1]);\r\n//\t\tfor(int s=0;s<maxs;s++) for(int i=0;i<n;i++) printf(\"%d%c\",f[s][i],\" \\n\"[i==n-1]);\r\n//\t\tputs(\"\");\r\n\t\tbool ok = 0;\r\n\t\tll sta =  a2i(c);\r\n\t\tfor(int i=0;i<nc;i++) if(f[maxs-1][i])\r\n\t\t{\r\n\t\t\tg[sta] = 1;\r\n\t\t\tok = 1;\r\n\t\t\tbreak;\r\n\t\t}\r\n\t\tif(!ok) g[sta] = 0;\r\n\t\treturn ;\r\n\t}\r\n\tint pos = 0;\r\n\tfor(;~c[pos];++pos);\r\n\tfor(int i=pos+1;i<n;i++) if(!~c[i])\r\n\t{\r\n\t\tc[pos] = c[i] = nc;\r\n\t\tpredfs(nc+1);\r\n\t\tc[pos] = c[i] = -1;\r\n\t}\r\n}\r\nbool check(int dep)\r\n{\r\n//\tprintf(\"%d\\n\",dep);\r\n//\tprintf(\"c : \");\r\n//\tfor(int i=0;i<n;i++) printf(\"%d%c\",c[i],\" \\n\"[i==n-1]);\r\n\tint cnt[MAXN], num[MAXN];\r\n\tint tot = 0;\r\n\tmemset(cnt, 0, (n+1)<<2);\r\n\tmemset(num, -1, (n+1)<<2);\r\n\tint cc[MAXN];\r\n\tfor(int i=0;i<n;i++) cc[i] = c[i];\r\n\tfor(int i=0;i<n;i++) if(!~num[c[i]]) num[c[i]] = tot++;\r\n\tfor(int i=0;i<n;i++) c[i] = num[c[i]], ++cnt[c[i]];\r\n//\tprintf(\"%d\\nnum : \",tot);\r\n//\tfor(int i=0;i<n;i++) printf(\"%d%c\",c[i],\" \\n\"[i==n-1]);\r\n//\tfor(int i=0;i<tot;i++) printf(\"%d%c\",cnt[i],\" \\n\"[i==tot-1]);\r\n//\tputs(\"\");\r\n\tint sta = a2i(c);\r\n\tif(g.count(sta))\r\n\t{\r\n\t\tfor(int i=0;i<n;i++) c[i] = cc[i];\r\n\t\treturn g[sta];\r\n\t}\r\n\tfor(int i=0;i<n;i++) if(cnt[c[i]] > 2)\r\n\t{\r\n\t\tint oc = c[i];\r\n\t\tfor(int j=i+1;j<n;j++) if(c[j] == oc)\r\n\t\t{\r\n\t\t\tc[i] = c[j] = tot;\r\n\t\t\tif(check(dep+1))\r\n\t\t\t{\r\n\t\t\t\treturn g[sta] = 1;\r\n\t\t\t}\r\n\t\t\tc[i] = c[j] = oc;\r\n//\t\t\tprintf(\"k \");\r\n//\t\t\tfor(int k=0;k<n;k++) printf(\"%d%c\",c[k],\" \\n\"[k==n-1]);\r\n\t\t}\r\n\t\tbreak;\r\n\t}\r\n\tfor(int i=0;i<n;i++) c[i] = cc[i];\r\n//\tprintf(\"%d\\n\",dep);\r\n//\tfor(int i=0;i<n;i++) printf(\"%d%c\",c[i],\" \\n\"[i==n-1]);\r\n\treturn g[sta] = 0;\r\n}\r\nint b[MAXN];\r\nvoid dfs(int nc)\r\n{\r\n\tint pos = 0;\r\n\tfor(;~b[pos];++pos);\r\n\tif(pos == n)\r\n\t{\r\n\t\tfor(int i=0;i<n;i++) c[i] = b[i];\r\n\t\treturn check(0), void();\r\n\t}\r\n\tfor(int j=0;j<nc+1;j++)\r\n\t\tfor(int i=pos+1;i<n;i++) if(!~b[i])\r\n\t\t{\r\n\t\t\tb[pos] = b[i] = j;\r\n\t\t\tdfs(max(j+1, nc));\r\n\t\t\tb[pos] = b[i] = -1;\r\n\t\t}\r\n}\r\nint fac[MAXN];\r\n\r\nint main()\r\n{\r\n//\tfreopen(\"wander.in\",\"r\",stdin);\r\n//\tfreopen(\"wander.out\",\"w\",stdout);\r\n\tg.clear();\r\n\tscanf(\"%d%d%d\",&n,&m,&K);\r\n\tmaxs = 1<<(n>>1);\r\n\tfor(int i=1,u,v;i<=m;i++)\r\n\t{\r\n\t\tscanf(\"%d%d\",&u,&v);\r\n\t\t--u; --v;\r\n\t\te[u][v] = e[v][u] = 1;\r\n\t}\r\n\tmemset(c, -1, (n+1)<<2);\r\n\tmemset(b, -1, (n+1)<<2);\r\n\tpredfs(0);\r\n//\tprintf(\"%d\\n\",g.size());\r\n\tdfs(0);\r\n\tfor(int i=fac[0]=1;i<=K;i++) fac[i] = fac[i-1]*i;\r\n\tll ans = 0;\r\n\tfor(map<ll,bool>::iterator it = g.begin(); it != g.end(); ++it) if(it->second)\r\n\t{\r\n\t\ti2a(it->first, c);\r\n\t\tint tot = 0;\r\n//\t\tfor(int i=0;i<n;i++) printf(\"%d%c\",c[i],\" \\n\"[i==n-1]);\r\n\t\tfor(int i=0;i<n;i++) tot = max(tot, c[i]);\r\n\t\tif(tot ^ K) ans += fac[K]/fac[K-tot-1];\r\n\t\telse ++ans;\r\n\t}\r\n\tprintf(\"%lld\\n\",ans);\r\n\treturn 0;\r\n}"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 225079544,
+    "contestId": 1423,
+    "creationTimeSeconds": 1695646493,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1423,
+        "index": "B",
+        "name": "Valuable Paper",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "binary search",
+            "flows",
+            "graph matchings",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1423,
+        "members": [
+            {
+                "handle": "bkifhr6"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601903100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 8192000,
+    "source": "#include<bits/stdc++.h>\n\n#define ll long long\n#define ri int\nusing namespace std;\n\ninline ll read() {\n    char ch;\n    ll f = 1;\n    while ((ch = getchar()) < '0' || ch > '9')\n        if (ch == '-')f = -1;\n    ll res = ch - 48;\n    while ((ch = getchar()) >= '0' && ch <= '9')\n        res = res * 10 + ch - 48;\n    return res * f;\n}\n\nconst int maxn = 1e4 + 5;\nll s, t;\n\nstruct Dinic {\n    struct node {\n        ll to, next, w;\n    } edge[maxn * 20];\n    ll h[maxn * 4], dis[maxn * 4], cur[maxn * 4];\n    ll cnt = -1;\n    const ll oo = 1e18;\n\n//    Dinic(ll _n) {\n//        for (ri i = 0; i <= _n; i++)h[i] = -1;\n//    }\n\n    void add(ll u, ll v, ll w) {\n        edge[++cnt].to = v;\n        edge[cnt].w = w;\n        edge[cnt].next = h[u];\n        h[u] = cnt;\n        edge[++cnt].to = u;\n        edge[cnt].w = 0;\n        edge[cnt].next = h[v];\n        h[v] = cnt;\n    }\n\n    bool bfs() {//\u5c06\u56fe\u5206\u5c42\n        queue<ll> q;\n        for (ri i = 0; i <= t; i++)dis[i] = oo, cur[i] = h[i];\n        dis[s] = 0;\n        q.push(s);\n        while (!q.empty()) {\n            ll now = q.front();\n            q.pop();\n            for (ri i = h[now]; i != -1; i = edge[i].next) {\n                ll to = edge[i].to;\n                if (dis[to] > dis[now] + 1 && edge[i].w > 0) {\n                    dis[to] = dis[now] + 1;\n                    q.push(to);\n                }\n            }\n        }\n        return dis[t] != oo;\n    }\n\n    ll dinic(ll now, ll lim) {\n        if (now == t || lim <= 0)return lim;\n        ll flow = 0, f;\n        for (ri i = cur[now]; i != -1; i = edge[i].next) {\n            ll to = edge[i].to;\n            cur[now] = i;\n            if (dis[to] == dis[now] + 1) {\n                f = dinic(to, min(lim, edge[i].w));\n                if (f > 0) {\n                    flow += f;\n                    lim -= f;\n                    edge[i].w -= f;\n                    edge[i ^ 1].w += f;\n                    if (lim <= 0)break;\n                }\n            }\n        }\n        return flow;\n    }\n\n    ll Max_flow() {\n        ll maxflow = 0;\n        while (bfs())maxflow += dinic(s, oo);\n        return maxflow;\n    }\n\n    void clear(ll n) {\n        cnt = -1;\n        for (ri i = 0; i <= n; i++)h[i] = -1;\n    }\n} d;\n\nstruct node {\n    ll from, to, w;\n\n    bool operator<(const node &x) const {\n        return w < x.w;\n    }\n} e[maxn * 10];\n\nll n, m;\n\nbool check(ll x) {\n    d.clear(t);\n    for (ri i = 1; i <= n; i++) {\n        d.add(s, i, 1);\n        d.add(i + n, t, 1);\n    }\n    for (ri i = 1; i <= x; i++) {\n        auto[u, v, w]=e[i];\n        d.add(u, v + n, w);\n    }\n    //cout << d.Max_flow() << endl;\n    return d.Max_flow() == n;\n}\n\nint main() {\n    n = read(), m = read();\n    for (ri i = 1; i <= m; i++) {\n        e[i].from = read();\n        e[i].to = read();\n        e[i].w = read();\n    }\n    sort(e + 1, e + 1 + m);\n    ll l = 1, r = m, ans = -1;\n    s = 0, t = 2 * n + 1;\n    while (l <= r) {\n        ll mid = (l + r) >> 1;\n        if (check(mid))ans = mid, r = mid - 1;\n        else l = mid + 1;\n    }\n    printf(\"%lld\\n\", ans);\n    return 0;\n}\n\n\t\t \t\t\t\t\t\t   \t         \t\t  \t \t"
+}

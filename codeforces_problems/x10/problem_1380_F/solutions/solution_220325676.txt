@@ -1,0 +1,36 @@
+{
+    "id": 220325676,
+    "contestId": 1380,
+    "creationTimeSeconds": 1692923822,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1380,
+        "index": "F",
+        "name": "Strange Addition",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "dp",
+            "matrices"
+        ]
+    },
+    "author": {
+        "contestId": 1380,
+        "members": [
+            {
+                "handle": "kyle845"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1594565100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 31,
+    "timeConsumedMillis": 1029,
+    "memoryConsumedBytes": 33587200,
+    "source": "#pragma GCC target(\"avx\")\r\n#pragma GCC optimize(2)\r\n#pragma GCC optimize(3,\"Ofast\",\"inline\")\r\n\r\n#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\nusing ll = long long;\r\n\r\nconst int maxN = 5e5 + 5;\r\nconst int mod = 998244353;\r\n\r\nstring s;\r\nint n, m, f[2];\r\n\r\nstruct matrix {\r\n\tint c[2][2];\r\n\t\r\n\tmatrix() {\r\n\t\tmemset(c, 0, sizeof c);\r\n\t}\r\n\t\r\n\tmatrix operator * (const matrix &a) const {\r\n\t\tmatrix b;\r\n\t\tfor (int i = 0; i < 2; ++i) {\r\n\t\t\tfor (int j = 0; j < 2; ++j) {\r\n\t\t\t\tfor (int k = 0; k < 2; ++k) {\r\n\t\t\t\t\tb.c[i][j] = (b.c[i][j] + 1ll * a.c[i][k] * c[k][j] % mod) % mod;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn b;\r\n\t}\r\n};\r\n\r\nnamespace smt {\r\n\tmatrix mul[maxN << 2];\r\n\t\r\n\tvoid build(int k, int L = 2, int R = n) {\r\n\t\tif (L > R) return;\r\n\t\tif (L >= R) {\r\n\t\t\tmul[k].c[0][0] = (s[L] - '0') + 1;\r\n\t\t\tmul[k].c[1][0] = 1, mul[k].c[1][1] = 0;\r\n\t\t\tint x = (s[L - 1] - '0') * 10 + (s[L] - '0');\r\n\t\t\tint delt = min(9, x) - max(0, x - 9) + 1;\r\n\t\t\tif ((s[L - 1] - '0') == 1) mul[k].c[0][1] = max(0, delt);\r\n\t\t\telse mul[k].c[0][1] = 0;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint mid = (L + R) >> 1;\r\n\t\tbuild(k << 1, L, mid), build(k << 1 | 1, mid + 1, R);\r\n\t\tmul[k] = mul[k << 1] * mul[k << 1 | 1];\r\n\t}\r\n\t\r\n\tvoid modify(int k, int pos, int L = 2, int R = n) {\r\n\t\tif (L >= R) {\r\n\t\t\tmul[k].c[0][0] = (s[L] - '0') + 1;\r\n\t\t\tmul[k].c[1][0] = 1, mul[k].c[1][1] = 0;\r\n\t\t\tint x = (s[L - 1] - '0') * 10 + (s[L] - '0');\r\n\t\t\tint delt = min(9, x) - max(0, x - 9) + 1;\r\n\t\t\tif ((s[L - 1] - '0') == 1) mul[k].c[0][1] = max(0, delt);\r\n\t\t\telse mul[k].c[0][1] = 0;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint mid = (L + R) >> 1;\r\n\t\tif (pos <= mid) modify(k << 1, pos, L, mid);\r\n\t\telse modify(k << 1 | 1, pos, mid + 1, R);\r\n\t\tmul[k] = mul[k << 1] * mul[k << 1 | 1];\r\n\t}\r\n\t\r\n\tmatrix query(int k, int l, int r, int L = 2, int R = n) {\r\n\t\tif (l <= L && R <= r) return mul[k];\r\n\t\tint mid = (L + R) >> 1;\r\n\t\tif (r <= mid) return query(k << 1, l, r, L, mid);\r\n\t\tif (l > mid) return query(k << 1 | 1, l, r, mid + 1, R);\r\n\t\treturn query(k << 1, l, r, L, mid) * query(k << 1 | 1, l, r, mid + 1, R);\r\n\t}\r\n}\r\n\r\nint main() {\r\n\tios_base::sync_with_stdio(false);\r\n\tcin.tie(nullptr);\r\n\t\r\n\tcin >> n >> m >> s;\r\n\ts = '_' + s;\r\n\tint rt = 0, tr = 0;\r\n\tsmt::build(1);\r\n\tf[0] = 1, f[1] = (s[1] - '0') + 1;\r\n\twhile (m--) {\r\n\t\tint x, y;\r\n\t\tcin >> x >> y;\r\n\t\ts[x] = char(y + '0');\r\n\t\tif (x == 1) {\r\n\t\t\tf[1] = y + 1;\r\n\t\t\tsmt::modify(1, 2);\r\n\t\t} else if (n >= 2) {\r\n\t\t\tsmt::modify(1, x);\r\n\t\t\tif (x != n) smt::modify(1, x + 1);\r\n\t\t}\r\n\t\tif (n == 1) {\r\n\t\t\tcout << f[1] << '\\n';\r\n\t\t} else {\r\n\t\t\tauto zeq = smt::query(1, 1, n);\r\n\t\t\tll ans = 1ll * f[1] * zeq.c[0][0] % mod + 1ll * f[0] * zeq.c[0][1];\r\n\t\t\tans %= mod;\r\n\t\t\tcout << ans << '\\n';\r\n\t\t}\r\n\t}\r\n\t\r\n\treturn 0;\r\n}"
+}

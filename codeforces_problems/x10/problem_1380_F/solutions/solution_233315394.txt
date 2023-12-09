@@ -1,0 +1,36 @@
+{
+    "id": 233315394,
+    "contestId": 1380,
+    "creationTimeSeconds": 1700321308,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1380,
+        "index": "F",
+        "name": "Strange Addition",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "dp",
+            "matrices"
+        ]
+    },
+    "author": {
+        "contestId": 1380,
+        "members": [
+            {
+                "handle": "serifefedartar"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1594565100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 249,
+    "memoryConsumedBytes": 96256000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define fast ios::sync_with_stdio(0);cin.tie(0);\r\n#define s second\r\n#define f first\r\ntypedef long long ll;\r\nconst ll MOD = 998244353;\r\nconst ll LOGN = 20; \r\nconst ll MAXN = 5e5 + 100;\r\n\r\nstruct Node {\r\n\tll ans[2][2];\r\n\tll l, r;\r\n\tNode() { \r\n\t\tfor (int i = 0; i < 2; i++)\r\n\t\t\tfor (int j = 0; j < 2; j++)\r\n\t\t\t\tans[i][j] = 0;\r\n\t}\r\n};\r\nNode sg[4*MAXN];\r\n\r\nll ways(bool l, int left, bool r, int right) {\r\n\tif (!l && !r) \r\n\t\treturn 1;\r\n\r\n\tint x;\r\n\tif (l && r)\r\n\t\tx = left * 10 + right;\r\n\telse if (l)\r\n\t\tx = left;\r\n\telse\r\n\t\tx = right;\r\n\r\n\tint cnt = 0;\r\n\tfor (int i = 0; i <= 9; i++)\r\n\t\tcnt += (((x-i) >= 0) && ((x-i) <= 9));\r\n\treturn cnt; \r\n}\r\n\r\nNode merge(Node a, Node b) {\r\n\tNode new_node = Node();\r\n\tnew_node.l = a.l;\r\n\tnew_node.r = b.r;\r\n\tfor (int a_l = 0; a_l <= 1; a_l++) {\r\n\t\tfor (int a_r = 0; a_r <= 1; a_r++) {\r\n\t\t\tfor (int b_l = 0; b_l <= 1; b_l++) {\r\n\t\t\t\tfor (int b_r = 0; b_r <= 1; b_r++)\r\n\t\t\t\t\tnew_node.ans[a_l][b_r] = (new_node.ans[a_l][b_r] + ((a.ans[a_l][a_r] * b.ans[b_l][b_r] % MOD) * ways(!a_r, a.r, !b_l, b.l)) % MOD) % MOD;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn new_node;\r\n}\r\n\r\nNode merge2(Node a, Node b) {\r\n\tNode new_node = Node();\r\n\tnew_node.l = a.l;\r\n\tnew_node.r = b.r;\r\n\tnew_node.ans[0][0] = 1; \r\n\tnew_node.ans[0][1] = ways(0, 0, 1, b.r);\r\n\tnew_node.ans[1][0] = ways(1, a.l, 0, 0);\r\n\tnew_node.ans[1][1] = ((a.l != 0 ? ways(1, a.l, 1, b.r) : 0) + new_node.ans[0][1] * new_node.ans[1][0] % MOD) % MOD;\r\n\treturn new_node;\r\n}\r\n\r\nNode merge3(Node a, Node b) {\r\n\tNode new_node = Node();\r\n\tnew_node.l = a.l;\r\n\tnew_node.r = b.r;\r\n\tnew_node.ans[0][0] = b.ans[1][0];\r\n\tnew_node.ans[0][1] = b.ans[1][1];\r\n\tnew_node.ans[1][0] = ((a.ans[1][1] * b.ans[1][0] % MOD) + (a.l != 0 ? (a.ans[0][0] * b.ans[0][0] % MOD * ways(1, a.l, 1, b.l)) % MOD : 0)) % MOD;\r\n\tnew_node.ans[1][1] = ((a.ans[1][1] * b.ans[1][1] % MOD) + (a.l != 0 ? (a.ans[0][0] * b.ans[0][1] % MOD * ways(1, a.l, 1, b.l)) % MOD : 0)) % MOD;\r\n\treturn new_node;\r\n}\r\n\r\nNode merge4(Node a, Node b) {\r\n\tNode new_node = Node();\r\n\tnew_node.l = a.l;\r\n\tnew_node.r = b.r;\r\n\tnew_node.ans[0][0] = a.ans[0][1];\r\n\tnew_node.ans[0][1] = ((a.ans[0][1] * b.ans[1][1] % MOD) + (a.r != 0 ? (a.ans[0][0] * b.ans[0][0] % MOD) * ways(1, a.r, 1, b.l) % MOD : 0)) % MOD;\r\n\tnew_node.ans[1][0] = a.ans[1][1];\r\n\tnew_node.ans[1][1] = ((a.ans[1][1] * b.ans[1][1] % MOD) + (a.r != 0 ? (a.ans[1][0] * b.ans[0][0] % MOD) * ways(1, a.r, 1, b.l) % MOD : 0)) % MOD;\r\n\treturn new_node;\r\n}\r\n\r\nstring C;\r\nvoid init(int k, int a, int b) {\r\n\tif (a == b) {\r\n\t\tsg[k].l = C[a] - '0';\r\n\t\tsg[k].r = C[a] - '0';\r\n\t\tsg[k].ans[1][1] = ways(0, 0, 1, C[a] - '0');\r\n\t\tsg[k].ans[0][0] = 1;\r\n\t\tsg[k].ans[1][0] = sg[k].ans[0][1] = 0;\r\n\t\treturn ;\r\n\t}\r\n\tinit(2*k, a, (a+b)/2);\r\n\tinit(2*k+1, (a+b)/2+1, b);\r\n\tif (a + 1 == b)\r\n\t\tsg[k] = merge2(sg[2*k], sg[2*k+1]);\r\n\telse if (a == (a+b)/2)\r\n\t\tsg[k] = merge3(sg[2*k], sg[2*k+1]);\r\n\telse if (b == (a+b)/2+1)\r\n\t\tsg[k] = merge4(sg[2*k], sg[2*k+1]);\r\n\telse\r\n\t\tsg[k] = merge(sg[2*k], sg[2*k+1]);\r\n}\r\n\r\nvoid update(int k, int a, int b, int plc, int val) {\r\n\tif (b < plc || a > plc)\r\n\t\treturn ;\r\n\tif (a == b) {\r\n\t\tsg[k].l = val;\r\n\t\tsg[k].r = val;\r\n\t\tsg[k].ans[1][1] = ways(0, 0, 1, val);\r\n\t\tsg[k].ans[0][0] = 1;\r\n\t\tsg[k].ans[1][0] = sg[k].ans[0][1] = 0;\r\n\t\treturn ;\r\n\t}\r\n\tupdate(2*k, a, (a+b)/2, plc, val);\r\n\tupdate(2*k+1, (a+b)/2+1, b, plc, val);\r\n\tif (a + 1 == b)\r\n\t\tsg[k] = merge2(sg[2*k], sg[2*k+1]);\r\n\telse if (a == (a+b)/2)\r\n\t\tsg[k] = merge3(sg[2*k], sg[2*k+1]);\r\n\telse if (b == (a+b)/2+1)\r\n\t\tsg[k] = merge4(sg[2*k], sg[2*k+1]);\r\n\telse\r\n\t\tsg[k] = merge(sg[2*k], sg[2*k+1]);\r\n}\r\n\r\nint main() {\r\n\tfast\r\n\tint n, m, x, d;\r\n\tcin >> n >> m >> C;\r\n\tC = \"#\" + C;\r\n\tinit(1, 1, n); \r\n\r\n\twhile (m--) {\r\n\t\tcin >> x >> d;\r\n\t\tupdate(1, 1, n, x, d);\r\n\t\tcout << sg[1].ans[1][1] << \"\\n\";\r\n\t}\r\n}"
+}

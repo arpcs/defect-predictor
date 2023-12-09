@@ -1,0 +1,38 @@
+{
+    "id": 211287298,
+    "contestId": 1585,
+    "creationTimeSeconds": 1687902990,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1585,
+        "index": "G",
+        "name": "Poachers",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 2500,
+        "tags": [
+            "dp",
+            "games",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1585,
+        "members": [
+            {
+                "handle": "Anonymous_Noob"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1639322100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\nusing ll = long long;\n#define sz(x) (int)::size(x)\n#define all(x) ::begin(x), ::end(x)\n#define debug(x) cerr << \"[\" << __LINE__ << \"] \"#x\" = \" << (x) << endl\n\nvoid process_mem_usage(double& vm_usage, double& resident_set)\n{\n   using std::ios_base;\n   using std::ifstream;\n   using std::string;\n\n   vm_usage     = 0.0;\n   resident_set = 0.0;\n\n   // 'file' stat seems to give the most reliable results\n   //\n   ifstream stat_stream(\"/proc/self/stat\",ios_base::in);\n\n   // dummy vars for leading entries in stat that we don't care about\n   //\n   string pid, comm, state, ppid, pgrp, session, tty_nr;\n   string tpgid, flags, minflt, cminflt, majflt, cmajflt;\n   string utime, stime, cutime, cstime, priority, nice;\n   string O, itrealvalue, starttime;\n\n   // the two fields we want\n   //\n   unsigned long vsize;\n   long rss;\n\n   stat_stream >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr\n               >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt\n               >> utime >> stime >> cutime >> cstime >> priority >> nice\n               >> O >> itrealvalue >> starttime >> vsize >> rss; // don't care about the rest\n\n   stat_stream.close();\n\n   long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; // in case x86-64 is configured to use 2MB pages\n   vm_usage     = vsize / 1024.0;\n   resident_set = rss * page_size_kb;\n}\n\nstruct Node {\n    int n = 1;\n    multiset<int> s;\n    set<int> me = {0};\n\n    Node() {}\n\n    void inc() {\n        if (s.find(n) == s.end()) me.insert(n);\n        n++;\n    }\n\n    void add(int i) {\n        me.erase(i);\n        s.insert(i);\n    }\n\n    void erase(int i) {\n        assert(s.count(i));\n        s.erase(s.find(i));\n        if (s.find(i) == s.end()) me.insert(i);\n    }\n\n    int mex() {\n        while (me.empty()) inc();\n        return *me.begin();\n    }\n};\n\nvector<vector<int>> g;\nvector<int> a[(int)5e5];\nvector<int> rnk, act;\nvector<Node> b;\n\nvoid dfs(int cur) {\n    for (int e : g[cur]) {\n        dfs(e);\n        rnk[cur] = min(rnk[cur], rnk[e]);\n        if (act[e] > act[cur]) {\n            swap(a[e], a[cur]);\n            swap(b[e], b[cur]);\n            swap(act[e], act[cur]);\n        }\n\n        while (act[e] != 1 && act[cur] > act[e]) {\n            int j = sz(a[cur]) - act[cur];\n            b[cur].erase(a[cur][j]);\n            act[cur]--;\n        }\n\n        for (int i=0; i<act[e]; i++) {\n            int j = sz(a[cur]) - 1 - i;\n            b[cur].erase(a[cur][j]);\n            a[cur][j] ^= a[e][sz(a[e]) - 1 - i];\n            b[cur].add(a[cur][j]);\n        }\n        b[e].s.clear();\n    }\n\n    if (rnk[cur] == (int)1e9) rnk[cur] = 0;\n    a[cur].push_back(b[cur].mex());\n    b[cur].add(a[cur].back());\n    rnk[cur]++;\n    act[cur]++;\n}\n\nint main() {\n    cin.tie(0)->sync_with_stdio(0);\n\n    int T;\n    cin >> T;\n    while (T--) {\n        int n;\n        cin >> n;\n\n        vector<int> p(n);\n        for (int& e : p) cin >> e;\n        g.assign(n, {});\n\n        vector<int> roots;\n        for (int i=0; i<n; i++) {\n            if (p[i] == 0) roots.push_back(i);\n            else {\n                g[p[i]-1].push_back(i);\n            }\n        }\n\n        for (int i=0; i<n; i++) a[i] = {0};\n        b.assign(n, {});\n        for (auto& e : b) e.add(0);\n        rnk.assign(n, 1e9);\n        act.assign(n, 1);\n\n        int ans = 0;\n        for (int e : roots) {\n            dfs(e);\n            //ans ^= b[e].mex();\n            ans ^= a[e].back();\n        }\n\n        cout << (ans == 0 ? \"NO\" : \"YES\") << '\\n';\n    }\n\n\tdouble vm, rss;\n  \tprocess_mem_usage(vm, rss);\n \t//cout << \"VM: \" << vm << \"; RSS: \" << rss << endl;\n}\n"
+}

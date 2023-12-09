@@ -1,0 +1,36 @@
+{
+    "id": 236457671,
+    "contestId": 855,
+    "creationTimeSeconds": 1702104813,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 855,
+        "index": "E",
+        "name": "Salazar Slytherin's Locket",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2200,
+        "tags": [
+            "bitmasks",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 855,
+        "members": [
+            {
+                "handle": "andif"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1506263700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 655,
+    "memoryConsumedBytes": 819200,
+    "source": "/**\r\n *    author: andif\r\n *    created: 09.12.2023 13:18:30\r\n**/\r\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define de(x) cerr << #x << \" = \" << x << endl\r\n#define dd(x) cerr << #x << \" = \" << x << \" \"\r\n#define rep(i, a, b) for(int i = a; i < b; ++i)\r\n#define per(i, a, b) for(int i = a; i > b; --i)\r\n#define mt(a, b) memset(a, b, sizeof(a))\r\n#define sz(a) (int)a.size()\r\n#define fi first\r\n#define se second\r\n#define qc ios_base::sync_with_stdio(0);cin.tie(0)\r\n#define eb emplace_back\r\n#define all(a) a.begin(), a.end()\r\nusing ll = long long;\r\nusing db = double;\r\nusing pii = pair<int, int>;\r\nusing pdd = pair<db, db>;\r\nusing pll = pair<ll, ll>;\r\nusing vi = vector<int>;\r\nusing vl = vector<ll>;\r\nconst db eps = 1e-9;\r\nconst int N = 61;\r\nconst int B = 11;\r\n\r\nvector<vector<vl>> f(B);\r\n\r\nll kpow(ll a, ll b) {\r\n    ll ret = 1;\r\n    while(b) {\r\n        if (b & 1) {\r\n            ret = ret * a;\r\n        }\r\n        a = a * a;\r\n        b >>= 1;\r\n    }\r\n    return ret;\r\n}\r\n\r\nvector<vl> get(int b) {\r\n    const ll R = 1e18;\r\n    int m = 0;\r\n    while(kpow(b, m) < R) m++;\r\n    if (kpow(b, m) > R) m--;\r\n    vector<vl> ret(m + 1, vl(1 << b));\r\n    ret[0][0] = 1;\r\n    rep(i, 0, m) {\r\n        rep(j, 0, (1 << b)) {\r\n            if (ret[i][j]) {\r\n                rep(k, 0, b) {\r\n                    int nj = j ^ (1 << k);\r\n                    ret[i + 1][nj] += ret[i][j];\r\n                }\r\n            }\r\n        }\r\n    }\r\n    return ret;\r\n}\r\n\r\nvoid init() {\r\n    rep(i, 2, B) f[i] = get(i);\r\n}\r\n\r\nvi change(ll n, int b) {\r\n    vi ret;\r\n    while(n) {\r\n        ll x = n / b;\r\n        ll y = x * b;\r\n        ll z = n - y;\r\n        n = x;\r\n        ret.eb(z);\r\n    }\r\n    ret.eb(0);\r\n    reverse(all(ret));\r\n    return ret;\r\n}\r\n\r\nll gao(ll n, int b) {\r\n    if (!n) return 0;\r\n    ll ret = 0;\r\n    vi c = change(n, b);\r\n    int m = sz(c) - 1;\r\n    vi cnt(b);\r\n    rep(i, 1, m + 1) {\r\n        if (i == 1) {\r\n            rep(h, 1, m + 1) {\r\n                int up = h == 1 ? c[h] : b;\r\n                rep(j, 1, up) {\r\n                    cnt[j]++;\r\n                    int s = 0;\r\n                    rep(k, 0, b) if (cnt[k] & 1) s |= (1 << k);\r\n                    ret += f[b][m - h][s];\r\n                    cnt[j]--;\r\n                }\r\n            }\r\n        } else if (!(m & 1)) {\r\n            rep(j, 0, c[i]) {\r\n                cnt[j]++;\r\n                int s = 0;\r\n                rep(k, 0, b) if(cnt[k] & 1) s |= (1 << k);\r\n                ret += f[b][m - i][s];\r\n                cnt[j]--;\r\n           } \r\n        }\r\n        cnt[c[i]]++;\r\n    }\r\n    bool ok = true;\r\n    rep(i, 0, b) {\r\n        if (cnt[i] & 1) ok = false;\r\n    }\r\n    if (ok) ret++;\r\n    return ret;\r\n}\r\n\r\nint main() {\r\n    qc;\r\n    init();\r\n    int q; cin >> q;\r\n    while(q--) {\r\n        int b; cin >> b;\r\n        ll l, r; cin >> l >> r;\r\n        cout << gao(r, b) - gao(l - 1, b) << '\\n';\r\n    }\r\n    return 0;\r\n}\r\n"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 206406135,
+    "contestId": 1416,
+    "creationTimeSeconds": 1684473943,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1416,
+        "index": "F",
+        "name": "Showing Off",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3300,
+        "tags": [
+            "flows",
+            "graph matchings",
+            "greedy",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1416,
+        "members": [
+            {
+                "handle": "Misono_Mika"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601219100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 10,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 38297600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;void ini();void solve();\r\nint cases=1;\r\nconst int inf=1e9;\r\nint main(){\r\n    ini();\r\n    cin.tie(nullptr);\r\n    ios::sync_with_stdio(false);\r\n    cout.tie(nullptr);\r\n    cout<<fixed<<setprecision(15);\r\n    int T;\r\n    if(cases)cin>>T;else T=1;\r\n    for(int tt=0;tt<T;tt++){\r\n        solve();\r\n    }\r\n}\r\nconst int V=1000111,E=1000111,N=100013;\r\ntemplate<typename T>struct FlowGraph{\r\n    int s,t,vtt;\r\n    int head[V],ett,dis[V],cur[V];\r\n    struct edge{int v,nxt;T f;}e[E * 2];\r\n    void add(int u,int v,T f,T f2=0){\r\n        e[ett]={v,head[u],f};head[u]=ett++;\r\n        e[ett]={u,head[v],f2};head[v]=ett++;\r\n    }\r\n    bool bfs(){\r\n        for(int i=1;i<=vtt;i++)dis[i]=0,cur[i]=head[i];\r\n        queue<int>q;\r\n        q.push(s);dis[s]=1;\r\n        while(!q.empty()){\r\n            int u=q.front(),v;q.pop();\r\n            for(int i=head[u];~i;i=e[i].nxt)if(e[i].f&&!dis[e[i].v]){\r\n                v=e[i].v,dis[v]=dis[u]+1;\r\n                if(v==t)return true;\r\n                q.push(v);\r\n            }\r\n        }\r\n        return false;\r\n    }\r\n    T dfs(int u,T m){\r\n        if(u==t)return m;\r\n        T flow=0;\r\n        for(int i=cur[u];~i;cur[u]=i=e[i].nxt)if(e[i].f&&dis[e[i].v]==dis[u]+1){\r\n            T f=dfs(e[i].v,min(m,e[i].f));\r\n            e[i].f-=f,e[i^1].f+=f,m-=f,flow+=f;\r\n            if(!m) break;\r\n        }\r\n        if(!flow) dis[u]=-1;\r\n        return flow;\r\n    }\r\n    T dinic(){\r\n        T flow=0;\r\n        while(bfs()) flow+=dfs(s,numeric_limits<T>::max());\r\n        return flow;\r\n    }\r\n    void init(int s_,int t_,int vtt_){\r\n        s=s_,t=t_,vtt=vtt_,ett=0;\r\n        for(int i=1;i <= vtt;i ++) head[i]=-1;\r\n    }\r\n};\r\n#define id(x,y) (((x)-1)*m+(y))\r\narray<int,2>dir[4]={{0,1},{0,-1},{1,0},{-1,0}};\r\nstring s=\"RLDU\";\r\nint n,m,v[N],S,T,S_,T_;\r\nFlowGraph<int>g;\r\nbool in(int x,int y){return x&&y&&x<=n&&y<=m;}\r\nchar D[N];\r\nint rs[N];\r\ntuple<char,char,int,int>info[N];\r\nvoid solve(){\r\n    cin>>n>>m;\r\n    for(int i=1;i<=n*m;i++)cin>>v[i];\r\n    S_=n*m+1,T_=n*m+2,S=n*m+3,T=n*m+4;\r\n    g.init(S,T,n*m+4);\r\n    int all=0;\r\n    for(int f,id,i=1;i<=n;i++)for(int j=1;j<=m;j++){\r\n        f=1,id=id(i,j);\r\n        for(int p,q,_=0;_<4;_++)if(in(i+dir[_][0],j+dir[_][1])){\r\n            p=i+dir[_][0],q=j+dir[_][1];\r\n            if((i+j)&1&&v[id(i,j)]==v[id(p,q)])\r\n                info[g.ett]={s[_],s[_^1],id(i,j),id(p,q)},g.add(id(i,j),id(p,q),1);\r\n            if(v[id(i,j)]>v[id(p,q)])rs[id(i,j)]=v[id(i,j)]-v[id(p,q)],D[id(i,j)]=s[_],f=0;\r\n        }\r\n        if(f){\r\n            all++;\r\n            if((i+j)&1)g.add(S,id(i,j),1),g.add(S_,T,1);\r\n            else g.add(id(i,j),T,1),g.add(S,T_,1);\r\n        }else{\r\n            if((i+j)&1)g.add(S_,id(i,j),1);\r\n            else g.add(id(i,j),T_,1);\r\n        }\r\n    }\r\n    g.add(T_,S_,inf);\r\n    if(all!=g.dinic()){\r\n        cout<<\"NO\\n\";\r\n        for(int i=0;i<=g.ett;i+=2)info[i]={0,0,0,0};\r\n        return;\r\n    }\r\n    cout<<\"YES\\n\";\r\n    for(int i=0;i<=g.ett;i+=2){\r\n        auto&[c,d,x,y]=info[i];\r\n        if(g.e[i^1].f&&x)D[x]=c,D[y]=d,rs[x]=1,rs[y]=v[x]-1;\r\n        info[i]={0,0,0,0};\r\n    }\r\n    for(int i=1;i<=n;i++)for(int j=1;j<=m;j++)cout<<rs[id(i,j)]<<\" \\n\"[j==m];\r\n    for(int i=1;i<=n;i++)for(int j=1;j<=m;j++)cout<<D[id(i,j)]<<\" \\n\"[j==m];\r\n}\r\nvoid ini(){}\r\n"
+}

@@ -1,0 +1,42 @@
+{
+    "id": 231527692,
+    "contestId": 1633,
+    "creationTimeSeconds": 1699235281,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1633,
+        "index": "E",
+        "name": "Spanning Tree Queries",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "greedy",
+            "math",
+            "sortings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1633,
+        "members": [
+            {
+                "handle": "dbsic211"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1643639700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 25,
+    "timeConsumedMillis": 702,
+    "memoryConsumedBytes": 12595200,
+    "source": "#include \"bits/stdc++.h\"\r\nusing namespace std;\r\n#define int long long\r\n#define double long double\r\nconst int MAXN = 3e5 + 10;\r\nconst int MOD = 1e9 + 7;\r\nmt19937_64 rng((int)std::chrono::steady_clock::now().time_since_epoch().count());\r\nint rnd(int x, int y) {\r\n  int u = uniform_int_distribution<int>(x, y)(rng); return u;\r\n}\r\nint bm(int b, int p) {\r\n  if(p==0) return 1 % MOD;\r\n  int r = bm(b, p >> 1);\r\n  if(p&1) return (((r*r) % MOD) * b) % MOD;\r\n  return (r*r) % MOD;\r\n}\r\nint inv(int b) { \r\n  return bm(b, MOD-2);\r\n}\r\nint fastlog(int x) {\r\n  return (x == 0 ? -1 : 64 - __builtin_clzll(x) - 1);\r\n}\r\nvoid printcase(int i) { cout << \"Case #\" << i << \": \"; }\r\nstatic void run_with_stack_size(void (*func)(void), size_t stsize) {\r\n  char *stack, *send;\r\n  stack = (char *)malloc(stsize);\r\n  send = stack + stsize - 16;\r\n  send = (char *)((uintptr_t)send / 16 * 16);\r\n  asm volatile(\r\n    \"mov %%rsp, (%0)\\n\"\r\n    \"mov %0, %%rsp\\n\"\r\n    :\r\n    : \"r\"(send));\r\n  func();\r\n  asm volatile(\"mov (%0), %%rsp\\n\" : : \"r\"(send));\r\n  free(stack);\r\n}\r\nint n, m;\r\nint ok[301];\r\npair<pair<int,int>,int> edges[301];\r\nbool cmp(pair<pair<int,int>,pair<int,int>> x, pair<pair<int,int>,pair<int,int>> y) {\r\n  return x.second.first < y.second.first;\r\n}\r\nint dsu[51];\r\nint set_of(int u) {\r\n  if(dsu[u] == u) return u;\r\n  return dsu[u] = set_of(dsu[u]);\r\n}\r\nvoid union_(int u, int v) {\r\n  dsu[set_of(u)] = set_of(v);\r\n}\r\npair<int,int> cost(int x) {\r\n  pair<pair<int,int>,pair<int,int>> bruhs[m+1];\r\n  for(int i=1; i<=m; i++) bruhs[i] = {edges[i].first, {abs(edges[i].second - x), i}};\r\n  sort(bruhs+1, bruhs+m+1, cmp);\r\n  for(int i=1; i<=n; i++) dsu[i] = i;\r\n  int mst = 0, hv = 0;\r\n  for(int i=1; i<=m; i++) {\r\n    if(set_of(bruhs[i].first.first) != set_of(bruhs[i].first.second)) {\r\n      union_(bruhs[i].first.first, bruhs[i].first.second);\r\n      mst += bruhs[i].second.first;\r\n      hv ^= ok[bruhs[i].second.second];\r\n    }\r\n  }\r\n  return {mst, hv};\r\n}\r\npair<int,int> custom(int x) {\r\n  pair<pair<int,int>,pair<int,int>> bruhs[m+1];\r\n  for(int i=1; i<=m; i++) bruhs[i] = {edges[i].first, {abs(edges[i].second - x), i}};\r\n  sort(bruhs+1, bruhs+m+1, cmp);\r\n  for(int i=1; i<=n; i++) dsu[i] = i;\r\n  int s = 0, c = 0;\r\n  for(int i=1; i<=m; i++) {\r\n    if(set_of(bruhs[i].first.first) != set_of(bruhs[i].first.second)) {\r\n      union_(bruhs[i].first.first, bruhs[i].first.second);\r\n      int id = bruhs[i].second.second;\r\n      if(edges[id].second <= x) s++, c -= edges[id].second;\r\n      else s--, c += edges[id].second;\r\n    }\r\n  }\r\n  return {s, c};\r\n}\r\nbitset<100000000> contain;\r\nvoid solve(int tc) {\r\n  for(int i=1; i<=300; i++) ok[i] = rnd(0, (1ll << 60) - 1);\r\n  cin >> n >> m;\r\n  int sorted[m+1];\r\n  for(int i=1; i<=m; i++) {\r\n    int u, v, w;\r\n    cin >> u >> v >> w;\r\n    sorted[i] = w;\r\n    edges[i] = {{u, v}, w};\r\n  }\r\n  sort(sorted+1, sorted+m+1);\r\n  int p, k, a, b, c;\r\n  cin >> p >> k >> a >> b >> c;\r\n  int prv = 0;\r\n  for(int i=1; i<=p; i++) {\r\n    int q;\r\n    cin >> q;\r\n    contain[q] = (contain[q] ? 0 : 1);\r\n    prv = q;\r\n  }\r\n  for(int i=p+1; i<=k; i++) {\r\n    int q = (prv * a + b) % c;\r\n    contain[q] = (contain[q] ? 0 : 1);\r\n    prv = q;\r\n  }\r\n  int bruh = 0;\r\n  int ans = 0;\r\n  while(bruh < 100000000) {\r\n    int lb = 1, rb = m;\r\n    while(lb < rb) {\r\n      int mid = (lb + rb) >> 1;\r\n      if(sorted[mid] > bruh) rb = mid;\r\n      else lb = mid + 1;\r\n    }\r\n    rb = (sorted[lb] > bruh ? sorted[lb] - 1 : 99999999);\r\n    lb = bruh;\r\n    pair<int,int> ref = cost(bruh);\r\n    while(lb < rb) {\r\n      int mid = (lb + rb + 1) >> 1;\r\n      if(cost(mid).second == ref.second) lb = mid;\r\n      else rb = mid - 1;\r\n    }\r\n    pair<int,int> cu = custom(bruh);\r\n    for(int i=bruh; i<=lb; i++) {\r\n      if(contain[i]) {\r\n        ans ^= (cu.first * i + cu.second);\r\n      }\r\n    }\r\n    bruh = lb + 1;\r\n  }\r\n  cout << ans << '\\n';\r\n}\r\nvoid uwu() {\r\n  ios::sync_with_stdio(0); cin.tie(0);\r\n  int t = 1; //cin >> t;\r\n  for(int i=1; i<=t; i++) solve(i);\r\n}\r\nint32_t main() {\r\n  #ifdef ONLINE_JUDGE\r\n  uwu();\r\n  #endif\r\n  #ifndef ONLINE_JUDGE\r\n  run_with_stack_size(uwu, 1024 * 1024 * 1024); // run with a 1 GiB stack\r\n  #endif\r\n}\r\n/*\r\ng++ E.cpp -std=c++17 -O2 -o E\r\n./E < input.txt\r\n*/\r\n"
+}

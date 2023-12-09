@@ -1,0 +1,35 @@
+{
+    "id": 216836373,
+    "contestId": 1295,
+    "creationTimeSeconds": 1690974534,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1295,
+        "index": "E",
+        "name": "Permutation Separation",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "data structures",
+            "divide and conquer"
+        ]
+    },
+    "author": {
+        "contestId": 1295,
+        "members": [
+            {
+                "handle": "_gyrFalcon_"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1580308500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 25,
+    "timeConsumedMillis": 187,
+    "memoryConsumedBytes": 19251200,
+    "source": "#include <iostream>\r\n#include <cstdio>\r\n#include <cstdlib>\r\n#include <algorithm>\r\n#include <cmath>\r\n#include <vector>\r\n#include <set>\r\n#include <map>\r\n#include <unordered_set>\r\n#include <unordered_map>\r\n#include <queue>\r\n#include <ctime>\r\n#include <cassert>\r\n#include <complex>\r\n#include <string>\r\n#include <cstring>\r\n#include <chrono>\r\n#include <random>\r\n#include <bitset>\r\n#include <array>\r\n#include <iomanip>\r\n#include<ext/pb_ds/assoc_container.hpp> \r\n#include<ext/pb_ds/tree_policy.hpp> \r\n#include<functional> \r\nusing namespace __gnu_pbds; \r\nusing namespace std; \r\n#define int long long  \r\n#define endl \"\\n\" \r\nconst int mod=1e9+7; \r\nconst int MOD= 998244353 ; \r\nconst int inf=1e18; \r\nconst long double eps=1e-7; \r\n\r\nconst int N=0; \r\n \r\ntypedef tree<int, null_type, less<int>, rb_tree_tag,  \r\ntree_order_statistics_node_update>  \r\nordered_set; \r\n \r\nmt19937_64  \r\nrang(chrono::high_resolution_clock::now().time_since_epoch().count()); \r\n \r\nvoid inthe_code(){\r\n    #ifndef ONLINE_JUDGE\r\n    freopen(\"input.txt\",\"r\",stdin);\r\n    freopen(\"output.txt\",\"w\",stdout);\r\n    #endif\r\n}\r\n\r\nvector<int> dp, stree, lazy;\r\n\r\nvoid build(int tidx, int s, int e){\r\n    if(s == e){\r\n        stree[tidx] = dp[s];\r\n        return;\r\n    }\r\n    int mid = (s + e)/2;\r\n    build(2*tidx, s, mid);\r\n    build(2*tidx+1, mid+1, e);\r\n    stree[tidx] = min(stree[2*tidx], stree[2*tidx+1]);\r\n}\r\n\r\nvoid update(int tidx, int s, int e, int l, int r, int val){\r\n    if(lazy[tidx] != 0){\r\n        stree[tidx] += lazy[tidx];\r\n        if(s != e){\r\n            lazy[2*tidx] += lazy[tidx];\r\n            lazy[2*tidx+1] += lazy[tidx];\r\n        }\r\n        lazy[tidx] = 0;\r\n    }\r\n    if(s > r or e < l){\r\n        return;\r\n    }\r\n    else if(s >= l and e <= r){\r\n        stree[tidx] += val;\r\n        if(s != e){\r\n            lazy[2*tidx] += val;\r\n            lazy[2*tidx+1] += val;\r\n        }\r\n        return;\r\n    }\r\n    int mid = (s + e)/2;\r\n    update(2*tidx, s, mid, l, r, val);\r\n    update(2*tidx+1, mid+1, e, l, r, val);\r\n    stree[tidx] = min(stree[2*tidx], stree[2*tidx+1]);\r\n}\r\n\r\nint query(int tidx, int s, int e, int l, int r){\r\n    if(lazy[tidx] != 0){\r\n        stree[tidx] += lazy[tidx];\r\n        if(s != e){\r\n            lazy[2*tidx] += lazy[tidx];\r\n            lazy[2*tidx+1] += lazy[tidx];\r\n        }\r\n        lazy[tidx] = 0;\r\n    }\r\n    if(s > r or e < l){\r\n        return inf;\r\n    }\r\n    else if(s >= l and e <= r){\r\n        return stree[tidx];\r\n    }\r\n    int mid = (s + e)/2;\r\n    int left = query(2*tidx, s, mid, l, r);\r\n    int right = query(2*tidx+1, mid+1, e, l, r);\r\n    stree[tidx] = min(stree[2*tidx], stree[2*tidx+1]);\r\n}\r\n\r\nint32_t main(){ \r\n    inthe_code();\r\n    ios_base::sync_with_stdio(0);cin.tie(0);cout.tie(0); \r\n    srand(chrono::high_resolution_clock::now().time_since_epoch().count()); \r\n    \r\n    int n;\r\n    cin>>n;\r\n    std::vector<int> p(n), a(n);\r\n    std::vector<int> idx(n+1);\r\n    for(int i=0;i<n;i++){\r\n        cin>>p[i];\r\n        idx[p[i]] = i;\r\n    }\r\n    for(int i=0;i<n;i++){\r\n        cin>>a[i];\r\n    }\r\n    dp = vector<int> (n);\r\n    stree = lazy = vector<int> (4*n);\r\n    int cost = a[idx[1]];\r\n    int ans = inf;\r\n    for(int pos=0;pos<n-1;pos++){\r\n        // pos index tak first set me rahega;\r\n        // and first set me kewal 1 ko rakhna hai;\r\n        if(p[pos] == 1) cost -= a[pos];\r\n        else cost += a[pos];\r\n        dp[pos] = cost;\r\n        ans = min(ans, dp[pos]);\r\n    }\r\n    \r\n    build(1, 0, n-2);\r\n    for(int var=2;var<=n;var++){\r\n        // element <= var in first set;\r\n        // element > var in second set;\r\n        // pos >= idx[var] ; dp[pos] -= a[idx[var]]\r\n        // pos < idx[var]  ; dp[pos] += a[idx[var]]\r\n        update(1, 0, n-2, idx[var], n-2, -a[idx[var]]);\r\n        update(1, 0, n-2, 0, idx[var]-1, a[idx[var]]);\r\n        ans = min(ans, query(1, 0, n-2, 0, n-2));\r\n    }\r\n    int tot = 0;\r\n    for(int i=0;i<n;i++){\r\n        tot += a[i];\r\n    }\r\n    int currSum = 0;\r\n    for(int i=0;i<n-1;i++){\r\n        currSum += a[i];\r\n        tot -= a[i];\r\n        ans = min(ans, min(currSum, tot));\r\n    }\r\n    \r\n    cout<<ans<<endl;\r\n}"
+}

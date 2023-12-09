@@ -1,0 +1,35 @@
+{
+    "id": 130740013,
+    "contestId": 1218,
+    "creationTimeSeconds": 1633294373,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1218,
+        "index": "B",
+        "name": "Guarding warehouses",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "data structures",
+            "geometry"
+        ]
+    },
+    "author": {
+        "contestId": 1218,
+        "members": [
+            {
+                "handle": "Stepavly"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1568554500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 4300800,
+    "source": "#include <bits/stdc++.h>\n\nusing namespace std;\n\nusing ll = long long;\nusing ld = long double;\nusing pii = pair<int, int>;\nusing cd = complex<ld>;\n\nstruct pt {\n  ld x, y;\n\n  pt(ld x, ld y) : x(x), y(y) {}\n\n  pt() = default;\n\n  ld ang() const {\n    return atan2(y, x);\n  }\n\n  ld dist2() const {\n    return x * x + y * y;\n  }\n};\n\npt operator-(const pt &a, const pt &b) {\n  return pt(a.x - b.x, a.y - b.y);\n}\n\nld cross(const pt &a, const pt &b) {\n  return a.x * b.y - a.y * b.x;\n}\n\nstruct line {\n  ld a, b, c;\n\n  line(const pt &p, const pt &q) {\n    a = q.y - p.y;\n    b = p.x - q.x;\n    c = -(a * p.x + b * p.y);\n    if (a < 0 || (abs(a) < 1e-8 && b < 0)) {\n      a = -a;\n      b = -b;\n      c = -c;\n    }\n  }\n\n  bool operator==(const line &rhs) const {\n    return a == rhs.a &&\n           b == rhs.b &&\n           c == rhs.c;\n  }\n\n  bool operator!=(const line &rhs) const {\n    return !(rhs == *this);\n  }\n};\n\nbool canIntersect(const line &a, const line &b) {\n  return abs(a.a * b.b - a.b * b.a) > 1e-8;\n}\n\npt intersect(const line &a, const line &b) {\n  ld det = a.a * b.b - a.b * b.a;\n  return pt((-a.c * b.b + a.b * b.c) / det, (-a.a * b.c + b.a * a.c) / det);\n}\n\nstruct ev {\n  vector<pair<pt, int>> add;\n  vector<pair<pt, int>> remove;\n  vector<pair<line, int>> addLine;\n  vector<pair<line, int>> removeLine;\n};\n\nstruct polyPt {\n  pt p;\n  int id;\n};\n\nbool operator<(const polyPt &a, const polyPt &b) {\n  ld dx = a.p.dist2() - b.p.dist2();\n  if (abs(dx) > 1e-8) {\n    return dx < 0;\n  } else {\n    return a.id < b.id;\n  }\n}\n\nld area(const vector<pt> &pts) {\n  vector<int> p(pts.size());\n  iota(p.begin(), p.end(), 0);\n  ld res = -1e18;\n  do {\n    ld cur = 0;\n    for (int i = 1; i + 1 < (int) p.size(); i++) {\n      cur += cross(pts[p[i]] - pts[0], pts[p[i + 1]] - pts[0]);\n    }\n    res = max(res, cur);\n  } while (next_permutation(p.begin() + 1, p.end()));\n  return res / 2;\n}\n\nvoid print(const vector<pt> &pts) {\n  cout << \"polygon([\";\n  bool fst = true;\n  for (const auto &p: pts) {\n    if (!fst) {\n      cout << \",\";\n    }\n    fst = false;\n    cout << \"(\" << p.x << \", \" << p.y << \")\";\n  }\n  cout << \"])\" << endl;\n}\n\nconst ld PI = acos(-1);\n\nint main() {\n  ios_base::sync_with_stdio(false);\n  cin.tie(nullptr);\n  cout.precision(20);\n  cout << fixed;\n\n  int n;\n  cin >> n;\n  map<ld, ev> evs;\n  for (int i = 0; i < n; i++) {\n    int k;\n    cin >> k;\n    vector<pt> pts(k);\n    for (int j = 0; j < k; j++) {\n      cin >> pts[j].x >> pts[j].y;\n    }\n    pts.push_back(pts[0]);\n    for (int j = 0; j < k; j++) {\n      pt p1 = pts[j], p2 = pts[j + 1];\n      ld a1 = pts[j].ang();\n      ld a2 = pts[j + 1].ang();\n      if (a1 < a2) {\n        swap(a1, a2);\n        swap(p1, p2);\n      }\n      if (a1 - a2 > PI) {\n        evs[-PI].add.emplace_back(p1, i);\n        evs[-PI].add.emplace_back(p2, i);\n        evs[-PI].addLine.emplace_back(line(p1, p2), i);\n\n        evs[a2].remove.emplace_back(p1, i);\n        evs[a2].remove.emplace_back(p2, i);\n        evs[a2].removeLine.emplace_back(line(p1, p2), i);\n\n        evs[a1].add.emplace_back(p1, i);\n        evs[a1].add.emplace_back(p2, i);\n        evs[a1].addLine.emplace_back(line(p1, p2), i);\n\n        evs[PI].remove.emplace_back(p1, i);\n        evs[PI].remove.emplace_back(p2, i);\n        evs[PI].removeLine.emplace_back(line(p1, p2), i);\n      } else {\n        evs[a2].add.emplace_back(p1, i);\n        evs[a2].add.emplace_back(p2, i);\n        evs[a2].addLine.emplace_back(line(p1, p2), i);\n\n        evs[a1].remove.emplace_back(p1, i);\n        evs[a1].remove.emplace_back(p2, i);\n        evs[a1].removeLine.emplace_back(line(p1, p2), i);\n      }\n    }\n  }\n\n  ld res = 0;\n  vector<vector<line>> polyLines(n);\n  multiset<polyPt> near;\n  ld prevX = -20;\n  for (auto[x, e]: evs) {\n    if (prevX != -20 && !near.empty()) {\n      int nearId = near.begin()->id;\n      vector<pt> subPoly;\n      for (line l1: {line(pt(0, 0), pt(cos(prevX), sin(prevX))), line(pt(0, 0), pt(cos(x), sin(x)))}) {\n        for (line l2: polyLines[nearId]) {\n          if (canIntersect(l1, l2)) {\n            subPoly.push_back(intersect(l1, l2));\n          }\n        }\n      }\n//      print(subPoly);\n      res += area(subPoly);\n    }\n    prevX = x;\n    for (auto[p, id]: e.add) {\n      near.insert(polyPt{p, id});\n    }\n    for (auto[p, id]: e.remove) {\n      near.erase(near.find(polyPt{p, id}));\n    }\n    for (auto[l, id]: e.addLine) {\n      polyLines[id].push_back(l);\n    }\n    for (auto[l, id]: e.removeLine) {\n      const auto &position = find(polyLines[id].begin(), polyLines[id].end(), l);\n      if (position != polyLines[id].end()) {\n        polyLines[id].erase(position);\n      }\n    }\n  }\n  cout << res;\n  return 0;\n}\n"
+}

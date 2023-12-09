@@ -1,0 +1,35 @@
+{
+    "id": 203995062,
+    "contestId": 765,
+    "creationTimeSeconds": 1682823591,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 765,
+        "index": "F",
+        "name": "Souvenirs",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 3100,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 765,
+        "members": [
+            {
+                "handle": "DaiRuiChen007"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1487059500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 560,
+    "memoryConsumedBytes": 34713600,
+    "source": "// LUOGU_RID: 109236901\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int MAXN=1e5+1,MAXQ=3e5+1,INF=1e9;\r\nint n,q;\r\nclass SegmentTree {\r\n\tprivate:\r\n\t\tstruct Node {\r\n\t\t\tint min;\r\n\t\t}\ttree[MAXN<<2];\r\n\t\tinline int left(int p) { return p<<1; }\r\n\t\tinline int right(int p) { return p<<1|1; }\r\n\t\tinline void pushup(int p) {\r\n\t\t\ttree[p].min=min(tree[left(p)].min,tree[right(p)].min);\r\n\t\t}\r\n\tpublic: \r\n\t\tinline void Build(int l=1,int r=n,int pos=1) {\r\n\t\t\ttree[pos].min=INF;\r\n\t\t\tif(l==r) return ;\r\n\t\t\tint mid=(l+r)>>1;\r\n\t\t\tBuild(l,mid,left(pos));\r\n\t\t\tBuild(mid+1,r,right(pos));\r\n\t\t}\r\n\t\tinline void Modify(int u,int x,int l=1,int r=n,int pos=1) {\r\n\t\t\tif(l==r) {\r\n\t\t\t\ttree[pos].min=min(tree[pos].min,x);\r\n\t\t\t\treturn ;\r\n\t\t\t}\r\n\t\t\tint mid=(l+r)>>1;\r\n\t\t\tif(u<=mid) Modify(u,x,l,mid,left(pos));\r\n\t\t\telse Modify(u,x,mid+1,r,right(pos));\r\n\t\t\tpushup(pos);\r\n\t\t}\r\n\t\tinline int Query(int u,int b,int l=1,int r=n,int pos=1) {\r\n\t\t\t//maximum index {i} in [1,u] s.t. a[i]<=b\r\n\t\t\tif(!u||tree[pos].min==INF||tree[pos].min>b) return 0;\r\n\t\t\tif(l==r) return l;\r\n\t\t\tint mid=(l+r)>>1;\r\n\t\t\tif(u<=mid) return Query(u,b,l,mid,left(pos));\r\n\t\t\telse {\r\n\t\t\t\tint ret=Query(u,b,mid+1,r,right(pos));\r\n\t\t\t\treturn ret?ret:Query(u,b,l,mid,left(pos));\r\n\t\t\t}\r\n\t\t}\r\n}\tTR;\r\nclass FenwickTree {\r\n\tprivate:\r\n\t\tint tree[MAXN];\r\n\t\tinline int lowbit(int x) { return x&-x; }\r\n\tpublic:\r\n\t\tinline void Init() { memset(tree,0x3f,sizeof(tree)); }\r\n\t\tinline void Modify(int x,int v) {\r\n\t\t\tfor(;x<=n;x+=lowbit(x)) tree[x]=min(tree[x],v);\r\n\t\t}\r\n\t\tinline int Query(int x) {\r\n\t\t\tint ret=INF;\r\n\t\t\tfor(;x;x-=lowbit(x)) ret=min(ret,tree[x]);\r\n\t\t\treturn ret;\r\n\t\t}\r\n}\tFT;\r\nstruct Query {\r\n\tint l,r,id;\r\n\tQuery(int _l=0,int _r=0,int _id=0): l(_l),r(_r),id(_id) {}\r\n};\r\nvector <Query> Q[MAXN];\r\nint a[MAXN],ans[MAXQ],ord[MAXN];\r\nstruct Update {\r\n\tint l,r,x;\r\n\tUpdate(int _l=0,int _r=0,int _x=0): l(_l),r(_r),x(_x) {}\r\n};\r\nvector <Update> I[MAXN];\r\ninline void Solve() {\r\n\tTR.Build(),FT.Init();\r\n\tiota(ord+1,ord+n+1,1);\r\n\tsort(ord+1,ord+n+1,[&](int x,int y) {\r\n\t\tif(a[x]==a[y]) return x<y;\r\n\t\treturn a[x]>a[y];\r\n\t});\r\n\tfor(int i=1;i<=n;++i) I[i].clear();\r\n\tfor(int i=1;i<=n;++i) {\r\n\t\tint u=ord[i],lst=u,minv=INF;\r\n\t\twhile(true) {\r\n\t\t\tlst=TR.Query(lst-1,minv);\r\n\t\t\tif(!lst) break;\r\n\t\t\tI[u].push_back(Update(lst,u,a[lst]-a[u]));\r\n\t\t\tminv=(a[lst]+a[u])/2;\r\n\t\t\tif(a[lst]==a[u]) break;\r\n\t\t}\r\n\t\tTR.Modify(u,a[u]);\r\n\t}\r\n\tfor(int i=1;i<=n;++i) {\r\n\t\tfor(auto x:I[i]) FT.Modify(n-x.l+1,x.x);\r\n\t\tfor(auto x:Q[i]) ans[x.id]=min(ans[x.id],FT.Query(n-x.l+1));\r\n\t}\r\n}\r\nsigned main() {\r\n\tscanf(\"%d\",&n);\r\n\tfor(int i=1;i<=n;++i) scanf(\"%d\",&a[i]);\r\n\tscanf(\"%d\",&q);\r\n\tfor(int i=1;i<=q;++i) {\r\n\t\tint l,r;\r\n\t\tscanf(\"%d%d\",&l,&r);\r\n\t\tQ[r].push_back(Query(l,r,i));\r\n\t}\r\n\tmemset(ans,0x3f,sizeof(ans));\r\n\tSolve();\r\n\tfor(int i=1;i<=n;++i) a[i]=-a[i];\r\n\tSolve();\r\n\tfor(int i=1;i<=q;++i) printf(\"%d\\n\",ans[i]);\r\n\treturn 0;\r\n}"
+}

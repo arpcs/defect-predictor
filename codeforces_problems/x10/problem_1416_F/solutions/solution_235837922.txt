@@ -1,0 +1,38 @@
+{
+    "id": 235837922,
+    "contestId": 1416,
+    "creationTimeSeconds": 1701776164,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1416,
+        "index": "F",
+        "name": "Showing Off",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3300,
+        "tags": [
+            "flows",
+            "graph matchings",
+            "greedy",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1416,
+        "members": [
+            {
+                "handle": "yhlyj"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601219100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 12,
+    "timeConsumedMillis": 2729,
+    "memoryConsumedBytes": 19968000,
+    "source": "// LUOGU_RID: 138328471\n#include <bits/stdc++.h>\r\nusing namespace std;\r\nconst int dx[] = {0, 1, 0, -1}, dy[] = {1, 0, -1, 0};\r\nint n, d[500005], ans[500005], m, S, cnt = -1, T, e[500005], ne[500005], h[500005], cur[500005], w[500005], ff[500005];\r\nvector <int> a[100005], g[100005];\r\nchar dir[500005];\r\nvoid add(int x, int y, int c){\r\n\tne[++cnt] = h[x], e[cnt] = y, w[cnt] = c, h[x] = cnt;\r\n\tne[++cnt] = h[y], e[cnt] = x, w[cnt] = 0, h[y] = cnt;\r\n}\r\nvoid addd(int x, int y, int l, int r){\r\n\tadd(x, y, r - l), ff[x] += l, ff[y] -= l;\r\n}\r\nint bfs(){\r\n\tmemset(d, -1, sizeof d);\r\n\tqueue <int> q;\r\n\tq.push(S), d[S] = 0;\r\n\twhile(!q.empty()){\r\n\t\tint t = q.front(); q.pop();\r\n\t\tcur[t] = h[t];\r\n\t\tfor(int i = h[t]; ~i; i = ne[i])\r\n\t\t\tif(w[i] > 0 && d[e[i]] == -1)\r\n\t\t\t\tq.push(e[i]), d[e[i]] = d[t] + 1;\r\n\t}\r\n\treturn d[T];\r\n}\r\nint find(int x, int mf){\r\n\tif(x == T) return mf;\r\n\tint flow = 0;\r\n\tfor(int i = h[x]; ~i; i = ne[i]){\r\n\t\tcur[x] = i;\r\n\t\tif(d[e[i]] == d[x] + 1 && w[i]){\r\n\t\t\tint fw = find(e[i], min(w[i], mf));\r\n\t\t\tmf -= fw, flow += fw, w[i] -= fw, w[i ^ 1] += fw;\r\n\t\t}\r\n\t\tif(!mf) break;\r\n\t}\r\n\treturn flow;\r\n}\r\nint dinic(){\r\n\tint ans = 0;\r\n\twhile(bfs() != -1) ans += find(S, 1e9);\r\n\treturn ans;\r\n}\r\nvoid build(int &flag){\r\n\tfor(int i = 1; i <= n; i++)\r\n\t\tfor(int j = 1; j <= m; j++){\r\n\t\t\tfor(int k = 0; k < 4; k++){\r\n\t\t\t\tint sx = i + dx[k], sy = j + dy[k];\r\n\t\t\t\tif(sx < 1 || sx > n || sy < 1 || sy > m) continue;\r\n\t\t\t\tif(a[sx][sy] == a[i][j]){\r\n\t\t\t\t\tg[i][j]++;\r\n\t\t\t\t\tif(i + j & 1)\r\n\t\t\t\t\t\taddd((i - 1) * m + j, (sx - 1) * m + sy, 0, 1);\r\n\t\t\t\t}\r\n\t\t\t\telse if(a[sx][sy] < a[i][j]) g[i][j] += 10;\r\n\t\t\t}\r\n\t\t\tif(g[i][j] == 0) flag = 1;\r\n\t\t\tif(i + j & 1) addd(n * m + 1, (i - 1) * m + j, g[i][j] < 10, 1);\r\n\t\t\telse addd((i - 1) * m + j, n * m + 2, g[i][j] < 10, 1);\r\n\t\t}\r\n\taddd(n * m + 2, n * m + 1, 0, 1e9);\r\n\tfor(int i = 1; i <= n * m + 2; i++)\r\n\t\tif(ff[i] > 0) add(i, T, ff[i]);\r\n\t\telse if(ff[i] < 0) add(S, i, -ff[i]);\r\n}\r\nvoid findans(){\r\n\tfor(int i = 1; i <= n; i++)\r\n\t\tfor(int j = 1; j <= m; j++)\r\n\t\t\tif(i + j & 1)\r\n\t\t\t\tfor(int k = h[(i - 1) * m + j]; ~k; k = ne[k])\r\n\t\t\t\t\tif(!w[k] && e[k] <= n * m){\r\n\t\t\t\t\t\tint nid = (i - 1) * m + j;\r\n\t\t\t\t\t\tif(e[k] == nid + 1)\r\n\t\t\t\t\t\t\tdir[e[k]] = 'L', dir[nid] = 'R';\r\n\t\t\t\t\t\tif(e[k] == nid - 1)\r\n\t\t\t\t\t\t\tdir[e[k]] = 'R', dir[nid] = 'L';\r\n\t\t\t\t\t\tif(e[k] == nid + m)\r\n\t\t\t\t\t\t\tdir[e[k]] = 'U', dir[nid] = 'D';\r\n\t\t\t\t\t\tif(e[k] == nid - m)\r\n\t\t\t\t\t\t\tdir[e[k]] = 'D', dir[nid] = 'U';\r\n\t\t\t\t\t\tans[e[k]] = a[i][j] - 1, ans[nid] = 1;\r\n\t\t\t\t\t}\r\n\tfor(int i = 1; i <= n; i++)\r\n\t\tfor(int j = 1; j <= m; j++)\r\n\t\t\tif(!ans[(i - 1) * m + j])\r\n\t\t\t\tfor(int k = 0; k < 4; k++){\r\n\t\t\t\t\tint sx = i + dx[k], sy = j + dy[k];\r\n\t\t\t\t\tif(sx < 1 || sx > n || sy < 1 || sy > m) continue;\r\n\t\t\t\t\tif(a[sx][sy] < a[i][j]){\r\n\t\t\t\t\t\tans[(i - 1) * m + j] = a[i][j] - a[sx][sy];\r\n\t\t\t\t\t\tdir[(i - 1) * m + j] = (k == 0) * 'R' + (k == 1) * 'D' + (k == 2) * 'L' + (k == 3) * 'U';\r\n//\t\t\t\t\t\tcout << i << ' ' << j << endl;\r\n\t\t\t\t\t\tbreak;\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n}\r\nsigned main(){\r\n\tint TT;\r\n\tcin >> TT;\r\n\twhile(TT--){\r\n\t\tmemset(h, -1, sizeof h), memset(ff, 0, sizeof ff), memset(ans, 0, sizeof ans), cnt = -1;\r\n\t\tint flag = 0;\r\n\t\tcin >> n >> m; S = n * m + 3, T = n * m + 4;\r\n\t\tfor(int i = 1; i <= n; i++){\r\n\t\t\ta[i].resize(m + 1), g[i].clear(), g[i].resize(m + 1);\r\n\t\t\tfor(int j = 1; j <= m; j++) cin >> a[i][j];\r\n\t\t}\r\n\t\tbuild(flag), dinic();\r\n\t\tfor(int i = h[S]; ~i; i = ne[i]) if(w[i]) flag = 1;\r\n\t\tif(flag){\r\n\t\t\tcout << \"NO\\n\";\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tfindans();\r\n\t\tcout << \"YES\\n\";\r\n\t\tfor(int i = 1; i <= n; i++, cout << endl)\r\n\t\t\tfor(int j = 1; j <= m; j++)\r\n\t\t\t\tcout << ans[(i - 1) * m + j] << ' ';\r\n\t\tfor(int i = 1; i <= n; i++, cout << endl)\r\n\t\t\tfor(int j = 1; j <= m; j++)\r\n\t\t\t\tcout << dir[(i - 1) * m + j] << ' ';\r\n\t}\r\n\treturn 0;\r\n}"
+}

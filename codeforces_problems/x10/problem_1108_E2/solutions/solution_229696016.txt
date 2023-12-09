@@ -1,0 +1,35 @@
+{
+    "id": 229696016,
+    "contestId": 1108,
+    "creationTimeSeconds": 1698239455,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1108,
+        "index": "E2",
+        "name": "Array and Segments (Hard version)",
+        "type": "PROGRAMMING",
+        "rating": 2100,
+        "tags": [
+            "data structures",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1108,
+        "members": [
+            {
+                "handle": "To_be_or_Not_to_be_8"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1548254100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 4812800,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define ll long long\r\n#define F first\r\n#define S second\r\nconst ll N = 1e5 + 20 ;\r\nconst ll MOD = 998244353 ;\r\nconst ll Inf = 2e18 ;\r\nconst long double eps = 1e-7;\r\nll n , a[N] , b[N] , d , m , k , u , v , t , x , y  , z ,Timer  , tt = 1  ;\r\npair < pair < ll , ll  > , ll > P[N] ;\r\nstruct Seg_Tree\r\n{\r\n    vector < ll > Mins ,  Maxs , G;\r\n    ll Size = 1 ;\r\n    void  inti(ll  n)\r\n    {\r\n        while(Size < n)Size *= 2 ;\r\n        Mins.assign(2 * Size , 0) ;\r\n        G.assign(2 * Size , 0);\r\n        Maxs.assign(2 * Size , 0) ;\r\n    }\r\n    void ProPagate(ll x , ll lx , ll rx)\r\n    {\r\n        if(rx - lx == 1)return;\r\n\r\n        G[2 * x +  1]   += G[x] ;\r\n        G[2 * x +  2]   += G[x] ;\r\n\r\n        Mins[2 * x + 1] += G[x] ;\r\n        Mins[2 * x + 2] += G[x] ;\r\n\r\n        Maxs[2 * x + 1] += G[x] ;\r\n        Maxs[2 * x + 2] += G[x] ;\r\n\r\n        G[x]  = 0 ;\r\n    }\r\n    void Update(ll x  , ll lx , ll rx , ll l , ll r)\r\n    {\r\n       if(lx >= r || rx <= l)return ;\r\n       if(l <= lx && rx <= r)\r\n       {\r\n          G[x] += v ;\r\n          Mins[x] += v ;\r\n          Maxs[x] += v ;\r\n          return ;\r\n       }\r\n       ll M = (lx  +  rx) >> 1 ;\r\n       ProPagate(x , lx , rx) ;\r\n       Update(2 * x + 1 , lx , M , l , r) ;\r\n       Update(2 * x + 2 , M , rx , l , r) ;\r\n       Mins[x] = min(Mins[2 * x + 1] , Mins[2 * x + 2]) ;\r\n       Maxs[x] = max(Maxs[2 * x + 1] , Maxs[2 * x + 2]) ;\r\n    }\r\n    void Update(ll l , ll r)\r\n    {\r\n       Update( 0 ,  0 ,  Size , l , r);\r\n    }\r\n    pair < ll , ll > Get(ll x , ll lx , ll rx , ll l , ll r)\r\n    {\r\n       if(lx >= r || rx <= l)return {Inf , -Inf} ;\r\n       if(l <= lx && rx <= r)\r\n       {\r\n          return {Mins[x] , Maxs[x]} ;\r\n       }\r\n       ProPagate(x , lx , rx)  ;\r\n       ll M = (lx  +  rx) >> 1 ;\r\n       auto Res1 =  Get(2 * x + 1 , lx , M , l , r) ;\r\n       auto Res2 =  Get(2 * x + 2 , M , rx , l , r) ;\r\n       return {min(Res1.F,Res2.F) + G[x] , max(Res1.S , Res2.S) + G[x]};\r\n    }\r\n    pair < ll , ll > Get(ll l , ll r)\r\n    {\r\n        return Get(0 , 0 , Size , l , r) ;\r\n    }\r\n};\r\nvoid Solve()\r\n{\r\n\r\n   scanf(\"%lld%lld\",&n,&m);\r\n\r\n   for(ll i = 1 ; i <= n ; ++i)\r\n   {\r\n       scanf(\"%lld\",&a[i]) ;\r\n   }\r\n\r\n   Seg_Tree St ;\r\n   St.inti(n + 1) ;\r\n\r\n\r\n   for(ll i = 1 ; i <= m ; ++i)\r\n   {\r\n       cin >> P[i].F.F >> P[i].F.S ;\r\n       P[i].S = i ;\r\n       v = -1 ;\r\n       St.Update(P[i].F.F , P[i].F.S + 1);\r\n   }\r\n\r\n   for(ll i  = 1 ; i <= n ; ++i)\r\n   {\r\n     v = a[i] ;\r\n     St.Update(i , i + 1) ;\r\n   }\r\n\r\n   sort(P + 1 , P + m + 1) ;\r\n\r\n   vector < ll >  Ans ;\r\n\r\n   ll Tar = 0 , j = 1 , ans = -Inf ;\r\n\r\n   for(ll i = 1 ; i <= n ; ++i)\r\n   {\r\n     set < ll > xx , yy ;\r\n     while(P[j].F.F == i)\r\n     {\r\n         v = +1 ;\r\n         St.Update(P[j].F.F , P[j].F.S + 1 );\r\n         xx.insert(P[j].S) ;\r\n         yy.insert(j);\r\n         j++;\r\n     }\r\n     auto Z = St.Get(1 , n + 1) ;\r\n     if(Z.S - Z.F > ans)\r\n     {\r\n         ans = Z.S - Z.F  ;\r\n         Tar = i ;\r\n         Ans.clear();\r\n         for(int j = 1 ; j <= m ; ++j)if(xx.find(j) == xx.end())Ans.push_back(j);\r\n     }\r\n     for(auto x : yy)\r\n     {\r\n         v = -1 ;\r\n         St.Update(P[x].F.F , P[x].F.S + 1 );\r\n     }\r\n   }\r\n\r\n   sort(a + 1 , a + n + 1) ;\r\n\r\n   if(a[n] - a[1] > ans)\r\n   {\r\n       cout << a[n] - a[1] << \"\\n\";\r\n       cout << 0 << \"\\n\";\r\n       return;\r\n   }\r\n\r\n\r\n\r\n   cout << ans << \"\\n\";\r\n   cout << Ans.size() << \"\\n\";\r\n   for(auto x : Ans)\r\n   cout << x << \" \" ;\r\n\r\n\r\n}\r\nint main(){\r\n   // scanf(\"%lld\",&tt);\r\n    while(tt--){\r\n   //   ++Timer;\r\n      Solve();\r\n\r\n    }\r\n}\r\n"
+}

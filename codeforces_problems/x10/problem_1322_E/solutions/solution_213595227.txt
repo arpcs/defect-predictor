@@ -1,0 +1,35 @@
+{
+    "id": 213595227,
+    "contestId": 1322,
+    "creationTimeSeconds": 1689224752,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1322,
+        "index": "E",
+        "name": "Median Mountain Range",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1322,
+        "members": [
+            {
+                "handle": "luogu_bot4"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1583573700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 10956800,
+    "source": "// LUOGU_RID: 115248860\n#include<bits/stdc++.h>\r\n#define N 500009\r\nusing namespace std;\r\nint read(){\r\n\tint x=0,fl=1;char ch=getchar();\r\n\twhile(ch<'0'||ch>'9'){if(ch=='-')fl=-1;ch=getchar();}\r\n\twhile(ch>='0'&&ch<='9')x=x*10+(ch-'0'),ch=getchar();\r\n\treturn x*fl;\r\n}\r\nvoid write(int x){\r\n\tif(x<0)putchar('-'),x=-x;\r\n\tif(x>9)write(x/10);\r\n\tputchar(x%10+'0');\r\n}\r\nint type,n;\r\nint a[N],ans[N];\r\nbool ok[N];\r\nset<int>im1;\r\nint check(int x){\r\n\tif(ok[x]==1&&(x==n||ok[x+1]==1))return 1;\r\n\tif(ok[x]==1&&(x==1||ok[x-1]==1))return 1;\r\n\tif(ok[x]==0&&(x==n||ok[x+1]==0))return 0;\r\n\tif(ok[x]==0&&(x==1||ok[x-1]==0))return 0;\r\n\treturn -1;\r\n}\r\nstruct{\r\n\tint nxt[N];\r\n\tint findnxt(int x){\r\n\t\tif(x==nxt[x])return x;\r\n\t\treturn nxt[x]=findnxt(nxt[x]);\r\n\t}\r\n\tvoid clear(){\r\n\t\tfor(int i=0;i<=n+1;i++)nxt[i]=i;\r\n\t}\r\n}ansr,im0l,im0r;\r\nvoid setans(int x,int val){\r\n\tif(ans[x]!=-1)return;\r\n\tans[x]=val;ansr.nxt[x]=x+1;\r\n}\r\nvoid updateans(int l,int r,int val){\r\n\t//cerr<<l<<\"~\"<<r<<\":\"<<val<<endl;\r\n\tfor(int i=ansr.findnxt(l);i<=r;i=ansr.findnxt(i))setans(i,val);\r\n}\r\nint cnt;\r\nvoid recalc(int l,int r,int val){\r\n\tvector<pair<int,int>>s;\r\n\tfor(int i=im0r.findnxt(l);i<=r;i=im0r.findnxt(i+1))s.push_back(make_pair(i,0));\r\n\tfor(auto it=im1.lower_bound(l);it!=im1.end()&&(*it)<=r;it++){\r\n\t\ts.push_back(make_pair(*it,1));\r\n\t}\r\n\tsort(s.begin(),s.end());\r\n\t//for(auto x:s)cerr<<x.first<<\"-\"<<x.second<<endl;\r\n\tpair<int,int>lst=make_pair(-1,0);\r\n\tfor(auto x:s){\r\n\t\tif(lst.first==-1){\r\n\t\t\tlst=x;\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tif(lst.second==x.second){\r\n\t\t\tif(x.first-lst.first-1==0){lst=x;continue;}\r\n\r\n\t\t\tcnt=max(cnt,(x.first-lst.first)/2);\r\n\t\t\tif(x.second==0){lst=x;continue;}\r\n\t\t\tassert(x.second==1);\r\n\t\t\tupdateans(lst.first+1,x.first-1,val);\r\n\t\t}\r\n\t\telse{\r\n\t\t\tint tmp=(x.first-lst.first-1)/2;\r\n\t\t\tif(lst.second==1)updateans(lst.first+1,lst.first+tmp,val);\r\n\t\t\telse updateans(x.first-tmp,x.first-1,val);\r\n\t\t\tcnt=max(cnt,tmp);\r\n\t\t}\r\n\t\tlst=x;\r\n\t}\r\n}\r\nvoid solve(){\r\n\tim0l.clear();im0r.clear();\r\n\tansr.clear();im1.clear();\r\n\tcnt=0;\r\n\tfill(ok,ok+N,0);\r\n\tfill(ans,ans+N,-1);\r\n\tvector<int>v;\r\n\tfor(int i=1;i<=n;i++)v.push_back(i);\r\n\tsort(v.begin(),v.end(),[&](const int&x,const int&y){return a[x]<a[y];});\r\n\t\r\n\tvector<int>v2;\r\n\tfor(int gd=0;gd<n;gd++){\r\n\t\tint i=v[gd];\r\n\t\tok[i]^=1;\r\n\t\t//update(i);\r\n\t\tif(check(i)!=0){if(im0l.findnxt(i)==i)im0l.nxt[i]=i-1,im0r.nxt[i]=i+1;}\r\n\t\tif(i>1&&check(i-1)!=0){if(im0l.findnxt(i-1)==i-1)im0l.nxt[i-1]=i-2,im0r.nxt[i-1]=i;}\r\n\t\tif(i<n&&check(i+1)!=0){if(im0l.findnxt(i+1)==i+1)im0l.nxt[i+1]=i,im0r.nxt[i+1]=i+2;}\r\n\t\t\r\n\t\tif(check(i)==1)im1.insert(i),setans(i,a[i]);\r\n\t\tif(i>1&&check(i-1)==1)im1.insert(i-1),setans(i-1,a[i]);\r\n\t\tif(i<n&&check(i+1)==1)im1.insert(i+1),setans(i+1,a[i]);\r\n\t\t\r\n\t\tv2.push_back(i);\r\n\t\t\r\n\t\tif(gd==n-1||a[v[gd]]!=a[v[gd+1]]){\r\n\t\t\t//try the bound please!!!!!!!!!!!!!!!!!!!!!!!!!1\r\n\t\t\tfor(auto i:v2){\r\n\t\t\t\tint l=1,r=n;\r\n\t\t\t\tr=min(r,im0r.findnxt(i+1));\r\n\t\t\t\tauto it=im1.upper_bound(i+1);\r\n\t\t\t\tif(it!=im1.end())r=min(r,*it);\r\n\t\t\t\t\r\n\t\t\t\tl=max(l,im0l.findnxt(i-1));\r\n\t\t\t\tit=im1.lower_bound(i-1);\r\n\t\t\t\tif(it!=im1.begin())it--,l=max(l,*it);\r\n\t\t\t\trecalc(l,r,a[i]);\r\n\t\t\t}\r\n\t\t\tv2.clear();\r\n\t\t}\r\n\t\t\r\n\t}\r\n}\r\nint main(){\r\n\t//freopen(\"walk.in\",\"r\",stdin);\r\n\t//freopen(\"walk.out\",\"w\",stdout);\r\n\t//type=read();\r\n\tn=read();\r\n\tfor(int i=1;i<=n;i++)a[i]=read();\r\n\tsolve();\r\n\twrite(cnt);putchar('\\n');\r\n\tif(type){\r\n\t\tfor(int i=1;i<=n;i++)write(ans[i]),putchar(' ');\r\n\t\tputchar('\\n');\r\n\t}\r\n\treturn 0;\r\n}"
+}

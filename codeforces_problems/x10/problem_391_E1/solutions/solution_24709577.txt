@@ -1,0 +1,32 @@
+{
+    "id": 24709577,
+    "contestId": 391,
+    "creationTimeSeconds": 1487220739,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 391,
+        "index": "E1",
+        "name": "Three Trees",
+        "type": "PROGRAMMING",
+        "points": 11.0,
+        "tags": []
+    },
+    "author": {
+        "contestId": 391,
+        "members": [
+            {
+                "handle": "Tung_Duong"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1392573600
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS1",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 74240000,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\ntypedef long long ll;\ntypedef pair<int, int> ii;\nconst int maxn = (int) 2e5 + 5;\n#define pb push_back\n#define fi first\n#define se second\n\nstruct TREE {\n    int n, sz[maxn], bg[maxn], ed[maxn], N, h[maxn], lg2[maxn], mn[maxn][18], T2, T3;\n    ll sum = 0, tmp = 0, res = 0, D[maxn];\n    ii cand[maxn];\n    vector<int> G[maxn];\n    void input() {\n        for (int i = 1; i < n; i ++) {\n            int u, v; cin >> u >> v;\n            G[u].pb(v);\n            G[v].pb(u);\n        }\n    }\n    void dfs(int u, int p) {\n        sz[u] = 1;\n        mn[++ N][0] = h[u];\n        bg[u] = ed[u] = N;\n        for (auto v : G[u]) if(v != p) {\n            h[v] = h[u] + 1;\n            dfs(v, u);\n            sz[u] += sz[v];\n            mn[++ N][0] = h[u];\n            ed[u] = N;\n        }\n        if(p != -1) sum += 1LL * sz[u] * (n - sz[u]), D[1] += sz[u];\n    }\n    void redfs(int u, int p) {\n        if(p != -1) D[u] = D[p] + n - 2 * sz[u]; // + sz[p];\n        for (auto v : G[u]) if(v != p) redfs(v, u);\n    }\n    int dist(int u, int v) {\n        if(bg[u] > bg[v]) swap(u, v);\n        int l = bg[u], r = ed[v], k = lg2[r - l + 1];\n        return h[u] + h[v] - 2 * min(mn[l][k], mn[r - (1 << k) + 1][k]);\n    }\n    ll f(int u, int v) {\n        return D[u] * T2 + D[v] * T3 + 1LL * (dist(u, v) + 2) * T2 * T3;\n    }\n    void calc(int u, int p) {\n        cand[u] = ii(u, -1);\n        for (auto v : G[u]) if(v != p) {\n            calc(v, u);\n            if(cand[u].se == -1 || f(u, cand[u].se) < f(u, cand[v].fi)) cand[u].se = cand[v].fi;\n            if(f(u, cand[u].se) > f(u, cand[u].fi)) swap(cand[u].fi, cand[u].se);\n        }\n    }\n    void modify(int u, int p) {\n        if(p != -1) {\n            int v = cand[p].fi;\n            if(f(u, cand[u].fi) <= f(u, v)) {\n                swap(cand[u].fi, cand[u].se);\n                cand[u].fi = v;\n            }\n            else if(f(u, cand[u].se) <= f(u, v)) cand[u].se = v;\n            v = cand[p].se;\n            if(f(u, cand[u].fi) <= f(u, v)) {\n                swap(cand[u].fi, cand[u].se);\n                cand[u].fi = v;\n            }\n            else if(f(u, cand[u].se) <= f(u, v)) cand[u].se = v;\n        }\n        for (auto x : G[u]) if(x != p) modify(x, u);\n    }\n    void solve() {\n        dfs(1, -1);\n        redfs(1, -1);\n        for (int i = 1; i <= N; i ++) lg2[i] = log2(i);\n        for(int k = 1; (1 << k) <= N; k ++) for (int i = 1; i + (1 << k) - 1 <= N; i ++) {\n            mn[i][k] = min(mn[i][k - 1], mn[i + (1 << k - 1)][k - 1]);\n        }\n        calc(1, -1);\n        modify(1, -1);\n        for (int i = 1; i <= n; i ++) {\n            //cout << D[i] << endl;\n            res = max(res, f(i, cand[i].fi));\n            assert(cand[i].fi != cand[i].se);\n            tmp = max(tmp, D[i] * (T2 + T3));\n        }\n        //for (int i = 1; i <= n; i ++) for (int j = 1; j <= n; j ++) res = max(res, f(i, j));\n        //for (int i = 1; i <= n; i ++) for (int j = 1; j <= n; j ++) {\n        //    cout << i << ' ' << j << ' ' << D[i] << ' ' << D[j] << ' ' << dist(i,j) << endl;\n        //}\n        //cout << res << endl;\n        res += 1LL * n * (T2 + T3);\n    }\n};\n\nTREE A, B, C;\n\nint main() {\n    //freopen(\"test.txt\", \"r\", stdin);\n    ios_base::sync_with_stdio(0); cin.tie(0);\n    cin >> A.n >> B.n >> C.n;\n    A.T2 = B.n, A.T3 = C.n;\n    B.T2 = A.n, B.T3 = C.n;\n    C.T2 = B.n, C.T3 = A.n;\n    A.input();\n    B.input();\n    C.input();\n    A.solve();\n    B.solve();\n    C.solve();\n//    cout << A.res << endl;\n//    cout << B.tmp << endl;\n//    cout << C.tmp << endl;\n    ll ans = max(A.res + B.tmp + C.tmp, max(A.tmp + B.res + C.tmp, A.tmp + B.tmp + C.res));\n    ans += A.sum + B.sum + C.sum;\n    cout << ans << '\\n';\n}\n\n"
+}

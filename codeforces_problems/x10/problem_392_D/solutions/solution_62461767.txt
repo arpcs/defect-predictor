@@ -1,0 +1,34 @@
+{
+    "id": 62461767,
+    "contestId": 392,
+    "creationTimeSeconds": 1570955481,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 392,
+        "index": "D",
+        "name": "Three Arrays",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 392,
+        "members": [
+            {
+                "handle": "AliShahali1382"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1392728400
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 60,
+    "timeConsumedMillis": 186,
+    "memoryConsumedBytes": 14438400,
+    "source": "#include <bits/stdc++.h>\r\n#pragma GCC optimize (\"O2\")\r\n#pragma GCC optimize (\"unroll-loops\")\r\n//#pragma GCC optimize(\"no-stack-protector,fast-math\")\r\n\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef pair<int, int> pii;\r\ntypedef pair<pii, int> piii;\r\ntypedef pair<ll, ll> pll;\r\n#define debug(x) cerr<<#x<<'='<<(x)<<endl;\r\n#define debugp(x) cerr<<#x<<\"= {\"<<(x.first)<<\", \"<<(x.second)<<\"}\"<<endl;\r\n#define debug2(x, y) cerr<<\"{\"<<#x<<\", \"<<#y<<\"} = {\"<<(x)<<\", \"<<(y)<<\"}\"<<endl;\r\n#define debugv(v) cerr<<#v<<\" : \";for (auto x:v) cerr<<x<<' ';cerr<<endl;\r\n#define all(x) x.begin(), x.end()\r\n#define pb push_back\r\n#define kill(x) return cout<<x<<'\\n', 0;\r\n\r\nconst ld eps=1e-7;\r\nconst int inf=10000010;\r\nconst ll INF=10000000000000010LL;\r\nconst int mod = 1000000007;\r\nconst int MAXN = 100010, LOG=20;\r\n\r\nint n, m, k, u, v, x, y, t, a, b, ans;\r\nint A[3][MAXN];\r\nint B[3][3*MAXN];\r\nint seg[MAXN<<2], lazy[MAXN<<2], Mn[MAXN<<2], Mx[MAXN<<2];\r\nvector<int> compress;\r\nset<piii> st;\r\n\r\nint build(int id, int tl, int tr){\r\n\tif (tr-tl==1) return seg[id]=tl;\r\n\tint mid=(tl+tr)>>1;\r\n\treturn seg[id]=min(build(id<<1, tl, mid), build(id<<1 | 1, mid, tr));\r\n}\r\n\r\nvoid add_lazy(int id, int val){\r\n\tseg[id]+=val;\r\n\tMn[id]+=val;\r\n\tMx[id]+=val;\r\n\tlazy[id]+=val;\r\n}\r\n\r\nvoid shift(int id){\r\n\tif (!lazy[id]) return ;\r\n\tadd_lazy(id<<1, lazy[id]);\r\n\tadd_lazy(id<<1 | 1, lazy[id]);\r\n\tlazy[id]=0;\r\n}\r\n\r\nvoid Add(int id, int tl, int tr, int l, int r, int val){\r\n\tif (tr<=l || r<=tl) return ;\r\n\tif (l<=tl && tr<=r){\r\n\t\tadd_lazy(id, val);\r\n\t\treturn ;\r\n\t}\r\n\tshift(id);\r\n\tint mid=(tl+tr)>>1;\r\n\tAdd(id<<1, tl, mid, l, r, val);\r\n\tAdd(id<<1 | 1, mid, tr, l, r, val);\r\n\tseg[id]=min(seg[id<<1], seg[id<<1 | 1]);\r\n\tMn[id]=min(Mn[id<<1], Mn[id<<1 | 1]);\r\n\tMn[id]=max(Mx[id<<1], Mx[id<<1 | 1]);\r\n}\r\n\r\nvoid Maximize(int id, int tl, int tr, int l, int r, int val){\r\n\tif (r<=tl || tr<=l || Mn[id]>=val) return ;\r\n\tif (l<=tl && tr<=r && Mn[id]==Mx[id]){\r\n\t\tadd_lazy(id, val-Mx[id]);\r\n\t\treturn ;\r\n\t}\r\n\tshift(id);\r\n\tint mid=(tl+tr)>>1;\r\n\tMaximize(id<<1, tl, mid, l, r, val);\r\n\tMaximize(id<<1 | 1, mid, tr, l, r, val);\r\n\tseg[id]=min(seg[id<<1], seg[id<<1 | 1]);\r\n\tMn[id]=min(Mn[id<<1], Mn[id<<1 | 1]);\r\n\tMx[id]=max(Mx[id<<1], Mx[id<<1 | 1]);\r\n}\r\n\r\nvoid Condition(int num){\r\n\tif (!B[1][num] && B[2][num]) Maximize(1, 0, n+1, 0, n+1, B[2][num]);\r\n\tif (B[1][num] && !B[2][num]) Maximize(1, 0, n+1, 0, B[1][num], inf);\r\n\tif (B[1][num] && B[2][num]) Maximize(1, 0, n+1, 0, B[1][num], B[2][num]);\r\n}\r\n\r\nint main(){\r\n\tios_base::sync_with_stdio(false);cin.tie(0);cout.tie(0);\r\n\t//freopen(\"input.txt\", \"r\", stdin);\r\n\t//freopen(\"output.txt\", \"w\", stdout);\r\n\tcin>>n;\r\n\tfor (int j=0; j<3; j++) for (int i=1; i<=n; i++) cin>>A[j][i], compress.pb(A[j][i]);\r\n\tsort(all(compress));\r\n\tcompress.resize(unique(all(compress))-compress.begin());\r\n\tfor (int j=0; j<3; j++) for (int i=n; i; i--) B[j][A[j][i]=lower_bound(all(compress), A[j][i])-compress.begin()]=i;\r\n\r\n\tbuild(1, 0, n+1);\r\n\tfor (int i=0; i<compress.size(); i++) if (!B[0][i]){\r\n\t\tif (!B[1][i] && !B[2][i]) continue ;\r\n\t\tCondition(i);\r\n\t}\r\n\r\n\tans=seg[1]+n;\r\n\tfor (int i=n; i; i--){\r\n\t\tint num=A[0][i];\r\n\t\tif (B[0][num]==i){\r\n\t\t\tif (!B[1][num] && !B[2][num]) break ;\r\n\t\t\tCondition(num);\r\n\t\t}\r\n\t\tans=min(ans, seg[1]+i-1);\r\n\t}\r\n\tcout<<ans<<'\\n';\r\n\t\r\n\treturn 0;\r\n}\r\n"
+}

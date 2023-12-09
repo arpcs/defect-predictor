@@ -1,0 +1,39 @@
+{
+    "id": 230634872,
+    "contestId": 467,
+    "creationTimeSeconds": 1698736079,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 467,
+        "index": "D",
+        "name": "Fedor and Essay",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 467,
+        "members": [
+            {
+                "handle": "luogu_bot5"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1411054200
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 68,
+    "timeConsumedMillis": 78,
+    "memoryConsumedBytes": 5017600,
+    "source": "// LUOGU_RID: 132589910\n#include <bits/stdc++.h>\n\nnamespace std {\n\ttemplate<class T>\n\tconstexpr bool chmax(T &a, const T &b) {\n\t\tif (a < b) {\n\t\t\ta = b;\n\t\t\treturn true;\n\t\t}\n\t\treturn false;\n\t}\n\ttemplate<class T>\n\tconstexpr bool chmin(T &a, const T &b) {\n\t\tif (a > b) {\n\t\t\ta = b;\n\t\t\treturn true;\n\t\t}\n\t\treturn false;\n\t}\n}\n\n#ifdef LOCAL\n#include <debug.h>\n#else\n#define debug(...)\n#endif\n\nstd::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());\n\nstd::string lower(std::string s) {\n\tfor (char &c : s) {\n\t\tif (isupper(c)) {\n\t\t\tc = tolower(c);\n\t\t}\n\t}\n\n\treturn s;\n}\n\nvoid flying() {\n\tint n;\n\tstd::cin >> n;\n\n\tstd::map<std::string, int> id;\n\tint g = 0;\n\n\tstd::vector<int> a(n);\n\tfor (int i = 0; i < n; i++) {\n\t\tstd::string s;\n\t\tstd::cin >> s;\n\n\t\ts = lower(s);\n\n\t\tif (!id.contains(s)) {\n\t\t\tid[s] = g++;\n\t\t}\n\n\t\ta[i] = id[s];\n\t}\n\n\tint m;\n\tstd::cin >> m;\n\n\tstd::vector<int> u(m), v(m);\n\n\tfor (int i = 0; i < m; i++) {\n\t\tstd::string su, sv;\n\t\tstd::cin >> su >> sv;\n\n\t\tsu = lower(su), sv = lower(sv);\n\n\t\tif (!id.contains(su)) {\n\t\t\tid[su] = g++;\n\t\t}\n\t\tif (!id.contains(sv)) {\n\t\t\tid[sv] = g++;\n\t\t}\n\n\t\tu[i] = id[su], v[i] = id[sv];\n\t}\n\n\tstd::vector<std::vector<int>> G(g);\n\tfor (int i = 0; i < m; i++) {\n\t\tG[u[i]].push_back(v[i]);\n\t}\n\n\tstd::vector<std::pair<int, int>> wg(g);\n\tfor (auto [s, i] : id) {\n\t\twg[i] = {std::count(s.begin(), s.end(), 'r'), s.size()};\n\t}\n\n\tstd::vector<int> dfn(g, -1), low(g);\n\tint ord = 0;\n\tstd::vector<int> stk;\n\tstd::vector<bool> instk(g);\n\tstd::vector<int> scc(g);\n\tint h = 0;\n\n\tstd::function<void(int)> tarjan = [&](int u) {\n\t\tdfn[u] = low[u] = ord++;\n\t\tstk.push_back(u);\n\t\tinstk[u] = true;\n\n\t\tfor (int v : G[u]) {\n\t\t\tif (dfn[v] == -1) {\n\t\t\t\ttarjan(v);\n\n\t\t\t\tstd::chmin(low[u], low[v]);\n\t\t\t} else if (instk[v]) {\n\t\t\t\tstd::chmin(low[u], dfn[v]);\n\t\t\t}\n\t\t}\n\n\t\tif (low[u] == dfn[u]) {\n\t\t\twhile (true) {\n\t\t\t\tint top = stk.back();\n\t\t\t\tstk.pop_back();\n\t\t\t\tscc[top] = h;\n\t\t\t\tinstk[top] = false;\n\n\t\t\t\tif (top == u) {\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\t\t\th++;\n\t\t}\n\t};\n\n\tfor (int i = 0; i < g; i++) {\n\t\tif (dfn[i] == -1) {\n\t\t\ttarjan(i);\n\t\t}\n\t}\n\n\tstd::vector<std::pair<int, int>> wh(h, {2e9, 2e9});\n\tfor (int i = 0; i < g; i++) {\n\t\tstd::chmin(wh[scc[i]], wg[i]);\n\t}\n\n\tstd::vector<std::vector<int>> H(h);\n\tfor (int u = 0; u < g; u++) {\n\t\tfor (int v : G[u]) {\n\t\t\tif (scc[u] != scc[v]) {\n\t\t\t\tH[scc[u]].push_back(scc[v]);\n\t\t\t}\n\t\t}\n\t}\n\n\tstd::vector<std::pair<int, int>> dp(h, {-1, -1});\n\n\tstd::function<std::pair<int, int>(int)> trav = [&](int u) {\n\t\tif (dp[u] != std::pair{-1, -1}) {\n\t\t\treturn dp[u];\n\t\t}\n\n\t\tauto &res = dp[u] = wh[u];\n\n\t\tfor (int v : H[u]) {\n\t\t\tstd::chmin(res, trav(v));\n\t\t}\n\n\t\treturn res;\n\t};\n\n\tint64_t x = 0,  y = 0;\n\tfor (int i = 0; i < n; i++) {\n\t\tauto [xx, yy] = trav(scc[a[i]]);\n\t\tdebug(xx, yy);\n\t\tx += xx, y += yy;\n\t}\n\n\tstd::cout << x << \" \" << y << \"\\n\";\n}\n\nint main() {\n#ifdef LOCAL\n\tfreopen(\"error.txt\", \"w\", stderr);\n#endif\n\n\tstd::ios::sync_with_stdio(false);\n\tstd::cin.tie(nullptr);\n\tstd::cout.tie(nullptr);\n\n\tflying();\n\n\treturn 0;\n}"
+}

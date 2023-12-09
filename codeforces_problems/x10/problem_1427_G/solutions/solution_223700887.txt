@@ -1,0 +1,36 @@
+{
+    "id": 223700887,
+    "contestId": 1427,
+    "creationTimeSeconds": 1694940006,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1427,
+        "index": "G",
+        "name": "One Billion Shades of Grey",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3300,
+        "tags": [
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1427,
+        "members": [
+            {
+                "handle": "for_sx_e_1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1602341400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 561,
+    "memoryConsumedBytes": 2457600,
+    "source": "// LUOGU_RID: 125008881\n#include<algorithm>\r\n#include<cstdio>\r\n#include<vector>\r\n#include<queue>\r\ntypedef long long ll;\r\nconst int givn=2e2+5;\r\nconst int maxn=4e4+5;\r\nconst int edgm=maxn*4+givn*8+5;\r\nconst int inf=1073741823;\r\nstruct edge{int to,next,w;}qxx[edgm];\r\nint qxx_cnt=1,h[maxn];\r\nvoid add(int x,int y,int z){\r\n//\tprintf(\"add:%d,%d,%d\\n\",x,y,z);\r\n\tqxx[++qxx_cnt]=(edge){y,h[x],z},h[x]=qxx_cnt;\r\n\treturn;\r\n}\r\nvoid ad(int x,int y,int z){\r\n\tadd(x,y,z),add(y,x,0);\r\n\treturn;\r\n}\r\nvoid tad(int x,int y,int z){\r\n\tadd(x,y,z),add(y,x,z);\r\n\treturn;\r\n}\r\nint d[maxn];\r\nstd::queue<int>q;\r\nint st,en;\r\nbool bfs(){\r\n\twhile(!q.empty())q.pop();\r\n\tfor(int i=0;i<=maxn-2;i++)d[i]=0;\r\n\td[st]=1,q.push(st);\r\n\twhile(!q.empty()){\r\n\t\tint x=q.front();\r\n\t\tq.pop();\r\n\t\tfor(int i=h[x];i;i=qxx[i].next){\r\n\t\t\tint v=qxx[i].to;\r\n\t\t\tif(!d[v]&&qxx[i].w){\r\n\t\t\t\td[v]=d[x]+1,q.push(v);\r\n\t\t\t\tif(v==en)return true;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn false;\r\n}\r\nint dfs(int x,int flow){\r\n\tif(x==en)return flow;\r\n\tint rest=flow;\r\n\tfor(int i=h[x];i;i=qxx[i].next){\r\n\t\tint v=qxx[i].to;\r\n\t\tif(d[v]==d[x]+1&&qxx[i].w){\r\n\t\t\tint tmp=dfs(v,std::min(qxx[i].w,rest));\r\n\t\t\tif(!tmp)d[v]=0;\r\n\t\t\trest-=tmp,qxx[i].w-=tmp,qxx[i^1].w+=tmp;\r\n\t\t\tif(rest<=0)break;\r\n\t\t}\r\n\t}\r\n\treturn flow-rest;\r\n}\r\nint maxflow(int gst,int gen){\r\n\tst=gst,en=gen;\r\n\tint ret=0,now=0;\r\n\twhile(bfs())while((bool)(now=dfs(st,inf)))ret+=now;\r\n\treturn ret;\r\n}\r\nint n;\r\nint mp[givn][givn];\r\nint id(int x,int y){return (x-1)*n+y;}\r\nstruct pii{int v,id;}poi[givn*4];\r\nint pcnt;\r\nsigned main(){\r\n\tscanf(\"%d\",&n);\r\n\tint st=n*n+1,en=st+1;\r\n\tfor(int i=1;i<=n;i++)for(int j=1;j<=n;j++){\r\n\t\tscanf(\"%d\",mp[i]+j);\r\n\t\tif(mp[i][j]==-1)continue;\r\n\t\tif(i>=2&&mp[i-1][j]!=-1)tad(id(i-1,j),id(i,j),1);\r\n\t\tif(j>=2&&mp[i][j-1]!=-1)tad(id(i,j-1),id(i,j),1);\r\n\t\tif(mp[i][j]>0)ad(id(i,j),en,inf),poi[++pcnt]=(pii){mp[i][j],id(i,j)};\r\n\t}\r\n\tstd::sort(poi+1,poi+pcnt+1,[](pii now,pii oth){return now.v<oth.v;});\r\n\tll ans=0;\r\n\tint flow=0;\r\n\tfor(int i=1;i<=pcnt-1;i++){\r\n\t\tint memk=0;\r\n//\t\tprintf(\"dec,poi[i].v=%d\\n\",poi[i].v);\r\n\t\tfor(int j=h[poi[i].id];j;j=qxx[j].next){\r\n\t\t\tint v=qxx[j].to;\r\n//\t\t\tprintf(\"x=%d,v=%d,qxx[j^1].to=%d\\n\",poi[i].id,v,qxx[j^1].to);\r\n\t\t\tif(v==en){\r\n\t\t\t\tmemk=qxx[j^1].w,qxx[j].w=qxx[j^1].w=0;\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t}\r\n\t\tmaxflow(poi[i].id,st),ad(st,poi[i].id,inf),flow+=maxflow(st,en)-memk;\r\n//\t\tprintf(\"memk=%d,flow=%d\\n\",memk,flow);\r\n\t\tans+=1ll*(poi[i+1].v-poi[i].v)*flow;\r\n\t}\r\n\tprintf(\"%lld\",ans);\r\n\treturn 0;\r\n}\r\n//namespace burningContract"
+}

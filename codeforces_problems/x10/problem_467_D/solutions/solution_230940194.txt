@@ -1,0 +1,39 @@
+{
+    "id": 230940194,
+    "contestId": 467,
+    "creationTimeSeconds": 1698914743,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 467,
+        "index": "D",
+        "name": "Fedor and Essay",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 467,
+        "members": [
+            {
+                "handle": "SenGYi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1411054200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 15257600,
+    "source": "// LUOGU_RID: 132933367\n#include <bits/stdc++.h>\r\n#define int long long \r\n\r\nusing namespace std;\r\n\r\nconst int N = 1e5 + 5;\r\n\r\nstruct NODE {\r\n  int to, nxt;\r\n} e[N];\r\nint h[N], cnt;\r\n\r\nstruct node {\r\n  int to, nxt;\r\n} e2[N];\r\nint h2[N], cnt2;\r\n\r\nint n, m, tot, rcnt[N], siz[N];\r\nstring s[N];\r\nmap<string, int> tp;\r\n\r\nstring gt(string s) {\r\n  for (int i = 0; i < s.size(); ++ i) {\r\n    if (s[i] >= 'A' && s[i] <= 'Z') {\r\n      s[i] = s[i] - 'A' + 'a';\r\n    }\r\n  }\r\n  return s;\r\n}\r\n\r\nvoid add(int u, int v) {\r\n  e[++ cnt] = {v, h[u]};\r\n  h[u] = cnt;\r\n}\r\n\r\nvoid add2(int u, int v) {\r\n  e2[++ cnt2] = {v, h2[u]};\r\n  h2[u] = cnt2;\r\n}\r\n\r\nint dfn[N], low[N], dfnid;\r\nint stk[N], top, Onstack[N];\r\nint scc[N], sccid, g[N], f[N], in[N];\r\n\r\nvoid tarjan(int x) {\r\n  // cout << x << endl;\r\n  low[x] = dfn[x] = ++ dfnid;\r\n  stk[++ top] = x;\r\n  Onstack[x] = 1;\r\n  for (int i = h[x]; i; i = e[i].nxt) {\r\n    int to = e[i].to;\r\n    if (!dfn[to]) {\r\n      tarjan(to);\r\n      low[x] = min(low[x], low[to]) ;\r\n    } else if (Onstack[to]) {\r\n      low[x] = min(low[x], dfn[to]);\r\n    }\r\n  }\r\n  if (dfn[x] == low[x]) {\r\n    ++ sccid;\r\n    f[sccid] = 1e9;\r\n    g[sccid] = 1e9;\r\n    // cout << \"!\" << endl;\r\n    do {\r\n      Onstack[stk[top]] = 0;\r\n      if (rcnt[x] < f[sccid]) {\r\n        f[sccid] = rcnt[x];\r\n        g[sccid] = siz[x];\r\n      } else if (rcnt[x] == f[sccid]) {\r\n        g[sccid] = min(g[sccid], siz[x]);\r\n      }\r\n      scc[stk[top --]] = sccid;\r\n    } while (stk[top + 1] != x);\r\n    // cout << \"!\" << endl;\r\n  }\r\n}\r\n\r\nvoid toposort() {\r\n  queue<int> q;\r\n  for (int i = 1; i <= sccid; ++ i) {\r\n    if (in[i] == 0) {\r\n      q.push(i);\r\n    }\r\n  }\r\n  while (!q.empty()) {\r\n    int u = q.front();\r\n    q.pop();\r\n    for (int i = h2[u]; i; i = e2[i].nxt) {\r\n      int to = e2[i].to;\r\n      in[to] --;\r\n      if (f[to] > f[u]) {\r\n        f[to] = f[u];\r\n        g[to] = g[u];\r\n      } else if (f[to] == f[u]) {\r\n        g[to] = min(g[to], g[u]);\r\n      }\r\n      if (!in[to]) {\r\n        q.push(to);\r\n      }\r\n    }\r\n  }\r\n}\r\n\r\nint countr(string s) {\r\n  int res = 0;\r\n  \r\n  for (int i = 0; i < (int)s.size(); ++ i) {\r\n    if (s[i] == 'r') {\r\n      res ++;\r\n    }\r\n  }\r\n  return res;\r\n}\r\n\r\nsigned main() {\r\n  ios::sync_with_stdio(0);\r\n  cin.tie(0), cout.tie(0);\r\n  cin >> n;\r\n  for (int i = 1; i <= n; ++ i) {\r\n    cin >> s[i];\r\n    s[i] = gt(s[i]);\r\n    // cout << s[i] << '\\n';\r\n    if (!tp[s[i]]) {\r\n      tp[s[i]] = ++ tot;\r\n      siz[tot] = s[i].size();\r\n      rcnt[tot] = countr(s[i]);\r\n    }\r\n  }\r\n  cin >> m;\r\n  for (int i = 1; i <= m; ++ i) {\r\n    string a, b;\r\n    cin >> a >> b;\r\n    a = gt(a), b = gt(b);\r\n    if (!tp[a]) {\r\n      tp[a] = ++ tot;\r\n      siz[tot] = a.size();\r\n      rcnt[tot] = countr(a);\r\n    }\r\n    if (!tp[b]) {\r\n      tp[b] = ++ tot;\r\n      siz[tot] = b.size();\r\n      rcnt[tot] = countr(b);\r\n    }\r\n    // cout << tp[a] << ' ' << tp[b] << '\\n';\r\n    add(tp[a], tp[b]);\r\n  }\r\n  // cout << \"!\" << endl;\r\n  for (int i = 1; i <= tot; ++ i) {\r\n    if (!dfn[i]) {\r\n      tarjan(i);\r\n    }\r\n  }\r\n  // for (int i = 1; i <= tot; ++ i) {\r\n  //   cout << i << ' ' << scc[i] << '\\n';\r\n  // }\r\n  for (int i = 1; i <= tot; ++ i) {\r\n    for (int j = h[i]; j; j = e[j].nxt) {\r\n      int to = e[j].to;\r\n      if (scc[i] != scc[to]) {\r\n        add2(scc[to], scc[i]);\r\n        // cout << scc[to] << ' ' << scc[i] << '\\n';\r\n        in[scc[i]] ++;\r\n      }\r\n    }\r\n  }\r\n  toposort();\r\n  int ans1 = 0, ans2 = 0;\r\n  for (int i = 1; i <= n; ++ i) {\r\n    ans1 += f[scc[tp[s[i]]]];\r\n    ans2 += g[scc[tp[s[i]]]];\r\n  }\r\n  cout << ans1 << ' ' << ans2 << '\\n';\r\n}"
+}

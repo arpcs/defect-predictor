@@ -1,0 +1,37 @@
+{
+    "id": 205288223,
+    "contestId": 1422,
+    "creationTimeSeconds": 1683694240,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1422,
+        "index": "F",
+        "name": "Boring Queries",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1422,
+        "members": [
+            {
+                "handle": "Charming"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601827500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 50,
+    "timeConsumedMillis": 1216,
+    "memoryConsumedBytes": 484454400,
+    "source": "#include <bits/stdc++.h>\r\n#define ll long long\r\n//#define int ll\r\nusing namespace std;\r\nconst int N = 2e5 + 5;\r\nconst int MOD = 1e9 + 7;\r\n\r\nstruct SegmentTree {\r\n  int n, tot;\r\n  vector <int> a, root, node, ls, rs;\r\n\r\n  SegmentTree (int n) {\r\n    this -> n = n, tot = 0;\r\n    root = vector <int> (n + 5);\r\n    node = vector <int> (N * 200, 1);\r\n    ls = rs = vector <int> (N * 200);\r\n  }\r\n\r\n\tint Modify (int pre, int l, int r, int p, ll k) {\r\n\t\tint cur = ++tot;\r\n\t\tnode[cur] = (node[pre] * k) % MOD;\r\n\t\tif (l == r) return cur;\r\n\t\tls[cur] = ls[pre], rs[cur] = rs[pre];\r\n\t\tint mid = l + r >> 1;\r\n\t\tif (p <= mid) ls[cur] = Modify (ls[pre], l, mid, p, k);\r\n\t\telse rs[cur] = Modify (rs[pre], mid + 1, r, p, k);\r\n\t\treturn cur;\r\n\t}\r\n\t\r\n  ll Query (int rt, int l, int r, int ql, int qr) {\r\n    if (l >= ql && r <= qr) return 1ll * node[rt];\r\n    int mid = l + r >> 1;\r\n\t\tll ans = 1;\r\n    if (ql <= mid) ans = (ans * Query (ls[rt], l, mid, ql, qr)) % MOD;\r\n    if (qr > mid) ans = (ans * Query (rs[rt], mid + 1, r, ql, qr)) % MOD;\r\n    return ans;\r\n  }\r\n};\r\n\r\nint n, q;\r\n\r\nvoid init () {}\r\n\r\nvoid charming () {\r\n  init ();\r\n  cin >> n;\r\n  vector <int> a (n + 5), fiPrime (N), inv (N);\r\n  \r\n  auto FPOW = [] (ll x, ll p) -> ll {\r\n  \tll ans = 1;\r\n  \twhile (p) {\r\n  \t\tif (p & 1) ans = (ans * x) % MOD;\r\n  \t\tp >>= 1, x = (x * x) % MOD;\r\n  \t}\r\n  \treturn ans;\r\n  };\r\n  \r\n  auto Get_Prime = [&] () -> void {\r\n  \tvector <int> prime;\r\n  \tfor (int i = 2; i < N; ++i) {\r\n  \t\tif (!fiPrime[i]) fiPrime[i] = i, prime.emplace_back (i);\r\n  \t\tfor (int j = 0, siz = prime.size (); i * prime[j] < N && j < siz; ++j) {\r\n  \t\t\tif (!fiPrime[i * prime[j]]) fiPrime[i * prime[j]] = prime[j];\r\n  \t\t\tif (i % prime[j] == 0) break;\r\n  \t\t}\r\n  \t}\r\n  };\r\n  \r\n  auto Get_inv = [&] () -> void {\r\n  \tinv[0] = 1;\r\n  \tfor (int i = 1; i < N; ++i) inv[i] = FPOW (i, MOD - 2);\r\n  };\r\n  \r\n  Get_Prime (), Get_inv ();\r\n  SegmentTree Tree (n);\r\n  vector <int> last (N);\r\n  for (int i = 1, lastp, mul, val; i <= n; ++i) {\r\n\t\tcin >> a[i], lastp = mul = 0;\r\n\t\tTree.root[i] = Tree.root[i - 1];\r\n\t\twhile (a[i] > 1) {\r\n\t\t\tval = inv[fiPrime[a[i]]];\r\n\t\t\tif (fiPrime[a[i]] != lastp) {\r\n\t\t\t\tif (mul) Tree.root[i] = Tree.Modify (Tree.root[i], 1, n, i, mul);\r\n\t\t\t\tmul = fiPrime[a[i]];\r\n\t\t\t\tlastp = mul;\r\n\t\t\t}\r\n\t\t\telse mul *= lastp;\r\n\t\t\tif (last[mul]) Tree.root[i] = Tree.Modify (Tree.root[i], 1, n, last[mul], val);\r\n\t\t\tlast[mul] = i;\r\n\t\t\ta[i] /= fiPrime[a[i]];\r\n\t\t}\r\n\t\tif (mul) Tree.root[i] = Tree.Modify (Tree.root[i], 1, n, i, mul);\r\n\t}\r\n  cin >> q;\r\n  for (int i = 1, l, r, lastans = 0; i <= q; ++i) {\r\n    cin >> l >> r;\r\n    l = (l + lastans) % n + 1;\r\n    r = (r + lastans) % n + 1;\r\n    if (l > r) swap (l, r);\r\n    lastans = Tree.Query (Tree.root[r], 1, n, l, r);\r\n    lastans = ((lastans % MOD) + MOD) % MOD;\r\n    cout << lastans << endl;\r\n  }\r\n}\r\n\r\nsigned main () {\r\n  ios_base::sync_with_stdio (false);\r\n  cin.tie (NULL);\r\n  cout.tie (NULL);\r\n  charming ();\r\n  return 0;\r\n}"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 144146147,
+    "contestId": 392,
+    "creationTimeSeconds": 1643278191,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 392,
+        "index": "C",
+        "name": "Yet Another Number Sequence",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "tags": [
+            "combinatorics",
+            "math",
+            "matrices"
+        ]
+    },
+    "author": {
+        "contestId": 392,
+        "members": [
+            {
+                "handle": "Faster"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1392728400
+    },
+    "programmingLanguage": "Python 3",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 0,
+    "source": "def add_mat(a, b, mod):\r\n\treturn [[(a[i][j] + b[i][j]) % mod for j in range(len(a[0]))] for i in range(len(a))]\r\n\r\n\r\ndef mul_mat(a, b, mod):\r\n\tres = []\r\n\tfor i in range(len(a)):\r\n\t\tres.append([])\r\n\t\tfor j in range(len(b[0])):\r\n\t\t\tres[i].append(sum(a[i][_] * b[_][j] for _ in range(len(a[0]))) % mod)\r\n\r\n\treturn res\r\n\r\n\r\ndef pow_mat(b, n, mod):\r\n\tif n == 1:\r\n\t\treturn b\r\n\r\n\ttmp = pow_mat(b, n//2, mod)\r\n\tres = mul_mat(tmp, tmp, mod)\r\n\tif n % 2 == 1:\r\n\t\tres = mul_mat(res, b, mod)\r\n\r\n\treturn res\r\n\r\n\r\ndef generate_coefs(n, a0, a1=1, mod=None):\r\n\t\"\"\"\r\n\tGenerate coefficients in the expansion of (a0+a1*x)^n.\r\n\t\"\"\"\r\n\tbinom = [1]\r\n\tfor i in range(n):\r\n\t\tbinom.append((n-i) * binom[-1] // (i+1))\r\n\r\n\tres = []\r\n\tfor i in range(n+1):\r\n\t\tres.append(binom[i] * a1**i * a0**(n-i))\r\n\t\tif mod is not None:\r\n\t\t\tres[i] %= mod\r\n\r\n\treturn res\r\n\r\n\r\ndef calculate(n, k, mod):\r\n\t\"\"\"\r\n\tCalculate the sum: (A_1(k) + A_2(k) + ... + A_n(k)) % mod\r\n\twith F_1 = 1, F_2 = 2, F_i = F_{i-1} + F_{i-2} (i > 2);\r\n\t     A_i(k) = F_i \u00d7 i^k (i >= 1).\r\n\t\"\"\"\r\n\tif n <= 1:\r\n\t\treturn n\r\n\r\n\tker_size = 2*(k+1)+1\r\n\tA = [None] * ker_size\r\n\tfor i in range(ker_size):\r\n\t\tA[i] = [0] * ker_size\r\n\r\n\tA[ker_size-1][ker_size-1] = 1\r\n\r\n\tfor x in range(k+1):\r\n\t\tA[k+1+x][x] = 1\r\n\t\tcoefs_1 = generate_coefs(x, 1, 1)\r\n\t\tcoefs_2 = generate_coefs(x, 2, 1)\r\n\t\t# print(x, coefs_1, coefs_2)\r\n\r\n\t\tfor i in range(x+1):\r\n\t\t\tA[i][k+1+x] = coefs_2[i]\r\n\t\t\tA[k+1+i][k+1+x] = coefs_1[i]\r\n\r\n\t\t\tif x == k:\r\n\t\t\t\tA[i][k+2+x] = coefs_2[i]\r\n\t\t\t\tA[k+1+i][k+2+x] = coefs_1[i]\r\n\r\n\t# print(*A, sep='\\n')\r\n\tb0 = [[1, 0, 0, 0, 1, 1, 1, 1, 1]]\r\n\t# fn1 = f(n-1)\r\n\t# b(n-1)  = [fn1*(n-1)**0..k, fn*n**0..k, s]\r\n\t# => b(n) = [fn*n**0..k, (fn1+fn)*(n+1)**0..k, s+...]\r\n\tbn = mul_mat(b0, pow_mat(A, n, mod), mod)\r\n\t# print(bn)\r\n\r\n\treturn bn[0][-1]\r\n\r\n\r\nif __name__ == '__main__':\r\n\tn, k = map(int, input().split())\r\n\tprint(calculate(n, k, 10**9 + 7))\r\n"
+}

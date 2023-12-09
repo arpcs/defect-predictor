@@ -1,0 +1,36 @@
+{
+    "id": 219904929,
+    "contestId": 1380,
+    "creationTimeSeconds": 1692704127,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1380,
+        "index": "F",
+        "name": "Strange Addition",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "dp",
+            "matrices"
+        ]
+    },
+    "author": {
+        "contestId": 1380,
+        "members": [
+            {
+                "handle": "Msents"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1594565100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 295,
+    "memoryConsumedBytes": 108236800,
+    "source": "// LUOGU_RID: 122277223\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int MaxN=500000,Mod=998244353;\r\nstruct Matrix{\r\n\tint mat[2][2];\r\n\tMatrix(){memset(mat,0x00,sizeof(mat));}\r\n\tMatrix(const vector<vector<int>>&v){\r\n\t\tfor(int i=0;i<2;i++)\r\n\t\t\tfor(int j=0;j<2;j++)\r\n\t\t\t\tmat[i][j]=v[i][j];\r\n\t}\r\n\tint*operator[](const int index){return mat[index];}\r\n\tconst int*operator[](const int index)const{return mat[index];}\r\n\tMatrix operator*(const Matrix&obj)const{\r\n\t\tMatrix temp;\r\n\t\tfor(int i=0;i<2;i++)\r\n\t\t\tfor(int j=0;j<2;j++)\r\n\t\t\t\tfor(int k=0;k<2;k++)\r\n\t\t\t\t\ttemp[i][j]=(temp[i][j]+mat[i][k]*obj[k][j])%Mod;\r\n\t\treturn temp;\r\n\t}\r\n};\r\nstruct Node{\r\n\tMatrix val;\r\n\tint l,r;\r\n\tint mid(){return (l+r)/2;}\r\n}tree[MaxN*8+1];\r\n#define lc(u) (u<<1)\r\n#define rc(u) (u<<1|1)\r\nvoid PushUp(const int u){\r\n\ttree[u].val=tree[lc(u)].val*tree[rc(u)].val;\r\n}\r\nMatrix arr[MaxN+1];\r\nvoid Build(const int u,const int l,const int r){\r\n\ttree[u].l=l,tree[u].r=r;\r\n\tif(tree[u].l==tree[u].r){\r\n\t\ttree[u].val=arr[l];\r\n\t\treturn;\r\n\t}\r\n\tBuild(lc(u),l,(l+r)/2);\r\n\tBuild(rc(u),(l+r)/2+1,r);\r\n\tPushUp(u);\r\n}\r\nvoid Modify(const int u,const int pos,const Matrix&val){\r\n\tif(tree[u].l==tree[u].r){\r\n\t\ttree[u].val=val;\r\n\t\treturn;\r\n\t}\r\n\tif(pos<=tree[u].mid())\r\n\t\tModify(lc(u),pos,val);\r\n\telse\r\n\t\tModify(rc(u),pos,val);\r\n\tPushUp(u);\r\n}\r\nMatrix Query(const int u,const int l,const int r){\r\n\tif(r<tree[u].l||tree[u].r<l)return Matrix();\r\n\tif(tree[u].l==tree[u].r)return tree[u].val;\r\n\tif(r<=tree[u].mid())\r\n\t\treturn Query(lc(u),l,r);\r\n\tif(tree[u].mid()<l)\r\n\t\treturn Query(rc(u),l,r);\r\n\treturn Query(lc(u),l,r)*Query(rc(u),l,r);\r\n}\r\nint n,m;\r\nstring c;\r\nint g[MaxN+1][2];\r\nvoid UpdateI(const int i){\r\n\tg[i][0]=(c[i]-'0')+1;\r\n\tif(i<n){\r\n\t\tif(c[i]-'0'>1)g[i][1]=0;\r\n\t\telse if(c[i]-'0'==1){\r\n\t\t\tif(c[i+1]-'0'==9)g[i][1]=0;\r\n\t\t\telse g[i][1]=(19-((c[i]-'0')*10+(c[i+1]-'0')));\r\n\t\t}else g[i][1]=(c[i+1]-'0')+1;\r\n\t}else{\r\n\t\tg[i][1]=0;\r\n\t}\r\n}\r\nMatrix Make(const int i){\r\n\treturn Matrix({\r\n\t\t{g[i][0],g[i][1]},\r\n\t\t{1\t\t,0\t\t}\r\n\t});\r\n}\r\nvoid Solve(){\r\n\tcin>>n>>m;\r\n\tcin>>c;\r\n\tc=' '+c;\r\n\tfor(int i=1;i<=n;i++)UpdateI(i);\r\n\tfor(int i=1;i<=n;i++)arr[i]=Make(i);\r\n\tBuild(1,1,n);\r\n\tint fr=0;\r\n\twhile(fr+1<=n&&c[fr+1]=='0')fr++;\r\n\twhile(fr>=1&&c[fr]!='0')fr--;\r\n\tfor(int i=1;i<=m;i++){\r\n\t\tint x;char d;\r\n\t\tcin>>x>>d;\r\n\t\tc[x]=d;\r\n\t\twhile(fr+1<=n&&c[fr+1]=='0')fr++;\r\n\t\twhile(fr>=1&&c[fr]!='0')fr--;\r\n\t\tUpdateI(x-1);\r\n\t\tUpdateI(x);\r\n\t\tModify(1,x-1,Make(x-1));\r\n\t\tModify(1,x,Make(x));\r\n\t\tMatrix ans=Query(1,fr+1,n);\r\n//\t\tcout<<ans[0][0]<<' '<<ans[0][1]<<'\\n'\r\n//\t\t\t<<ans[0][1]<<' '<<ans[1][1]<<'\\n';\r\n\t\tcout<<ans[0][0]+ans[0][1]<<'\\n';\r\n\t}\r\n}\r\nint main(){\r\n//\tfreopen(\".in\",\"r\",stdin);\r\n//\tfreopen(\".out\",\"w\",stdout);\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(0);\r\n//\tint T;\r\n//\tcin>>T;\r\n//\twhile(T--)\r\n\t\tSolve();\r\n\treturn 0;\r\n}\r\n/*\r\n6 1\r\n000001\r\n1 0\r\n*/\r\n"
+}

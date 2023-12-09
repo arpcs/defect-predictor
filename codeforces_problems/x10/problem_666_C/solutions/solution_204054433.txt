@@ -1,0 +1,36 @@
+{
+    "id": 204054433,
+    "contestId": 666,
+    "creationTimeSeconds": 1682865406,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 666,
+        "index": "C",
+        "name": "Codeword",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2500,
+        "tags": [
+            "combinatorics",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 666,
+        "members": [
+            {
+                "handle": "marcOS"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1461947700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 25,
+    "timeConsumedMillis": 1856,
+    "memoryConsumedBytes": 7884800,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define F first\r\n#define S second\r\n\r\ntypedef long long ll;\r\ntypedef pair<int, int> ii;\r\nstruct iii { int F, S, i, ans; };\r\n\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(0);cin.tie(0);\r\n\r\n    const ll mod = 1e9 + 7;\r\n    const int N = 1e5 + 1;\r\n    vector<ll> f(N); f[0] = 1;\r\n    for(int i=1; i<N; i++) f[i] = f[i - 1] * i % mod;\r\n    vector<ll> inv(N); inv[1] = 1;\r\n    for(int i=2; i<N; i++) inv[i] = inv[mod % i] * (mod - mod / i) % mod;\r\n    vector<ll> fi(N); fi[0] = 1;\r\n    for(int i=1; i<N; i++) fi[i] = fi[i - 1] * inv[i] % mod;\r\n    auto comb = [&](int n, int m){\r\n        if(n < m) return 0LL;\r\n        return f[n] * fi[m] % mod * fi[n - m] % mod;\r\n    };\r\n\r\n    vector<ll> p25(N); p25[0] = 1;\r\n    vector<ll> p26(N); p26[0] = 1;\r\n    for(int i=1; i<N; i++)\r\n    {\r\n        p25[i] = p25[i - 1] * 25 % mod;\r\n        p26[i] = p26[i - 1] * 26 % mod;\r\n    }\r\n\r\n    int q;\r\n    cin>>q;\r\n    string s;\r\n    cin>>s;\r\n\r\n    vector<iii> queries;\r\n    for(int i=0; i<q; i++)\r\n    {\r\n        int t;\r\n        cin>>t;\r\n        if(t == 1) cin>>s;\r\n        else {\r\n            int n;\r\n            cin>>n;\r\n            queries.push_back({(int)s.size(), n, i});\r\n        }\r\n    }\r\n\r\n    sort(queries.begin(), queries.end(), [](iii x, iii y)\r\n    { return ii(x.F, x.S) < ii{y.F, y.S}; });\r\n\r\n    vector<ll> dp(N);\r\n    for(int i=0, j=0; i<queries.size(); i=j)\r\n    {\r\n        int t = queries[i].F;\r\n        for(int k=1; k<N; k++)\r\n        {\r\n            if(k < t) dp[k] = 0;\r\n            else dp[k] = comb(k - 1, t - 1) * p25[k - t] % mod;\r\n        }\r\n\r\n        ll ans = 0, p = t - 1;\r\n        for(; j<queries.size() && queries[i].F == queries[j].F; j++)\r\n        {\r\n            while(p < queries[j].S)\r\n            {\r\n                ++p;\r\n                ans = (26 * ans + dp[p]) % mod;\r\n            }\r\n            queries[j].ans = ans;\r\n        }\r\n    }\r\n\r\n    sort(queries.begin(), queries.end(), [](iii x, iii y)\r\n    { return x.i < y.i; });\r\n\r\n    for(auto &i:queries)\r\n        cout<<i.ans<<'\\n';\r\n\r\n\r\n    return 0;\r\n}\r\n"
+}

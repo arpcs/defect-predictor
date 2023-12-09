@@ -1,0 +1,35 @@
+{
+    "id": 229622626,
+    "contestId": 744,
+    "creationTimeSeconds": 1698181854,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 744,
+        "index": "D",
+        "name": "Hongcow Draws a Circle",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "geometry"
+        ]
+    },
+    "author": {
+        "contestId": 744,
+        "members": [
+            {
+                "handle": "Sakuyalove"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1481992500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 182,
+    "timeConsumedMillis": 1637,
+    "memoryConsumedBytes": 1536000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define endl '\\n'\r\n\r\n#define pdd pair<double, double>\r\n#define pii pair<int, int>\r\n#define mp make_pair\r\n#define x first\r\n#define y second\r\n\r\nconst double eps = 1e-8;\r\n\r\npii operator - (const pii& u, const pii& v) {\r\n  return mp(u.x - v.x, u.y - v.y);\r\n}\r\n\r\nint operator % (const pii& u, const pii& v) {\r\n  return u.x * v.y - v.x * u.y;\r\n}\r\n\r\n\r\npdd operator - (const pdd& u, const pdd& v) {\r\n  return mp(u.x - v.x, u.y - v.y);\r\n}\r\n\r\ndouble operator % (const pdd& u, const pdd& v) {\r\n  return u.x * v.y - v.x * u.y;\r\n}\r\n\r\ndouble db(double w) {\r\n  return w * w;\r\n}\r\n\r\nint dcmp(double w) {\r\n  if (fabs(w) < eps) return 0;\r\n  return w > 0 ? 1 : -1;\r\n}\r\n\r\nvector<pii> hull(vector<pii> p) {\r\n  sort(p.begin(), p.end());\r\n  vector<pii> ch;\r\n  for (int i = 0; i < p.size(); i++) {\r\n    int sz = ch.size();\r\n    while (sz > 1 && (ch[sz - 1] - ch[sz - 2]) % (p[i] - ch[sz - 2]) < 0) {\r\n      ch.pop_back();\r\n      sz--;\r\n    }\r\n    ch.push_back(p[i]);\r\n  }\r\n  int k = ch.size();\r\n  for (int i = (int)p.size() - 2; i >= 0; i--) {\r\n    int sz = ch.size();\r\n    while (sz > k && (ch[sz - 1] - ch[sz - 2]) % (p[i] - ch[sz - 2]) < 0) {\r\n      ch.pop_back();\r\n      sz--;\r\n    }\r\n    ch.push_back(p[i]);\r\n  }\r\n  if (p.size() > 1) {\r\n    ch.pop_back();\r\n  }\r\n  return ch;\r\n}\r\n\r\nvector<pii> rd, bl;\r\nvector<pii> rb;\r\nvector<pair<pdd, int>> fc;\r\n\r\nint n, m;\r\n\r\nint tag(pdd u) {\r\n  if (u.y >= 0 && u.x > 0) return 1;\r\n  if (u.x <= 0 && u.y > 0) return 2;\r\n  if (u.y <= 0 && u.x < 0) return 3;\r\n  if (u.x >= 0 && u.y < 0) return 4;\r\n  return 0;\r\n}\r\n\r\nbool cmp(pdd u, pdd v) {\r\n  int tu = tag(u), tv = tag(v);\r\n  return tu == tv ? u % v > 0 : tu < tv;\r\n}\r\n\r\nbool cmp2(pair<pdd, pii> u, pair<pdd, pii> v) {\r\n  return cmp(u.x, v.x);\r\n}\r\n\r\nbool judge(double r, int bt) {\r\n  vector<pair<pdd, pii>> sk;\r\n  vector<pair<pdd, pdd>> sp;\r\n  vector<int> col;\r\n  int cnt = 1;\r\n  for (auto [p, k] : fc) {\r\n    double d = db(p.x) + db(p.y);\r\n    double dr = db(2 * r) - d;\r\n    if (dr <= 0) continue;\r\n    double bk = sqrt(dr / d);\r\n    pdd u = mp(p.x - p.y * bk, p.y + p.x * bk);\r\n    pdd v = mp(p.x + p.y * bk, p.y - p.x * bk);\r\n    u.x *= 0.5, v.x *= 0.5, u.y *= 0.5, v.y *= 0.5;\r\n    if (u % v < 0) swap(u, v);\r\n    sp.emplace_back(u, v);\r\n    sk.push_back(mp(u, mp(cnt, k)));\r\n    sk.push_back(mp(v, mp(-cnt, k)));\r\n    col.push_back(k);\r\n    cnt += 1;\r\n  }\r\n  int now[2];\r\n  now[0] = now[1] = 0;\r\n  now[0] += bt;\r\n  if (sk.empty()) return bt;\r\n  sort(sk.begin(), sk.end(), cmp2);\r\n  for (int i = 0; i < sp.size(); i++) {\r\n    int j = i + 1;\r\n    if (abs(sk[0].y.x) == j) {\r\n      now[col[i]] += sk[0].y.x > 0;\r\n    }\r\n    else {\r\n      now[col[i]] += sp[i].x % sk[0].x > 0 && sk[0].x % sp[i].y > 0;\r\n    }\r\n  }\r\n  for (int i = 1; i < sk.size(); i++) {\r\n    if (now[1] == 0 && now[0] > 0) return true;\r\n    if (sk[i].y.x > 0) now[sk[i].y.y] += 1;\r\n    if (sk[i].y.x < 0) now[sk[i].y.y] -= 1;\r\n    if (now[1] == 0 && now[0] > 0) return true;\r\n  }\r\n  return false;\r\n}\r\n\r\nvoid solve() {\r\n  cin >> n >> m;\r\n  for (int i = 0; i < n; i++) {\r\n    pii pr;\r\n    cin >> pr.x >> pr.y;\r\n    rd.push_back(pr);\r\n    rb.push_back(pr);\r\n  }\r\n  for (int i = 0; i < m; i++) {\r\n    pii pr;\r\n    cin >> pr.x >> pr.y;\r\n    bl.push_back(pr);\r\n    rb.push_back(pr);\r\n  }\r\n  rb = hull(rb);\r\n  for (auto pu : rd) {\r\n    for (auto pv : rb) {\r\n      if (pu == pv) {\r\n        cout << -1 << endl;\r\n        return ;\r\n      }\r\n    }\r\n  }\r\n  srand(41515);\r\n  random_shuffle(rd.begin(), rd.end());\r\n  random_shuffle(bl.begin(), bl.end());\r\n  double l = 0, r = 2e4;\r\n  for (auto pu : rd) {\r\n    vector<pair<pdd, int>>().swap(fc);\r\n    for (auto pv : bl) {\r\n      pii tmp = pv - pu;\r\n      fc.push_back(mp(mp((double)tmp.x, (double)tmp.y), 1));\r\n    }\r\n    if (judge(db(l), 1)) {\r\n      r = 3e4;\r\n      double mid = 0.5 * (l + r);\r\n      while (db(r) - db(l) > 1e-4 * max(1.0, db(l))) {\r\n        double mid = 0.5 * (l + r);\r\n        if (judge(db(mid), 1)) l = mid;\r\n        else r = mid;\r\n      } \r\n    }\r\n  }\r\n  for (auto pu : bl) {\r\n    vector<pair<pdd, int>>().swap(fc);\r\n    for (auto pv : bl) {\r\n      if (pu == pv) continue;\r\n      pii tmp = pv - pu;\r\n      fc.push_back(mp(mp((double)tmp.x, (double)tmp.y), 1));\r\n    }\r\n    for (auto pv : rd) {\r\n      pii tmp = pv - pu;\r\n      fc.push_back(mp(mp((double)tmp.x, (double)tmp.y), 0));\r\n    }\r\n    if (judge(db(l), 0)) {\r\n      r = 3e4;\r\n      double mid = 0.5 * (l + r);\r\n      while (db(r) - db(l) > 1e-4 * max(1.0, db(l))) {\r\n        double mid = 0.5 * (l + r);\r\n        if (judge(db(mid), 0)) l = mid;\r\n        else r = mid;\r\n      } \r\n    }\r\n  }\r\n  cout << fixed << setprecision(10) << db(0.5 * (l + r)) << endl;\r\n  return ;\r\n}\r\n\r\nsigned main() {\r\n  #ifdef Sakuyalove\r\n    freopen(\"in.in\", \"r\", stdin);\r\n    freopen(\"out.out\", \"w\", stdout);\r\n  #endif\r\n  ios::sync_with_stdio(false);\r\n  cin.tie(0);\r\n  cout.tie(0);\r\n  int T = 1;\r\n  // cin >> T;\r\n  while (T--) solve();\r\n  return 0;\r\n}"
+}

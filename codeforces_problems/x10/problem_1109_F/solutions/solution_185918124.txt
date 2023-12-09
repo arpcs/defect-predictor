@@ -1,0 +1,36 @@
+{
+    "id": 185918124,
+    "contestId": 1109,
+    "creationTimeSeconds": 1671433848,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1109,
+        "index": "F",
+        "name": "Sasha and Algorithm of Silence's Sounds",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1109,
+        "members": [
+            {
+                "handle": "xkcdjerry"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1550334900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 9,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 13721600,
+    "source": "// LUOGU_RID: 97625053\n#include <cstdio>\n#define S 1010\n#define N 200010\n\nnamespace LCT\n{\n#define FA(x) T[x].fa\n#define LSON(x) T[x].a[0]\n#define RSON(x) T[x].a[1]\n    struct node {int fa,a[2],flip;}T[N];\n    bool isroot(int x) {return LSON(FA(x))!=x&&RSON(FA(x))!=x;}\n    int locate(int x) {return RSON(FA(x))==x;}\n    void flip(int x) {T[x].flip^=1; int t=LSON(x); LSON(x)=RSON(x); RSON(x)=t;}\n    void push(int x) {if(T[x].flip) flip(LSON(x)),flip(RSON(x)),T[x].flip=0;}\n    void rotate(int x)\n    {\n        push(FA(x)),push(x);\n        int fa=FA(x),t=locate(x);\n        if(!isroot(fa)) T[FA(fa)].a[locate(fa)]=x;\n        FA(x)=FA(fa);\n        FA(T[fa].a[t]=T[x].a[!t])=fa;\n        FA(T[x].a[!t]=fa)=x;\n    }\n    void upd(int x) {if(!isroot(x)) upd(FA(x)); push(x);}\n    void splay(int x)\n    {\n        for(upd(x);!isroot(x);rotate(x)) if(!isroot(FA(x))) rotate(locate(FA(x))==locate(x)?FA(x):x);\n    }\n    void access(int x)\n    {\n        for(int y=0;x;y=x,x=FA(x)) {splay(x); RSON(x)=y;}\n    }\n    void setroot(int x) {access(x); splay(x); flip(x);}\n    int findroot(int x)\n    {\n        for(access(x),splay(x);LSON(x);) push(x),x=LSON(x);\n        return splay(x),x;\n    }\n    void link(int x,int y)\n    {\n        setroot(x);\n        if(findroot(y)!=x) FA(x)=y;\n    }\n    void cut(int x,int y)\n    {\n        setroot(x);\n        if(findroot(y)==x&&FA(y)==x&&!LSON(y)) FA(y)=RSON(x)=0;\n    }\n}\nnamespace Seg\n{\n    struct data\n    {\n        int mn,cnt;\n        data operator+(data b) const\n        {\n            if(mn<b.mn) return *this;\n            else if(mn>b.mn) return b;\n            else return data{mn,cnt+b.cnt};\n        }\n    };\n    struct seg {int l,r; data v; int lazy;} tree[N];\n    void pull(int o) {tree[o].v=tree[o<<1].v+tree[o<<1|1].v;}\n    void Add(int v,int o)\n    {\n        tree[o].v.mn+=v;\n        tree[o].lazy+=v;\n    }\n    void push(int o)\n    {\n        if(tree[o].lazy) Add(tree[o].lazy,o<<1), Add(tree[o].lazy,o<<1|1), tree[o].lazy=0;\n    }\n    void add(int l,int r,int v,int o)\n    {\n        //if(o==1) printf(\"%d %d %d %d\\n\",l,r,v,o);\n        if(tree[o].l==l&&tree[o].r==r) return Add(v,o);\n        int mid=(tree[o].l+tree[o].r)/2; push(o);\n        if(r<=mid) add(l,r,v,o<<1);\n        else if(l>mid) add(l,r,v,o<<1|1);\n        else add(l,mid,v,o<<1),add(mid+1,r,v,o<<1|1);\n        pull(o);\n    }\n    data query(int l,int r,int o)\n    {\n        if(tree[o].l==l&&tree[o].r==r) return tree[o].v;\n        int mid=(tree[o].l+tree[o].r)/2; push(o);\n        if(r<=mid) return query(l,r,o<<1);\n        else if(l>mid) return query(l,r,o<<1|1);\n        else return query(l,mid,o<<1)+query(mid+1,r,o<<1|1);\n    }\n    void init(int l,int r,int o=1)\n    {\n        tree[o].l=l,tree[o].r=r;\n        tree[o].v.cnt=r-l+1,tree[o].v.mn=0;\n        if(l!=r)\n        {\n            int mid=(l+r)/2;\n            init(l,mid,o<<1),init(mid+1,r,o<<1|1);\n        }\n    }\n}//\u7ef4\u62a4\u70b9\u6570-\u8fb9\u6570\nint x,y,n;\nint map[S][S]; int vis[N];\nstruct point{int x,y;}a[N];\nlong long ans;\nvoid add_point(int v)\n{\n    Seg::add(v,n,1,1);\n    int x=a[v].x,y=a[v].y;\n    int dx[4]={0,0,-1,1},dy[4]={1,-1,0,0};\n    vis[v]=true;\n    for(int i=0;i<4;i++)\n    {\n        int nx=x+dx[i],ny=y+dy[i];\n        if(nx>=1&&nx<=::x&&ny>=1&&ny<=::y)\n        {\n            int t=map[nx][ny];\n            if(vis[t])\n            {\n                LCT::link(v,t);\n                Seg::add(v,n,-1,1);\n            }\n        }\n    }\n}\nvoid rmv_point(int v)\n{\n    Seg::add(v,n,-1,1);\n    int x=a[v].x,y=a[v].y;\n    int dx[4]={0,0,-1,1},dy[4]={1,-1,0,0};\n    vis[v]=false;\n    for(int i=0;i<4;i++)\n    {\n        int nx=x+dx[i],ny=y+dy[i];\n        if(nx>=1&&nx<=::x&&ny>=1&&ny<=::y)\n        {\n            int t=map[nx][ny];\n            if(vis[t])\n            {\n                LCT::cut(v,t);\n                Seg::add(t,n,1,1);\n            }\n        }\n    }\n}\nbool judge(int v)\n{\n    int x=a[v].x,y=a[v].y;\n    int dx[4]={0,0,-1,1},dy[4]={1,-1,0,0};\n    int z[4]={-1,-2,-3,-4};\n    for(int i=0;i<4;i++)\n    {\n        int nx=x+dx[i],ny=y+dy[i];\n        if(nx>=1&&nx<=::x&&ny>=1&&ny<=::y)\n        {\n            int t=map[nx][ny];\n            if(vis[t])\n            {\n                z[i]=LCT::findroot(t);\n            }\n        }\n    }\n    for(int i=0;i<4;i++) for(int j=0;j<i;j++) if(z[i]==z[j]) return false;\n    return true;\n}\nint main()\n{\n    scanf(\"%d%d\",&x,&y);\n    for(int i=1;i<=x;i++) for(int j=1;j<=y;j++)\n    {\n        scanf(\"%d\",map[i]+j);\n        a[map[i][j]]=point{i,j};\n    }\n    n=x*y;\n    Seg::init(1,n,1);\n    int p=0;\n    //\u7ebf\u6bb5\u6811\u4f4d\u7f6ex:[l,x]\u7684\u70b9\u6570-\u8fb9\u6570\n    for(int l=1;l<=n;l++)\n    {\n        if(l-1) rmv_point(l-1);\n        while(p<n&&judge(p+1)) add_point(++p);\n        Seg::data t=Seg::query(l,p,1);\n        //if(t.mn==0) puts(\"LOL\");\n        if(t.mn==1) ans+=t.cnt;\n        //if(t.mn>1) puts(\"???\");\n    }\n    printf(\"%lld\",ans);\n}"
+}

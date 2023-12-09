@@ -1,0 +1,35 @@
+{
+    "id": 220403562,
+    "contestId": 283,
+    "creationTimeSeconds": 1692978789,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 283,
+        "index": "C",
+        "name": "Coin Troubles",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 283,
+        "members": [
+            {
+                "handle": "Little_Sheep_Yawn"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1363534200
+    },
+    "programmingLanguage": "PyPy 3-64",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 76,
+    "timeConsumedMillis": 622,
+    "memoryConsumedBytes": 11776000,
+    "source": "from io import BytesIO, IOBase\r\nimport sys\r\nimport os\r\n\r\n# import time\r\nimport bisect\r\n# import functools\r\nimport math\r\nimport random\r\n# import re\r\nfrom collections import Counter, defaultdict, deque\r\nfrom copy import deepcopy\r\nfrom functools import cmp_to_key, lru_cache, reduce\r\nfrom heapq import heapify, heappop, heappush, heappushpop, nlargest, nsmallest\r\nfrom itertools import accumulate, combinations, permutations, count, product\r\nfrom operator import add, iand, ior, itemgetter, mul, xor\r\nfrom string import ascii_lowercase, ascii_uppercase\r\nfrom typing import *\r\n\r\nclass IOWrapper(IOBase):\r\n    def __init__(self, file):\r\n        self.buffer = FastIO(file)\r\n        self.flush = self.buffer.flush\r\n        self.writable = self.buffer.writable\r\n        self.write = lambda s: self.buffer.write(s.encode(\"ascii\"))\r\n        self.read = lambda: self.buffer.read().decode(\"ascii\")\r\n        self.readline = lambda: self.buffer.readline().decode(\"ascii\")\r\n\r\nBUFSIZE = 5096\r\n\r\nclass FastIO(IOBase):\r\n    newlines = 0\r\n\r\n    def __init__(self, file):\r\n        self._fd = file.fileno()\r\n        self.buffer = BytesIO()\r\n        self.writable = \"x\" in file.mode or \"r\" not in file.mode\r\n        self.write = self.buffer.write if self.writable else None\r\n\r\n\r\n    def readline(self):\r\n        while self.newlines == 0:\r\n            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))\r\n            self.newlines = b.count(b\"\\n\") + (not b)\r\n            ptr = self.buffer.tell()\r\n            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)\r\n        self.newlines -= 1\r\n        return self.buffer.readline()\r\n\r\n    def flush(self):\r\n        if self.writable:\r\n            os.write(self._fd, self.buffer.getvalue())\r\n            self.buffer.truncate(0), self.buffer.seek(0)\r\n\r\n    def read(self):\r\n        while True:\r\n            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))\r\n            if not b:\r\n                break\r\n            ptr = self.buffer.tell()\r\n            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)\r\n        self.newlines = 0\r\n        return self.buffer.read()\r\n\r\n\r\nsys.stdin = IOWrapper(sys.stdin)\r\nsys.stdout = IOWrapper(sys.stdout)\r\ninput = lambda: sys.stdin.readline().rstrip(\"\\r\\n\")\r\n\r\ndef I():\r\n    return input()\r\n\r\ndef II():\r\n    return int(input())\r\n\r\ndef MII():\r\n    return map(int, input().split())\r\n\r\ndef LI():\r\n    return list(input().split())\r\n\r\ndef LII():\r\n    return list(map(int, input().split()))\r\n\r\ndef GMI():\r\n    return map(lambda x: int(x) - 1, input().split())\r\n\r\ndef LGMI():\r\n    return list(map(lambda x: int(x) - 1, input().split()))\r\n\r\ninf = float('inf')\r\n\r\nfrom types import GeneratorType\r\n\r\ndef bootstrap(f, stack=[]):\r\n    def wrappedfunc(*args, **kwargs):\r\n        if stack:\r\n            return f(*args, **kwargs)\r\n        else:\r\n            to = f(*args, **kwargs)\r\n            while True:\r\n                if type(to) is GeneratorType:\r\n                    stack.append(to)\r\n                    to = next(to)\r\n                else:\r\n                    stack.pop()\r\n                    if not stack:\r\n                        break\r\n                    to = stack[-1].send(to)\r\n            return to\r\n    return wrappedfunc\r\n\r\n# RANDOM = random.getrandbits(32)\r\n\r\n# class Wrapper_int(int):\r\n#     def __init__(self, x):\r\n#         int.__init__(x)\r\n\r\n#     def __hash__(self):\r\n#         return super(Wrapper_int, self).__hash__() ^ RANDOM\r\n\r\n# class Wrapper_str(str):\r\n#     def __init__(self, x):\r\n#         str.__init__(x)\r\n\r\n#     def __hash__(self):\r\n#         return super(Wrapper_str, self).__hash__() ^ RANDOM\r\n\r\n# class Wrapper_tuple(tuple):\r\n#     def __init__(self, x):\r\n#         tuple.__init__(x)\r\n\r\n#     def __hash__(self):\r\n#         return super(Wrapper_tuple, self).__hash__() ^ RANDOM\r\n\r\nn, q, t = MII()\r\nvals = LII()\r\n\r\npath = [[] for _ in range(n)]\r\nindeg = [0] * n\r\nfor _ in range(q):\r\n    u, v = GMI()\r\n    path[v].append(u)\r\n    indeg[u] += 1\r\n\r\nstack = [i for i in range(n) if indeg[i] == 0]\r\ndepth = [0] * n\r\nwhile stack:\r\n    u = stack.pop()\r\n    for v in path[u]:\r\n        depth[v] = max(depth[v], depth[u] + 1)\r\n        indeg[v] -= 1\r\n        if indeg[v] == 0:\r\n            stack.append(v)\r\n\r\nif max(indeg): print(0); exit()\r\n\r\nnew_vals = vals[:]\r\nfor i in range(n):\r\n    tmp = {i}\r\n    stack = [i]\r\n    while stack:\r\n        u = stack.pop()\r\n        for v in path[u]:\r\n            if v not in tmp:\r\n                tmp.add(v)\r\n                new_vals[i] += vals[v]\r\n                stack.append(v)\r\n\r\nfor i in range(n):\r\n    t -= depth[i] * vals[i]\r\n\r\nif t < 0: print(0); exit()\r\n\r\nmod = 10 ** 9 + 7\r\ndp = [0] * (t + 1)\r\ndp[0] = 1\r\nfor x in new_vals:\r\n    for i in range(x):\r\n        for j in range(i + x, t + 1, x):\r\n            dp[j] += dp[j-x]\r\n            dp[j] %= mod\r\n\r\nprint(dp[t])"
+}

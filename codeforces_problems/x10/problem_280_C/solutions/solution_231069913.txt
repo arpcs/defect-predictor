@@ -1,0 +1,38 @@
+{
+    "id": 231069913,
+    "contestId": 280,
+    "creationTimeSeconds": 1698991188,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 280,
+        "index": "C",
+        "name": "Game on Tree",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2200,
+        "tags": [
+            "implementation",
+            "math",
+            "probabilities",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 280,
+        "members": [
+            {
+                "handle": "XJ190720"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362929400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 3379200,
+    "source": "// LUOGU_RID: 133072740\n#include <cstdio>\n#include <cmath>\n#include <algorithm>\n#include <stack>\n#include <iostream>\n#include <ctime>\n#include <chrono>\n#include <random>\n#include <vector>\n\n#define int long long\n#define break(a) { a; break; }\n#define continue(a) { a; continue; }\n// #define return(a) { a; return 0; }\n// #define FOR(i, j, k, t) for (int i = j; i <= k; i += t)\n// #define ROF(i, j, k, t) for (int i = j; i >= k; i += t)\n// #define rep(i, j, k) for (int i = j; i <= k; i++) \n// #define per(i, j, k) for (int i = j; i >= k; i--) \n#define fore(i, h) for (int i = h; i; i = e[i].next)\n#define forr(i, h) for (int& i = h; i; i = e[i].next)\n// #define READ(limit, array) rep(i, 1, limit) in >> array[i];\n\nconst int MOD = 1e9 + 7;\n// const int kMaxN = 1e6 + 10;\nconst char endl = '\\n';\nconst double START = clock();\nconst double TIME = 0.5;\nconst long double PI = acos(-1);\nusing ll = long long;\n\n#ifdef IO\nIO::reader<signed(1e5)>  cin;\nIO::printer<signed(1e5)> cout;\nIO::printer<signed(1e5)> cerr(stderr);\n#else\nusing std::cin;\nusing std::cout;\nusing std::cerr;\n#endif\n\nusing std::vector;\n\ntemplate <class type, int pagesize = 256>\nclass pool { \nprivate:\n  vector<type*> v;\n  std::stack<type*> save;\n  int cnt = pagesize;\n\npublic:\n  ~pool() {\n    for (auto i : v) delete [] i;\n  }\n  type* alloc() {\n    static type* p;\n    if (save.size()) {\n      p = save.top(), save.pop();\n    } else {\n      if (cnt == pagesize) cnt = 0, v.push_back(new type[pagesize]);\n      p = v.back() + cnt++;\n    }\n    return p;\n  }\n  void dealloc(type* p) {\n    save.push(p);\n  }\n};\n\ntemplate<class type = void> inline void upmin(type& a, const type& b) { a = std::min(a, b); }\ntemplate<class type = void> inline void upmax(type& a, const type& b) { a = std::max(a, b); }\n\ntemplate<class type = void> inline type init_number(type a) {\n  a %= MOD;\n  while (a < 0) a += MOD;\n  return a;\n}\ntemplate<class type = void> inline type inc(type a, type b) { return init_number(a + b); }\ntemplate<class type = void> inline type dec(type a, type b) { return init_number(a - b); }\ntemplate<class type = void> inline type mul(type a, type b) { return init_number(a * b); }\n\ntemplate <class type>\nstruct mint {\n  type val;\n  operator type() { return val; }\n  mint() {};\n  mint(const type& p) { val = p; }\n  mint& operator += (const type& tmp) { return val = inc(val, tmp), *this; }\n  mint& operator -= (const type& tmp) { return val = dec(val, tmp), *this; }\n  mint& operator *= (const type& tmp) { return val = mul(val, tmp), *this; }\n  mint& operator += (const mint<type>& tmp) { return val = inc(val, tmp.val), *this; }\n  mint& operator -= (const mint<type>& tmp) { return val = dec(val, tmp.val), *this; }\n  mint& operator *= (const mint<type>& tmp) { return val = mul(val, tmp.val), *this; }\n  mint operator + (const type& tmp) const { return inc(val, tmp); }\n  mint operator - (const type& tmp) const { return dec(val, tmp); }\n  mint operator * (const type& tmp) const { return mul(val, tmp); }\n  mint operator + (const mint<type>& tmp) const { return inc(val, tmp.val); }\n  mint operator - (const mint<type>& tmp) const { return dec(val, tmp.val); }\n  mint operator * (const mint<type>& tmp) const { return mul(val, tmp.val); }\n};\n\ninline int rand(int l, int r) {\n  static std::mt19937_64 e(std::chrono::high_resolution_clock::now().time_since_epoch().count());\n  static std::uniform_int_distribution<int> rand;\n  rand = std::uniform_int_distribution<int>(l, r);\n  return rand(e);\n}\n\ntemplate<class type = void> inline int toint(const type& str) {\n  int w = 0;\n  for (auto i : str) w = w * 10 + i - '0';\n  return w;\n}\n\ntemplate<class type = void> inline void run(const type& fun) {\n  auto begin = clock();\n  fun();\n  std::cerr.setf(std::ios::fixed);\n  (std::cerr << (clock() - (double)begin) / CLOCKS_PER_SEC << endl).flush();\n}\n\nconst int kMaxN = 1e5 + 10;\n\nint n;\nlong double dp[kMaxN];\nvector<int> go[kMaxN];\nint dep[kMaxN];\n\nvoid dfs(int u, int fa) {\n  dep[u] = dep[fa] + 1;\n  for (auto v : go[u]) {\n    if (v == fa) continue;\n    dfs(v, u);\n  }\n}\n\nsigned main() {\n#ifndef IO\n  std::ios::sync_with_stdio(false);\n  cin.tie(0), cout.tie(0);\n#endif\n  cin >> n;\n  for (int i = 1; i < n; i++) {\n    int u, v;\n    cin >> u >> v;\n    go[u].push_back(v), go[v].push_back(u);\n  }\n  dfs(1, 0);\n  long double ans = 0;\n  for (int i = 1; i <= n; i++) {\n    ans += 1.0 / dep[i];\n  }\n  cout << ans << endl;\n  return 0;\n}\n"
+}

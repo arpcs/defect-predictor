@@ -1,0 +1,37 @@
+{
+    "id": 224248050,
+    "contestId": 1423,
+    "creationTimeSeconds": 1695271462,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1423,
+        "index": "B",
+        "name": "Valuable Paper",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "binary search",
+            "flows",
+            "graph matchings",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1423,
+        "members": [
+            {
+                "handle": "vjudge3"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601903100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 27,
+    "timeConsumedMillis": 1825,
+    "memoryConsumedBytes": 6553600,
+    "source": "#include <bits/stdc++.h>\nconst int N = 1e4+10,M = 1e5+10,inf = 2e9;\n\nstruct edge{\n    int u,v,t;\n}rode[M];\n\nint head[N*3],n,m,idx,maxflow;\nint dep[N*3],ans[N*3],vir[N*3];\n\nstruct node{\n    int to;\n    int w;\n    int next;\n}g[M*4];\n\ninline void add(int a, int b, int w){\n    g[idx]={b,w,head[a]};\n    head[a]=idx++;\n}\n\nbool bfs(){\n    for(int i=0; i<=2*n+1; i++){\n        dep[i]=0x3f3f3f3f;\n        ans[i]=0;\n        vir[i]=head[i];\n    }\n    std::queue<int> q;\n    q.push(0);\n    dep[0]=0;\n    while(!q.empty()){\n        int u=q.front();\n        q.pop();\n        ans[u]=0;\n        for(int i=head[u]; ~i; i=g[i].next){\n            int j=g[i].to;\n            if(dep[j]>dep[u]+1&&g[i].w){\n                dep[j]=dep[u]+1;\n                if(ans[j]==0){\n                    ans[j]=1;\n                    q.push(j);\n                }\n            }\n        }\n    }\n    if(dep[n*2+1]!=0x3f3f3f3f) return true;\n    return false;\n}\n\ninline int dfs(int u, int flow){\n    int rlow=0;\n    if(u==2*n+1){\n        maxflow+=flow;\n        return flow;\n    }\n    int used=0;\n    for(int i=vir[u]; ~i; i=g[i].next){\n        vir[u]=i;\n        int d=g[i].to;\n        if(g[i].w&&dep[d]==dep[u]+1){\n            if(rlow=dfs(d,std::min(flow-used,g[i].w))){\n                used+=rlow;\n                g[i].w-=rlow;\n                g[i^1].w+=rlow;\n                if(used==flow) break;\n            }\n        }\n    }\n    return used;\n}\n\ninline int dinic(){\n    while(bfs()){\n        dfs(0,inf);\n    }\n    return maxflow;\n}\n\ninline bool check(int x){\n    memset(head,0xff,sizeof(head));\n    idx=0;\n    for(int i=1; i<=n; i++){\n        add(0,i,1);\n        add(i,0,0);\n        add(i+n,2*n+1,1);\n        add(2*n+1,n+i,0);\n    }\n    for(int i=1; i<=m; i++){\n        if(rode[i].t<=x){\n            add(rode[i].u,rode[i].v+n,1);\n            add(rode[i].v+n,rode[i].u,0);\n        }\n    }\n    maxflow=0;\n    dinic();\n    //std::cout << maxflow << '\\n';\n    if(maxflow<n) return 0;\n    return 1;\n}\n\nint main(){\n    scanf(\"%d%d\",&n,&m);\n    int l=inf,r=0;\n    for(int i=1; i<=m; i++){\n        scanf(\"%d%d%d\",&rode[i].u,&rode[i].v,&rode[i].t);\n        if(rode[i].t<l) l=rode[i].t;\n        if(rode[i].t>r) r=rode[i].t;\n    }\n    int res=-1;\n    while(l<=r){\n        int mid=l+r>>1;\n        if(check(mid)){\n            res=mid;\n            r=mid-1;\n        }else{\n            l=mid+1;\n        }\n    }\n    printf(\"%d\\n\",res);\n    return 0;\n}\n\t     \t \t      \t\t  \t\t\t\t"
+}

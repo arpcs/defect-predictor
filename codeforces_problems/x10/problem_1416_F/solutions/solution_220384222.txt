@@ -1,0 +1,38 @@
+{
+    "id": 220384222,
+    "contestId": 1416,
+    "creationTimeSeconds": 1692971311,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1416,
+        "index": "F",
+        "name": "Showing Off",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3300,
+        "tags": [
+            "flows",
+            "graph matchings",
+            "greedy",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1416,
+        "members": [
+            {
+                "handle": "lcb9021"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601219100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "// LUOGU_RID: 122761965\n//test\n#include<bits/stdc++.h>\nusing namespace std;\nconst int N=3e6+10,inf=1e9;\nint n,m,sum[N],a[N],dic[N],ans;\ninline int id(int x,int y){return (x-1)*m+y;}\nint head[N],tot,lev[N],s,t,NM;\nstruct edge{\n\tint nxt,u,v,w;\n}e[N];\ninline void add(int k,int u,int v,int w){\n\tif(k){//\u5b58\u4e24\u4e2a\u56fe\n\t\tif(u!=s&&u!=t)u+=NM;\n\t\tif(v!=s&&v!=t)v+=NM;\n\t}\n//\tif(!Flg)printf(\"add:%d %d %d\\n\",u,v,w);\n\te[++tot]={head[u],u,v,w};\n\thead[u]=tot;\n}\ninline bool bfs(int s,int t){\n\tmemset(lev,-1,(2*NM+10)*sizeof(int));\n\tlev[s]=1;queue<int> q;\n\tq.push(s);\n\twhile(!q.empty()){\n\t\tint u=q.front();q.pop();\n\t\tfor(register int i=head[u];i;i=e[i].nxt){\n\t\t\tint v=e[i].v;\n\t\t\tif(e[i].w&&lev[v]==-1){\n\t\t\t\tlev[v]=lev[u]+1,q.push(v);\n\t\t\t\tif(v==t)return true;\n\t\t\t}\n\t\t}\n\t}\n\treturn false;\n}\nint dfs(int u,int in){\n\tif(u==t)return in;\n\tint out=0;\n\tfor(register int i=head[u];i;i=e[i].nxt){\n\t\tint v=e[i].v;\n\t\tif(e[i].w&&lev[v]==lev[u]+1){\n\t\t\tint use=dfs(v,min(e[i].w,in));\n\t\t\te[i].w-=use,out+=use;\n\t\t\te[i^1].w+=use,in-=use;\n\t\t}\n\t}\n\tif(!out)lev[u]=-1;\n\treturn out;\n}\ninline void dinic(int s,int t){\n\tans=0;\n\twhile(bfs(s,t))ans+=dfs(s,inf);\n}\nconst int xx[]={0,1,0,-1};\nconst int yy[]={1,0,-1,0};\nconst char ad[]={'R','D','L','U'};\nint ch[N],fa[N],vis[N];\ninline void Add(int u,int v){\n\ta[u]=1,a[v]=sum[v]-1;\n\tif(u+1==v)dic[u]=0;\n\tif(v+1==u)dic[u]=2;\n\tif(u+m==v)dic[u]=1;\n\tif(v+m==u)dic[u]=3;\n\tdic[v]=dic[u]^2;\n}\nvoid Dfs(int u){\n\tif(vis[u])return;\n\tvis[u]=1;\n\tif(!fa[u])return;\n\tint v=fa[u];\n//\tif(!Flg)printf(\"%d %d\\n\",u,v);\n\tvis[v]=1;\n\tAdd(u,v);\n\tif(fa[v])Dfs(fa[v]);\n}\ninline char nc(){\n    static char buf[1000010],*p1=buf,*p2=buf;\n    return p1==p2&&(p2=(p1=buf)+fread(buf,1,1000010,stdin),p1==p2)?EOF:*p1++;\n}\ninline int read(){\n    register int s=0,w=0;\n    static char ch=nc();\n    for(;!isdigit(ch);)ch=nc();\n    for(;isdigit(ch);){\n        s=(s<<1)+(s<<3)+(ch^48);\n        ch=nc();\n    }\n    return w?-s:s;\n}\ninline void work(){\n\tn=read(),m=read();NM=n*m,tot=1;\n\tif(n==250&&m==400)Flg=0;\n\tfor(register int i=1;i<=2*NM+3;++i)head[i]=fa[i]=ch[i]=vis[i]=0;\n\tfor(register int i=1;i<=NM;++i)sum[i]=read();\n\ts=2*NM+1,t=2*NM+2;\n\tint in=0;\n\tfor(register int i=1;i<=n;++i){\n\t\tfor(register int j=1;j<=m;++j){\n\t\t\tregister int flg=2,x=id(i,j);\n\t\t\tfor(register int k=0;k<4;k++){\n\t\t\t\tint nx=i+xx[k],ny=j+yy[k];\n\t\t\t\tif(nx<1||ny<1||nx>n||ny>m)continue;\n\t\t\t\tif(sum[id(nx,ny)]==sum[x])flg=1;\n\t\t\t\tif(sum[id(nx,ny)]<sum[x]){\n\t\t\t\t\ta[x]=sum[x]-sum[id(nx,ny)];\n\t\t\t\t\tdic[x]=k;\n\t\t\t\t\tflg=0;break;\n\t\t\t\t}\n\t\t\t}\n\t\t\tif(flg==2){puts(\"NO\");return;}\n\t\t\tint p=(i^j)&1;add(p^1,x,t,1),add(p^1,t,x,0);\n\t\t\tif(flg){\n\t\t\t\tadd(p,s,x,1),add(p,x,s,0),in++;\n\t\t\t\tfor(register int k=0;k<4;k++){\n\t\t\t\t\tint nx=i+xx[k],ny=j+yy[k];\n\t\t\t\t\tif(nx<1||ny<1||nx>n||ny>m)continue;\n\t\t\t\t\tif(sum[id(nx,ny)]==sum[x])add(p,x,id(nx,ny),1),add(p,id(nx,ny),x,0);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n\tdinic(s,t);\n\tif(ans!=in){puts(\"NO\");return;}\n\tfor(register int i=2;i<tot;i+=2){\n\t\tif(e[i].u==s||e[i].v==t||e[i].w)continue;\n\t\tif(e[i].u>NM)e[i].u-=NM;\n\t\tif(e[i].v>NM)e[i].v-=NM;\n\t\tfa[e[i].u]=e[i].v;\n\t\tch[e[i].v]=e[i].u;\n\t}\n\tfor(register int u=1;u<=NM;++u)if(!ch[u])Dfs(u);\n\tfor(register int u=1;u<=NM;++u)if(!vis[u])Dfs(u);\n//\tfor(int i=1;i<=NM;++i)if(!a[i]){puts(\"NO\");return;}\n\tputs(\"YES\");\n\tfor(register int i=1;i<=NM;++i){\n\t\tprintf(\"%d \",a[i]);\n\t\tif(i%m==0)puts(\"\");\n\t}\n\tfor(register int i=1;i<=NM;++i){\n\t\tprintf(\"%c \",ad[dic[i]]);\n\t\tif(i%m==0)puts(\"\");\n\t}\n}\nsigned main(){\n\tint T=read();\n\tfor(;T--;)work();\n}"
+}

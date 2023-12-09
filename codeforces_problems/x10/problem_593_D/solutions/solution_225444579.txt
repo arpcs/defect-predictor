@@ -1,0 +1,39 @@
+{
+    "id": 225444579,
+    "contestId": 593,
+    "creationTimeSeconds": 1695775285,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 593,
+        "index": "D",
+        "name": "Happy Tree Party",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 593,
+        "members": [
+            {
+                "handle": "TomGreen"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1446655500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 12,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 156569600,
+    "source": "// LUOGU_RID: 126278738\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define int long long\r\nconst int N=4e5+5;\r\nint n,m,q,u,v,w,op;\r\nint s[N<<2],g[N][20],a[N],at[N],id[N],siz[N],top[N],fa[N],son[N],dep[N],head[N],p,c;\r\nint tot,cnt;\r\nint ans,res;\r\nstruct edge{\r\n\tint to,nxt,w;\r\n}e[N<<1]; \r\nstruct edg{\r\n\tint u,v,w;\r\n}E[N<<1];\r\nvoid add(int u,int v,int w){\r\n\tcnt++;\r\n\te[cnt].to=v;\r\n\te[cnt].nxt=head[u];\r\n\te[cnt].w=w;\r\n\thead[u]=cnt;\r\n}\r\nvoid dfs1(int x,int f,int deep){\r\n\tdep[x]=deep;\r\n\tfa[x]=f;\r\n\tg[x][0]=f;\r\n\tsiz[x]=1;\r\n\tint maxson=-1;\r\n\t//cout<<\"deep=\"<<deep<<endl;\r\n\tfor(int i=head[x];i!=0;i=e[i].nxt){\r\n\t\tint to=e[i].to;\r\n\t\tif(to==f) continue;\r\n\t\ta[to]=e[i].w;\r\n\t\tdfs1(to,x,deep+1);\r\n\t\tsiz[x]+=siz[to];\r\n\t\tif(siz[to]>maxson){\r\n\t\t\tmaxson=siz[to];\r\n\t\t\tson[x]=to;\r\n\t\t}\r\n\t}\r\n}\r\nvoid dfs2(int x,int tf){\r\n\tid[x]=++tot;\r\n\t//cout<<\"cnt=\"<<cnt<<endl;\r\n\tat[tot]=a[x];\r\n\ttop[x]=tf;\r\n\tif(!son[x]) return;\r\n\tdfs2(son[x],tf);\r\n\tfor(int i=head[x];i!=0;i=e[i].nxt){\r\n\t\tint to=e[i].to;\r\n\t\tif(to==fa[x]||to==son[x]) continue;\r\n\t\tdfs2(to,to);\r\n\t} \r\n}\r\nvoid pushup(int x){\r\n\ts[x]=s[x<<1]*s[x<<1|1];\r\n}\r\nvoid build(int x,int l,int r){\r\n\tif(l==r){\r\n\t\ts[x]=at[l];\r\n\t\t//cout<<s[x]<<endl;\r\n\t\treturn;\r\n\t}\r\n\tint mid=(l+r)>>1;\r\n\tbuild(x<<1,l,mid);\r\n\tbuild(x<<1|1,mid+1,r);\r\n\tpushup(x);\r\n}\r\nint ask(int x,int l,int r,int ql,int qr){\r\n\t\r\n\t//if(ql>r||qr<l) return 1;\r\n\tif(ql<=l&&r<=qr){\r\n\t\treturn s[x];\r\n\t}\r\n\tint mid=(l+r)>>1;\r\n\tint res=1;\r\n\tif(ql<=mid) res*=ask(x<<1,l,mid,ql,qr);\r\n\tif(qr>mid) res*=ask(x<<1|1,mid+1,r,ql,qr);\r\n\treturn res;\r\n}\r\nint query(int x,int y){\r\n\tint res=1;\r\n\twhile(top[x]!=top[y]){\r\n\t\tif(dep[top[x]]<dep[top[y]]) swap(x,y);\r\n\t\t//cout<<top[x]<<\" \"<<x<<endl;\r\n\t\tres*=ask(1,1,n,id[top[x]],id[x]);\r\n\t\t//cout<<res<<endl;\r\n\t\tx=fa[top[x]];\r\n\t}\r\n\tif(dep[x]>dep[y]) swap(x,y);\r\n\t//cout<<x<<\" \"<<y<<endl;\r\n\tres*=ask(1,1,n,id[x],id[y]);\r\n\t//cout<<res<<endl;\r\n\treturn res;\r\n}\r\nvoid update(int x,int l,int r,int p,int v){\r\n\tif(l==p&&r==p){\r\n\t\ts[x]=v;\r\n\t\treturn;\r\n\t}\r\n\tint mid=(l+r)>>1;\r\n\tif(p<=mid) update(x<<1,l,mid,p,v);\r\n\telse update(x<<1|1,mid+1,r,p,v);\r\n\tpushup(x);\r\n}\r\nvoid init(){\r\n\tfor(int j=1;j<=18;j++){\r\n\t\tfor(int i=1;i<=n;i++){\r\n\t\t\tg[i][j]=g[g[i][j-1]][j-1];\r\n\t\t}\r\n\t}\r\n}\r\nint lca(int x,int y){\r\n\tif(dep[x]<dep[y]) swap(x,y);\r\n\tfor(int i=18;i>=0;i--){\r\n\t\tif(dep[g[x][i]]>=dep[y]) x=g[x][i];\r\n\t}\r\n\tif(x==y) return x;\r\n\tfor(int i=18;i>=0;i--){\r\n\t\tif(g[x][i]!=g[y][i]) x=g[x][i],y=g[y][i];\r\n\t}\r\n\treturn g[x][0];\r\n}\r\nsigned main(){\r\n\tscanf(\"%lld%lld\",&n,&q);\r\n\tfor(int i=1;i<n;i++){\r\n\t\tscanf(\"%lld%lld%lld\",&u,&v,&w);\r\n\t\tadd(u,v,w),add(v,u,w);\r\n\t\tE[i].u=u,E[i].v=v,E[i].w=w;\r\n\t}\r\n\tdfs1(1,0,1);\r\n\ta[1]=1;\r\n\tdfs2(1,1);\r\n\tinit();\r\n\tbuild(1,1,n);\r\n\twhile(q--){\r\n\t\tscanf(\"%lld\",&op);\r\n\t\tif(op==1){\r\n\t\t\tscanf(\"%lld%lld%lld\",&u,&v,&w);\r\n\t\t\tif(u==v){\r\n\t\t\t\tprintf(\"%lld\\n\",w);\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\tint ans=query(u,v);\r\n\t\t\tint l=lca(u,v);\r\n\t\t\t//cout<<l<<endl;\r\n\t\t\tans/=at[id[l]];\r\n\t\t\t//cout<<\"qwq\"<<endl;\r\n\t\t\t//cout<<ans<<endl;\r\n\t\t\tprintf(\"%lld\\n\",w/ans);\r\n\t\t}\r\n\t\telse{\r\n\t\t\tscanf(\"%lld%lld\",&p,&c);\r\n\t\t\tif(fa[E[p].u]==E[p].v) update(1,1,n,id[E[p].u],c);\r\n\t\t\telse update(1,1,n,id[E[p].v],c);\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}\r\n/*\r\n6 6\r\n1 2 1\r\n1 3 7\r\n1 4 4\r\n2 5 5\r\n2 6 2\r\n1 4 6 17\r\n2 3 2\r\n1 4 6 17\r\n1 5 5 20\r\n2 4 1\r\n1 5 1 3\r\n*/"
+}

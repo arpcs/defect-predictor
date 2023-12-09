@@ -1,0 +1,34 @@
+{
+    "id": 51977706,
+    "contestId": 392,
+    "creationTimeSeconds": 1553871386,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 392,
+        "index": "D",
+        "name": "Three Arrays",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 392,
+        "members": [
+            {
+                "handle": "Atreus"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1392728400
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 60,
+    "timeConsumedMillis": 186,
+    "memoryConsumedBytes": 13619200,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\ntypedef long long ll;\ntypedef long double ld;\n\nconst int maxn = 1e5 + 10;\n\nstruct node{\n\tint dp;\n\tint mnm;\n\tint mxm;\n\tint lazy;\n};\n\nnode seg[4 * maxn];\n\nvoid propagate(int, int, int);\n\nvoid change(int id, int L, int R, int l, int r, int x){\n\tif (seg[id].mnm >= x)\n\t\treturn;\n\tint mid = (L + R) >> 1;\n\tif (L == l and R == r){\n\t\tif (seg[id].mnm == seg[id].mxm){\n\t\t\tseg[id].dp += x - seg[id].mnm;\n\t\t\tseg[id].mnm = seg[id].mxm = x;\n\t\t\tseg[id].lazy = x;\n\t\t\treturn;\n\t\t}\n\t\tpropagate(id, L, R);\n\t\tchange(2 * id + 0, L, mid, L, mid, x);\n\t\tchange(2 * id + 1, mid, R, mid, R, x);\n\t\tseg[id].mnm = min(seg[2 * id + 0].mnm, seg[2 * id + 1].mnm);\n\t\tseg[id].mxm = max(seg[2 * id + 1].mxm, seg[2 * id + 1].mxm);\n\t\tseg[id].dp = min(seg[2 * id + 0].dp, seg[2 * id + 1].dp);\n\t\treturn;\n\t}\n\tpropagate(id, L, R);\n\tif (l < mid)\n\t\tchange(2 * id + 0, L, mid, l, min(mid, r), x);\n\tif (mid < r)\n\t\tchange(2 * id + 1, mid, R, max(l, mid), r, x);\n\tseg[id].mnm = min(seg[2 * id + 0].mnm, seg[2 * id + 1].mnm);\n\tseg[id].mxm = max(seg[2 * id + 0].mxm, seg[2 * id + 1].mxm);\n\tseg[id].dp = min(seg[2 * id + 0].dp, seg[2 * id + 1].dp);\n}\n\nvoid propagate(int id, int L, int R){\n\tif (seg[id].lazy == 0)\n\t\treturn;\n\tint mid = (L + R) >> 1;\n\tchange(2 * id + 0, L, mid, L, mid, seg[id].lazy);\n\tchange(2 * id + 1, mid, R, mid, R, seg[id].lazy);\n\tseg[id].lazy = 0;\n}\n\nvoid build(int id, int L, int R){\n\tseg[id].dp = L;\n\tif (L + 1 == R)\n\t\treturn;\n\tint mid = (L + R) >> 1;\n\tbuild(2 * id + 0, L, mid);\n\tbuild(2 * id + 1, mid, R);\n}\n\nint a[5][maxn], last[5][maxn];\n\nint main(){\n\tios_base::sync_with_stdio(false);\n\tint n;\n\tcin >> n;\n\tvector<int> v;\n\tfor (int i = 1; i <= 3; i++){\n\t\tfor (int j = 1; j <= n; j++){\n\t\t\tcin >> a[i][j];\n\t\t\tv.push_back(a[i][j]);\n\t\t}\n\t}\n\tsort(v.begin(), v.end());\n\tv.resize(unique(v.begin(), v.end()) - v.begin());\n\tmemset(last, -1, sizeof last);\n\tfor (int i = 1; i <= 3; i++){\n\t\tfor (int j = 1; j <= n; j++){\n\t\t\ta[i][j] = lower_bound(v.begin(), v.end(), a[i][j]) - v.begin() + 1;\n\t\t\tif (last[i][a[i][j]] == -1)\n\t\t\t\tlast[i][a[i][j]] = j;\n\t\t}\n\t}\n\tbuild(1, 0, n + 1);\n\tint max_number = v.size();\n\tint inf = 5 * n;\n\tfor (int i = 1; i <= max_number; i++){\n\t\tif (last[1][i] == -1){\n\t\t\tif (last[2][i] == -1)\n\t\t\t\tchange(1, 0, n + 1, 0, n + 1, last[3][i]);\n\t\t\telse{\n\t\t\t\tif (last[3][i] == -1)\n\t\t\t\t\tchange(1, 0, n + 1, 0, last[2][i], inf);\n\t\t\t\telse\n\t\t\t\t\tchange(1, 0, n + 1, 0, last[2][i], last[3][i]);\n\t\t\t}\n\t\t}\n\t}\n\tint answer = 3 * n;\n\tfor (int i = n; i >= 0; i--){\n\t\tanswer = min(answer, seg[1].dp + i);\n\t\tif (i == 0)\n\t\t\tbreak;\n\t\tif (last[1][a[1][i]] == i){\n\t\t\tif (last[2][a[1][i]] == -1){\n\t\t\t\tif (last[3][a[1][i]] == -1)\n\t\t\t\t\tbreak;\n\t\t\t\tchange(1, 0, n + 1, 0, n + 1, last[3][a[1][i]]);\n\t\t\t}\n\t\t\telse{\n\t\t\t\tif (last[3][a[1][i]] == -1)\n\t\t\t\t\tchange(1, 0, n + 1, 0, last[2][a[1][i]], inf);\n\t\t\t\telse\n\t\t\t\t\tchange(1, 0, n + 1, 0, last[2][a[1][i]], last[3][a[1][i]]);\n\t\t\t}\n\t\t}\n\t}\n\tcout << answer << endl;\n}\n"
+}

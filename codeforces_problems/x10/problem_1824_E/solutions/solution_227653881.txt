@@ -1,0 +1,36 @@
+{
+    "id": 227653881,
+    "contestId": 1824,
+    "creationTimeSeconds": 1697018195,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1824,
+        "index": "E",
+        "name": "LuoTianyi and Cartridge",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3500,
+        "tags": [
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1824,
+        "members": [
+            {
+                "handle": "nguyenquocthinhhung"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1683547500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 59,
+    "timeConsumedMillis": 576,
+    "memoryConsumedBytes": 30208000,
+    "source": "#include <bits/stdc++.h>\r\n#ifdef ONLINE_JUDGE\r\n#define freopen(...) 0\r\n#endif\r\n#define V vector\r\n#define fi first\r\n#define se second\r\n#define ins emplace\r\n#define eb emplace_back\r\n#define FO(i, a, b) F(i, a, (b) - 1)\r\n#define RO(i, a, b) R(i, a, (b) - 1)\r\n#define F(i, a, b) for (int i = (a), iee = (b); i <= iee; i++)\r\n#define R(i, a, b) for (int i = (b), iee = (a); i >= iee; i--)\r\n#define rsz resize\r\n#define sz(x) (x).size()\r\nusing namespace std;\r\nusing str = string;\r\nusing ll = long long;\r\nusing u32 = unsigned;\r\nusing db = long double;\r\nusing i128 = __int128_t;\r\nusing u128 = __uint128_t;\r\nusing u64 = decltype(1ull);\r\ntemplate <typename T, typename U = less<>>\r\nusing pq = priority_queue<T, V<T>, U>;\r\nmt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());\r\nll rand(ll l, ll r) { return rng() % (r - l + 1) + l; }\r\nll bits(ll x) { return x ? 64 - __builtin_clzll(x) : 0; }\r\n\r\nconst int N = 200100;\r\nint a[N], b[N], u[N], v[N], c[N], d[N], n;\r\nint fa[N], sum[N], deg[N];\r\nint getfa(int x) { return fa[x] == x ? x : fa[x] = getfa(fa[x]); }\r\n\r\nstruct fenwick {\r\n\tll b[N];\r\n\tvoid operator()(int x, ll k) { for (; x < N; x += x & -x) b[x] += k; }\r\n\tll operator()(int x) { ll k = 0; for (; x; x ^= x & -x) k += b[x]; return k; }\r\n\tint kth(ll k) {\r\n\t\tint l = 0, r = N - 1;\r\n\t\twhile (r - l > 1) {\r\n\t\t\tint m = l + (1 << (bits(r - l - 1) - 1));\r\n\t\t\tif (k > b[m]) k -= b[m], l = m;\r\n\t\t\telse r = m;\r\n\t\t}\r\n\t\treturn r;\r\n\t}\r\n};\r\nstruct abyss {\r\n\tfenwick a, b;\r\n\tint sz = 0;\r\n\tll sum = 0;\r\n\tvoid ins(int v, int k) {\r\n\t\ta(v, k), b(v, v * k), sz += k, sum += v * k;\r\n\t}\r\n\tll qry(int k) {\r\n\t\tif (k == sz) return sum;\r\n\t\tll ans = sum; k = sz - k;\r\n\t\tint v = a.kth(k);\r\n\t\tans += v * (a(v) - k) - b(v);\r\n\t\treturn ans;\r\n\t}\r\n} av, ae;\r\n\r\nstruct node {\r\n\tint val, lc, rc, rk, fa;\r\n} $[N];\r\nint rt[N];\r\nvoid build(int x, int v) {\r\n\trt[x] = x, $[x] = node{v};\r\n}\r\nvoid up(int p) {\r\n\t$[$[p].lc].fa = p, $[$[p].rc].fa = p;\r\n\tif ($[$[p].lc].rk < $[$[p].rc].rk) swap($[p].lc, $[p].rc);\r\n\t$[p].rk = $[$[p].rc].rk + 1;\r\n}\r\nvoid upd(int &x);\r\nint _merge(int x, int y) {\r\n\tif (!x || !y) return x | y;\r\n\tupd(x), upd(y);\r\n\tif ($[x].val > $[y].val) swap(x, y);\r\n\t$[y].rc = _merge(x, $[y].rc);\r\n\tup(y);\r\n\treturn y;\r\n}\r\nvoid merge(int x, int y) {\r\n\trt[y] = _merge(rt[x], rt[y]);\r\n}\r\nvoid upd(int &x) {\r\n\twhile (x && $[x].val < 0) x = _merge($[x].lc, $[x].rc);\r\n}\r\nbool empty(int x) {\r\n\tupd(rt[x]);\r\n\treturn !rt[x];\r\n}\r\nint top(int x) {\r\n\tupd(rt[x]);\r\n\treturn $[rt[x]].val;\r\n}\r\nvoid erase(int x) {\r\n\t$[x].val = -1;\r\n}\r\n\r\nll sumleaf;\r\nint numleaf;\r\nV<int> event[N];\r\n\r\nvoid yes(int x) {\r\n\tif (deg[x] == 1 && !empty(x)) {\r\n\t\tint y = top(x);\r\n\t\tav.ins(y, -1), numleaf++, sumleaf += y;\r\n\t}\r\n}\r\nvoid no(int x) {\r\n\tif (deg[x] == 1 && !empty(x)) {\r\n\t\tint y = top(x);\r\n\t\tav.ins(y, 1), numleaf--, sumleaf -= y;\r\n\t}\r\n}\r\n\r\nint main() {\r\n\tfreopen(\"CF1824.in\", \"r\", stdin),\r\n\tfreopen(\"CF1824.out\", \"w\", stdout),\r\n\tcin.tie(0)->sync_with_stdio(0);\r\n\tcin >> n;\r\n\tF(i, 1, n) cin >> a[i], event[a[i]].eb(i);\r\n\tF(i, 1, n) cin >> b[i];\r\n\tF(i, 2, n) {\r\n\t\tcin >> u[i] >> v[i] >> c[i] >> d[i];\r\n\t\tevent[c[i]].eb(i + n);\r\n\t\tsum[u[i]] ^= i, sum[v[i]] ^= i;\r\n\t\tdeg[u[i]]++, deg[v[i]]++;\r\n\t\tae.ins(d[i], 1);\r\n\t}\r\n\tF(i, 1, n) {\r\n\t\tfa[i] = i, build(i, b[i]);\r\n\t\tav.ins(b[i], 1), yes(i);\r\n\t}\r\n\tint nv = n, ne = n - 1;\r\n\tll ans = 0;\r\n\tFO(mn, 0, N) if (!event[mn].empty()) {\r\n\t\tint m = min(nv - 1, ne);\r\n\t\tll res = ae.qry(m) + av.qry(m + 1 - numleaf) + sumleaf;\r\n\t\tans = max(ans, res * mn);\r\n\t\tfor (int i: event[mn]) {\r\n\t\t\tif (i > n) {\r\n\t\t\t\ti -= n; int x = getfa(u[i]), y = getfa(v[i]);\r\n\t\t\t\tif (x == y) continue;\r\n\t\t\t\tae.ins(d[i], -1), ne--;\r\n\t\t\t\tno(x), no(y), merge(x, y);\r\n\t\t\t\tfa[x] = y, deg[y] += deg[x] - 2, sum[y] ^= sum[x];\r\n\t\t\t\tyes(y);\r\n\t\t\t} else {\r\n\t\t\t\tint x = getfa(i);\r\n\t\t\t\tnv--;\r\n\t\t\t\tno(x), erase(i);\r\n\t\t\t\tav.ins(b[i], -1), yes(x);\r\n\t\t\t\twhile (empty(x) && deg[x] == 1) {\r\n\t\t\t\t\tint i = sum[x], y = x ^ getfa(u[i]) ^ getfa(v[i]);\r\n\t\t\t\t\tae.ins(d[i], -1), ne--;\r\n\t\t\t\t\tno(y), fa[x] = y, deg[y]--, sum[y] ^= i, yes(y), x = y;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tcout << ans << \"\\n\";\r\n}\r\n"
+}

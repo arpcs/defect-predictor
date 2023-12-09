@@ -1,0 +1,36 @@
+{
+    "id": 215005687,
+    "contestId": 1491,
+    "creationTimeSeconds": 1690010378,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1491,
+        "index": "I",
+        "name": "Ruler Of The Zoo",
+        "type": "PROGRAMMING",
+        "points": 5000.0,
+        "rating": 3500,
+        "tags": [
+            "brute force",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1491,
+        "members": [
+            {
+                "handle": "Navigato"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1614519300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 75,
+    "timeConsumedMillis": 405,
+    "memoryConsumedBytes": 1331200,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nconst int RED = 0, BLUE = 1, GREEN = 2;\r\nconst long long inf = 1e16;\r\ntypedef pair<long long, long long> ii;\r\ntypedef pair<long long, ii> iii;\r\n\r\nlong long n;\r\nstruct animal{ int a, b, c, id, pos, colour, redHere; };\r\nvector<animal> belt;\r\nvector<animal> arr;\r\n\r\nvector<iii> s; ///strictly increasing stack\r\nvector<ii> reds;\r\nvoid insert(long long b, long long beltPos, long long pos){\r\n    while(!s.empty() && s.back().first >= b) s.pop_back();\r\n    s.push_back(iii(b,ii(beltPos, pos)));\r\n}\r\n\r\nlong long totalMoves = 0;\r\n\r\nvoid brute(){\r\n    deque<animal> q;\r\n    animal w = arr[0];\r\n\r\n    for(int i = 1;i < n;i++){\r\n        q.push_back(arr[i]);\r\n    }\r\n\r\n    long long count = 1;\r\n    for(int x = 1;;x++){\r\n        if(x > 2*n){\r\n            return;\r\n        }\r\n\r\n        if(count == 3){\r\n            cout << w.id << \" \" << x << \"\\n\"; // << \"\\n\" << (int)((clock() - start));\r\n            exit(0);\r\n        }\r\n\r\n        if(count == 1){\r\n            if(w.b > q.front().a){\r\n                animal y = q.front();\r\n                q.push_back(y);\r\n                q.pop_front();\r\n                count++;\r\n            }\r\n            else{\r\n                q.push_back(w);\r\n                w = q.front();\r\n                q.pop_front();\r\n                count = 1;\r\n            }\r\n        }\r\n        else{\r\n            if(w.c > q.front().a){\r\n                animal y = q.front();\r\n                q.push_back(y);\r\n                q.pop_front();\r\n                count++;\r\n            }\r\n            else{\r\n                q.push_back(w);\r\n                w = q.front();\r\n                q.pop_front();\r\n                count = 1;\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\nint main(){\r\n    ios_base::sync_with_stdio(false); cin.tie(0); cout.tie(0);\r\n\r\n    cin >> n;\r\n    for(int i = 0;i < n;i++){\r\n        int a, b, c; cin >> a >> b >> c;\r\n        assert(a > b and b < c);\r\n        arr.push_back({a,b,c,i,-1,1,-1});\r\n    }\r\n\r\n    if(arr[0].a > arr[1].a) swap(arr[0],arr[1]); ///settle first game\r\n    arr.push_back(arr[0]); arr.erase(arr.begin());\r\n\r\n    brute();\r\n\r\n    ///deciding which are RED\r\n    for(int i = 1;i < n;i++){\r\n        if(arr[i-1].b > arr[i].a){\r\n            arr[i].colour = RED;\r\n        }\r\n    }\r\n\r\n    ///for non-RED, decide if it's BLUE or GREEN\r\n    for(int i = 0;i < n;i++){\r\n        arr[i].pos = i;\r\n\r\n        if(arr[i].colour == RED) continue;\r\n        int nxt = i+1; if(nxt == n) nxt = 0;\r\n        if(arr[nxt].colour == RED) nxt++; if(nxt == n) nxt = 0;\r\n\r\n        if(arr[i].c > arr[nxt].a) arr[i].colour = GREEN;\r\n        else arr[i].colour = BLUE;\r\n    }\r\n\r\n    ///get ready the belt\r\n    arr.push_back(arr[0]);\r\n    for(int i = 0;i < n;i++){\r\n        if(arr[i].colour != RED){\r\n            if(arr[i+1].colour == RED){\r\n                arr[i].redHere = arr[i+1].pos;\r\n            }\r\n            belt.push_back(arr[i]);\r\n        }\r\n    }\r\n\r\n    while(true){\r\n        s.clear(); reds.clear();\r\n\r\n        ///Account for cyclic nature, so every element is inserted once, then later inserted again\r\n        for(int i = 0;i < (int) belt.size();i++){\r\n            animal A = belt[i];\r\n            if(A.colour == BLUE) insert(A.b, A.pos, i);\r\n            else insert(-inf, A.pos, i); ///GREEN trigger events regardless of the value of a\r\n        }\r\n\r\n        long long minMoves = inf;\r\n        for(int i = 0;i < (int) belt.size();i++){\r\n            animal A = belt[i];\r\n            if(A.colour == BLUE) insert(A.b, A.pos, i);\r\n            else insert(-inf, A.pos, i); ///GREEN trigger events regardless of the value of a\r\n\r\n            ///find the RED at that position, if any\r\n            int red = A.redHere; if(red == -1) continue;\r\n            reds.push_back(ii(red, i));\r\n\r\n            ///find the earliest event that triggers this RED (rightmost non-Red with nonRED.a < RED.b or rightmost GREEN)\r\n            auto early = lower_bound(s.begin(), s.end(), iii(arr[red].a, ii(-1,-1)));\r\n            if(early == s.begin()) continue; ///no event in this case\r\n            early--;\r\n\r\n            ///Number of rotations before event (rotation = N-1 turns)\r\n            long long distance = i - (early->second).second;\r\n            if(distance < 0) distance += (belt.size());\r\n            minMoves = min(distance, minMoves); ///find the minimum number of rotations\r\n        }\r\n\r\n        ///No event can occur, answer last infiinite\r\n        if(minMoves == inf){\r\n            cout << \"-1 -1\";\r\n            return 0;\r\n        }\r\n        else if(minMoves != 0){ ///Move the reds CCW along the belt\r\n            totalMoves += minMoves * (n-1);\r\n            for(ii R : reds) belt[R.second].redHere = -1;\r\n            for(ii R : reds){\r\n                int pos = R.second;\r\n                pos -= minMoves; if(pos < 0) pos += belt.size();\r\n                belt[pos].redHere = R.first;\r\n            }\r\n        }\r\n\r\n        ii ans = ii(inf, inf);\r\n\r\n        ///Updating the belt\r\n        for(int i = 0;i < (int) belt.size();i++){\r\n            if(belt[i].redHere == -1) continue;\r\n            animal R = arr[belt[i].redHere];\r\n            if(belt[i].b < R.a){ ///BLUE type event occured\r\n                belt[i].redHere = -1;\r\n                belt.insert(belt.begin()+(i+1), R); ///inserting in middle of vector\r\n\r\n                ///updating the colours of the surrounding non-REDs\r\n                if(belt[i].c > R.a) belt[i].colour = GREEN;\r\n                else belt[i].colour = BLUE;\r\n\r\n                int nxt = i+2; if(nxt == (int) belt.size()) nxt = 0;\r\n                if(belt[i+1].c > belt[nxt].a) belt[i+1].colour = GREEN;\r\n                else belt[i+1].colour = BLUE;\r\n            }\r\n            else if(belt[i].colour == GREEN){ ///GREEN type event occured, game ends\r\n                ans = min(ans, ii(totalMoves + R.pos + 2, belt[i].id));\r\n            }\r\n        }\r\n\r\n        if(ans.first != inf){\r\n            cout << ans.second << \" \" << ans.first;\r\n            return 0;\r\n        }\r\n    }\r\n}"
+}

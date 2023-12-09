@@ -1,0 +1,32 @@
+{
+    "id": 40989060,
+    "contestId": 391,
+    "creationTimeSeconds": 1532990093,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 391,
+        "index": "E1",
+        "name": "Three Trees",
+        "type": "PROGRAMMING",
+        "points": 11.0,
+        "tags": []
+    },
+    "author": {
+        "contestId": 391,
+        "members": [
+            {
+                "handle": "ReaLNero1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1392573600
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "OK",
+    "testset": "TESTS1",
+    "passedTestCount": 16,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 19456000,
+    "source": "//tonynater - CodeForces 2014\r\n\r\n#include <algorithm>\r\n#include <assert.h>\r\n#include <bitset>\r\n#include <cassert>\r\n#include <climits>\r\n#include <cmath>\r\n#include <complex>\r\n#include <ctime>\r\n#include <ctype.h>\r\n#include <fstream>\r\n#include <iomanip>\r\n#include <iostream>\r\n#include <list>\r\n#include <map>\r\n#include <math.h>\r\n#include <queue>\r\n#include <set>\r\n#include <sstream>\r\n#include <stack>\r\n#include <string>\r\n#include <vector>\r\n#include <stdio.h>\r\n#include <stdlib.h>\r\n#include <string.h>\r\n#include <time.h>\r\n\r\nusing namespace std;\r\n\r\n#define sz(x) ((int) x.size())\r\n\r\ntypedef long double ld;\r\ntypedef long long ll;\r\ntypedef pair<int, int> pii;\r\n\r\nconst double pi = acos(-1);\r\nconst double tau = 2*pi;\r\nconst double epsilon = 1e-9;\r\n\r\nconst ll INF = (1LL)<<60;\r\n\r\nconst int MAX_N = 100100;\r\n\r\nint N[3];\r\n\r\nvector<int> adj[3][MAX_N];\r\n\r\nvector<int> children[3][MAX_N];\r\nvoid root(int tree, int u, int parent)\r\n{\r\n    for(int i = 0; i < sz(adj[tree][u]); i++)\r\n        if(adj[tree][u][i] != parent)\r\n        {\r\n            children[tree][u].push_back(adj[tree][u][i]);\r\n            root(tree, adj[tree][u][i], u);\r\n        }\r\n}\r\n\r\nll sz[3][MAX_N];\r\nvoid compsz(int tree, int u)\r\n{\r\n    sz[tree][u] = 1;\r\n    for(int i = 0; i < sz(children[tree][u]); i++)\r\n    {\r\n        compsz(tree, children[tree][u][i]);\r\n        sz[tree][u] += sz[tree][children[tree][u][i]];\r\n    }\r\n}\r\n\r\nll subS[3][MAX_N];\r\nvoid compsubS(int tree, int u)\r\n{\r\n    for(int i = 0; i < sz(children[tree][u]); i++)\r\n    {\r\n        compsubS(tree, children[tree][u][i]);\r\n        subS[tree][u] += subS[tree][children[tree][u][i]]+sz[tree][children[tree][u][i]];\r\n    }\r\n}\r\n\r\nll S[3][MAX_N];\r\nll mxS[3];\r\nvoid compS(int tree, int u, ll pS)\r\n{\r\n    S[tree][u] = pS + subS[tree][u];\r\n    mxS[tree] = max(S[tree][u], mxS[tree]);\r\n    for(int i = 0; i < sz(children[tree][u]); i++)\r\n        compS(tree, children[tree][u][i],\r\n              pS+subS[tree][u]-(subS[tree][children[tree][u][i]]+sz[tree][children[tree][u][i]])+N[tree]-sz[tree][children[tree][u][i]]);\r\n}\r\n\r\nll subSDN[3][MAX_N];\r\nvoid compsubSDN(int tree, int u)\r\n{\r\n    subSDN[tree][u] = S[tree][u];\r\n    for(int i = 0; i < sz(children[tree][u]); i++)\r\n    {\r\n        compsubSDN(tree, children[tree][u][i]);\r\n        subSDN[tree][u] = max(subSDN[tree][children[tree][u][i]]+N[(tree+1)%3], subSDN[tree][u]);\r\n    }\r\n}\r\n\r\nll SDN[3][MAX_N];\r\nvoid compSDN(int tree, int u, ll pSDN)\r\n{\r\n    SDN[tree][u] = max(subSDN[tree][u], pSDN);\r\n    \r\n    ll mx1 = -INF, idx1 = -1, mx2 = -INF, idx2 = -1;\r\n    for(int i = 0; i < sz(children[tree][u]); i++)\r\n        if(subSDN[tree][children[tree][u][i]] > mx1)\r\n        {\r\n            mx2 = mx1;\r\n            idx2 = idx1;\r\n            mx1 = subSDN[tree][children[tree][u][i]];\r\n            idx1 = i;\r\n        }else if(subSDN[tree][children[tree][u][i]] > mx2)\r\n        {\r\n            mx2 = subSDN[tree][children[tree][u][i]];\r\n            idx2 = i;\r\n        }\r\n    \r\n    pSDN = max(pSDN, S[tree][u]);\r\n    for(int i = 0; i < sz(children[tree][u]); i++)\r\n        if(i != idx1) compSDN(tree, children[tree][u][i], max(pSDN, mx1+N[(tree+1)%3])+N[(tree+1)%3]);\r\n        else if(idx2 != -1) compSDN(tree, children[tree][u][i], max(pSDN, mx2+N[(tree+1)%3])+N[(tree+1)%3]);\r\n        else compSDN(tree, children[tree][u][i], pSDN+N[(tree+1)%3]);\r\n}\r\n\r\nll inside[3];\r\nvoid compinside(int tree, int u)\r\n{\r\n    inside[tree] += (N[tree]-sz[tree][u])*sz[tree][u];\r\n    for(int i = 0; i < sz(children[tree][u]); i++)\r\n        compinside(tree, children[tree][u][i]);\r\n}\r\n\r\nint main()\r\n{\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(NULL);\r\n    \r\n    for(int i = 0; i < 3; i++)\r\n        cin >> N[i];\r\n    \r\n    for(int i = 0; i < 3; i++)\r\n        for(int j = 0; j < N[i]-1; j++)\r\n        {\r\n            int u, v;\r\n            cin >> u >> v;\r\n            --u; --v;\r\n            \r\n            adj[i][u].push_back(v);\r\n            adj[i][v].push_back(u);\r\n        }\r\n    \r\n    for(int i = 0; i < 3; i++)\r\n    {\r\n        root(i, 0, -1);\r\n        compsz(i, 0);\r\n        compsubS(i, 0);\r\n        compS(i, 0, 0);\r\n        compsubSDN(i, 0);\r\n        compSDN(i, 0, -INF);\r\n        compinside(i, 0);\r\n    }\r\n    \r\n    ll maxDist = 0;\r\n    for(int i = 0; i < 3; i++)\r\n        for(int j = 0; j < N[i]; j++)\r\n        {\r\n            ll n1 = N[(i+1)%3], n2 = N[i], n3 = N[(i+2)%3];\r\n            ll s1 = mxS[(i+1)%3], s2 = S[i][j], s3 = mxS[(i+2)%3];\r\n            \r\n            ll curDist = inside[0] + inside[1] + inside[2] + n1*(n2+n3) + s1*(n2+n3) + s2*n1 + n3*(n1+n2) + s3*(n2+n1) + n3*SDN[i][j];\r\n            maxDist = max(curDist, maxDist);\r\n        }\r\n    \r\n    cout << maxDist << '\\n';\r\n    \r\n    return 0;\r\n}"
+}

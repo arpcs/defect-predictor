@@ -1,0 +1,39 @@
+{
+    "id": 225453650,
+    "contestId": 593,
+    "creationTimeSeconds": 1695785327,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 593,
+        "index": "D",
+        "name": "Happy Tree Party",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 593,
+        "members": [
+            {
+                "handle": "AsiaticToddaliaRoot"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1446655500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 2651,
+    "memoryConsumedBytes": 75776000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\n#define pb emplace_back\r\n#define pii pair<int, int>\r\nconst int N = 3e5 + 5;\r\nconst ll inf =1e18+555;\r\nint n,m,pos[N],siz[N],son[N],top[N],F[N],dep[N],anc[26][N];\r\nll ans;\r\nvector<int> G[N];\r\npii E[N];\r\nvoid dfs1(int u, int fath) {\r\n\tsiz[u]=1;dep[u]=dep[fath]+1; anc[0][u]=fath;\r\n\tfor(int k=1;k<=23;k++) anc[k][u]=anc[k-1][anc[k-1][u]];\r\n\tfor(auto v:G[u]){\r\n\t\tif(v==fath) continue ;\r\n\t\tdfs1(v,u);\r\n\t\tsiz[u]+=siz[v];\r\n\t}\r\n}\r\nint fa[N], idx[N];\r\nint find(int x) { \r\n\tif(x==fa[x]) return x;\r\n\treturn fa[x]=find(fa[x]);\r\n}\r\nll val[N];\r\nvoid prework(){\r\n\tfor(int i=1;i<N;++i) fa[i]=i;\r\n\tcin>>n>>m;\r\n\tfor(int i=1,u,v;i<n;i++) {\r\n\t\tll w;\r\n\t\tcin>>u>>v>>w;\r\n\t\tE[i]={u,v};val[i] = w;\r\n\t\tG[v].pb(u);G[u].pb(v);\r\n\t}\r\n\tdfs1(1, 0);\r\n\tfor(int i=1;i<n;i++){\r\n\t\tauto [u,v]=E[i];\r\n\t\tif(anc[0][u]==v){\r\n\t\t\tpos[i]=u;idx[u]=i;\r\n\t\t\tif(val[i]==1) fa[find(u)]=find(v);\r\n\t\t}else{\r\n\t\t\tpos[i]=v;idx[v]=i;\r\n\t\t\tif(val[i]==1) fa[find(v)]=find(u);\r\n\t\t}\r\n\t} \t\r\n}\r\nint LCA(int u,int v){\r\n\tif(dep[v]>dep[u]) swap(v,u);\r\n\tfor(int k=19;~k;k--) {\r\n\t\tif(dep[u]-(1<<k)>=dep[v]) u=anc[k][u];\r\n\t\tif(u==v) return u;\r\n\t}\r\n\tfor(int k=23;~k;k--){\r\n\t\tif(anc[k][u]!=anc[k][v]){\r\n\t\t\tu=anc[k][u];\r\n\t\t\tv=anc[k][v];\r\n\t\t}\r\n\t}\t\r\n\treturn anc[0][u];\r\n}\r\n\r\nsigned main() {\r\n\tprework();\r\n\tll x;\r\n\tint op,u,v;\r\n\twhile(m--){\r\n\t\tcin>>op;\r\n\t\tif(op==2){\r\n\t\t\tcin>>u>>x;\r\n\t\t\tif(val[u]>1&&x==1) fa[find(pos[u])]=find(anc[0][pos[u]]);\r\n\t\t\tval[u]=x;\r\n\t\t}else{\r\n\t\t\tcin>>u>>v>>x;\r\n\t\t\tint lca=LCA(u,v);\r\n\t\t\tans=1;\r\n\t\t\tfor(;dep[u]>dep[lca];u=anc[0][u]) {\r\n\t\t\t\tif(!u) break ;\r\n\t\t\t\tu=find(u); \r\n\t\t\t\tif(dep[u] <= dep[lca]) break;\r\n\t\t\t\t//cout<<x<<\" \"<<ans<<endl;\r\n\t\t\t\tif(val[idx[u]] <=x/ans) {\r\n\t\t\t\t\tans *= val[idx[u]];\r\n\t\t\t\t}else{\r\n\t\t\t\t\tans=x+1;\r\n\t\t\t\t\tbreak;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tif(ans==x+1) {cout<<0<<endl;continue; }\r\n\t\t\tfor(;dep[v]>dep[lca];v=anc[0][v]) {\r\n\t\t\t\tif(!v) break;\r\n\t\t\t\t//cout<<v<<endl;\r\n\t\t\t\tv=find(v); \r\n\t\t\t\tif(dep[v]<=dep[lca]) break;\r\n\t\t\t\tif(val[idx[v]]<=x/ans) {\r\n\t\t\t\t\tans*=val[idx[v]];\r\n\t\t\t\t}else{\r\n\t\t\t\t\tans=x+1;\r\n\t\t\t\t\tbreak;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\t\r\n\t\t\t\r\n\t\t\tif(ans==x+1) {cout<<0<<endl;continue;}\r\n\t\t\tans=x/ans;\r\n\t\t\tcout<<ans<<endl;\t\t\t\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}//15484618273851632957"
+}

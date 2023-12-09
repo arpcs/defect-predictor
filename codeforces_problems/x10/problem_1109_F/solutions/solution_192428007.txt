@@ -1,0 +1,36 @@
+{
+    "id": 192428007,
+    "contestId": 1109,
+    "creationTimeSeconds": 1675664540,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1109,
+        "index": "F",
+        "name": "Sasha and Algorithm of Silence's Sounds",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1109,
+        "members": [
+            {
+                "handle": "Azimjonm0012"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1550334900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 156,
+    "memoryConsumedBytes": 17817600,
+    "source": "#include<cstdio>\r\r\n#include<algorithm>\r\r\nusing namespace std;\r\r\nconst int N=2*1e5+10;\r\r\ntypedef long long ll;\r\r\nconst int dx[4]={1,-1,0,0};\r\r\nconst int dy[4]={0,0,-1,1};\r\r\nint n,m;\r\r\nstruct mar{\r\r\n\tint f[N*2];\r\r\n\tinline int* operator [](const int& x){return f+x*m;}\r\r\n}val;\r\r\nbool book[N];\r\r\nstruct data{\r\r\n\tint x,y;\r\r\n}nod[N];\r\r\nint ctt,ptr,totr;\r\r\nstruct tnod{\r\r\n\tint val;int cnt;\r\r\n\tfriend tnod operator +(tnod a,tnod b)\r\r\n\t{\r\r\n\t\tif(a.val<b.val)return a;if(a.val>b.val)return b;\r\r\n\t\treturn (tnod){a.val,a.cnt+b.cnt};\r\r\n\t}void operator +=(const int& x){val+=x;}\r\r\n};\r\r\nstruct linkcuttree\r\r\n{\r\r\n\tint s[N][2];int fa[N];int mi[N];int rv[N];int st[N];int tp;\r\r\n\tlinkcuttree(){mi[0]=0x3f3f3f3f;}\r\r\n\tinline int gc(int x){return s[fa[x]][1]==x;}\r\r\n\tinline bool isr(int x){return (s[fa[x]][1]!=x&&s[fa[x]][0]!=x);}\r\r\n\tinline void ud(int x){mi[x]=min(min(mi[s[x][0]],mi[s[x][1]]),x);}\r\r\n\tinline void pd(int p){if(rv[p])rv[s[p][0]]^=1,rv[s[p][1]]^=1,swap(s[p][0],s[p][1]),rv[p]=0;}\r\r\n\tinline void pdall(int p)\r\r\n\t{for(int x=p;(st[++tp]=x,!isr(x));x=fa[x]);while(tp)pd(st[tp--]);}\r\r\n\tinline void rt(int x)\r\r\n\t{\r\r\n\t\tint d=fa[x];int t=gc(x);s[d][t]=s[x][t^1];fa[s[x][t^1]]=d;\r\r\n\t\tif(!isr(d))s[fa[d]][gc(d)]=x;fa[x]=fa[d];\r\r\n\t\ts[x][t^1]=d;fa[d]=x;ud(d);ud(x);\r\r\n\t}inline void rtup(int x){rt((gc(x)^gc(fa[x]))?x:fa[x]);rt(x);}\r\r\n\tinline void splay(int x)\r\r\n\t{pdall(x);for(;!isr(x)&&!isr(fa[x]);rtup(x));if(!isr(x))rt(x);}\r\r\n\tinline void acc(int p)\r\r\n\t{for(splay(p),s[p][1]=0,ud(p);fa[p];splay(fa[p]),s[fa[p]][1]=p,ud(fa[p]),splay(p));}\r\r\n\tinline void mkr(int p){acc(p);rv[p]^=1;}\r\r\n\tinline void lk(int u,int v){mkr(u);acc(v);fa[u]=v;}\r\r\n\tinline void cu(int u,int v){mkr(u);acc(v);if(s[v][0]==u&&s[u][1]==0)s[v][0]=0,fa[u]=0,ud(v);}\r\r\n\tinline int cmi(int u,int v){mkr(u);acc(v);if(fa[u]==0)return 0x3f3f3f3f;else return mi[v];}\r\r\n}lct;\r\r\nstruct linetree\r\r\n{\r\r\n\ttnod v[N<<2];int add[N<<2];\r\r\n\tinline void pd(int p,int p1,int p2)\r\r\n\t{if(add[p])v[p1]+=add[p],v[p2]+=add[p],add[p1]+=add[p],add[p2]+=add[p],add[p]=0;}\r\r\n\tinline void build(int p,int l,int r)\r\r\n\t{\r\r\n\t\tv[p]=(tnod){0,r-l};if(r-l==1){return;}int mid=(l+r)>>1;\r\r\n\t\tbuild(p<<1,l,mid);build(p<<1|1,mid,r);\r\r\n\t}\r\r\n\tinline void stadd(int p,int l,int r,int dl,int dr,int pl)\r\r\n\t{\r\r\n\t\tif(dl==l&&dr==r){v[p]+=pl;add[p]+=pl;return;}int mid=(l+r)>>1;pd(p,p<<1,p<<1|1);\r\r\n\t\tif(dl<mid)stadd(p<<1,l,mid,dl,min(dr,mid),pl);\r\r\n\t\tif(mid<dr)stadd(p<<1|1,mid,r,max(dl,mid),dr,pl);v[p]=v[p<<1]+v[p<<1|1];\r\r\n\t}inline tnod sum(int p,int l,int r,int dl,int dr)\r\r\n\t{\r\r\n\t\tif(dl==l&&dr==r)return v[p];int mid=(l+r)>>1;pd(p,p<<1,p<<1|1);\r\r\n\t\tif(dl<mid&&mid<dr)return sum(p<<1,l,mid,dl,mid)+sum(p<<1|1,mid,r,mid,dr);\r\r\n\t\tif(dl<mid)return sum(p<<1,l,mid,dl,dr);else return sum(p<<1|1,mid,r,dl,dr);\r\r\n\t}\r\r\n}lt;\r\r\ninline void delnod(int sx,int sy)\r\r\n{\r\r\n\tint np=val[sx][sy];\r\r\n\tfor(int k=0,tx,ty;k<4;k++)\r\r\n\t{\r\r\n\t\ttx=sx+dx[k];\r\r\n\t\tty=sy+dy[k];\r\r\n\t\tif(tx<1||tx>n||ty<1||ty>m||val[tx][ty]<ptr||val[tx][ty]>totr)continue;\r\r\n\t\tlct.cu(np,val[tx][ty]);\t\t\r\r\n\t}\r\r\n\tptr++;\r\r\n}\r\r\ninline void insed(int p1,int p2)\r\r\n{\r\r\n\tlt.stadd(1,0,ctt,0,p2,-1);\r\r\n\tint tmp=lct.cmi(p1,p2);\r\r\n\tif(tmp==0x3f3f3f3f)\r\r\n\t{\r\r\n\t\tlct.lk(p1,p2);\r\r\n\t\treturn;\r\r\n\t}\r\r\n\tfor(int k=ptr;k<=tmp;k++)delnod(nod[k].x,nod[k].y);\r\r\n\tlct.lk(p1,p2);\r\r\n}\r\r\nint main()\r\r\n{\r\r\n\tscanf(\"%d%d\",&n,&m);ctt=n*m;lt.build(1,0,ctt);\r\r\n\tfor(int i=1;i<=n;i++)for(int j=1,t;j<=m;j++)scanf(\"%d\",&t),val[i][j]=t,nod[t]=(data){i,j};\r\r\n\tll ans=0;ptr=1;totr=1;\r\r\n\tfor(int i=1;i<=ctt;i++)\r\r\n\t{\r\r\n\t\ttotr=i;\r\r\n\t\tint sx=nod[i].x,sy=nod[i].y;\r\r\n\t\tlt.stadd(1,0,ctt,0,i,1);\r\r\n\t\tfor(int k=0,tx,ty;k<4;k++)\r\r\n\t\t{\r\r\n\t\t\ttx=sx+dx[k],ty=sy+dy[k];\r\r\n\t\t\tif(tx<1||tx>n||ty<1||ty>m||val[tx][ty]>i||val[tx][ty]<ptr)continue;\r\r\n\t\t\tinsed(i,val[tx][ty]);\r\r\n\t\t}\r\r\n\t\ttnod ret=lt.sum(1,0,ctt,ptr-1,i);\r\r\n\t\tif(ret.val==1)ans+=ret.cnt;\r\r\n\t}\r\r\n\tprintf(\"%I64d\",ans);\r\r\n\treturn 0;\r\r\n}"
+}

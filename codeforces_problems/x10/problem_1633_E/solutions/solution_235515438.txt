@@ -1,0 +1,42 @@
+{
+    "id": 235515438,
+    "contestId": 1633,
+    "creationTimeSeconds": 1701604576,
+    "relativeTimeSeconds": 6676,
+    "problem": {
+        "contestId": 1633,
+        "index": "E",
+        "name": "Spanning Tree Queries",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "greedy",
+            "math",
+            "sortings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1633,
+        "members": [
+            {
+                "handle": "-Fainted-"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1701597900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 25,
+    "timeConsumedMillis": 2386,
+    "memoryConsumedBytes": 40140800,
+    "source": "#include <bits/stdc++.h>\r\n\r\nnamespace {\r\n\r\ntemplate <class Invocable>\r\nclass y_combinator_result {\r\npublic:\r\n  explicit y_combinator_result(Invocable&& function)\r\n      : function_(std::forward<Invocable>(function)) {\r\n  }\r\n\r\n  template <typename ...Args>\r\n  auto operator()(Args&& ... args) {\r\n    return function_(std::ref(*this),\r\n                     std::forward<Args>(args)...);\r\n  }\r\n\r\nprivate:\r\n  Invocable function_;\r\n};\r\n\r\ntemplate <class Invocable>\r\nauto y_combinator(Invocable&& function) {\r\n  return y_combinator_result<Invocable>(std::forward<Invocable>(function));\r\n}\r\n\r\nnamespace internal {\r\n\r\nclass Dsu {\r\npublic:\r\n  explicit Dsu(int n)\r\n      : parent_(n), weight_(n, 1) {\r\n    std::iota(parent_.begin(), parent_.end(), 0);\r\n  }\r\n\r\n  int Find(int v) const {\r\n    int u = v;\r\n    while (parent_[v] != v) { v = parent_[v]; }\r\n    while (u != v) { u = std::exchange(parent_[u], v); }\r\n    return v;\r\n  }\r\n\r\n  [[nodiscard]]\r\n  bool Same(int u, int v) const {\r\n    return Find(u) == Find(v);\r\n  }\r\n\r\n  void Join(int u, int v) {\r\n    u = Find(u);\r\n    v = Find(v);\r\n    if (u == v) {\r\n      return;\r\n    }\r\n    if (weight_[u] > weight_[v]) {\r\n      std::swap(u, v);\r\n    }\r\n    parent_[u] = v;\r\n    weight_[v] += weight_[u];\r\n  }\r\n\r\nprivate:\r\n  std::vector<int> weight_;\r\n  mutable std::vector<int> parent_;\r\n};\r\n\r\nstruct Edge {\r\n  Edge() = default;\r\n\r\n  Edge(int from, int to, int cost)\r\n      : from(from), to(to), cost(cost) {}\r\n\r\n  int from;\r\n  int to;\r\n  int cost;\r\n};\r\n\r\nstruct MSTInfo {\r\n  MSTInfo()\r\n      : cost(0), steps(0), taken_left(0), taken_right(0) {}\r\n\r\n  int64_t cost;\r\n  int steps;\r\n  int taken_left;\r\n  int taken_right;\r\n};\r\n\r\nvoid RunCase([[maybe_unused]] int testcase) {\r\n  int n;\r\n  int m;\r\n  std::cin >> n >> m;\r\n\r\n  std::vector<Edge> edges(m);\r\n  for (auto& [from, to, cost] : edges) {\r\n    std::cin >> from >> to >> cost;\r\n    --from;\r\n    --to;\r\n  }\r\n\r\n  std::sort(edges.begin(), edges.end(),\r\n            [&](const Edge& lhs, const Edge& rhs) -> bool {\r\n              return lhs.cost < rhs.cost;\r\n            });\r\n\r\n  int q;\r\n  std::vector<int> queries;\r\n\r\n  {\r\n    int p;\r\n    int a;\r\n    int b;\r\n    int c;\r\n    std::cin >> p >> q >> a >> b >> c;\r\n\r\n    queries.resize(q);\r\n    for (int i = 0; i < p; ++i) {\r\n      std::cin >> queries[i];\r\n    }\r\n    for (int i = p; i < q; ++i) {\r\n      queries[i] = static_cast<int>(\r\n          (static_cast<int64_t>(queries[i - 1]) * a + b) % c);\r\n    }\r\n  }\r\n\r\n  auto Rebuild = [&](int weight) -> MSTInfo {\r\n    auto Cost = [&](const Edge& e) -> int {\r\n      return std::abs(e.cost - weight);\r\n    };\r\n\r\n    std::vector<int> order(m);\r\n    std::iota(order.begin(), order.end(), 0);\r\n    std::sort(order.begin(), order.end(), [&](int i, int j) -> bool {\r\n      return Cost(edges[i]) < Cost(edges[j]);\r\n    });\r\n\r\n    MSTInfo result;\r\n    Dsu dsu(n);\r\n    for (int id : order) {\r\n      const Edge& e(edges[id]);\r\n      if (!dsu.Same(e.from, e.to)) {\r\n        if (e.cost < weight) {\r\n          result.cost += weight - e.cost;\r\n          result.taken_left += 1;\r\n        } else {\r\n          result.cost += e.cost - weight;\r\n          result.taken_right += 1;\r\n        }\r\n        dsu.Join(e.from, e.to);\r\n      }\r\n    }\r\n\r\n    std::set<int> left;\r\n    std::set<int> right;\r\n    for (const auto& e : edges) {\r\n      if (e.cost < weight) {\r\n        left.insert(weight - e.cost);\r\n      } else {\r\n        right.insert(e.cost - weight);\r\n      }\r\n    }\r\n\r\n    if (!left.empty()) {\r\n      result.steps = *left.begin();\r\n      for (int c : right) {\r\n        if (auto it = left.lower_bound(c); it != left.end()) {\r\n          result.steps = std::min(result.steps, (*it - c) / 2);\r\n        }\r\n      }\r\n    } else {\r\n      result.steps = std::numeric_limits<int>::max() / 2;\r\n    }\r\n\r\n    return result;\r\n  };\r\n\r\n  std::sort(queries.rbegin(), queries.rend());\r\n\r\n  MSTInfo info;\r\n  int64_t answer = 0;\r\n  int last = std::numeric_limits<int>::max() / 2;\r\n  for (int w : queries) {\r\n    if (w < last - info.steps) {\r\n      last = w;\r\n      info = Rebuild(w);\r\n    }\r\n    int64_t delta = last - w;\r\n    answer ^= info.cost + delta * (info.taken_right - info.taken_left);\r\n  }\r\n\r\n  std::cout << answer << \"\\n\";\r\n}\r\n\r\n} // namespace internal\r\n\r\nvoid Main() {\r\n  int testcases = 1;\r\n  //std::cin >> testcases;\r\n  for (int testcase = 1; testcase <= testcases; ++testcase) {\r\n    internal::RunCase(testcase);\r\n  }\r\n}\r\n\r\n} // namespace\r\n\r\nint32_t main() {\r\n  std::ios::sync_with_stdio(false);\r\n  std::cin.tie(nullptr);\r\n  Main();\r\n  return 0;\r\n}\r\n"
+}

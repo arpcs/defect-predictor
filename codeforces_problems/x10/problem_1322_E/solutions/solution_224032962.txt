@@ -1,0 +1,35 @@
+{
+    "id": 224032962,
+    "contestId": 1322,
+    "creationTimeSeconds": 1695125032,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1322,
+        "index": "E",
+        "name": "Median Mountain Range",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3300,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1322,
+        "members": [
+            {
+                "handle": "Qiuly.qwq"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1583573700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 146,
+    "timeConsumedMillis": 1715,
+    "memoryConsumedBytes": 63385600,
+    "source": "// LUOGU_RID: 125226090\n#pragma GCC optimize(3,\"Ofast\",\"inline\")\r\n// \r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef unsigned int uint;\r\n#define debug(...) fprintf (stderr, __VA_ARGS__)\r\n\r\n#define fi first\r\n#define se second\r\n#define lep(i, l, r) for (int i = (l), i##_end = (r); i <= i##_end; ++ i)\r\n#define rep(i, r, l) for (int i = (r), i##_end = (l); i >= i##_end; -- i)\r\n\r\nchar _c; bool _f; template <class T> inline void IN (T & x) {\r\n\t_f = 0, x = 0; while (_c = getchar (), ! isdigit (_c)) if (_c == '-') _f = 1;\r\n\twhile (isdigit (_c)) x = x * 10 + _c - '0', _c = getchar (); if (_f) x = - x;\r\n}\r\n\r\ntemplate <class T> inline void chkmax (T & x, T y) { if (x < y) x = y; }\r\ntemplate <class T> inline void chkmin (T & x, T y) { if (x > y) x = y; }\r\n\r\nconst int N = 5e5 + 5;\r\n\r\nint n, a[N], c[N];\r\n\r\nset <tuple <int, int, int> > s;\r\n\r\npriority_queue <int> A, B;\r\ninline void I (int x) { A.push (x); }\r\ninline void D (int x) { A.top () == x ? A.pop () : B.push (x); }\r\ninline int Q () {\r\n\twhile (! A.empty () && ! B.empty () && A.top () == B.top ()) A.pop (), B.pop ();\r\n\treturn A.top ();\r\n}\r\n\r\ninline int calc (tuple <int, int, int> x) {\r\n\treturn (get <1> (x) - get <0> (x)) / 2;\r\n}\r\ninline void del (int x, int t) {\r\n\tauto r = s.lower_bound ({ x + 1, -1, -1 }), l = prev (r);\r\n\ts.insert ({ get <0> ( * l), get <1> ( * r), t }), I ( (get <1> ( * r) - get <0> ( * l)) / 2 );\r\n\tD (calc ( * l)), s.erase (l);\r\n\tD (calc ( * r)), s.erase (r);\r\n}\r\ninline void ins (int x, int t) {\r\n\tauto v = prev (s.lower_bound ({ x + 1, -1, -1 }));\r\n\ts.insert ({ get <0> ( * v), x, t }), I ((x - get <0> ( * v)) / 2);\r\n\ts.insert ({ x + 1, get <1> ( * v), t }), I ((get <1> ( * v) - x - 1) / 2);\r\n\tD (calc ( * v)), s.erase (v);\r\n}\r\n\r\nint lnk[N];\r\nint find (int x) { return x == lnk[x] ? x : lnk[x] = find (lnk[x]); }\r\n\r\ninline void cover (int l, int r, int x) {\r\n\tfor (int p = find (l); p <= r; p = find (p + 1)) c[p] = x, lnk[p] = p + 1;\r\n}\r\n\r\nsigned main () {\r\n\tIN (n);\r\n\tlep (i, 1, n + 1) lnk[i] = i;\r\n\tlep (i, 1, n) IN (a[i]);\r\n\tif (n == 1) return printf (\"0\\n%d\\n\", a[1]), 0;\r\n\r\n\tvector <int> id (n);\r\n\tiota (id.begin (), id.end (), 1);\r\n\tsort (id.begin (), id.end (), [&] (int x, int y) { return a[x] < a[y]; });\r\n\r\n\tvector <bool> b (n + 2, 1);\r\n\tlep (i, 1, n) s.insert ({ i, i, 0 }), I (0);\r\n\r\n\tint t = 0, ret = 0;\r\n\tfor (auto & u : id) {\r\n\t\t++ t, b[u] = 0;\r\n\t\tif (u > 1) b[u - 1] ? del (u - 1, t) : ins (u - 1, t);\r\n\t\tif (u < n) b[u + 1] ? del (u, t) : ins (u, t);\r\n\t\tauto it = s.lower_bound ({ min (u + 1, n), -1, -1 });\r\n\t\tfor ( it = it == s.end () ? prev (it) : it; get <1> (* it) >= u - 1; -- it ) {\r\n\t\t\tint l, r, _t; tie (l, r, _t) = * it;\r\n\t\t\tif (_t == t) {\r\n\t\t\t\tif ((l & 1) == (r & 1)) {\r\n\t\t\t\t\tif (! b[l]) cover (l, r, a[u]);\r\n\t\t\t\t} else {\r\n\t\t\t\t\tint mid = l + r >> 1;\r\n\t\t\t\t\tif (! b[l]) cover (l, mid, a[u]);\r\n\t\t\t\t\telse cover (mid + 1, r, a[u]);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tif (it == s.begin ()) break ;\r\n\t\t}\r\n\t\tif (t == n || a[u] != a[id[t]]) chkmax (ret, Q ());\r\n\t}\r\n\tprintf (\"%d\\n\", ret);\r\n\tlep (i, 1, n) printf (\"%d%c\", c[i], \" \\n\"[i == n]);\r\n\treturn 0;\r\n}"
+}

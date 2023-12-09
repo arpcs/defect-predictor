@@ -1,0 +1,36 @@
+{
+    "id": 221218120,
+    "contestId": 1626,
+    "creationTimeSeconds": 1693455049,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1626,
+        "index": "E",
+        "name": "Black and White Tree",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "dfs and similar",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1626,
+        "members": [
+            {
+                "handle": "sans.undertale"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1642343700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 265,
+    "memoryConsumedBytes": 273203200,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\nint black[300001];\nint subtree[300001];\nint n;\nint accessible[300001];\nunordered_map<int, vector<int>> tree;\nvector<pair<int,int>> edges;\nunordered_map<int, vector<int>> directedgraph;\nint parents[300001];\nvoid getparents(int node){\n    for (int i : tree[node]){\n        parents[i] = node;\n        getparents(i);\n    }\n}\nint getblack(int node){\n    if (subtree[node] != -1){\n        return subtree[node];\n    }\n    int answer = 0;\n    if (black[node] == 1){\n        answer += 1;\n    }\n    for (int i : tree[node]){\n        if (i == parents[node]){\n            continue;\n        }\n        answer += getblack(i);\n    }\n    subtree[node] = answer;\n    return answer;\n}\nint main() {\n\n    cin >> n;\n    int totalblack = 0;\n    for (int i = 1; i <= n; i++){\n        cin >> black[i];\n        if (black[i] == 1){\n            totalblack += 1;\n        }\n    }\n\n    for (int i = 0; i < n-1; i++){\n        int a,b; cin >> a >> b;\n        tree[a].push_back(b);\n        tree[b].push_back(a);\n        if (a > b){\n            swap(a,b);\n        }\n        edges.push_back({a,b});\n    }\n    memset(parents,-1,sizeof parents);\n    memset(subtree, -1, sizeof subtree);\n    getparents(1);\n    getblack(1);\n\n    for (auto i : edges){\n        int x = i.first; int y = i.second;\n        if (x == parents[y]){\n            swap(x,y);\n        }\n        //y is always the parent\n        //reversed the edges\n        if (black[x]){\n            directedgraph[x].push_back(y);\n        } else if (getblack(x) >= 2){\n            directedgraph[x].push_back(y);\n        }\n\n        if (black[y]){\n            directedgraph[y].push_back(x);\n        } else if (totalblack-getblack(x) >= 2){\n            directedgraph[y].push_back(x);\n        }\n    }\n\n    queue<int> q;\n    for (int i = 1; i <= n; i++){\n        if (black[i]){\n            q.push(i);\n        }\n    }\n    while (!q.empty()){\n        int rah = q.front(); q.pop();\n        if (accessible[rah]){\n            continue;\n        }\n        accessible[rah] = 1;\n        for (int i : directedgraph[rah]){\n            if (!accessible[rah]) {\n                q.push(i);\n            }\n        }\n    }\n    for (int i = 1; i <= n; i++){\n        if (accessible[i]){\n            cout << 1 << \" \";\n        } else{\n            cout << 0 << \" \";\n        }\n    }\n\n\n\n}\n"
+}

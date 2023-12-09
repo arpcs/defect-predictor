@@ -1,0 +1,38 @@
+{
+    "id": 235490198,
+    "contestId": 486,
+    "creationTimeSeconds": 1701592443,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 486,
+        "index": "D",
+        "name": "Valid Sets",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2100,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 486,
+        "members": [
+            {
+                "handle": "QazallMaleki-"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1415718000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 257843200,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define TOF_io ios_base::sync_with_stdio(false); cin.tie(0);cout.tie(0)\r\n#define file_io freopen(\"input.txt\",\"r\",stdin);freopen(\"output.txt\",\"w\",stdout);\r\n#define pb push_back\r\n#define Mp make_pair\r\n#define F first\r\n#define S second\r\n#define all(x) (x).begin(), (x).end()\r\n#define SZ(x) (int) (x).size()\r\n\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef pair<int, int> pii;\r\ntypedef pair<long long, long long> pll;\r\ntypedef unsigned long long int ull;\r\n\r\nconst long long inf = 2e9, INF = 1e18;\r\nconst int md = 1e9 + 7;\r\nconst int lg = 64;\r\nconst int sq = 320;\r\nconst int N = 2000 + 5;\r\n\r\nint d, n, a[N];\r\nint seg[N << 2][N << 2];\r\nint ans;\r\nvector<int> edges[N];\r\n\r\nvoid upd(int id, int s, int e, int l, int r, int x, int t) {\r\n\tif (r <= s || e <= l) return;\r\n\tif (l <= s && e <= r) {\r\n\t\tseg[t][id] = (seg[t][id] + x) % md;\r\n\t\treturn; \r\n\t}\r\n\t\r\n\tint mid = (s + e) / 2;\r\n\tupd(2 * id,  s, mid,    l, r, x, t);\r\n\tupd(2 * id + 1, mid, e, l, r, x, t);\r\n\t\r\n\tseg[t][id] = (seg[t][2 * id] + seg[t][2 * id + 1]) % md;\r\n}\r\n\r\nll get(int id, int s, int e, int l, int r, int t) {\r\n\tif (r <= s || e <= l) return 0;\r\n\tif (l <= s && e <= r) return seg[t][id];\r\n\t\r\n\tint mid = (s + e) / 2;\r\n\treturn (get(2 * id,  s, mid,   l, r, t) +\r\n\t\t   get(2 * id + 1, mid, e, l, r, t)) % md;\r\n}\r\n\r\nvoid dfs(int par, int v) {\r\n\tfor (int u: edges[v])\r\n\t\tif (u != par) dfs(v, u);\r\n\t\r\n\tupd(1, 0, N, a[v], a[v] + 1, 1, v);\r\n\t\r\n\tll val = 1;\r\n\tfor (int u: edges[v]) {\r\n\t    if (u == par) continue;\r\n\t    \r\n\t    val = val * (get(1, 0, N, max(1, a[v] - d), a[v] + 1, u) + 1) % md;\r\n\t}\r\n\t\r\n\tif (edges[v].size() > 1 || ! v) upd(1, 0, N, a[v], a[v] + 1, val -  1, v);\r\n\t\r\n\tfor (int i = a[v] + 1; i < a[v] + d + 1; i ++) {\r\n\t\tll val = 1, bad = 1;\r\n\t\tfor (int u: edges[v]) {\r\n\t\t\tif (u == par) continue;\r\n\t\t\t\r\n\t\t\tval = val * (get(1, 0, N, max(1, i - d), i + 1, u) + 1) % md;\r\n\t\t\tbad = bad * (get(1, 0, N, max(1, i - d), i,     u) + 1) % md;\r\n\t\t}\r\n\r\n\t\tupd(1, 0, N, i, i + 1, val - bad, v);\r\n\t}\r\n}\r\n\r\nint main() {\r\n\tTOF_io;\r\n\tcin >> d >> n;\r\n\tfor (int i = 0; i < n; i ++) cin >> a[i];\r\n\tfor (int i = 0, v, u; i < n - 1; i ++) {\r\n\t\tcin >> v >> u, v --, u --;\r\n\t\tedges[v].pb(u), edges[u].pb(v);\r\n\t}\r\n\t\r\n\tdfs(0, 0);\r\n\tfor (int i = 0; i < n; i ++) \r\n\t\tfor (int s = a[i]; s < a[i] + d + 1; s ++) \r\n\t\t\tans = (ans + get(1, 0, N, s, s + 1, i)) % md;\r\n\t\r\n\tcout << ans;\r\n\treturn 0;\r\n}"
+}

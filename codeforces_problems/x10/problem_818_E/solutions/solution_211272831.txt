@@ -1,0 +1,37 @@
+{
+    "id": 211272831,
+    "contestId": 818,
+    "creationTimeSeconds": 1687887935,
+    "relativeTimeSeconds": 5135,
+    "problem": {
+        "contestId": 818,
+        "index": "E",
+        "name": "Card Game Again",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "binary search",
+            "data structures",
+            "number theory",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 818,
+        "members": [
+            {
+                "handle": "hi_just_chillin"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1687882800
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define int long long\r\n\r\nvector<pair<int, int>> getPrimeFactorization(int n) {\r\n  map<int, int> mp;\r\n  if (n % 2 == 0) {\r\n    int exp = 0;\r\n    while (n % 2 == 0) \r\n      ++exp, n /= 2;\r\n    mp[2] = exp;\r\n  }\r\n  for (int i = 3; i * i <= n; i += 2) {\r\n    if (n % i == 0) {\r\n      int exp = 0;\r\n      while (n % i == 0) \r\n        ++exp, n /= i;\r\n      mp[i] = exp;\r\n    }\r\n  }\r\n  if (n >= 2) {\r\n    mp[n] += 1;\r\n  }\r\n  return vector<pair<int, int>>(begin(mp), end(mp));\r\n}\r\n\r\nint32_t main() {\r\n  ios::sync_with_stdio(false);\r\n  cin.tie(0);\r\n  int n, k;\r\n  cin >> n >> k;\r\n  vector<int> a(n);\r\n  for (int& p : a) cin >> p;\r\n\r\n  vector<pair<int, int>> k_fact = getPrimeFactorization(k);\r\n\r\n  map<vector<int>, int> mp;\r\n  map<int, int> cur_fact;\r\n\r\n  vector<vector<int>> facts(n);\r\n\r\n  int res = 0;\r\n  for (int i = 0; i < n; i++) {\r\n    bool ok = true;\r\n    int idx = 0;\r\n    for (auto& [prime, exp] : k_fact) { \r\n      int cur_exp = 0;\r\n      while (a[i] % prime == 0) {\r\n        cur_exp++;\r\n        a[i] /= prime;\r\n      }\r\n      int tot = cur_exp + (i ? facts[i - 1][idx] : 0);\r\n      if (tot < exp)\r\n        ok = false;\r\n      facts[i].emplace_back(tot);\r\n      ++idx;\r\n    }\r\n    if (ok) {\r\n      // it is possible to get one divisible from this prefix \r\n      // check where is stops\r\n      int lo = 0, hi = i;\r\n      int ans1 = i;\r\n      while (lo <= hi) {\r\n        int mid = lo + hi >> 1;\r\n        bool can = true;\r\n        for (int j = 0; j < (int) k_fact.size(); j++) {\r\n          int val = facts[i][j] - (mid > 0 ? facts[mid - 1][j] : 0);\r\n          if (val < k_fact[j].second) \r\n            can = false;\r\n        } \r\n        if (can) {\r\n          ans1 = mid;\r\n          hi = mid - 1;\r\n        } else {\r\n          lo = mid + 1;\r\n        }\r\n      }\r\n      int ans2 = i;\r\n      lo = ans1, hi = i;\r\n      while (lo <= hi) {\r\n        int mid = lo + hi >> 1;\r\n        bool can = true;\r\n        for (int j = 0; j < (int) k_fact.size(); j++) {\r\n          int val = facts[i][j] - (mid > 0 ? facts[mid - 1][j] : 0);\r\n          if (val < k_fact[j].second) \r\n            can = false;\r\n        }\r\n        if (can) {\r\n          ans2 = mid;\r\n          lo = mid + 1;\r\n        } else {\r\n          hi = mid - 1;\r\n        }\r\n      } \r\n      res += ans2 - ans1 + 1;\r\n    }\r\n  }\r\n\r\n  cout << res << '\\n';\r\n  return 0;\r\n}"
+}

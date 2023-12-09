@@ -1,0 +1,37 @@
+{
+    "id": 227619121,
+    "contestId": 1181,
+    "creationTimeSeconds": 1696998474,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1181,
+        "index": "E1",
+        "name": "A Story of One Country (Easy)",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2500,
+        "tags": [
+            "brute force",
+            "divide and conquer",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1181,
+        "members": [
+            {
+                "handle": "hocky"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560677700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 327,
+    "memoryConsumedBytes": 201011200,
+    "source": "/*\nAuthor : Hocky Yudhiono\nRab 11 Okt 2023 10:57:18\n*/\n\n#include <bits/stdc++.h>\nusing namespace std;\n\ntypedef long long ll;\ntypedef long long LL;\ntypedef vector<int> vi;\ntypedef vector<ll> vl;\ntypedef vector<vi> vvi;\ntypedef vector<vl> vvl;\ntypedef pair<int, int> PII;\ntypedef pair<int, int> pii;\ntypedef pair<ll, ll> PLL;\ntypedef pair<ll, ll> pll;\ntypedef long double ld;\n\n#define rep(i, a, b) for(int i = a; i < (b); ++i)\n#define trav(a, x) for(auto& a : x)\n#define all(x) begin(x), end(x)\n#define sz(x) (int)(x).size()\n#define popf pop_front\n#define pf push_front\n#define popb pop_back\n#define pb push_back\n#define fi first\n#define se second\n\nconst double EPS = 1e-9;\nconst int INFMEM = 63;\n\n// Do dir^1 to get reverse direction\nconst int dx[8] = {0, 0, 1, -1, 1, -1, 1, -1};\nconst int dy[8] = {1, -1, 0, 0, 1, -1, -1, 1};\nconst char dch[4] = {'R', 'L', 'D', 'U'};\n\n// Do (dir + 2)%4 to get reverse direction\n// const int dx[8] = {-1,0,1,0,-1,1,1,-1};\n// const int dy[8] = {0,1,0,-1,1,1,-1,-1};\n// const char dch[4] = {'U','R','D','L'};\nconst double PI = 3.141592653589793;\n\ninline void fasterios() {\n  cin.tie(0)->sync_with_stdio(0);\n  cin.exceptions(cin.failbit);\n}\n#define endl '\\n'\nconst int MOD = 1000000007;\n// const int MOD = 998244353;\n\ntypedef PLL Point;\ntypedef pair<Point, Point> Rectangle;\n\nLL presum[5005][5005];\n\nLL getSum(Rectangle rectangle) {\n  return presum[rectangle.se.fi][rectangle.se.se]\n         - presum[rectangle.fi.fi - 1][rectangle.se.se]\n         - presum[rectangle.se.fi][rectangle.fi.se - 1]\n         + presum[rectangle.fi.fi - 1][rectangle.fi.se - 1];\n}\n\nLL getArea(Rectangle rectangle) {\n  return (rectangle.se.fi - rectangle.fi.fi)\n         * (rectangle.se.se - rectangle.fi.se);\n}\n\nint main() {\n  fasterios();\n  int n; cin >> n;\n  vector <LL> points;\n  vector <Rectangle> isi(n);\n  trav(cur, isi) {\n    cin >> cur.fi.fi >> cur.fi.se;\n    cin >> cur.se.fi >> cur.se.se;\n    cur.se.fi--;\n    cur.se.se--;\n    points.pb(cur.fi.fi);\n    points.pb(cur.fi.se);\n    points.pb(cur.se.fi);\n    points.pb(cur.se.se);\n  }\n  sort(all(points));\n  points.erase(unique(all(points)), points.end());\n  unordered_map <int, int> compressMap;\n  rep(i, 0, sz(points)) {\n    compressMap[points[i]] = i + 1;\n  }\n  trav(cur, isi) {\n    cur.fi.fi = compressMap[cur.fi.fi];\n    cur.fi.se = compressMap[cur.fi.se];\n    cur.se.fi = compressMap[cur.se.fi];\n    cur.se.se = compressMap[cur.se.se];\n    // cout << cur.fi.fi << \" \" << cur.fi.se << \" \" << cur.se.fi << \" \" << cur.se.se << endl;\n  }\n  int m = sz(compressMap);\n  // Coba 4 arah terus di extend\n  for (int dir = 0; dir < 5; dir++) {\n    // Bikin prefix sum dulu\n    memset(presum, 0, sizeof(presum));\n    int idx = 0;\n    trav(rectangle, isi) {\n      idx++;\n      for (int i = rectangle.fi.fi; i <= rectangle.se.fi; i++) {\n        for (int j = rectangle.fi.se; j <= rectangle.se.se; j++) {\n          // cout << idx << \" \" << i << \" \" << j << endl;\n          presum[i][j] = idx;\n        }\n      }\n    }\n    // for (int i = 1; i <= m; i++) {\n    //   for (int j = 1; j <= m; j++) {\n    //     cout << presum[i][j];\n    //   }\n    //   cout << endl;\n    // }\n    // cout << endl;\n    for (int i = 1; i <= m; i++) {\n      for (int j = 1; j <= m; j++) {\n        presum[i][j] = !!presum[i][j];\n        presum[i][j] += presum[i - 1][j] + presum[i][j - 1] - presum[i - 1][j - 1];\n      }\n    }\n    if (dir == 4) break;\n    // Extend this rectangle\n    trav(cur, isi) {\n      while (1) {\n        Rectangle nx = cur;\n        // Extend it \n        nx.fi.fi = min(nx.fi.fi, nx.fi.fi + dx[dir]);\n        nx.fi.se = min(nx.fi.se, nx.fi.se + dy[dir]);\n        nx.se.fi = max(nx.se.fi, nx.se.fi + dx[dir]);\n        nx.se.se = max(nx.se.se, nx.se.se + dy[dir]);\n        if (1 <= nx.fi.fi && 1 <= nx.fi.se && nx.se.fi <= m && nx.se.se <= m) {\n          // Masih good in range\n          LL difference = getSum(cur) - getSum(nx);\n          if (difference != 0) {\n            break;\n          }\n          cur = nx;\n        } else {\n          break;\n        }\n      }\n    }\n  }\n  if (presum[m][m] == m * m) {\n    cout << \"YES\" << endl;\n  } else {\n    cout << \"NO\" << endl;\n  }\n}"
+}

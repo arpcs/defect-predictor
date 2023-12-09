@@ -1,0 +1,38 @@
+{
+    "id": 210640974,
+    "contestId": 51,
+    "creationTimeSeconds": 1687427952,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 51,
+        "index": "F",
+        "name": "Caterpillar",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2800,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 51,
+        "members": [
+            {
+                "handle": "Alex_Wei"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1293552000
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "// LUOGU_RID: 113128426\n#include <bits/stdc++.h>\r\nusing namespace std;\r\nconstexpr int N = 2e3 + 5;\r\n\r\nint n, m;\r\nvector<pii> e[N];\r\nvector<int> g[N];\r\nint dn, dfn[N], low[N], top, stc[N], cn, col[N];\r\nvoid form(int id) {cn++; for(int x = 0; x != id; ) col[x = stc[top--]] = cn;}\r\nvoid tarjan(int id, int eid) {\r\n  stc[++top] = id, dfn[id] = low[id] = ++dn;\r\n  for(pii _ : e[id]) {\r\n    if(_.second == eid) continue;\r\n    int it = _.first;\r\n    if(!dfn[it]) {\r\n      tarjan(it, _.second), low[id] = min(low[id], low[it]);\r\n      if(low[it] > dfn[id]) form(it);\r\n    }\r\n    else low[id] = min(low[id], dfn[it]);\r\n  }\r\n  if(!eid) form(id);\r\n}\r\n\r\nint ans, comp, vis[N], dis[N];\r\nvector<int> cur;\r\nvoid find(int id) {\r\n  cur.push_back(id), vis[id] = 1;\r\n  for(int it : g[id]) if(!vis[it]) find(it);\r\n}\r\nvoid dfs(int id, int ff) {\r\n  dis[id] = dis[ff] + 1;\r\n  for(int it : g[id]) if(it != ff) dfs(it, id);\r\n}\r\nvoid deal(int id) {\r\n  if(g[id].empty()) return ans++, void();\r\n  cur.clear(), find(id);\r\n  dfs(id, 0);\r\n  int u = id, leaf = 0;\r\n  for(int it : cur) if(dis[it] > dis[u]) u = it;\r\n  dfs(u, 0);\r\n  for(int it : cur) if(dis[it] > dis[u]) u = it;\r\n  for(int it : cur) leaf += g[it].size() == 1;\r\n  ans += dis[u] + leaf - 2;\r\n}\r\n\r\nint main() {\r\n  cin >> n >> m;\r\n  for(int i = 1; i <= m; i++) {\r\n    int u, v;\r\n    scanf(\"%d%d\", &u, &v);\r\n    e[u].push_back({v, i});\r\n    e[v].push_back({u, i});\r\n  }\r\n  for(int i = 1; i <= n; i++) if(!dfn[i]) tarjan(i, 0);\r\n  for(int i = 1; i <= n; i++)\r\n    for(pii _ : e[i])\r\n      if(col[i] != col[_.first])\r\n        g[col[i]].push_back(col[_.first]);\r\n  for(int i = 1; i <= n; i++) if(!vis[i]) deal(i), comp++;\r\n  cout << n - ans + comp - 1 << endl;\r\n  return cerr << \"Time: \" << clock() << endl, 0;\r\n}"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 222190890,
+    "contestId": 896,
+    "creationTimeSeconds": 1694083791,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 896,
+        "index": "C",
+        "name": "Willem, Chtholly and Seniorious",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 896,
+        "members": [
+            {
+                "handle": "Argvchs"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1512223500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 34,
+    "timeConsumedMillis": 343,
+    "memoryConsumedBytes": 10854400,
+    "source": "#include <algorithm>\r\n#include <iostream>\r\n#include <limits>\r\n#include <set>\r\n#include <vector>\r\nusing namespace std;\r\nusing i64 = long long;\r\nconst int N = 1e5 + 5, P = 1e9 + 7;\r\nint n, m, seed, p, a[N];\r\nstruct node {\r\n    int l, r;\r\n    mutable i64 val;\r\n};\r\nbool cmp(node a, node b) { return a.l < b.l; }\r\nset<node, decltype(&cmp)> S(cmp);\r\nvector<pair<i64, int>> tmp;\r\nauto split(int x) {\r\n    auto it = --S.upper_bound({x, 0, 0});\r\n    if (it->l == x) return it;\r\n    int l = it->l, r = it->r;\r\n    i64 val = it->val;\r\n    S.erase(it);\r\n    S.emplace(l, x - 1, val);\r\n    return S.emplace(x, r, val).first;\r\n}\r\nvoid assign(int l, int r, int x) {\r\n    auto ed = split(r + 1), st = split(l);\r\n    S.erase(st, ed);\r\n    S.emplace(l, r, x);\r\n}\r\nvoid update(int l, int r, int x) {\r\n    auto ed = split(r + 1), st = split(l);\r\n    for (auto it = st; it != ed; ++it) it->val += x;\r\n}\r\nint quickpow(int a, int b, int p) {\r\n    int ret = 1;\r\n    while (b) {\r\n        if (b & 1) ret = (i64)ret * a % p;\r\n        a = (i64)a * a % p, b >>= 1;\r\n    }\r\n    return ret;\r\n}\r\nint querysum(int l, int r, int x, int y) {\r\n    auto ed = split(r + 1), st = split(l);\r\n    int ret = 0;\r\n    for (auto it = st; it != ed; ++it)\r\n        ret = (ret + (i64)quickpow(it->val % y, x, y) * (it->r - it->l + 1) % y) % y;\r\n    return ret;\r\n}\r\ni64 querykth(int l, int r, int x) {\r\n    auto ed = split(r + 1), st = split(l);\r\n    tmp.clear();\r\n    for (auto it = st; it != ed; ++it) tmp.emplace_back(it->val, it->r - it->l + 1);\r\n    sort(tmp.begin(), tmp.end());\r\n    for (auto [val, cnt] : tmp)\r\n        if ((x -= cnt) <= 0) return val;\r\n    return numeric_limits<i64>::max();\r\n}\r\nint rnd() {\r\n    int ret = seed;\r\n    seed = ((i64)seed * 7 + 13) % P;\r\n    return ret;\r\n}\r\nint main() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n    cin >> n >> m >> seed >> p;\r\n    for (int i = 1; i <= n; ++i) {\r\n        a[i] = (rnd() % p) + 1;\r\n        S.emplace(i, i, a[i]);\r\n    }\r\n    for (int i = 1, op, l, r, x, y; i <= m; i++) {\r\n        op = (rnd() % 4) + 1;\r\n        l = (rnd() % n) + 1;\r\n        r = (rnd() % n) + 1;\r\n        if (l > r) swap(l, r);\r\n        if (op == 1) {\r\n            x = (rnd() % p) + 1;\r\n            update(l, r, x);\r\n        } else if (op == 2) {\r\n            x = (rnd() % p) + 1;\r\n            assign(l, r, x);\r\n        } else if (op == 3) {\r\n            x = (rnd() % (r - l + 1)) + 1;\r\n            cout << querykth(l, r, x) << '\\n';\r\n        } else {\r\n            x = (rnd() % p) + 1;\r\n            y = (rnd() % p) + 1;\r\n            cout << querysum(l, r, x, y) << '\\n';\r\n        }\r\n    }\r\n    return 0;\r\n}"
+}

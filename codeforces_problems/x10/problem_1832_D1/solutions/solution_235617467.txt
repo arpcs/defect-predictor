@@ -1,0 +1,37 @@
+{
+    "id": 235617467,
+    "contestId": 1832,
+    "creationTimeSeconds": 1701626465,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1832,
+        "index": "D1",
+        "name": "Red-Blue Operations (Easy Version)",
+        "type": "PROGRAMMING",
+        "rating": 2100,
+        "tags": [
+            "binary search",
+            "greedy",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1832,
+        "members": [
+            {
+                "handle": "Moolamp"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1683902100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 103,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 25702400,
+    "source": "#include <bits/stdc++.h>\r\n#define int long long\r\nusing namespace std;\r\nconst int NMAX = 2e5 + 5;\r\nnamespace aint\r\n{\r\n  pair<int, int> t[4 * NMAX];\r\n  int lazy[4 * NMAX];\r\n  \r\n  void update (int v, int tl, int tr, int st, int dr, int val)\r\n  {\r\n    if (tl == st && tr == dr)\r\n    {\r\n      lazy[v] += val;\r\n      if (st == dr)\r\n        t[v].second = st;\r\n      return;\r\n    }\r\n    int tm = (tl + tr) / 2;\r\n    if (st <= tm)\r\n      update(v * 2, tl, tm, st, min(dr, tm), val);\r\n    if (dr >= tm + 1)\r\n      update(v * 2 + 1, tm + 1, tr, max(st, tm + 1), dr, val);\r\n    if (t[v * 2].first + lazy[v * 2] < t[v * 2 + 1].first + lazy[v * 2 + 1])\r\n      t[v] = {t[v * 2].first + lazy[v * 2], t[v * 2].second};\r\n    else\r\n      t[v] = {t[v * 2 + 1].first + lazy[v * 2 + 1], t[v * 2 + 1].second};\r\n  }\r\n  \r\n  pair<int, int> query (int v, int tl, int tr, int st, int dr, int sum)\r\n  {\r\n    if (tl == st && tr == dr)\r\n      return {sum + t[v].first + lazy[v], t[v].second};\r\n    int tm = (tl + tr) / 2;\r\n    pair<int, int> ans = {LLONG_MAX, 0};\r\n    if (st <= tm)\r\n      ans = query(v * 2, tl, tm, st, min(dr, tm), sum + lazy[v]);\r\n    if (dr >= tm + 1)\r\n      ans = min(ans, query(v * 2 + 1, tm + 1, tr, max(st, tm + 1), dr, sum + lazy[v]));\r\n    return ans;\r\n  }\r\n}\r\nint n, q, init[NMAX], ans[NMAX], oddsum, alt_oddsum, oddelem, evensum, evenelem;\r\npair<int, int> a[NMAX];\r\nvoid restart ()\r\n{\r\n  for (int i = 1; i <= n; i++)\r\n  {\r\n    a[i].first = init[i];\r\n    a[i].second = i;\r\n  }\r\n}\r\nsigned main ()\r\n{\r\n  cin.tie(nullptr)->sync_with_stdio(false);\r\n  cin >> n >> q;\r\n  for (int i = 1; i <= n; i++)\r\n    cin >> a[i].first;\r\n  sort(a + 1, a + n + 1);\r\n  for (int i = 1; i <= n; i++)\r\n  {\r\n    init[i] = a[i].first;\r\n    a[i].second = i;\r\n  }\r\n  for (int i = 1; i <= n - (n + 1 - n) % 2; i++)\r\n    a[i].first += n + 1 - i + 1;\r\n  sort(a + 1, a + n + 1);\r\n  oddelem = a[1].second;\r\n  for (int i = 1; i <= n; i++)\r\n    oddsum += a[i].first - a[1].first;\r\n  int idk = init[n] - a[1].first;\r\n  oddsum -= idk;\r\n  if (idk & 1)\r\n    idk++;\r\n  restart();\r\n  for (int i = 1; i <= n - (n + 1 - n) % 2; i++)\r\n    a[i].first += n + 1 + idk - i + 1;\r\n  sort(a + 1, a + n + 1);\r\n  for (int i = 1; i <= n; i++)\r\n    alt_oddsum += a[i].first - a[1].first;\r\n  restart();\r\n  for (int i = 1; i <= n - (n + 2 - n) % 2; i++)\r\n    a[i].first += n + 2 - i + 1;\r\n  sort(a + 1, a + n + 1);\r\n  evenelem = a[1].second;\r\n  for (int i = 1; i <= n; i++)\r\n    evensum += a[i].first - a[1].first;\r\n  restart();\r\n  for (int i = 1; i <= n; i++)\r\n    aint::update(1, 1, n, i, i, a[i].first);\r\n  for (int i = 1; i <= n; i++)\r\n  {\r\n    aint::update(1, 1, n, 1, i, 1);\r\n    ans[i] = aint::query(1, 1, n, 1, n, 0).second;\r\n  }\r\n  while (q--)\r\n  {\r\n    int x; cin >> x;\r\n    if (x <= n)\r\n      cout << a[ans[x]].first + max(0ll, x - ans[x] + 1) << ' ';\r\n    else if ((x - n) & 1)\r\n    {\r\n      if (x >= n + 1 + idk)\r\n      {\r\n        int cati = (x - (n - (x - n) % 2)) / 2, elem = a[n].first, sum = alt_oddsum + (x - (n + 1 + idk)) * (n - 1);\r\n        if (cati <= sum)\r\n          cout << elem << ' ';\r\n        else\r\n        {\r\n          cati -= sum;\r\n          cout << elem - (cati + n - 1) / n << ' ';\r\n        }\r\n        continue;\r\n      }\r\n      int cati = (x - (n - (x - n) % 2)) / 2, elem = a[oddelem].first + (x - oddelem + 1);\r\n      int sum = oddsum + a[n].first - elem;\r\n      if (cati <= sum)\r\n        cout << elem << ' ';\r\n      else\r\n      {\r\n        cati -= sum;\r\n        cout << elem - (cati + n - 1) / n << ' ';\r\n      }\r\n    }\r\n    else\r\n    {\r\n      int cati = (x - (n - (x - n) % 2)) / 2, elem = a[evenelem].first + x - evenelem + 1;\r\n      if (cati <= evensum)\r\n        cout << elem << ' ';\r\n      else\r\n      {\r\n        cati -= evensum;\r\n        cout << elem - (cati + n - 1) / n << ' ';\r\n      } \r\n    }\r\n  }\r\n}"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 211910089,
+    "contestId": 741,
+    "creationTimeSeconds": 1688368744,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 741,
+        "index": "E",
+        "name": "Arpa\u2019s abnormal DNA and Mehrdad\u2019s deep interest",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3400,
+        "tags": [
+            "data structures",
+            "string suffix structures"
+        ]
+    },
+    "author": {
+        "contestId": 741,
+        "members": [
+            {
+                "handle": "Muer"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1481034900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 91,
+    "timeConsumedMillis": 499,
+    "memoryConsumedBytes": 54272000,
+    "source": "#include<bits/stdc++.h> \r\nusing namespace std;\r\nchar S[200005],T[200005],str[200005];\r\nint len,bit[200005],bac[200005],sa[200005],SA[200005],RK[200005],Rank[200005],h[200005],ord[200005],val[200005],n,m,q,ans[200005],id[200005],idx,l[200005],r[200005],K[200005],x[200005],y[200005];\r\nstruct RMQ{\r\n\tint rmq[17][200005];\r\n\tinline void build(int len){\r\n\t\tfor(int j=1;j<17;j++) for(int i=0;i<=len;i++) rmq[j][i]=min(rmq[j-1][i],rmq[j-1][i-(1<<(j-1))]);\r\n\t}\r\n\tinline int query(int l,int r){\r\n\t\tif(l>r) return 1e9;\r\n\t\tint j=bit[r-l+1];\r\n\t\treturn min(rmq[j][r],rmq[j][l+(1<<j)-1]);\r\n\t}\r\n}suf,rmq,rmqj;\r\ninline int read(){\r\n\tint x=0,f=1;char ch=getchar();\r\n\twhile(ch<'0'||ch>'9'){\r\n\t\tif(ch=='-') f=-1;\r\n\t\tch=getchar();\r\n\t}\r\n\twhile(ch>='0'&&ch<='9'){\r\n\t\tx=(x<<1)+(x<<3)+(ch^48);\r\n\t\tch=getchar();\r\n\t}\r\n\treturn x*f;\r\n}\r\ninline void write(int x){\r\n\tint tnt=0;char f[15];\r\n\tif(x<0) x=-x,putchar('-');\r\n\tif(!x) {putchar('0');putchar(' ');return;}\r\n\twhile(x) f[++tnt]=x%10,x/=10;\r\n\twhile(tnt) putchar(f[tnt--]+'0');\r\n\tputchar(' ');\r\n}\r\ninline void upd(int &x,int y){if(x>y) x=y;}\r\ninline void suffix(int alp){\r\n\tfor(int i=0;i<=alp;i++) bac[i]=0;\r\n\tfor(int i=1;i<=len;i++) bac[(int)str[i]]++;\r\n\tfor(int i=1;i<=alp;i++) bac[i]+=bac[i-1];\r\n\tfor(int i=1;i<=len;i++) sa[bac[(int)str[i]]--]=i;\r\n\tfor(int i=1;i<=len;i++) RK[sa[i]]=RK[sa[i-1]]+(str[sa[i]]!=str[sa[i-1]]);\r\n\tfor(int p=1;p<=len;p<<=1){\r\n\t\tfor(int i=1;i<=len;i++) bac[RK[sa[i]]]=i;\r\n\t\tfor(int i=len;i>=1;i--) if(sa[i]>p) SA[bac[RK[sa[i]-p]]--]=sa[i]-p;\r\n\t\tfor(int i=len-p+1;i<=len;i++) SA[bac[RK[i]]--]=i;\r\n\t\tfor(int i=1;i<=len;i++) Rank[SA[i]]=Rank[SA[i-1]]+(RK[SA[i]]!=RK[SA[i-1]]||RK[SA[i]+p]!=RK[SA[i-1]+p]);\r\n\t\tswap(SA,sa);\r\n\t\tswap(RK,Rank);\r\n\t}\r\n\tfor(int i=1;i<=len;i++){\r\n\t\tint j=sa[RK[i]-1],k=max(0,h[i-1]-1);\r\n\t\twhile(str[i+k]==str[j+k]) ++k;\r\n\t\th[i]=k;\r\n\t\tsuf.rmq[0][RK[i]]=k;\r\n\t}\r\n\tsuf.build(len);\r\n}\r\ninline int lcp(int u,int v){\r\n\tu=RK[u];v=RK[v];\r\n\tif(u>v) swap(u,v);\r\n\treturn suf.query(u+1,v);\r\n}\r\ninline bool cmp(int i,int j){\r\n\tif(i==j) return 0;\r\n\tbool sw=0;\r\n\tif(i>j) swap(i,j),sw=1;\r\n\tif(j-i>=m){\r\n\t\tint d=(j-i)-m;\r\n\t\tint lcp1=lcp(n+1,i+1);\r\n\t\tif(lcp1<m) return (RK[n+1]<RK[i+1])^sw;\r\n\t\tint lcp2=lcp(i+1,i+1+m);\r\n\t\tif(lcp2<d) return (RK[i+1]<RK[i+1+m])^sw;\r\n\t\tint lcp3=lcp(i+1+d,n+1);\r\n\t\tif(lcp3<m) return (RK[i+1+d]<RK[n+1])^sw;\r\n\t}\r\n\telse{\r\n\t\tint d=m-(j-i),w=j-i;\r\n\t\tint lcp1=lcp(n+1,i+1);\r\n\t\tif(lcp1<w) return (RK[n+1]<RK[i+1])^sw;\r\n\t\tint lcp2=lcp(n+1+w,n+1);\r\n\t\tif(lcp2<d) return (RK[n+1+w]<RK[n+1])^sw;\r\n\t\tint lcp3=lcp(i+1,n+1+d);\r\n\t\tif(lcp3<w) return (RK[i+1]<RK[n+1+d])^sw;\r\n\t}\r\n\treturn !sw;\r\n}\r\nint main(){ \r\n\tscanf(\"%s\",S+1);\r\n\tn=strlen(S+1);\r\n\tscanf(\"%s\",T+1);\r\n\tm=strlen(T+1);\r\n\tfor(int i=1;i<=n;i++) str[++len]=S[i];\r\n\tfor(int i=1;i<=m;i++) str[++len]=T[i];\r\n\tfor(int i=2;i<=len;i++) bit[i]=bit[i>>1]+1;\r\n\tsuffix(128);\r\n\tfor(int i=0;i<=n;i++) ord[i]=i;\r\n\tsort(ord,ord+n+1,cmp);\r\n\tfor(int i=0;i<=n;i++) val[ord[i]]=i;\r\n\tfor(int i=0;i<=n;i++) rmq.rmq[0][i]=val[i];\r\n\trmq.build(n);\r\n\tq=read();\r\n\tfor(int i=0;i<=q;i++) ans[i]=-1;\r\n\tfor(int i=1;i<=q;i++) l[i]=read(),r[i]=read(),K[i]=read(),x[i]=read(),y[i]=read();\r\n\tfor(int i=1;i<=q;i++){\r\n\t\tif(ans[i]<0){\r\n\t\t\tif(K[i]>120){\r\n\t\t\t\tans[i]=1e9;\r\n\t\t\t\tfor(int j=0;j*K[i]<=r[i];j++) upd(ans[i],rmq.query(max(l[i],j*K[i]+x[i]),min(r[i],j*K[i]+y[i])));\r\n\t\t\t}\r\n\t\t\telse{\r\n\t\t\t\tidx=0;\r\n\t\t\t\tfor(int j=0;j<K[i];j++)\r\n\t\t\t\tfor(int k=0;k*K[i]+j<=n;k++) rmqj.rmq[0][idx]=val[k*K[i]+j],id[k*K[i]+j]=idx++;\r\n\t\t\t\trmqj.build(idx);\r\n\t\t\t\tfor(int j=i;j<=q;j++){\r\n\t\t\t\t\tif(K[j]==K[i]){\r\n\t\t\t\t\t\tans[j]=1e9;\r\n\t\t\t\t\t\tfor(int k=x[j];k<=y[j];k++){\r\n\t\t\t\t\t\t\tint L=l[j]/K[j]*K[j]+k;\r\n\t\t\t\t\t\t\tint R=r[j]/K[j]*K[j]+k;\r\n\t\t\t\t\t\t\twhile(L<l[j]) L+=K[j];\r\n\t\t\t\t\t\t\twhile(R>r[j]) R-=K[j];\r\n\t\t\t\t\t\t\tif(L<=R) upd(ans[j],rmqj.query(id[L],id[R]));\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tfor(int i=1;i<=q;i++) write(ans[i]!=1e9?ord[ans[i]]:-1);\r\n\treturn 0;\r\n}"
+}

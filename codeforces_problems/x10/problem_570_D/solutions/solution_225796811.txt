@@ -1,0 +1,40 @@
+{
+    "id": 225796811,
+    "contestId": 570,
+    "creationTimeSeconds": 1696000514,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 570,
+        "index": "D",
+        "name": "Tree Requests",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "bitmasks",
+            "constructive algorithms",
+            "dfs and similar",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 570,
+        "members": [
+            {
+                "handle": "AH-20"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1439483400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 65,
+    "timeConsumedMillis": 1216,
+    "memoryConsumedBytes": 129740800,
+    "source": "#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\nconst int maxm = 5e5+7;\r\nstruct Query{\r\n    int id,h;\r\n};\r\nint sz[maxm],son[maxm],dep[maxm];\r\nint cnt[maxm][30],s[maxm],ans[maxm];\r\nchar ss[maxm];\r\nvector<int>edge[maxm];\r\nvector<Query>have[maxm];\r\n//\u5b58\u50a8\u6bcf\u4e2a\u70b9\u7684\u8be2\u95ee\u4fe1\u606f\r\nvoid dfs0(int now,int fa){\r\n    //\u5904\u7406\u51fa\u9ad8\u5ea6\u548c\u91cd\u513f\u5b50\u7b49\u4fe1\u606f\r\n    sz[now] = 1;dep[now] = dep[fa] + 1;\r\n    for(auto u:edge[now]){\r\n        dfs0(u,now);\r\n        if(sz[son[now]]<sz[u]) son[now] = u;\r\n    }\r\n}\r\nvoid delSubtree(int now){\r\n    cnt[dep[now]][s[now]]--;\r\n    for(auto u:edge[now]){\r\n        delSubtree(u);\r\n    }\r\n}\r\nvoid addSubtree(int now){\r\n    cnt[dep[now]][s[now]]++;\r\n    for(auto u:edge[now]){\r\n        addSubtree(u);\r\n    }\r\n}\r\nbool check(int H){\r\n    int tot = 0;\r\n    for(int i=1;i<=26;i++){\r\n        if(cnt[H][i]&1) ++tot;\r\n    }\r\n    return tot<2;\r\n}\r\nvoid work(int now){\r\n    for(auto u:have[now]){\r\n        int H = u.h;\r\n        ans[u.id] = check(H);\r\n    }\r\n}\r\nvoid dfs1(int now,int fa,bool keep){\r\n    for(auto u:edge[now]){\r\n        if(u == fa or u==son[now]) continue;\r\n        dfs1(u,now,false);\r\n    }\r\n    if(son[now]) dfs1(son[now],now,true);\r\n    for(auto u:edge[now]){\r\n        if(u == fa or u==son[now]) continue;\r\n        addSubtree(u);\r\n    }\r\n    \r\n    cnt[dep[now]][s[now]]++;\r\n    \r\n    work(now);//\u5904\u7406\u8be2\u95ee\r\n    if(!keep) delSubtree(now);\r\n}\r\nint main(){\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(0);cout.tie(0);\r\n    int n,q;\r\n    cin>>n>>q;\r\n    for(int i=2;i<=n;i++){\r\n        int p;\r\n        cin>>p;\r\n        edge[p].push_back(i);\r\n    }\r\n    cin>>ss+1;\r\n    for(int i=1;i<=n;i++){\r\n        s[i] = ss[i] - 'a' + 1;\r\n    }\r\n    for(int i=1;i<=q;i++){\r\n        Query now;int node;\r\n        now.id = i;\r\n        cin>>node>>now.h;\r\n        have[node].push_back(now);\r\n    }\r\n    \r\n    dfs0(1,0);\r\n    dfs1(1,0,false);\r\n    for(int i=1;i<=q;i++){\r\n        if(ans[i]) cout<<\"Yes\\n\";\r\n        else cout<<\"No\\n\";\r\n    }\r\n    return 0;\r\n}"
+}

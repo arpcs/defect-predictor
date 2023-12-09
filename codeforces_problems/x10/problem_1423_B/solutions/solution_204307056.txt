@@ -1,0 +1,37 @@
+{
+    "id": 204307056,
+    "contestId": 1423,
+    "creationTimeSeconds": 1683080961,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1423,
+        "index": "B",
+        "name": "Valuable Paper",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "binary search",
+            "flows",
+            "graph matchings",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1423,
+        "members": [
+            {
+                "handle": "AlexJzG"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601903100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 27,
+    "timeConsumedMillis": 1996,
+    "memoryConsumedBytes": 16588800,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef vector<int> vi;\r\ntypedef pair<int,int> pii;\r\ntypedef vector<pii> vii;\r\n\r\n#define all(v) v.begin(),v.end()\r\n#define pb(x) push_back(x)\r\n\r\nconst ll inf = 1e17;\r\n\r\nstruct flowEdge {\r\n    int u,v;\r\n    ll cap,flow = 0; \r\n    flowEdge(int u, int v, ll cap) : u(u), v(v), cap(cap) {};\r\n};\r\n\r\nstruct Dinic{\r\n    vector<flowEdge> edges; \r\n    vector<vi> adj; \r\n    int n,s,t; \r\n    int id = 0;\r\n    vi level, next; \r\n    \r\n    queue<int> q;\r\n    Dinic(int n, int s, int t) : n(n), s(s), t(t) {\r\n        adj.resize(n);\r\n        level.resize(n);\r\n        next.resize(n);\r\n        fill(all(level),-1); \r\n        level[s] = 0; \r\n        q.push(s);\r\n    }\r\n\r\n    void add(int u, int v, ll cap){\r\n        edges.emplace_back(u,v,cap);\r\n        edges.emplace_back(v,u,0);\r\n        adj[u].pb(id++); \r\n        adj[v].pb(id++); \r\n    }\r\n\r\n    bool bfs(){\r\n        while (!q.empty()){\r\n            int curr = q.front();\r\n            q.pop();\r\n            for (auto e : adj[curr]){\r\n                if (edges[e].cap - edges[e].flow  < 1) continue; \r\n                if (level[edges[e].v] != -1) continue; \r\n                level[edges[e].v] = level[edges[e].u] + 1; \r\n                q.push(edges[e].v);\r\n            }\r\n        }\r\n        return level[t] != -1; \r\n    }\r\n\r\n    ll dfs(int u, ll flow){\r\n        if (flow == 0) return 0;\r\n        if (u == t) return flow;\r\n        for (auto& cid = next[u]; cid < adj[u].size(); cid++){ \r\n            int e = adj[u][cid]; \r\n            int v = edges[e].v; \r\n\r\n            if (level[edges[e].u] + 1 != level[v] || edges[e].cap - edges[e].flow < 1) continue;\r\n            ll f = dfs(v,min(flow,edges[e].cap - edges[e].flow)); \r\n            if (f == 0) continue; \r\n            edges[e].flow += f; \r\n            edges[e ^ 1].flow -= f;\r\n            return f;\r\n        }\r\n        return 0;\r\n    }\r\n\r\n    ll maxFlow(){\r\n        ll flow = 0;\r\n        while (bfs()){\r\n            fill(all(next),0);\r\n            for (ll f = dfs(s,inf); f != 0ll; f = dfs(s,inf)) flow += f;\r\n            fill(all(level),-1); \r\n            level[s] = 0;\r\n            q.push(s);\r\n        }\r\n        return flow;\r\n    }\r\n\r\n\r\n    vii minCut(){\r\n        vii ans;\r\n        fill(all(level),-1);\r\n        level[s] = 0;\r\n        q.push(s);\r\n        while (!q.empty()){\r\n            int curr = q.front();\r\n            q.pop();\r\n            for (int id = 0; id < adj[curr].size(); id++){\r\n               int e = adj[curr][id];\r\n               if (level[edges[e].v] == -1 && edges[e].cap - edges[e].flow > 0){\r\n\r\n                   q.push(edges[e].v);\r\n                   level[edges[e].v] = level[edges[e].u] + 1; \r\n               }\r\n            }\r\n        }\r\n        for (int i = 0; i < level.size(); i++){\r\n            if (level[i] != - 1){\r\n                for (int id = 0; id < adj[i].size(); id++){\r\n                    int e = adj[i][id];\r\n                    if (level[edges[e].v] == -1 && edges[e].cap - edges[e].flow == 0){\r\n                        ans.emplace_back(edges[e].u,edges[e].v);\r\n                    }\r\n                }\r\n            }\r\n        }\r\n        return ans;\r\n    }\r\n\r\n    vii MaximumMatching(){\r\n        vii ans;\r\n        fill(all(level),-1);\r\n        level[s] = 0;\r\n        q.push(s);\r\n        while (!q.empty()){\r\n            int curr = q.front();\r\n            q.pop();\r\n            for (int id = 0; id < adj[curr].size(); id++){\r\n               int e = adj[curr][id];\r\n               if (level[edges[e].v] == -1 && edges[e].cap - edges[e].flow == 0 && edges[e].flow != 0ll){\r\n\r\n                   q.push(edges[e].v);\r\n                   level[edges[e].v] = level[edges[e].u] + 1;\r\n               }\r\n            }\r\n        }\r\n        for (int i = 0; i < level.size(); i++){\r\n            if (level[i] != - 1){\r\n                for (int id = 0; id < adj[i].size(); id++){\r\n                    int e = adj[i][id];\r\n                    if (edges[e].u != s && edges[e].v != t && edges[e].cap - edges[e].flow == 0 && edges[e].flow != 0ll){\r\n                        ans.emplace_back(edges[e].u,edges[e].v);\r\n                    }\r\n                }\r\n            }\r\n        }\r\n        return ans;\r\n    }\r\n\r\n};\r\n\r\nstruct Edge {\r\n    int u, v, weight;\r\n    Edge(int u,int v, int w) : u(u), v(v), weight(w) {};\r\n    bool operator<(Edge const& other) {\r\n        return weight < other.weight;\r\n    }\r\n};\r\n\r\n#define dist(a,b) (abs((a).first - (b.first)) + abs((a).second - (b).second))\r\n\r\nint main(){\r\n    int n,m; cin >> n >> m;\r\n\r\n    vector<Edge> edges;\r\n    for(int i = 0; i < m ; i++){\r\n        int a,b,c; cin >> a >> b >> c;\r\n        a--,b--;\r\n        edges.emplace_back(a,n+b,c);\r\n    }\r\n\r\n    sort(all(edges));\r\n    vi dists;\r\n    for(auto e : edges)\r\n        dists.push_back(e.weight);\r\n\r\n    int ans = -1,l = 0, r = 1e9;\r\n\r\n    while(l < r){\r\n        Dinic g(n*2+2,n*2,n*2+1);\r\n        int m = l + (r-l)/2;\r\n        int up = upper_bound(all(dists), m)-dists.begin();\r\n        for(int i = 0; i < up ; i++){\r\n            Edge e = edges[i];\r\n            g.add(e.u,e.v,1);\r\n        }\r\n        for(int i = 0; i < n ; i++){\r\n            g.add(n*2,i,1);\r\n            g.add(n+i, n*2+1,1);\r\n        }\r\n        if(g.maxFlow()==n){\r\n            ans = m;\r\n            r = m;\r\n        }else{\r\n            l = m+1;\r\n        }\r\n    }\r\n    cout << ans << '\\n';\r\n}\r\n\r\n"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 230729097,
+    "contestId": 1763,
+    "creationTimeSeconds": 1698777309,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1763,
+        "index": "E",
+        "name": "Node Pairs",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "dp",
+            "graphs",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1763,
+        "members": [
+            {
+                "handle": "NooB_VansH"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1671460500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 65,
+    "timeConsumedMillis": 421,
+    "memoryConsumedBytes": 3174400,
+    "source": "#include <bits/stdc++.h>\r\n\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\nusing namespace __gnu_pbds;\r\n#define ordered_set tree<int, null_type,less<int>, rb_tree_tag,tree_order_statistics_node_update>\r\n\r\nusing namespace std;\r\n#define ll long long\r\n#define ull unsigned long long\r\n#define INF 1e9\r\n#define pb push_back\r\n#define pr pop_back\r\n#define rep(a, b, c) for (int(a) = (b); (a) <= (c); ++(a))\r\n#define irep(a, b, c) for (int(a) = (b); (a) >= (c); --(a))\r\n#define pi pair<int, int>\r\n#define pl pair<ll, ll>\r\n#define vi vector<int>\r\n#define vb vector<bool>\r\n#define vl vector<ll>\r\n#define vpi vector<pair<int, int>>\r\n#define vpl vector<pair<ll, ll>>\r\n#define vvi vector<vector<int>>\r\n#define vvl vector<vector<ll>>\r\n#define vvb vector<vector<bool>>\r\n#define vvvi vector<vector<vector<int>>>\r\n#define vvvl vector<vector<vector<ll>>>\r\n#define YES cout << \"Yes\\n\";\r\n#define NO cout << \"No\\n\";\r\nll M = 1e9 + 7;\r\n\r\n//----------------------Template-----------------------//\r\nll getrandom(int range)\r\n{\r\n    random_device dev;\r\n    mt19937 rng(dev());\r\n    uniform_int_distribution<mt19937::result_type> dist6(0, range);\r\n    return dist6(rng);\r\n}\r\nll gcd(ll XX, ll YY) { return YY == 0 ? XX : gcd(YY, XX % YY);}\r\nll lcm(ll XX, ll YY) { return XX * YY / gcd(XX, YY); }\r\nll exppow(ll XX, ll YY)\r\n{\r\n    XX %= M;\r\n    ll ret = 1;\r\n    while (YY > 0) {\r\n        if (YY % 2)\r\n            ret = (ret * XX) % M;\r\n        XX = (XX * XX) % M;\r\n        YY /= 2;\r\n    }\r\n    return ret;\r\n}\r\nll fracmod(ll XX, ll YY)\r\n{\r\n    ll ZZ = gcd(XX, YY);\r\n    XX = XX / ZZ;\r\n    YY = YY / ZZ;\r\n    return (XX * exppow(YY, M - 2)) % M;\r\n}\r\nstruct DisjSet {\r\n    int n;\r\n    vi p, sz;\r\n    DisjSet() {}\r\n    DisjSet(int N)\r\n    {\r\n        n = N;\r\n        p.resize(n);\r\n        sz.assign(n, 1);\r\n        rep(i, 0, n - 1) p[i] = i;\r\n    }\r\n    int find(int u)\r\n    {\r\n        if (p[u] != u)\r\n            p[u] = find(p[u]);\r\n        return p[u];\r\n    }\r\n    bool issame(int u, int v) { return find(u) == find(v); }\r\n    void merge(int u, int v)\r\n    {\r\n        int x = find(u), y = find(v);\r\n        if (x == y)\r\n            return;\r\n        if (sz[x] > sz[y])\r\n            p[y] = x, sz[x] += sz[y];\r\n        else\r\n            p[x] = y, sz[y] += sz[x];\r\n        return;\r\n    }\r\n};\r\nstruct SegTree {\r\n    int n;\r\n    vi st, lazy;\r\n    SegTree() {}\r\n    SegTree(int N)\r\n    {\r\n        n = N;\r\n        st.assign(8 * n, 0);\r\n        lazy.assign(8 * n, 0);\r\n    }\r\n    SegTree(vi &a)\r\n    {\r\n        n = a.size();\r\n        st.resize(8 * n);\r\n        lazy.resize(8 * n);\r\n        build(1, 0, n - 1, a);\r\n    }\r\n    int lc(int x) { return 2 * x; }\r\n    int rc(int x) { return 2 * x + 1; }\r\n    void build(int x, int l, int r, vi &a)\r\n    {\r\n        if (l > r)\r\n            return;\r\n        if (l == r)\r\n            st[x] = a[l], lazy[x] = 0;\r\n        else\r\n        {\r\n            int m = (l + r) / 2;\r\n            build(lc(x), l, m, a);\r\n            build(rc(x), m + 1, r, a);\r\n            st[x] = min(st[lc(x)], st[rc(x)]), lazy[x] = 0;\r\n        }\r\n\r\n    }\r\n    void pushdown(int x)\r\n    {\r\n        if (!lazy[x])\r\n            return;\r\n        st[lc(x)] += lazy[x];\r\n        lazy[lc(x)] += lazy[x];\r\n        st[rc(x)] += lazy[x];\r\n        lazy[rc(x)] += lazy[x];\r\n        lazy[x] = 0;\r\n    }\r\n    void pushup(int x) { st[x] = st[lc(x)] + st[rc(x)]; }\r\n    void update(int x, int tl, int tr, int l, int r, int v)\r\n    {\r\n        pushdown(x);\r\n        if (tl > tr || tl > r || tr < l)\r\n            return;\r\n        if (tl >= l && tr <= r)\r\n        {\r\n            st[x] += v, lazy[x] += v;\r\n            pushdown(x);\r\n        }\r\n        else\r\n        {\r\n            int m = (tl + tr) / 2;\r\n            update(lc(x), tl, m, l, r, v);\r\n            update(rc(x), m + 1, tr, l, r, v);\r\n            pushup(x);\r\n        }\r\n    }\r\n    int query(int x, int tl, int tr, int l, int r)\r\n    {\r\n        pushdown(x);\r\n        if (tl > tr || tl > r || tr < l)\r\n            return INF;\r\n        if (tl >= l && tr <= r)\r\n            return st[x];\r\n        int m = (tl + tr) / 2;\r\n        return min(query(lc(x), tl, m, l, r), query(rc(x), m + 1, tr, l, r));\r\n    }\r\n    void update(int l, int r, int v) { update(1, 0, n - 1, l, r, v); }\r\n    int query(int l, int r) { return query(1, 0, n - 1, l, r); }\r\n};\r\nstruct BIT {\r\n    int n;\r\n    vi bit;\r\n    BIT() {}\r\n    BIT(int N)\r\n    {\r\n        n = N + 1;\r\n        bit.assign(n, 0);\r\n    }\r\n    BIT(vi &arr)\r\n    {\r\n        n = arr.size() + 1;\r\n        bit.assign(n, 0);\r\n        rep(i, 0, arr.size() - 1) add(i + 1, arr[i]);\r\n    }\r\n    void add(int i, int v)\r\n    {\r\n        i++;\r\n        while (i < n)\r\n        {\r\n            bit[i] += v;\r\n            i += i & -i;\r\n        }\r\n    }\r\n    int sum(int i)\r\n    {\r\n        i++;\r\n        int ret = 0;\r\n        while (i > 0)\r\n        {\r\n            ret += bit[i];\r\n            i -= i & -i;\r\n        }\r\n        return ret;\r\n    }\r\n    int sum(int l, int r) { return sum(r) - sum(l - 1); }\r\n};\r\n\r\nvoid mul(ll& v, ll x) { v = (v * x) % M; }\r\n\r\n//--------------------Template-------------------------//\r\n\r\nvoid solve()\r\n{\r\n    ll n;\r\n    cin >> n;\r\n    vl dp(n + 1, 1e9), p(n + 1, 1e9);\r\n    p[0] = dp[0] = 0;\r\n    for (ll i = 1; i <= n; i++)\r\n        for (ll j = 2; j * (j - 1) / 2 <= i; j++)\r\n            if (dp[i] > j + dp[i - j * (j - 1) / 2])\r\n                dp[i] = j + dp[i - j * (j - 1) / 2], p[i] = j;\r\n    cout << dp[n] << \" \";\r\n    ll sum = 0;\r\n    vl a;\r\n    while (n > 0)\r\n    {\r\n        a.pb(p[n]);\r\n        sum += p[n];\r\n        n -= p[n] * (p[n] - 1) / 2;\r\n    }\r\n    sort(a.begin(), a.end());\r\n    ll x = 0;\r\n    irep(i, a.size() - 1, 1) x +=  1ll * a[i] * (sum - a[i]), sum -= a[i];\r\n    cout << x;\r\n}\r\n\r\nint main()\r\n{\r\n    cin.sync_with_stdio(false);\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n\r\n#ifndef ONLINE_JUDGE\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n    freopen(\"output.txt\", \"w\", stdout);\r\n#endif\r\n\r\n    int tt = 1;\r\n    // cin >> tt;\r\n    for (int TT = 1; TT <= tt; TT++)\r\n    {\r\n        solve();\r\n        cout << \"\\n\";\r\n    }\r\n}\r\n"
+}

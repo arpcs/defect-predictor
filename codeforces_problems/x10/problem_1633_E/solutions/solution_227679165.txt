@@ -1,0 +1,42 @@
+{
+    "id": 227679165,
+    "contestId": 1633,
+    "creationTimeSeconds": 1697028756,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1633,
+        "index": "E",
+        "name": "Spanning Tree Queries",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "greedy",
+            "math",
+            "sortings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1633,
+        "members": [
+            {
+                "handle": "Raisetsu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1643639700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 0,
+    "source": "/*\nIf the radiance of a thousand suns were to burst into the sky?\n...that would be like the splendor of the mighty one.\n*/\n#include <bits/stdc++.h>\n#define pii pair<int, int>\n#define mp(x, y) make_pair(x, y)\n#define all(v) (v).begin(), (v).end()\n\nusing i128 = __int128;\nusing i64 = long long;\nusing u64 = unsigned long long;\n\nconst int inf = 0x3f3f3f3f;\n\nstruct edge { int u, v, w, wpre; };\n\nstruct DSU {\n  const int n;\n  std::vector<int> fa;\n  DSU(int __n) : n(__n) {\n    fa.resize(n + 5);\n    for (int i = 1; i <= n; i++) fa[i] = i;\n  }\n  inline int findset(int v) {\n    return fa[v] == v ? fa[v] : fa[v] = findset(fa[v]);\n  }\n  inline bool unionset(int u, int v) {\n    int x = findset(u), y = findset(v);\n    if (x == y) return false;\n    fa[x] = y;\n    return true;\n  }\n};\n\ninline void solve() {\n  int n, m; std::cin >> n >> m;\n  std::vector<edge> e(m);\n  for (int i = 0; i < m; i++) std::cin >> e[i].u >> e[i].v >> e[i].w, e[i].wpre = e[i].w;\n  std::sort(all(e), [](const edge& x, const edge& y) { return x.w < y.w; });\n\n  std::vector<int> tim;\n  tim.push_back(0), tim.push_back(inf);\n  for (int i = 0; i < m; i++)\n    for (int j = i + 1; j < m; j++)\n      tim.push_back((e[i].w + e[j].w) / 2 + ((e[i].w + e[j].w) & 1));\n  std::sort(all(tim));\n  tim.resize(std::unique(all(tim)) - tim.begin());\n\n  std::vector<edge> now(m);\n  std::vector<std::pii> cnt;\n  std::vector<i64> res;\n  for (int t : tim) {\n    DSU dsu(n);\n    for (int i = 0; i < m; i++) now[i] = e[i], now[i].w = std::abs(t - e[i].w);\n    std::sort(all(now), [](const edge& x, const edge& y) { return x.w == y.w ? x.wpre > y.wpre : x.w < y.w; });\n    res.push_back(0), cnt.push_back({ 0, 0 });\n    for (edge it : now) if (dsu.unionset(it.u, it.v)) {\n      res.back() += it.w;\n      if (it.wpre > t) cnt.back().second++;\n      else cnt.back().first++;\n    }\n  }\n  int p, k;\n  i64 a, b, c, lst, all = 0;\n  std::cin >> p >> k >> a >> b >> c;\n  for (int i = 1; i <= k; i++) {\n    if (i <= p) std::cin >> lst;\n    else lst = (lst * a + b) % c;\n    int pos = std::upper_bound(all(tim), lst) - tim.begin() - 1;\n    i64 delta = lst - tim[pos];\n    i64 ans = res[pos] - delta * cnt[pos].second + delta * cnt[pos].first;\n    all ^= ans;\n  }\n  std::cout << all << \"\\n\";\n}\n\nint main() {\n  std::ios::sync_with_stdio(false);\n  std::cin.tie(0), std::cout.tie(0);\n\n  int T = 1;\n  // std::cin >> T;\n  while (T--) solve();\n  return 0;\n}\n"
+}

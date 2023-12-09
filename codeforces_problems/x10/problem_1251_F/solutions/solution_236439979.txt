@@ -1,0 +1,35 @@
+{
+    "id": 236439979,
+    "contestId": 1251,
+    "creationTimeSeconds": 1702090410,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1251,
+        "index": "F",
+        "name": "Red-White Fence",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "combinatorics",
+            "fft"
+        ]
+    },
+    "author": {
+        "contestId": 1251,
+        "members": [
+            {
+                "handle": "zhangzizhuo2021"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571929500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 107,
+    "timeConsumedMillis": 1669,
+    "memoryConsumedBytes": 151142400,
+    "source": "// LUOGU_RID: 138810672\n#include <cstdio>\n#include <algorithm>\n#include <cstring>\n\n#define int long long\n#define For(i, l, r) for(int i = l; i <= r; i ++)\n\nusing namespace std;\n\nvoid in(int &x)\n{\n\tchar c = getchar();\n\twhile(c > '9' || c < '0') c = getchar();\n\tfor(x = 0; c >= '0' && c <= '9'; c = getchar())\n\t\tx = x * 10 + c - '0';\n}\n\nconst int N = (1 << 20) + 50, P = 998244353, G = 3;\n\nint n, m, a[N], b[N], t1[N], fac[N], inv[N], ton[N], t2[N];\n\nint ksm(int x, int y)\n{\n\tint s = 1;\n\twhile(y)\n\t{\n\t\tif(y & 1) s = s * x % P; x = x * x % P; y >>= 1;\n\t}\n\treturn s;\n}\n\nint G_inv = ksm(3, P - 2), pw[N], tot = N - 50, bit = 20, rev[N];\n\nint C(int n, int m) {if(n < 0 || m < 0 || n < m)return 0;return fac[n] * inv[m] % P * inv[n - m] % P;}\nint Ans[6][N];\nint f[N], g[N], h[N];\n\nvoid NTT(int *a, int op)\n{\n\tFor(i, 0, tot - 1) if(i < rev[i]) swap(a[i], a[rev[i]]);\n\tfor(int mid = 1; mid < tot; mid <<= 1)\n\t{\n\t\tint w = ksm((op == 1 ? G : G_inv), (P - 1) / (mid << 1));\n\t\tfor(int i = 0, x, y; i < tot; i += mid * 2)\n\t\t{\n\t\t\tint W = 1;\n\t\t\tFor(j, i, i + mid - 1)\n\t\t\t{\n\t\t\t\tx = a[j]; y = a[j + mid];\n\t\t\t\ta[j] = (x + W * y) % P; a[j + mid] = (x - W * y % P + P) % P;\n\t\t\t\tW = W * w % P;\n\t\t\t}\n\t\t}\n\t}\n\tif(op == 1) return ;\n\tint iv = ksm(tot, P - 2);\n\tFor(i, 0, tot - 1) a[i] = a[i] * iv % P;\n}\n\nsigned main()\n{\n\t// freopen(\"pub.in\", \"r\", stdin);\n\t// freopen(\"pub.out\", \"w\", stdout);\n\tin(n); in(m);\n\tFor(i, 1, n) in(a[i]), ton[a[i]] ++;\n\tsort(a + 1, a + n + 1);\n\tFor(i, 1, tot) ton[i] = min(ton[i], 2ll);\n\tFor(i, 1, m) in(b[i]);\n\tFor(i, 1, m) For(j, 1, b[i] - 1)\n\t{\n\t\tif(!ton[j]) continue;\n\t\tif(ton[j] == 1) t1[i] ++; else t2[i] ++;\n\t}\n\tfac[0] = inv[0] = 1;\n\tFor(i, 1, tot) fac[i] = fac[i - 1] * i % P;\n\tinv[tot] = ksm(fac[tot], P - 2);\n\tfor(int i = tot; i ; i --) inv[i - 1] = inv[i] * i % P;\n\tpw[0] = 1;\n\tFor(i, 1, tot) pw[i] = (pw[i - 1] + pw[i - 1]) % P;\n\tint qq; in(qq);\n\tFor(i, 0, tot - 1) rev[i] = (rev[i >> 1] >> 1) | ((i & 1) << bit - 1);\n\tFor(ii, 1, m)\n\t{\n\t\tint mx = b[ii], u = t2[ii], v = t1[ii];\n\t\tFor(i, 0, tot - 1) f[i] = g[i] = h[i] = 0;\n\t\tFor(i, 0, u * 2) f[i] = C(u * 2, i);\n\t\tFor(i, 0, v) g[i] = C(v, i) * pw[i] % P;\n\t\tNTT(f, 1); NTT(g, 1);\n\t\tFor(i, 0, tot - 1) h[i] = f[i] * g[i] % P;\n\t\tNTT(h, -1);\n\t\tFor(i, 0, tot - 1) Ans[ii][i] = h[i];\n\t}\n\twhile(qq --)\n\t{\n\t\tint Q;\n\t\tin(Q); Q /= 2;\n\t\tint ans = 0;\n\t\tFor(ii, 1, m)\n\t\t{\n\t\t\tint mx = b[ii], u = t2[ii], v = t1[ii], len = Q - mx - 1;\n\t\t\tif(len < 0) continue;\n\t\t\t(ans += Ans[ii][len]) %= P;\n\t\t}\n\t\tprintf(\"%lld\\n\", ans);\n\t}\n\treturn 0;\n}"
+}

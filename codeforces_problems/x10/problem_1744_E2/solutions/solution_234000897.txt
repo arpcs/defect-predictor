@@ -1,0 +1,36 @@
+{
+    "id": 234000897,
+    "contestId": 1744,
+    "creationTimeSeconds": 1700808029,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1744,
+        "index": "E2",
+        "name": "Divisible Numbers (hard version)",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "brute force",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1744,
+        "members": [
+            {
+                "handle": "vjudge3"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1665930900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\n\n#define Body_code  ios_base::sync_with_stdio(false);cin.tie(NULL);\n#define files    freopen(\"input.txt\", \"r\", stdin); freopen(\"output.txt\", \"w\", stdout);\n#define clo cout << \"Time execute: \" << clock()/ (double)CLOCKS_PER_SEC << \" sec\" << endl;\n#define all(ele)  ele.begin(), ele.end()\n#define fo(i , n) for (long long int i =0 ; i < n ; i++)\n#define ll long long int\n#define ull unsigned long long\n#define MX INT_MAX\n#define MN INT_MIN\n#define LMX  LONG_LONG_MAX\n#define LMN LONG_LONG_MIN\n#define yes cout << \"YES\";\n#define no cout << \"NO\";\n#define X first\n#define Y second\n\nusing namespace std;\n\nchar di[] = {'D', 'L', 'U', 'R'};\nint dx[] = {1, 0, -1, 0, -1, -1, 1, 1};\nint dy[] = {0, -1, 0, 1, -1, 1, -1, 1};\n\n\nconst int N = 1e5, mod = 1e9+7;\n\nint sx , sy, ex, ey ;\n\nvector<vector<int>>adj;\nvector<int>dict , pr;\nvector<vector<int>>grid;\nvector<bool>vis;\n\nbool nextPoint(int x, int y , int n ) {\n    return (x >= 0 && x < n) && (y >= 0 && y < n);\n}\n\n\nbool Is_excellent(char a , char b , string s){\n    return count_if(all(s),[&] (char cr) {return cr == a || cr==b ; }) == s.size();\n}\n\nll FastPower_mod(ll n , ll m , ll M = mod){\n    ll res = 1 ;\n    while (m > 0){\n        if (m&1) res = (res * n)%M;\n        n =n*n;\n        m >>=1;\n        n %= M;\n    }\n    return res;\n}\nll Add(ll n , ll m ){\n    n = (n+m)%mod;\n    return n;\n}\nll Sub(ll n , ll m ){\n    n = (n-m)%mod;\n    if (n < 0) n += mod ;\n    return n;\n}\nll Mul(ll n , ll m ){\n    n = (n%mod) * (m%mod) ;\n    return n%mod;\n}\nll Dic(ll n , ll m ){\n    n = (n%mod) * FastPower_mod(m , mod-2) ;\n    return n % mod;\n}\n\nvector<int>spf (N);\nvector<int>primes;\nvoid Sieve(){  // time == n * log(log(n))\n    spf[1] = 1 ;\n    for (int i = 2 ; i < N ; i += 1+(i&1) ){\n        if (!spf[i]){\n            spf[i] = i ;\n            primes.push_back(i);   //  number of primes = n/log(n)\n            for(ll j = i*1ll*i ; j < N ; j+=i){\n                if (!spf[j])\n                    spf[j] = i ;\n            }   // Smallest divisor be prime\n        }\n    }\n}\n\nmap<int,int>factorization;\n\nvoid factorize(int n){ // sqrt(n) * log(n)   ||  root n = 1e5 , time = 1e5/log(1e5) * log(n)\n    for (auto vl : primes){\n        if (vl*1ll*vl > n)\n            break;\n        while (n%vl == 0){\n            factorization[vl]++;\n            n /= vl;\n        }\n    }\n    if (n > 1) factorization[n]++;\n}\nvoid factorize_spf(int n){ // time log(n)\n    while (n > 1){\n        factorization[spf[n]]++;\n        n /= spf[n];\n    }\n}\n\n\nll Factorial(ll n){\n    ll fact = 1 ;\n    for (int i = 2 ; i <= n ; i++){\n        fact = (fact * i)%mod;\n    }\n    return fact ;\n}\nll Combinations (ll n , ll r){\n    ll numerator = Factorial(n);\n    ll denomerator = Mul(Factorial(r) , Factorial(n-r));\n    return Dic(numerator , denomerator);\n}\nll Permutations (ll n , ll r){\n    ll numerator = Factorial(n);\n    ll denomerator = Factorial(n-r);\n    return Dic(numerator , denomerator);\n}\n\nvector<ll>divisors ;\nvector<pair<int,int>>vfactorization;\nvoid GetDivisors(int i , ll dv = 1){\n    if (i == vfactorization.size()){\n        divisors.push_back(dv);\n        return;\n    }\n    fo(p , vfactorization[i].Y+1){\n        GetDivisors(i+1 , dv);\n        dv *= vfactorization[i].X ;\n    }\n}\nll Sumofdivisors(int i ){   // log(n)\n    if (i == vfactorization.size()){\n        return 1;\n    }\n    ll sm = (FastPower_mod(vfactorization[i].X , vfactorization[i].Y+1)-1)/(vfactorization[i].X-1);\n    return sm * Sumofdivisors(i+1);\n}\n\nvoid burn(int tc) {\n    factorization.clear();\n    vfactorization.clear();\n    divisors.clear();\n    int a , b , c , d ;\n    cin >> a >> b >> c >> d ;\n\n    factorize(a);\n    factorize(b);\n    for (auto vl : factorization){\n        vfactorization.push_back(vl);\n    }\n    GetDivisors(0);\n    ll ab = a*1ll*b , x , y ;\n    for (auto vl : divisors){\n        x = vl ;\n        x = (a/x + 1ll)*x;\n        y = ab/vl;\n//        cout << ab << ' ' << x  <<' ' << y << endl;\n        y = (b/y + 1ll)*y;\n        if (x <= c && y <= d){\n            return void (cout << x << ' ' << y );\n        }\n    }\n    cout << \"-1 -1\";\n}\n\n\n\n\nint main() {\n    Body_code\n#ifndef ONLINE_JUDGE\n    files\n#endif\n    int cas = 1 , T = 1 ;\n    Sieve();\n    cin >> cas ;\n    for (int i = 0 ; i < cas ; i++){\n        burn(i);\n        cout << '\\n';\n    }\n    return 0;\n\n}\n\u00a0\n \t      \t\t\t\t   \t \t\t\t \t  \t \t\t"
+}

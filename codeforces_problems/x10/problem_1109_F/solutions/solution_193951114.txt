@@ -1,0 +1,36 @@
+{
+    "id": 193951114,
+    "contestId": 1109,
+    "creationTimeSeconds": 1676608184,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1109,
+        "index": "F",
+        "name": "Sasha and Algorithm of Silence's Sounds",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1109,
+        "members": [
+            {
+                "handle": "Tony2_CF"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1550334900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 234,
+    "memoryConsumedBytes": 18636800,
+    "source": "// LUOGU_RID: 102290071\n#include <bits/stdc++.h>\r\n#define endl '\\n'\r\n#define ll long long\r\nusing namespace std;\r\nconst int N = 2e5 + 5;\r\nstruct LCT{\r\n\tstruct node{\r\n\t\tint fa, son[2];\r\n\t\tbool r;\r\n\t\tint& operator [] (const int &x){\r\n\t\t\treturn son[x];\r\n\t\t}\r\n\t\tbool check(int x){\r\n\t\t\treturn son[1] == x;\r\n\t\t}\r\n\t}a[N];\r\n\tvoid update(int p){\r\n\t\ta[p].r ^= 1;\r\n\t\tswap(a[p][0], a[p][1]);\r\n\t}\r\n\tvoid down(int p){\r\n\t\tif (!a[p].r) return;\r\n\t\tupdate(a[p][0]);\r\n\t\tupdate(a[p][1]);\r\n\t\ta[p].r = 0;\r\n\t}\r\n\tbool isroot(int p){\r\n\t\treturn a[a[p].fa][0] != p && a[a[p].fa][1] != p;\r\n\t}\r\n\tvoid spin(int p){\r\n\t\tint x = a[p].fa, k = a[x].check(p);\r\n\t\tdown(x), down(p);\r\n\t\tif (!isroot(x)){\r\n\t\t\tint y = a[x].fa;\r\n\t\t\ta[y][a[y].check(x)] = p;\r\n\t\t}\r\n\t\ta[p].fa = a[x].fa;\r\n\t\ta[x].fa = p;\r\n\t\ta[a[x][k] = a[p][!k]].fa = x;\r\n\t\ta[p][!k] = x;\r\n\t}\r\n\tvoid splay(int p){\r\n\t\twhile (!isroot(p)){\r\n\t\t\tint x = a[p].fa, y = a[x].fa;\r\n\t\t\tif (!isroot(x))\r\n\t\t\t\tspin(a[x].check(p) ^ a[y].check(x) ? p : x);\r\n\t\t\tspin(p);\r\n\t\t}\r\n\t}\r\n\tvoid access(int p){\r\n\t\tfor (int y = 0; p; p = a[y = p].fa){\r\n\t\t\tsplay(p);\r\n\t\t\tdown(p);\r\n\t\t\ta[p][1] = y;\r\n\t\t}\r\n\t}\r\n\tvoid makeroot(int p){\r\n\t\taccess(p);\r\n\t\tsplay(p);\r\n\t\tupdate(p);\r\n\t}\r\n\tint findroot(int p){\r\n\t\taccess(p);\r\n\t\tsplay(p);\r\n\t\tint x;\r\n\t\tdo{\r\n\t\t\tx = p;\r\n\t\t\tdown(p);\r\n\t\t}while ((p = a[p][0]));\r\n\t\tsplay(x);\r\n\t\treturn x;\r\n\t}\r\n\tvoid link(int x, int y){\r\n\t\tmakeroot(x);\r\n\t\ta[x].fa = y;\r\n\t}\r\n\tvoid cut(int x, int y){\r\n\t\tmakeroot(x);\r\n\t\taccess(y);\r\n\t\tdown(x);\r\n\t\ta[x][1] = a[y].fa = 0; \r\n\t}\r\n}lct;\r\nstruct tree{\r\n#define mid ((l + r) >> 1)\r\n#define ls (now << 1)\r\n#define rs (now << 1 | 1)\r\n\tint a[N << 2], cnt[N << 2], tag[N << 2];\r\n\tvoid up(int now){\r\n\t\ta[now] = min(a[ls], a[rs]);\r\n\t\tcnt[now] = 0;\r\n\t\tif (a[ls] == a[now]) cnt[now] += cnt[ls];\r\n\t\tif (a[rs] == a[now]) cnt[now] += cnt[rs];\r\n\t}\r\n\tvoid update(int now, int k){\r\n\t\ttag[now] += k;\r\n\t\ta[now] += k;\r\n\t}\r\n\tvoid down(int now){\r\n\t\tif (!tag[now]) return;\r\n\t\tupdate(ls, tag[now]);\r\n\t\tupdate(rs, tag[now]);\r\n\t\ttag[now] = 0;\r\n\t}\r\n\tvoid build(int now, int l, int r){\r\n\t\tif (l == r){\r\n\t\t\tcnt[now] = 1;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tbuild(ls, l, mid);\r\n\t\tbuild(rs, mid + 1, r);\r\n\t\tup(now);\r\n\t}\r\n\tvoid add(int now, int l, int r, int s, int t, int k){\r\n\t\tif (s <= l && r <= t)\r\n\t\t\treturn update(now, k);\r\n\t\tdown(now);\r\n\t\tif (s <= mid) add(ls, l, mid, s, t, k);\r\n\t\tif (t > mid) add(rs, mid + 1, r, s, t, k);\r\n\t\tup(now);\r\n\t}\r\n\tint ask(int now, int l, int r, int s, int t){\r\n\t\tif (s <= l && r <= t)\r\n\t\t\treturn a[now] == 1 ? cnt[now] : 0;\r\n\t\tdown(now);\r\n\t\tint res = 0;\r\n\t\tif (s <= mid) res += ask(ls, l, mid, s, t);\r\n\t\tif (t > mid) res += ask(rs, mid + 1, r, s, t);\r\n\t\treturn res;\r\n\t}\r\n#undef mid\r\n#undef ls\r\n#undef rs\r\n}T;\r\nint n, m;\r\nint id[1005][1005];\r\npair<int, int> pos[N];\r\nll ans;\r\nint dx[] = {1, 0, -1, 0}, dy[] = {0, 1, 0, -1};\r\nbool check(int x, int y, int l, int r){\r\n\tset<int> st;\r\n\tfor (int i = 0; i < 4; i++){\r\n\t\tint xx = x + dx[i], yy = y + dy[i];\r\n\t\tif (xx == 0 || yy == 0 || xx > n || yy > m)\r\n\t\t\tcontinue;\r\n\t\tif (l <= id[xx][yy] && id[xx][yy] <= r){\r\n\t\t\tint rt = lct.findroot(id[xx][yy]);\r\n\t\t\tif (st.find(rt) != st.end())\r\n\t\t\t\treturn 0;\r\n\t\t\tst.insert(rt);\r\n\t\t}\r\n\t}\r\n\treturn 1;\r\n}\r\nvoid cut(int x, int y, int l, int r){\r\n\tfor (int i = 0; i < 4; i++){\r\n\t\tint xx = x + dx[i], yy = y + dy[i];\r\n\t\tif (xx == 0 || yy == 0 || xx > n || yy > m)\r\n\t\t\tcontinue;\r\n\t\tif (l <= id[xx][yy] && id[xx][yy] <= r)\r\n\t\t\tlct.cut(id[x][y], id[xx][yy]);\r\n\t}\r\n}\r\nvoid link(int x, int y, int l, int r){\r\n\tfor (int i = 0; i < 4; i++){\r\n\t\tint xx = x + dx[i], yy = y + dy[i];\r\n\t\tif (xx == 0 || yy == 0 || xx > n || yy > m)\r\n\t\t\tcontinue;\r\n\t\tif (l <= id[xx][yy] && id[xx][yy] <= r){\r\n\t\t\tlct.link(id[x][y], id[xx][yy]);\r\n\t\t\tT.add(1, 1, n * m, 1, id[xx][yy], -1);\r\n\t\t}\r\n\t}\r\n}\r\nint main(){\r\n\tios::sync_with_stdio(0); cin.tie(0); cout.tie(0);\r\n//\tfreopen(\"in.txt\", \"r\", stdin);\r\n//\tfreopen(\"out.txt\", \"w\", stdout);\r\n\tcin >> n >> m;\r\n\tfor (int i = 1; i <= n; i++)\r\n\t\tfor (int j = 1; j <= m; j++){\r\n\t\t\tcin >> id[i][j];\r\n\t\t\tpos[id[i][j]] = make_pair(i, j);\r\n\t\t}\r\n\tT.build(1, 1, n * m);\r\n\tfor (int i = 1, j = 1; i <= n * m; i++){\r\n\t\tint x = pos[i].first, y = pos[i].second;\r\n\t\twhile (!check(x, y, j, i - 1)){\r\n\t\t\tcut(pos[j].first, pos[j].second, j, i - 1);\r\n\t\t\tj++;\r\n\t\t}\r\n\t\tT.add(1, 1, n * m, 1, i, 1);\r\n\t\tlink(x, y, j, i - 1);\r\n\t\tans += T.ask(1, 1, n * m, j, i);\r\n//\t\tcout << j << endl;\r\n\t}\r\n\tcout << ans;\r\n\treturn 0;\r\n}"
+}

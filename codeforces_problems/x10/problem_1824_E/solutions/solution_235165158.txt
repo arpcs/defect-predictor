@@ -1,0 +1,36 @@
+{
+    "id": 235165158,
+    "contestId": 1824,
+    "creationTimeSeconds": 1701404719,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1824,
+        "index": "E",
+        "name": "LuoTianyi and Cartridge",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3500,
+        "tags": [
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1824,
+        "members": [
+            {
+                "handle": "zhaohaikun"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1683547500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 9,
+    "timeConsumedMillis": 763,
+    "memoryConsumedBytes": 54579200,
+    "source": "// MagicDark\r\n#include <bits/stdc++.h>\r\n#define mid ((l + r) >> 1)\r\n#define ls num << 1\r\n#define rs ls | 1\r\n#define li ls, l, mid\r\n#define ri rs, mid + 1, r\r\n#define debug cerr << \"[\" << __LINE__ << \"] \"\r\n#define SZ(x) (int) x.size() - 1\r\n#define all(x) x.begin(), x.end()\r\n#define ms(x, y) memset(x, y, sizeof x)\r\n#define F(i, x, y) for (int i = (x); i <= (y); i++)\r\n#define DF(i, x, y) for (int i = (x); i >= (y); i--)\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef unsigned long long ull;\r\ntemplate <typename T> inline void chkmax(T& x, T y) {x = max(x, y);}\r\ntemplate <typename T> inline void chkmin(T& x, T y) {x = min(x, y);}\r\ntemplate <typename T> inline void read(T &x) {\r\n\tx = 0; int f = 1; char c = getchar();\r\n\tfor (; !isdigit(c); c = getchar()) if (c == '-') f = -f;\r\n\tfor (; isdigit(c); c = getchar()) x = (x << 1) + (x << 3) + (c ^ 48);\r\n\tx *= f;\r\n}\r\nconst int N = 2e5 + 10, T = 2e5;\r\nint n, a[N], b[N], x[N], y[N], c[N], d[N], dep[N], mx1[N], mx2[N], dfn[N], rdfn[N], dd[N], s1, s2;\r\nll ss, ans;\r\nvector <int> v[N];\r\nvoid dfs(int x, int fa) {\r\n\tdep[x] = dep[fa] + 1;\r\n\tdd[dfn[x] = ++dfn[0]] = x;\r\n\tfor (int i: v[x])\r\n\t\tif (i != fa) {\r\n\t\t\tdfs(i, x);\r\n\t\t\tchkmax(mx1[x], mx1[i]);\r\n\t\t}\r\n\trdfn[x] = dfn[0];\r\n}\r\nvoid dfs2(int x, int fa) {\r\n\tint fi = 0, se = 0;\r\n\tfor (int i: v[x])\r\n\t\tif (i != fa) {\r\n\t\t\tif (mx1[i] > fi) se = fi, fi = mx1[i];\r\n\t\t\telse chkmax(se, mx1[i]);\r\n\t\t}\r\n\tfor (int i: v[x])\r\n\t\tif (i != fa) {\r\n\t\t\tchkmax(mx2[i], max(a[x], mx2[x]));\r\n\t\t\tif (fi == mx1[i]) chkmax(mx2[i], se);\r\n\t\t\telse chkmax(mx2[i], fi);\r\n\t\t\tdfs2(i, x);\r\n\t\t}\r\n}\r\nvector <int> A[N], B[N];\r\nstruct Seg1 {\r\n\tint sz[N << 2], sum[N << 2];\r\n\tvoid pushup(int num) {\r\n\t\tsz[num] = sz[ls] + sz[rs];\r\n\t\tsum[num] = sum[ls] + sum[rs];\r\n\t}\r\n\tvoid update(int num, int l, int r, int x, int y) {\r\n\t\tif (l == r) {\r\n\t\t\tsz[num] += y, sum[num] += x * y;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tif (mid >= x) update(li, x, y);\r\n\t\tif (mid < x) update(ri, x, y);\r\n\t\tpushup(num);\r\n\t}\r\n\tll query(int num, int l, int r, int x) {\r\n\t\tif (l == r) return (ll) x * l;\r\n\t\tif (sz[rs] >= x) return query(ri, x);\r\n\t\treturn query(li, x - sz[rs]) + sum[rs];\r\n\t}\r\n\tvoid add(int x) {\r\n\t\tupdate(1, 1, T, x, 1);\r\n\t}\r\n\tvoid del(int x) {\r\n\t\tupdate(1, 1, T, x, -1);\r\n\t}\r\n\tll ask(int k) {\r\n\t\treturn query(1, 1, T, k);\r\n\t}\r\n} T1, T2;\r\nstruct Seg2 {\r\n\tint mx[N << 2];\r\n\tvoid pushup(int num) {\r\n\t\tmx[num] = max(mx[ls], mx[rs]);\r\n\t}\r\n\tvoid update(int num, int l, int r, int x, int y) {\r\n\t\tif (l == r) return mx[num] = y, void();\r\n\t\tif (mid >= x) update(li, x, y);\r\n\t\telse update(ri, x, y);\r\n\t\tpushup(num);\r\n\t}\r\n\tint query(int num, int l, int r, int L, int R) {\r\n\t\tif (L <= l && r <= R) return mx[num];\r\n\t\tif (mid >= R) return query(li, L, R);\r\n\t\tif (mid < L) return query(ri, L, R);\r\n\t\treturn max(query(li, L, R), query(ri, L, R));\r\n\t}\r\n\tvoid modify(int x, int y) {\r\n\t\tupdate(1, 1, n, x, y);\r\n\t}\r\n\tint ask(int l, int r) {\r\n\t\treturn query(1, 1, n, l, r);\r\n\t}\r\n} T3;\r\nnamespace DS {\r\n\tint minn = 1e9, maxn = -1, mm, t[N];\r\n\tll ss;\r\n\tset <pair <int, int>> s;\r\n\tvoid insert1(int x) {//\u70b9\r\n\t\tT1.add(b[x]);\r\n\t\tT3.modify(dfn[x], b[x]);\r\n\t\tauto it = s.lower_bound(make_pair(dfn[x], 1e9));\r\n\t\tif (it == s.begin()) return;\r\n\t\tit--;\r\n\t\tif (-it -> second >= dfn[x]) {\r\n\t\t\tif (b[x] > t[it -> first]) {\r\n\t\t\t\tss -= t[it -> first];\r\n\t\t\t\tT1.add(t[it -> first]);\r\n\t\t\t\tt[it -> first] = b[x];\r\n\t\t\t\tss += b[x];\r\n\t\t\t\tT1.del(b[x]);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tvoid insert2(int x) {//\u8fb9\r\n\t\tif (dfn[x] < minn) minn = dfn[x], mm = rdfn[x];\r\n\t\tchkmax(maxn, rdfn[x]);\r\n\t\t// debug << \"! \" << dfn[x] << \" \" << rdfn[x] << endl;\r\n\t\tauto it = s.emplace(dfn[x], -rdfn[x]).first;\r\n\t\tif (it != prev(s.end())) {\r\n\t\t\tif (-next(it) -> second <= rdfn[x]) {\r\n\t\t\t\ts.erase(it);\r\n\t\t\t\treturn;\r\n\t\t\t}\r\n\t\t}\r\n\t\tif (it != s.begin()) {\r\n\t\t\tif (-prev(it) -> second >= rdfn[x]) {\r\n\t\t\t\tss -= t[prev(it) -> first];\r\n\t\t\t\tT1.add(t[prev(it) -> first]);\r\n\t\t\t\ts.erase(prev(it));\r\n\t\t\t}\r\n\t\t}\r\n\t\tT1.del(t[dfn[x]] = T3.ask(dfn[x], rdfn[x]));\r\n\t\tss += t[dfn[x]];\r\n\t}\r\n\tll query(int x) {\r\n\t\tx -= s.size();\r\n\t\tll ans = T2.sum[1] + ss;\r\n\t\t// debug << \"@ \" << x << \" \" << mm << \" \" << maxn << endl;\r\n\t\t// for (auto [i, j]: s) cout << i << \" \" << j << endl;\r\n\t\tif (mm == maxn) {\r\n\t\t\tint k = 0;\r\n\t\t\tif (minn > 1) chkmax(k, T3.ask(1, minn - 1));\r\n\t\t\tif (maxn < n) chkmax(k, T3.ask(maxn + 1, n));\r\n\t\t\tT1.del(k);\r\n\t\t\tans += k;\r\n\t\t\tans += T1.ask(x - 1);\r\n\t\t\tT1.add(k);\r\n\t\t} else ans += T1.ask(x);\r\n\t\treturn ans;\r\n\t}\r\n}\r\nsigned main() {\r\n\tread(n);\r\n\tF(i, 1, n) read(a[i]), mx1[i] = a[i];\r\n\tF(i, 1, n) read(b[i]);\r\n\tF(i, 1, n - 1) {\r\n\t\tread(x[i]), read(y[i]), read(c[i]), read(d[i]);\r\n\t\tv[x[i]].push_back(y[i]);\r\n\t\tv[y[i]].push_back(x[i]);\r\n\t}\r\n\tdfs(1, 0), dfs2(1, 0);\r\n\tF(i, 1, n) A[a[i]].push_back(i);\r\n\tF(i, 1, n - 1) {\r\n\t\tif (dep[x[i]] > dep[y[i]]) swap(x[i], y[i]);\r\n\t\t// debug << \"? \" << y[i] << \" \" << mx1[y[i]] << \" \" << mx2[y[i]] << endl;\r\n\t\tB[min(c[i], min(mx1[y[i]], mx2[y[i]]))].push_back(i);\r\n\t}\r\n\tDF(i, T, 1) {\r\n\t\tfor (int j: A[i]) {//\u70b9\r\n\t\t\ts1++;\r\n\t\t\tss += b[j];\r\n\t\t\tDS::insert1(j);\r\n\t\t}\r\n\t\tfor (int j: B[i]) {//\u8fb9\r\n\t\t\tT2.add(d[j]);\r\n\t\t\ts2++;\r\n\t\t\tDS::insert2(y[j]);\r\n\t\t}\r\n\t\tif (s1 > s2 + 1) chkmax(ans, (ll) i * DS::query(s2 + 1));\r\n\t\telse chkmax(ans, (ll) i * (ss + T2.ask(s1 - 1)));\r\n\t\t// if (i == 1000) debug << ans << \" \" << s1 << \" \" << s2 << \" \" << DS::query(s2 + 1) << endl;\r\n\t}\r\n\tcout << ans;\r\n\treturn 0;\r\n}\r\n/* why?\r\n*/"
+}

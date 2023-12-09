@@ -1,0 +1,35 @@
+{
+    "id": 230081466,
+    "contestId": 762,
+    "creationTimeSeconds": 1698438378,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 762,
+        "index": "E",
+        "name": "Radio stations",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 762,
+        "members": [
+            {
+                "handle": "ilia13122008"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1485354900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 77,
+    "memoryConsumedBytes": 134758400,
+    "source": "/*\r\n* powered by ANDRIY POPYK\r\n* in honor of  SEGMENT DECOMPOSITION and N ^ (log(N)) and hate_club_Dasha_Lobas\r\n* I hate GeZhiyuan\r\n* fuck you\r\n*/\r\n\r\n\r\n#pragma GCC optimize(\"Ofast\")\r\n#pragma GCC target(\"avx,avx2,fma\")\r\n#pragma GCC optimization(\"unroll-loops\")\r\n#pragma GCC target(\"avx,avx2,sse,sse2,sse3,sse4,popcnt\")\r\n\r\n#include <algorithm>\r\n#include <cmath>\r\n#include <cstdio>\r\n#include <iostream>\r\n#include <map>\r\n#include <set>\r\n#include <bitset>\r\n#include <queue>\r\n#include <vector>\r\n#include <stack>\r\n#include <random>\r\n#include <ctime>\r\n#include <iomanip>\r\n#include <unordered_map>\r\n\r\nusing namespace std;\r\ntypedef long long ll;\r\n\r\n\r\n\r\nint mod = 998244353;\r\nint inf = 1000000000;\r\n\r\nstruct ell\r\n{\r\n    int x, r;\r\n};\r\n\r\nbool cmp(ell a, ell b)\r\n{\r\n    if (a.x < b.x)\r\n        return true;\r\n    return false;\r\n}\r\n\r\nbool cmp2(ell a, ell b)\r\n{\r\n    if ((a.x - a.r) < (b.x - b.r))\r\n        return true;\r\n    return false;\r\n}\r\n\r\nbool cmp3(ell a, ell b)\r\n{\r\n    if ((a.x + a.r) < (b.x + b.r))\r\n        return true;\r\n    return false;\r\n}\r\n\r\nstruct segment_tree\r\n{\r\n\tvector <pair <int, int>> tree;\r\n\tint size;\r\n\tint size2;\r\n\tvoid init(int n)\r\n\t{\r\n\t\tsize2 = n;\r\n\t\tsize = 1;\r\n\t\twhile (size < n)\r\n\t\t\tsize *= 2;\r\n\t\ttree.resize(size * 2, { 0 , 0 });\r\n\t}\r\n\r\n\tvoid build(int l, int r, int ind)\r\n\t{\r\n\t\tif (r - l == 1)\r\n\t\t{\r\n\t\t\tif (l < size2)\r\n\t\t\t\ttree[ind].first = 0;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint m = (r + l) / 2;\r\n\t\tbuild(l, m, ind * 2 + 1);\r\n\t\tbuild(m, r, ind * 2 + 2);\r\n\t\ttree[ind].first = tree[ind * 2 + 1].first + tree[ind * 2 + 2].first;\r\n\t}\r\n\r\n\tvoid build(int n)\r\n\t{\r\n\t\tinit(n);\r\n\t\t//build(0, size, 0);\r\n\t}\r\n\t/*\r\n\tvoid push(int ind)\r\n\t{\r\n\t\tif (tree[ind] != -1)\r\n\t\t{\r\n\t\t\ttree[ind * 2 + 1] = tree[ind];\r\n\t\t\ttree[ind * 2 + 2] = tree[ind];\r\n\t\t\ttree[ind] = -1;\r\n\t\t}\r\n\t}*/\r\n\tvoid modified(int l, int r, int ind, int lx, int rx, int v)\r\n\t{\r\n\t\tif (r <= lx)\r\n\t\t\treturn;\r\n\t\tif (rx <= l)\r\n\t\t\treturn;\r\n\r\n\t\tif (r - l == 1)\r\n\t\t{\r\n\t\t\ttree[ind].second += v;\r\n\r\n\t\t\ttree[ind].first += v * (r - l);\r\n\t\t\treturn;\r\n\t\t}\r\n\r\n\t\tif ((lx <= l) and (r <= rx))\r\n\t\t{\r\n\t\t\ttree[ind].second += v;\r\n\r\n\t\t\ttree[ind].first += v * (r - l);\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint m = (r + l) / 2;\r\n\t\tmodified(l, m, ind * 2 + 1, lx, rx, v);\r\n\t\tmodified(m, r, ind * 2 + 2, lx, rx, v);\r\n\t\ttree[ind].first = (tree[ind * 2 + 1].first + tree[ind * 2 + 2].first) + tree[ind].second * (r - l);\r\n\t}\r\n\tvoid modified(int lx, int rx, int v)\r\n\t{\r\n\t\tmodified(0, size, 0, lx, rx, v);\r\n\t}\r\n\r\n\tint get(int l, int r, int ind, int lx, int rx, int sum)\r\n\t{\r\n\t\tif (r <= lx)\r\n\t\t\treturn 0;\r\n\t\tif (rx <= l)\r\n\t\t\treturn 0;\r\n\r\n\t\tif (r - l == 1)\r\n\t\t{\r\n\t\t\treturn tree[ind].first + sum * (r - l);\r\n\t\t}\r\n\r\n\t\tif ((lx <= l) and (r <= rx))\r\n\t\t{\r\n\t\t\treturn tree[ind].first + sum * (r - l);\r\n\t\t}\r\n\t\tsum += tree[ind].second;\r\n\r\n\t\tint m = (r + l) / 2;\r\n\t\tll g1 = get(l, m, ind * 2 + 1, lx, rx, sum);\r\n\t\tll g2 = get(m, r, ind * 2 + 2, lx, rx, sum);\r\n\t\treturn g1 + g2;\r\n\t}\r\n\tint get(int l, int r)\r\n\t{\r\n\t\treturn get(0, size, 0, l, r, 0);\r\n\t}\r\n};\r\n\r\n\r\nsigned main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n    cout.tie(nullptr);\r\n\r\n    int times_ = 1;\r\n\r\n    //cin >> times_;\r\n\r\n    while (times_--)\r\n    {\r\n\r\n        int n, k;\r\n        cin >> n >> k;\r\n\r\n        vector <vector <ell>> vf(10011);\r\n\r\n\r\n        for (int i = 0; i < n; i++)\r\n        {\r\n            int x_, r_, f_;\r\n            cin >> x_ >> r_ >> f_;\r\n\r\n            vf[f_].push_back({ x_ , r_ });\r\n        }\r\n\r\n        for (int i = 0; i < vf.size(); i++)\r\n            sort(vf[i].begin(), vf[i].end() , cmp);\r\n\r\n        vector <ell> ve;\r\n        vector <ell> ve2;\r\n\r\n\t\tsegment_tree st;\r\n\t\tst.build(5000000);\r\n\r\n\t\tint res = 0;\r\n        for (int i = 0; i < 10001; i++)\r\n        {\r\n\t\t\tif (vf[i].size() == 0)\r\n\t\t\t\tcontinue;\r\n\r\n            ve.clear();\r\n            ve2.clear();\r\n\r\n\r\n            for (int j = max(0, i - k); j <= i + k; j++)\r\n            {\r\n                for (int u = 0; u < vf[j].size(); u++)\r\n                {\r\n                    ve.push_back(vf[j][u]);\r\n                    ve2.push_back(vf[j][u]);\r\n                }\r\n            }\r\n\r\n            sort(ve.begin(), ve.end(), cmp2);\r\n            sort(ve2.begin(), ve2.end(), cmp2);\r\n\r\n            int ind = 0;\r\n\t\t\tint ind2 = 0;\r\n\r\n            for (int j = 0; j < vf[i].size(); j++)\r\n            {\r\n                while ((ind != ve.size()) and (ve[ind].x - ve[ind].r <= vf[i][j].x))\r\n                {\r\n\t\t\t\t\tst.modified(ve[ind].x, ve[ind].x + 1, 1);\r\n\t\t\t\t\tind++;\r\n                }\r\n\r\n\t\t\t\twhile ((ind2 != ve.size()) and (ve2[ind2].x + ve[ind2].r < vf[i][j].x))\r\n\t\t\t\t{\r\n\t\t\t\t\tst.modified(ve[ind2].x, ve[ind2].x + 1, -1);\r\n\t\t\t\t\tind2++;\r\n\t\t\t\t}\r\n\r\n\r\n\t\t\t\tres += st.get(vf[i][j].x - vf[i][j].r, vf[i][j].x + vf[i][j].r + 1);\r\n            }\r\n\r\n\t\t\twhile (ind2 != ind)\r\n\t\t\t{\r\n\t\t\t\tst.modified(ve[ind2].x, ve[ind2].x + 1, -1);\r\n\t\t\t\tind2++;\r\n\t\t\t}\r\n        }\r\n\r\n\r\n\t\tcout << (res - n) /2 << \"\\n\";\r\n\r\n        cerr << \"Please, give me some problems)\";\r\n    }\r\n}\r\n"
+}

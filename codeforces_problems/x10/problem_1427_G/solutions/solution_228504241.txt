@@ -1,0 +1,36 @@
+{
+    "id": 228504241,
+    "contestId": 1427,
+    "creationTimeSeconds": 1697526013,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1427,
+        "index": "G",
+        "name": "One Billion Shades of Grey",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3300,
+        "tags": [
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1427,
+        "members": [
+            {
+                "handle": "FISHER_"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1602341400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 61,
+    "memoryConsumedBytes": 5734400,
+    "source": "#include <bits/stdc++.h>\r\n#define PB push_back\r\n#define EB eplace_back\r\nusing namespace std;\r\nconst int maxn = 200, maxs = 40002;\r\nint n;\r\nint a[maxn + 5][maxn + 5];\r\ninline int get(int x, int y) { return (x - 1) * n + y; }\r\nstruct edge { int v, f; };\r\nvector<edge> e;\r\nvector<int> g[maxs + 5];\r\ninline void addE(int u, int v, int w, int w2 = 0) {\r\n\tg[u].PB(e.size()), e.PB({v, w});\r\n\tg[v].PB(e.size()), e.PB({u, w2});\r\n}\r\nint d[maxs + 5];\r\nint cur[maxs + 5];\r\nint S, T;\r\nbool bfs(int s, int t) {\r\n\tmemset(d, 127, sizeof(d)), memset(cur, 0, sizeof(cur));\r\n\tqueue<int> q;\r\n\tq.push(s), d[s] = 0; \r\n\twhile (!q.empty()) {\r\n\t\tint u = q.front(); q.pop();\r\n\t\tfor (int eid : g[u]) {\r\n\t\t\tint v = e[eid].v; int f = e[eid].f;\r\n\t\t\tif (f && d[v] > T) {\r\n\t\t\t\tq.push(v), d[v] = d[u] + 1;\r\n\t\t\t\tif (v == t) return 1;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}\r\nint dfs(int u, int t, int fl) {\r\n\tif (u == t) return fl;\r\n\tint rs = 0;\r\n\tfor (int i = cur[u]; i < g[u].size(); i++) {\r\n\t\tcur[u] = i;\r\n\t\tint eid = g[u][i], v = e[eid].v; int f = e[eid].f;\r\n\t\tif (f && d[v] == d[u] + 1) {\r\n\t\t\tint nf = dfs(v, t, min(fl, f));\r\n\t\t\te[eid].f -= nf, e[eid ^ 1].f += nf;\r\n\t\t\tfl -= nf, rs += nf;\r\n\t\t\tif (!fl) break;\r\n\t\t}\r\n\t}\r\n\treturn rs;\r\n}\r\nint dinic(int s, int t, int mx = INT_MAX) {\r\n\tint rs = 0;\r\n\twhile (bfs(s, t)) {\r\n\t\tif (!mx) break;\r\n\t\tint nw = dfs(s, t, mx);\r\n\t\trs += nw, mx -= nw;\r\n\t}\r\n\treturn rs;\r\n}\r\nint main() {\r\n\tscanf(\"%d\", &n);\r\n\tvector<int> v;\r\n\tfor (int i = 1; i <= n; i++) \r\n\t\tfor (int j = 1; j <= n; j++) {\r\n\t\t\tscanf(\"%d\", &a[i][j]);\r\n\t\t\tif (i == 1 || i == n || j == 1 || j == n) v.PB(a[i][j]);\r\n\t\t}\r\n\tsort(v.begin(), v.end()), v.erase(unique(v.begin(), v.end()), v.end());\r\n\tS = n * n + 1, T = S + 1;\r\n\tfor (int i = 1; i <= n; i++)\r\n\t\tfor (int j = 1; j <= n; j++) {\r\n\t\t\tif (i == 1 || i == n || j == 1 || j == n) addE(get(i, j), T, 3);\r\n\t\t\tif (i < n && a[i][j] != -1 && a[i + 1][j] != -1) addE(get(i, j), get(i + 1, j), 1, 1);\r\n\t\t\tif (j < n && a[i][j] != -1 && a[i][j + 1] != -1) addE(get(i, j), get(i, j + 1), 1, 1);\r\n\t\t}\r\n\tint fl = 0;\r\n\tlong long ans = 0;\r\n\tfor (int x = 0; x < v.size() - 1; x++) {\r\n\t\tfor (int i = 1; i <= n; i++)\r\n\t\t\tfor (int j = 1; j <= n; j++) {\r\n\t\t\t\tif ((i == 1 || i == n || j == 1 || j == n) && a[i][j] == v[x]) {\r\n\t\t\t\t\tint mx;\r\n\t\t\t\t\tfor (int eid : g[T])\r\n\t\t\t\t\t\tif (e[eid].v == get(i, j)) mx = e[eid].f, e[eid].f = 0;\r\n\t\t\t\t\tfor (int eid : g[get(i, j)])\r\n\t\t\t\t\t\tif (e[eid].v == T) e[eid].f = 0;\r\n\t\t\t\t\tfl -= dinic(get(i, j), S, mx);\r\n\t\t\t\t\tint rs = dinic(get(i, j), T, 3);\r\n\t\t\t\t\tfl += rs;\r\n\t\t\t\t\taddE(S, get(i, j), 3 - rs, rs);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\tans += 1LL * (v[x + 1] - v[x]) * fl;\r\n\t}\r\n\tprintf(\"%lld\", ans);\r\n}"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 26961837,
+    "contestId": 391,
+    "creationTimeSeconds": 1494265513,
+    "relativeTimeSeconds": 8113,
+    "problem": {
+        "contestId": 391,
+        "index": "E1",
+        "name": "Three Trees",
+        "type": "PROGRAMMING",
+        "points": 11.0,
+        "tags": []
+    },
+    "author": {
+        "contestId": 391,
+        "members": [
+            {
+                "handle": "Ali.Kh"
+            },
+            {
+                "handle": "Ehsan22"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "teamId": 24138,
+        "teamName": ":D",
+        "ghost": false,
+        "startTimeSeconds": 1494257400
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS1",
+    "passedTestCount": 16,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 15769600,
+    "source": "//In the name of Allah\r\n\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef pair <int , int> pii;\r\n\r\nconst int N = 3e5+10 , MOD = 1e9+7;\r\n\r\nint n[3] , ch[N] , index[4] , chc[N];\r\nvector <int> g[N];\r\nll ans , dp_down[N] , dp_up[N] , mx[4] , dp_downc[N] , dp_upc[N];\r\n\r\nvoid dfs_down(int v , int p){\r\n    for(int u:g[v])\r\n        if(u != p){\r\n            dfs_down(u , v);\r\n            ch[v] += ch[u];\r\n            dp_down[v] += dp_down[u] + ch[u];\r\n        }\r\n    ch[v]++;\r\n}\r\n\r\nvoid dfs_up(int v , int p , int ind){\r\n    ll sum = 0;\r\n    for(int u:g[v])\r\n        if(u != p)\r\n            sum += dp_down[u] + 2 * ch[u];\r\n    for(int u:g[v])\r\n        if(u != p)\r\n            dp_up[u] = dp_up[v] + (n[ind] - ch[v] + 1) + sum - (dp_down[u] + 2 * ch[u]);\r\n    for(int u:g[v])\r\n        if(u != p)\r\n            dfs_up(u , v , ind);\r\n    if(dp_down[v] + dp_up[v] > mx[ind]){\r\n        mx[ind] = dp_down[v] + dp_up[v];\r\n        index[ind] = v;\r\n    }\r\n}\r\n\r\nvoid dfs_downc(int v , int p){\r\n    for(int u:g[v])\r\n        if(u != p){\r\n            dfs_downc(u , v);\r\n            chc[v] += chc[u];\r\n            dp_downc[v] += dp_downc[u] + chc[u];\r\n        }\r\n    chc[v]++;\r\n}\r\n\r\nvoid dfs_upc(int v , int p , int nn , int ind){\r\n    ll sum = 0;\r\n    for(int u:g[v])\r\n        if(u != p)\r\n            sum += dp_downc[u] + 2 * chc[u];\r\n    for(int u:g[v])\r\n        if(u != p)\r\n            dp_upc[u] = dp_upc[v] + (nn - chc[v] + 1) + sum - (dp_downc[u] + 2 * chc[u]);\r\n    for(int u:g[v])\r\n        if(u != p)\r\n            dfs_upc(u , v , nn , ind);\r\n    if(dp_downc[v] + dp_upc[v] > mx[ind]){\r\n        mx[ind] = dp_downc[v] + dp_upc[v];\r\n        index[ind] = v;\r\n    }\r\n}\r\n\r\nvoid check(int ind1 , int ind2 , int ind3){\r\n    memset(dp_downc , 0 , sizeof(dp_downc));\r\n    memset(dp_upc , 0 , sizeof(dp_upc));\r\n    mx[3] = -1;\r\n    memset(chc , 0 , sizeof(chc));\r\n    g[index[ind1]].push_back(index[ind2]);\r\n    g[index[ind2]].push_back(index[ind1]);\r\n    dfs_downc(index[ind1] , index[ind1]);\r\n    dfs_upc(index[ind1] , index[ind1] , n[ind1] + n[ind2] , 3);\r\n    memset(dp_downc , 0 , sizeof(dp_downc));\r\n    memset(dp_upc , 0 , sizeof(dp_upc));\r\n    mx[3] = -1;\r\n    memset(chc , 0 , sizeof(chc));\r\n    g[index[3]].push_back(index[ind3]);\r\n    g[index[ind3]].push_back(index[3]);\r\n    int x = index[3];\r\n    dfs_downc(0 , 0);\r\n    dfs_upc(0 , 0 , n[ind1] + n[ind2] + n[ind3] , 3);\r\n    ll sum = 0;\r\n    for(int i=0 ; i<n[0] + n[1] + n[2]  ; i++)\r\n        sum += dp_downc[i] + dp_upc[i];\r\n    ans = max(ans , sum / 2);\r\n    g[index[ind1]].pop_back();\r\n    g[index[ind2]].pop_back();\r\n    g[index[ind3]].pop_back();\r\n    g[x].pop_back();\r\n}\r\n\r\nint32_t main()\r\n{\r\n    ios_base::sync_with_stdio(false); cin.tie(0); cout.tie(0);\r\n    int u , v;\r\n    memset(mx , -1 , sizeof(mx));\r\n    for(int i=0 ; i<3 ; i++)\r\n        cin >> n[i];\r\n    for(int i=0 ; i<3 ; i++){\r\n        for(int j=0 ; j<n[i]-1 ; j++){\r\n            cin >> u >> v;\r\n            u--; v--;\r\n            if(i >= 1)\r\n                u += n[0] , v += n[0];\r\n            if(i == 2)\r\n                u += n[1] , v += n[1];\r\n            g[u].push_back(v);\r\n            g[v].push_back(u);\r\n        }\r\n        int r = 0;\r\n        if(i >= 1)\r\n            r += n[0];\r\n        if(i == 2)\r\n            r += n[1];\r\n        dfs_down(r , r);\r\n        dfs_up(r , r , i);\r\n    }\r\n    check(0 , 1 , 2);\r\n    check(0 , 2 , 1);\r\n    check(1 , 2 , 0);\r\n    cout << ans;\r\n    return 0;\r\n}\r\n"
+}

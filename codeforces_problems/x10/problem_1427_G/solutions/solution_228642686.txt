@@ -1,0 +1,36 @@
+{
+    "id": 228642686,
+    "contestId": 1427,
+    "creationTimeSeconds": 1697615122,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1427,
+        "index": "G",
+        "name": "One Billion Shades of Grey",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3300,
+        "tags": [
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1427,
+        "members": [
+            {
+                "handle": "gxy114514"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1602341400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 129,
+    "timeConsumedMillis": 2683,
+    "memoryConsumedBytes": 14540800,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nchar buf[1<<21],*p1,*p2;\r\n#define getchar() (p1==p2&&(p2=(p1=buf)+fread(buf,1,1<<21,stdin),p1==p2)?EOF:*p1++)\r\nvoid rdstr(string &s)\r\n{\r\n    char ch;s=\" \";\r\n    for(ch=getchar();(ch<'A'||ch>'Z')&&(ch<'a'||ch>'z')&&(ch<'0'||ch>'9');ch=getchar()) ;\r\n    for(;(ch>='A'&&ch<='Z')||(ch>='a'&&ch<='z')||(ch>='0'&&ch<='9');ch=getchar())\r\n        s.push_back(ch);\r\n}\r\nlong long rd()\r\n{\r\n    long long res=0,f=1;char ch;\r\n    for(ch=getchar();ch<'0'||ch>'9';ch=getchar())\r\n        if(ch=='-') f=-1;\r\n    for(;ch>='0'&&ch<='9';ch=getchar())\r\n        res=(res<<3)+(res<<1)+ch-'0';\r\n    return res*f;\r\n}\r\nvoid wt(long long x,char ch=0)\r\n{\r\n    if(x<0) putchar('-'),wt(-x);\r\n    else\r\n    {\r\n        if(x>=10) wt(x/10);\r\n        putchar(x%10+'0');\r\n    }\r\n    if(ch) putchar(ch);\r\n    return ;\r\n}\r\nstruct edge{\r\n    int to,nex,flow;\r\n}e[640010];\r\nint head[200100],cnt=1;\r\nconst int inf=0x3f3f3f3f3f3f3f3f;\r\nvoid add(int u,int v,int w1,int w2)\r\n{\r\n    e[++cnt]={v,head[u],w1};head[u]=cnt;\r\n    e[++cnt]={u,head[v],w2};head[v]=cnt;\r\n}\r\nint dis[200100],cur[200100];\r\nint S,T,s,t,n;\r\nint a[201][201];\r\nbool bfs(int S,int T)\r\n{\r\n    memset(dis,0,sizeof(dis));\r\n    memcpy(cur,head,sizeof(cur));\r\n    dis[S]=1;\r\n    queue<int>q;q.push(S);\r\n    while(!q.empty())\r\n    {\r\n        int u=q.front();q.pop();\r\n        for(int i=head[u];i;i=e[i].nex)\r\n        {\r\n            int v=e[i].to;\r\n            if(e[i].flow&&!dis[v])\r\n            {\r\n                dis[v]=dis[u]+1;\r\n                q.push(v);\r\n                if(v==T) return true;\r\n            }\r\n        }\r\n    }\r\n    return false;\r\n}\r\nint dfs(int now,int sum)\r\n{\r\n    if(now==T) return sum;\r\n    int res=sum,i;\r\n    for(i=cur[now];i;i=e[i].nex)\r\n    {\r\n        int v=e[i].to;\r\n        if(e[i].flow&&dis[v]==dis[now]+1)\r\n        {\r\n            int k=dfs(v,min(e[i].flow,res));\r\n            e[i].flow-=k;\r\n            e[i^1].flow+=k;\r\n            if(!(res-=k)) break;\r\n        }\r\n    }\r\n    cur[now]=i;\r\n    return sum-res;\r\n}\r\nint ans;\r\nint id(int x,int y)\r\n{\r\n    return (x-1)*n+y;\r\n}\r\nbool check(int x,int y)\r\n{\r\n    if(x>=1&&x<=n&&y>=1&&y<=n&&a[x][y]>=0) return 1;\r\n    else return 0;\r\n}\r\nvector<pair<int,int> >vc;\r\nbool vis[400100];\r\nint eid[400100];\r\nsigned main()\r\n{\r\n\r\n    // cin>>T;\r\n\t// freopen(\"b.in\",\"r\",stdin);\r\n\t// freopen(\"b.out\",\"w\",stdout);\r\n    // cin>>a>>b>>c>>d;\r\n    cin>>n;\r\n    for(int i=1;i<=n;i++)\r\n    {\r\n        for(int j=1;j<=n;j++)\r\n        {\r\n            cin>>a[i][j];\r\n        }\r\n    }\r\n    s=0,t=n*n+1;\r\n    for(int i=1;i<=n;i++)\r\n    {\r\n        for(int j=1;j<=n;j++)\r\n        {\r\n            if(a[i][j]>=0)\r\n            {\r\n                if(a[i][j]>0)\r\n                {\r\n                    vc.push_back(make_pair(a[i][j],id(i,j)));\r\n                    add(s,id(i,j),inf,0);\r\n                    eid[id(i,j)]=cnt;\r\n                }\r\n                if(check(i+1,j))\r\n                {\r\n                    add(id(i,j),id(i+1,j),1,1);\r\n                }\r\n                if(check(i,j+1))\r\n                {\r\n                    add(id(i,j),id(i,j+1),1,1);\r\n                }\r\n            }\r\n        }\r\n    }\r\n    sort(vc.begin(),vc.end());\r\n    long long anss=0;\r\n    for(int i=0;i<(int)vc.size()-1;i++)\r\n    {\r\n        int u=vc[i].second;\r\n        int flow=e[eid[u]].flow;\r\n        e[eid[u]].flow=e[eid[u]^1].flow=0;\r\n        S=t,T=u;\r\n        while(bfs(S,T)&&flow)\r\n        {\r\n            int k=dfs(S,flow);\r\n            ans-=k;flow-=k;\r\n        }\r\n        add(u,t,inf,0);\r\n        S=s;T=t;\r\n         while(bfs(S,T))\r\n        {\r\n            int k=dfs(S,inf);\r\n            ans+=k;\r\n        }\r\n        anss+=1ll*ans*(vc[i+1].first-vc[i].first);\r\n    }\r\n    cout<<anss<<endl;\r\n    fclose(stdin);\r\n    fclose(stdout);\r\n    return 0;\r\n}"
+}

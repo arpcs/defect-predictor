@@ -1,0 +1,39 @@
+{
+    "id": 207486350,
+    "contestId": 362,
+    "creationTimeSeconds": 1685201694,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 362,
+        "index": "D",
+        "name": "Fools and Foolproof Roads",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2100,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 362,
+        "members": [
+            {
+                "handle": "fbrunodr"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1384443000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 74,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 16998400,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\nusing vi = vector<int>;\nusing ii = pair<int, int>;\nusing vii = vector<ii>;\nusing i64 = long long;\nusing vi64 = vector<i64>;\n\nvector<vii> AL;\n\nint currRegion;\nvi initialRegion;\ni64 dfs(int u){\n    i64 regionCost = 0;\n    initialRegion[u] = currRegion;\n    for(auto& [v, w] : AL[u]){\n        regionCost += w;\n        if(initialRegion[v])\n            continue;\n        regionCost += dfs(v);\n    }\n\n    return regionCost;\n}\n\nvoid impossible(){\n    cout << \"NO\" << endl;\n    exit(0);\n}\n\nint main(){\n    ios_base::sync_with_stdio(false);\n    cin.tie(nullptr);\n\n    int n, m, p, q; cin >> n >> m >> p >> q;\n\n    if(n == 1 && p != 0)\n        impossible();\n\n    ii safePair{-1,-1};\n\n    AL = vector<vii>(n+1);\n    for(int i = 0; i < m; i++){\n        int u, v, w; cin >> u >> v >> w;\n        AL[u].emplace_back(v, w);\n        AL[v].emplace_back(u, w);\n\n        if(safePair == make_pair(-1, -1))\n            safePair = {u, v};\n    }\n\n    currRegion = 1;\n    initialRegion = vi(n+1, 0);\n    vi regionToSomeCityInIt;\n    regionToSomeCityInIt.push_back(-1);\n    vi64 regionCost;\n    regionCost.push_back(-1);\n    for(int u = 1; u <= n; u++)\n        if(!initialRegion[u]){\n            regionToSomeCityInIt.push_back(u);\n            regionCost.push_back(dfs(u)/2);\n            currRegion++;\n        }\n\n    int nRegions = currRegion - 1;\n    if(nRegions - p > q)\n        impossible();\n\n    if(nRegions < q)\n        impossible();\n\n    set< pair<i64, int> > costAndRegion;\n    for(int i = 1; i <= nRegions; i++)\n        costAndRegion.emplace(regionCost[i], regionToSomeCityInIt[i]);\n\n    i64 totalCost = 0;\n    vii ans;\n    while(nRegions > q){\n        auto it = costAndRegion.begin();\n        auto [s1, city1] = *it;\n        it++;\n        auto [s2, city2] = *it;\n        ans.emplace_back(city1, city2);\n        i64 newRoad = min((i64)1e9, s1 + s2 + 1);\n        totalCost += newRoad;\n        costAndRegion.erase({s1, city1});\n        costAndRegion.erase({s2, city2});\n        costAndRegion.emplace(s1 + s2 + newRoad, city1);\n        p--;\n        nRegions--;\n        if(safePair == make_pair(-1, -1))\n            safePair = {city1, city2};\n    }\n\n    if(p && safePair == make_pair(-1, -1))\n        impossible();\n\n    while(p--){\n        auto [u, v] = safePair;\n        ans.emplace_back(u, v);\n        totalCost += 1000;\n    }\n\n    cout << \"YES\" << '\\n';\n    for(auto& [u, v] : ans)\n        cout << u << ' ' << v << '\\n';\n\n    return 0;\n}\n"
+}

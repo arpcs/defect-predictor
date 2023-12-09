@@ -1,0 +1,36 @@
+{
+    "id": 226093350,
+    "contestId": 1109,
+    "creationTimeSeconds": 1696121877,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1109,
+        "index": "F",
+        "name": "Sasha and Algorithm of Silence's Sounds",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1109,
+        "members": [
+            {
+                "handle": "locsey"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1550334900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 218,
+    "memoryConsumedBytes": 24678400,
+    "source": "// LUOGU_RID: 126788276\n#include <bits/stdc++.h>\r\n#define fi first \r\n#define se second\r\n\r\nusing std :: cin;\r\nusing std :: min; \r\nusing std :: max; \r\nusing std :: cout; \r\nusing std :: vector; \r\n\r\nconstexpr int M = 2e5 + 5; \r\nconstexpr int INF = 0x3f3f3f3f; \r\n\r\ntypedef long long ll; \r\ntypedef unsigned long long ull; \r\ntypedef double db; \r\ntypedef std :: pair < int, int > pii; \r\n\r\n//char buf[1 << 23], *p1 = buf, *p2 = buf, obuf[1 << 23], *O = obuf;\r\n//#define getchar() (p1 == p2) && (p2 = (p1 = buf) + fread(buf, 1, 1 << 21, stdin), p1 == p2)? EOF : *p1++\r\n\r\ninline int read() { \r\n\tint f = 1, s = 0; char ch = getchar(); \r\n\twhile(!isdigit(ch)) (ch == '-') && (f = -1), ch = getchar(); \r\n\twhile(isdigit(ch)) s = s * 10 + ch - '0', ch = getchar(); \r\n\treturn f * s; \r\n}\r\n\r\nnamespace Solver {\r\n\tint n, m, a[M]; \r\n\tinline int id(int x, int y) {return (x - 1) * m + y;}\r\n\tstruct node {\r\n\t\tint v, cnt; \r\n\t\tnode(int v = 0, int cnt = 0) : v(v), cnt(cnt) {}\r\n\t\tinline node operator + (const node &rhs) const {\r\n\t\t    if(v < rhs.v) return *this; if(v > rhs.v) return rhs; \r\n\t\t    return node(v, cnt + rhs.cnt); \r\n\t\t}\r\n\t} ; \r\n\tstruct SGT {\r\n\t\tint l, r; node v; int tg; \r\n\t} t[M << 2]; \r\n\tinline void pus(int p) {t[p].v = t[p << 1].v + t[p << 1 | 1].v;}\r\n\tinline void ptg(int p, int d) {t[p].tg += d, t[p].v.v += d;}\r\n\tinline void pusd(int p) {if(t[p].tg) ptg(p << 1, t[p].tg), ptg(p << 1 | 1, t[p].tg), t[p].tg = 0;}\r\n\tinline void byd(int p, int l, int r) {\r\n\t\tt[p].l = l, t[p].r = r; if(l == r) return t[p].v.cnt = 1, void(); int mid = l + r >> 1; \r\n\t\tbyd(p << 1, l, mid), byd(p << 1 | 1, mid + 1, r), pus(p); \r\n\t}\r\n\tinline void upd(int p, int l, int r, int v) {\r\n\t\tif(l <= t[p].l && t[p].r <= r) return ptg(p, v), void(); int mid = t[p].l + t[p].r >> 1; pusd(p); \r\n\t\tif(l <= mid) upd(p << 1, l, r, v); if(r > mid) upd(p << 1 | 1, l, r, v); pus(p); \r\n\t}\r\n\tinline node Q(int p, int l, int r) {\r\n\t\tif(l <= t[p].l && t[p].r <= r) return t[p].v; int mid = t[p].l + t[p].r >> 1; pusd(p); \r\n\t\tif(l > mid) return Q(p << 1 | 1, l, r); if(r <= mid) return Q(p << 1, l, r); return Q(p << 1, l, r) + Q(p << 1 | 1, l, r) ; \r\n\t}\r\n\tnamespace LCT {\r\n\t\tint f[M], rev[M], c[M][2], sz[M]; \r\n\t\tinline void pus(int p) {sz[p] = sz[c[p][0]] + sz[c[p][1]] + 1;}\r\n\t\tinline bool nroot(int x) {return c[f[x]][0] == x || c[f[x]][1] == x;}\r\n\t\tinline void rotate(int x) {\r\n\t\t\tint y = f[x], z = f[y], d = (x == c[y][1]); if(nroot(y)) c[z][y == c[z][1]] = x; f[x] = z; \r\n\t\t\tc[y][d] = c[x][d ^ 1], f[c[x][d ^ 1]] = y, c[x][d ^ 1] = y, f[y] = x, pus(y), pus(x); \r\n\t\t}\r\n\t\tinline void pure(int p) {if(!p) return ; std :: swap(c[p][0], c[p][1]), rev[p] ^= 1;}\r\n\t\tinline void pusd(int p) {if(rev[p]) pure(c[p][0]), pure(c[p][1]), rev[p] = 0;}\r\n\t\tinline void pusall(int p) {if(nroot(p)) pusall(f[p]); pusd(p);}\r\n\t\tinline void Splay(int x) {\r\n\t\t\tpusall(x); \r\n\t\t\twhile(nroot(x)) {\r\n\t\t\t\tint y = f[x], z = f[y]; \r\n\t\t\t\tif(nroot(y)) (x == c[y][0] ^ y == c[z][0]) ? rotate(x) : rotate(y); \r\n\t\t\t\trotate(x); \r\n\t\t\t}\r\n\t\t}\r\n\t\tinline void access(int x) {\r\n\t\t\tfor(int y = 0; x; y = x, x = f[x]) Splay(x), c[x][1] = y, pus(x); \r\n\t\t}\r\n\t\tinline void mkr(int x) {access(x), Splay(x), pure(x);}\r\n\t\tinline int fdr(int x) {access(x), Splay(x); while(c[x][0]) x = c[x][0]; return Splay(x), x;}\r\n\t\tinline void link(int x, int y) {mkr(x), mkr(y), f[x] = y;}\r\n\t\tinline void cut(int x, int y) {mkr(x); if(fdr(y) == x && f[y] == x && c[x][1] == y) f[y] = c[x][1] = 0, pus(x);} \r\n\t\tinline int ask(int x, int y) {return fdr(x) != fdr(y);}\r\n\t} ; \r\n\tint dx[4] = {1, 0, 0, -1}, dy[4] = {0, 1, -1, 0}; \r\n\tinline int in(int x, int y) {return 1 <= x && x <= n && 1 <= y && y <= m;}\r\n\tint fp[M], vis[M]; \r\n\tinline void mian() {\r\n   \t\tn = read(), m = read(); int T = n * m; \r\n   \t\tfor(int i = 1; i <= T; ++i) a[i] = read(), fp[a[i]] = i;\r\n\t    for(int i = 1; i <= T; ++i) LCT :: sz[i] = 1; \r\n   \t\tbyd(1, 1, T); ll ans = 0; int cur = 1; \r\n   \t\tfor(int i = 1; i <= T; ++i) {\r\n   \t\t\tint z = fp[i]; vis[z] = 1; \r\n   \t\t    upd(1, 1, i, 1); int x = (z - 1) / m + 1, y = z - (x - 1) * m; \r\n\t\t\tfor(int o = 0; o < 4; ++o) {\r\n\t\t\t\tint tx = x + dx[o], ty = y + dy[o]; \r\n\t\t\t\tif(in(tx, ty) && a[id(tx, ty)] < i && vis[id(tx, ty)]) {\r\n\t\t\t\t\tupd(1, 1, a[id(tx, ty)], -1); int t = id(tx, ty); \r\n\t\t\t\t\tif(LCT :: ask(t, z)) LCT :: link(t, z); \r\n\t\t\t\t\telse {\r\n\t\t\t\t\t\twhile(!LCT :: ask(t, z)) {\r\n\t\t\t\t\t\t    int ds = fp[cur]; int ox = (ds - 1) / m + 1, oy = ds - (ox - 1) * m; \r\n\t\t\t\t\t\t    vis[ds] = 0; \r\n\t\t\t\t\t\t\tfor(int g = 0; g < 4; ++g) {\r\n\t\t\t\t\t\t\t\tint zx = dx[g] + ox, zy = dy[g] + oy; \r\n\t\t\t\t\t\t\t\tif(in(zx, zy) && vis[id(zx, zy)]) {\r\n\t\t\t\t\t\t\t\t\tif(!LCT :: ask(ds, id(zx, zy))) LCT :: cut(ds, id(zx, zy)); \r\n\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t++cur; \r\n\t\t\t\t\t\t} \r\n//\t\t\t\t\t\tprintf(\"cur = %d\\n\", cur); \r\n\t\t\t\t\t\tLCT :: link(t, z); \r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n//\t\t\tprintf(\"[%d, %d]\\n\", cur, i); \r\n\t\t\tauto it = Q(1, cur, i); \r\n//\t\t\tcout << it.v << ' ' << it.cnt << '\\n'; \r\n\t\t\tassert(it.v == 1); \r\n\t\t\tans += it.cnt; \r\n\t\t}\r\n\t\tcout << ans << '\\n'; \r\n\t}\r\n\t\r\n}\r\n\r\nint main() \r\n{\r\n\tSolver :: mian(); \r\n\treturn 0; \r\n}     "
+}

@@ -1,0 +1,38 @@
+{
+    "id": 227763841,
+    "contestId": 150,
+    "creationTimeSeconds": 1697091454,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 150,
+        "index": "E",
+        "name": "Freezing with Style",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3000,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 150,
+        "members": [
+            {
+                "handle": "WrongAnswer_90"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1329490800
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "// LUOGU_RID: 128892022\n#include<cstdio>\n#include<algorithm>\n#include<queue>\n#include<vector>\n#define VEI vector <ed> :: iterator \n#define BG v[u].begin()\n#define ED v[u].end()\nusing namespace std;const int N=1e5+10;int n;int L;int R;\nstruct data{int u;int f;int dis;int dep;};queue <data> q1,q2;\nstruct ed//\u5b58\u8fb9\u7684\u7ed3\u6784\u4f53 \n{\n\tint v;int val;int siz;int ori;\n\tfriend bool operator <(ed a,ed b){return a.siz<b.siz;}\n};vector <ed> v[N];int ng[N];int tim;int nsiz[N];\nint w[N];int nu[N];int siz[N];bool cut[N];int ans1;int ans2;\nstruct dq//\u53cc\u7aef\u961f\u5217 \n{\n\tint q[3*N];int hd;int tl;\n\tinline void clr(){hd=1;tl=0;} \t   inline bool emp(){return hd<=tl;}\n\tinline void ins(int j){while(hd<=tl&&w[j]>=w[q[tl]])tl--;q[++tl]=j;}\n\tinline void del(int k){while(hd<=tl&&q[hd]>k)hd++;}\n\tinline int qmx(){return q[hd];}\n}q;\ninline void clear(queue <data>& q){queue <data> emp;swap(q,emp);}\ninline int dfs1(int u,int f)//\u5904\u7406siz \n{siz[u]=1;for(VEI it=BG;it!=ED;++it)if(it->v!=f&&!cut[it->v])siz[u]+=dfs1(it->v,u);return siz[u];}\ninline int find(int u,int f,const int& tot)//\u5904\u7406\u91cd\u5fc3 \n{\n\tfor(VEI it=BG;it!=ED;++it)\n\t\tif(it->v!=f&&!cut[it->v]&&2*siz[it->v]>=tot)return find(it->v,u,tot);return u;\n}\ninline int dfs3(int u,int f)//\u5904\u7406\u6700\u5927\u6df1\u5ea6 \n{int mx=0;for(VEI it=BG;it!=ED;++it)if(it->v!=f&&!cut[it->v])mx=max(mx,dfs3(it->v,u));return mx+1;}\ninline bool bfs(data st,int mxsiz)//bfs \n{\n\tq.clr();clear(q1);clear(q2);int j=min(R,mxsiz);for(;j>=L;j--)q.ins(j);\n\tfor(q1.push(st);!q1.empty();)\n\t{\n\t\tdata nw=q1.front();q2.push(nw);q1.pop();if(nw.dep>R)continue;\n\t\tint dl=max(L-nw.dep,0);int dr=min(R-nw.dep,mxsiz);for(;j>=dl;j--)q.ins(j);q.del(dr);\n\t\tif(q.emp()){int p=q.qmx();if(nw.dis+w[p]>=0){ans1=nu[p];ans2=nw.u;return true;}}\n\t\tfor(VEI it=v[nw.u].begin();it!=v[nw.u].end();++it)\n\t\t\tif(it->v!=nw.f&&!cut[it->v])q1.push((data){it->v,nw.u,nw.dis+it->val,nw.dep+1});\n\t}\n\tfor(;!q2.empty();q2.pop()){data a=q2.front();if(w[a.dep]<a.dis)w[a.dep]=a.dis,nu[a.dep]=a.u;}\n\treturn false;\n}\ninline bool solve(int u)\n{\n\t++tim;int g;\n\tif(ng[tim]==-1)//\u5bf9\u70b9\u5206\u6cbb\u8fdb\u884c\u8bb0\u5fc6\u5316 \n\t{\n\t\tdfs1(u,0);g=find(u,0,siz[u]);cut[g]=true;ng[tim]=g;nsiz[tim]=siz[u];\n\t\tif(siz[u]==1)return false;\n\t\tfor(int i=1;i<=siz[u];i++)w[i]=-0x3f3f3f3f,nu[i]=0;\n\t\tfor(VEI it=v[g].begin();it!=v[g].end();++it)if(!cut[it->v])it->siz=dfs3(it->v,g);\n\t\tsort(v[g].begin(),v[g].end());w[0]=0;nu[0]=g;\n\t}\n\telse \n\t{\n\t\tg=ng[tim];cut[g]=true;if(nsiz[tim]==1)return false;\n\t\tfor(int i=1;i<=nsiz[tim];i++)w[i]=-0x3f3f3f3f,nu[i]=0;w[0]=0;nu[0]=g;\n\t}\n\tfor(VEI it=v[g].begin();it!=v[g].end();++it)//bfs\u5224\u65ad \n\t\tif(!cut[it->v])if(bfs((data){it->v,g,it->val,1},it->siz))return true;\n\tfor(VEI it=v[g].begin();it!=v[g].end();++it)if(!cut[it->v])if(solve(it->v))return true;\n\treturn false;\n}\ninline bool jud(int mid)\n{\n\ttim=0;\n\tfor(int i=1;i<=n;i++)\n\t\tfor(VEI it=v[i].begin();it!=v[i].end();++it)it->val=(it->ori>=mid)?1:-1;\n\tfor(int i=1;i<=n;i++)cut[i]=false;\n\treturn solve(1);\n}\nint main()\n{\n\tscanf(\"%d%d%d\",&n,&L,&R);int l=0;int r=0;\n\tfor(int i=1;i<=n;i++)ng[i]=-1;\n\tfor(int i=1,u,V,va;i<n;i++)\n\t{\n\t\tscanf(\"%d%d%d\",&u,&V,&va);r=max(r,va);\n\t\tv[u].push_back((ed){V,0,0,va});v[V].push_back((ed){u,0,0,va});\n\t}//\u5927\u529b\u4e8c\u5206\u5c31\u884c\u4e86 \n\twhile(l!=r){int mid=(l+r+1)/2;if(jud(mid))l=mid;else r=mid-1;}\n\tjud(l);printf(\"%d %d\",ans1,ans2);return 0;\n}\n"
+}

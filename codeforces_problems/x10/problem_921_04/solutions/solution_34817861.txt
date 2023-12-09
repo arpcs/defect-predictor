@@ -1,0 +1,37 @@
+{
+    "id": 34817861,
+    "contestId": 921,
+    "creationTimeSeconds": 1517511588,
+    "relativeTimeSeconds": 10788,
+    "problem": {
+        "contestId": 921,
+        "index": "04",
+        "name": "Labyrinth-4",
+        "type": "PROGRAMMING",
+        "rating": 3200,
+        "tags": []
+    },
+    "author": {
+        "contestId": 921,
+        "members": [
+            {
+                "handle": "Jakube"
+            },
+            {
+                "handle": "Osama_Alkhodairy"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "teamId": 37308,
+        "teamName": "BadAtNaming",
+        "ghost": false,
+        "startTimeSeconds": 1517500800
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define ll long long\r\n#define finish(x) return cout << x << endl, 0;\r\n\r\nint testfile;\r\nlong long W;\r\nint N, M;\r\n\r\nstruct Cell {\r\n  bool contains_key = false;\r\n  bool is_exit = false;\r\n  array<bool, 4> has_wall = {{false, false, false, false}};\r\n  array<bool, 4> has_door = {{false, false, false, false}};\r\n  // directions are 0-up, 1-left, 2-down, 3-right\r\n};\r\n\r\nstruct Coord {\r\n  int x, y;\r\n  int keys = 0;\r\n};\r\nstruct out{\r\n  int dir, times;\r\n};\r\n\r\nvector<vector<Cell>> maze;\r\n\r\nint main(){\r\n  ios_base::sync_with_stdio(0);\r\n  cin.tie(NULL);\r\n  cout.tie(NULL);\r\n  \r\n  int x0, y0;\r\n  int C, D, K, E;\r\n  cin >> testfile >> W >> N >> M >> x0 >> y0 >> C >> D >> K >> E;\r\n  maze.assign(N, vector<Cell>(M));\r\n  for (int i = 0; i < C; i++) {\r\n    int x1, y1, x2, y2;\r\n    cin >> x1 >> y1 >> x2 >> y2;\r\n    if(x1-x2 == 1){\r\n      maze[x1][y1].has_wall[0] = 1;\r\n      maze[x2][y2].has_wall[2] = 1;\r\n    }\r\n    else if(x1-x2 == -1){\r\n      maze[x1][y1].has_wall[2] = 1;\r\n      maze[x2][y2].has_wall[0] = 1;\r\n    }\r\n    else if(y1-y2 == 1){\r\n      maze[x1][y1].has_wall[1] = 1;\r\n      maze[x2][y2].has_wall[3] = 1;\r\n    } else{\r\n      maze[x1][y1].has_wall[3] = 1;\r\n      maze[x2][y2].has_wall[1] = 1;\r\n    }\r\n  }\r\n  \r\n  for(int i = 0 ; i < D ; i++){\r\n    int x1, y1, x2, y2;\r\n    cin >> x1 >> y1 >> x2 >> y2;\r\n    if(x1-x2 == 1){\r\n      maze[x1][y1].has_door[0] = 1;\r\n      maze[x2][y2].has_door[2] = 1;\r\n    }\r\n    else if(x1-x2 == -1){\r\n      maze[x1][y1].has_door[2] = 1;\r\n      maze[x2][y2].has_door[0] = 1;\r\n    }\r\n    else if(y1-y2 == 1){\r\n      maze[x1][y1].has_door[1] = 1;\r\n      maze[x2][y2].has_door[3] = 1;\r\n    }\r\n    else{\r\n      maze[x1][y1].has_door[3] = 1;\r\n      maze[x2][y2].has_door[1] = 1;\r\n    }\r\n  }\r\n  \r\n  for (int i = 0; i < K; i++) {\r\n    int x, y;\r\n    cin >> x >> y;\r\n    maze[x][y].contains_key = true;\r\n  }\r\n  for (int i = 0; i < E; i++) {\r\n    int x, y;\r\n    cin >> x >> y;\r\n    maze[x][y].is_exit = true;\r\n  }\r\n  \r\n  int dx[] = {-1, 0, 1, 0};\r\n  int dy[] = {0, -1, 0, 1};\r\n  \r\n  vector<vector<bool>> in_queue(N, vector<bool>(M, false));\r\n  vector<vector<int>> from_direction(N, vector<int>(M, -1));\r\n  queue<Coord> queue;\r\n  queue.push({x0, y0, 0});\r\n  Coord cur;\r\n  bool found_exit = false;\r\n  while (queue.size()) {\r\n    cur = queue.front();\r\n    queue.pop();\r\n    in_queue[cur.x][cur.y] = true;\r\n    auto& cur_cell = maze[cur.x][cur.y];\r\n    if (cur_cell.is_exit) {\r\n      found_exit = true;\r\n      break;\r\n    }\r\n    if (cur_cell.contains_key) {\r\n      cur.keys++;\r\n    }\r\n    for (int dir = 0; dir < 4; dir++) {\r\n      if (cur_cell.has_wall[dir] || (cur_cell.has_door[dir] && cur.keys == 0))\r\n        continue;\r\n      Coord next = {cur.x + dx[dir], cur.y + dy[dir], cur.keys};\r\n      if (cur_cell.has_door[dir])\r\n        next.keys--;\r\n      if (next.x >= 0 && next.y >= 0 && next.x < N && next.y < M) {\r\n        if (!in_queue[next.x][next.y]) {\r\n          in_queue[next.x][next.y] = true;\r\n          from_direction[next.x][next.y] = (dir + 2) % 4;\r\n          queue.push(next);\r\n        }\r\n      }\r\n    }\r\n  }\r\n  \r\n  vector <out> output;\r\n  if (found_exit) {\r\n    vector<int> path;\r\n    int used_doors = 0;\r\n    while (cur.x != x0 || cur.y != y0) {\r\n      int dir = from_direction[cur.x][cur.y];\r\n      int inv_dir = (dir + 2) % 4;\r\n      path.push_back(inv_dir);\r\n      if (maze[cur.x][cur.y].has_door[dir]) {\r\n        path.push_back(inv_dir + 4); // 4 = open_up, 5 = open_left, ...\r\n        used_doors++;\r\n      }\r\n      cur = {cur.x + dx[dir], cur.y + dy[dir]};\r\n      if (maze[cur.x][cur.y].contains_key && used_doors > 0) {\r\n        path.push_back(8); // 8 = pick up key\r\n        used_doors--;\r\n      }\r\n    }\r\n    reverse(path.begin(), path.end());\r\n    for(int i = 0 ; i < path.size() ; i++){\r\n      int j = i;\r\n      while(path[j] == path[i] && j < (int)(path.size())) j++;\r\n      j--;\r\n      output.push_back({path[i], j-i+1});\r\n      i = j;\r\n    }\r\n    \r\n    string names[] = {\"move-up\", \"move-left\", \"move-down\", \"move-right\", \r\n                      \"open-up\", \"open-left\", \"open-down\", \"open-right\", \r\n                      \"take\"};\r\n    for(auto i : output){\r\n      if(i.times == 1) cout << names[i.dir] << '\\n';\r\n      else\r\n        cout << \"for-\" << i.times << \" \" << names[i.dir] << \" end\\n\";\r\n    }\r\n  }\r\n  return 0;\r\n}"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 207521190,
+    "contestId": 1585,
+    "creationTimeSeconds": 1685238382,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1585,
+        "index": "G",
+        "name": "Poachers",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 2500,
+        "tags": [
+            "dp",
+            "games",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1585,
+        "members": [
+            {
+                "handle": "tabelogcf"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1639322100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 73,
+    "timeConsumedMillis": 592,
+    "memoryConsumedBytes": 139059200,
+    "source": "// LUOGU_RID: 111445466\n#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing ll = long long;\r\n#define REP(n) for (int _ = 0; _ < (n); _++)\r\n#define FOR(i, a, b) for (int i = a; i < (b); i++)\r\n#define F0R(i, a) for (int i = 0; i < (a); i++)\r\n#define FORd(i, a, b) for (int i = (b)-1; i >= a; i--)\r\n#define F0Rd(i, a) for (int i = (a)-1; i >= 0; i--)\r\n#define sz(x) (int)(x).size()\r\n#define all(x) x.begin(), x.end()\r\ntemplate <class T>\r\nbool ckmin(T &a, const T &b) {\r\n\treturn b < a ? a = b, 1 : 0;\r\n}\r\ntemplate <class T>\r\nbool ckmax(T &a, const T &b) {\r\n\treturn a < b ? a = b, 1 : 0;\r\n}\r\nnamespace std {\r\n\ttemplate <class Fun>\r\n\tclass y_combinator_result {\r\n\t\tFun fun_;\r\n\t\tpublic:\r\n\t\t\ttemplate <class T>\r\n\t\t\texplicit y_combinator_result(T &&fun) : fun_(std::forward<T>(fun)) {}\r\n\t\t\ttemplate <class... Args>\r\n\t\t\tdecltype(auto) operator()(Args &&...args) {\r\n\t\t\t\treturn fun_(std::ref(*this), std::forward<Args>(args)...);\r\n\t\t\t}\r\n\t};\r\n\ttemplate <class Fun>\r\n\tdecltype(auto) y_combinator(Fun &&fun) {\r\n\t\treturn y_combinator_result<std::decay_t<Fun>>(std::forward<Fun>(fun));\r\n\t}\r\n}\r\n#define DEBUG(x) cerr << #x << \": \" << x << '\\n'\r\ntemplate <typename A, typename B>\r\nostream &operator<<(ostream &os, const pair<A, B> &p) {\r\n\treturn os << '(' << p.first << \", \" << p.second << ')';\r\n}\r\ntemplate <typename T_container, typename T = typename enable_if<!is_same<T_container, string>::value,typename T_container::value_type>::type>\r\nostream &operator<<(ostream &os, const T_container &v) {\r\n\tos << '[';\r\n\tstring sep;\r\n\tfor (const T &x : v) os << sep << x, sep = \", \";\r\n\treturn os << ']';\r\n}\r\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\r\nconst int maxn = 5e5+5;\r\nint N;\r\nvector<int> adj[maxn];\r\nstruct Bag {\r\n\tvector<int> v;\r\n\tmultiset<int> s;\r\n\tvoid update(int i, int x) {\r\n\t    auto it = s.find(v[i]);\r\n\t    assert(it != s.end());\r\n\t    s.erase(it);\r\n\t    v[i] ^= x;\r\n\t    s.insert(v[i]);\r\n\t}\r\n\tvoid insert(int x) {\r\n\t    v.push_back(x);\r\n\t    s.insert(x);\r\n\t}\r\n\tint mex(int x) {\r\n\t    while (s.count(x)) x++;\r\n\t    return x;\r\n\t}\r\n};\r\nusing T = Bag;\r\nvoid merge(T& a, T& b) {\r\n\tF0R(i, sz(a.v)) {\r\n\t\ta.update(sz(a.v)-1-i, b.v[sz(b.v)-1-i]);\r\n\t}\r\n\tb.v.clear(); b.s.clear();\r\n}\r\nint mex(vector<int> v) {\r\n\tsort(all(v));\r\n\tv.erase(unique(all(v)), v.end());\r\n\tF0R(i, sz(v)) if (v[i] != i) return i;\r\n\treturn sz(v);\r\n}\r\nint depth[maxn];\r\nvoid prep(int i) {\r\n\tdepth[i] = adj[i].empty() ? 1 : 1e9;\r\n\tfor (int j: adj[i]) {\r\n\t    prep(j);\r\n\t    ckmin(depth[i], depth[j]+1);\r\n\t}\r\n}\r\nT* dfs(int i) {\r\n\tT* v = new T;\r\n\tv->insert(0);\r\n\tsort(all(adj[i]), [&](auto a, auto b) { return depth[a] < depth[b]; });\r\n\tF0R(idx, sz(adj[i])) {\r\n\t    int j = adj[i][idx];\r\n\t    auto vj = dfs(j);\r\n\t    if (idx == 0) v = vj;\r\n\t    else merge(*v, *vj);\r\n\t}\r\n\tif (sz(adj[i]) == 1) {\r\n\t\tv->insert(v->mex(v->v.back()));\r\n\t}\r\n\telse {\r\n\t\tv->insert(mex(v->v));\r\n\t}\r\n  return v;\r\n}\r\nvoid solve() {\r\n\tcin >> N;\r\n\tFOR(i, 0, N+1) adj[i].clear();\r\n\tFOR(i, 1, N+1) {\r\n\t\tint p; cin >> p;\r\n\t\tadj[p].push_back(i);\r\n\t}\r\n\tprep(0);\r\n\tint ans = 0;\r\n\tfor (int i: adj[0]) {\r\n\t\tauto v = dfs(i);\r\n\t\tans ^= v->v.back();\r\n\t}\r\n\tcout << (ans ? \"YES\" : \"NO\") << '\\n';\r\n}\r\nint main() {\r\n\tios_base::sync_with_stdio(false); cin.tie(NULL);\r\n\tint T; cin >> T;\r\n\twhile (T--) solve();\r\n}"
+}

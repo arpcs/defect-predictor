@@ -1,0 +1,39 @@
+{
+    "id": 216464953,
+    "contestId": 362,
+    "creationTimeSeconds": 1690729556,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 362,
+        "index": "D",
+        "name": "Fools and Foolproof Roads",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2100,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 362,
+        "members": [
+            {
+                "handle": "toomatho"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1384443000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 74,
+    "timeConsumedMillis": 109,
+    "memoryConsumedBytes": 13926400,
+    "source": "#include<bits/stdc++.h>\r\n\r\n#define pii pair<int,int>\r\n#define fi first\r\n#define pb push_back\r\n#define si second\r\n#define int long long\r\n// #define mod 1000000007\r\n#define mod 998244353\r\n#define fast ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);\r\n#define double long double\r\n#define all(o) o.begin(),o.end()\r\nusing namespace std;\r\nint power(int x, int y)\r\n{\r\n    int res = 1;\r\n    x = x % mod;\r\n    while (y > 0)\r\n    {\r\n        if (y & 1)\r\n            res = (res*x) % mod;\r\n        y = y>>1; // y = y/2\r\n        x = (x%mod*x%mod) % mod;\r\n    }\r\n    return res%mod;\r\n}\r\nint inv(int  n)\r\n{\r\n    return power(n,mod-2)%mod;\r\n}\r\n\r\nstruct DSU {\r\n  vector<int> par, rnk, sz,sum;\r\n  int c;\r\n  DSU(int n) : par(n + 1), rnk(n + 1, 0), sz(n + 1, 1), c(n),sum(n+1,0) {\r\n    for (int i = 1; i <= n; ++i) par[i] = i;\r\n  }\r\n  int find(int i) {\r\n    return (par[i] == i ? i : (par[i] = find(par[i])));\r\n  }\r\n  bool same(int i, int j) {\r\n    return find(i) == find(j);\r\n  }\r\n  int get_size(int i) {\r\n    return sz[find(i)];\r\n  }\r\n  int get_sum(int i){\r\n    return sum[find(i)];\r\n  }\r\n  int count() {\r\n    return c;    //connected components\r\n  }\r\n  int merge(int i, int j,int w=-1) {\r\n    if ((i = find(i)) == (j = find(j))){ \r\n        if(w!=-1)\r\n            sum[i]+=w;\r\n        return -1;\r\n    }\r\n    else --c;\r\n    if (rnk[i] > rnk[j]) swap(i, j);\r\n    if(w!=-1)\r\n      sum[j]+=w + sum[i];\r\n    else\r\n    {\r\n        sum[j]+=min((int)(1e9),sum[i]+1+sum[j])+sum[i];\r\n    }\r\n    par[i] = j;\r\n\r\n    if (rnk[i] == rnk[j]) rnk[j]++;\r\n    return j;\r\n  }\r\n};\r\nvoid dis(vector<pii> & v){\r\n    // cout<<v.size()<<'\\n';\r\n    cout<<\"YES\\n\";\r\n    for(auto [x,y]:v)\r\n        cout<<x<<\" \"<<y<<'\\n';\r\n    \r\n}\r\n\r\n\r\nvoid solve(){\r\n\r\n    int n,m,p,req;\r\n    cin>>n>>m>>p>>req;\r\n\r\n\r\n    DSU dsu(n);\r\n\r\n\r\n\r\n    int x,y,l;\r\n\r\n    for(int i=1;i<=m;i++){\r\n        cin>>x>>y>>l;\r\n        dsu.merge(x,y,l);\r\n    }\r\n\r\n    set<pii> s;\r\n\r\n    for(int i=1;i<=n;i++)\r\n        s.insert({dsu.get_sum(i),dsu.find(i)});\r\n\r\n\r\n    if(req>s.size() ){\r\n        cout<<\"NO\\n\";\r\n        return;\r\n    }\r\n    vector<pii> res; \r\n\r\n\r\n\r\n    while(p && s.size()>req){\r\n\r\n             \r\n\r\n        auto it1=s.begin();\r\n        auto it2=it1;\r\n        it2++;\r\n\r\n        int nn=dsu.merge(it1->si,it2->si);\r\n\r\n        res.pb({it1->si,it2->si});\r\n        x=it1->si;\r\n        y=it2->si;\r\n\r\n        s.erase(s.begin());\r\n        s.erase(s.begin());\r\n\r\n\r\n        s.insert({dsu.get_sum(nn),nn});\r\n    \r\n\r\n       \r\n        p--;\r\n    }\r\n\r\n    if(s.size()==req)\r\n    {\r\n        if(p==0){\r\n            //ok\r\n            dis(res);\r\n        }\r\n        else\r\n        {\r\n            if(req==n)\r\n            {   cout<<\"NO\\n\";\r\n                return;\r\n            }\r\n            while(p--)\r\n                res.pb({x,y});\r\n            dis(res);\r\n        }\r\n    }\r\n    else\r\n    {\r\n        //p<req\r\n        cout<<\"NO\\n\";\r\n    }\r\n       \r\n}\r\n\r\n\r\n\r\n\r\nint32_t main(){\r\n    fast\r\n    int t=1;\r\n    int tc=0;\r\n    // cin>>t; \r\n\r\n\r\n    while(t--) \r\n    {\r\n      tc++;\r\n      // cout<<\"Case #\"<<tc<<\": \";\r\n        solve();\r\n    }\r\n}\r\n"
+}

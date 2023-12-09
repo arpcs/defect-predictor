@@ -1,0 +1,37 @@
+{
+    "id": 225156289,
+    "contestId": 1081,
+    "creationTimeSeconds": 1695661261,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1081,
+        "index": "H",
+        "name": "Palindromic Magic",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "data structures",
+            "hashing",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1081,
+        "members": [
+            {
+                "handle": "Aaeria"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1544970900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 77,
+    "timeConsumedMillis": 966,
+    "memoryConsumedBytes": 129536000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int N=2e5+5,mo1=1e9+7,mo2=998244853;\r\ninline int poww(int x,int y,int mo){int ans=1;for(;y;y>>=1,x=1ll*x*x%mo)if(y&1)ans=1ll*ans*x%mo;return ans;}\r\nstruct P{int x,y;}mi[N],imi[N],ha[2][N];\r\nconst P B=(P){31,29},iB=(P){poww(31,mo1-2,mo1),poww(29,mo2-2,mo2)};\r\ninline P operator+(const P&a,const P&b){return (P){(a.x+b.x)%mo1,(a.y+b.y)%mo2};}\r\ninline P operator-(const P&a,const P&b){return (P){(a.x+mo1-b.x)%mo1,(a.y+mo2-b.y)%mo2};}\r\ninline P operator*(const P&a,const P&b){return (P){int(1ll*a.x*b.x%mo1),int(1ll*a.y*b.y%mo2)};}\r\ninline bool operator<(const P&a,const P&b){return a.x==b.x?a.y<b.y:a.x<b.x;}\r\nchar c[2][N];\r\nint i,j,k,l[2],le[2][N],xbb[2];\r\nlong long ans;\r\nstruct PAM{\r\n\tint ch[N][26],pre[N],xb,len[N],anc[20][N];P h[N];\r\n\tinline void build(char*c){\r\n\t\tint i,j,x,p,q,lst=1;\r\n\t\txb=1;len[1]=-1;pre[0]=1;\r\n\t\tfor(int i=1;c[i];++i){\r\n\t\t\tx=c[i]-'a';\r\n\t\t\tfor(p=lst;c[i-len[p]-1]!=c[i];p=pre[p]);\r\n\t\t\tif(!ch[p][x]){\r\n\t\t\t\tfor(q=pre[p];c[i-len[q]-1]!=c[i];q=pre[q]);\r\n\t\t\t\tlen[++xb]=len[p]+2;pre[xb]=ch[q][x];ch[p][x]=xb;\r\n\t\t\t}\r\n\t\t\tlst=ch[p][x];\r\n\t\t}\r\n\t\tfor(i=0;i<=xb;++i)for(j=0;j<26;++j)if(ch[i][j]>1)\r\n\t\t\th[ch[i][j]]=i==1?(P){j+1,j+1}:h[i]*B+(P){j+1,j+1}*(mi[0]+mi[len[ch[i][j]]-1]);\r\n\t\tmemcpy(anc[0],pre,xb+1<<2);\r\n\t\tfor(i=1;i<20;++i)for(j=0;j<=xb;++j)anc[i][j]=anc[i-1][anc[i-1][j]];\r\n\t}\r\n\tinline int go1(char*c,int i,int u,char x){\r\n\t\tfor(;c[i-len[u]-1]!=x;u=pre[u]);\r\n\t\treturn ch[u][x-'a'];\r\n\t}\r\n\tinline int go2(char*c,int i,int u,char x){\r\n\t\tfor(;c[i+len[u]+1]!=x;u=pre[u]);\r\n\t\treturn ch[u][x-'a'];\r\n\t}\r\n\tinline int climb(int u,int l){\r\n\t\tfor(int i=19;i>=0;--i)if(len[anc[i][u]]>l)u=anc[i][u];\r\n\t\treturn pre[u];\r\n\t}\r\n\tinline P gethh(int o,int u){\r\n\t\treturn o==0?h[u]-h[pre[u]]*mi[len[u]-len[pre[u]]]:(h[u]-h[pre[u]])*imi[len[pre[u]]];\r\n\t}\r\n}PA[2];\r\ninline void work(int o){\r\n\tstatic int pos[N],rpos[N],id[N];\r\n\tscanf(\"%s\",c[o]+1);l[o]=strlen(c[o]+1);\r\n\tPA[o].build(c[o]);\r\n\tpos[0]=1;for(i=1;i<=l[o];++i)pos[i]=PA[o].go1(c[o],i,pos[i-1],c[o][i]),id[pos[i]]=i;\r\n\trpos[l[o]+1]=1;for(i=l[o];i;--i)rpos[i]=PA[o].go2(c[o],i,rpos[i+1],c[o][i]);\r\n\tfor(i=2;i<=PA[o].xb;++i)if(PA[o].len[i]>1){\r\n\t\tint r=id[i],l=r-PA[o].len[i]+1,z;\r\n\t\tif(o==1)r-=PA[o].len[PA[o].pre[i]];else l+=PA[o].len[PA[o].pre[i]];\r\n\t\tif(l>=r)continue;\r\n\t\tj=PA[o].climb(rpos[l],r-l);z=PA[o].len[j];\r\n\t\tif(j>1 && (k=PA[o].climb(pos[r],r-l+1-z),PA[o].len[k]==r-l+1-z)){\r\n\t\t\t++xbb[o];\r\n\t\t\tif(o==0)ha[o][xbb[o]]=PA[o].h[j]*(mi[r-l+1]+mi[0])+PA[o].h[k]*mi[z],le[o][xbb[o]]=z;\r\n\t\t\t\telse ha[o][xbb[o]]=PA[o].h[k]*(mi[r-l+1]+mi[0])+PA[o].h[j]*mi[r-l+1-z],le[o][xbb[o]]=r-l+1-z;\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tj=PA[o].climb(pos[r],r-l);z=PA[o].len[j];\r\n\t\tif(j>1 && (k=PA[o].climb(rpos[l],r-l+1-z),PA[o].len[k]==r-l+1-z)){\r\n\t\t\tswap(j,k);z=r-l+1-z;\r\n\t\t\t++xbb[o];\r\n\t\t\tif(o==0)ha[o][xbb[o]]=PA[o].h[j]*(mi[r-l+1]+mi[0])+PA[o].h[k]*mi[z],le[o][xbb[o]]=z;\r\n\t\t\t\telse ha[o][xbb[o]]=PA[o].h[k]*(mi[r-l+1]+mi[0])+PA[o].h[j]*mi[r-l+1-z],le[o][xbb[o]]=r-l+1-z;\r\n\t\t}\r\n\t}\r\n}\r\ninline void work2(int o){\r\n\tmap<P,int>mp;\r\n\tfor(i=2;i<=PA[o].xb;++i)if(PA[o].len[i]>1)mp[PA[o].h[i]]=i;\r\n\tfor(i=1;i<=xbb[!o];++i){\r\n\t\tauto it=mp.find(ha[!o][i]);if(it==mp.end())continue;\r\n\t\tans-=PA[o].len[PA[o].pre[it->second]]>le[!o][i];\r\n\t}\r\n}\r\nint main(){\r\n\tfor(i=1,mi[0]=imi[0]=(P){1,1};i<N;++i)mi[i]=mi[i-1]*B,imi[i]=imi[i-1]*iB;\r\n\twork(0);work(1);\r\n\tans=1ll*(PA[0].xb-1)*(PA[1].xb-1);\r\n\tmap<P,int>mp;\r\n\tfor(i=2;i<=PA[0].xb;++i)if(PA[0].len[i]>1)++mp[PA[0].gethh(0,i)];\r\n\tfor(i=2;i<=PA[1].xb;++i)if(PA[1].len[i]>1)ans-=mp[PA[1].gethh(1,i)];\r\n\twork2(0);work2(1);printf(\"%lld\\n\",ans);\r\n}"
+}

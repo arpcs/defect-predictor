@@ -1,0 +1,35 @@
+{
+    "id": 235047087,
+    "contestId": 765,
+    "creationTimeSeconds": 1701346203,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 765,
+        "index": "F",
+        "name": "Souvenirs",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 3100,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 765,
+        "members": [
+            {
+                "handle": "luogu_bot5"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1487059500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 20684800,
+    "source": "// LUOGU_RID: 137586237\n#include<bits/stdc++.h>\r\n#define ll long long\r\n#define x first\r\n#define y second\r\n#define endl '\\n'\r\n#define maxn 1000000000\r\nusing namespace std;\r\n\r\ntypedef pair<int, int> pii;\r\nconst int N = 1e5 + 100;\r\nconst int M = 1e6 + 100;\r\n\r\nll n, m, k;\r\n\r\nvector <pii> e[N];\r\nint t[N]; //\u540e\u7f00\u6700\u5c0f\u503c\u6811\u72b6\u6570\u7ec4\r\nint a[N], ls[M], rs[M], ans[N], mx[M];\r\n//mx\u50a8\u5b58\u4e0b\u6807\r\nint cur, tot, root;\r\n\r\ninline int lowbit(int x) { return x & (-x); };\r\n\r\nvoid add(int x, int v) {\r\n    //cout << \"add(\" << endl;\r\n    for (int i = x; i; i -= lowbit(i))\r\n        t[i] = min(t[i], v);\r\n}\r\n\r\n//\u5bfb\u627e\u6700\u5c0f\u503c\r\nint ask(int x) {\r\n    //cout << \"ask(\" << endl;\r\n    int res = maxn;\r\n    for (int i = x; i <= n; i += lowbit(i))\r\n        res = min(res, t[i]);\r\n    return res;\r\n}\r\n\r\n//\u6743\u503c\u7ebf\u6bb5\u6811(\u5b58\u7684\u4e0b\u6807)\r\n//\u7528\u6765\u5bfb\u627ej < i\uff0c aj > ai \u7684\u6700\u5927\u4f4d\u7f6ej\r\nvoid update(int p, int l, int r, int v, int& cur) {\r\n    //cout << \"update(\" << endl;\r\n    // l, r\u503c\u57df\r\n    //cur\u7528\u6765\u52a8\u6001\u5f00\u70b9(?\u4e5f\u8bb8\r\n    //v\u4f20\u5165\u4e0b\u6807\r\n    if (!cur) cur = ++tot;\r\n    \r\n    mx[cur] = max(mx[cur], v);\r\n    if (l == r) return;\r\n    int mid = (l + r) >> 1;\r\n\r\n    if (p <= mid) update(p, l, mid, v, ls[cur]);\r\n    else update(p, mid + 1, r, v, rs[cur]);\r\n}\r\n\r\nll qry(int p, int l, int r, int nl, int nr) {\r\n    //cout << \"qry(\" << endl;\r\n    if (!p) return 0;\r\n    if (nl <= l && r <= nr) return mx[p];\r\n    ll v = 0;\r\n    int mid = (l + r) >> 1;\r\n    if (nl <= mid) v = max(v, qry(ls[p], l, mid, nl, nr));\r\n    if (mid < nr) v = max(v, qry(rs[p], mid + 1, r, nl, nr));\r\n    return v;\r\n}\r\n\r\nvoid clear() {\r\n    //cout << \"clear()\" << endl;\r\n    for (int i = 1; i <= n; i++) t[i] = maxn;\r\n    for (int i = 1; i <= tot; i++) ls[i] = rs[i] = mx[i] = 0;\r\n    tot = root = 0;\r\n}\r\n\r\nvoid solve() {\r\n    //cout << \"solve()\" << endl;\r\n    clear();\r\n\r\n    for (int i = 1; i <= n; i++) {\r\n        //\u6811\u72b6\u6570\u7ec4\uff1a\u7528\u6765\u5bfb\u627e\u4f4d\u7f6e\u5927\u4e8e k \u7684\u6700\u5c0f\u503c\r\n        int pos = qry(root, 0, maxn, a[i], maxn);\r\n        //pos\uff1a\u5927\u4e8ea[i]\u7684\u6700\u5927\u4e0b\u6807j(j < i)\r\n        while (pos) {\r\n            //\u5728pos\u8bb0\u5f55\u5dee\u503ca[pos] - a[i];\r\n            add(pos, a[pos] - a[i]);\r\n            pos = qry(root, 0, maxn, a[i], (a[i] + a[pos] - 1) / 2);\r\n        }\r\n        \r\n\r\n        update(a[i], 0, maxn, i, root);\r\n        for (int j = 0; j < e[i].size(); j++)\r\n            ans[e[i][j].second] = min(ans[e[i][j].second], ask(e[i][j].first));\r\n    }\r\n}\r\n\r\nvoid work() {\r\n    cin >> n;\r\n    for (int i = 1; i <= n; i++) cin >> a[i];\r\n\r\n    cin >> m;\r\n    for (int i = 1; i <= m; i++) ans[i] = maxn;\r\n    for (int i = 1; i <= m; i++) {\r\n        int l, r;\r\n        cin >> l >> r;\r\n        e[r].push_back({ l, i });\r\n    }\r\n    solve();\r\n    for (int i = 1; i <= n; i++) a[i] = maxn - a[i];\r\n    solve();\r\n    for (int i = 1; i <= m; i++) cout << ans[i] << endl;\r\n};\r\n\r\n//void test() {\r\n//    for (int i = 1; i <= 10; i++) {\r\n//        cout << i << \" \" << i / 2 - (~(i) & 1)  << endl;\r\n//        cout << (i - 1) / 2 << endl;\r\n//    }\r\n//};\r\n\r\nint main() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(nullptr), cout.tie(nullptr);\r\n\r\n    int T = 1; //cin >> T;\r\n    while (T--) work();\r\n    return 0;\r\n}"
+}

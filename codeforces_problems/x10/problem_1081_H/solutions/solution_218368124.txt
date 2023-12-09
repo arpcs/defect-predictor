@@ -1,0 +1,37 @@
+{
+    "id": 218368124,
+    "contestId": 1081,
+    "creationTimeSeconds": 1691767587,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1081,
+        "index": "H",
+        "name": "Palindromic Magic",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "data structures",
+            "hashing",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1081,
+        "members": [
+            {
+                "handle": "Golden_azy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1544970900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 77,
+    "timeConsumedMillis": 686,
+    "memoryConsumedBytes": 487219200,
+    "source": "#include<bits/stdc++.h>\r\n#define ll long long\r\n#define qwq printf(\"qwq\\n\");\r\n#define R(i,a,b) for(int i=(a),i##E=(b);i<=i##E;i++)\r\n#define L(i,a,b) for(int i=(b),i##E=(a);i>=i##E;i--)\r\nusing namespace std;\r\nconst int base1=1379973;\r\nconst int base2=3771931;\r\nconst int mod1=1e9+7;\r\nconst int mod2=1e9+9;\r\n\r\nint pw1[222222],pw2[222222];\r\nchar A[222222],B[222222];\r\nint n,m;\r\nll ans;\r\n\r\nstruct hashing\r\n{\r\n    ll x,y;\r\n    inline hashing (ll X=0,ll Y=0):x(X),y(Y) {}\r\n    inline hashing nxt(int a)\r\n    {\r\n        return hashing(x*pw1[a]%mod1,y*pw2[a]%mod2);\r\n    }\r\n    inline hashing operator +(const char a)\r\n    {\r\n        return hashing((x+a)%mod1,(y+a)%mod2);\r\n    }\r\n    inline hashing operator +(const hashing a)\r\n    {\r\n        return hashing((x+a.x)%mod1,(y+a.y)%mod2);\r\n    }\r\n    inline hashing operator -(const hashing a)\r\n    {\r\n        return hashing((x-a.x+mod1)%mod1,(y-a.y+mod2)%mod2);\r\n    }\r\n    inline ll val()\r\n    {\r\n        return x*mod2+y;\r\n    }\r\n};\r\nconst ll hs=1235287;\r\nstruct hashtable\r\n{\r\n    ll head[hs+10],cnt;\r\n    struct edge\r\n    {\r\n        ll nxt;\r\n        ll key,val;\r\n    }e[666666];\r\n    inline ll hash(ll x)\r\n    {\r\n        return (x%hs+hs)%hs;\r\n    }\r\n    inline void add_edge(ll u,ll v,ll d)\r\n    {\r\n        e[++cnt]=(edge){head[u],v,d};head[u]=cnt;\r\n    }\r\n    inline int get_val(ll x)\r\n    {\r\n        ll h=hash(x);\r\n        for(int i=head[h];i;i=e[i].nxt) \r\n            if(e[i].key==x) return e[i].val;\r\n        return 0;\r\n    }\r\n    inline void ins(ll x,ll d)\r\n    {\r\n        ll h=hash(x);\r\n        for(int i=head[h];i;i=e[i].nxt)\r\n        {\r\n            if(e[i].key==x) \r\n            {\r\n                e[i].val=d;\r\n                return;\r\n            }\r\n        } \r\n        add_edge(h,x,d);\r\n    }\r\n};\r\n\r\nstruct PalindromicTree\r\n{\r\n    hashtable mxlen,hst;\r\n    hashing hs1[222222],hs2[222222];\r\n    char s[222222];\r\n    int n,tot,to[222222][26];\r\n    int fil[222222],diff[222222],slink[222222],len[222222];\r\n    int mnp[222222];\r\n    ll phs1[222222],phs2[222222];\r\n    pair<int,int>seg[222222];\r\n    int append(int n,int p)\r\n    {\r\n        int c=s[n]-'a';\r\n        while(s[n-1-len[p]]!=s[n]) p=fil[p];\r\n        if(to[p][c]) return to[p][c];\r\n        int q=++tot;\r\n        len[q]=len[p]+2;\r\n        seg[q]={n-len[q]+1,n};\r\n        int f=fil[p];\r\n        while(s[n-1-len[f]]!=s[n]) f=fil[f];\r\n        fil[q]=to[f][c];\r\n        to[p][c]=q;\r\n        diff[q]=len[q]-len[fil[q]];\r\n        slink[q]=diff[q]==diff[fil[q]]?slink[fil[q]]:fil[q];\r\n        return q;\r\n    }\r\n    int st[222222];\r\n    ll geths2(int l,int r,int l2,int r2)\r\n    {\r\n        return ((hs1[r]-hs1[l-1].nxt(r-l+1)).nxt(r2-l2+1)+hs1[r2]-hs1[l2-1].nxt(r2-l2+1)).val();\r\n    }\r\n    ll geths(int l,int r)\r\n    {\r\n        return (hs1[r]-hs1[l-1].nxt(r-l+1)).val();\r\n    }\r\n    ll gethss(int l,int r)\r\n    {\r\n        return (hs2[l]-hs2[r+1].nxt(r-l+1)).val();\r\n    }\r\n    void construct(int _n,char _s[])\r\n    {\r\n        n=_n;\r\n        hs1[0]=hashing(0,0);\r\n        R(i,1,n) s[i]=_s[i],hs1[i]=hs1[i-1].nxt(1)+s[i];\r\n        hs1[n+1]=hashing(0,0);\r\n        L(i,1,n) hs2[i]=hs2[i+1].nxt(1)+s[i];\r\n        int p=0;\r\n        fil[0]=1,len[0]=0,seg[0]={1,0};\r\n        fil[1]=0,len[1]=-1,seg[1]={1,0};\r\n        tot=1;\r\n        st[0]=p;\r\n        R(i,1,n)\r\n        {\r\n            p=append(i,p);\r\n            st[i]=p;\r\n        }\r\n        R(i,2,tot)\r\n        {\r\n            hst.ins(geths(seg[i].first,seg[i].second),1);\r\n            mnp[i]=len[i]-len[fil[i]];\r\n            phs1[i]=geths(seg[i].first,seg[i].first+mnp[i]-1);\r\n            phs2[i]=gethss(seg[i].first,seg[i].first+mnp[i]-1);\r\n            if(len[i]>=mnp[i]*2) mxlen.ins(phs1[i],max(mxlen.get_val(phs1[i]),len[i]/mnp[i]-1));\r\n        }\r\n    }\r\n    int query_mxp(int p,int b)\r\n    {\r\n        if(b>len[p]) return len[p];\r\n        while(1)\r\n        {\r\n            int l=len[slink[p]];\r\n            int d=diff[p];\r\n            if(b>=l) return ((b-l)/d)*d+l;\r\n            p=slink[p];\r\n        }\r\n    }\r\n}t1,t2,t11,t22;\r\nvoid init()\r\n{\r\n    t1.construct(n,A);\r\n    t2.construct(m,B);\r\n    ans=1ll*(t1.tot-1)*(t2.tot-1);\r\n    reverse(A+1,A+n+1);\r\n    reverse(B+1,B+m+1);\r\n    t11.construct(n,A);\r\n    t22.construct(m,B);\r\n    reverse(A+1,A+n+1);\r\n    reverse(B+1,B+m+1);\r\n}\r\ninline bool is_pal(int l,int r)\r\n{\r\n    return t1.query_mxp(t1.st[r],r-l+1)==r-l+1;\r\n}\r\nvoid check_pal_deco(int l,int r)\r\n{\r\n    int p=t1.query_mxp(t1.st[r],r-l+1);\r\n    if(l<=r-p&&r-p<r&is_pal(l,r-p))\r\n    {\r\n        ans-=t2.hst.get_val(t1.geths2(l,r,l,r-p));\r\n        return;\r\n    }\r\n    p=t11.query_mxp(t11.st[n-l+1],r-l+1);\r\n    if(l<l+p&&l+p<=r&&is_pal(l+p,r))\r\n    {\r\n        ans-=t2.hst.get_val(t1.geths2(l,r,l,l+p-1));\r\n        return;\r\n    }\r\n}\r\nunordered_map<ll,int>mp;\r\n\r\nvoid calc(int opt)\r\n{\r\n    R(i,2,t1.tot)\r\n    {\r\n        int p=t1.mnp[i];\r\n        if(t1.len[i]<=p) continue;\r\n        int cnt=t2.mxlen.get_val(t1.phs2[i]);\r\n        ans-=cnt;\r\n        check_pal_deco(t1.seg[i].second-p+1,t1.seg[i].second);\r\n        if(!opt) mp[t1.phs1[i]]++;\r\n        else ans+=mp[t1.phs2[i]];\r\n    }\r\n}\r\n\r\nsigned main()\r\n{\r\n    pw1[0]=pw2[0]=1;\r\n    R(i,1,200005) pw1[i]=1ll*pw1[i-1]*base1%mod1,pw2[i]=1ll*pw2[i-1]*base2%mod2;\r\n    scanf(\"%s%s\",A+1,B+1);\r\n    n=strlen(A+1),m=strlen(B+1);\r\n    init();\r\n    calc(0);\r\n    swap(A,B);\r\n    swap(n,m);\r\n    swap(t1,t2);\r\n    swap(t11,t22);\r\n    calc(1);\r\n    printf(\"%lld\\n\",ans);\r\n}"
+}

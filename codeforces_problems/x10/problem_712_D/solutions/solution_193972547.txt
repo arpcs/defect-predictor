@@ -1,0 +1,37 @@
+{
+    "id": 193972547,
+    "contestId": 712,
+    "creationTimeSeconds": 1676626253,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 712,
+        "index": "D",
+        "name": "Memory and Scores",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2200,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 712,
+        "members": [
+            {
+                "handle": "NP_Prob"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1473525900
+    },
+    "programmingLanguage": "PyPy 3",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 67,
+    "timeConsumedMillis": 296,
+    "memoryConsumedBytes": 12390400,
+    "source": "import math\r\nimport heapq\r\nimport bisect\r\nimport functools\r\nimport itertools\r\nimport collections\r\nimport os\r\nimport sys\r\nfrom io import BytesIO, IOBase\r\nfrom typing import List\r\n\r\nMOD0 = 10 ** 9 + 7\r\nMOD1 = 998244353\r\nBUFSIZE = 8192\r\n\r\n\r\nclass FastIO(IOBase):\r\n    newlines = 0\r\n\r\n    def __init__(self, file):\r\n        self._fd = file.fileno()\r\n        self.buffer = BytesIO()\r\n        self.writable = \"x\" in file.mode or \"r\" not in file.mode\r\n        self.write = self.buffer.write if self.writable else None\r\n\r\n    def read(self):\r\n        while True:\r\n            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))\r\n            if not b:\r\n                break\r\n            ptr = self.buffer.tell()\r\n            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)\r\n        self.newlines = 0\r\n        return self.buffer.read()\r\n\r\n    def readline(self):\r\n        while self.newlines == 0:\r\n            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))\r\n            self.newlines = b.count(b\"\\n\") + (not b)\r\n            ptr = self.buffer.tell()\r\n            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)\r\n        self.newlines -= 1\r\n        return self.buffer.readline()\r\n\r\n    def flush(self):\r\n        if self.writable:\r\n            os.write(self._fd, self.buffer.getvalue())\r\n            self.buffer.truncate(0), self.buffer.seek(0)\r\n\r\n\r\nclass IOWrapper(IOBase):\r\n    def __init__(self, file):\r\n        self.buffer = FastIO(file)\r\n        self.flush = self.buffer.flush\r\n        self.writable = self.buffer.writable\r\n        self.write = lambda s: self.buffer.write(s.encode(\"ascii\"))\r\n        self.read = lambda: self.buffer.read().decode(\"ascii\")\r\n        self.readline = lambda: self.buffer.readline().decode(\"ascii\")\r\n\r\n\r\nsys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)\r\ninput = lambda: sys.stdin.readline().rstrip(\"\\r\\n\")\r\nread_str = lambda: input().strip()\r\nread_int = lambda: int(input())\r\nread_ints = lambda: map(int, input().split())\r\nread_list_ints = lambda: list(map(int, input().split()))\r\nread_list_strs = lambda: input().strip().split()\r\n\r\n\r\ndef solve():\r\n    a, b, k, t = read_ints()\r\n\r\n    dp = [1]\r\n    for _ in range(t):\r\n        tmp_dp = dp + [0] * (2 * k)\r\n        for i in range(len(dp) - 1):\r\n            tmp_dp[i + 2 * k + 1] -= dp[i]\r\n        for i in range(1, len(tmp_dp)):\r\n            tmp_dp[i] = (tmp_dp[i] + tmp_dp[i - 1]) % MOD0\r\n        dp = tmp_dp\r\n\r\n    s, l = dp.copy(), len(dp)\r\n    for i in range(1, l):\r\n        s[i] = (s[i] + s[i - 1]) % MOD0\r\n\r\n    ans, d = 0, a - b - 1\r\n    for i in range(l):\r\n        if i + d >= 0:\r\n            ans += dp[i] * s[min(i + d, l - 1)] % MOD0\r\n            ans %= MOD0\r\n\r\n    print(ans % MOD0)\r\n\r\n\r\nsolve()"
+}

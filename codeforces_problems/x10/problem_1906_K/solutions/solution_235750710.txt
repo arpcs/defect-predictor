@@ -1,0 +1,35 @@
+{
+    "id": 235750710,
+    "contestId": 1906,
+    "creationTimeSeconds": 1701710260,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1906,
+        "index": "K",
+        "name": "Deck-Building Game",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "divide and conquer",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1906,
+        "members": [
+            {
+                "handle": "Kilo_5723"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1701578100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 23,
+    "timeConsumedMillis": 217,
+    "memoryConsumedBytes": 25600000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nconst char el = '\\n';\r\ntypedef long long ll;\r\nconst ll mod = 998244353;\r\nconst int maxn = 1e6;\r\nvector<ll> fact(maxn), ifac(maxn);\r\nll binom(int n, int m) {\r\n  return n < m ? 0 : fact[n] * ifac[m] % mod * ifac[n - m] % mod;\r\n}\r\nll qpow(ll a, ll b) {\r\n  ll res = 1;\r\n  while (b) {\r\n    if (b & 1) res = res * a % mod;\r\n    a = a * a % mod, b >>= 1;\r\n  }\r\n  return res;\r\n}\r\nconst ll inv2 = qpow(2, mod - 2);\r\nvector<ll> fwt(vector<ll> a, void (*opr)(ll &, ll &)) {\r\n  int n = a.size();\r\n  for (int i = 0; 1 << i < n; i++)\r\n    for (int j = 0; j < n; j++)\r\n      if (j >> i & 1) opr(a[j - (1 << i)], a[j]);\r\n  return a;\r\n}\r\nvoid fwtxor(ll &a, ll &b) {\r\n  ll x = a + b, y = a - b;\r\n  a = x % mod, b = y % mod;\r\n}\r\nvoid revxor(ll &a, ll &b) {\r\n  ll x = a + b, y = a - b;\r\n  a = x * inv2 % mod, b = y * inv2 % mod;\r\n}\r\nvector<ll> mul(vector<ll> a, vector<ll> b) {\r\n  for (int i = 0; i < a.size(); i++) a[i] = a[i] * b[i] % mod;\r\n  return a;\r\n}\r\narray<vector<ll>, 2> solve(vector<ll> a) {\r\n  if (a.size() == 1) {\r\n    int n = a[0];\r\n    array<vector<ll>, 2> res;\r\n    res.fill({0});\r\n    for (int i = 0; i <= n; i++)\r\n      res[i & 1][0] += qpow(2, i) * binom(n, i) % mod;\r\n    res[0][0] %= mod, res[1][0] %= mod;\r\n    return res;\r\n  }\r\n  int n = a.size(), m = n / 2;\r\n  vector<ll> b{a.begin(), a.begin() + m}, c{a.begin() + m, a.end()};\r\n  auto rb = solve(b), rc = solve(c);\r\n  array<vector<ll>, 2> res;\r\n  res.fill(vector<ll>(n));\r\n  for (auto i : {0, 1})\r\n    for (auto j : {0, 1}) {\r\n      auto tmp = mul(rb[i], rc[j]);\r\n      // auto tmp = fwt(mul(rb[i], rc[j]), revxor);\r\n      int k = i ^ j, s = j * m;\r\n      for (int x = 0; x < m; x++) res[k][s + x] += tmp[x] % mod;\r\n    }\r\n  for (auto &arr : res) {\r\n    for (auto &v : arr) v %= mod;\r\n    for (int i = 0; i < m; i++) fwtxor(arr[i], arr[i + m]);\r\n  }\r\n  return res;\r\n}\r\nint main() {\r\n  ios::sync_with_stdio(false);\r\n  cin.tie(0);\r\n  cout << setprecision(15);\r\n  fact[0] = 1;\r\n  for (int i = 1; i < maxn; i++) fact[i] = fact[i - 1] * i % mod;\r\n  ifac.back() = qpow(fact.back(), mod - 2);\r\n  for (int i = maxn - 1; i; i--) ifac[i - 1] = ifac[i] * i % mod;\r\n  vector<ll> a(1 << 17);\r\n  int n;\r\n  cin >> n;\r\n  while (n--) {\r\n    int v;\r\n    cin >> v;\r\n    a[v]++;\r\n  }\r\n  auto res = solve(a);\r\n  for (auto &arr : res) arr = fwt(arr, revxor);\r\n  cout << ((res[0][0] + res[1][0]) % mod + mod) % mod;\r\n  return 0;\r\n}"
+}

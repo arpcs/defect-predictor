@@ -1,0 +1,37 @@
+{
+    "id": 232305339,
+    "contestId": 1726,
+    "creationTimeSeconds": 1699656633,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "E",
+        "name": "Almost Perfect",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "combinatorics",
+            "fft",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "Edlue"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 15,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 11673600,
+    "source": "#include <iostream>\n#include <string>\n#include <vector>\n#include <algorithm>\n#include <sstream>\n#include <queue>\n#include <deque>\n#include <bitset>\n#include <iterator>\n#include <list>\n#include <stack>\n#include <map>\n#include <set>\n#include <functional>\n#include <numeric>\n#include <utility>\n#include <limits>\n#include <time.h>\n#include <math.h>\n#include <stdio.h>\n#include <string.h>\n#include <stdlib.h>\n#include <assert.h>\n#include <array>\n#include <unordered_map>\n#include <unordered_set>\n#include <iomanip>\n#include <chrono>\n#include <random>\n#include <climits>\n\nusing namespace std;\n\n#define itn int\n#define rep(i, a, b) for(int i = a; i < (b); ++i)\n#define all(x) begin(x), end(x)\n#define sz(x) (int)(x).size()\ntypedef long long ll;\ntypedef long double ld;\ntypedef pair<int, int> pii;\ntypedef vector<int> vi;\n\ntemplate<const int MOD>\nstruct modint{\n    int val;\n    modint() {val = 0;}\n    modint(const long long& v){\n        val = v % MOD;\n        if(val < 0) val += MOD;\n    }\n\n    friend ostream& operator<<(ostream& os, const modint& a){return os << a.val;}\n    friend bool operator==(const modint& a, const modint& b){return a.val == b.val;}\n    friend bool operator!=(const modint& a, const modint& b){return !(a == b);}\n    friend bool operator<(const modint& a, const modint& b){return a.val < b.val;}\n\n    modint operator-() const {return modint(-val);}\n    modint& operator+=(const modint& other){\n        val += other.val;\n        if(val >= MOD) val -= MOD;\n        return *this;\n    }\n    modint& operator-=(const modint& other){\n        val -= other.val;\n        if(val < 0) val += MOD;\n        return *this;\n    }\n    modint& operator*=(const modint& other){\n        val = (int)((1LL * val * other.val) % MOD);\n        return *this;\n    }\n    modint& operator++(){\n        val++;\n        if(val == MOD) val = 0;\n        return *this;\n    }\n    modint& operator--(){\n        if(val == 0) val = MOD;\n        val--;\n        return *this;\n    }\n    friend modint modpow(modint a, long long p){\n        modint res = 1;\n        for(; p; p >>= 1, a *= a){\n            if(p & 1) res *= a;\n        }\n        return res;\n    }\n    friend modint inv(const modint& a){return modpow(a, MOD - 2);}\n    modint& operator/=(const modint& other){return (*this) *= inv(other);}\n\n    friend modint operator+(modint a, const modint& b){return a += b;}\n    friend modint operator-(modint a, const modint& b){return a -= b;}\n    friend modint operator*(modint a, const modint& b){return a *= b;}\n    friend modint operator/(modint a, const modint& b){return a /= b;}\n    friend modint operator++(modint& a, int){modint r = a; ++a; return r;}\n    friend modint operator--(modint& a, int){modint r = a; --a; return r;}\n\n    operator long long() const{return val;}\n};\n\nusing mint = modint<998244353>;\n\nconst int N = 1e6;\n\nvector<mint> fac(N), ifac(N);\n\nvoid solve(){\n    int n;\n    cin>>n;\n    vector<mint> dp(n+1);\n    dp[0] = 1;\n    dp[1] = 1;\n    for(int i=2;i<=n;i++){\n        dp[i] = dp[i-1] + mint(i-1) * dp[i-2];\n    }\n    // for(int i=0;i<=20;i++){\n    //     cout<<dp[i]<<\" \";\n    // }\n    // cout<<endl;\n\n    vector<mint> facfac(n+1);\n    facfac[0] = 1;\n    facfac[1] = 1;\n    for(int i=2;i<=n;i++){\n        facfac[i] = facfac[i-2] * mint(i);\n    }\n    vector<mint> pows(n+1);\n    pows[0] = 1;\n    for(int i=1;i<=n;i++){\n        pows[i] = pows[i-1] * mint(2);\n    }\n    // for(int i=0;i<=n;i++){\n    //     cout<<facfac[i]<<\" \";\n    // }\n    // cout<<endl;\n    mint ans;\n\n    auto choose = [&](int n, int k){\n        return fac[n] * ifac[k] * ifac[n-k];\n    };\n    for(int rem=0;rem<=n;rem++){\n        int four = n-rem;\n        if(four%4 != 0) continue;\n        int numpairs = four/2;\n        // cout<<numpairs+rem<<\" \"<<rem<<endl;\n        mint val = choose(numpairs + rem, rem) * pows[numpairs/2];\n        if(numpairs != 0) val *= facfac[numpairs-1];\n        val *= dp[rem];\n        ans += val;\n    }\n    cout<<ans<<\"\\n\";\n}\n\nsigned main(){\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    cout<<setprecision(15)<<fixed;\n    int t=1;\n    cin >> t;\n    fac[0] = 1;\n    for(int i=1;i<N;i++){\n        fac[i] = fac[i-1] * mint(i);\n    }\n    ifac[N-1] = inv(fac[N-1]);\n    for(int i=N-2;i>=0;i--){\n        ifac[i] = ifac[i+1] * mint(i+1);\n    }\n    for (int c = 0; c < t; c++)\n    {   \n        // cout<<\"Case #\"<<c+1<<\": \";\n        solve();\n    }\n}"
+}

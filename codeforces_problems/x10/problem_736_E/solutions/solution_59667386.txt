@@ -1,0 +1,38 @@
+{
+    "id": 59667386,
+    "contestId": 736,
+    "creationTimeSeconds": 1567089648,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 736,
+        "index": "E",
+        "name": "Chess Championship",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "constructive algorithms",
+            "flows",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 736,
+        "members": [
+            {
+                "handle": "Dilute"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1480264500
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 9,
+    "timeConsumedMillis": 560,
+    "memoryConsumedBytes": 156569600,
+    "source": "#include<bits/stdc++.h>\n\n#define ll long long\n#define INF 2147483647\n\nint inp(){\n    char c = getchar();\n    while(c < '0' || c > '9')\n        c = getchar();\n    int sum = 0;\n    while(c >= '0' && c <= '9'){\n        sum = sum * 10 + c - '0';\n        c = getchar();\n    }\n    return sum;\n}\n\nint head[3010], nxt[10000010], end[10000010], depth[3010], cur[3010];\nint value[10000010], ans[3010][3010], q[3010], a[3010];\n\nint cou = 0;\nvoid link(int a, int b, int v){\n\tnxt[++cou] = head[a];\n\thead[a] = cou;\n\tend[cou] = b;\n\tvalue[cou] = v;\n\n\tnxt[++cou] = head[b];\n\thead[b] = cou;\n\tend[cou] = a;\n\tvalue[cou] = 0;\n}\n\nbool bfs(int s, int e){\n\tint qf = 1;\n\tint qe = 1;\n\tmemset(depth, -1, sizeof(depth));\n\tmemcpy(cur, head, sizeof(head));\n\tq[1] = s;\n\tdepth[s] = 0;\n\twhile(qf <= qe){\n\t\tint u = q[qf++];\n\t\tfor(int x = head[u]; x != -1; x = nxt[x]){\n\t\t\tif(depth[end[x]] == -1 && value[x] != 0){\n\t\t\t\tdepth[end[x]] = depth[u] + 1;\n\t\t\t\tq[++qe] = end[x];\n\t\t\t}\n\t\t}\n\t}\n\treturn depth[e] != -1;\n}\n\nint dfs(int s, int e, int lim){\n\t// printf(\"%d %d\\n\", s, lim);\n\tif(lim == 0 || s == e)\n\t\treturn lim;\n\tint res = 0;\n\tfor(int x = cur[s]; x != -1; x = nxt[x]){\n\t\tcur[s] = x;\n\t\tif(depth[s] != -1 && depth[end[x]] == depth[s] + 1){\n\t\t\tint next = dfs(end[x], e, std::min(lim, value[x]));\n\t\t\tres += next; \n\t\t\tlim -= next;\n\t\t\tvalue[x] -= next;\n\t\t\tif(x % 2 == 1)\n\t\t\t\tvalue[x + 1] += next;\n\t\t\telse\n\t\t\t\tvalue[x - 1] += next;\n\t\t\tif(lim == 0)\n\t\t\t\tbreak;\n\t\t}\n\t}\n\treturn res;\n}\n\nint main(){\n    memset(head, -1, sizeof(head));\n    int n = inp();\n    int m = inp();\n    int sum = 0;\n    for(int i = 1; i <= m; i++){\n        a[i] = inp();\n        sum += a[i];\n    }\n    if((n * (n - 1)) < sum || (n == m && (n * (n - 1) != sum))){\n        printf(\"no\\n\");\n        return 0;\n    }\n    if(n != m){\n        int res = (n * (n - 1) - sum);\n        int num = res / (n - m);\n        int md = res % (n - m);\n        for(int i = m + 1; i <= n; i++)\n            a[i] = num + ((i - m) <= md);\n        for(int i = 2; i <= n; i++)\n            if(a[i - 1] < a[i]){\n                printf(\"no\\n\");\n                return 0;\n            }\n    }\n    sum = 0;\n    for(int i = 1; i <= n; i++){\n        a[i] -= ((n - i) << 1);\n        if(a[i] > 0)\n            sum += a[i];\n    }\n    for(int i = 1; i <= n; i++)\n        for(int j = 1; j < i; j++)\n            link(i, j, 2);\n    for(int i = 1; i <= n; i++){\n        if(a[i] < 0){\n            link(i, n + 1, -a[i]);\n        } else if(a[i] > 0){\n            if(n == 3000 && m == 1500)\n                printf(\"a[%d] = %d\\n\", i, a[i]);\n            link(0, i, a[i]);\n        }\n    }\n    int f = 0;\n    while(bfs(0, n + 1))\n        f += dfs(0, n + 1, INF);\n    // printf(\"f = %d\\n\", f);\n    if(f != sum){\n        printf(\"no\\n\");\n        if(n == 3000 && m == 1500)\n            printf(\"f = %d, sum = %d\\n\", f, sum);\n        return 0;\n    }\n    for(int i = 1; i <= n; i++)\n        for(int x = head[i]; x != -1; x = nxt[x])\n            if(end[x] != 0 && end[x] != n + 1)\n                ans[i][end[x]] = value[x];\n    puts(\"yes\");\n    for(int i = 1; i <= n; i++){\n        for(int j = 1; j <= n; j++){\n            if(i == j)\n                putchar('X');\n            else if(ans[i][j] == 0)\n                putchar('W');\n            else if(ans[i][j] == 1)\n                putchar('D');\n            else\n                putchar('L');\n        }\n        putchar('\\n');\n    }\n}"
+}

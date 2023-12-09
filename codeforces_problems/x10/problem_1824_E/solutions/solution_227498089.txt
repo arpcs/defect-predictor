@@ -1,0 +1,36 @@
+{
+    "id": 227498089,
+    "contestId": 1824,
+    "creationTimeSeconds": 1696924434,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1824,
+        "index": "E",
+        "name": "LuoTianyi and Cartridge",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3500,
+        "tags": [
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1824,
+        "members": [
+            {
+                "handle": "wythend"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1683547500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 59,
+    "timeConsumedMillis": 1294,
+    "memoryConsumedBytes": 69427200,
+    "source": "// Hydro submission #6525030f9fbdaa24a73631b8@1696924432106\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define ll long long\r\n#define MP make_pair\r\nmt19937 rnd(time(0));\r\nconst int MAXN=2e5+5;\r\nint n,m=2e5,tv,tl;ll sl;\r\nint a[MAXN],b[MAXN];bool vis[MAXN];\r\nstruct edge{int u,v,c,d,id;}e[MAXN],h[MAXN<<1]; \r\nset<int> edg[MAXN];\r\nmultiset<int,greater<int> > val[MAXN];\r\nll ans=0;\r\nstruct sugt{\r\nll cnt[MAXN<<2],sum[MAXN<<2];\r\nvoid insert(int x,int op=1,int id=1,int l=1,int r=m){\r\n\tcnt[id]+=op;sum[id]+=x*op;\r\n\tif(l==r) return; \r\n\tint mid=l+r>>1;\r\n\tif(x<=mid) insert(x,op,id<<1,l,mid);\r\n\telse insert(x,op,id<<1|1,mid+1,r);\r\n}\r\nll ask(int k,int id=1,int l=1,int r=m){// \u524d k \u5927 \r\n\tif(l==r) return 1ll*k*l;\r\n\tint mid=l+r>>1;\r\n\tif(k<cnt[id<<1|1]) return ask(k,id<<1|1,mid+1,r);\r\n\telse if(k==cnt[id<<1|1]) return sum[id<<1|1];\r\n\telse return sum[id<<1|1]+ask(k-cnt[id<<1|1],id<<1,l,mid);\r\n}\r\n}Te,Tv;\r\nstruct dsu{\r\nint fa[MAXN],tot;\r\ninline int find(int x){\r\n\twhile(x^fa[x]) x=fa[x]=fa[fa[x]];\r\n\treturn x;\r\n}\r\nvoid merge(int x,int y,int id){\r\n\tx=find(x),y=find(y);\r\n\tif(x==y) return;\r\n\ttot--;\r\n\tfa[x]=y;\r\n//\tfor(int i:val[x]) cou\r\n\tif(edg[x].size()==1) sl-=*val[x].begin(),tl--,Tv.insert(*val[x].begin());\r\n\tif(edg[y].size()==1) sl-=*val[y].begin(),tl--,Tv.insert(*val[y].begin());\r\n\tif(edg[x].size()>edg[y].size()) swap(edg[x],edg[y]);\r\n\tfor(int i:edg[x]) edg[y].insert(i);\r\n\tif(edg[y].count(id)) edg[y].erase(id);\r\n\tif(val[x].size()>val[y].size()) swap(val[x],val[y]);\r\n\tfor(int i:val[x]) val[y].insert(i);\r\n\tedg[x].clear();val[x].clear();\r\n\tif(edg[y].size()==1) sl+=*val[y].begin(),tl++,Tv.insert(*val[y].begin(),-1);\r\n\tTe.insert(e[id].d,-1);\r\n\treturn; \r\n}\r\nvoid init(){\r\n\tfor(int i=1;i<MAXN;i++) fa[i]=i;\r\n\ttot=n-1;\r\n}\r\n}dsu;\r\nint main(){\r\n\tios::sync_with_stdio(false);\r\n\tcin>>n;\r\n\ttv=n;\r\n\tfor(int i=1;i<=n;i++) cin>>a[i];\r\n\tfor(int i=1;i<=n;i++) cin>>b[i],val[i].insert(b[i]);\r\n\tfor(int i=1;i<n;i++){\r\n\t\tcin>>e[i].u>>e[i].v>>e[i].c>>e[i].d;\r\n\t\tedg[e[i].u].insert(i);\r\n\t\tedg[e[i].v].insert(i);\r\n\t\tTe.insert(e[i].d);\r\n\t}\r\n\tfor(int i=1;i<=n;i++) \r\n\t\tif(edg[i].size()==1) tl++,sl+=b[i];\r\n\t\telse Tv.insert(b[i]);\r\n\tfor(int i=1;i<n;i++) h[i]=e[i],h[i].id=i;\r\n\tfor(int i=1;i<=n;i++) h[i+n-1]=(edge){i,i,a[i],b[i],0};\r\n\tsort(h+1,h+2*n,[&](edge x,edge y){return x.c<y.c;});\r\n\tdsu.init();\r\n\tfor(int i=1;i<2*n;i++){\r\n\t\tint k=min(tv,dsu.tot+1);\r\n//\t\tcout<<\"Node \"<<tv<<endl;\r\n//\t\tcout<<\"erase \"<<h[i].u<<' '<<h[i].v<<' '<<k<<' '<<tl<<endl;\r\n\t\tans=max(ans,1ll*h[i].c*(Te.ask(k-1)+sl+Tv.ask(k-tl)));\r\n//\t\tcout<<\"update \"<<h[i].c<<' '<<Te.ask(k-1)<<' '<<sl<<' '<<Tv.ask(k-tl)<<endl;\r\n\t\tif(h[i].u==h[i].v){\r\n\t\t\tint p=dsu.find(h[i].u),u=h[i].u;\r\n\t\t\tvis[u]=true;tv--;\r\n\t\t\tauto it=val[p].lower_bound(b[u]);\r\n\t\t\tbool flag=(it==val[p].begin())&&(edg[p].size()==1);\r\n\t\t\tif(flag) sl-=b[u];\r\n\t\t\telse Tv.insert(b[u],-1);\r\n\t\t\tval[p].erase(it);\r\n\t\t\tif(flag){\r\n\t\t\t\tif(val[p].size()) Tv.insert(*val[p].begin(),-1),sl+=*val[p].begin();\r\n\t\t\t\telse{\r\n\t\t\t\t\ttl--;\r\n\t\t\t\t\tqueue<int> q;\r\n\t\t\t\t\tq.push(u);\r\n\t\t\t\t\twhile(!q.empty()){\r\n\t\t\t\t\t\tint v=q.front();q.pop();v=dsu.find(v);\r\n\t\t\t\t\t\tint id=*edg[v].begin();\r\n//\t\t\t\t\t\tcout<<\"queue \"<<v<<endl;\r\n\t\t\t\t\t\tif(!vis[v]) vis[v]=true,tv--;\r\n\t\t\t\t\t\tint to=(dsu.find(e[id].u)==v?dsu.find(e[id].v):dsu.find(e[id].u));\r\n\t\t\t\t\t\tdsu.fa[v]=to;dsu.tot--;\r\n\t\t\t\t\t\tedg[to].erase(id);Te.insert(e[id].d,-1);\r\n\t\t\t\t\t\tif(edg[to].size()==1&&val[to].empty()){\r\n\t\t\t\t\t\t\tq.push(to);\r\n\t\t\t\t\t\t}else if(edg[to].size()<=1){\r\n\t\t\t\t\t\t\ttl++;sl+=*val[to].begin();\r\n\t\t\t\t\t\t\tTv.insert(*val[to].begin(),-1);\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}else{\r\n\t\t\tdsu.merge(h[i].u,h[i].v,h[i].id);\r\n\t\t}\r\n\t}\r\n\tcout<<ans<<endl;\r\n\treturn 0;\r\n}"
+}
