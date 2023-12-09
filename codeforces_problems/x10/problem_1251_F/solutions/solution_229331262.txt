@@ -1,0 +1,35 @@
+{
+    "id": 229331262,
+    "contestId": 1251,
+    "creationTimeSeconds": 1697999992,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1251,
+        "index": "F",
+        "name": "Red-White Fence",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "combinatorics",
+            "fft"
+        ]
+    },
+    "author": {
+        "contestId": 1251,
+        "members": [
+            {
+                "handle": "misorin"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571929500
+    },
+    "programmingLanguage": "PyPy 3-64",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 107,
+    "timeConsumedMillis": 1138,
+    "memoryConsumedBytes": 180428800,
+    "source": "import sys, os, io\r\ninput = io.BytesIO(os.read(0, os.fstat(0).st_size)).readline\r\n\r\nmod = 998244353\r\nr = [pow(3, mod >> i, mod) for i in range(23)]\r\nir = [pow(i, mod - 2, mod) for i in r]\r\nu = [0] * (1 << 23)\r\ndef convolve(f, g):\r\n    lf, lg = len(f), len(g)\r\n    c = lf + lg - 1\r\n    x = c.bit_length()\r\n    l = 1 << x\r\n    for i in range(lf):\r\n        u[i] = f[i]\r\n    for i in range(lf, l):\r\n        u[i] = 0\r\n    for i in range(lg):\r\n        u[i ^ l] = g[i]\r\n    for i in range(lg, l):\r\n        u[i ^ l] = 0\r\n    m = l >> 1\r\n    for k in range(x, 0, -1):\r\n        r0 = r[k]\r\n        for i in range(0, l, m << 1):\r\n            y = 1\r\n            for j in range(i, m + i):\r\n                u[j], u[j + m] = (u[j] + u[j + m]) % mod, (u[j] - u[j + m]) * y % mod\r\n                u[j + l], u[j + m + l] = (u[j + l] + u[j + m + l]) % mod, (u[j + l] - u[j + m + l]) * y % mod\r\n                y = y * r0 % mod\r\n        m >>= 1\r\n    for i in range(l):\r\n        u[i] = u[i] * u[i ^ l] % mod\r\n    m = 1\r\n    for k in range(1, x + 1):\r\n        r0 = ir[k]\r\n        for i in range(0, l, m << 1):\r\n            y = 1\r\n            for j in range(i, m + i):\r\n                u[j], u[j + m] = (u[j] + u[j + m] * y) % mod, (u[j] - u[j + m] * y) % mod\r\n                y = y * r0 % mod\r\n        m <<= 1\r\n    inv0 = pow(u[0], mod - 2, mod)\r\n    for i in range(c):\r\n        u[i] *= inv0\r\n    return\r\n\r\ndef comb(n, r):\r\n    return fact[n] * inv[r] % mod * inv[n - r] % mod if n >= r >= 0 else 0\r\n\r\nn, k = map(int, input().split())\r\nmod = 998244353\r\na = list(map(int, input().split()))\r\nl = 2 * max(a) + 5\r\nc = [0] * l\r\nfor i in a:\r\n    c[i] += 1\r\nb = list(map(int, input().split()))\r\nfact = [1] * (l + 1)\r\nfor i in range(1, l + 1):\r\n    fact[i] = i * fact[i - 1] % mod\r\ninv = [1] * (l + 1)\r\ninv[l] = pow(fact[l], mod - 2, mod)\r\nfor i in range(l - 1, -1, -1):\r\n    inv[i] = (i + 1) * inv[i + 1] % mod\r\npow2 = [1] * (l + 1)\r\nfor i in range(1, l + 1):\r\n    pow2[i] = 2 * pow2[i - 1] % mod\r\ncnt = [0] * (1 << 21)\r\nfor x in b:\r\n    c1, c2 = 0, 0\r\n    for i in range(min(x, l)):\r\n        if c[i] == 1:\r\n            c1 += 1\r\n        elif c[i] >= 2:\r\n            c2 += 1\r\n    f = [pow2[i] * comb(c1, i) % mod for i in range(c1 + 1)]\r\n    g = [comb(2 * c2, i) for i in range(2 * c2 + 1)]\r\n    convolve(f, g)\r\n    m = len(f) + len(g) - 1\r\n    j = 2 * (x + 1)\r\n    for i in range(m):\r\n        cnt[2 * i + j] += u[i] % mod\r\nq = int(input())\r\nq = list(map(int, input().split()))\r\nans = [cnt[i] % mod for i in q]\r\nsys.stdout.write(\"\\n\".join(map(str, ans)))"
+}

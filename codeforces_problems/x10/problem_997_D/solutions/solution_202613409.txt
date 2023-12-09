@@ -1,0 +1,37 @@
+{
+    "id": 202613409,
+    "contestId": 997,
+    "creationTimeSeconds": 1681826219,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 997,
+        "index": "D",
+        "name": "Cycles in product",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "combinatorics",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 997,
+        "members": [
+            {
+                "handle": "yangsonghan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530453900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 7782400,
+    "source": "// LUOGU_RID: 108435904\n#include <bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\nconst int inf = 2e9;\r\ninline int read() {\r\n\tint s = 0,f = 1;char ch = getchar();\r\n\twhile (!isdigit(ch)) f = ch == '-' ? -1 : 1, ch = getchar();\r\n\twhile (isdigit(ch)) s = (s << 3) + (s << 1) + ch - '0', ch = getchar();\r\n\treturn s*f;\r\n}\r\nint n,m,K,head[4010],cnt,tmp[80];\r\nstruct edge {\r\n\tint v,nxt;\r\n}ed[8010];\r\nvoid add(int u,int v) {\r\n\ted[++cnt] = {v,head[u]};\r\n\thead[u] = cnt;\r\n}\r\nconst int mod = 998244353;\r\nint d,dp[2][4010][80],f[2][4010][80],f2[2][4010][80],fa[4010];\r\nvoid dfs(int x,int ft) {\r\n\tf[d][x][0] = 1;\r\n\tfa[x] = ft;\r\n\tfor (int i = head[x];i;i = ed[i].nxt) {\r\n\t\tint v = ed[i].v;\r\n\t\tif (v == ft) continue; \r\n\t\tdfs(v,x);\r\n\t}\r\n\tfor (int j = 2;j <= K;j += 2)\r\n\t\tfor (int i = head[x];i;i = ed[i].nxt) {\r\n\t\t\tint v = ed[i].v;\r\n\t\t\tif (v == ft) continue;\r\n\t\t\tfor (int k = 2;k <= K;k += 2)\r\n\t\t\t\tf[d][x][j] = (f[d][x][j] + 1ll * f[d][x][j - k] * f[d][v][k - 2]) % mod;\r\n\t\t}\r\n//\tcout << \"qwq:\" << d << ' ' << x << endl;\r\n//\tfor (int i = 0;i <= K;i ++ ) cout << f[d][x][i] << ' ';\r\n//\tputs(\"\");\r\n}\r\nvoid dfs2(int x) {\r\n\tif (x != 1) f2[d][x][0] = 1;\r\n\tdp[d][x][0] = 1;\r\n\tfor (int i = 2;i <= K;i += 2) {\r\n\t\tfor (int j = 2;j <= i;j += 2) {\r\n\t\t\tf2[d][x][i] = (f2[d][x][i] + 1ll * f2[d][x][i - j] * f2[d][fa[x]][j - 2]) % mod;\r\n\t\t}\r\n\t\tfor (int j = head[fa[x]];j;j = ed[j].nxt) {\r\n\t\t\tint v = ed[j].v;\r\n\t\t\tif (v == x || v == fa[fa[x]]) continue;\r\n\t\t\tfor (int k = 2;k <= i;k += 2)\r\n\t\t\t\tf2[d][x][i] = (f2[d][x][i] + 1ll * f2[d][x][i - k] * f[d][v][k - 2]) % mod;\r\n\t\t}\r\n\t}\r\n//\tcout << \"qwq:\" << d << ' ' << x << endl;\r\n//\tfor (int i = 0;i <= K;i ++ ) cout << f2[d][x][i] << ' ';\r\n//\tputs(\"\");\r\n\tfor (int i = head[x];i;i = ed[i].nxt) {\r\n\t\tint v = ed[i].v;\r\n\t\tif (v == fa[x]) continue;\r\n\t\tdfs2(v);\r\n\t}\r\n\tfor (int i = 2;i <= K;i += 2) {\r\n\t\tfor (int j = 2;j <= K;j += 2) {\r\n\t\t\tdp[d][x][i] = (dp[d][x][i] + 1ll * dp[d][x][i - j] * f2[d][x][j - 2]) % mod;\r\n\t\t}\r\n\t\tfor (int k = head[x];k;k = ed[k].nxt) {\r\n\t\t\tint v = ed[k].v;\r\n\t\t\tif (v == fa[x]) continue;\r\n\t\t\tfor (int j = 2;j <= K;j += 2) {\r\n\t\t\t\tdp[d][x][i] = (dp[d][x][i] + 1ll * dp[d][x][i - j] * f[d][v][j - 2]) % mod;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\nint C[80][80];\r\nint main() {\r\n\tn = read(), m = read(), K = read();\r\n\tfor (int i = 1;i < n;i ++ ) {\r\n\t\tint u = read(),v = read();\r\n\t\tadd(u,v), add(v,u);\r\n\t}\r\n\tdfs(1,0), dfs2(1);\r\n\td = 1;\r\n\tmemset(head,0,sizeof head), cnt = 0;\r\n\tmemset(fa,0,sizeof fa);\r\n\tfor (int i = 1;i < m;i ++ ) {\r\n\t\tint u = read(),v = read();\r\n\t\tadd(u,v), add(v,u);\r\n\t}\r\n\tdfs(1,0), dfs2(1);\r\n\tC[0][0] = 1;\r\n\tfor (int i = 1;i <= K;i ++ ) {\r\n\t\tC[i][0] = 1;\r\n\t\tfor (int j = 1;j <= i;j ++ ) C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % mod;\r\n\t}\r\n\tint ans = 0;\r\n\tfor (int i = 0;i <= K;i += 2) {\r\n\t\tint s0 = 0,s1 = 0;\r\n\t\tfor (int j = 1;j <= n;j ++ ) s0 = (s0 + dp[0][j][i]) % mod;\r\n\t\tfor (int j = 1;j <= m;j ++ ) s1 = (s1 + dp[1][j][K - i]) % mod;\r\n\t\tans = (ans + 1ll * s0 * s1 % mod * C[K][i] % mod) % mod;\r\n\t}\r\n\tcout << ans;\r\n\treturn 0;\r\n}"
+}

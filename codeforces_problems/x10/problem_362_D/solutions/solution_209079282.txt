@@ -1,0 +1,39 @@
+{
+    "id": 209079282,
+    "contestId": 362,
+    "creationTimeSeconds": 1686304180,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 362,
+        "index": "D",
+        "name": "Fools and Foolproof Roads",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2100,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 362,
+        "members": [
+            {
+                "handle": "vjudge5"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1384443000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 74,
+    "timeConsumedMillis": 343,
+    "memoryConsumedBytes": 10649600,
+    "source": "//#pragma GCC optimize(2)\n#include<bits/stdc++.h>\nusing namespace std;\n#define int long long\n#define ll long long\n#define N 200005\n#define mod 998244353\n#define pii pair<int,int>\n#define mp make_pair\n#define pb push_back\n#define ld long double\n#define ls (rt<<1)\n#define rs ((rt<<1)|1)\n#define SZ(x) (int)(x.size())\n#define debug cout<<endl<<\"ff\"<<endl\n#define YES cout<<\"YES\"<<endl\n#define NO cout<<\"NO\"<<endl\n#define fi first\n#define se second\n#define INF 1e9\n#define pq priority_queue\n#define rep(x,a,b) for(int x=a;x<=b;x++)\nint qpow(int a,int b){\n\tint res=1;\n\tfor(;b;b>>=1){\n\t\tif(b&1) res=res*a%mod;\n\t\ta=a*a%mod;\n\t}\n\treturn res;\n}\n/*int fac[N],ifac[N];\nint C(int n,int m){\n\tif(m>n||m<0||n<0) return 0;\n\treturn fac[n]*ifac[n-m]%mod*ifac[m]%mod;\n}\nvoid init(){\n\tfac[0]=1;\n\tfor(int i=1;i<N;i++) fac[i]=fac[i-1]*i%mod;\n\tifac[N-1]=qpow(fac[N-1],mod-2);\n\tfor(int i=N-2;i>=0;i--) ifac[i]=ifac[i+1]*(i+1)%mod;\n}*/\n/*struct node{\n\tint nxt,to;\n}e[N<<1];\nint cnt=1,head[N];\ninline void add(int x,int y){\n\te[++cnt].nxt=head[x];\n\thead[x]=cnt;\n\te[cnt].to=y;\n}*/\ninline int lowbit(int x){return x&(-x);}\ninline int read(){\n  int x=0,t=1;char ch=getchar();\n  while(ch<'0'||ch>'9'){\n    if(ch=='-') t=-1;\n    ch=getchar();\n  }\n    while(ch>='0'&&ch<='9'){\n        x=(x<<1)+(x<<3)+(ch-'0');\n        ch=getchar();\n    }\n    return x*t;\n}\ninline void write(int x){\n\tif(x<0) putchar('-'),x=-x;\n\tif(x>=10) write(x/10);\n\tputchar(x%10+'0');\n}\nint T,n,m,p,q,f[N],sz[N],lim=1e9,s1[N],s2[N];\nint find(int x){\n\tif(x==f[x]) return x;\n\treturn f[x]=find(f[x]);\n}\nvoid link(int x,int y,int w){\n\tint fx=find(x),fy=find(y);\n\tif(fx==fy) sz[fx]+=w;\n\telse f[fx]=fy,sz[fy]+=sz[fx]+w;\n\tsz[fy]=min(sz[fy],lim);\n}\npriority_queue<pii,vector<pii>,greater<pii>>q2;\npriority_queue<pair<int,pii>,vector<pair<int,pii>>,greater<pair<int,pii>>>q1;\nsigned main(){\n\tios::sync_with_stdio(false);\n\tcin.tie(0);cout.tie(0);\n\tcin>>n>>m>>p>>q;\n\tif(q==n&&(m+p!=0)){\n\t\tcout<<\"NO\"<<endl;\n\t\treturn 0;\n\t}if(q==n){\n\t\tcout<<\"YES\"<<endl;\n\t\treturn 0;\n\t}\n\tfor(int i=1;i<=n;i++) f[i]=i,sz[i]=0;\n\tfor(int i=1;i<=m;i++){\n\t\tint x,y,w;\n\t\tcin>>x>>y>>w;w=min(w,lim);\n\t\tlink(x,y,w);\n\t}\n\tint now=0;\n\tfor(int i=1;i<=n;i++)\n\t\tif(i==f[i])\n\t\t\tnow++,q2.push(mp(sz[i],i));\n\tif(now<q||now-p>q){\n\t\tcout<<\"NO\"<<endl;\n\t\treturn 0;\n\t}cout<<\"YES\"<<endl;\n\tint res=now-q;\n\tfor(int i=1;i<=res;i++){\n\t\tpii u=q2.top();q2.pop();\n\t\tpii v=q2.top();q2.pop();\n\t\tint x=u.se,y=v.se;\n\t\tcout<<x<<\" \"<<y<<endl;\n\t\tf[y]=x;sz[x]=min(lim,2*(sz[x]+sz[y])+1);\n\t\tu.fi=min(lim,2*(u.fi+v.fi)+1);\n\t\tq2.push(u);\n\t}\n\tfor(int i=1;i<=n;i++){\n\t\tint x=find(i);\n\t\tif(sz[x]==0) continue;\n\t\tif(!s1[x]) s1[x]=i;\n\t\telse s2[x]=i;\n\t}\n\tfor(int i=1;i<=n;i++)\n\t\tif(i==f[i]&&sz[i]!=0)\n\t\t\tq1.push(mp(sz[i],mp(s1[i],s2[i])));\n\tfor(int i=1;i<=p-res;i++){\n\t\tauto u=q1.top();q1.pop();\n\t\tcout<<u.se.fi<<\" \"<<u.se.se<<endl;\n\t\tu.fi=min(u.fi*2+1,lim);\n\t\tq1.push(u);\n\t}\n\treturn 0;\n}\n\n\n  \t\t\t\t\t   \t \t\t \t    \t\t\t  \t"
+}

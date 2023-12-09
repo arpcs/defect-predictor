@@ -1,0 +1,36 @@
+{
+    "id": 236076768,
+    "contestId": 141,
+    "creationTimeSeconds": 1701878386,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 141,
+        "index": "D",
+        "name": "Take-off Ramps",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2300,
+        "tags": [
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 141,
+        "members": [
+            {
+                "handle": "chipp"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1326034800
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 70,
+    "timeConsumedMillis": 1808,
+    "memoryConsumedBytes": 38092800,
+    "source": "#include <iostream>\r\n#include <queue>\r\n#include <vector>\r\n#include <stack>\r\n#include <algorithm>\r\n#include <iomanip>\r\n#include <set>\r\n\r\nusing namespace std;\r\n\r\nusing ll = long long;\r\n\r\ntemplate<typename T>\r\nistream& operator >> (istream& stream, vector<T>& v) {\r\n\tfor(T& el : v) stream >> el;\r\n\treturn stream;\r\n}\r\n\r\ntemplate<typename T>\r\nostream& operator << (ostream& stream, vector<T>& v) {\r\n\tstream << '[';\r\n\tif(v.size())\r\n\t\tstream << v[0];\r\n\tfor(ll i = 1; i < v.size(); ++i)\r\n\t\tstream << \", \" << v[i];\r\n\treturn stream << ']';\r\n}\r\n\r\nconst ll INF = 1e9;\r\n\r\nll binS(vector<ll>& v, ll x) {\r\n\tll l = 0, r = v.size();\r\n\twhile (r - l > 1) {\r\n\t\tll m = (r + l) / 2;\r\n\t\tif (v[m] > x)\r\n\t\t\tr = m;\r\n\t\telse\r\n\t\t\tl = m;\r\n\t}\r\n\r\n\treturn l;\r\n}\r\n\r\nstruct Edge {\r\n\tll w, to;\r\n\tll tramplin;\r\n\tEdge() {}\r\n\tEdge(ll a, ll b, ll c = -1): w(a), to(b), tramplin(c) {}\r\n};\r\n\r\nstruct Tramplin {\r\n\tll from, to, w, i;\r\n\tTramplin() {}\r\n\tTramplin(ll a, ll b, ll c, ll d): from(a), to(b), w(c), i(d) {}\r\n};\r\n\r\nvector<vector<Edge>> g;\r\nvector<ll> pos;\r\n\r\nvoid dijkstra(vector<ll>& d, vector<tuple<ll, ll, ll>>& p, ll st = 0) {\r\n\td.assign(g.size(), INF);\r\n\tp.assign(g.size(), {-1, -1, 0});\r\n\r\n\td[st] = 0;\r\n\tset<pair<ll, ll>> m;\r\n\tfor(ll i = 0; i < d.size(); ++i)\r\n\t\tm.emplace(d[i], i);\r\n\r\n\twhile(m.size()) {\r\n\t\tauto [dist, v] = *m.begin();\r\n\t\tm.erase(m.begin());\r\n\r\n\t\tfor(auto [w, to, tramplin] : g[v]) {\r\n\t\t\tif (d[to] > d[v] + w) {\r\n\t\t\t\tm.erase(m.find({d[to], to}));\r\n\t\t\t\td[to] = d[v] + w;\r\n\t\t\t\tm.emplace(d[to], to);\r\n\t\t\t\tp[to] = {v, tramplin, w};\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\n\r\nint main()\r\n{\r\n\tll n, L;\r\n\tcin >> n >> L;\r\n\r\n\tpos.reserve(n*2 + 2);\r\n\tpos.push_back(0);\r\n\tpos.push_back(L);\r\n\r\n\tvector<Tramplin> tramplins;\r\n\ttramplins.reserve(n);\r\n\r\n\tfor(ll i = 0; i < n; ++i) {\r\n\t\tll x, d, t, p;\r\n\t\tcin >> x >> d >> t >> p;\r\n\r\n\t\tll from = x - p;\r\n\t\tll to = x + d;\r\n\t\tll w = t + p;\r\n\r\n\t\tif (from < 0) continue;\r\n\r\n\t\ttramplins.emplace_back(from, to, w, i);\r\n\t\tpos.push_back(from);\r\n\t\tpos.push_back(to);\r\n\t}\r\n\r\n\tsort(pos.begin(), pos.end());\r\n\tpos.resize(unique(pos.begin(), pos.end()) - pos.begin());\r\n\r\n\tg.resize(pos.size());\r\n\r\n\tfor(ll i = 0; i < tramplins.size(); ++i) {\r\n\t\tll from = binS(pos, tramplins[i].from), to = binS(pos, tramplins[i].to);\r\n\t\tg[from].emplace_back(tramplins[i].w, to, tramplins[i].i+1);\r\n\t}\r\n\tfor(ll i = 1; i < pos.size(); ++i) {\r\n\t\tll d = pos[i] - pos[i-1];\r\n\t\tg[i-1].emplace_back(d, i);\r\n\t\tg[i].emplace_back(d, i-1);\r\n\t}\r\n\r\n\tvector<ll> d;\r\n\tvector<tuple<ll, ll, ll>> p;\r\n\tdijkstra(d, p);\r\n\r\n\tcout << d.back() << endl;\r\n\r\n\tauto [last, tramplin, w] = p.back();\r\n\r\n\tstack<ll> tramps;\r\n\r\n\twhile(last != -1) {\r\n\t\t//cout << \"tramplin: \" << tramplin << \"\\tpos: \" << pos[last] << \"\\tw: \" << w << endl;\r\n\t\tif (tramplin != -1)\r\n\t\t\ttramps.push(tramplin);\r\n\r\n\t\ttie(last, tramplin, w) = p[last];\r\n\t}\r\n\r\n\tcout << tramps.size() << endl;\r\n\r\n\twhile(tramps.size()) {\r\n\t\tll top = tramps.top();\r\n\t\ttramps.pop();\r\n\r\n\t\tif (top != -1) {\r\n\t\t\tcout << top << ' ';\r\n\t\t}\r\n\t}\r\n\r\n\treturn 0;\r\n}\r\n"
+}

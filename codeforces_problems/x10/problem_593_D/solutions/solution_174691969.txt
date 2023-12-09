@@ -1,0 +1,39 @@
+{
+    "id": 174691969,
+    "contestId": 593,
+    "creationTimeSeconds": 1664945299,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 593,
+        "index": "D",
+        "name": "Happy Tree Party",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 593,
+        "members": [
+            {
+                "handle": "cylyyds123"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1446655500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 22,
+    "timeConsumedMillis": 1029,
+    "memoryConsumedBytes": 143462400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\n#define P pair<ll,ll>\r\nconst int N = 1e6 + 10;\r\nll sz[N], dfn[N], son[N], top[N], dep[N], fa[N],n,m,w[N],w2[N];\r\nclass node2 {\r\npublic:\r\n\tll v, val;\r\n};\r\nvector<node2>g[N];\r\nclass node3 {\r\npublic:\r\n\tll u, v, id;\r\n}c[N];\r\nclass node {\r\npublic:\r\n\tll l, r, val;\r\n}tr[N];\r\nvoid dfs1(ll u = 1,ll f=0) {\r\n\tsz[u] = 1;\r\n\tfor (auto [v,val] : g[u]) {\r\n\t\tif (v == f)continue;\r\n\t\tdep[v] = dep[u] + 1;\r\n\t\tw[v] = val;\r\n\t\tfa[v] = u;\r\n\t\tdfs1(v, u);\r\n\t\tsz[u] += sz[v];\r\n\t\tif (sz[v] > sz[son[u]])son[u] = v;\r\n\t}\r\n}\r\nll cnt = 0;\r\nvoid dfs2(ll u = 1, ll f=1) {\r\n\tdfn[u] = ++cnt; w2[cnt] = w[u];\r\n\ttop[u] = f;\r\n\tif (son[u]) {\r\n\t\tdfs2(son[u],f);\r\n\t}\r\n\tfor (auto [v,val] : g[u]) {\r\n\t\tif (v == son[u] || v == fa[u])continue;\r\n\t\tdfs2(v,v);\r\n\t}\r\n}\r\nll mul(ll x, ll y) {\r\n\tif (!x && (1e18 + 1) / y >= x)return 1e18 + 1;\r\n\treturn x * y;\r\n}\r\nvoid up(ll u) {\r\n\ttr[u].val = mul(tr[u << 1].val, tr[u << 1 | 1].val);\r\n}\r\nvoid build(ll u, ll l, ll r) {\r\n\ttr[u].l = l, tr[u].r = r;\r\n\tif (r == l) {\r\n\t\ttr[u].val = w2[l];\r\n\t\treturn;\r\n\t}\r\n\tll mid = l + r >> 1;\r\n\tbuild(u << 1, l, mid);\r\n\tbuild(u << 1 | 1, mid + 1, r);\r\n\tup(u);\r\n}\r\nvoid update(ll u, ll x, ll val) {\r\n\tif (tr[u].l == tr[u].r) \r\n\t{ tr[u].val = val; return; }\r\n\tll mid = tr[u].l + tr[u].r >> 1;\r\n\tif (x <= mid)update(u << 1, x, val);\r\n\telse update(u << 1 | 1, x, val);\r\n\tup(u);\r\n}\r\nll query(ll u, ll x, ll y) {\r\n\tif (tr[u].l >= x && tr[u].r <= y)return tr[u].val;\r\n\tll mid = tr[u].l + tr[u].r >> 1;\r\n\tll ans = 1;\r\n\tif (x <= mid)ans = mul(ans, query(u << 1, x, y));\r\n\tif (y > mid)ans = mul(ans, query(u << 1 | 1, x, y));\r\n\treturn ans;\r\n}\r\nll ask(ll x, ll y) {\r\n\tll res = 1;\r\n\twhile (top[x] != top[y])//\u8282\u70b9\u4e0d\u5728\u540c\u4e00\u6761\u94fe\u4e0a\r\n\t{\r\n\t\tif (dep[top[x]] < dep[top[y]])swap(x, y);\r\n\t\tres = mul(res, query(1, dfn[top[x]], dfn[x]));\r\n\t\tx = fa[top[x]];\r\n\t}\r\n\tif (dep[x] > dep[y])swap(x, y);\r\n\tres = mul(res, query(1, dfn[x]+1, dfn[y]));\r\n\treturn res;\r\n}\r\nvoid solve() {\r\n\tcin >> n >> m;\r\n\tfor (int i = 2; i <= n; i++) {\r\n\t\tll u, v,val;\r\n\t\tcin >> u >> v>>val;\r\n\t\tg[u].push_back({v,val});\r\n\t\tg[v].push_back({u,val});\r\n\t\tc[i].u = u, c[i].v = v, c[i].id = i;\r\n\t}\r\n\tdfs1();\r\n\tdfs2();\r\n\tbuild(1, 1, cnt);\r\n\twhile (m--) {\r\n\t\tint op;\r\n\t\tll x, y, z;\r\n\t\tcin >> op;\r\n\t\tif (op == 1) {\r\n\t\t\tcin >> x >> y >> z;\r\n\t\t\tll ser = ask(x, y);\r\n\t\t\tif (!ser)cout << 0 << '\\n';\r\n\t\t\telse cout << z /ser << '\\n';\r\n\t\t}\r\n\t\telse {\r\n\t\t\tcin >> x >> y;\r\n\t\t\tll u = c[x+1].u;\r\n\t\t\tll v = c[x+1].v;\r\n\t\t\tll ps = (dep[u] > dep[v] ? u : v);\r\n\t\t\tupdate(1, dfn[ps], y);\r\n\t\t}\r\n\t}\r\n}\r\nint main() {\r\n\tios::sync_with_stdio(false);\r\n\tint t = 1;\r\n\t//cin >> t;\r\n\twhile (t--)solve();\r\n\treturn 0;\r\n}"
+}

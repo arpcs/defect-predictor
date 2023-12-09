@@ -1,0 +1,37 @@
+{
+    "id": 174032019,
+    "contestId": 901,
+    "creationTimeSeconds": 1664501137,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 901,
+        "index": "D",
+        "name": "Weighting a Tree",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2700,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 901,
+        "members": [
+            {
+                "handle": "WolfBlue"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1513697700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 42,
+    "timeConsumedMillis": 264,
+    "memoryConsumedBytes": 16896000,
+    "source": "#include <bits/stdc++.h>\n\n#include <ext/pb_ds/assoc_container.hpp>\ntemplate <class k, class v>\nusing hash_map = __gnu_pbds::gp_hash_table<k, v>;\nusing namespace std;\n#define rep(i, a, b) for (int i = a; i < (b); ++i)\n#define all(x) begin(x), end(x)\n#define len(x) (int)(x).size()\n#define dbg(x) cerr << \">>> \" << #x << \" = \" << x << '\\n'\n#define _ << \" _ \" <<\ntypedef long long ll;\ntypedef pair<int, int> pii;\ntypedef vector<ll> vi;\n\n#ifdef LOCAL\n#pragma GCC optimize(\"trapv\")  // signed overflow => RE\n#else\n#pragma GCC target(\"arch=skylake\")  // CF only\n#endif\n\nvector<int> shortest_path(vector<vi>& G, int node) {\n  queue<pii> Q;\n  int n = G.size();\n  vector<vi> prev(2, vi(n, -1));\n  Q.push({0, node});\n  prev[0][node] = node;\n  while (!Q.empty()) {\n    pii cur = Q.front();\n    int goal_color = 1 - cur.first;\n    for (int next : G[cur.second]) {\n      if (prev[goal_color][next] == -1) {\n        prev[goal_color][next] = cur.second;\n        Q.push({goal_color, next});\n      }\n    }\n    Q.pop();\n  }\n  vector<int> cycle;\n  int type = 1;\n  int index = node;\n  do {\n    index = prev[type][index];\n    cycle.push_back(index);\n    type ^= 1;\n  } while (index != node);\n  return cycle;\n}\n\nvector<int> find_odd_cycle(vector<vi>& G) {\n  int n = G.size();\n  vector<vi> prev(2, vi(n, -1));\n  queue<pii> Q;\n  Q.push({0, 0});\n  prev[0][0] = 0;\n  while (!Q.empty()) {\n    pii cur = Q.front();\n    int goal_color = 1 - cur.first;\n    for (int next : G[cur.second]) {\n      if (prev[goal_color][next] == -1) {\n        prev[goal_color][next] = cur.second;\n        Q.push({goal_color, next});\n        if (prev[cur.first][next] != -1) {\n          // found an odd cycle\n          return shortest_path(G, cur.second);\n        }\n      }\n    }\n    Q.pop();\n  }\n  return {};\n}\n\n/*\n If there is a solution, then there is a solution with no\n even cycles. So if there are no odd cycles (bipartite),\n then we can reduce to a tree (by taking bfs edges)\n and then greedily determine if it is possible from the leaves,\n checking for validity at the end.\n\n Otherwise, there is an odd cycle. Any set of weights is solvable\n for an odd cycle. So we extend tress from each each node in the odd cycle,\n greedily determine what the root of the tree should be to satisfy the\n constraints, and then consturct the solution for the resulting solution.\n*/\nbool checkEdges(vector<bool>& seen, int st, vi& c, vi& ans,\n      map<pii, int>& lookup, vector<vi>& G) {\n  queue<int> Q;\n  vector<pii> prev;\n  seen[st] = true;\n  Q.push(st);\n  while(!Q.empty()) {\n    int cur = Q.front();\n    Q.pop();\n    for(int next : G[cur]) {\n      if(!seen[next]){\n        prev.push_back({cur, next});\n        seen[next] = true;\n        Q.push(next);\n      }\n    }\n  }\n  reverse(prev.begin(), prev.end());\n  for(pii edge : prev) {\n    int from = edge.first;\n    int to = edge.second;\n    ll val = lookup[edge];\n    ans[val] = c[to];\n    c[to] -= ans[val];\n    c[from] -= ans[val];\n  }\n  return c[st] == 0;\n}\n\nint main() {\n  ios::sync_with_stdio(false);\n  cin.tie(nullptr);\n  int n, m;\n  cin >> n >> m;\n  vi c(n);\n  rep(i, 0, n) { cin >> c[i]; }\n  vector<vi> G(n);\n  map<pii, int> lookup;\n  rep(i, 0, m) {\n    int st, end;\n    cin >> st >> end;\n    st--;\n    end--;\n    lookup[{st, end}] = i;\n    lookup[{end, st}] = i;\n    G[st].push_back(end);\n    G[end].push_back(st);\n    // First, we make all node costs even by\n    // adding 1 to all edges.\n    // Otherwise, the odd cycle trick will fail.\n    c[st]--;\n    c[end]--;\n  }\n  vector<int> oddCycle = find_odd_cycle(G);\n  vi ans(m);\n  vector<bool> seen(n, false);\n  if(oddCycle.size() == 0) {\n    if(!checkEdges(seen, 0, c, ans, lookup, G)){\n      cout << \"NO\\n\";\n      return 0;\n    }\n  } else {\n    for(int i = 0; i < oddCycle.size(); i++){\n      seen[oddCycle[i]] = true;\n    }\n    for(int i = 0; i < oddCycle.size(); i++){ \n      checkEdges(seen, oddCycle[i], c, ans, lookup, G);\n    }\n    ll x = 0;\n    for(int i = 0; i < oddCycle.size(); i++){\n      if (i == 0 || i % 2 == 1) {\n        x += c[oddCycle[i % oddCycle.size()]];\n      } else {\n        x -= c[oddCycle[i % oddCycle.size()]];\n      }\n    }\n    assert(x % 2 == 0);\n    x /= 2;\n    for(int i = 0; i < oddCycle.size(); i++){ \n      int st = oddCycle[(i) % oddCycle.size()];\n      int end = oddCycle[(i + 1) % oddCycle.size()];\n      int ind = lookup[{st, end}];\n      if(i == 0) {\n        ans[ind] = x;\n      } else {\n        ans[ind] = c[st];\n      }\n      c[st] -= ans[ind];\n      c[end] -= ans[ind];\n    }\n    assert(c[oddCycle[0]] == 0);\n  }\n  cout << \"YES\\n\";\n  rep(i, 0, m){\n    // remember that we assumed that we\n    // added 1 to all edges during\n    // preprocessing.\n    cout << (ans[i] + 1) << \"\\n\";\n  }\n  return 0;\n}\n"
+}

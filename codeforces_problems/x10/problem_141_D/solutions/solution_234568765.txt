@@ -1,0 +1,36 @@
+{
+    "id": 234568765,
+    "contestId": 141,
+    "creationTimeSeconds": 1701080751,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 141,
+        "index": "D",
+        "name": "Take-off Ramps",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2300,
+        "tags": [
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 141,
+        "members": [
+            {
+                "handle": "ar88lo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1326034800
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 43,
+    "timeConsumedMillis": 2308,
+    "memoryConsumedBytes": 63180800,
+    "source": "//22:06\n#include <bits/stdc++.h>\n\nusing namespace std;\n#define int long long \n\nmap<int,vector<pair<int,int>>> g;\nmap<int,int> dis;\nmap<int,int> p;\nmap<pair<int,int>, int> m;\nset<pair<int,int>> edges;\n\nint n,L;\nconst int INF = 1e18+10;\nconst int max_n = 2e5+10;\nstruct ramp{\n    int x,d,t,p;\n};\nramp a[max_n];\n\nbool cmp(ramp& A, ramp& B){\n    return A.x < B.x;\n}\nvoid dijkstra(){\n\n    queue<int> q;\n    q.push(0);\n    dis[0] = 0;\n\n    //spfa\n    int u,v,w;\n    while(!q.empty()){\n\n        u = q.front();\n        q.pop();\n\n        if(dis[u] > dis[L]) continue;\n        if(u < 0 || u > L) continue;\n        for(auto x:g[u]){\n            v = x.first; w = x.second;\n            if(dis[u] + w >= dis[v]) continue;\n            dis[v] = dis[u] + w;\n            p[v] = u;\n            q.push(v);\n        }\n    }\n\n}\nint32_t main(){\n\n    ios::sync_with_stdio(0); cin.tie(0); cout.tie(0);\n\n    cin>>n>>L;\n    for(int i = 0; i < n; i++){\n        cin>>a[i].x>>a[i].d>>a[i].t>>a[i].p;\n        if(a[i].t >= a[i].d) continue;\n\n        g[a[i].x-a[i].p].push_back({a[i].x+a[i].d, a[i].t + a[i].p});\n        edges.insert({a[i].x-a[i].p, a[i].x + a[i].d});\n        if(m[{a[i].x - a[i].p, a[i].x + a[i].d}] == 0){\n            m[{a[i].x - a[i].p, a[i].x + a[i].d}] = i+1;\n        }\n        else if(a[m[{a[i].x - a[i].p, a[i].x + a[i].d}] - 1].t > a[i].t){\n            m[{a[i].x - a[i].p, a[i].x + a[i].d}] = i+1;\n        }\n    }\n\n    set<int> temp;\n    vector<int> v;\n    temp.insert(0);\n    temp.insert(L);\n    for(int i = 0; i < n; i++){\n        temp.insert(a[i].x - a[i].p);\n        temp.insert(a[i].x + a[i].d);\n    }\n\n    for(auto i:temp){\n        v.push_back(i);\n        dis[i] = INF;\n        p[i] = -1;\n    }\n\n    for(int i = 0; i < v.size() - 1; i++){\n        g[v[i]].push_back({v[i+1],abs(v[i] - v[i+1])});\n        g[v[i+1]].push_back({v[i],abs(v[i] - v[i+1])});\n    }\n\n    dijkstra();\n    vector<int> path;\n    int u = L;\n    while(p[u] != -1){\n        path.push_back(u);\n        u = p[u];\n    }\n    path.push_back(0);\n    reverse(path.begin(), path.end());\n\n    int k = 0;\n    for(int i = 0; i < path.size() - 1; i++){\n        if(edges.count({path[i],path[i+1]})){\n            k++;\n        }\n    }\n    cout<<dis[L]<<'\\n';\n    cout<<k<<'\\n';\n    for(int i = 0; i < path.size() - 1; i++){\n        if(edges.count({path[i], path[i+1]})){\n            cout<<m[{path[i], path[i+1]}]<<\" \";\n        }\n    }\n    cout<<'\\n';\n    return 0;\n}"
+}

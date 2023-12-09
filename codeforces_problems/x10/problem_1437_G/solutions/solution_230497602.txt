@@ -1,0 +1,37 @@
+{
+    "id": 230497602,
+    "contestId": 1437,
+    "creationTimeSeconds": 1698670272,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1437,
+        "index": "G",
+        "name": "Death DBMS",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "string suffix structures",
+            "strings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1437,
+        "members": [
+            {
+                "handle": "Anonyme"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1603809300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 105779200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define QwQ330AwA return 0\r\n\r\nconst int N = 3e5 + 5;\r\nint n, m;\r\nstruct Node {\r\n\tint son[26];\r\n\tint fail;\r\n\tint ed;\r\n\tint val;\r\n\tNode () {\r\n\t\tval = -1;\r\n\t} \r\n} t[N];\r\n\r\nint cnt;\r\nint idd[N];\r\nint ww[N];\r\n\r\nvoid ins(string s, int id) {\r\n\tint now = 0;\r\n\tfor (auto x : s) {\r\n\t\tint w = x - 'a';\r\n\t\tif (!t[now].son[w]) t[now].son[w] = ++cnt;\r\n\t\tnow = t[now].son[w];\r\n\t}\r\n\tt[now].ed = 1;\r\n\tt[now].val = 0;\r\n\tidd[id] = now;\r\n}\r\n\r\nvector <int> e[N];\r\n\r\nvoid build() {\r\n\tqueue <int> q;\r\n\tfor (int i = 0; i < 26; i++) {\r\n\t\tif (t[0].son[i]) {\r\n\t\t\tq.push(t[0].son[i]);\r\n\t\t\tt[t[0].son[i]].fail = 0;\r\n\t\t\te[0].push_back(t[0].son[i]);\r\n\t\t\t//cout << 1 << ' ' << t[0].son[i] << endl;\r\n\t\t}\r\n\t}\r\n\twhile (!q.empty()) {\r\n\t\tint u = q.front();\r\n\t\tq.pop();\r\n\t\tfor (int i = 0; i < 26; i++) {\r\n\t\t\tif (t[u].son[i]) {\r\n\t\t\t\tq.push(t[u].son[i]);\r\n\t\t\t\tt[t[u].son[i]].fail = t[t[u].fail].son[i];\r\n\t\t\t\te[t[t[u].fail].son[i]].push_back(t[u].son[i]);\r\n\t\t\t\t//cout << t[t[u].fail].son[i] << ' ' << t[u].son[i] << endl;\r\n\t\t\t} else t[u].son[i] = t[t[u].fail].son[i];\r\n\t\t}\r\n\t}\r\n}\r\n\r\nint dfn[N], id[N], siz[N], tot;\r\n\r\nvoid dfs(int u) {\r\n\t//cout << u << endl;\r\n\tdfn[++tot] = u;\r\n\tid[u] = tot;\r\n\tsiz[u] = 1;\r\n\tfor (auto v : e[u]) dfs(v), siz[u] += siz[v];\r\n}\r\n\r\n#define lson(p) (p << 1)\r\n#define rson(p) ((p << 1) | 1)\r\nmultiset <int> tr[N << 2];\r\n\r\nvoid update(int p, int l, int r, int L, int R, int w, int ww) {\r\n\t//cout << l << ' ' << r << endl;\r\n\tif (L <= l && r <= R) {\r\n\t\t//cout << l << ' ' << r << ' ' << w << endl;\r\n\t\tif (ww) tr[p].erase(tr[p].find(ww));\r\n\t\ttr[p].insert(w);\r\n\t\treturn ;\r\n\t}\r\n\tint mid = (l + r) / 2;\r\n\tif (L <= mid) update(lson(p), l, mid, L, R, w, ww);\r\n\tif (mid < R) update(rson(p), mid + 1, r, L, R, w, ww);\r\n}\r\n\r\nint query(int p, int l, int r, int x) {\r\n\tif (l == r) return (tr[p].empty() ? -1 : *tr[p].rbegin());\r\n\tint mid = (l + r) / 2;\r\n\tint w = (tr[p].empty() ? -1 : *tr[p].rbegin());\r\n\tif (x <= mid) return max(w, query(lson(p), l, mid, x));\r\n\telse return max(w, query(rson(p), mid + 1, r, x));\r\n}\r\n\r\nint query(string s) {\r\n\tint now = 0;\r\n\tint ans = -1;\r\n\tfor (auto x : s) {\r\n\t\tint w = x - 'a';\r\n\t\tnow = t[now].son[w];\r\n\t\t//cout << id[now] << endl;\r\n\t\tans = max(ans, query(1, 0, cnt + 1, id[now]));\r\n\t}\r\n\treturn ans;\r\n}\r\n\r\nsigned main() {\r\n\tios::sync_with_stdio(0);\r\n\tcin.tie(0);\r\n\tcin >> n >> m;\r\n\tfor (int i = 1; i <= n; i++) {\r\n\t\tstring s;\r\n\t\tcin >> s;\r\n\t\tins(s, i);\r\n\t}\r\n\t//cout << cnt << endl;\r\n\tbuild();\r\n\tdfs(0);\r\n\tfor (int i = 0; i <= cnt; i++) {\r\n\t\tif (t[i].val == 0) update(1, 0, cnt, id[i], id[i] + siz[i] - 1, 0, 0);\r\n\t}\r\n\twhile (m--) {\r\n\t\tint opt;\r\n\t\tcin >> opt;\r\n\t\tif (opt == 1) {\r\n\t\t\tint x, y;\r\n\t\t\tcin >> x >> y;\r\n\t\t\tint now = idd[x];\r\n\t\t\tint u = id[now];\r\n\t\t\t//cout << now << endl;\r\n\t\t\t//cout << id[now] << ' ' << id[now] + siz[now] - 1 << '\\n';\r\n\t\t\tupdate(1, 0, cnt + 1, id[now], id[now] + siz[now] - 1, y, ww[x]);\r\n\t\t\tww[x] = y;\r\n\t\t} else {\r\n\t\t\tstring s;\r\n\t\t\tcin >> s;\r\n\t\t\tcout << query(s) << '\\n'; \r\n\t\t}\r\n\t}\r\n\tQwQ330AwA;\r\n}\r\n\r\n\r\n"
+}

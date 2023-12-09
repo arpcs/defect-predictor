@@ -1,0 +1,35 @@
+{
+    "id": 200638744,
+    "contestId": 765,
+    "creationTimeSeconds": 1680585333,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 765,
+        "index": "F",
+        "name": "Souvenirs",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 3100,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 765,
+        "members": [
+            {
+                "handle": "Nahida__"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1487059500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 1029,
+    "memoryConsumedBytes": 25907200,
+    "source": "// LUOGU_RID: 106917230\n#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\nconst int N=3e5+10;\r\n#define pd(x) push_back(x)\r\n#define rz(x,y) x.resize(y)\r\n#define all(x) x.begin(),x.end()\r\n//==============================================================================\r\nll QP(ll x,ll y,ll mod){ll ans=1;for(;y;y>>=1,x=x*x%mod)if(y&1)ans=ans*x%mod;return ans;}\r\n//==============================================================================\r\nnamespace IO{\r\n\tint readInt(){\r\n\t\tint x=0,y=0;char c=0;\r\n\t\twhile(!isdigit(c))y|=c=='-',c=getchar();\r\n\t\twhile(isdigit(c))x=(x<<3)+(x<<1)+(c^48),c=getchar();\r\n\t\treturn !y?x:-x;\r\n\t}ll readLL(){\r\n\t\tll x=0,y=0;char c=0;\r\n\t\twhile(!isdigit(c))y|=c=='-',c=getchar();\r\n\t\twhile(isdigit(c))x=(x<<3)+(x<<1)+(c^48),c=getchar();\r\n\t\treturn !y?x:-x;\r\n\t}\r\n\tchar readChar(){\r\n\t\tchar c=' ';\r\n\t\twhile(c!=' '&&c!='\\n')c=getchar();\r\n\t\treturn c;\r\n\t}void write(int x){\r\n\t\tif(!x)return;\r\n\t\twrite(x/10);\r\n\t\tputchar(x%10+'0');\r\n\t}void Output(int x){if(x<0)putchar('-'),x=-x;if(!x)putchar('0');else write(x);}\r\n\tvoid WL(int x){Output(x);putchar('\\n');}\r\n\tvoid WS(int x){Output(x);putchar(' ');}\r\n\tvoid Wc(char c){putchar(c);}\r\n\tvoid writell(ll x){\r\n\t\tif(!x)return;\r\n\t\twrite(x/10);\r\n\t\tputchar(x%10+'0');\r\n\t}void Outputll(ll x){if(x<0)putchar('-'),x=-x;if(!x)putchar('0');else writell(x);}\r\n\tvoid WLll(ll x){Outputll(x);putchar('\\n');}\r\n\tvoid WSll(ll x){Outputll(x);putchar(' ');}\r\n}\r\n//==============================================================================\r\nstruct Lis{\r\n\tint pr[N],su[N],tab[N];\r\n\tint n;\r\n\tvoid init(int _n){n=_n;su[0]=1,pr[n+1]=n;for(int i=1;i<=n;i++)su[i]=i+1,pr[i]=i-1;}\r\n\tvoid del(int k){su[pr[k]]=su[k],pr[su[k]]=pr[k];}\r\n\tint query(int x){\r\n\t\tsu[pr[x]]=pr[su[x]]=x;\r\n\t\tint rs=1e9;\r\n\t\tif(pr[x])rs=min(rs,tab[x]-tab[pr[x]]);\r\n\t\tif(su[x]!=n+1)rs=min(rs,tab[su[x]]-tab[x]);\r\n\t\treturn rs;\r\n\t}\r\n}Ls;\r\nint ans[N];\r\nint n,m,B=300;\r\nint a[N];\r\npair<int,int> b[N];\r\nint pos[N];\r\nstruct node{int l,r,id;};\r\nvector<node> Q[N];\r\nint P[N];\r\nint main(){\r\n\t//freopen(\".in\",\"r\",stdin);\r\n\t//freopen(\".out\",\"w\",stdout);\r\n\tn=IO::readInt();\r\n\tfor(int i=1;i<=n;i++)b[i]={IO::readInt(),i},pos[i]=(i-1)/B;\r\n\tsort(b+1,b+n+1);\r\n\tfor(int i=1;i<=n;i++)Ls.tab[i]=b[i].first,a[b[i].second]=i;\r\n\tm=IO::readInt();\r\n\tfor(int i=1;i<=m;i++){int l=IO::readInt(),r=IO::readInt();Q[pos[l]].push_back({l,r,i});}\r\n\tmemset(ans,0x3f,sizeof(ans));Ls.init(n);\r\n\tfor(int i=0;i<=pos[n];i++){\r\n\t\tsort(Q[i].begin(),Q[i].end(),[](const node &x,const node &y){return x.r<y.r;});\r\n\t\tint Pl=i*B+1,Pr=min((i+1)*B,n);\r\n\t\tfor(int j=n;j>=Pl;j--)Ls.del(a[j]);\r\n\t\tint r=Pl-1;\r\n\t\tfor(int j=0;j<Q[i].size();j++){\r\n\t\t\twhile(r<Q[i][j].r)Ls.query(a[++r]);\r\n\t\t\tfor(int s=Pl;s<=min(Q[i][j].r,Pr);s++)Ls.del(a[s]);\r\n\t\t\tfor(int s=min(Q[i][j].r,Pr);s>=Q[i][j].l;s--)\r\n\t\t\t\tans[Q[i][j].id]=min(ans[Q[i][j].id],Ls.query(a[s]));\r\n\t\t\tfor(int s=Q[i][j].l-1;s>=Pl;s--)Ls.query(a[s]);\r\n\t\t}while(r<n)Ls.query(a[++r]);\r\n\t\tfor(int j=Pl;j<=Pr;j++)Ls.del(a[j]);\r\n\t\tfor(int j=n;j>Pr;j--)Ls.del(a[j]);\r\n\t\tP[Pr]=1e9;\r\n\t\tfor(int j=Pr+1;j<=n;j++)P[j]=min(P[j-1],Ls.query(a[j]));\r\n\t\tfor(int j=0;j<Q[i].size();j++)\r\n\t\t\tif(Q[i][j].r>Pr)ans[Q[i][j].id]=min(ans[Q[i][j].id],P[Q[i][j].r]);\r\n\t}for(int i=1;i<=m;i++)printf(\"%d\\n\",ans[i]);\r\n}\r\n\r\n"
+}

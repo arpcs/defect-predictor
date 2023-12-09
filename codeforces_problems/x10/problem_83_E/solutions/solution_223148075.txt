@@ -1,0 +1,36 @@
+{
+    "id": 223148075,
+    "contestId": 83,
+    "creationTimeSeconds": 1694559216,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 83,
+        "index": "E",
+        "name": "Two Subsequences",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2800,
+        "tags": [
+            "bitmasks",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 83,
+        "members": [
+            {
+                "handle": "llzer"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1305299400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 592,
+    "memoryConsumedBytes": 90009600,
+    "source": "#include<bits/stdc++.h>\r\n#define For(i,l,r) for(int i=(l);i<=(r);++i)\r\n#define ReFor(i,r,l) for(int i=(r);i>=(l);--i)\r\nconst int N=200010;\r\nconst int inf=1000000000;\r\nusing namespace std;\r\nint f1[N],f2[N];\r\nchar s[N][21];\r\nint n,len,add_1,add_2;\r\nint cost(int id1,int id2)\r\n{\r\n    if(id1==0)return len;\r\n    if(id2==0)return len;\r\n    ReFor(LEN,len,1)\r\n    {\r\n        bool flag=true;\r\n        int j=1;\r\n        For(i,len-LEN+1,len)\r\n        {\r\n            if(s[id1][i]!=s[id2][j]){flag=false;break;}\r\n            ++j;\r\n        }\r\n        if(flag==true)return (len-LEN);\r\n    }\r\n    return len;\r\n}\r\nstruct node{int f1,f2,fa;int son[2];};\r\nstruct Trie\r\n{\r\n    int tot=1;\r\n    node ch[N*21];\r\n    void init(){tot=1;For(i,0,(N*21)-1){ch[i].f1=inf;ch[i].f2=inf;ch[i].son[0]=0;ch[i].son[1]=0;ch[i].fa=0;}return;}\r\n    void pushup(int x)\r\n    {\r\n        int lson=ch[x].son[0],rson=ch[x].son[1];\r\n        if(lson!=0){ch[x].f1=min(ch[x].f1,ch[lson].f1);ch[x].f2=min(ch[x].f2,ch[lson].f2);}\r\n        if(rson!=0){ch[x].f1=min(ch[x].f1,ch[rson].f2);ch[x].f2=min(ch[x].f2,ch[rson].f2);}\r\n        return;\r\n    }\r\n    void insert(int pos)\r\n    {\r\n        int no_w=1;\r\n        ReFor(i,len,1)\r\n        {\r\n            int t_o=(s[pos][i]-'0');\r\n            if(ch[no_w].son[t_o]==0){++tot;ch[no_w].son[t_o]=tot;}\r\n            ch[ch[no_w].son[t_o]].fa=no_w;\r\n            no_w=ch[no_w].son[t_o];    \r\n        }\r\n        ch[no_w].f1=f1[pos];ch[no_w].f2=f2[pos];\r\n        int tmp=no_w;while(tmp!=0){tmp=ch[tmp].fa;pushup(tmp);}\r\n        return;\r\n    }\r\n    void dfs(int x)\r\n    {\r\n        int lson=ch[x].son[0],rson=ch[x].son[1];\r\n        if((lson==0) && (rson==0))return;\r\n        if(lson!=0)dfs(lson);if(rson!=0)dfs(rson);\r\n        pushup(x);\r\n    }\r\n}T;\r\nint main()\r\n{\r\n    ios::sync_with_stdio(0);cin.tie(0);cout.tie(0);\r\n    cin>>n;For(i,1,n)cin>>(s[i]+1);len=strlen(s[1]+1);\r\n    For(j,0,n){f1[j]=0;f2[j]=0;}T.init();\r\n    f1[0]=len;f2[0]=len;\r\n    For(i,2,n)\r\n    {\r\n        int minn1=(len+len),minn2=(len+len);\r\n        //int no_w=1;int cos_t=len;\r\n        /*For(LEN,1,len)\r\n        {\r\n            if(T.ch[no_w].son[s[i][LEN]-'0']!=0){no_w=T.ch[no_w].son[s[i][LEN]-'0'];--cos_t;}\r\n            else break;\r\n        }\r\n        while(no_w!=0)\r\n        {\r\n            minn1=min(minn1,(T.ch[no_w].f2+cos_t));\r\n            minn2=min(minn2,(T.ch[no_w].f1+cos_t));\r\n            ++cos_t;no_w=T.ch[no_w].fa;\r\n        }*/\r\n        For(LEN,0,len)\r\n        {\r\n            int no_w=1;\r\n            ReFor(j,LEN,1){no_w=T.ch[no_w].son[s[i][j]-'0'];if(no_w==0)break;}\r\n            if(no_w==0)continue;\r\n            minn1=min(minn1,(T.ch[no_w].f2+(len-LEN)));\r\n            minn2=min(minn2,(T.ch[no_w].f1+(len-LEN)));\r\n        }\r\n        minn1+=add_2;minn2+=add_1;\r\n        int tmp=cost((i-1),i);add_1+=tmp;add_2+=tmp;\r\n        f1[i-1]=(minn1-add_1);f2[i-1]=(minn2-add_2);T.insert(i-1);//T.dfs(1);\r\n    }\r\n    int ans=inf;\r\n    ans=min(ans,(f1[0]+add_1));ans=min(ans,(f2[0]+add_2));\r\n    ans=min(ans,(T.ch[1].f1+add_1));ans=min(ans,(T.ch[1].f2+add_2));\r\n    cout<<ans;return 0;\r\n}"
+}

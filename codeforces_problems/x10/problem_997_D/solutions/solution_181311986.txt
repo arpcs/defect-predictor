@@ -1,0 +1,37 @@
+{
+    "id": 181311986,
+    "contestId": 997,
+    "creationTimeSeconds": 1668689968,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 997,
+        "index": "D",
+        "name": "Cycles in product",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "combinatorics",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 997,
+        "members": [
+            {
+                "handle": "QwQwf"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530453900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 89,
+    "timeConsumedMillis": 2339,
+    "memoryConsumedBytes": 10752000,
+    "source": "// LUOGU_RID: 94384325\n#include<cstdio>\r\n#include<cstring>\r\n#include<cmath>\r\n#include<algorithm>\r\n#include<queue>\r\n#define ll long long\r\n#define int ll\r\n#define Inf 0x3f3f3f3f\r\nusing namespace std;\r\nconst int N=4e3+60,K=100+10,mod=998244353;\r\ninline int read(){\r\n\tint d=0,f=1;char x=getchar();\r\n\twhile(x<'0'||x>'9'){if(x=='-'){f=-1;}x=getchar();}\r\n\twhile(x>='0'&&x<='9'){d=(d<<1)+(d<<3)+(x-48);x=getchar();}\r\n\treturn d*f;\r\n}\r\nint n1,n2,k,ans[2][N],C[K][K];\r\nstruct Tree{\r\n\tstruct Edge{int v,nxt;}edge[N<<1];\r\n\tint head[N],ecnt,n,k;\r\n\tinline void add(int u,int v){\r\n\t\tedge[++ecnt]=(Edge){v,head[u]};\r\n\t\thead[u]=ecnt;\r\n\t}\r\n}t[2];\r\nstruct Poly{\r\n    vector<int> a;int deg;\r\n    Poly(int n=0,int pos=0,int x=1){\r\n\t    a.clear();\r\n\t    for(int i=0;i<=n;i++) a.push_back((i==pos)*x);\r\n\t    deg=n;\r\n\t}\r\n    inline Poly resize(int p){\r\n\t    if(deg>p) while(a.size()>p+1) a.pop_back();\r\n\t    if(deg<p) while(a.size()<p+1) a.push_back(0);\r\n\t    deg=p;\r\n\t    return (*this);\r\n\t}\r\n    Poly operator*(Poly t){ \r\n\t    int td=deg,tmp=t.deg;tmp+=td;\r\n\t    Poly res(tmp,0,0);\r\n\t    for(int i=0;i<=deg;i++)\r\n\t\t    for(int j=0;j<=t.deg;j++) res.a[i+j]=(res.a[i+j]+a[i]*t.a[j])%mod;\r\n\t\treturn res;\r\n\t}\r\n\tPoly operator*(int t){\r\n\t\tPoly res(deg);\r\n\t\tfor(int i=0;i<=deg;i++) res.a[i]=a[i]*t%mod;\r\n\t\treturn res;\r\n\t}\r\n\tPoly operator+(Poly t){\r\n\t\tPoly res(max(deg,t.deg));\r\n\t\tfor(int i=0;i<=res.deg;i++){\r\n\t\t\tres.a[i]=(i<=deg?a[i]:0)+(i<=t.deg?t.a[i]:0);\r\n\t\t\tres.a[i]-=res.a[i]>=mod?mod:0;\r\n\t\t}\r\n\t\treturn res;\r\n\t}\r\n\tPoly operator-(Poly t){return (*this)+t*(mod-1);}\r\n\tinline Poly inv(){\r\n\t\tPoly res(deg,0,1);\r\n \t\tfor(int i=1;i<=deg;i++){\r\n\t\t\tint sum=0;\r\n\t\t\tfor(int j=1;j<=i;j++) sum=(sum+a[j]*res.a[i-j])%mod;\r\n\t\t    res.a[i]=mod-sum;\r\n\t\t}\r\n\t\treturn res;\r\n \t}\r\n}f[2][N];\r\nvoid dfs1(int id,int u,int fa){\r\n\tf[id][u]=Poly(k,0,0);\r\n\tfor(int i=t[id].head[u];i;i=t[id].edge[i].nxt){\r\n\t\tint v=t[id].edge[i].v;\r\n\t\tif(v==fa) continue;\r\n\t\tdfs1(id,v,u);\r\n\t\tf[id][u]=(f[id][u]+Poly(2,2,1)*f[id][v]).resize(k);\r\n\t}\r\n\tf[id][u]=(Poly(0,0,1)-f[id][u]).inv();\r\n}\r\ninline void trans(int id,int u,int v){\r\n\tf[id][u]=(f[id][u].inv()+Poly(2,2,1)*f[id][v]).resize(k).inv();\r\n\tf[id][v]=(f[id][v].inv()-Poly(2,2,1)*f[id][u]).resize(k).inv();\r\n}\r\nvoid dfs2(int id,int u,int fa){\r\n\tfor(int i=0;i<=k;i++) ans[id][i]=(ans[id][i]+f[id][u].a[i])%mod;\r\n\tfor(int i=t[id].head[u];i;i=t[id].edge[i].nxt){\r\n\t\tint v=t[id].edge[i].v;\r\n\t\tif(v==fa) continue;\r\n\t\ttrans(id,u,v);dfs2(id,v,u);trans(id,v,u);\r\n\t}\r\n}\r\nsigned main(){\r\n\tn1=read();n2=read();k=read();\r\n\tfor(int i=1;i<n1;i++){\r\n\t\tint u=read(),v=read();\r\n\t\tt[0].add(u,v);t[0].add(v,u);\r\n\t}\r\n\tfor(int i=1;i<n2;i++){\r\n\t\tint u=read(),v=read();\r\n\t\tt[1].add(u,v);t[1].add(v,u);\r\n\t}\r\n\tC[0][0]=C[1][1]=C[1][0]=1;\r\n\tfor(int i=2;i<=k;i++){\r\n\t\tC[i][0]=1;\r\n\t\tfor(int j=1;j<=i;j++) C[i][j]=(C[i-1][j-1]+C[i-1][j])%mod;\r\n\t}\r\n\tfor(int i=0;i<2;i++) dfs1(i,1,0),dfs2(i,1,0);\r\n\tint res=0;\r\n\tfor(int i=0;i<=k;i++){\r\n\t\tres=(res+ans[0][i]*ans[1][k-i]%mod*C[k][i]%mod)%mod;\r\n\t}\r\n\tprintf(\"%lld\\n\",res);\r\n\treturn 0;\r\n}"
+}

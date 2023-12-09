@@ -1,0 +1,37 @@
+{
+    "id": 232209604,
+    "contestId": 176,
+    "creationTimeSeconds": 1699613187,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 176,
+        "index": "E",
+        "name": "Archaeology",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 176,
+        "members": [
+            {
+                "handle": "xhx114514"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1334934300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 27238400,
+    "source": "#include<bits/stdc++.h>\r\n#define ll long long\r\n#define il inline\r\nusing namespace std;\r\nconst int maxn=100010;\r\nconst int MAXN=maxn<<2;\r\nil int read(){\r\n\tint x=0,f=1;\r\n\tchar c=getchar();\r\n\tfor(;!(c>='0'&&c<='9');c=getchar())\r\n\t\tif(c=='-')f=-1;\r\n\tfor(;c>='0'&&c<='9';c=getchar())\r\n\t\tx=(x<<1)+(x<<3)+c-'0';\r\n\treturn x*f;\r\n}\r\nil int cread(){\r\n\tchar c=getchar();\r\n\tfor(;c!='+'&&c!='-'&&c!='?';c=getchar());\r\n\treturn c;\r\n}\r\nstruct edge{\r\n\tint v,to,w;\r\n}e[maxn<<1];\r\nint head[maxn],ecnt;\r\nvoid addedge(int u,int v,int w){\r\n\te[++ecnt].v=v,e[ecnt].w=w;\r\n\te[ecnt].to=head[u],head[u]=ecnt;\r\n}\r\nll p[maxn];\r\nint Oula[maxn<<1],loc[maxn],cnt;\r\nint st[maxn<<1][20]; \r\nint a[maxn],n,q,LCA;\r\nint dfn[maxn],DFN[maxn],top[maxn],idx;\r\nint sz[maxn],zson[maxn],dep[maxn],fa[maxn];\r\nint d[MAXN],lz[MAXN];\r\nstruct Int{\r\n\tint x;\r\n\tInt(int y=0){x=y;}\r\n\tbool operator <(Int a)const{\r\n\t\treturn loc[x]<loc[a.x];\r\n\t}\r\n};\r\nset<Int>s;\r\nvoid dfs1(int fath,int x,int lw=0){\r\n\tdep[x]=dep[fath],fa[x]=fath;\r\n\tp[x]=p[fath]+lw;\r\n\tOula[++cnt]=x,loc[x]=cnt;\r\n\tfor(int i=head[x];i;i=e[i].to)\r\n\t\tif(e[i].v^fath){\r\n\t\t\tdfs1(x,e[i].v,e[i].w),sz[x]+=sz[e[i].v];\r\n\t\t\tif(sz[zson[x]]<sz[e[i].v]) zson[x]=e[i].v;\r\n\t\t\tOula[++cnt]=x;\r\n\t\t}\r\n}\r\nvoid dfs2(int x){\r\n\tdfn[x]=++idx,DFN[idx]=x;\r\n\tif(zson[fa[x]]^x) top[x]=x;\r\n\telse top[x]=top[fa[x]];\r\n\tif(zson[x]) dfs2(zson[x]);\r\n\tfor(int i=head[x];i;i=e[i].to)\r\n\t\tif(e[i].v!=fa[x]&&e[i].v!=zson[x]) dfs2(e[i].v);\r\n}\r\nvoid init(){\r\n\tfor(int i=1;i<=cnt;i++) st[i][0]=Oula[i];\r\n\tfor(int j=1;j<20;j++)\r\n\t\tfor(int i=1;i+(1<<j)-1<=cnt;i++)\r\n\t\t\tif(dep[st[i][j-1]]>dep[st[i+(1<<j-1)][j-1]])\r\n\t\t\t\tst[i][j]=st[i+(1<<j-1)][j-1];\r\n\t\t\telse st[i][j]=st[i][j-1];\r\n}\r\nint lca(int x,int y){\r\n\tx=loc[x],y=loc[y];\r\n\tif(x>y) swap(x,y);\r\n\tint Log=log2(y-x+1);\r\n\tif(dep[st[x][Log]]>dep[st[y-(1<<Log)+1][Log]])\r\n\t\treturn st[y-(1<<Log)+1][Log];\r\n\telse return st[x][Log]; \r\n}\r\nvoid pushdown(int i){\r\n\tif(!lz[i]) return ;\r\n\td[i<<1]+=lz[i],d[i<<1|1]+=lz[i];\r\n\tlz[i<<1]+=lz[i],lz[i<<1|1]+=lz[i];\r\n\tlz[i]=0;\r\n}\r\nvoid A(int i,int l,int r,int L,int R,int x){\r\n\tif(l>=L&&r<=R){\r\n\t\td[i]+=x,lz[i]+=x;\r\n\t\treturn ;\r\n\t}pushdown(i);\r\n\tint mid=l+r>>1;\r\n\tif(mid>=L) A(i<<1,l,mid,L,R,x);\r\n\tif(mid<R) A(i<<1|1,mid+1,r,L,R,x);\r\n\td[i]=max(d[i<<1],d[i<<1|1]);\r\n}\r\nint Q(int i,int l,int r,int L,int R){\r\n\tif(l>R||r<L) return 0;\r\n\tif(l>=L&&r<=R) return d[i];\r\n\tpushdown(i);\r\n\tint mid=l+r>>1;\r\n\treturn max(Q(i<<1,l,mid,L,R),Q(i<<1|1,mid+1,r,L,R));\r\n}\r\nint Lst(int i,int l,int r,int L,int R,int x){\r\n\tif(l>R||r<L) return -1;\r\n\tif(d[i]<x) return -1;\r\n\tif(l==r) return l;\r\n\tpushdown(i);\r\n\tint mid=l+r>>1,v;\r\n\tif(l>=L&&r<=R){\r\n\t\tif(d[i<<1|1]>=x) \r\n\t\t\treturn Lst(i<<1|1,mid+1,r,L,R,x);\r\n\t\telse return Lst(i<<1,l,mid,L,R,x);\r\n\t}\r\n\tif(~(v=Lst(i<<1|1,mid+1,r,L,R,x))) return v;\r\n\treturn Lst(i<<1,l,mid,L,R,x);\r\n}\r\nvoid Add(int x){\r\n\tif(a[x]) return ; \r\n\ta[x]=1,s.insert(Int(x));\r\n\tif(s.empty()) LCA=1;\r\n\telse LCA=lca(s.begin()->x,(--s.end())->x); \r\n\twhile(x) A(1,1,n,dfn[top[x]],dfn[x],1),x=fa[top[x]];\r\n}\r\nvoid Era(int x){\r\n\tif(!a[x]) return ;\r\n\ta[x]=0,s.erase(Int(x));\r\n\tif(s.empty()) LCA=1;\r\n\telse LCA=lca(s.begin()->x,(--s.end())->x); \r\n\twhile(x) A(1,1,n,dfn[top[x]],dfn[x],-1),x=fa[top[x]];\r\n}\r\nint get0(int x){\r\n\tif(Q(1,1,n,dfn[x],dfn[x])!=0) return x;\r\n\tif(Q(1,1,n,dfn[1],dfn[1])==0) return 1;\r\n\twhile(x){\r\n\t\tif(Q(1,1,n,dfn[top[x]],dfn[x])==0) x=fa[top[x]];\r\n\t\telse return DFN[Lst(1,1,n,dfn[top[x]],dfn[x],1)];\r\n\t}\r\n}\r\nint get1(int x){\r\n\tif(Q(1,1,n,dfn[x],dfn[x])!=1) return x;\r\n\tif(Q(1,1,n,dfn[1],dfn[1])==1) return 1;\r\n\twhile(x){\r\n\t\tif(Q(1,1,n,dfn[top[x]],dfn[x])==1) x=fa[top[x]];\r\n\t\telse return DFN[Lst(1,1,n,dfn[top[x]],dfn[x],2)];\r\n\t}\r\n}\r\nint main(){\r\n\tn=read();\r\n\tfor(int i=1;i<n;i++){\r\n\t\tint x=read(),y=read(),z=read();\r\n\t\taddedge(x,y,z),addedge(y,x,z);\r\n\t}dfs1(0,1),dfs2(1),init();\r\n\tq=read();\r\n\tll sum=0,x,y;\r\n\twhile(q--){\r\n\t\tchar op=cread();\r\n\t\tif(op=='?'){\r\n\t\t\tif(Q(1,1,n,dfn[1],dfn[1])!=1){\r\n\t\t\t\tprintf(\"%lld\\n\",sum-p[LCA]);\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t}\r\n\t\telse if(op=='+'){\r\n\t\t\tx=read(),Add(x);\r\n\t\t\tsum+=p[x]-p[get1(x)];\r\n\t\t}\r\n\t\telse{\r\n\t\t\tx=read(),Era(x);\r\n\t\t\tsum-=p[x]-p[get0(x)];\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n} "
+}

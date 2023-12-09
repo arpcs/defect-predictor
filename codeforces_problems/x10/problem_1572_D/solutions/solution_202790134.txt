@@ -1,0 +1,38 @@
+{
+    "id": 202790134,
+    "contestId": 1572,
+    "creationTimeSeconds": 1681979166,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1572,
+        "index": "D",
+        "name": "Bridge Club",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2800,
+        "tags": [
+            "flows",
+            "graph matchings",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1572,
+        "members": [
+            {
+                "handle": "2021zll"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631975700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 717,
+    "memoryConsumedBytes": 10752000,
+    "source": "// LUOGU_RID: 108528662\n#include<cstdio>\r\n#include<cstring>\r\n#include<queue>\r\nnamespace IO{\r\n\tconst int ARR_SIZE=1<<20;\r\n\t#define gc() ((IO::si!=IO::ti||(IO::ti=(IO::si=IO::input)+fread(IO::input,1,IO::ARR_SIZE,stdin))),IO::si!=IO::ti?*(IO::si++):EOF)\r\n\tchar input[ARR_SIZE],*si=input,*ti=input;\r\n\ttemplate<typename T>\r\n\tvoid read(T&num){\r\n\t\tint ch=gc();\r\n\t\tnum=0;\r\n\t\twhile(ch<48||ch>57)ch=gc();\r\n\t\twhile(ch>=48&&ch<=57)num=(num<<3)+(num<<1)+(ch^48),ch=gc();\r\n\t}\r\n}\r\nusing IO::read;\r\ntypedef long long ll;\r\nconst int maxn=20,maxk=200;\r\ntemplate<typename P,typename Q,const int maxnode,const int maxedge>\r\nstruct FlowGraph{\r\n\tconst Q ninf=(Q)0xc0c0c0c0c0c0c0c0;\r\n\tint node,S,T,head[maxnode+1],total=1,cur[maxnode+1];\r\n\tstruct Edge{\r\n\t\tint to,next;\r\n\t\tP flow;\r\n\t\tQ cost;\r\n\t}e[maxedge*2+2];\r\n\tvoid add(const int u,const int v,const P w1,const Q c1){\r\n\t\te[++total]=Edge{v,head[u],w1,c1};\r\n\t\thead[u]=total;\r\n\t\te[++total]=Edge{u,head[v],0,-c1};\r\n\t\thead[v]=total;\r\n\t}\r\n\tbool vis[maxnode+1];\r\n\tQ dis[maxnode+1];\r\n\tint q[maxnode+5],qlen,front,tail;\r\n\tinline int qmod(const int x){\r\n\t\treturn x+((x>>31)&qlen);\r\n\t}\r\n\tbool spfa(){\r\n\t\tmemset(dis+1,0xc0,sizeof(Q)*node);\r\n\t\tfront=1,tail=0;\r\n\t\tvis[S]=true;\r\n\t\tdis[S]=0;\r\n\t\tq[tail=qmod(tail+1-qlen)]=S;\r\n\t\twhile(qmod(front-1)!=tail){\r\n\t\t\tconst int u=q[front];\r\n\t\t\tfront=qmod(front+1-qlen);\r\n\t\t\tvis[u]=false;\r\n\t\t\tfor(int i=head[u];i;i=e[i].next){\r\n\t\t\t\tconst int v=e[i].to;\r\n\t\t\t\tif(e[i].flow&&dis[v]<dis[u]+e[i].cost){\r\n\t\t\t\t\tdis[v]=dis[u]+e[i].cost;\r\n\t\t\t\t\tif(!vis[v]){\r\n\t\t\t\t\t\tvis[v]=true;\r\n\t\t\t\t\t\tq[tail=qmod(tail+1-qlen)]=v;\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn dis[T]!=ninf;\r\n\t}\r\n\tQ dfs(const int u,P in){\r\n\t\tif(u==T)return in;\r\n\t\tvis[u]=true;\r\n\t\tint out=0;\r\n\t\tfor(int&i=cur[u];i;i=e[i].next){\r\n\t\t\tconst int v=e[i].to;\r\n\t\t\tif(e[i].flow&&!vis[v]&&dis[v]==dis[u]+e[i].cost){\r\n\t\t\t\tconst P res=dfs(v,in<e[i].flow?in:e[i].flow);\r\n\t\t\t\tin-=res;\r\n\t\t\t\tout+=res;\r\n\t\t\t\te[i].flow-=res;\r\n\t\t\t\te[i^1].flow+=res;\r\n\t\t\t\tif(!in)break;\r\n\t\t\t}\r\n\t\t}\r\n\t\tif(!out)dis[u]=ninf;\r\n\t\tvis[u]=false;\r\n\t\treturn out;\r\n\t}\r\n\tQ dinic(P in){\r\n\t\tQ maxcost=0;\r\n\t\twhile(in&&spfa()){\r\n\t\t\tmemcpy(cur+1,head+1,sizeof(int)*node);\r\n\t\t\tconst P flow=dfs(S,in);\r\n\t\t\tif(!flow)break;\r\n\t\t\tin-=flow;\r\n\t\t\tmaxcost+=flow*dis[T];\r\n\t\t}\r\n\t\treturn maxcost;\r\n\t}\r\n};\r\nFlowGraph<int,ll,(maxn*2-1)*maxk*2+2,(maxn*2-1)*maxk*2>G;\r\nint n,k,m,lim,a[1<<maxn],tag=2,id[1<<maxn];\r\nstruct Edge{\r\n\tint u,v,w;\r\n};\r\nbool operator<(const Edge a,const Edge b){\r\n\treturn a.w>b.w;\r\n}\r\nstd::priority_queue<Edge>q;\r\nint main(){\r\n\tread(n),read(k),m=1<<n,lim=((n<<1)-1)*k;\r\n\tfor(int S=0;S<m;S++)read(a[S]);\r\n\tG.S=1,G.T=2;\r\n\tfor(int S=0;S<m;S++){\r\n\t\tfor(int T=1;T<m;T<<=1)\r\n\t\t\tif(S&T){\r\n\t\t\t\tq.push(Edge{S,S^T,a[S]+a[S^T]});\r\n\t\t\t\tif(q.size()>lim)q.pop();\r\n\t\t\t}\r\n\t}\r\n\twhile(!q.empty()){\r\n\t\tEdge e=q.top();\r\n\t\tq.pop();\r\n\t\tif(__builtin_parity(e.u))e.u^=e.v^=e.u^=e.v;\r\n\t\tint&x=id[e.u],&y=id[e.v];\r\n\t\tif(!x)x=++tag,G.add(G.S,x,1,a[e.u]);\r\n\t\tif(!y)y=++tag,G.add(y,G.T,1,a[e.v]);\r\n\t\tG.add(x,y,1,0);\r\n\t}\r\n\tG.node=tag,G.qlen=G.node+2;\r\n\tprintf(\"%lld\\n\",G.dinic(k));\r\n\treturn 0;\r\n}"
+}

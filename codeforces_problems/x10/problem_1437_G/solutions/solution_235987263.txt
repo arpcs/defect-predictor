@@ -1,0 +1,37 @@
+{
+    "id": 235987263,
+    "contestId": 1437,
+    "creationTimeSeconds": 1701829546,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1437,
+        "index": "G",
+        "name": "Death DBMS",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "string suffix structures",
+            "strings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1437,
+        "members": [
+            {
+                "handle": "EarthMessenger"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1603809300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <algorithm>\n#include <array>\n#include <cctype>\n#include <cstdio>\n#include <limits>\n#include <vector>\n\nconstexpr long long NINF = std::numeric_limits<long long>::min() / 2;\n\ntemplate <typename T = int>\nT next_int()\n{\n  T x = 0, f = 1;\n  char ch = getchar();\n  while (!isdigit(ch)) {\n    if (ch == '-') f = -f;\n    ch = getchar();\n  }\n  while (isdigit(ch)) {\n    x = x * 10 + ch - '0';\n    ch = getchar();\n  }\n  return x * f;\n}\n\nvoid solve()\n{\n  int n = next_int();;\n  std::vector<int> a(n);\n  for (auto &i : a) i = next_int();\n  std::vector<std::vector<int>> adj(n);\n  for (int i = 0; i < n - 1; i++) {\n    int u = next_int() - 1;\n    int v = next_int() - 1;\n    adj[u].emplace_back(v);\n    adj[v].emplace_back(u);\n  }\n\n  std::vector<std::array<long long, 4>> f(n, {NINF, NINF, NINF, NINF});\n  auto dfs = [&](auto &&self, int u) -> void\n  {\n    f[u][0] = a[u];\n    for (auto v : adj[u]) {\n      std::erase(adj[v], u);\n      self(self, v);\n      for (int i = 4; i > 0; i--) {\n        if (f[u][i - 1] == NINF) continue;\n        int ri = std::min(i, 3);\n        int d = 0;\n        if (i == 2) d = -a[u];\n        else if (i == 3) d = a[u];\n        f[u][ri] = std::max({\n          f[u][ri],\n          f[u][i - 1] + d + f[v][0],\n          f[u][i - 1] + d + f[v][1] - a[v],\n          f[u][i - 1] + d + f[v][2] + a[v],\n          f[u][i - 1] + d + f[v][3]\n        });\n      }\n    }\n  };\n  dfs(dfs, 0);\n\n  long long ans = 0;\n  for (int i = 0; i < n; i++) {\n    for (int j = 0; j < 4; j++) {\n      ans = std::max(ans, f[i][j]);\n    }\n  }\n  printf(\"%lld\\n\", ans);\n}\n\nint main()\n{\n  int t = next_int();\n  while (t--) solve();\n}\n"
+}

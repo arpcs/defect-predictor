@@ -1,0 +1,40 @@
+{
+    "id": 226767571,
+    "contestId": 1263,
+    "creationTimeSeconds": 1696522752,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1263,
+        "index": "F",
+        "name": "Economic Difficulties",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "dp",
+            "flows",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1263,
+        "members": [
+            {
+                "handle": "SuperBeau"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1575038100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 265,
+    "memoryConsumedBytes": 65843200,
+    "source": "#include<bits/stdc++.h>\r\n#define endl \"\\n\"\r\nusing namespace std;\r\n#define int long long \r\nusing ll=long long;\r\nconst int N=2e3+6;\r\ntypedef pair<int,int>P;\r\nconst ll mask=chrono::steady_clock::now().time_since_epoch().count();\r\ninline int sft(int x){\r\n    x^=mask;\r\n    x^=x<<13;\r\n    x^=x>>7;\r\n    x^=x<<17;\r\n    x^=mask;\r\n    return x;\r\n}\r\nint w[2][N][N],dp[N];\r\nint arr1[N],arr2[N];\r\nvector<int>e1[N],e2[N];\r\nint c1[N],c2[N],f1[N][30],f2[N][30];\r\nint dep1[N],dep2[N];\r\nvoid dfs1(int u,int fa){\r\n    dep1[u]=dep1[fa]+1;\r\n    f1[u][0]=fa;\r\n    for(int i=1;i<=20;i++)\r\n        f1[u][i]=f1[f1[u][i-1]][i-1];\r\n    for(auto&v:e1[u]){\r\n        if(v==fa) continue;\r\n        dfs1(v,u);\r\n    }\r\n    return;\r\n}\r\nvoid dfs2(int u,int fa){\r\n    dep2[u]=dep2[fa]+1;\r\n    f2[u][0]=fa;\r\n    for(int i=1;i<=20;i++)\r\n        f2[u][i]=f2[f2[u][i-1]][i-1];\r\n    for(auto&v:e2[u]){\r\n        if(v==fa) continue;\r\n        dfs2(v,u);\r\n    }\r\n    return;\r\n}\r\nint lca1(int x,int y){\r\n    if(dep1[x]>dep1[y]) swap(x,y);\r\n    for(int i=20;i>=0;i--){\r\n        if(dep1[f1[y][i]]>=dep1[x])\r\n            y=f1[y][i];\r\n    }\r\n    if(x==y) return y;\r\n    for(int i=20;i>=0;i--){\r\n        if(f1[x][i]!=f1[y][i]){\r\n            x=f1[x][i];\r\n            y=f1[y][i];\r\n        }\r\n    }\r\n    return f1[x][0];\r\n}\r\nint lca2(int x,int y){\r\n    if(dep2[x]>dep2[y]) swap(x,y);\r\n    for(int i=20;i>=0;i--){\r\n        if(dep2[f2[y][i]]>=dep2[x])\r\n            y=f2[y][i];\r\n    }\r\n    if(x==y) return y;\r\n    for(int i=20;i>=0;i--){\r\n        if(f2[x][i]!=f2[y][i]){\r\n            x=f2[x][i];\r\n            y=f2[y][i];\r\n        }\r\n    }\r\n    return f2[x][0];\r\n}\r\n\r\nvoid solve(){\r\n    int n;\r\n    cin>>n;\r\n    int a;cin>>a;\r\n    for(int i=2;i<=a;i++){\r\n        int u;cin>>u;\r\n        e1[u].push_back(i);\r\n    }\r\n    for(int i=1;i<=n;i++)\r\n        cin>>arr1[i];\r\n    int b;cin>>b;\r\n    for(int i=2;i<=b;i++){\r\n        int u;cin>>u;\r\n        e2[u].push_back(i);\r\n    }\r\n    for(int i=1;i<=n;i++)\r\n        cin>>arr2[i];\r\n    dfs1(1,0);\r\n    dfs2(1,0);\r\n    for(int i=1;i<=n;i++){\r\n        for(int j=i;j<=n;j++){\r\n                int l=lca1(arr1[j],arr1[i-1]),l2=lca1(arr1[j],arr1[j + 1]);\r\n                //if(i==1&&j==3)\r\n                    //cout<<l<<' '<<l2<<endl;\r\n                if (dep1[l]<dep1[l2]&&l2)\r\n                    swap(l,l2);\r\n                \r\n                w[0][i][j]=w[0][i][j-1]+dep1[arr1[j]]-dep1[l];\r\n            }\r\n    }\r\n    for(int i=1;i<=n;i++){\r\n        for(int j=i;j<=n;j++){\r\n                int l=lca2(arr2[j],arr2[i-1]),l2=lca2(arr2[j],arr2[j + 1]);\r\n                if (dep2[l]<dep2[l2])\r\n                    swap(l,l2);\r\n                w[1][i][j]=w[1][i][j-1]+dep2[arr2[j]]-dep2[l];\r\n            }\r\n    }\r\n    //cout<<dep1[arr1[3]]<<endl;\r\n    w[0][1][n]=a-1;\r\n    w[0][1][n]=b-1;\r\n    for(int i=0;i<n;i++){\r\n        for(int j=i+1;j<=n;j++){\r\n            dp[j]=max(dp[i]+max(w[0][i+1][j],w[1][i+1][j]),dp[j]);\r\n        }\r\n    }\r\n    cout<<dp[n]<<endl;\r\n    return;\r\n}\r\nsigned main(){\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(nullptr);cout.tie(nullptr);\r\n    int t=1;//cin>>t;\r\n    while(t--)solve();\r\n    return 0; \r\n}\r\n"
+}

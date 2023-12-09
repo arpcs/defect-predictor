@@ -86,6 +86,9 @@ def fill_suggested_categories(amount, probs_sols, prob_sol_paths, prob_or_sol):
 def count_filed_suggested_categories(probs_sols):
     return len([probs_sol for probs_sol in probs_sols if 'suggested_categories' in probs_sol])
 
+picked_categories = ['mathematics', 'dynamic programming', 'bit manipulation', 'greedy', 'brute force', 'graphs', 'sortings', 'search', 'trees', 'strings', 'number theory', 'combinatorics', 'two pointers', 'geometry', 'shortest paths', 'divide and conquer', 'probabilities', 'data structures', 'game theory', '2d, 3d','Recursive','Well-Commented','Self-Documenting','Complex','readable','Well-Named','Efficient','Reusable','Documented','Good error-Handling']
+
+def pick_
 
 def main():
     problems = helper.problem_getter()

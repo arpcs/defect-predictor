@@ -1,0 +1,37 @@
+{
+    "id": 223680861,
+    "contestId": 1073,
+    "creationTimeSeconds": 1694921019,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1073,
+        "index": "F",
+        "name": "Choosing Two Paths",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1073,
+        "members": [
+            {
+                "handle": "JueFan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1540478100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 156,
+    "memoryConsumedBytes": 42598400,
+    "source": "// LUOGU_RID: 124962633\n// Problem: CF1073F Choosing Two Paths\r\n// Contest: Luogu\r\n// URL: https://www.luogu.com.cn/problem/CF1073F\r\n// Memory Limit: 250 MB\r\n// Time Limit: 2000 ms\r\n\r\n#include<bits/stdc++.h>\r\n#define F(i,a,b) for(int i=a,i##end=b;i<=i##end;i++)\r\n#define G(i,x) for(int i=start[x];i;i=Next[i])\r\nusing namespace std;\r\n#define getchar() (p1==p2&&(p2=(p1=buf)+fread(buf,1,1<<21,stdin),p1==p2)?EOF:*p1++)\r\nchar *p1,*p2,buf[1<<21];\r\nint read() {\r\n\tint s=0,w=0;char ch=getchar();\r\n\twhile(ch<'0'||ch>'9') w|=(ch=='-'),ch=getchar();\r\n\twhile(ch>='0'&&ch<='9') s=(s<<3)+(s<<1)+(ch^48),ch=getchar();\r\n\treturn w?-s:s;\r\n}\r\nconst int N=2e5+5,M=N<<1;\r\nint n,cnt,v[M],Next[M],start[N],tot,dfn[N],dfx[N],dep[N],st[N][20],k,V[N];\r\nint o1,q1,o2,q2;\r\nstruct LIAN {\t\r\n\tint l,x;\r\n\tbool operator<(LIAN b)const{return l<b.l;}\r\n\tbool operator>(LIAN b)const{return l>b.l;}\r\n\tLIAN operator+(int b)const{return {l+b,x};}\r\n} h[N],ma[N][4],a1,a2;\r\nvoid add(int x,int y) {v[++cnt]=y;Next[cnt]=start[x];start[x]=cnt;}\r\nvoid Add(int x,int y) {add(x,y);add(y,x);}\r\nvoid geng(int x,LIAN p) {\r\n\tif(p>ma[x][1]) swap(ma[x][1],p);\r\n\tif(p>ma[x][2]) swap(ma[x][2],p);\r\n\tif(p>ma[x][3]) swap(ma[x][3],p);\r\n}\r\nvoid d1(int x,int fa) {\r\n\tdfn[x]=++tot;dfx[tot]=x;dep[x]=dep[fa]+1;st[dfn[x]][0]=fa;\r\n\tma[x][1]=ma[x][2]=ma[x][3]=h[x]={0,x};\r\n\tG(i,x) if(v[i]^fa) {\r\n\t\td1(v[i],x);\r\n\t\tgeng(x,ma[v[i]][1]+1);\r\n\t}\r\n}\r\nvoid d2(int x,int fa) {\r\n\tG(i,x) if(v[i]^fa) {\r\n\t\th[v[i]]=max(h[x],ma[v[i]][1].l+1==ma[x][1].l?ma[x][2]:ma[x][1])+1;\r\n\t\td2(v[i],x);\r\n\t} geng(x,h[x]);\r\n}\r\nint Min(int x,int y) {return dep[x]<dep[y]?x:y;}\r\nint lca(int x,int y) {\r\n\tif(x==y) return x;\r\n\tx=dfn[x];y=dfn[y];\r\n\tif(x>y) swap(x,y);\r\n\tx++;int p=__lg(y-x+1);\r\n\treturn Min(st[x][p],st[y-(1<<p)+1][p]);\r\n}\r\nint dis(int x,int y) {return dep[x]+dep[y]-2*dep[lca(x,y)];}\r\nbool in(int x,int a,int b) {return dis(a,x)+dis(b,x)==dis(a,b);}\r\nint ddd(int x,int y) {//x-y\r\n\tif(x==y) return 0;\r\n\tif(in(y,x,ma[x][1].x)) return ma[x][2].l;\r\n\treturn ma[x][1].l;\r\n}\r\nint wai(LIAN &a,LIAN &b) {\r\n\tint ansa,ansb;\r\n\tif(in(a.x,b.x,ma[b.x][1].x)) ansb=ma[b.x][2].l+ma[b.x][3].l;\r\n\telse if(in(a.x,b.x,ma[b.x][2].x)) ansb=ma[b.x][1].l+ma[b.x][3].l;\r\n\telse ansb=ma[b.x][1].l+ma[b.x][2].l;\r\n\tif(in(b.x,a.x,ma[a.x][1].x)) ansa=ma[a.x][2].l+ma[a.x][3].l;\r\n\telse if(in(b.x,a.x,ma[a.x][2].x)) ansa=ma[a.x][1].l+ma[a.x][3].l;\r\n\telse ansa=ma[a.x][1].l+ma[a.x][2].l;\r\n\treturn ansa+ansb;\r\n}\r\nvoid upd(LIAN &a,LIAN &b) {\r\n\tif(a.l+b.l>a1.l+a2.l) a1=a,a2=b;\r\n\telse if(a.l+b.l==a1.l+a2.l&&wai(a,b)>wai(a1,a2)) a1=a,a2=b;\r\n}\r\nstruct XU {\r\n\tint cnt,v[M],w[M],Next[M],start[N];\r\n\tLIAN f[N],g[N];\r\n\tvoid add(int x,int y,int z) {v[++cnt]=y;w[cnt]=z;Next[cnt]=start[x];start[x]=cnt;}\r\n\tvoid Add(int x,int y,int z) {add(x,y,z);add(y,x,z);}\r\n\tvoid Add(int x,int y) {Add(x,y,dep[y]-dep[x]);}\r\n\tvoid d1(int x,int fa) {\r\n\t\tassert(ma[x][3].x!=x);\r\n\t\tf[x]=g[x]={0,x};\r\n\t\tG(i,x) if(v[i]^fa) {\r\n\t\t\td1(v[i],x);\r\n\t\t\tauto t=f[v[i]]+w[i];\r\n\t\t\tif(t>f[x]||(t.l==f[x].l&&ddd(t.x,x)<ddd(f[x].x,x))) swap(t,f[x]);\r\n\t\t\tif(t>g[x]||(t.l==g[x].l&&ddd(t.x,x)<ddd(g[x].x,x))) swap(t,g[x]);\r\n\t\t} if(f[x].l+g[x].l>=a1.l+a2.l) upd(f[x],g[x]);\r\n\t}\r\n} xu;\r\nint main() {\r\n\tn=read();\r\n\tF(i,1,n-1) Add(read(),read());d1(1,0);d2(1,0);\r\n\tF(j,1,19) F(i,1,n) if(i+(1<<j-1)<=n) st[i][j]=Min(st[i][j-1],st[i+(1<<j-1)][j-1]);\r\n\tF(i,1,n) if(Next[Next[start[i]]]) V[++k]=i;\r\n\tsort(V+1,V+k+1,[](int x,int y){return dfn[x]<dfn[y];});\r\n\tF(i,1,k-1) V[++k]=lca(V[i],V[i+1]);\r\n\tsort(V+1,V+k+1,[](int x,int y){return dfn[x]<dfn[y];});\r\n\tk=unique(V+1,V+k+1)-V-1;\r\n\tF(i,1,k-1) xu.Add(lca(V[i],V[i+1]),V[i+1]);xu.d1(V[1],0);\r\n\tif(in(a1.x,a2.x,ma[a2.x][1].x)) o1=ma[a2.x][2].x,o2=ma[a2.x][3].x;\r\n\telse if(in(a1.x,a2.x,ma[a2.x][2].x)) o1=ma[a2.x][1].x,o2=ma[a2.x][3].x;\r\n\telse o1=ma[a2.x][1].x,o2=ma[a2.x][2].x;\r\n\tif(in(a2.x,a1.x,ma[a1.x][1].x)) q1=ma[a1.x][2].x,q2=ma[a1.x][3].x;\r\n\telse if(in(a2.x,a1.x,ma[a1.x][2].x)) q1=ma[a1.x][1].x,q2=ma[a1.x][3].x;\r\n\telse q1=ma[a1.x][1].x,q2=ma[a1.x][2].x;\r\n\tcout<<o1<<' '<<q1<<endl<<o2<<' '<<q2<<endl;\r\n\t// cerr<<\"PP\\n\";\r\n\t// cerr<<a1.x<<' '<<q1<<' '<<q2<<endl;\r\n\t// cerr<<a2.x<<' '<<o1<<' '<<o2<<endl;\r\n\t// cerr<<\"LANS\"<<wai(a1,a2)<<endl;\r\n\treturn 0;\r\n}"
+}

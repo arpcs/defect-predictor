@@ -1,0 +1,37 @@
+{
+    "id": 208676238,
+    "contestId": 176,
+    "creationTimeSeconds": 1686043082,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 176,
+        "index": "E",
+        "name": "Archaeology",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 176,
+        "members": [
+            {
+                "handle": "-Complex-"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1334934300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 11980800,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\n#define rep(i,l,r) for(int i(l);i<=(r);++i)\r\n#define per(i,r,l) for(int i(r);i>=(l);--i)\r\n#define eb emplace_back\r\n#define Debug(...) fprintf(stderr,__VA_ARGS__)\r\nchar read(){\r\n\tchar ch=getchar();\r\n\twhile(ch!='+'&&ch!='-'&&ch!='?')ch=getchar();\r\n\treturn ch;\r\n}\r\ntemplate<typename T>\r\nvoid read(T &x){\r\n\tx=0;T flg=1;\r\n\tchar ch=getchar();\r\n\twhile(!isdigit(ch)){if(ch=='-')flg=-1;ch=getchar();}\r\n\twhile(isdigit(ch))x=(x<<3)+(x<<1)+(ch^48),ch=getchar();\r\n\tx*=flg;\r\n}\r\ntemplate<typename T,typename... Args>\r\nvoid read(T &x,Args &...args){read(x),read(args...);}\r\nconst int N=1e5+7;\r\nint n,q,dfn[N],anc[N][19],dep[N],idx[N];\r\nvector<pair<int,int> >g[N];\r\nset<int>key;\r\nll dis[N];\r\n\r\nvoid dfs(int u,int F){\r\n\tdfn[u]=++dfn[0];idx[dfn[0]]=u;anc[u][0]=F;dep[u]=dep[F]+1;\r\n\trep(i,1,18)anc[u][i]=anc[anc[u][i-1]][i-1];\r\n\tfor(auto [v,w]:g[u])if(v!=F)dis[v]=dis[u]+w,dfs(v,u);\r\n}\r\n\r\nint glca(int u,int v){\r\n\tif(dep[u]<dep[v])swap(v,u);\r\n\tper(i,18,0)if(dep[anc[u][i]]>=dep[v])u=anc[u][i];\r\n\tif(u==v)return u;\r\n\tper(i,18,0)if(anc[u][i]!=anc[v][i])u=anc[u][i],v=anc[v][i];\r\n\treturn anc[u][0];\r\n}\r\n\r\nint main(){\r\n\tread(n);\r\n\tfor(int i=1,u,v,w;i<n;i++)\r\n\t\tread(u,v,w),g[u].eb(v,w),g[v].eb(u,w);\r\n\tdfs(1,0);\r\n\tll ans=0;\r\n\tread(q);\r\n\tauto ins=[&](int x){\r\n\t\tauto pos=key.emplace(dfn[x]).first;\r\n\t\tif(pos==key.begin()&&pos==prev(key.end())){\r\n\t\t\treturn;\r\n\t\t}\r\n\t\telse if(pos==key.begin()){\r\n\t\t\tauto nxt=next(pos);\r\n\t\t\tans+=dis[x]+dis[idx[*nxt]]-2*dis[glca(x,idx[*nxt])];\r\n\t\t}\r\n\t\telse if(pos==prev(key.end())){\r\n\t\t\tauto pre=prev(pos);\r\n\t\t\tans+=dis[x]+dis[idx[*pre]]-2*dis[glca(x,idx[*pre])];\r\n\t\t}\r\n\t\telse{\r\n\t\t\tauto nxt=next(pos);\r\n\t\t\tans+=dis[x]+dis[idx[*nxt]]-2*dis[glca(x,idx[*nxt])];\r\n\t\t\tauto pre=prev(pos);\r\n\t\t\tans+=dis[x]+dis[idx[*pre]]-2*dis[glca(x,idx[*pre])];\r\n\t\t\tans-=dis[idx[*pre]]+dis[idx[*nxt]]-2*dis[glca(idx[*pre],idx[*nxt])];\r\n\t\t}\r\n\t};\r\n\tauto del=[&](int x){\r\n\t\tauto pos=key.find(dfn[x]);\r\n\t\tif(pos==key.begin()&&pos==prev(key.end())){\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tif(pos==key.begin()){\r\n\t\t\tauto nxt=next(pos);\r\n\t\t\tans-=dis[x]+dis[idx[*nxt]]-2*dis[glca(x,idx[*nxt])];\r\n\t\t}\r\n\t\telse if(pos==prev(key.end())){\r\n\t\t\tauto pre=prev(pos);\r\n\t\t\tans-=dis[x]+dis[idx[*pre]]-2*dis[glca(x,idx[*pre])];\r\n\t\t}\r\n\t\telse{\r\n\t\t\tauto nxt=next(pos);\r\n\t\t\tans-=dis[x]+dis[idx[*nxt]]-2*dis[glca(x,idx[*nxt])];\r\n\t\t\tauto pre=prev(pos);\r\n\t\t\tans-=dis[x]+dis[idx[*pre]]-2*dis[glca(x,idx[*pre])];\r\n\t\t\tans+=dis[idx[*pre]]+dis[idx[*nxt]]-2*dis[glca(idx[*pre],idx[*nxt])];\r\n\t\t}\r\n\t\tkey.erase(pos);\r\n\t};\r\n\tauto calc=[&](){\r\n\t\tll u=*key.begin(),v=*prev(key.end());\r\n\t\treturn (ans+dis[u]+dis[v]-2*dis[glca(u,v)])/2;\r\n\t};\r\n\twhile(q--){\r\n\t\tchar op=read();\r\n\t\tif(op=='+'){int x;read(x);ins(x);}\r\n\t\tif(op=='-'){int x;read(x);del(x);}\r\n\t\tif(op=='?'){printf(\"%lld\\n\",calc());}\r\n\t}\r\n\treturn 0;\r\n}"
+}

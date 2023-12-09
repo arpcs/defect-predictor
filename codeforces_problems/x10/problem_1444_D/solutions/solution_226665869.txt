@@ -1,0 +1,37 @@
+{
+    "id": 226665869,
+    "contestId": 1444,
+    "creationTimeSeconds": 1696462739,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1444,
+        "index": "D",
+        "name": "Rectangular Polyline",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2900,
+        "tags": [
+            "constructive algorithms",
+            "dp",
+            "geometry"
+        ]
+    },
+    "author": {
+        "contestId": 1444,
+        "members": [
+            {
+                "handle": "mraron"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1604228700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\n#define sz(x) (int)(x).size()\n#define xx first\n#define yy second\n#define all(x) (x).begin(), (x).end()\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(0);\n    int T;\n    cin>>T;\n    while(T--) {\n        int n,m;\n        cin>>n;\n        vector<int> h(n);\n        for(int i=0;i<n;++i) cin>>h[i];\n        cin>>m;\n        vector<int> v(m);\n        for(int i=0;i<m;++i) cin>>v[i];\n        \n        auto divide=[&](vector<int>& lens) -> pair<vector<int>, vector<int>> {\n            int sum=0;\n            for(int i:lens) sum+=i;\n            if(sum&1) return {{}, {}};\n            vector<vector<bool>> dp(sz(lens)+1, vector<bool>(sum/2+1, false));\n            vector<vector<bool>> par(sz(lens)+1, vector<bool>(sum/2+1, false));\n            dp[0][0]=1;\n            par[0][0]=0;\n            for(int i=1;i<=(int)lens.size();++i) {\n                for(int j=0;j<=sum/2;++j) {\n                    if(lens[i-1]<=j && dp[i-1][j-lens[i-1]]) {\n                        dp[i][j]=1;\n                        par[i][j]=1;\n                    }\n                    if(dp[i-1][j]) {\n                        dp[i][j]=1;\n                        par[i][j]=0;\n                    }\n                }\n                \n            }\n            \n            if(!dp[lens.size()][sum/2]) return {{}, {}};\n            vector<int> egyik, masik;\n            \n            int a=lens.size(), b=sum/2;\n            while(a>0) {\n                if(!par[a][b]) {\n                    egyik.push_back(lens[a-1]);\n                    a--;\n                }else {\n                    masik.push_back(lens[a-1]);\n                    b-=lens[a-1];\n                    a--;\n                }\n            }\n            \n            return {egyik, masik};\n        };\n        \n        auto x=divide(h), y=divide(v);\n        if(x.xx.empty() || x.yy.empty() || y.xx.empty() || y.yy.empty() || n!=m) {\n            cout<<\"No\\n\";\n        }else {\n            sort(all(x.xx));sort(all(x.yy));\n            reverse(all(x.xx));reverse(all(x.yy));\n            sort(all(y.xx));sort(all(y.yy));\n            reverse(all(y.xx));reverser(all(y.yy));\n            if(y.xx>y.yy) swap(y.xx, y.yy);\n            if(x.xx>x.yy) swap(x.xx, x.yy);\n            \n            sort(x.xx.begin(), x.xx.end());\n            sort(y.xx.begin(), y.xx.end());reverse(y.xx.begin(), y.xx.end());\n            sort(x.yy.begin(), x.yy.end());reverse(x.yy.begin(), x.yy.end());\n            sort(y.yy.begin(), y.yy.end());\n            \n            vector<int> remv, remh;\n            \n            pair<int,int> orig={0,0};\n            vector<pair<int,int>> pts1={orig};\n            for(int i=0;i<min(sz(y.xx), sz(x.xx));++i) {\n                orig.yy+=y.xx[i];\n                pts1.push_back(orig);\n                orig.xx+=x.xx[i];\n                pts1.push_back(orig);\n            }\n            for(int i=min(sz(y.xx), sz(x.xx));i<max(sz(y.xx), sz(x.xx));++i) {\n                if(i<sz(y.xx)) remv.push_back(-y.xx[i]);\n                else remh.push_back(-x.xx[i]);\n            }\n            \n            orig={0,0};\n            vector<pair<int,int>> pts2={};\n            for(int i=0;i<min(sz(y.yy), sz(x.yy));++i) {\n                orig.xx+=x.yy[i];\n                pts2.push_back(orig);\n                orig.yy+=y.yy[i];\n                pts2.push_back(orig);\n            }\n            \n            for(int i=min(sz(y.yy),sz(x.yy));i<max(sz(y.yy), sz(x.yy));++i) {\n                if(i<sz(y.yy)) remv.push_back(y.yy[i]);\n                else remh.push_back(x.yy[i]);\n            }\n            \n            //~ for(auto i:pts1) cerr<<i.xx<<\" \"<<i.yy<<\"; \"; cerr<<\"pts1\\n\";\n            //~ for(auto i:pts2) cerr<<i.xx<<\" \"<<i.yy<<\"; \"; cerr<<\"pts2\\n\";\n            \n            //~ for(auto i:remh) cerr<<i<<\" \";cerr<<\"\\n\";\n            //~ for(auto i:remv) cerr<<i<<\" \";cerr<<\"\\n\";\n            \n            while(!remv.empty()) {\n                orig.xx+=remh.back();remh.pop_back();\n                pts2.push_back(orig);\n                orig.yy+=remv.back();remv.pop_back();\n                pts2.push_back(orig);\n            }\n            pts2.pop_back();\n            \n            reverse(pts2.begin(), pts2.end());\n            for(auto i:pts2) pts1.push_back(i);\n            \n            cout<<\"Yes\\n\";\n            for(auto& [x,y]:pts1) cout<<x<<\" \"<<y<<\"\\n\";\n        }\n    }\n}\n"
+}

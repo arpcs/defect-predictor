@@ -1,0 +1,38 @@
+{
+    "id": 227339071,
+    "contestId": 1416,
+    "creationTimeSeconds": 1696861435,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1416,
+        "index": "F",
+        "name": "Showing Off",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3300,
+        "tags": [
+            "flows",
+            "graph matchings",
+            "greedy",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1416,
+        "members": [
+            {
+                "handle": "zlxFTH"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601219100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 96,
+    "timeConsumedMillis": 1980,
+    "memoryConsumedBytes": 41369600,
+    "source": "#pragma GCC optimize(\"Ofast,unroll-loops\")\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nusing i64 = long long;\r\n\r\nstruct Flow {\r\n  int n;\r\n  struct Edge {\r\n    int v;\r\n    i64 w;\r\n  };\r\n  vector<Edge> e;\r\n  vector<vector<int>> g;\r\n  vector<int> cur, d;\r\n  Flow(int n) : n(n), g(n), cur(n) {}\r\n  void add(int u, int v, i64 w) {\r\n    g[u].push_back(e.size());\r\n    e.push_back({v, w});\r\n    g[v].push_back(e.size());\r\n    e.push_back({u, 0});\r\n  }\r\n  bool bfs(int s, int t) {\r\n    d.assign(n, -1);\r\n    d[s] = 0;\r\n    queue<int> q;\r\n    q.push(s);\r\n    while (!q.empty()) {\r\n      int u = q.front();\r\n      q.pop();\r\n      for (auto i : g[u]) {\r\n        int v = e[i].v;\r\n        i64 w = e[i].w;\r\n        if (w && d[v] == -1) {\r\n          d[v] = d[u] + 1;\r\n          if (v == t) return true;\r\n          q.push(v);\r\n        }\r\n      }\r\n    }\r\n    return false;\r\n  }\r\n  i64 dfs(int u, int t, i64 in) {\r\n    if (u == t)\r\n      return in;\r\n    i64 out = 0;\r\n    for (int &_ = cur[u]; _ < g[u].size(); _++) {\r\n      int i = g[u][_];\r\n      int v = e[i].v;\r\n      i64 w = e[i].w;\r\n      if (w && d[v] == d[u] + 1) {\r\n        i64 res = dfs(v, t, min(in - out, w));\r\n        out += res;\r\n        e[i].w -= res;\r\n        e[i ^ 1].w += res;\r\n        if (in == out) return out;\r\n      }\r\n    }\r\n    if (!out)\r\n      d[u] = -1;\r\n    return out;\r\n  }\r\n  i64 work(int s, int t) {\r\n    i64 res = 0;\r\n    while (bfs(s, t)) {\r\n      cur.assign(n, 0);\r\n      res += dfs(s, t, 1e18);\r\n    }\r\n    return res;\r\n  }\r\n};\r\n\r\nconstexpr int dx[] = {0, 0, 1, -1};\r\nconstexpr int dy[] = {1, -1, 0, 0};\r\nconstexpr char sig[] = {'R', 'L', 'D', 'U'};\r\n\r\nvoid solve() {\r\n  int n, m;\r\n  cin >> n >> m;\r\n  vector<vector<int>> a(n, vector<int>(m));\r\n  for (int i = 0; i < n; i++) {\r\n    for (int j = 0; j < m; j++) {\r\n      cin >> a[i][j];\r\n    }\r\n  }\r\n\r\n  auto id = [&](int x, int y) {\r\n    return x * m + y;\r\n  };\r\n  int s = n * m, t = n * m + 1, p = t + 1, q = t + 2;\r\n  Flow flow(q + 1);\r\n  flow.add(t, s, 1e18);\r\n\r\n  vector<vector<int>> b(n, vector<int>(m, 1));\r\n  vector<vector<int>> g(n, vector<int>(m, 0));\r\n  for (int i = 0; i < n; i++) {\r\n    for (int j = 0; j < m; j++) {\r\n      int tp = (i + j) & 1;\r\n      for (int d = 0; d < 4; d++) {\r\n        int x = i + dx[d];\r\n        int y = j + dy[d];\r\n        if (x < 0 || y < 0 || x >= n || y >= m) {\r\n          continue;\r\n        }\r\n        if (a[x][y] < a[i][j]) {\r\n          b[i][j] = 0;\r\n        }\r\n        if (a[x][y] == a[i][j] && tp && (b[i][j] || b[x][y])) {\r\n          flow.add(id(i, j), id(x, y), 1);\r\n          g[i][j] = g[x][y] = 1;\r\n        }\r\n      }\r\n    }\r\n  }\r\n\r\n  vector<int> in(n * m + 4), out(n * m + 4);\r\n  for (int i = 0; i < n; i++) {\r\n    for (int j = 0; j < m; j++) {\r\n      if (!g[i][j]) {\r\n        continue;\r\n      }\r\n      int tp = (i + j) & 1;\r\n      if (!b[i][j]) {\r\n        if (tp) {\r\n          flow.add(s, id(i, j), 1);\r\n        } else {\r\n          flow.add(id(i, j), t, 1);\r\n        }\r\n      } else {\r\n        if (tp) {\r\n          out[s] += 1;\r\n          in[id(i, j)] += 1;\r\n        } else {\r\n          out[id(i, j)] += 1;\r\n          in[t] += 1;\r\n        }\r\n      }\r\n    }\r\n  }\r\n  i64 sum = 0;\r\n  for (int i = 0; i < t + 1; i++) {\r\n    if (in[i] < out[i]) {\r\n      flow.add(i, q, out[i] - in[i]);\r\n      sum += out[i] - in[i];\r\n    }\r\n    if (in[i] > out[i]) {\r\n      flow.add(p, i, in[i] - out[i]);\r\n    }\r\n  }\r\n  i64 res = flow.work(p, q);\r\n  if (sum != res || !sum) {\r\n    cout << \"NO\\n\";\r\n    return;\r\n  }\r\n  cout << \"YES\\n\";\r\n  auto e = flow.e;\r\n  vector<int> vis(q + 1);\r\n  vector<vector<int>> c(n, vector<int>(m));\r\n  vector<vector<char>> f(n, vector<char>(m));\r\n  auto rid = [&](int x) {\r\n    return make_pair(x / m, x % m);\r\n  };\r\n  for (int i = 0; i < e.size(); i += 2) {\r\n    int u = e[i].v, v = e[i ^ 1].v;\r\n    if (max(u, v) < n * m && e[i ^ 1].w) {\r\n      vis[u] = vis[v] = 1;\r\n      auto [x1, y1] = rid(u);\r\n      auto [x2, y2] = rid(v);\r\n      c[x1][y1] = 1;\r\n      c[x2][y2] = a[x1][y1] - 1;\r\n      for (int d = 0; d < 4; d++) {\r\n        int nx = x1 + dx[d];\r\n        int ny = y1 + dy[d];\r\n        if (nx == x2 && ny == y2) {\r\n          f[x1][y1] = sig[d];\r\n        }\r\n      }\r\n      for (int d = 0; d < 4; d++) {\r\n        int nx = x2 + dx[d];\r\n        int ny = y2 + dy[d];\r\n        if (nx == x1 && ny == y1) {\r\n          f[x2][y2] = sig[d];\r\n        }\r\n      }\r\n    }\r\n  }\r\n  for (int i = 0; i < n; i++) {\r\n    for (int j = 0; j < m; j++) {\r\n      int Id = id(i, j);\r\n      if (!vis[Id]) {\r\n        for (int d = 0; d < 4; d++) {\r\n          int x = i + dx[d];\r\n          int y = j + dy[d];\r\n          if (x < 0 || y < 0 || x >= n || y >= m) {\r\n            continue;\r\n          }\r\n          if (a[x][y] < a[i][j]) {\r\n            f[i][j] = sig[d];\r\n            c[i][j] = a[i][j] - a[x][y];\r\n            break;\r\n          }\r\n        }\r\n      }\r\n    }\r\n  }\r\n  for (int i = 0; i < n; i++) {\r\n    for (int j = 0; j < m; j++) {\r\n      cout << c[i][j] << \" \\n\"[j == m - 1];\r\n    }\r\n  }\r\n  for (int i = 0; i < n; i++) {\r\n    for (int j = 0; j < m; j++) {\r\n      cout << f[i][j] << \" \\n\"[j == m - 1];\r\n    }\r\n  }\r\n}\r\n\r\nint main() {\r\n  cin.tie(0)->sync_with_stdio(0);\r\n  int t;\r\n  cin >> t;\r\n  while (t--) {\r\n    solve();\r\n  }\r\n  return 0;\r\n}"
+}

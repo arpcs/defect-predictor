@@ -1,0 +1,36 @@
+{
+    "id": 232958511,
+    "contestId": 141,
+    "creationTimeSeconds": 1700134407,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 141,
+        "index": "D",
+        "name": "Take-off Ramps",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2300,
+        "tags": [
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 141,
+        "members": [
+            {
+                "handle": "WRuperD"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1326034800
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "// Problem: Take-off Ramps\r\n// Contest: Luogu\r\n// URL: https://www.luogu.com.cn/problem/CF141D\r\n// Memory Limit: 250 MB\r\n// Time Limit: 4000 ms\r\n// \r\n// Powered by CP Editor (https://cpeditor.org)\r\n\r\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst long long inf = 1e18;\r\nconst int mininf = 1e9 + 7;\r\n#define int long long\r\n#define pb emplace_back\r\ninline int read(){int x=0,f=1;char ch=getchar();while(ch<'0'||ch>'9'){if(ch=='-')f=-1;ch=getchar();}while(ch>='0'&&ch<='9'){x=(x<<1)+(x<<3)+(ch^48);ch=getchar();}return x*f;}\r\ninline void write(int x){if(x<0){x=~(x-1);putchar('-');}if(x>9)write(x/10);putchar(x%10+'0');}\r\n#define put() putchar(' ')\r\n#define endl puts(\"\")\r\nconst int MAX = 2e5 + 10;\r\n\r\nstruct Seg{\r\n\tint s[MAX << 2], tag[MAX << 2];\r\n\t\r\n\tvoid build(int l, int r, int x){\r\n\t\ts[x] = inf;\r\n\t\tif(l == r)\treturn ;\r\n\t\tint mid = (l + r) >> 1;\r\n\t\tbuild(l, mid, x << 1), build(mid + 1, r, x << 1 | 1);\r\n\t}\r\n\t\r\n\tvoid pushup(int x){\r\n\t\ts[x] = min(s[x << 1], s[x << 1| 1]);\r\n\t}\r\n\t\r\n\tvoid pushdown(int x){\r\n\t\ts[x << 1] += tag[x], s[x << 1 | 1] += tag[x], tag[x << 1] += tag[x], tag[x << 1 | 1] += tag[x];\r\n\t\ttag[x] = 0;\r\n\t}\r\n\t\r\n\tvoid add(int l, int r, int dl, int dr, int val, int x){\r\n\t\tif(dl > dr)\treturn ;\r\n\t\tif(dl <= l and r <= dr){\r\n\t\t\ts[x] += val;\r\n\t\t\tif(l - r)\ttag[x] += val;\r\n\t\t\treturn ;\r\n\t\t}\r\n\t\tpushdown(x);\r\n\t\tint mid = (l + r) >> 1;\r\n\t\tif(dl <= mid)\tadd(l, mid, dl, dr, val, x << 1);\r\n\t\tif(dr > mid)\tadd(mid + 1, r, dl, dr, val, x << 1 | 1);\r\n\t\tpushup(x);\r\n\t}\r\n\t\r\n\tint query(int l, int r, int dl, int dr, int x){\r\n\t\tif(dl > dr)\treturn inf;\r\n\t\tif(dl <= l and r <= dr)\treturn s[x];\r\n\t\tint ans = inf, mid = (l + r) >> 1;\r\n\t\tpushdown(x);\r\n\t\tif(dl <= mid)\tans = min(ans, query(l, mid, dl, dr, x << 1));\r\n\t\tif(dr > mid)\tans = min(ans, query(mid + 1, r, dl, dr, x << 1 | 1));\r\n\t\treturn ans;\r\n\t}\r\n\t\r\n}; Seg s1, s2;\r\n\r\nstruct node{\r\n\tint x, d, t;\r\n}; node a[MAX];\r\n\r\nint lsh[MAX << 1];\r\n\r\nint f[MAX];\r\n\r\nvoid solve(){\r\n\tint n = read(), m = read();\r\n\tif(n == 0){\r\n\t\twrite(m), endl;\r\n\t\twrite(0), endl;\r\n\t\treturn 0;\r\n\t}\r\n\tint n2 = 0, n3 = 0;\r\n\tfor(int i = 1; i <= n; i++){\r\n\t\tint x = read(), d = read(), t = read(), p = read();\r\n\t\td += p;\r\n\t\tt += p, x -= p;\r\n\t\tif(x < 0)\tcontinue;\r\n\t\ta[++n2].x = x, a[n2].d = d, a[n2].t = t;\r\n\t\tlsh[++n3] = x, lsh[++n3] = x + d;\r\n\t}\r\n\tsort(lsh + 1, lsh + n3 + 1);\r\n\tn3 = unique (lsh + 1, lsh + n3 + 1) - lsh - 1;\r\n\ts1.build(1, n3, 1), s2.build(1, n3, 1);\r\n\tint ans = m;\r\n\tint mk = 0;\r\n\tfor(int i = 1; i <= n2; i++){\r\n\t\tint x = lower_bound(lsh + 1, lsh + n3 + 1, a[i].x) - lsh;\r\n\t\ts1.add(1, n3, 1, x, a[i].x, 1), s2.add(1, n3, x + 1, n3, -a[i].x, 1);\r\n\t\tf[i] = min(s1.query(1, n3, 1, x, 1), s2.query(1, n3, x + 1, n3, 1));\r\n\t\tf[i] = min(f[i], a[i].x);\r\n\t\tint y = lower_bound(lsh + 1, lsh + n3 + 1, a[i].x + a[i].d) - lsh;\r\n\t\ts1.add(1, n3, 1, x, -a[i].x, 1), s2.add(1, n3, x + 1, n3, a[i].x, 1);\r\n\t\ts1.add(1, n3, y, y, f[i] + a[i].t - a[i].x - a[i].d, 1);\r\n\t\ts2.add(1, n3, y, y, f[i] + a[i].t + a[i].x + a[i].d, 1);\r\n\t\tans = min({ans, max(0ll, f[i] + m - a[i].x - a[i].d) + a[i].t});\r\n\t\tif(ans == min({ans, max(0ll, f[i] + m - a[i].x - a[i].d) + a[i].t})) mk = i;\r\n\t}\r\n\t\r\n\tvector <int> Ans;\r\n\tAns.pb(mk);\r\n\tint pre = f[mk] + a[mk].x, pre2 = f[mk] - a[mk].x;\r\n\tfor(int i = mk - 1; i >= 1; i--){\r\n\t\tif(f[i] + a[i].t + a[i].x + a[i].d == pre or f[i] + a[i].t - a[i].x  - a[i].d == pre2){\r\n\t\t\tAns.pb(i);\r\n\t\t\tmk = i;\r\n\t\t\tpre = f[mk] + a[mk].x, pre2 = f[mk] - a[mk].x;\r\n\t\t}\r\n\t}\r\n\t\r\n\twrite(ans), endl;\r\n\twrite(Ans.size()), endl;\r\n\tfor(int i = 0; i < Ans.size(); i++){\r\n\t\twrite(Ans[i]), endl;\r\n\t}\r\n}\r\n\r\nsigned main(){\r\n\tint t = 1;\r\n\twhile(t--)\tsolve();\r\n\treturn 0;\r\n}"
+}

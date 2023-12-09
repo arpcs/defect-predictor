@@ -1,0 +1,36 @@
+{
+    "id": 234764746,
+    "contestId": 1109,
+    "creationTimeSeconds": 1701180394,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1109,
+        "index": "F",
+        "name": "Sasha and Algorithm of Silence's Sounds",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1109,
+        "members": [
+            {
+                "handle": "DaiRuiChen007"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1550334900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 62,
+    "timeConsumedMillis": 405,
+    "memoryConsumedBytes": 37580800,
+    "source": "// LUOGU_RID: 137342308\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int MAXN=2e5+5,MAXM=2005;\r\nint H,W,n;\r\nstruct SegmentTree {\r\n\tint add[MAXN<<2],mn[MAXN<<2],cnt[MAXN<<2];\r\n\tinline int L(int p) { return p<<1; }\r\n\tinline int R(int p) { return p<<1|1; }\r\n\tinline void psu(int p) {\r\n\t\tmn[p]=std::min(mn[L(p)],mn[R(p)]),cnt[p]=0;\r\n\t\tif(mn[L(p)]==mn[p]) cnt[p]+=cnt[L(p)];\r\n\t\tif(mn[R(p)]==mn[p]) cnt[p]+=cnt[R(p)];\r\n\t}\r\n\tinline void adt(int p,int k) { add[p]+=k,mn[p]+=k; }\r\n\tinline void psd(int p) { adt(L(p),add[p]),adt(R(p),add[p]),add[p]=0; }\r\n\tinline void Build(int l=1,int r=n,int p=1) {\r\n\t\tmn[p]=0,cnt[p]=r-l+1;\r\n\t\tif(l==r) return ;\r\n\t\tint mid=(l+r)>>1;\r\n\t\tBuild(l,mid,L(p)),Build(mid+1,r,R(p));\r\n\t}\r\n\tinline void Add(int ul,int ur,int k,int l=1,int r=n,int p=1) {\r\n\t\tif(ul<=l&&r<=ur) return adt(p,k);\r\n\t\tint mid=(l+r)>>1; psd(p);\r\n\t\tif(ul<=mid) Add(ul,ur,k,l,mid,L(p));\r\n\t\tif(mid<ur) Add(ul,ur,k,mid+1,r,R(p));\r\n\t\tpsu(p);\r\n\t}\r\n\tinline int Qry(int ul,int ur,int l=1,int r=n,int p=1) {\r\n\t\tif(ul<=l&&r<=ur) return mn[p]==1?cnt[p]:0;\r\n\t\tint mid=(l+r)>>1,ans=0; psd(p);\r\n\t\tif(ul<=mid) ans+=Qry(ul,ur,l,mid,L(p));\r\n\t\tif(mid<ur) ans+=Qry(ul,ur,mid+1,r,R(p));\r\n\t\treturn ans;\r\n\t}\r\n}\tV;\r\nstruct LinkCutTree {\r\n\tint fa[MAXN],ch[MAXN][2];\r\n\tbool tag[MAXN];\r\n\tinline bool nrt(int x) { return ch[fa[x]][0]==x||ch[fa[x]][1]==x; }\r\n\tinline int son(int x) { return ch[fa[x]][1]==x; }\r\n\tinline void rev(int x) { tag[x]^=1,swap(ch[x][0],ch[x][1]); }\r\n\tinline void psd(int x) { if(tag[x]) rev(ch[x][0]),rev(ch[x][1]),tag[x]=0; }\r\n\tinline void upd(int x) { if(nrt(x)) upd(fa[x]); psd(x); }\r\n\tinline void rot(int x) {\r\n\t\tint y=fa[x],z=fa[y],k=son(x);\r\n\t\tif(nrt(y)) ch[z][son(y)]=x;\r\n\t\tch[y][k]=ch[x][k^1],fa[ch[y][k]]=y;\r\n\t\tch[x][k^1]=y,fa[y]=x,fa[x]=z;\r\n\t}\r\n\tinline void splay(int x) {\r\n\t\tfor(upd(x);nrt(x);rot(x)) if(nrt(fa[x])) rot(son(fa[x])==son(x)?fa[x]:x);\r\n\t}\r\n\tinline int acc(int x) {\r\n\t\tint y=0;\r\n\t\tfor(;x;y=x,x=fa[x]) splay(x),ch[x][1]=y;\r\n\t\treturn y;\r\n\t}\r\n\tinline void mkrt(int x) { rev(acc(x)); }\r\n\tinline int grt(int x) {\r\n\t\tfor(acc(x),splay(x),psd(x);ch[x][0];) psd(x=ch[x][0]); \r\n\t\treturn splay(x),x;\r\n\t}\r\n\tinline void link(int x,int y) { mkrt(x),splay(x),fa[x]=y; }\r\n\tinline void cut(int x,int y) { mkrt(x),acc(y),splay(y),fa[x]=ch[y][0]=0; }\r\n\tinline bool dif(int x,int y) { return grt(x)!=grt(y); }\r\n}\tT;\r\nvector <int> G[MAXN];\r\nint p[MAXM][MAXM];\r\nconst int dx[]={0,0,1,-1},dy[]={1,-1,0,0};\r\nsigned main() {\r\n\tscanf(\"%d%d\",&H,&W),n=H*W;\r\n\tfor(int i=1;i<=H;++i) for(int j=1;j<=W;++j) scanf(\"%d\",&p[i][j]);\r\n\tfor(int i=1;i<=H;++i) for(int j=1;j<=W;++j) for(int d:{0,1,2,3}) {\r\n\t\tint x=i+dx[d],y=j+dy[d];\r\n\t\tif(1<=x&&x<=H&&1<=y&&y<=W) G[p[i][j]].push_back(p[x][y]);\r\n\t}\r\n\tV.Build();\r\n\tlong long ans=0;\r\n\tfor(int l=1,r=0;l<=n;++l) {\r\n\t\tfor(int i=r+1;i<=n;++i) {\r\n\t\t\tbool ok=true;\r\n\t\t\tfor(int j:G[i]) if(l<=j&&j<=i) {\r\n\t\t\t\tif(T.dif(i,j)) T.link(i,j);\r\n\t\t\t\telse { ok=false; break; }\r\n\t\t\t}\r\n\t\t\tfor(int j:G[i]) if(l<=j&&j<=i) if(!T.dif(i,j)) T.cut(i,j);\r\n\t\t\tif(!ok) break;\r\n\t\t\tint cnt=0;\r\n\t\t\tfor(int j:G[i]) if(l<=j&&j<=i) T.link(i,j),++cnt;\r\n\t\t\tr=i,V.Add(r,r,r-l+1),V.Add(r,n,-cnt);\r\n\t\t}\r\n\t\tans+=V.Qry(l,r),V.Add(l,r,-1);\r\n\t\tfor(int x:G[l]) if(l<=x&&x<=r) T.cut(l,x),V.Add(x,n,1);\r\n\t}\r\n\tprintf(\"%lld\\n\",ans);\r\n\treturn 0;\r\n}"
+}

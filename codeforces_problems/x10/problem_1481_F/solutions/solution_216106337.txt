@@ -1,0 +1,37 @@
+{
+    "id": 216106337,
+    "contestId": 1481,
+    "creationTimeSeconds": 1690555732,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1481,
+        "index": "F",
+        "name": "AB Tree",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3100,
+        "tags": [
+            "dp",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1481,
+        "members": [
+            {
+                "handle": "tomas_fang"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1612535700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 84,
+    "timeConsumedMillis": 1762,
+    "memoryConsumedBytes": 193126400,
+    "source": "#include <bits/stdc++.h>\n#include <ext/pb_ds/assoc_container.hpp>\n#include <ext/pb_ds/tree_policy.hpp>\n#define debug(x) cerr << #x << \" \" << x << \"\\n\"\n#define debugs(x) cerr << #x << \" \" << x << \" \"\n#pragma GCC optimize(\"Ofast,unroll-loops\")\n#pragma GCC target(\"sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,avx,tune=native\")\nusing namespace std;\nusing namespace __gnu_pbds;\ntypedef long long ll;\ntypedef pair<int, int> pii;\ntypedef pair<long double, pii> muchie;\ntypedef tree<ll, null_type, less_equal<ll>, rb_tree_tag,\n             tree_order_statistics_node_update>\n    OST;\nconst ll NMAX = 100001;\nconst ll INF = (1LL << 60);\nconst ll HALF = (1LL << 59);\nconst ll MOD = 1000000007;\nconst ll BLOCK = 449;\nconst ll base = 31;\nconst ll nr_of_bits = 21;\nconst ll LIMIT = 1000;\nint dp[BLOCK][NMAX];\nint cnt[NMAX];\nvector<int> lvl[NMAX];\nvector<int> v[NMAX];\nvector<int> levelecu[NMAX];\nmap<int, int> mp;\nmap<int, int> l;\nint depth;\nchar cul[NMAX];\nint cc[NMAX];\nvoid DFS(int node, int p, int level) {\n  lvl[level].push_back(node);\n  depth = max(depth, level);\n  for (auto x : v[node]) {\n    if (x == p)\n      continue;\n    DFS(x, node, level + 1);\n  }\n}\nint main() {\n  int n, x, i;\n  cin >> n >> x;\n  int a = x;\n  int b = n - x;\n  for (i = 2; i <= n; i++) {\n    cin >> x;\n    v[x].push_back(i);\n    v[i].push_back(x);\n  }\n  for (i = 1; i <= n; i++) {\n    cnt[i] = v[i].size() - (i != 1);\n  }\n  DFS(1, 0, 1);\n  for (i = 1; i <= n; i++) {\n    if (lvl[i].size() == 0)\n      continue;\n    levelecu[lvl[i].size()].push_back(i);\n    mp[lvl[i].size()]++;\n  }\n  int c = 0;\n  dp[0][0] = 1;\n  for (auto x : mp) {\n    ++c;\n    cc[c] = x.first;\n    int val = x.first;\n    int freq = x.second;\n    for (i = 0; i < val; i++) {\n      l[i] = -1;\n    }\n    for (i = 0; i <= a; i++) {\n      if (dp[c - 1][i])\n        l[i % val] = i;\n      int rest = i % val;\n      if (l[rest] != -1 && (i - l[rest]) / val <= freq) {\n        dp[c][i] = 1;\n      }\n    }\n  }\n  if (dp[c][a]) {\n    int cant = a;\n    vector<int> sol;\n    while (c > 0) {\n      pii r = {cc[c], 0};\n      c--;\n      while (!dp[c][cant]) {\n        cant -= r.first;\n        r.second++;\n      }\n      while (r.second--)\n        sol.push_back(r.first);\n    }\n    vector<int> alvl;\n    for (auto x : sol) {\n      alvl.push_back(levelecu[x].back());\n      levelecu[x].pop_back();\n    }\n    for (auto x : alvl) {\n      for (auto y : lvl[x]) {\n        cul[y] = 'a';\n      }\n    }\n    cout << depth << \"\\n\";\n    for (int i = 1; i <= n; i++) {\n      if (cul[i] != 'a')\n        cul[i] = 'b';\n      cout << cul[i];\n    }\n    return 0;\n  }\n  for (int i = 1; i <= n; i++) {\n    if (lvl[i].size() == 0)\n      continue;\n    int sz = lvl[i].size();\n    if (sz <= a) {\n      a -= sz;\n      for (auto x : lvl[i])\n        cul[x] = 'a';\n      continue;\n    }\n    if (sz <= b) {\n      b -= sz;\n      for (auto x : lvl[i])\n        cul[x] = 'b';\n      continue;\n    }\n    if (a > b) {\n      for (auto x : lvl[i]) {\n        if (cnt[x] > 0) {\n          cul[x] = 'a';\n          a--;\n        }\n      }\n      for (auto x : lvl[i]) {\n        if (a && cul[x] != 'a') {\n          cul[x] = 'a';\n          a--;\n        }\n      }\n      for (auto x : lvl[i]) {\n        if (cul[x] != 'a') {\n          cul[x] = 'b';\n          b--;\n        }\n      }\n    } else {\n      for (auto x : lvl[i]) {\n        if (cnt[x] > 0) {\n          cul[x] = 'b';\n          b--;\n        }\n      }\n      for (auto x : lvl[i]) {\n        if (b && cul[x] != 'b') {\n          cul[x] = 'b';\n          b--;\n        }\n      }\n      for (auto x : lvl[i]) {\n        if (cul[x] != 'b') {\n          cul[x] = 'a';\n          a--;\n        }\n      }\n    }\n  }\n  cout << depth + 1 << \"\\n\";\n  for (int i = 1; i <= n; i++) {\n    cout << cul[i];\n  }\n  return 0;\n}\n\n// aAmBvlZnwTeUjdAjIWHSUNuByBHHxyBBYqMiedsKrzBqGThQbDPUNCcrVezlRKRMTUmJeadMtjXRBWwGGCRcQknCYtAihViLaJZiIxIGOMjenLYTmfEKqqBUOxWMpWqX"
+}

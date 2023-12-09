@@ -1,0 +1,35 @@
+{
+    "id": 223438567,
+    "contestId": 1017,
+    "creationTimeSeconds": 1694757820,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1017,
+        "index": "H",
+        "name": "The Films",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 3300,
+        "tags": [
+            "brute force"
+        ]
+    },
+    "author": {
+        "contestId": 1017,
+        "members": [
+            {
+                "handle": "JWRuixi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1533737100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 2386,
+    "memoryConsumedBytes": 9932800,
+    "source": "#include <bits/stdc++.h>\r\n#define int long long\r\n#pragma GCC target(\"sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,avx,avx2\")\r\n// #define ATC\r\n#define LL long long\r\n#define eb emplace_back\r\n#define writesp(x) write(x), putchar(' ')\r\n#define writeln(x) write(x), putchar('\\n')\r\n#define FIO(FILENAME) freopen(FILENAME\".in\", \"r\", stdin), freopen(FILENAME\".out\", \"w\", stdout)\r\nusing namespace std;\r\n\r\n#ifdef ATC\r\n#include <atcoder/all>\r\nusing namespace atcoder;\r\n#endif\r\n\r\nnamespace IO {\r\n    char ibuf[(1 << 20) + 1], *iS, *iT;\r\n#if ONLINE_JUDGE\r\n#define gh() (iS == iT ? iT = (iS = ibuf) + fread(ibuf, 1, (1 << 20) + 1, stdin), (iS == iT ? EOF : *iS++) : *iS++)\r\n#else\r\n#define gh() getchar()\r\n#endif\r\n    inline int read() {\r\n        char ch = gh();\r\n        int x = 0;\r\n        bool t = 0;\r\n        while (ch < '0' || ch > '9') t |= ch == '-', ch = gh();\r\n        while (ch >= '0' && ch <= '9') x = (x << 1) + (x << 3) + (ch ^ 48), ch = gh();\r\n        return t ? ~(x - 1) : x;\r\n    }\r\n    template<typename _Tp>\r\n    inline void write(_Tp x) {\r\n        static char stk[64], *top = stk;\r\n        if (x < 0) {\r\n            x = ~(x - 1);\r\n            putchar('-');\r\n        }\r\n        do *top++ = x % 10, x /= 10;\r\n        while (x);\r\n        while (top != stk) putchar((*--top) | 48);\r\n    }\r\n}\r\n\r\nusing IO::read;\r\nusing IO::write;\r\n\r\nconst int maxn = 1e5 + 500, mod = 998244353;\r\nint n, m, v, B, a[maxn], bid[maxn], b[maxn], c[maxn], as[maxn], now, u, inv[maxn], f[maxn];\r\n\r\nstruct Node {\r\n    int id, l, r, k;\r\n    inline bool operator < (const Node &rhs) const {\r\n        return bid[l] == bid[rhs.l] ? (bid[l] & 1 ? r < rhs.r : r > rhs.r) : l < rhs.l;\r\n    }\r\n} q[maxn];\r\n\r\ninline void add (int x) {\r\n    ++c[x];\r\n    now = (LL)now * (u + b[x] - c[x] + 1) % mod;\r\n}\r\n\r\ninline void del (int x) {\r\n    now = (LL)now * inv[u + b[x] - c[x] + 1] % mod;\r\n    --c[x];\r\n}\r\n\r\ninline int ksm (int b, int k) {\r\n    int res = 1;\r\n    for (; k; k >>= 1, b = (LL)b * b % mod) if (k & 1) res = (LL)res * b % mod;\r\n    return res;\r\n}\r\n\r\nsigned main() {\r\n    n = read(), v = read(), m = read();\r\n    for (int i = 1; i <= n; i++) a[i] = read(), b[a[i]]++;\r\n    for (int i = 1; i <= m; i++) q[i] = {i, read(), read(), read()};\r\n    sort(q + 1, q + m + 1, [](const Node &L, const Node &R) {\r\n        return L.k < R.k;\r\n    });\r\n    int up = 0;\r\n    for_each(q + 1, q + m + 1, [&](const Node &o) { up = max(up, o.k); });\r\n    inv[1] = 1;\r\n    for (int i = 2; i <= up + n; i++) inv[i] = (LL)inv[mod % i] * (mod - mod / i) % mod;\r\n    for (int i = 1, j; i <= m; i = j + 1) {\r\n        for (j = i; q[j + 1].k == q[i].k; j++);\r\n        B = ceil(n / sqrt(m));\r\n        for (int o = 1, l = 1; l <= n; l += B) {\r\n            int r = min(n, l + B - 1);\r\n            fill(bid + l, bid + r + 1, o);\r\n        }\r\n        sort(q + i, q + j + 1);\r\n        memset(c, 0, v + 1 << 3), u = q[i].k, now = 1;\r\n        f[0] = 1;\r\n        int s = (LL)v * u % mod;\r\n        for (int p = 1; p <= n; p++) f[p] = (LL)f[p - 1] * (++s) % mod;\r\n        for (int k = i, l = 1, r = 0; k <= j; k++) {\r\n            while (l > q[k].l) add(a[--l]);\r\n            while (r < q[k].r) add(a[++r]);\r\n            while (l < q[k].l) del(a[l++]);\r\n            while (r > q[k].r) del(a[r--]);\r\n            as[q[k].id] = (LL)now * f[n - r + l - 1] % mod;\r\n        } \r\n    }\r\n    for (int i = 1; i <= m; i++) writeln(as[i]);\r\n}\r\n// I love WHQ!"
+}

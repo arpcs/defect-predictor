@@ -1,0 +1,35 @@
+{
+    "id": 207718728,
+    "contestId": 1031,
+    "creationTimeSeconds": 1685340851,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1031,
+        "index": "E",
+        "name": "Triple Flips",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2600,
+        "tags": [
+            "constructive algorithms"
+        ]
+    },
+    "author": {
+        "contestId": 1031,
+        "members": [
+            {
+                "handle": "Raiden"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1540109400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 105,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 5222400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int MAX = 2e5 + 5;\r\nint vis[MAX], par[MAX];\r\nvoid bfs(int len){\r\n\tvis[0] = 1;\r\n\tqueue<int> q;\r\n\tq.push(0);\r\n\twhile(q.size()){\r\n\t\tauto u = q.front();\r\n\t\tq.pop();\r\n\t\tfor(int i = 0; i < len; i++){\r\n\t\t\tfor(int d = 1; i + 2 * d < len; d++){\r\n\t\t\t\tint mask = (1 << i) + (1 << (i + d)) + (1 << (i + 2 * d));\r\n\t\t\t\tint v = u ^ mask;\r\n\t\t\t\tif(vis[v]) continue;\r\n\t\t\t\tvis[v] = 1;\r\n\t\t\t\tpar[v] = u;\r\n\t\t\t\tq.push(v);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\nint A[MAX], B[MAX];\r\nvoid solve(){\r\n\tint n;\r\n\tcin >> n;\r\n\tvector<int> v(n);\r\n\tfor(auto &x : v) cin >> x;\r\n\tvector<array<int,3> > ans;\r\n\tset<int> st;\r\n\tfor(int d1 = 1; d1 <= 6; d1++){\r\n\t\tfor(int d2 = 1; d2 <= 5; d2++){\r\n\t\t\tint mask = 1 ^ 2 ^ (1 << d1) ^ (1 << (2 * d1)) ^ (1 << (d2 + 1)) ^ (1 << (2 * d2 + 1));\r\n\t\t\tA[mask % (1 << 6)] = d1, B[mask % (1 << 6)] = d2;\r\n\t\t\tif(mask % 8 == 3)\r\n\t\t\tst.insert(mask % (1 << 6));\r\n\t\t}\r\n\t}\r\n\twhile(v.size() >= 14){\r\n\t\tint i = (int)v.size() - 1;\r\n\t\tint j = i - 1, k = j - 1;\r\n\t\tint mask = (v[i] << 0) + (v[j] << 1) + (v[k] << 2);\r\n\t\tif(mask == 3){\r\n\t\t\tint mask = 0;\r\n\t\t\tfor(int x = 0; x < 6; x++) mask ^= v[v.size() - 1 - x] << x;\r\n\t\t\tint d1 = A[mask], d2 = B[mask];\r\n\t\t\tans.push_back({i - 2 * d1, i - d1, i});\r\n\t\t\tfor(auto idx : ans.back()) v[idx] ^= 1;\r\n\t\t\tans.push_back({j - 2 * d2, j - d2, j});\r\n\t\t\tfor(auto idx : ans.back()) v[idx] ^= 1;\r\n\t\t\tfor(int x = 0; x < 6; x++) v.pop_back();\r\n\t\t}else{\r\n\t\t\tif(mask == 0){\r\n\t\t\t\t;\r\n\t\t\t}else{\r\n\t\t\t\twhile(!v[i]) i--;\r\n\t\t\t\tif(__builtin_popcount(mask) == 1){\r\n\t\t\t\t\tans.push_back({i - 8, i - 4, i});\r\n\t\t\t\t}else if(mask == 7){\r\n\t\t\t\t\tans.push_back({i - 2, i - 1, i});\r\n\t\t\t\t}else{\r\n\t\t\t\t\tj = i - 1;\r\n\t\t\t\t\twhile(!v[j]) j--;\r\n\t\t\t\t\tans.push_back({2 * j - i, j, i});\r\n\t\t\t\t}\r\n\t\t\t\tfor(auto idx : ans.back()) v[idx] ^= 1;\r\n\t\t\t}\r\n\t\t\tfor(int x = 0; x < 3; x++) v.pop_back();\r\n\t\t}\r\n\t}\r\n\tint mask = 0;\r\n\tfor(int i = 0; i < v.size(); i++) if(v[i]) mask ^= (1 << i);\r\n\tbfs(v.size());\r\n\tif(!vis[mask]){\r\n\t\tcout << \"NO\" << '\\n';\r\n\t\treturn ;\r\n\t}\r\n\tcout << \"YES\" << '\\n';\r\n\twhile(mask != 0){\r\n\t\tint cmsk = mask ^ par[mask];\r\n\t\tmask = par[mask];\r\n\t\tvector<int> cur;\r\n\t\tfor(int j = 0; j < v.size(); j++) if(cmsk & (1 << j)) cur.push_back(j);\r\n\t\tans.push_back({cur[0], cur[1], cur[2]});\r\n\t}\r\n\tcout << ans.size() << '\\n';\r\n\tfor(auto [x, y, z] : ans) cout << x + 1 << ' ' << y + 1 << ' ' << z + 1 << '\\n';\r\n}\r\n\r\nint32_t main(){\r\n\tios_base::sync_with_stdio(0), cin.tie(0);\r\n\tint t = 1;\r\n\t// cin >> t;\r\n\twhile(t--) solve();\r\n}"
+}

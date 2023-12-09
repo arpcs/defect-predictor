@@ -1,0 +1,37 @@
+{
+    "id": 224683996,
+    "contestId": 1437,
+    "creationTimeSeconds": 1695433177,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1437,
+        "index": "G",
+        "name": "Death DBMS",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "string suffix structures",
+            "strings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1437,
+        "members": [
+            {
+                "handle": "muxingchengfeng"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1603809300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 44544000,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing i64 = long long;\r\n\r\nstruct ACA\r\n{\r\n    std::vector<std::array<int, 26>> tr;\r\n    std::vector<int> ne;\r\n    std::vector<int> id;\r\n    std::vector<int> invid;\r\n    std::vector<int> cnt;\r\n    std::vector<int> q;\r\n    std::vector<std::vector<int>> adj;\r\n    int idx;\r\n\r\n    ACA(int n) : tr(n + 1), ne(n + 1), invid(n + 1), id(n + 1), cnt(n + 1), q(n + 1)\r\n    {\r\n        adj.assign(n + 1, std::vector<int>());\r\n        idx = 0;\r\n    }\r\n\r\n    void insert(std::string s, int x)\r\n    {\r\n        int p = 0;\r\n        int sz = s.size();\r\n        for (int i = 0; i < sz; i++)\r\n        {\r\n            int t = s[i] - 'a';\r\n            if (!tr[p][t])\r\n                tr[p][t] = ++idx;\r\n            p = tr[p][t];\r\n        }\r\n        id[p] = x; // p\u662fx\u7ed3\u5c3e\u7684\u6570\u636e\r\n        invid[x] = p;\r\n    }\r\n\r\n    void build()\r\n    {\r\n        int hh = 0, tt = -1;\r\n        for (int i = 0; i < 26; i++)\r\n            if (tr[0][i])\r\n                q[++tt] = tr[0][i];\r\n        while (hh <= tt)\r\n        {\r\n            int p = q[hh++];\r\n            adj[ne[p]].push_back(p);\r\n            for (int i = 0; i < 26; i++)\r\n                if (!tr[p][i])\r\n                    tr[p][i] = tr[ne[p]][i];\r\n                else\r\n                {\r\n                    ne[tr[p][i]] = tr[ne[p]][i];\r\n                    q[++tt] = tr[p][i];\r\n                }\r\n        }\r\n    }\r\n\r\n    void query(std::string str)\r\n    {\r\n        int sz = str.size();\r\n        for (int i = 0, now = 0; i < sz; i++)\r\n        {\r\n            int t = str[i] - 'a';\r\n            now = tr[now][t];\r\n            int p = now;\r\n            cnt[p]++; // \u5bf9\u5e94\u7684\u8282\u70b9\u52a0\u4e00\uff0c\u5728\u6700\u540ebfs\u662f\u4fdd\u8bc1\u524d\u8282\u70b9\u5168\u90e8\u52a0\u4e00\r\n        }\r\n    }\r\n\r\n    void dfs(int u)\r\n    {\r\n        for (auto v : adj[u])\r\n        {\r\n            dfs(v);\r\n            cnt[u] += cnt[v];\r\n        }\r\n    }\r\n};\r\n\r\nconstexpr int N = 3E5;\r\n\r\nint main()\r\n{\r\n    std::ios::sync_with_stdio(false);\r\n    std::cin.tie(nullptr);\r\n\r\n    ACA aca(N);\r\n\r\n    int n, q;\r\n    std::cin >> n >> q;\r\n    std::vector<int> a(n + 1, 0);\r\n    for (int i = 1; i <= n; i++)\r\n    {\r\n        std::string s;\r\n        std::cin >> s;\r\n        aca.insert(s, i);\r\n    }\r\n\r\n    aca.build();\r\n\r\n    std::vector<int> up(aca.idx + 1);\r\n\r\n    auto dfs1 = [&](auto self, int u, int last) -> void\r\n    {\r\n        up[u] = last;\r\n        if (aca.id[u])\r\n            last = u;\r\n        for (auto v : aca.adj[u])\r\n            self(self, v, last);\r\n    };\r\n\r\n    dfs1(dfs1, 0, 0);\r\n\r\n    while (q--)\r\n    {\r\n        int op;\r\n        std::cin >> op;\r\n        if (op == 1)\r\n        {\r\n            int x, y;\r\n            std::cin >> x >> y;\r\n            a[x] = y;\r\n        }\r\n        else\r\n        {\r\n            std::string str;\r\n            std::cin >> str;\r\n            int ans = -1;\r\n            for (int i = 0, now = 0; i < str.size(); i++)\r\n            {\r\n                int t = str[i] - 'a';\r\n                now = aca.tr[now][t];\r\n                if (aca.id[now])\r\n                    ans = std::max(ans, a[aca.id[now]]);\r\n                int p = up[now];\r\n                while (p)\r\n                {\r\n                    ans = std::max(ans, a[aca.id[p]]);\r\n                    p = up[p];\r\n                }\r\n            }\r\n            std::cout << ans << \"\\n\";\r\n        }\r\n    }\r\n\r\n    return 0;\r\n}\r\n\r\n/*\r\n5 2\r\nkurou\r\ntakuo\r\ntakeshi\r\nnaomi\r\nshingo\r\n1 3 943\r\n2 takuotakeshi\r\n*/"
+}

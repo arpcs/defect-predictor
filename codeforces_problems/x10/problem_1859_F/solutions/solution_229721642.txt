@@ -1,0 +1,40 @@
+{
+    "id": 229721642,
+    "contestId": 1859,
+    "creationTimeSeconds": 1698249957,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1859,
+        "index": "F",
+        "name": "Teleportation in Byteland",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "graphs",
+            "shortest paths",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1859,
+        "members": [
+            {
+                "handle": "chenyihengCF"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1691850900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 3057,
+    "memoryConsumedBytes": 65945600,
+    "source": "// LUOGU_RID: 131626786\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nbool Mbegin;\r\nvoid File_Work(){\r\n\tfreopen(\"test.in\",\"r\",stdin);\r\n\tfreopen(\"test.out\",\"w\",stdout);\r\n}\r\ntypedef long long LL;\r\ntypedef pair<LL,int> pii;\r\nconst int N=1e5+8,Q=1e5+8;\r\nconst LL oo=1e16+8; \r\nint n,m,q,from[Q],to[Q],_lca[Q];\r\nchar str[N];\r\nstruct Graph{\r\n\tint head[N],edge_tot=1,to[N<<1],next[N<<1];\r\n\tLL cost[N<<1];\r\n\tvoid init(){\r\n\t\tfor(int i=1;i<=n;i++)\r\n\t\t\thead[i]=0;\r\n\t\tedge_tot=1;\r\n\t}\r\n\tvoid add_edge(int u,int v,LL w){\r\n\t\tedge_tot++;\r\n\t\tto[edge_tot]=v;\r\n\t\tnext[edge_tot]=head[u];\r\n\t\tcost[edge_tot]=w;\r\n\t\thead[u]=edge_tot;\r\n\t}\r\n}Tree0,Tree;\r\nint depth[N],anc[21][N];\r\nLL pathlen[N],pathval[N],dis[N],mnval[2][21][N];\r\nbool vis[N];\r\nLL ans[Q];\r\nvoid dfs1(int u,int father){\r\n\tdepth[u]=depth[father]+1;\r\n\tanc[0][u]=father;\r\n\tfor(int i=1;i<=20;i++)\r\n\t\tanc[i][u]=anc[i-1][anc[i-1][u]];\r\n\tfor(int i=Tree0.head[u];i;i=Tree0.next[i]){\r\n\t\tint v=Tree0.to[i];\r\n\t\tLL w=Tree0.cost[i];\r\n\t\tif(v==father)\r\n\t\t\tcontinue;\r\n\t\tpathlen[v]=pathlen[u]+w;\r\n\t\tdfs1(v,u);\r\n\t}\r\n}\r\nvoid dfs2(int u,int father){\r\n\tmnval[0][0][u]=dis[u]+pathval[u]-pathlen[u];\r\n\tmnval[1][0][u]=dis[u]-pathval[u]+pathlen[u];\r\n\tfor(int i=1;i<=20;i++){\r\n\t\tmnval[0][i][u]=min(mnval[0][i-1][u],mnval[0][i-1][anc[i-1][u]]);\r\n\t\tmnval[1][i][u]=min(mnval[1][i-1][u],mnval[1][i-1][anc[i-1][u]]);\r\n\t}\r\n\tfor(int i=Tree.head[u];i;i=Tree.next[i]){\r\n\t\tint v=Tree.to[i],w=Tree.cost[i];\r\n\t\tif(v==father)\r\n\t\t\tcontinue;\r\n\t\tpathval[v]=pathval[u]+w;\r\n\t\tdfs2(v,u);\r\n\t}\r\n}\r\nint get_lca(int u,int v){\r\n\tif(u==v)\r\n\t\treturn u;\r\n\tif(depth[u]<depth[v])\r\n\t\tswap(u,v);\r\n\tfor(int i=20;i>=0;i--)\r\n\t\tif(depth[anc[i][u]]>=depth[v])\r\n\t\t\tu=anc[i][u];\r\n\tif(u==v)\r\n\t\treturn u;\r\n\tfor(int i=20;i>=0;i--){\r\n\t\tif(anc[i][u]!=anc[i][v]){\r\n\t\t\tu=anc[i][u];\r\n\t\t\tv=anc[i][v];\r\n\t\t}\r\n\t}\r\n\treturn anc[0][u];\r\n}\r\npriority_queue<pii,vector<pii>,greater<pii> > prq;\r\nvoid Dijkstra(LL div){\r\n\twhile(prq.empty()==0)\r\n\t\tprq.pop();\r\n\tfor(int u=1;u<=n;u++){\r\n\t\tdis[u]=oo;\r\n\t\tvis[u]=0;\r\n\t\tif(str[u]=='1'){\r\n\t\t\tdis[u]=0;\r\n\t\t\tprq.push({0,u});\r\n\t\t}\r\n\t}\r\n\twhile(prq.empty()==0){\r\n\t\tint u=prq.top().second;\r\n\t\tprq.pop();\r\n\t\tif(vis[u]==1)\r\n\t\t\tcontinue;\r\n\t\tvis[u]=1;\r\n\t\tfor(int i=Tree0.head[u];i;i=Tree0.next[i]){\r\n\t\t\tint v=Tree0.to[i];\r\n\t\t\tLL w=Tree0.cost[i];\r\n\t\t\tLL tmp=dis[u]+w+ceil(1.0*w/div);\r\n\t\t\tif(tmp<dis[v]){\r\n\t\t\t\tdis[v]=tmp;\r\n\t\t\t\tprq.push({dis[v],v});\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\nvoid solve(int x){\r\n\tLL mul=(1<<x);\r\n\tTree.init();\r\n\tfor(int u=1;u<=n;u++){\r\n\t\tfor(int i=Tree0.head[u];i;i=Tree0.next[i]){\r\n\t\t\tauto add_edge=[&](int u,int v,LL w){\r\n\t\t\t\tTree.add_edge(u,v,w);\r\n\t\t\t\tTree.add_edge(v,u,w);\r\n\t\t\t};\r\n\t\t\tint v=Tree0.to[i];\r\n\t\t\tLL w=Tree0.cost[i];\r\n\t\t\tif(v==anc[0][u])\r\n\t\t\t\tcontinue;\r\n\t\t\tadd_edge(u,v,ceil(1.0*w/mul));\r\n\t\t}\r\n\t}\r\n\tDijkstra(mul);\r\n\tdfs2(1,0);\r\n\tfor(int i=1;i<=q;i++){\r\n\t\tint u=from[i],v=to[i];\r\n\t\tLL ext,res=oo;\r\n\t\text=pathlen[from[i]]+pathval[to[i]]-pathval[_lca[i]]*2;\r\n\t\tfor(int j=20;j>=0;j--){\r\n\t\t\tif(anc[j][u]!=0&&depth[anc[j][u]]+1>=depth[_lca[i]]){\r\n\t\t\t\tres=min(res,mnval[0][j][u]+ext);\r\n\t\t\t\tu=anc[j][u];\r\n\t\t\t}\r\n\t\t}\r\n\t\text=pathlen[from[i]]+pathval[to[i]]-pathlen[_lca[i]]*2;\r\n\t\tfor(int j=20;j>=0;j--){\r\n\t\t\tif(anc[j][v]!=0&&depth[anc[j][v]]+1>=depth[_lca[i]]){\r\n\t\t\t\tres=min(res,mnval[1][j][v]+ext);\r\n\t\t\t\tv=anc[j][v];\r\n\t\t\t}\r\n\t\t}\r\n\t\tres=min(res,mnval[1][0][_lca[i]]+ext);\r\n\t\tans[i]=min(ans[i],res+x*m); \r\n\t}\r\n}\r\nvoid mian(){\r\n\tTree0.init();\r\n\tcin>>n>>m;\r\n\tfor(int i=1;i<=n-1;i++){\r\n\t\tauto add_edge=[&](int u,int v,int w){\r\n\t\t\tTree0.add_edge(u,v,w);\r\n\t\t\tTree0.add_edge(v,u,w);\r\n\t\t};\r\n\t\tint u,v,w;\r\n\t\tcin>>u>>v>>w;\r\n\t\tadd_edge(u,v,w);\r\n\t}\r\n\tcin>>(str+1);\r\n\tdfs1(1,0);\r\n\tcin>>q;\r\n\tfor(int i=1;i<=q;i++){\r\n\t\tcin>>from[i]>>to[i];\r\n\t\t_lca[i]=get_lca(from[i],to[i]);\r\n\t\tans[i]=pathlen[from[i]]+pathlen[to[i]]-pathlen[_lca[i]]*2;\r\n\t}\r\n\tfor(int x=1;x<=20;x++)\r\n\t\tsolve(x);\r\n\tfor(int i=1;i<=q;i++)\r\n\t\tcout<<ans[i]<<'\\n';\r\n}\r\nbool Mend;\r\nint main(){\r\n//\tFile_Work();\r\n\tios::sync_with_stdio(0),cin.tie(0),cout.tie(0);\r\n\tcerr<<fixed<<setprecision(3)<<(&Mbegin-&Mend)/1048576.0<<\" MB\\n\\n\\n\";\r\n\tint testnum;\r\n\tcin>>testnum;\r\n\twhile(testnum--)\r\n\t\tmian();\r\n\tcerr<<\"\\n\\n\\n\"<<fixed<<setprecision(0)<<1e3*clock()/CLOCKS_PER_SEC<<\" ms\";\r\n\treturn 0;\r\n}"
+}

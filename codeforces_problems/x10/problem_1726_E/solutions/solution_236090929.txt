@@ -1,0 +1,37 @@
+{
+    "id": 236090929,
+    "contestId": 1726,
+    "creationTimeSeconds": 1701884508,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "E",
+        "name": "Almost Perfect",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "combinatorics",
+            "fft",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "kutcoder"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 15,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 7168000,
+    "source": "#include <iostream>\r\n#include <cstdio>\r\n#include <cstdlib>\r\n#include <algorithm>\r\n#include <cmath>\r\n#include <vector>\r\n#include <set>\r\n#include <map>\r\n#include <unordered_set>\r\n#include <unordered_map>\r\n#include <queue>\r\n#include <ctime>\r\n#include <cassert>\r\n#include <complex>\r\n#include <string>\r\n#include <cstring>\r\n#include <chrono>\r\n#include <random>\r\n#include <bitset>\r\n#include <array>\r\nusing namespace std;\r\n\r\n#ifdef LOCAL\r\n\t#define eprintf(...) {fprintf(stderr, __VA_ARGS__);fflush(stderr);}\r\n#else\r\n\t#define eprintf(...) 42\r\n#endif\r\n\r\nusing ll = long long;\r\nusing ld = long double;\r\nusing uint = unsigned int;\r\nusing ull = unsigned long long;\r\ntemplate<typename T>\r\nusing pair2 = pair<T, T>;\r\nusing pii = pair<int, int>;\r\nusing pli = pair<ll, int>;\r\nusing pll = pair<ll, ll>;\r\nmt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());\r\nll myRand(ll B) {\r\n\treturn (ull)rng() % B;\r\n}\r\n\r\n#define pb push_back\r\n#define mp make_pair\r\n#define all(x) (x).begin(),(x).end()\r\n#define fi first\r\n#define se second\r\n\r\nclock_t startTime;\r\ndouble getCurrentTime() {\r\n\treturn (double)(clock() - startTime) / CLOCKS_PER_SEC;\r\n}\r\n\r\n\r\nconst uint MOD = 998244353;\r\ntemplate<uint mod = MOD> struct mint { // 1000000007  1000000009\r\n\tuint x;\r\n\r\n\tmint() : x(0) {}\r\n\tmint(ll _x) {\r\n\t\t_x %= mod;\r\n\t\tif (_x < 0) _x += mod;\r\n\t\tx = _x;\r\n\t}\r\n\r\n\tmint& operator += (const mint &a) {\r\n\t\tx += a.x;\r\n\t\tif (x >= mod) x -= mod;\r\n\t\treturn *this;\r\n\t}\r\n\tmint& operator -= (const mint &a) {\r\n\t\tx += mod - a.x;\r\n\t\tif (x >= mod) x -= mod;\r\n\t\treturn *this;\r\n\t}\r\n\tmint& operator *= (const mint &a) {\r\n\t\tx = (ull)x * a.x % mod;\r\n\t\treturn *this;\r\n\t}\r\n\tmint pow(ll pw) const {\r\n\t\tmint res = 1;\r\n\t\tmint cur = *this;\r\n\t\twhile(pw) {\r\n\t\t\tif (pw & 1) res *= cur;\r\n\t\t\tcur *= cur;\r\n\t\t\tpw >>= 1;\r\n\t\t}\r\n\t\treturn res;\r\n\t}\r\n\tmint inv() const {\r\n\t\tassert(x != 0);\r\n\t\tuint t = x;\r\n\t\tuint res = 1;\r\n\t\twhile(t != 1) {\r\n\t\t\tuint z = mod / t;\r\n\t\t\tres = (ull)res * (mod - z) % mod;\r\n\t\t\tt = mod - t * z;\r\n\t\t}\r\n\t\treturn res;\r\n\t}\r\n\tmint& operator /= (const mint &a) {\r\n\t\treturn *this *= a.inv();\r\n\t}\r\n\tmint operator + (const mint &a) const {\r\n\t\treturn mint(*this) += a;\r\n\t}\r\n\tmint operator - (const mint &a) const {\r\n\t\treturn mint(*this) -= a;\r\n\t}\r\n\tmint operator * (const mint &a) const {\r\n\t\treturn mint(*this) *= a;\r\n\t}\r\n\tmint operator / (const mint &a) const {\r\n\t\treturn mint(*this) /= a;\r\n\t}\r\n\r\n\tbool sqrt(mint &res) const {\r\n\t\tif (mod == 2 || x == 0) {\r\n\t\t\tres = *this;\r\n\t\t\treturn true;\r\n\t\t}\r\n\t\tif (pow((mod - 1) / 2) != 1) return false;\r\n\t\tif (mod % 4 == 3) {\r\n\t\t\tres = pow((mod + 1) / 4);\r\n\t\t\treturn true;\r\n\t\t}\r\n\t\tint pw = (mod - 1) / 2;\r\n\t\tint K = 30;\r\n\t\twhile((1 << K) > pw) K--;\r\n\t\twhile(true) {\r\n\t\t\tmint t = myRand(mod);\r\n\t\t\tmint a = 0, b = 0, c = 1;\r\n\t\t\tfor (int k = K; k >= 0; k--) {\r\n\t\t\t\ta = b * b;\r\n\t\t\t\tb = b * c * 2;\r\n\t\t\t\tc = c * c + a * *this;\r\n\t\t\t\tif (((pw >> k) & 1) == 0) continue;\r\n\t\t\t\ta = b;\r\n\t\t\t\tb = b * t + c;\r\n\t\t\t\tc = c * t + a * *this;\r\n\t\t\t}\r\n\t\t\tif (b == 0) continue;\r\n\t\t\tc -= 1;\r\n\t\t\tc *= mint() - b.inv();\r\n\t\t\tif (c * c == *this) {\r\n\t\t\t\tres = c;\r\n\t\t\t\treturn true;\r\n\t\t\t}\r\n\t\t}\r\n\t\tassert(false);\r\n\t}\r\n\r\n\tbool operator == (const mint &a) const {\r\n\t\treturn x == a.x;\r\n\t}\r\n\tbool operator != (const mint &a) const {\r\n\t\treturn x != a.x;\r\n\t}\r\n\tbool operator < (const mint &a) const {\r\n\t\treturn x < a.x;\r\n\t}\r\n};\r\ntemplate<uint mod = MOD> struct Factorials {\r\n\tusing Mint = mint<mod>;\r\n\tvector<Mint> f, fi;\r\n\r\n\tFactorials() : f(), fi() {}\r\n\tFactorials(int n) {\r\n\t\tn += 10;\r\n\t\tf = vector<Mint>(n);\r\n\t\tfi = vector<Mint>(n);\r\n\t\tf[0] = 1;\r\n\t\tfor (int i = 1; i < n; i++)\r\n\t\t\tf[i] = f[i - 1] * i;\r\n\t\tfi[n - 1] = f[n - 1].inv();\r\n\t\tfor (int i = n - 1; i > 0; i--)\r\n\t\t\tfi[i - 1] = fi[i] * i;\r\n\t}\r\n\r\n\tMint C(int n, int k) {\r\n\t\tif (k < 0 || k > n) return 0;\r\n\t\treturn f[n] * fi[k] * fi[n - k];\r\n\t}\r\n};\r\ntemplate<uint mod = MOD> struct Powers {\r\n\tusing Mint = mint<mod>;\r\n\tvector<Mint> p, pi;\r\n\r\n\tPowers() : p(), pi() {}\r\n\tPowers(int n, Mint x) {\r\n\t\tn += 10;\r\n\t\tif (x == 0) {\r\n\t\t\tp = vector<Mint>(n);\r\n\t\t\tp[0] = 1;\r\n\t\t} else {\r\n\t\t\tp = vector<Mint>(n);\r\n\t\t\tpi = vector<Mint>(n);\r\n\t\t\tp[0] = pi[0] = 1;\r\n\t\t\tMint xi = x.inv();\r\n\t\t\tfor (int i = 1; i < n; i++) {\r\n\t\t\t\tp[i] = p[i - 1] * x;\r\n\t\t\t\tpi[i] = pi[i - 1] * xi;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\r\n\tMint pow(int n) {\r\n\t\tif (n >= 0)\r\n\t\t\treturn p[n];\r\n\t\telse\r\n\t\t\treturn pi[-n];\r\n\t}\r\n};\r\ntemplate<uint mod = MOD> struct Inverses {\r\n\tusing Mint = mint<mod>;\r\n\tvector<Mint> ii;\r\n\r\n\tInverses() : ii() {}\r\n\tInverses(int n) {\r\n\t\tn += 10;\r\n\t\tii = vector<Mint>(n);\r\n\t\tii[1] = 1;\r\n\t\tfor (int x = 2; x < n; x++)\r\n\t\t\tii[x] = Mint() - ii[mod % x] * (mod / x);\r\n\t}\r\n\r\n\tMint inv(Mint x) {\r\n\t\tassert(x != 0);\r\n\t\tuint t = x.x;\r\n\t\tuint res = 1;\r\n\t\twhile(t >= (int)ii.size()) {\r\n\t\t\tuint z = mod / t;\r\n\t\t\tres = (ull)res * (mod - z) % mod;\r\n\t\t\tt = mod - t * z;\r\n\t\t}\r\n\t\treturn ii[t] * res;\r\n\t}\r\n};\r\nusing Mint = mint<>;\r\n\r\nconst int N = 300300;\r\nFactorials F(N);\r\nMint F2[N];\r\nPowers P2(N, Mint(2));\r\nMint invol[N];\r\n\r\nvoid precalc() {\r\n\tF2[0] = 1;\r\n\tfor (int i = 1; i < N; i++)\r\n\t\tF2[i] = F2[i - 1] * (2 * i - 1);\r\n\tinvol[0] = invol[1] = 1;\r\n\tfor (int i = 2; i < N; i++)\r\n\t\tinvol[i] = invol[i - 1] + invol[i - 2] * (i - 1);\r\n}\r\n\r\nvoid solve() {\r\n\tint n;\r\n\tscanf(\"%d\", &n);\r\n\tMint ans = 0;\r\n\tfor (int k = 0; 4 * k <= n; k++) {\r\n\t\tMint cur = invol[n - 4 * k];\r\n\t\tcur *= F.C(n - 2 * k, 2 * k);\r\n\t\tcur *= F2[k];\r\n\t\tcur *= P2.pow(k);\r\n\t\tans += cur;\r\n\t}\r\n\tprintf(\"%u\\n\", ans.x);\r\n}\r\n\r\nint main()\r\n{\r\n\tstartTime = clock();\r\n//\tfreopen(\"input.txt\", \"r\", stdin);\r\n//\tfreopen(\"output.txt\", \"w\", stdout);\r\n\r\n\tprecalc();\r\n\r\n\tint t;\r\n\tscanf(\"%d\", &t);\r\n\twhile(t--) solve();\r\n\r\n\treturn 0;\r\n}"
+}

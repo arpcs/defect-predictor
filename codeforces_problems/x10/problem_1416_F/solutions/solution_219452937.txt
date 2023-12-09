@@ -1,0 +1,38 @@
+{
+    "id": 219452937,
+    "contestId": 1416,
+    "creationTimeSeconds": 1692365644,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1416,
+        "index": "F",
+        "name": "Showing Off",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3300,
+        "tags": [
+            "flows",
+            "graph matchings",
+            "greedy",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1416,
+        "members": [
+            {
+                "handle": "YHT_CC"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601219100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 20889600,
+    "source": "// LUOGU_RID: 121664197\n#include <bits/stdc++.h>\nnamespace IO {\n#define iL (1 << 20)\nchar ibuf[iL], *iS = ibuf + iL, *iT = ibuf + iL;\n#define gc() ((iS == iT) ? (iT = (iS = ibuf) + fread(ibuf, 1, iL, stdin), iS == iT ? EOF : *iS ++) : *iS ++)\ntemplate<class T> inline void read(T &x) {\n  x = 0;int f = 0;char ch = gc();\n  for (; !isdigit(ch); f |= ch == '-', ch = gc());\n  for (; isdigit(ch); x = (x << 1) + (x << 3) + (ch ^ 48), ch = gc());\n  x = (f == 1 ? ~ x + 1 : x);\n}\ntemplate<class T, class... Args> inline void read(T &x, Args&... args) { read(x), read(args...); }\ntemplate<class T> inline void readch(T &x) { char ch = gc(); for (; !isalpha(ch); ch = gc()); x = ch; }\nchar Out[iL], *iter = Out;\n#define flush() fwrite(Out, 1, iter - Out, stdout), iter = Out\ntemplate<class T> inline void write(T x, char ch = '\\n') {\n  T l, c[35];\n  if (x < 0) *iter ++ = '-', x = ~ x + 1;\n  for (l = 0; !l || x; c[l] = x % 10, l++, x /= 10);\n  for (; l; -- l, *iter ++ = c[l] + '0');*iter ++ = ch;\n  flush();\n}\ntemplate<class T, class... Args> inline void write(T x, Args... args) { write(x, ' '), write(args...); }\n} // IO\nusing namespace IO;\n#define N 100005\n#define M 1000005\n#define ll long long\n#define DEBUG\n#define pii pair<int, int>\n#define mp make_pair\n#define fi first\n#define se second\n#define vi vector<int>\n#define MOD 998244353\n#define il inline\n#define get(x, y) ((x - 1) * m + y)\nusing namespace std;\ninline int pls(int x, int y) { return x + y >= MOD ? x + y - MOD : x + y; }\ninline int sub(int x, int y) { return x - y < 0 ? x - y + MOD : x - y; }\ninline int prd(int x, int y) { return (1ll * x * y % MOD); } \nstruct edge { int x, y, c; }e[M];\nint QWT, n, m, S, T, VS, VT, cnt, head[N], nxt[M], dis[N], cur[N];\nil void ins(int x, int y, int c) { e[++ cnt] = (edge){x, y, c}, nxt[cnt] = head[x], head[x] = cnt; }\nil void add(int x, int y, int c) { ins(x, y, c), ins(y, x, 0); }\nil void add(int x, int y, int l, int r) { add(VS, y, l), add(x, VT, l); if (l != r) add(x, y, r - l); }\nil bool bfs(int s) {\n  for (int i = 1; i <= VT; i++) cur[i] = head[i], dis[i] = -1;\n  dis[s] = 0; queue<int> q; q.push(s);\n  while (!q.empty()) {\n    int x = q.front(); q.pop();\n    for (int i = head[x]; i; i = nxt[i]) {\n      int y = e[i].y; if (e[i].c > 0 && dis[y] == -1) { dis[y] = dis[x] + 1; q.push(y); }\n    }\n  }\n  return (dis[VT] != -1);\n}\nint dfs(int x, int flow) {\n  if (x == VT || !flow) return flow; int res = 0;\n  for (int &i = cur[x]; i; i = nxt[i]) {\n    int y = e[i].y;\n    if (e[i].c > 0 && dis[y] == dis[x] + 1) {\n      int tmp = dfs(y, min(flow, e[i].c));\n      flow -= tmp, e[i].c -= tmp, res += tmp, e[i ^ 1].c += tmp; if (!flow) break;\n    }\n  }\n  if (!res) dis[x] = -1; return res;\n}\nil ll maxflow() {\n  ll ans = 0; while (bfs(VS)) ans += dfs(VS, INT_MAX);\n  return ans;\n}\nint dx[4] = {1, -1, 0, 0}, dy[4] = {0, 0, 1, -1}, Sum[N], gh[N], A[N], B[N];\nchar str[4] = {'D', 'U', 'R', 'L'};\nil void solve() {\n  for (int i = 1; i <= VT; i++) head[i] = 0; \n  for (int i = 0; i <= (n + 1) * (m + 1); i++) A[i] = B[i] = Sum[i] = 0; read(n, m), cnt = 1; \n  S = n * m + 1, T = S + 1, VS = T + 1, VT = VS + 1;\n  for (int i = 1; i <= n; i++) for (int j = 1; j <= m; j++) read(Sum[get(i, j)]);\n  for (int i = 1; i <= n; i++) for (int j = 1; j <= m; j++) {\n    gh[get(i, j)] = 0;\n    for (int k = 0; k < 4; k++) {\n      int nx = i + dx[k], ny = j + dy[k]; if (nx < 1 || nx > n || ny < 1 || ny > m) continue;\n      gh[get(i, j)] |= (Sum[get(i, j)] > Sum[get(nx, ny)]);\n    }\n    gh[get(i, j)] ^= 1;\n  }\n  for (int i = 1; i <= n; i++) for (int j = 1; j <= m; j++) if ((i + j) & 1) {\n    add(S, get(i, j), gh[get(i, j)], 1);\n    for (int k = 0; k < 4; k++) {\n      int nx = i + dx[k], ny = j + dy[k]; if (nx < 1 || nx > n || ny < 1 || ny > m) continue;\n      add(get(i, j), get(nx, ny), 1);\n    }\n  }  else add(get(i, j), T, gh[get(i, j)], 1);\n  add(T, S, INT_MAX); int goal = 0;\n  for (int i = 1; i <= n; i++) for (int j = 1; j <= m; j++) goal += gh[get(i, j)];\n  if (maxflow() != goal) { puts(\"NO\"); return ; }\n  for (int i = 1; i <= n; i++) for (int j = 1; j <= m; j++) if ((i + j) & 1) {\n    for (int p = head[get(i, j)]; p; p = nxt[p]) { int y = e[p].y;\n      if (y != S && y != T && e[p ^ 1].c) {\n        A[get(i, j)] = 1, A[y] = Sum[y] - 1;\n        for (int k = 0; k < 4; k++) {\n          int nx = i + dx[k], ny = j + dy[k]; if (nx < 1 || nx > n || ny < 1 || ny > m) continue;\n          if (get(nx, ny) == y) { B[get(i, j)] = k, B[y] = k ^ 1; }\n        }\n      }\n    }\n  }\n  for (int i = 1; i <= n; i++) for (int j = 1; j <= m; j++) if (!A[get(i, j)]) {\n    for (int k = 0; k < 4; k++) {\n      int nx = i + dx[k], ny = j + dy[k]; if (nx < 1 || nx > n || ny < 1 || ny > m) continue;\n      if (Sum[get(i, j)] > Sum[get(nx, ny)]) {\n        A[get(i, j)] = Sum[get(i, j)] - Sum[get(nx, ny)], B[get(i, j)] = k; break;\n      } \n    }\n  }\n  puts(\"YES\");\n  for (int i = 1; i <= n; i++) {\n    for (int j = 1; j <= m; j++) write(A[get(i, j)], ' '); puts(\"\");\n  }\n  for (int i = 1; i <= n; i++) {\n    for (int j = 1; j <= m; j++) *iter ++ = str[B[get(i, j)]], *iter ++ = ' ';\n    *iter ++ = '\\n'; flush();\n  }\n}\nint main() {\n#ifndef ONLINE_JUDGE\n  freopen(\"test.in\", \"r\", stdin); freopen(\"test.out\", \"w\", stdout);\n#endif\n  read(QWT); while (QWT --) solve();\n  return 0;\n}"
+}

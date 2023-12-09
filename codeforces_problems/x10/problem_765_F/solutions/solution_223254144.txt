@@ -1,0 +1,35 @@
+{
+    "id": 223254144,
+    "contestId": 765,
+    "creationTimeSeconds": 1694625562,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 765,
+        "index": "F",
+        "name": "Souvenirs",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 3100,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 765,
+        "members": [
+            {
+                "handle": "baizongyu314"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1487059500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 10444800,
+    "source": "#ifdef DEBUG\r\n#define GNU_DEBUG\r\n#define _GLIBCXX_DEBUG 1\r\n#define _GLIBCXX_DEBUG_PEDANTIC 1\r\n#define _GLIBCXX_SANITIZE_VECTOR 1\r\n#endif\r\n\r\n#include<bits/stdc++.h>\r\n#define F(i,j,k) for(auto i=j;i<=(decltype(i))k;i++)\r\n#define exec(...) [&](){__VA_ARGS__}()\r\n#define lambda [&]\r\n#define endl '\\n'\r\n#define view(x) begin(x),end(x)\r\n#define pb push_back\r\n#define x first\r\n#define y second\r\n#define os ostream\r\nusing namespace std;\r\ntemplate<typename T>void ckmax(T& a,T b){a=max(a,b);}\r\ntemplate<typename T>void ckmin(T& a,T b){a=min(a,b);}\r\n\r\n#ifdef DEBUG\r\ntemplate<typename...T>os& operator<<(os& out,tuple<T...> x);\r\n\r\ntemplate<typename T1,typename T2>os& operator<<(os& out,pair<T1,T2> x){return out<<tuple(x);}\r\ntemplate<typename T,typename=decltype(T().begin()),typename=enable_if_t<!is_same_v<decay_t<T>,string>>>os& operator<<(os& out,T x){return out<<\"{\",exec(auto n=0u;for(auto i:x) out<<i<<(++n==x.size()?\"\":\",\");),out<<\"}\";}\r\ntemplate<typename...T>os& operator<<(os& out,tuple<T...> x){return apply(lambda(T... xx){auto n=0u;out<<\"{\",((out<<xx<<(++n==sizeof...(T)?\"\":\",\")),...),out<<\"}\";},x),out;}\r\n#define debug(...) cerr<<\"#\"<<__LINE__<<\": \"<<#__VA_ARGS__<<\" = \"<<std::make_tuple(__VA_ARGS__)<<endl\r\n#else\r\n#define debug(...) (void)0\r\n#endif\r\n#define nodebug(...) (void)0\r\n\r\n#define int long long\r\nconst int maxn=1e5+5;\r\n\r\n#define ls t[node].l\r\n#define rs t[node].r\r\n#define mid (l+r)/2\r\n#define pkgl l,mid,(ls?ls:ls=++tot)\r\n#define pkgr mid+1,r,(rs?rs:rs=++tot)\r\n\r\nstruct Segment{\r\n    int tot=1;\r\n    struct Name{\r\n        int l,r,mx;\r\n    }t[maxn*2];\r\n    void init(){\r\n        tot=1;\r\n        F(i,0,maxn*2-1) t[i]={0,0,LLONG_MAX/100};\r\n    }\r\n    void update(int l,int r,int node,int x,int y){\r\n        if(l==r) return ckmin(t[node].mx,y),(void)0;\r\n        if(mid>=x) update(pkgl,x,y);\r\n        else update(pkgr,x,y);\r\n        t[node].mx=min(t[ls].mx,t[rs].mx);\r\n    }\r\n    int query(int l,int r,int node,int x,int y){\r\n        if(x<=l&&r<=y) return t[node].mx;\r\n        int ans=LLONG_MAX/100;\r\n        if(mid>=x) ckmin(ans,query(pkgl,x,y));\r\n        if(mid<y) ckmin(ans,query(pkgr,x,y));\r\n        return ans;\r\n    }\r\n}t;\r\n\r\nmultiset<pair<int,int>> mst={{LLONG_MIN/100,0}};\r\n\r\nint n,a[maxn],m,l[maxn],r[maxn];\r\nvector<tuple<int,int,int>> v[maxn];\r\nint ans[maxn];\r\n\r\nvoid solve(int r){\r\n    int bnd=1e9+5;\r\n    while(1){\r\n        auto iter=--mst.upper_bound({bnd,LLONG_MAX/100});\r\n        debug(r,a[r],bnd,iter->x);\r\n        if(iter->x<a[r]) break;\r\n        t.update(1,n,1,iter->y,iter->x-a[r]);\r\n        if(iter->x==a[r]) break;\r\n        bnd=a[r]+(iter->x-a[r])/2;\r\n    }\r\n}\r\n\r\n\r\nsigned main(){\r\n    cin.tie(0)->sync_with_stdio(0);\r\n    cin>>n;\r\n    F(i,1,n) cin>>a[i],ans[i]=LLONG_MAX/100;;\r\n    cin>>m;\r\n    F(i,1,m) cin>>l[i]>>r[i];\r\n    F(i,1,m) v[r[i]].pb({i,l[i],LLONG_MAX/100});\r\n    F(_,1,2){\r\n        t.init();\r\n        mst={{LLONG_MIN/100,0}};\r\n        F(i,1,n){\r\n            for(auto& j:v[i]) get<2>(j)=t.query(1,n,1,get<1>(j),i);\r\n            mst.insert({a[i],i});\r\n            debug(i,mst);\r\n            solve(i+1);\r\n        }\r\n        F(i,1,n) for(auto j:v[i]) ckmin(ans[get<0>(j)],get<2>(j));\r\n        F(i,1,n) a[i]=1e9+1-a[i];\r\n    }\r\n    F(i,1,m) cout<<ans[i]<<endl;\r\n    return 0;\r\n}\r\n/*\r\n~\r\n~\r\n~\r\n~\r\n~\r\n~\r\n~\r\n~\r\n*/\r\n\r\n"
+}

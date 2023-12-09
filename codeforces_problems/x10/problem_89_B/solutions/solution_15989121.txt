@@ -1,0 +1,38 @@
+{
+    "id": 15989121,
+    "contestId": 89,
+    "creationTimeSeconds": 1455375797,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 89,
+        "index": "B",
+        "name": "Widget Library",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "expression parsing",
+            "graphs",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 89,
+        "members": [
+            {
+                "handle": "Y-MP"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1308236400
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 39,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 0,
+    "source": "#include <cinttypes>\n#include <cstdlib>\n#include <cstring>\n#include <cstdio>\n#include <cctype>\n\n#include <algorithm>\n#include <string>\n#include <vector>\n#include <map>\n\nstruct size { int64_t x, y; };\n\nstruct widget { enum { W, H, V } t; size z; int64_t b, s; };\n\nstatic size resize(const std::string &s,\n\tstd::map<std::string, std::vector<std::string>> &ns,\n\tstd::map<std::string, widget> &ws)\n{\n\twidget &w = ws[s];\n\n\tif (w.t == widget::W || w.z.x != -1 || w.z.y != -1)\n\t\treturn w.z;\n\n\tsize z = { };\n\n\tif (w.t == widget::H) {\n\t\tif (!ns[s].empty())\n\t\t\tz = { .x = 2*w.b - w.s, .y = 2*w.b };\n\t\tfor (const std::string &t : ns[s]) {\n\t\t\tconst size zz = resize(t, ns, ws);\n\t\t\tz = { .x = z.x + zz.x + w.s,\n\t\t\t      .y = std::max(z.y, 2*w.b + zz.y) };\n\t\t}\n\t}\n\n\tif (w.t == widget::V) {\n\t\tif (!ns[s].empty())\n\t\t\tz = { .x = 2*w.b, .y = 2*w.b - w.s };\n\t\tfor (const std::string &t : ns[s]) {\n\t\t\tconst size zz = resize(t, ns, ws);\n\t\t\tz = { .x = std::max(z.x, 2*w.b + zz.x),\n\t\t\t      .y = z.y + zz.y + w.s };\n\t\t}\n\t}\n\n\treturn w.z = z;\n}\n\nint main(int argc, const char * const argv[])\n{\n\tint n;\n\n\tif (scanf(\"%d\\n\", &n) != 1 || n < 1 || 100 < n) {\n\t\tfprintf(stderr, \"scanf: Header IO error.\\n\");\n\t\texit(EXIT_FAILURE);\n\t}\n\n\tstd::map<std::string, std::vector<std::string>> ns;\n\tstd::map<std::string, widget> ws;\n\tchar line[1001];\n\n\tfor (size_t i = 0; i < n && scanf(\"%1000[^\\n]\\n\", line) == 1; i++) {\n\t\tchar a[1001], b[1001];\n\t\tint x, y;\n\n\t\tif (sscanf(line, \"Widget %1000[^(](%d, %d)\", a, &x, &y) == 3)\n\t\t\tws[a] = { .t = widget::W, .z = { .x = x, .y = y } };\n\t\telse if (sscanf(line, \"HBox %1000s\", a) == 1)\n\t\t\tws[a] = { .t = widget::H, .z = { .x = -1, .y = -1 } };\n\t\telse if (sscanf(line, \"VBox %1000s\", a) == 1)\n\t\t\tws[a] = { .t = widget::V, .z = { .x = -1, .y = -1 } };\n\t\telse if (sscanf(line, \"%1000[^.].pack(%1000[^)])\", a, b) == 2)\n\t\t\tns[a].push_back(b);\n\t\telse if (sscanf(line, \"%1000[^.].set_border(%d)\", a, &x) == 2)\n\t\t\tws[a].b = x;\n\t\telse if (sscanf(line, \"%1000[^.].set_spacing(%d)\", a, &x) == 2)\n\t\t\tws[a].s = x;\n\t\telse {\n\t\t\tfprintf(stderr, \"scanf: Instriction IO error.\\n\");\n\t\t\treturn EXIT_FAILURE;\n\t\t}\n\t}\n\n\tfor (const std::pair<std::string, widget> &w : ws)\n\t\tresize(w.first, ns, ws);\n\n\tfor (const std::pair<std::string, widget> &w : ws)\n\t\tprintf(\"%s %\" PRId64 \" %\" PRId64 \"\\n\",\n\t\t\tw.first.c_str(), w.second.z.x, w.second.z.y);\n\n\treturn EXIT_SUCCESS;\n}\n"
+}

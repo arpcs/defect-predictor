@@ -1,0 +1,42 @@
+{
+    "id": 229807589,
+    "contestId": 1633,
+    "creationTimeSeconds": 1698312633,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1633,
+        "index": "E",
+        "name": "Spanning Tree Queries",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "greedy",
+            "math",
+            "sortings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1633,
+        "members": [
+            {
+                "handle": "Iceturky"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1643639700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 16,
+    "timeConsumedMillis": 748,
+    "memoryConsumedBytes": 2252800,
+    "source": "// LUOGU_RID: 131703431\n#include<iostream>\r\n#include<cstdio>\r\n#include<cstdlib>\r\n#include<vector>\r\n#include<algorithm>\r\n#include<cstring>\r\n#define int long long\r\n#define ls (x<<1)\r\n#define rs ((x<<1)|1)\r\n#define gc() getchar()\r\n#define pc(x) putchar(x)\r\n#define lowbit(x) ((x)&-(x))\r\n\r\nusing namespace std;\r\n\r\ninline int read(){\r\n\tint w,f=1;char c;\r\n\twhile((c=gc())>'9'||c<'0')if(c=='-')f=-1;\r\n\tw=c-'0';\r\n\twhile((c=gc())>='0'&&c<='9')w=w*10+c-'0';\r\n\treturn w*f;\r\n}\r\nint never_use[105],Never;\r\ninline void print(int x){\r\n\tif(x==0)pc(48);\r\n\tif(x<0)\r\n\t\tpc('-'),x=-x;\r\n\twhile(x)\r\n\t\tnever_use[++Never]=x%10,x/=10;\r\n\twhile(Never)\r\n\t\tpc(never_use[Never--]+48);\r\n}\r\n\r\nconst int N=5e1+5,M=3e2+5;\r\n\r\nstruct Edge{\r\n\tint u,v,w,id;\r\n\tbool operator<(Edge ano)const{\r\n\t\treturn w==ano.w?id<ano.id:w<ano.w;\r\n\t}\r\n}E[M],e[M];\r\nint l[M],r[M];\r\n\r\nint fa[N],summ[M];\r\nint find(int x){\r\n\tif(fa[x]==x)\r\n\t\treturn x;\r\n\tfa[x]=find(fa[x]);\r\n\tsumm[fa[x]]+=summ[x];\r\n\tsumm[x]=0;\r\n\treturn fa[x];\r\n}\r\n\r\nint n,m;\r\nvoid init(){for(int i=1;i<=n;i++)fa[i]=i,summ[i]=1;}\r\nbool check(int x,int nw)\r\n{\r\n//\tfor(int i=1;i<=n;i++)\r\n//\t\tprint(e)\r\n\tinit();\r\n\tfor(int i=1;i<=m;i++)\r\n\t\te[i]=E[i],e[i].w=abs(e[i].w-x);\r\n\tfor(int i=1;i<=m;i++){\r\n\t\tif(e[nw]<e[i]||i==nw)\r\n\t\t\tcontinue;\r\n\t\tint u=e[i].u,v=e[i].v;\r\n\t\tif(find(u)!=find(v)){\r\n\t\t\tif(summ[find(u)]>summ[find(v)])\r\n\t\t\t\tfa[find(v)]=find(u);\r\n\t\t\telse\r\n\t\t\t\tfa[find(u)]=find(v);\r\n\t\t}\r\n\t}\r\n\treturn find(e[nw].u)!=find(e[nw].v);\r\n}\r\n\r\n//int Q[10000005];\r\nint cnt[M*M];\r\n//signed ans[10000005];\r\nint X[M*M];\r\nint sum[M*M];\r\nstruct opt{\r\n\tint id,a,b;\r\n};\r\nopt K[M*3];\r\n\r\nsigned main()\r\n{\r\n\tn=read(),m=read();\r\n\tfor(int i=1;i<=m;i++)\r\n\t\tE[i]={read(),read(),read(),i};\r\n\tfor(int i=1;i<=m;i++)\r\n\t{\r\n\t\tif(!check(E[i].w,i))\r\n\t\t\tcontinue;\r\n\t\tint ll=0,rr=E[i].w,mid,ans=0;\r\n\t\twhile(ll<=rr)\r\n\t\t{\r\n\t\t\tmid=(rr+ll)>>1;\r\n\t\t\tif(check(mid,i))\r\n\t\t\t\tans=mid,rr=mid-1;\r\n\t\t\telse\r\n\t\t\t\tll=mid+1;\r\n\t\t}\r\n\t\tl[i]=ans;\r\n\t\tll=E[i].w,rr=1e8,ans=0;\r\n\t\twhile(ll<=rr){\r\n\t\t\tmid=(rr+ll)>>1;\r\n\t\t\tif(check(mid,i))\r\n\t\t\t\tans=mid,ll=mid+1;\r\n\t\t\telse\r\n\t\t\t\trr=mid-1;\r\n\t\t}\r\n\t\tr[i]=ans+1;\r\n//\t\tcout<<l[i]<<\" \"<<r[i]<<endl;\r\n\t}\r\n//\tcout<<tot<<endl;\r\n\tint tot=0;//unique(X+1,X+1+tot)-X-1;\r\n//\tcout<<tot<<endl;\r\n//\tfor(int i=1;i<=tot;i++)\r\n//\t\tprint(X[i]),pc(' ');\r\n//\tpc('\\n');\r\n\tfor(int i=1;i<=m;i++){\r\n//\t\tif(!(r[i]-l[i]+1))\r\n//\t\t\tcontinue;\r\n//\t\tl[i]=lower_bound(X+1,X+1+tot,l[i])-X;\r\n//\t\tr[i]=upper_bound(X+1,X+1+tot,r[i])-X;\r\n//\t\tint nw=lower_bound(X+1,X+1+tot,E[i].w)-X;\r\n//\t\tcout<<l[i]<<\" \"<<r[i]<<\" \"<<E[i].w<<endl;\r\n\t\tK[++tot]={l[i],E[i].w,-1},X[tot]=l[i];\r\n\t\tK[++tot]={E[i].w,-2*E[i].w,2},X[tot]=E[i].w;\r\n\t\tK[++tot]={r[i],E[i].w,-1},X[tot]=r[i];\r\n//\t\tcnt[l[i]]+=E[i].w;\r\n//\t\tcnt[nw]-=2*E[i].w;\r\n//\t\tcnt[r[i]]+=E[i].w;\r\n//\t\tsum[l[i]]--;\r\n//\t\tsum[nw]+=2;\r\n//\t\tsum[r[i]]--;\r\n\t}\r\n\tsort(X+1,X+1+tot);\r\n\ttot=unique(X+1,X+1+tot)-X-1;\r\n//\tfor(int i=1;i<=tot;i++)\r\n//\t\tprint(X[i]),pc(' ');\r\n//\tpc('\\n');\r\n\tfor(int i=1;i<=3*m;i++)\r\n\t{\r\n\t\tK[i].id=lower_bound(X+1,X+1+tot,K[i].id)-X,sum[K[i].id]+=K[i].a,cnt[K[i].id]+=K[i].b;\r\n//\t\tcout<<K[i].id<<\" \"<<K[i].a<<\" \"<<K[i].b<<endl;\r\n\t}\r\n\t\t\r\n\tfor(int i=1;i<=tot;i++)\r\n\t\tcnt[i]+=cnt[i-1],sum[i]+=sum[i-1];//,cout<<cnt[i]<<\" \"<<sum[i]<<\" \"<<X[i]<<endl;\r\n\tint p=read(),k=read(),a=read(),b=read(),c=read();\r\n//\tint tot=0;\r\n\tint lst;\r\n\tint ans=0;\r\n\tfor(int i=1;i<=p;i++){\r\n\t\tlst=read();\r\n\t\tint tmp=upper_bound(X+1,X+1+tot,lst)-X-1;//cout<<lst<<\" \"<<tmp<<endl;\r\n\t\tans^=sum[tmp]+cnt[tmp]*lst;\r\n\t}\r\n\tfor(int i=p+1;i<=k;i++){\r\n\t\tint x=lst*a+b;x%=c;\r\n\t\tint tmp=upper_bound(X+1,X+1+tot,x)-X-1;//cout<<x<<\" \"<<tmp<<endl;\r\n\t\tans^=sum[tmp]+cnt[tmp]*x;\r\n\t\tlst=x;\r\n\t}\r\n//\t\tQ[i]=X[++tot]=(Q[i-1]*a+b)%c;\r\n//\tsort(X+1,X+1+tot);\r\n//\tint ans=0;\r\n//\tfor(int i=1;i<=k;i++){\r\n//\t\tint nw=lower_bound(X+1,X+1+tot,Q[i])-X;\r\n//\t\tans^=cnt[nw]+sum[nw]*Q[i];//,print(cnt[nw]+sum[nw]*Q[i]),pc('\\n');\r\n//\t}\r\n\tprint(ans),pc('\\n');\r\n\treturn 0;\r\n}"
+}

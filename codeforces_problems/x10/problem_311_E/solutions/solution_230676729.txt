@@ -1,0 +1,35 @@
+{
+    "id": 230676729,
+    "contestId": 311,
+    "creationTimeSeconds": 1698755353,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 311,
+        "index": "E",
+        "name": "Biologist",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2300,
+        "tags": [
+            "flows"
+        ]
+    },
+    "author": {
+        "contestId": 311,
+        "members": [
+            {
+                "handle": "Glassy_Sky"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1369582200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 1638400,
+    "source": "// LUOGU_RID: 132660570\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\nconst int maxn=1e4+5,maxm=2e3+5;\r\nconst int N=maxm+maxn,M=maxn+maxm*10;\r\nconst long long INF=1e16;\r\n\r\nstruct Flow {\r\n\tint head[N],idx=1;\r\n\tstruct edge {\r\n\t\tint v;\r\n\t\tlong long w;\r\n\t\tint next;\r\n\t}e[M<<1];\r\n\tinline void Add(int u,int v,long long w) {\r\n\t\te[++idx]={v,w,head[u]};\r\n\t\thead[u]=idx;\r\n\t\te[++idx]={u,0,head[v]};\r\n\t\thead[v]=idx;\r\n\t}\r\n\tint dep[N],cur[N],S,T;\r\n\tbool bfs() {\r\n\t\tmemset(dep,0,sizeof dep);\r\n\t\tdep[S]=1;\r\n\t\tqueue<int>q;\r\n\t\tq.push(S);\r\n\t\twhile(!q.empty()) {\r\n\t\t\tint now=q.front();\r\n\t\t\tq.pop();\r\n\t\t\tfor(int i=head[now];i;i=e[i].next) {\r\n\t\t\t\tint v=e[i].v;\r\n\t\t\t\tif(!dep[v]&&e[i].w) {\r\n\t\t\t\t\tdep[v]=dep[now]+1;\r\n\t\t\t\t\tq.push(v);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn dep[T];\r\n\t}\r\n\tlong long dfs(int u,long long flow) {\r\n\t\tif(u==T||!flow) return flow;\r\n\t\tlong long ret=0;\r\n\t\tfor(int &i=cur[u];i;i=e[i].next) {\r\n\t\t\tint v=e[i].v;\r\n\t\t\tif(dep[v]!=dep[u]+1) continue;\r\n\t\t\tlong long d=dfs(v,min(flow-ret,e[i].w));\r\n\t\t\tif(d) {\r\n\t\t\t\tret+=d;\r\n\t\t\t\te[i].w-=d;\r\n\t\t\t\te[i^1].w+=d;\r\n\t\t\t\tif(ret==flow) return ret;\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn ret;\r\n\t}\r\n\tlong long maxflow;\r\n\tvoid dicnic() {\r\n\t\tmaxflow=0;\r\n\t\twhile(bfs()) {\r\n\t\t\tmemcpy(cur,head,sizeof cur);\r\n\t\t\tmaxflow+=dfs(S,INF);\r\n\t\t}\r\n\t}\r\n}mf;\r\n\r\n\r\nint n,m,g,idx=0;\r\nint &S=mf.S,&T=mf.T;\r\nint a[maxn],id[maxn];\r\n\r\nint main() {\r\n\tscanf(\"%d%d%d\",&n,&m,&g);\r\n\tS=++idx,T=++idx;\r\n\tfor(int i=1;i<=n;i++) {\r\n\t\tscanf(\"%d\",&a[i]);\r\n\t\tid[i]=++idx;\r\n\t}\r\n\tfor(int i=1;i<=n;i++) {\r\n\t\tint w;\r\n\t\tscanf(\"%d\",&w);\r\n\t\tif(!a[i]) mf.Add(S,id[i],w);\r\n\t\telse mf.Add(id[i],T,w);\r\n\t}\r\n\tlong long sum=0;\r\n\tfor(int i=1;i<=m;i++) {\r\n\t\tint op,w,k,q;\r\n\t\tscanf(\"%d%d%d\",&op,&w,&k);\r\n\t\t++idx;\r\n\t\tsum+=w;\r\n\t\tfor(int j=1;j<=k;j++) {\r\n\t\t\tint pos;\r\n\t\t\tscanf(\"%d\",&pos);\r\n\t\t\tif(!op) mf.Add(idx,id[pos],INF);\r\n\t\t\telse mf.Add(id[pos],idx,INF);\r\n\t\t}\r\n\t\tscanf(\"%d\",&q);\r\n\t\tif(q) w+=g;\r\n\t\tif(!op) mf.Add(S,idx,w);\r\n\t\telse mf.Add(idx,T,w);\r\n\t}\r\n\tmf.dicnic();\r\n\tprintf(\"%lld\",sum-mf.maxflow);\r\n\treturn 0;\r\n}"
+}

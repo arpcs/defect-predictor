@@ -1,0 +1,35 @@
+{
+    "id": 236396807,
+    "contestId": 1251,
+    "creationTimeSeconds": 1702055329,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1251,
+        "index": "F",
+        "name": "Red-White Fence",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "combinatorics",
+            "fft"
+        ]
+    },
+    "author": {
+        "contestId": 1251,
+        "members": [
+            {
+                "handle": "bobbilyking"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571929500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 22,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 4915200,
+    "source": "//Number Theoretic Transform\r\n#pragma GCC target(\"avx2\")\r\n#pragma GCC optimize(\"O3\")\r\n#pragma GCC optimize(\"unroll-loops\")\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef long long int ll;\r\ntypedef long double ld;\r\ntypedef pair<ll, ll> pl;\r\ntypedef vector<ll> vl;\r\n\r\n#define G(x) ll x; cin >> x;\r\n#define F(i, l, r) for(ll i = l; i < (r); ++i)\r\n#define M 998244353\r\n#define NN 600010\r\n#define rep(i, a, b) for(int i = a; i < (b); ++i)\r\n#define all(x) x.begin(), x.end()\r\n#define sz(x) (int)(x).size()\r\n\r\nconstexpr ll modpow(ll b, ll e) {\r\n\tll r = 1; for (; e; e/=2) {\r\n\t\tif (e&1) r=r*b%M;\r\n\t\tb=b*b%M;\r\n\t} \r\n\treturn r;\r\n}\r\n\r\nconst ll mod = (119 << 23) + 1, root = 3; // = 998244353\r\n// For p < 2^30 there is also e.g. (5 << 25, 3), (7 << 26, 3),\r\n// (479 << 21, 3) and (483 << 21, 5). The last two are > 10^9.\r\n\r\ntypedef vector<ll> vl;\r\nvoid ntt(ll* x, ll* temp, ll* roots, int N, int skip) {\r\n\tif (N == 1) return;\r\n\tint n2 = N/2;\r\n\tntt(x     , temp, roots, n2, skip*2);\r\n\tntt(x+skip, temp, roots, n2, skip*2);\r\n\trep(i,0,N) temp[i] = x[i*skip];\r\n\trep(i,0,n2) {\r\n\t\tll s = temp[2*i], t = temp[2*i+1] * roots[skip*i];\r\n\t\tx[skip*i] = (s + t) % mod; x[skip*(i+n2)] = (s - t + mod) % mod;\r\n\t}\r\n}\r\n\r\nvoid ntt(vl& x, bool inv = false) {\r\n\tll e = modpow(root, (mod-1) / sz(x));\r\n\tif (inv) e = modpow(e, mod-2);\r\n\tvl roots(sz(x), 1), temp = roots;\r\n\trep(i,1,sz(x)) roots[i] = roots[i-1] * e % mod;\r\n\tntt(&x[0], &temp[0], &roots[0], sz(x), 1);\r\n}\r\n\r\nvl conv(vl a, vl b) {\r\n\tint s = sz(a) + sz(b) - 1; if (s <= 0) return {};\r\n\tint L = s > 1 ? 32 - __builtin_clz(s - 1) : 0, n = 1 << L;\r\n\tif (s <= 200) { // (factor 10 optimization for |a|,|b| = 10)\r\n\t\tvl c(s);\r\n\t\trep(i,0,sz(a)) rep(j,0,sz(b))\r\n\t\t\tc[i + j] = (c[i + j] + a[i] * b[j]) % mod;\r\n\t\treturn c;\r\n\t}\r\n\ta.resize(n); ntt(a);\r\n\tb.resize(n); ntt(b);\r\n\tvl c(n); ll d = modpow(n, mod-2);\r\n\trep(i,0,n) c[i] = a[i] * b[i] % mod * d % mod;\r\n\tntt(c, true); \r\n    c.resize(min(s, NN)); \r\n    return c;\r\n}\r\n\r\n// avoid copying memory\r\nvl polyrec(vector<vl>::iterator l, vector<vl>::iterator r) {\r\n    if (l+1==r) return *l;\r\n    ll dist = ll(r-l)/2;\r\n    return conv(polyrec(l, l + dist), polyrec(l+dist, r));\r\n}\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);\r\n\r\n    G(n) G(k)\r\n    vl cnts(NN);\r\n    while (n--) {\r\n        G(x) cnts[x] = min(cnts[x]+1, 2ll);\r\n    }\r\n    vl b(k);\r\n    F(i, 0, k) cin >> b[i];\r\n\r\n    G(q)\r\n    vector<pl> queries(q);\r\n    F(i, 0, q) cin >> queries[i].first;\r\n\r\n    F(i, 0, k) {\r\n        vector<vl> comb; \r\n        F(j, 0, b[i]) if (cnts[j] == 1) {\r\n            comb.push_back(vl{1, 2});\r\n        } else if (cnts[j] == 2) {\r\n            comb.push_back(vl{1, 2, 1}); \r\n        }\r\n        vl res = {1};\r\n        if (comb.size()) res = polyrec(comb.begin(), comb.end());\r\n\r\n        for (auto &[x, ans]: queries) {\r\n            ll rem = (x - 2 * b[i])/2 - 1; // don't forget the length of the red board itself lol\r\n            if (rem >= 0 and rem < res.size()) ans += res[rem];\r\n        }\r\n    }\r\n\r\n    F(i, 0, q) cout << queries[i].second%M << '\\n';\r\n}"
+}

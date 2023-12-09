@@ -1,0 +1,36 @@
+{
+    "id": 232491321,
+    "contestId": 1702,
+    "creationTimeSeconds": 1699785643,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1702,
+        "index": "E",
+        "name": "Split Into Two Sets",
+        "type": "PROGRAMMING",
+        "rating": 1600,
+        "tags": [
+            "dfs and similar",
+            "dsu",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1702,
+        "members": [
+            {
+                "handle": "maitohgobihu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1657463700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 33689600,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std; \r\n\r\n#include<ext/pb_ds/assoc_container.hpp>\r\n#include<ext/pb_ds/tree_policy.hpp>\r\nusing namespace __gnu_pbds;\r\ntypedef tree<long long, null_type, less<long long>, rb_tree_tag, tree_order_statistics_node_update> pbds;\r\n//order_of_key(k) , find_by_order(k)\r\n\r\n#define endl                   \"\\n\" ;\r\n#define int                    long long\r\n#define rep(i,a,b)             for(int i = a ; i <= b ; i++)\r\n#define rev(i,a,b)             for (int i = a ; i >= b ; i--)\r\n#define vi                     vector<int>\r\n#define pii                    pair<int,int>\r\n#define pb                     push_back\r\n#define ppb                    pop_back\r\n#define pf                     push_front\r\n#define ppf                    pop_front \r\n#define all(x)                 (x).begin(),(x).end()\r\n#define setit(a,b)             memset(a,b,sizeof(a))\r\n#define mp                     make_pair\r\n#define ff                     first \r\n#define ss                     second\r\n#define least                  INT_MIN\r\n#define great                  INT_MAX       \r\n#define its(n)                 int n ; cin>>n \r\n#define get(arr,n)             vi arr(n) ; rep(i,0,n-1){cin>>arr[i] ;}\r\n#define give(x)                cout<<#x<<\" is \"<<x<<endl;\r\n#define out(x)                 cout<<x<<endl;\r\n#define yes                    cout<<\"YES\"<<endl;\r\n#define no                     cout<<\"NO\"<<endl;\r\n#define c(x)                   cout<<((x)? \"YES\" : \"NO\")<<endl ;\r\n#define debug(x,n)             rep(i,0,n-1){cout<<#x<<i<<\" is \"<<arr[i]<<endl;}\r\n#define outarr(arr,n)          rep(i,0,n-1){cout<<arr[i]<<\" \" ;} cout<<endl;\r\n#define maxe                   *max_element \r\n#define mine                   *min_element\r\n#define ppcll                  __builtin_popcountll\r\n\r\n\r\nconst int mod = 998244353;\r\nconst int inf = 1e18 ;\r\nconst int Mod = 1000000007 ;\r\n/*--------------------------FUNCTIONS----------------------------------*/\r\nint fact(int x){\r\n    int fact[x+1] ;\r\n    fact[0] = 1 ;\r\n    rep(i,1,x){\r\n        fact[i] = (fact[i-1]%Mod * i%Mod)%Mod ;\r\n    }\r\n    return fact[x]%Mod ;\r\n}\r\n\r\n\r\nbool prime(int x){\r\n    int i = 2 ;\r\n    while(i<=sqrt(x)){\r\n        if(x%i == 0){return false ;}\r\n        i++ ;\r\n    }\r\n        return true ;\r\n}\r\n\r\n\r\nvector<int> sieve(int n)\r\n{\r\n    bool prime[n + 1];\r\n    memset(prime, true, sizeof(prime));\r\n    vi v ;\r\n    for (int p = 2; p <= n; p++) {\r\n        if (prime[p] == true) {\r\n            v.pb(p) ;\r\n            for (int i = 2 * p; i <= n; i += p)\r\n                prime[i] = false;\r\n        }\r\n    }\r\n    return v ;\r\n}\r\n\r\n\r\nint binexp(int a , int b , int m){\r\n    int ans = 1 ;\r\n    while(b > 0){\r\n        if(b & 1){\r\n            ans = (ans % m * a % m) % m ;\r\n        }\r\n        a = (a % m * a % m) % m ;\r\n        b >>= 1 ;\r\n    }\r\n    return ans ;\r\n}\r\n\r\n\r\nint modinv(int a , int m ){\r\n    return binexp(a , m-2 , m);\r\n}\r\n\r\n\r\nint nCr(int n , int r){\r\n   return fact(n)/(fact(r)*fact(n-r)) ;\r\n}\r\n/*--------------------------MAIN CODE----------------------------------*/\r\nint32_t main()\r\n{\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL); cout.tie(NULL) ;\r\n    int t ;\r\n    cin >> t ;\r\n    int cnt = 0 ;\r\n    rep(k,1,t){ \r\n        int n ;\r\n        cin >> n ;\r\n        bool ok = true ;\r\n        vi adj[n+1] ;\r\n        rep(i,1,n){\r\n            int u , v ;\r\n            cin >> u >> v ;\r\n            adj[u].pb(v) ;\r\n            adj[v].pb(u) ;\r\n            if(u == v || (adj[u].size() > 2) || (adj[v].size() > 2)){\r\n                ok = false ;\r\n            }\r\n        }\r\n        vi vis(n+1 , 0) ;\r\n        vi col(n+1 , 0) ;\r\n        function<void(int)> dfs = [&](int node){\r\n            vis[node] = 1 ;\r\n            for(auto child : adj[node]){\r\n                if(!vis[child]){\r\n                    col[child] = col[node] ^ 1 ;\r\n                    dfs(child) ;\r\n                }\r\n                else{\r\n                    ok &= (col[child] != col[node]) ;\r\n                }\r\n            }\r\n        };\r\n        rep(i,1,n){\r\n            if(!vis[i]){\r\n                dfs(i) ;\r\n            }\r\n        }\r\n        c(ok) ;\r\n    }\r\n    return 0 ;\r\n}"
+}

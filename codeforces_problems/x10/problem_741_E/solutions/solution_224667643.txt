@@ -1,0 +1,36 @@
+{
+    "id": 224667643,
+    "contestId": 741,
+    "creationTimeSeconds": 1695413883,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 741,
+        "index": "E",
+        "name": "Arpa\u2019s abnormal DNA and Mehrdad\u2019s deep interest",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3400,
+        "tags": [
+            "data structures",
+            "string suffix structures"
+        ]
+    },
+    "author": {
+        "contestId": 741,
+        "members": [
+            {
+                "handle": "zavodil"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1481034900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 91,
+    "timeConsumedMillis": 1559,
+    "memoryConsumedBytes": 50585600,
+    "source": "#include <bits/stdc++.h>\r\n#define fst first\r\n#define snd second\r\n#define fore(i,a,b) for(int i=a,ThxDem=b;i<ThxDem;++i)\r\n#define pb push_back\r\n#define ALL(s) s.begin(),s.end()\r\n#define FIN ios_base::sync_with_stdio(0);cin.tie(0);cout.tie(0)\r\n#define SZ(s) int(s.size())\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef pair<int,int> ii;\r\n\r\nconst int MAXN=2e5+10, SQ=sqrt(MAXN);\r\nint ans[MAXN],to[MAXN],whs[MAXN],wht[MAXN],n,m;\r\nvector<pair<pair<ii,ii>,int>> qs[SQ];\r\nvector<int> wh[SQ];\r\nstring s,t;\r\n\r\n#define RB(x) (x<n?r[x]:0)\r\nvoid csort(vector<int>& sa, vector<int>& r, int k){\r\n\tint n=sa.size();\r\n\tvector<int> f(max(255,n),0),t(n);\r\n\tfore(i,0,n)f[RB(i+k)]++;\r\n\tint sum=0;\r\n\tfore(i,0,max(255,n))f[i]=(sum+=f[i])-f[i];\r\n\tfore(i,0,n)t[f[RB(sa[i]+k)]++]=sa[i];\r\n\tsa=t;\r\n}\r\nvector<int> constructSA(string& s){\r\n\tint n=s.size(),rank;\r\n\tvector<int> sa(n),r(n),t(n);\r\n\tfore(i,0,n)sa[i]=i,r[i]=s[i];\r\n\tfor(int k=1;k<n;k*=2){\r\n\t\tcsort(sa,r,k);csort(sa,r,0);\r\n\t\tt[sa[0]]=rank=0;\r\n\t\tfore(i,1,n){\r\n\t\t\tif(r[sa[i]]!=r[sa[i-1]]||RB(sa[i]+k)!=RB(sa[i-1]+k))rank++;\r\n\t\t\tt[sa[i]]=rank;\r\n\t\t}\r\n\t\tr=t;\r\n\t\tif(r[sa[n-1]]==n-1)break;\r\n\t}\r\n\treturn sa;\r\n}\r\n\r\nvector<int> computeLCP(string& s, vector<int>& sa){\r\n\tint n=s.size(),L=0;\r\n\tvector<int> lcp(n),plcp(n),phi(n);\r\n\tphi[sa[0]]=-1;\r\n\tfore(i,1,n)phi[sa[i]]=sa[i-1];\r\n\tfore(i,0,n){\r\n\t\tif(phi[i]<0){plcp[i]=0;continue;}\r\n\t\twhile(s[i+L]==s[phi[i]+L])L++;\r\n\t\tplcp[i]=L;\r\n\t\tL=max(L-1,0);\r\n\t}\r\n\tfore(i,0,n)lcp[i]=plcp[sa[i]];\r\n\treturn lcp;\r\n}\r\n\r\nstruct minq{\r\n\tint K;\r\n\tvector<vector<int>> st;\r\n\tvector<int> up;\r\n\tminq(){}\r\n\tminq(vector<int> &v){\r\n\t\tint pw=1,n=SZ(v); K=0;\r\n\r\n\t\twhile(pw<=n) pw*=2, K++;\r\n\t\tst.resize(K, vector<int>(n));\r\n\t\t\r\n\t\tup.resize(n+1);\r\n\t\tint asd=0;\r\n\t\tfore(i,1,n+1){\r\n\t\t\twhile((1<<(asd+1))<=i) asd++;\r\n\t\t\tup[i]=asd;\r\n\t\t}\r\n\t\t\r\n\t\tfore(i,0,n) st[0][i]=v[i];\r\n\t\tfore(k,1,K) fore(i,0,n){\r\n\t\t\tst[k][i]=st[k-1][i];\r\n\t\t\tif(i+(1<<(k-1))<n) st[k][i]=min(st[k][i],st[k-1][i+(1<<(k-1))]);\r\n\t\t}\r\n\t}\r\n\t\r\n\tint query(int l, int r){\r\n\t\tint len=r-l;\r\n\t\treturn min(st[up[len]][l], st[up[len]][r-(1<<up[len])]);\r\n\t}\r\n};\r\n\r\nchar getc(int i, int k){\r\n\tif(k>=n+m) return '.';\r\n\tif(k<i) return s[k];\r\n\tif(k<i+m) return t[k-i];\r\n\treturn s[k-m];\r\n}\r\n\r\nminq lcp;\r\n\r\nint getlcp(int x, int y){\r\n\treturn lcp.query(min(x,y)+1,max(x,y)+1);\r\n}\r\n\r\nint findlcp(int x, int y){\r\n\tif(x>y)swap(x,y);\r\n\t\r\n\tif(x+m<y){\r\n\t\tint p0=x, p1=m, p2=y-x-m, p3=m;\r\n\t\t\r\n\t\tint l1=getlcp(wht[0],whs[p0]);\r\n\t\tif(l1<p1) return p0+l1;\r\n\t\t\r\n\t\tint l2=getlcp(whs[p0],whs[p0+p1]);\r\n\t\tif(l2<p2) return p0+p1+l2;\r\n\t\t\r\n\t\tint l3=getlcp(whs[p0+p2], wht[0]);\r\n\t\tif(l3<p3) return p0+p1+p2+l3;\r\n\t\t\r\n\t\treturn n+m;\r\n\t}\r\n\t\r\n\telse{\r\n\t\tint p0=x, p1=y-x, p2=x+m-y, p3=y-x;\r\n\t\t\r\n\t\tint l1=getlcp(wht[0],whs[p0]);\r\n\t\tif(l1<p1) return p0+l1;\r\n\t\t\r\n\t\tint l2=getlcp(wht[p1], wht[0]);\r\n\t\tif(l2<p2) return p0+p1+l2;\r\n\t\t\r\n\t\tint l3=getlcp(whs[p0], wht[p2]);\r\n\t\tif(l3<p3) return p0+p1+p2+l3;\r\n\t\r\n\t\treturn n+m;\r\n\t}\r\n}\r\n\r\nbool cmp(int x, int y){\r\n\tint lc=findlcp(x,y);\r\n\tchar me=getc(x,lc), he=getc(y,lc);\r\n\treturn me<he || (me==he && x<y);\r\n}\r\n\r\nint main(){FIN;\r\n\tcin>>s>>t;\r\n\tn=SZ(s); m=SZ(t);\r\n\t\r\n\tstring asd=s+\"#\"+t+\"$\";\r\n\tauto sa=constructSA(asd);\r\n\tauto lc=computeLCP(asd,sa);\r\n\tlcp=minq(lc);\r\n\tfore(i,0,SZ(sa)){\r\n\t\tif(0<=sa[i] && sa[i]<n) whs[sa[i]]=i;\r\n\t\tif(n<sa[i] && sa[i]<n+m+1) wht[sa[i]-n-1]=i;\r\n\t}\r\n\t\r\n\t\r\n\tn++;\r\n\tvector<int> p(n),a(n);\r\n\tfore(i,0,n) p[i]=i;\r\n\tsort(ALL(p),cmp);\r\n\tfore(i,0,n) a[p[i]]=i;\r\n\t\r\n\tminq all(a);\r\n\t\r\n\tint q; cin>>q;\r\n\tfore(i,0,q){\r\n\t\tint l,r,k,x,y; cin>>l>>r>>k>>x>>y;\r\n\t\t\r\n\t\tif(k>=SQ){\r\n\t\t\tint bst=1e9;\r\n\t\t\tfore(t,0,n/k+1){\r\n\t\t\t\tint lef=t*k+x, rig=t*k+y;\r\n\t\t\t\tlef=max(lef,l);\r\n\t\t\t\trig=min(rig,r);\r\n\t\t\t\tif(lef<=rig) bst=min(bst,all.query(lef,rig+1));\r\n\t\t\t}\r\n\t\t\tans[i]=bst;\r\n\t\t}\r\n\t\telse{\r\n\t\t\tqs[k].pb({{{l,r},{x,y}},i});\r\n\t\t}\r\n\t}\r\n\t\r\n\tfore(it,1,SQ){\r\n\t\tfore(i,0,it) wh[i].clear();\r\n\t\tvector<vector<int>> teta(it);\r\n\t\tfore(i,0,n) wh[i%it].pb(a[i]);\r\n\t\t\r\n\t\tvector<minq> st(it);\r\n\t\tfore(i,0,it) st[i]=minq(wh[i]);\r\n\t\t\r\n\t\tfor(auto qq:qs[it]){\r\n\t\t\tint l=qq.fst.fst.fst, r=qq.fst.fst.snd, x=qq.fst.snd.fst, y=qq.fst.snd.snd, id=qq.snd;\r\n\t\t\t\r\n\t\t\tint bst=1e9;\r\n\t\t\tfore(i,x,y+1) if(i<=r){\r\n\t\t\t\tint lef = (max(0,l-i)+it-1)/it;\r\n\t\t\t\tint rig = (r-i)/it;\r\n\t\t\t\tif(lef<=rig) bst=min(bst, st[i].query(lef,rig+1));\r\n\t\t\t}\r\n\t\t\t\r\n\t\t\tans[id]=bst;\r\n\t\t}\r\n\t}\r\n\t\r\n\tfore(i,0,q){\r\n\t\tif(ans[i]==1e9) cout<<\"-1 \";\r\n\t\telse cout<<p[ans[i]]<<\" \";\r\n\t}\r\n\tcout<<\"\\n\";\r\n}/*1695413883.416168*/"
+}

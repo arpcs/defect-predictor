@@ -1,0 +1,38 @@
+{
+    "id": 217195110,
+    "contestId": 1572,
+    "creationTimeSeconds": 1691207891,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1572,
+        "index": "D",
+        "name": "Bridge Club",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2800,
+        "tags": [
+            "flows",
+            "graph matchings",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1572,
+        "members": [
+            {
+                "handle": "hyforces"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631975700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 374,
+    "memoryConsumedBytes": 329318400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define N ((1<<20)+2)\r\n#define inf 0x3f3f3f3f\r\nconst int BUFSIZE=20<<20;//20MB\r\nchar Buf[BUFSIZE+1],*buf=Buf;\r\n//fread(Buf,1,BUFSIZE,stdin); add this before taking any input...\r\ntemplate<class T>\r\nvoid scan(T&a){\r\n    int sgn=1;\r\n    for(a=0;*buf<'0'||*buf>'9';buf++)if(*buf=='-')sgn=-1;\r\n    while(*buf>='0'&&*buf<='9'){a=a*10+(*buf-'0');buf++;}\r\n    a*=sgn;\r\n}\r\nnamespace Flows{\r\n    struct Edge{\r\n        int cost;\r\n        int u,v,flow,capacity;\r\n        Edge():flow(0),capacity(0),u(0),v(0){}\r\n        Edge(int uu,int vv,int ccapacity,int ccost,int fflow=0):u(uu),v(vv),cost(ccost),flow(fflow),capacity(ccapacity){}\r\n        int residual(){\r\n            return capacity-flow;\r\n        }\r\n    };\r\n    int n;\r\n    vector<Edge>edges;\r\n    vector<vector<int>>adj;\r\n    vector<int>vis;\r\n    vector<bool>iq;\r\n    vector<pair<int,int>>par;\r\n    vector<int>potential;\r\n    vector<bool>visited;\r\n    void init(int nn){\r\n        n=nn;\r\n        edges.clear();\r\n        adj.clear();\r\n        potential.clear();\r\n        visited.clear();\r\n        for(int a=0;a<n;++a){\r\n            adj.push_back(vector<int>{});\r\n            vis.push_back(0);\r\n            iq.push_back(0);\r\n            par.push_back(make_pair(0,0));\r\n            potential.push_back(0);\r\n            visited.push_back(0);\r\n        }\r\n    }\r\n    void addEdge(int u,int v,int capacity,int cost){\r\n        cost=-cost;\r\n        if(u!=v){\r\n            edges.push_back(Edge(u,v,capacity,cost));\r\n            adj[u].push_back(edges.size()-1);\r\n            edges.push_back(Edge(v,u,0,-cost));\r\n            adj[v].push_back(edges.size()-1);\r\n        }\r\n    }\r\n    void pushr(int a){\r\n        for(int nxt:adj[a]){\r\n            if(edges[nxt].flow<edges[nxt].capacity){\r\n                potential[edges[nxt].v]=min(potential[edges[nxt].v],potential[a]+edges[nxt].cost);\r\n            }\r\n        }\r\n    }\r\n    void Potentials(int source){\r\n        assert(source==0);\r\n        potential[source]=0;\r\n        pushr(0);\r\n        for(int a=2;a<n;++a){\r\n            if(__builtin_popcount(a-2)&1){\r\n                pushr(a);\r\n            }\r\n        }\r\n        for(int a=2;a<n;++a){\r\n            if(!(__builtin_popcount(a-2)&1)){\r\n                pushr(a);\r\n            }\r\n        }\r\n        pushr(1);\r\n    }\r\n    bool dijkstra(int source,int sink){\r\n        priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>>pro;pro.push({0,source});\r\n        for(int a=0;a<n;++a){\r\n            vis[a]=(inf);\r\n            visited[a]=false;\r\n            iq[a]=false;\r\n            par[a]=make_pair(-1,-1);\r\n        }\r\n        vis[source]=0;\r\n        while(!pro.empty()){\r\n            auto u=pro.top();pro.pop();\r\n            if(visited[u.second]){\r\n                continue;\r\n            }\r\n            assert(u.first==vis[u.second]);\r\n            visited[u.second]=true;\r\n            for(int nxt:adj[u.second]){\r\n                int dd=edges[nxt].cost+potential[u.second]-potential[edges[nxt].v];\r\n                if(edges[nxt].flow<edges[nxt].capacity&&(!visited[edges[nxt].v])&&vis[edges[nxt].v]>vis[u.second]+dd){\r\n                    par[edges[nxt].v]=make_pair(u.second,nxt);\r\n                    vis[edges[nxt].v]=vis[u.second]+dd;\r\n                    pro.push({vis[edges[nxt].v],edges[nxt].v});\r\n                }\r\n            }\r\n        }\r\n        return vis[sink]<inf;\r\n    }\r\n    void reset_edges(){\r\n        for(int a=0;a<edges.size();++a){\r\n            edges[a].flow=0;\r\n        }\r\n    }\r\n    int PushK(int source,int sink,int k){\r\n        reset_edges();\r\n        int ans=0;\r\n        int cost=0;\r\n        for(int a=0;a<k;++a){\r\n            if(!dijkstra(source,sink))break;\r\n            int fl=1;\r\n            for(int x=sink;x!=source;x=par[x].first){\r\n                fl=min(fl,edges[par[x].second].residual());\r\n            }\r\n            if(!fl)break;\r\n            ans+=fl;\r\n            cost+=fl*(vis[sink]+potential[sink]-potential[source]);\r\n            for(int x=sink;x!=source;x=par[x].first){\r\n                edges[par[x].second].flow+=fl;\r\n                edges[par[x].second^1].flow-=fl;\r\n            }\r\n            for(int b=0;b<n;++b){\r\n                potential[b]=vis[b]+potential[b]-potential[source];\r\n            }\r\n        }\r\n        return -cost;\r\n    }\r\n}\r\nstruct dt{\r\n    int w,u,v;\r\n    friend bool operator<(const dt&x,const dt&y){\r\n        return x.w>y.w;\r\n    }\r\n};\r\nint n,k;\r\nvector<dt>ed;\r\nvector<int>arr;\r\nbool vis[N];\r\nvector<int>disc;\r\nsigned main(){\r\n    fread(Buf,1,BUFSIZE,stdin);\r\n    scan(n),scan(k);\r\n    for(int a=0;a<(1<<n);++a){\r\n        int x;scan(x);\r\n        arr.push_back(x);\r\n    }\r\n    for(int a=0;a<(1<<n);++a){\r\n        if(__builtin_popcountll(a)&1){\r\n            for(int b=0;b<n;++b){\r\n                ed.push_back({arr[a]+arr[a^(1<<b)],a,a^(1<<b)});\r\n            }\r\n        }\r\n    }\r\n    int HEURISTIC=2*n*k+100;\r\n    nth_element(ed.begin(),ed.end(),ed.begin()+min((int)ed.size()-1,HEURISTIC));\r\n    int src=0;\r\n    int snk=src+1;\r\n    for(int a=0;a<min(HEURISTIC,(int)ed.size());++a){\r\n        vis[ed[a].u]=vis[ed[a].v]=true;\r\n        disc.push_back(ed[a].u);\r\n        disc.push_back(ed[a].v);\r\n    }\r\n    sort(disc.begin(),disc.end());\r\n    disc.erase(unique(disc.begin(),disc.end()),disc.end());\r\n    auto gd=[&](int x)->int{return lower_bound(disc.begin(),disc.end(),x)-disc.begin();};\r\n    Flows::init(disc.size()+2);\r\n    for(int a=0;a<min(HEURISTIC,(int)ed.size());++a){\r\n        Flows::addEdge(gd(ed[a].u)+2,gd(ed[a].v)+2,1,ed[a].w);\r\n    }\r\n    for(int a=0;a<(1<<n);++a){\r\n        if(vis[a]&&(__builtin_popcount(a)&1)){\r\n            Flows::addEdge(src,gd(a)+2,1,0);\r\n        }\r\n        else if(vis[a])Flows::addEdge(gd(a)+2,snk,1,0);\r\n    }\r\n    for(auto&a:Flows::potential)a=inf;\r\n    Flows::potential[0]=0;\r\n    Flows::pushr(0);\r\n    for(int a=0;a<(1<<n);++a){\r\n        if(vis[a]&&(__builtin_popcount(a)&1)){\r\n            Flows::pushr(gd(a)+2);\r\n        }\r\n    }\r\n    for(int a=0;a<(1<<n);++a){\r\n        if(vis[a]&&!(__builtin_popcount(a)&1)){\r\n            Flows::pushr(gd(a)+2);\r\n        }\r\n    }\r\n    Flows::pushr(1);\r\n    cout<<Flows::PushK(src,snk,k)<<\"\\n\";\r\n}"
+}

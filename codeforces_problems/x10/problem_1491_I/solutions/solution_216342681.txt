@@ -1,0 +1,36 @@
+{
+    "id": 216342681,
+    "contestId": 1491,
+    "creationTimeSeconds": 1690651512,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1491,
+        "index": "I",
+        "name": "Ruler Of The Zoo",
+        "type": "PROGRAMMING",
+        "points": 5000.0,
+        "rating": 3500,
+        "tags": [
+            "brute force",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1491,
+        "members": [
+            {
+                "handle": "Shivam_Yqdqv"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1614519300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 75,
+    "timeConsumedMillis": 233,
+    "memoryConsumedBytes": 921600,
+    "source": "// Author: wlzhouzhuan\r\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define rep(i,l,r) for(int i=(l);i<=(r);i++)\r\n#define per(i,l,r) for(int i=(l);i>=(r);i--)\r\n#define ll long long\r\n#define ull unsigned long long\r\n#define pii pair<int,int>\r\n#define mset(s,t) memset(s,t,sizeof(s))\r\n#define mcpy(s,t) memcpy(s,t,sizeof(t))\r\n#define SZ(x) ((int)x.size())\r\n#define pb push_back\r\n#define eb emplace_back\r\n#define fir first\r\n#define sec second\r\n\r\ntemplate<class T1,class T2>bool ckmax(T1 &a,T2 b){if(a<b)return a=b,1;else return 0;}\r\ntemplate<class T1,class T2>bool ckmin(T1 &a,T2 b){if(a>b)return a=b,1;else return 0;}\r\n\r\ninline int read(){\r\n    int x=0,f=0;char ch=getchar();\r\n    while(!isdigit(ch))f|=ch=='-',ch=getchar();\r\n    while(isdigit(ch))x=10*x+ch-'0',ch=getchar();\r\n    return f?-x:x;\r\n}\r\ntemplate<typename T>void print(T x){\r\n    if(x<0)putchar('-'),x=-x;\r\n    if(x>=10)print(x/10);\r\n    putchar(x%10+'0');\r\n}\r\ntemplate<typename T>void print(T x,char ch){\r\n    print(x),putchar(ch);\r\n}\r\n\r\nconst int N=6005;\r\nconst int inf=2e9;\r\nconst ll llinf=6e18;\r\n\r\nstruct node{\r\n\t/*\r\n\tcol=2: \u7ea2\u8272 (\u5f53\u524d a < \u524d\u9a71 b)\r\n\tcol=1: \u84dd\u8272 (\u5f53\u524d c > \u4e0b\u4e00\u4e2a\u975e\u7ea2\u8272\u7684 a)\r\n\tcol=0: \u7eff\u8272 (\u5176\u4ed6)\r\n\t*/\r\n\tint a,b,c,id;\r\n\tint col,nxt;\r\n}a[N];\r\nint n;\r\n\r\nvoid brute(){\r\n\tqueue<int> q;\r\n\trep(i,1,n-1)q.push(i);\r\n\tint now=0,turns=1;\r\n\tfor(int i=1;i<=2*n;i++){\r\n\t\tint u=q.front();q.pop();\r\n\t\tif(turns==1){\r\n\t\t\tif(a[now].b>a[u].a)++turns,q.push(u);\r\n\t\t\telse now=u,turns=1,q.push(now);\r\n\t\t}else if(turns==2){\r\n\t\t\tif(a[now].c>a[u].a)++turns,q.push(u);\r\n\t\t\telse now=u,turns=1,q.push(now);\r\n\t\t}\r\n\t\tif(turns==3){\r\n\t\t\tprintf(\"%d %d\\n\",a[now].id,i+1);\r\n\t\t\texit(0);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nint main(){\r\n\tn=read();rep(i,0,n-1)a[i].a=read(),a[i].b=read(),a[i].c=read(),a[i].id=i;\r\n\tif(a[0].a<a[1].a){\r\n\t\tnode tmp=a[0];\r\n\t\trep(i,0,n-2)a[i]=a[i+1];\r\n\t\ta[n-1]=tmp;\r\n\t}else{\r\n\t\tnode tmp=a[1];\r\n\t\trep(i,1,n-2)a[i]=a[i+1];\r\n\t\ta[n-1]=tmp;\r\n\t}\r\n\t// rep(i,0,n-1)printf(\"Info (i=%d): %d %d %d\\n\",i,a[i].a,a[i].b,a[i].c);\r\n\t\r\n\tbrute();\r\n\t\r\n\trep(i,1,n-1)if(a[i-1].b>a[i].a)a[i].col=2;\r\n\tvector<node> nred;\r\n\trep(i,0,n-1){\r\n\t\ta[i].nxt=-1;\r\n\t\tif(a[i].col==2)continue;\r\n\t\tint nxt=(i+1)%n;\r\n\t\tif(a[nxt].col==2)a[i].nxt=nxt,nxt=(nxt+1)%n;\r\n\t\ta[i].col=a[i].c>a[nxt].a,nred.pb(a[i]);\r\n\t}\r\n\tll ans=1;\r\n\twhile(1){\r\n\t\tauto norm=[&](int x){\r\n\t\t\tif(x<0)x+=SZ(nred);\r\n\t\t\treturn x;\r\n\t\t};\r\n\t\t// (b, \u7f16\u53f7)\r\n\t\tvector<pii> stk;\r\n\t\tauto Push=[&](pii x){\r\n\t\t\twhile(!stk.empty()&&stk.back().fir>=x.fir)stk.pop_back();\r\n\t\t\tstk.pb(x);\r\n\t\t};\r\n\t\trep(i,0,SZ(nred)-1)Push({nred[i].col==1?-inf:nred[i].b,i});\r\n\r\n\t\tint step=inf; // \u4fdd\u6301\u4e0d\u540c\u7684\u6b65\u6570\r\n\t\tvector<pii> change_nxt;\r\n\t\trep(i,0,SZ(nred)-1){\r\n\t\t\tPush({nred[i].col==1?-inf:nred[i].b,i});\r\n\t\t\tif(!~nred[i].nxt)continue;\r\n\t\t\tint nxt=nred[i].nxt;\r\n\t\t\tchange_nxt.pb({i,nxt});\r\n\t\t\tint pos=lower_bound(stk.begin(),stk.end(),make_pair(a[nxt].a,-1))-stk.begin()-1;\r\n\t\t\tif(pos>=0)ckmin(step,norm(i-stk[pos].sec));\r\n\t\t}\r\n\t\tif(step==inf)return puts(\"-1 -1\"),0;\r\n\r\n\t\tans+=1ll*step*(n-1);\r\n\t\t// \u4fee\u6b63 nxt \u6307\u9488\r\n\t\tfor(auto [x,nxt]:change_nxt){\r\n\t\t\tif(nred[x].nxt==nxt)nred[x].nxt=-1;\r\n\t\t\tx=norm(x-step),nred[x].nxt=nxt;\r\n\t\t}\r\n\t\tpair<ll,int> ANS=make_pair(llinf,-1);\r\n\t\trep(i,0,SZ(nred)-1){\r\n\t\t\tif(!~nred[i].nxt)continue;\r\n\t\t\tint nxt=nred[i].nxt;\r\n\t\t\t// \u4e00\u6b21\u7ea2\u70b9\u6d88\u5931\u4e8b\u4ef6\r\n\t\t\tif(nred[i].b<a[nxt].a){\r\n\t\t\t\tnred[i].nxt=-1;\r\n\t\t\t\tnred.insert(nred.begin()+i+1,a[nxt]);\r\n\t\t\t\tnred[i].col=nred[i].c>nred[i+1].a;\r\n\t\t\t\tint k=(i+2)%SZ(nred);\r\n\t\t\t\tnred[i+1].col=nred[i+1].c>nred[k].a;\r\n\t\t\t}\r\n\t\t\t// \u9009\u51fa\u5927\u738b\u4e8b\u4ef6\r\n\t\t\telse if(nred[i].col==1){\r\n\t\t\t\tckmin(ANS,make_pair(ans+a[nxt].id,nred[i].id));\r\n\t\t\t}\r\n\t\t}\r\n\t\tif(ANS.fir!=llinf){\r\n\t\t\tprintf(\"%d %lld\\n\",ANS.sec,ANS.fir);\r\n\t\t\treturn 0;\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}"
+}

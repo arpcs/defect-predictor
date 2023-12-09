@@ -1,0 +1,38 @@
+{
+    "id": 15143033,
+    "contestId": 89,
+    "creationTimeSeconds": 1451602809,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 89,
+        "index": "B",
+        "name": "Widget Library",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "expression parsing",
+            "graphs",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 89,
+        "members": [
+            {
+                "handle": "HappyNewYearMike"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1308236400
+    },
+    "programmingLanguage": "GNU C++",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 39,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\n#include <vector>\n#include <map>\n#include <string>\n#include <sstream>\n#include <stack>\n#include <cmath>\n\nusing namespace std;\n\nstring elimina(string s)\n{\n  for (int i=0;i<int(s.size());i++) {\n    if (s[i]==')' or s[i]=='(' or s[i]==',' or s[i]=='.')\n      s[i]=' ';\n  }\n  return s;\n}\n\ntypedef long long int lint;\n\nint main()\n{\n  string ss;\n  int n;\n  cin>>n;\n  getline(cin,ss);\n  map<string,vector<string> > g;\n  map<string,vector<string> > pare;\n  map<string,string> tipus;\n  map<string,lint> border;\n  map<string,lint> spacing;\n  map<string,lint> width;\n  map<string,lint> height;\n  map<string,lint> aritat;\n  for (int pas=0;pas<n;pas++) {\n    getline(cin,ss);\n    ss=elimina(ss);\n    istringstream ci(ss);\n    string name;\n    ci>>name;\n    if (name==\"VBox\") {\n      ci>>name;\n      tipus[name]=\"VBox\";\n    } else if (name==\"HBox\") {\n      ci>>name;\n      tipus[name]=\"HBox\";\n    } else if (name==\"Widget\") {\n      ci>>name;\n      tipus[name]=\"Widget\";\n      lint w,h;\n      ci>>w>>h;\n      width[name]=w;\n      height[name]=h;\n    } else {\n      string inst;\n      ci>>inst;\n      if (inst==\"pack\") {\n\tstring name2;\n\tci>>name2;\n\tg[name].push_back(name2);\n\taritat[name]++;\n\tpare[name2].push_back(name);\n      } else if (inst==\"set_border\") {\n\tlint b;\n\tci>>b;\n\tborder[name]=b;\n      } else if (inst==\"set_spacing\")  {\n\tlint spa;\n\tci>>spa;\n\tspacing[name]=spa;\n      }\n    }\n  }\n  stack<string> s;\n  for (map<string,string>::iterator it=tipus.begin();it!=tipus.end();it++) {\n    string name=it->first;\n    if (aritat[name]==0) s.push(name);\n  }\n  while (not s.empty()) {\n    string name=s.top();\n    s.pop();\n    if (tipus[name]==\"HBox\") {\n      lint ample=0;\n      lint alt=0;\n      vector<string> &fill=g[name];\n      for (int i=0;i<int(fill.size());i++) {\n\tstring f=fill[i];\n\talt=max(alt,height[f]);\n\tample+=width[f];\n      }\n      if (int(fill.size())==0) {\n\tample=0;alt=0;\n      } else if (int(fill.size())==1) {\n\talt+=2*border[name];\n\tample+=2*border[name];\n      } else {\n\talt+=2*border[name];\n\tample+=2*border[name]+(int(fill.size())-1)*spacing[name];\n      }\n      height[name]=alt;\n      width[name]=ample;\n    } else if (tipus[name]==\"VBox\") {\n      lint ample=0;\n      lint alt=0;\n      vector<string> &fill=g[name];\n      for (int i=0;i<int(fill.size());i++) {\n\tstring f=fill[i];\n\talt+=height[f];\n\tample=max(ample,width[f]);\n      }\n      if (int(fill.size())==0) {\n\tample=0;alt=0;\n      } else if (int(fill.size())==1) {\n\talt+=2*border[name];\n\tample+=2*border[name];\n      } else {\n\talt+=2*border[name]+(int(fill.size())-1)*spacing[name];\n\tample+=2*border[name];\n      }\n      height[name]=alt;\n      width[name]=ample;\n    }\n    vector<string> &p=pare[name];\n    for (int i=0;i<int(p.size());i++) {\n      string nam=p[i];\n      aritat[nam]--;\n      if (aritat[nam]==0) {\n\ts.push(nam);\n      }\n    }\n  }\n  for (map<string,string>::iterator it=tipus.begin();it!=tipus.end();it++) {\n    string name=it->first;\n    cout<<name<<\" \"<<width[name]<<\" \"<<height[name]<<endl;\n  }\n}\n"
+}

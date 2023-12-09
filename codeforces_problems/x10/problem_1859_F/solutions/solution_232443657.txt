@@ -1,0 +1,40 @@
+{
+    "id": 232443657,
+    "contestId": 1859,
+    "creationTimeSeconds": 1699752075,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1859,
+        "index": "F",
+        "name": "Teleportation in Byteland",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "graphs",
+            "shortest paths",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1859,
+        "members": [
+            {
+                "handle": "zzuqy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1691850900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 2745,
+    "memoryConsumedBytes": 483840000,
+    "source": "#include<bits/stdc++.h>\r\n#define ll long long\r\n#define pii pair<int,int>\r\n#define pli pair<ll,int>\r\n#define bi (1<<i)\r\nusing namespace std;\r\nint read(){int x;scanf(\"%d\",&x);return x;}\r\nint dis[100005][18][21],diss[100005][21];\r\nint dis1[100005][18][21],dis2[100005][18][21];\r\nint fa[100005][18],dep[100005];\r\nbool vis[100005],vs[100005];\r\nvector<pii>e[100005];\r\nint n;\r\nll t;\r\nint add(int x,int y){\r\n    return min((ll)2e9,(ll)x+y);\r\n}\r\nvoid dfs(int x,int f){\r\n    vis[x]=1;\r\n    fa[x][0]=f;\r\n    dep[x]=dep[f]+1;\r\n    for(int i=1;i<=20;i++){\r\n        dis[x][0][i]=dis[x][0][0]>>i;\r\n        if(dis[x][0][0]%bi)dis[x][0][i]++;\r\n    }\r\n    for(int i=1;i<=17;i++){\r\n        fa[x][i]=fa[fa[x][i-1]][i-1];\r\n        for(int j=0;j<=20;j++)\r\n            dis[x][i][j]=add(dis[fa[x][i-1]][i-1][j],dis[x][i-1][j]);\r\n    }\r\n    for(int i=0;i<=20;i++){\r\n        dis1[x][0][i]=add(diss[x][i],dis[x][0][i]);\r\n        dis2[x][0][i]=add(diss[f][i],dis[x][0][i]);\r\n    }\r\n    for(int i=1;i<=17;i++)\r\n        for(int j=0;j<=20;j++){\r\n            int f=fa[x][i-1];\r\n            dis1[x][i][j]=min(add(dis1[x][i-1][j],dis[f][i-1][j]),add(dis[x][i-1][0],dis1[f][i-1][j]));\r\n            dis2[x][i][j]=min(add(dis2[x][i-1][j],dis[f][i-1][0]),add(dis[x][i-1][j],dis2[f][i-1][j]));\r\n        }\r\n    for(auto u:e[x])\r\n        if(!vis[u.first]){\r\n            dis[u.first][0][0]=u.second;\r\n            dfs(u.first,x);\r\n        }\r\n}\r\nint lca(int u,int v){\r\n    if(dep[u]<dep[v])swap(u,v);\r\n    for(int i=17;i>=0;i--)\r\n        if(dep[u]-dep[v]>=bi)u=fa[u][i];\r\n    if(u==v)return u;\r\n    for(int i=17;i>=0;i--)\r\n        if(fa[u][i]!=fa[v][i])\r\n            u=fa[u][i],v=fa[v][i];\r\n    return fa[u][0];\r\n}\r\nll sum(int u,int v,int m){\r\n    ll cnt=0;\r\n    int l=lca(u,v);\r\n    for(int i=17;i>=0;i--){\r\n        if(dep[u]-dep[l]>=bi)\r\n            cnt+=dis[u][i][m],u=fa[u][i];\r\n        if(dep[v]-dep[l]>=bi)\r\n            cnt+=dis[v][i][m],v=fa[v][i];\r\n    }\r\n    return cnt;\r\n}\r\nll qry(int u,int v){\r\n    int l=lca(u,v);\r\n    ll cnt[21],ans=sum(u,v,0);\r\n    for(int i=0;i<=20;i++)cnt[i]=0;\r\n    for(int i=17;i>=0;i--)\r\n        if(dep[u]-dep[l]>=bi){\r\n            int f=fa[u][i];\r\n            for(int j=1;j<=20;j++)\r\n                ans=min(ans,dis1[u][i][j]+sum(f,v,j)+cnt[0]+t*j);\r\n            cnt[0]+=dis[u][i][0];\r\n            u=fa[u][i];\r\n        }\r\n    for(int i=17;i>=0;i--)\r\n        if(dep[v]-dep[l]>=bi){\r\n            int f=fa[v][i];\r\n            for(int j=1;j<=20;j++){\r\n                ans=min(ans,dis2[v][i][j]+sum(f,u,0)+cnt[0]+cnt[j]+t*j);\r\n                cnt[j]+=dis[v][i][j];\r\n            }\r\n            v=fa[v][i];\r\n        }\r\n    return ans;\r\n}\r\nvoid bfs(int x){\r\n    priority_queue<pli,vector<pli>,greater<pli>>q;\r\n    for(int i=1;i<=n;i++){\r\n        diss[i][x]=2147483647;\r\n        if(vs[i])//\u628a\u9a7e\u6821\u653e\u8fdb\u4f18\u5148\u961f\u5217\u8fdb\u884c\u591a\u6e90bfs\r\n        {\r\n            q.push({0,i});\r\n            diss[i][x]=0;\r\n        }\r\n    }\r\n    while(!q.empty()){\r\n        int now=q.top().second;\r\n        ll d=q.top().first;\r\n        q.pop();\r\n        if(d>diss[now][x])continue;\r\n        for(auto u:e[now])\r\n            if(diss[u.first][x]>d+1+((u.second-1)>>x)+u.second){//1+((u.second-1)>>x)\u662f\u8fb9\u6743/(2\u7684x\u6b21\u65b9)\u60f3\u4e0a\u53d6\u6574\r\n                diss[u.first][x]=d+1+((u.second-1)>>x)+u.second;\r\n                q.push({diss[u.first][x],u.first});\r\n            }\r\n    }\r\n}\r\nint main(){\r\n    // freopen(\"1.in\",\"r\",stdin);\r\n    for(int T=read();T;T--)\r\n    {\r\n        n=read();t=read();\r\n        for(int i=1;i<=n;i++)\r\n        {\r\n            e[i].clear();\r\n            vis[i]=0;\r\n        }\r\n        for(int i=1;i<n;i++)\r\n        {\r\n            int u=read(),v=read(),w=read();\r\n            e[u].push_back({v,w});\r\n            e[v].push_back({u,w});\r\n        }\r\n        getchar();\r\n        for(int i=1;i<=n;i++)\r\n            vs[i]=getchar()-'0';\r\n        for(int i=0;i<=20;i++)\r\n            bfs(i);//\u500d\u589ei\u6b21\r\n        dfs(1,0);\r\n        for(int q=read();q;q--)\r\n        {\r\n            int x=read();\r\n            printf(\"%lld\\n\",qry(x,read()));\r\n        }\r\n    }\r\n    return 0;\r\n}\r\n\r\n"
+}

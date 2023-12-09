@@ -1,0 +1,38 @@
+{
+    "id": 220734931,
+    "contestId": 1348,
+    "creationTimeSeconds": 1693148294,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1348,
+        "index": "F",
+        "name": "Phoenix and Memory",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1348,
+        "members": [
+            {
+                "handle": "darkkcyan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1588343700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 109,
+    "timeConsumedMillis": 202,
+    "memoryConsumedBytes": 30822400,
+    "source": "/* #pragma GCC optimize(\"O3\") */\n/* #pragma GCC optimize(\"unroll-loops\") */\n/* #pragma GCC target(\"avx2,bmi,bmi2,popcnt,lzcnt\") */\n\n#include <bits/stdc++.h>\nusing namespace std;\n#if (__cplusplus >= 202002)\nnamespace R = std::ranges;\nnamespace RV = R::views;\n#endif\n\n// #define constexpr(...) (__VA_ARGS__)\nusing ll = long long;\nusing ld = long double;\nconst ld eps = 1e-8;\n// for matching the kactl notes\n#define sz(x) ((int)x.size())\ntemplate <typename T> struct num_itr {\n    T v;\n    num_itr(T _v) : v(_v) {}\n    operator T &() { return v; }\n    T operator*() const { return v; }\n};\ntemplate <typename T> struct num_range {\n    T b, e;\n    num_range(T begin, T end) : b(begin), e(end) {}\n    num_itr<T> begin() { return b; }\n    num_itr<T> end() { return e; }\n};\ntemplate <typename T> num_range<T> range(T b, T e) { return num_range<T>(b, e); }\n#define all(a) (a).begin(), (a).end()\n#define print_op(...) ostream &operator<<(ostream &out, const __VA_ARGS__ &u)\n// DEBUGING TEMPLETE\n// ////////////////////////////////////////////////////////////////////////{{{\n// What? You wanted to see how this template works?  Check this out:\n// https://quangloc99.github.io/2021/07/30/my-CP-debugging-template.html\n#define db(val) \"[\" #val \" = \" << (val) << \"] \"\n#define CONCAT_(x, y) x##y\n#define CONCAT(x, y) CONCAT_(x, y)\n#ifdef LOCAL_DEBUG\n#define clog cerr << setw(__db_level * 2) << setfill(' ') << \"\" << setw(0)\n#define DB() debug_block CONCAT(dbbl, __LINE__)\nint __db_level = 0;\nstruct debug_block {\n    debug_block() {\n        clog << \"{\" << endl;\n        ++__db_level;\n    }\n    ~debug_block() {\n        --__db_level;\n        clog << \"}\" << endl;\n    }\n};\n#else\n#define clog                                                                                       \\\n    if (0) cerr\n#define DB(...)\n#endif\n\ntemplate <class U, class V> print_op(pair<U, V>) {\n    return out << \"(\" << u.first << \", \" << u.second << \")\";\n}\ntemplate <size_t i, class T> ostream &print_tuple_utils(ostream &out, const T &tup) {\n    if constexpr (i == tuple_size<T>::value)\n        return out << \")\";\n    else\n        return print_tuple_utils<i + 1, T>(out << (i ? \", \" : \"(\") << get<i>(tup), tup);\n}\ntemplate <class... U> print_op(tuple<U...>) { return print_tuple_utils<0, tuple<U...>>(out, u); }\ntemplate <class Con, class = decltype(begin(declval<Con>()))>\ntypename enable_if<!is_same<Con, string>::value, ostream &>::type operator<<(ostream &out,\n                                                                             const Con &con) {\n    out << \"{\";\n    for (auto beg = con.begin(), it = beg; it != con.end(); ++it)\n        out << (it == beg ? \"\" : \", \") << *it;\n    return out << \"}\";\n}\n// ACTUAL SOLUTION START HERE\n// ////////////////////////////////////////////////////////////////}}}\n\nstruct MinSt {\n    int n;\n    vector<pair<int, int>> data;\n    MinSt(int n_) : n(n_), data(2 * n, { INT_MAX, 0 }) {}\n\n    void upd(int i, int val) {\n        i += n;\n        data[i] = { val, i - n };\n        while ((i >>= 1)) data[i] = min(data[2 * i], data[2 * i + 1]);\n    }\n\n    pair<int, int> get(int l, int r) {\n        pair<int, int> ans = { INT_MAX, 0 };\n        for (l += n, r += n; l < r; l >>= 1, r >>= 1) {\n            if (l & 1) ans = min(ans, data[l++]);\n            if (r & 1) ans = min(ans, data[--r]);\n        }\n        return ans;\n    }\n};\n\nint main() {\n#ifdef LOCAL\n    freopen(\"main.inp\", \"r\", stdin);\n    freopen(\"main.out\", \"w\", stdout);\n    freopen(\".log\", \"w\", stderr);\n#endif\n    cin.tie(0)->sync_with_stdio(0);\n\n    int n;\n    cin >> n;\n    struct Range {\n        int l, r, id;\n    };\n    vector<Range> ranges(n);\n    for (auto i : range(0, n)) {\n        ranges[i].id = i;\n        cin >> ranges[i].l >> ranges[i].r;\n        --ranges[i].l;\n    }\n\n    vector<vector<int>> evt_l(n), evt_r(n + 1);\n\n    for (auto r : ranges) {\n        evt_l[r.l].push_back(r.id);\n        evt_r[r.r].push_back(r.id);\n    }\n\n    vector<int> a(n), p(n);\n    set<pair<int, int>> se;\n    MinSt st(n);\n    for (auto i : range(0, n)) {\n        for (auto id : evt_l[i]) { se.emplace(ranges[id].r, id); }\n        assert(se.size());\n        auto id = se.begin()->second;\n        se.erase(se.begin());\n        a[id] = i;\n        p[i] = id;\n        st.upd(i, ranges[id].l);\n    }\n\n    clog << db(a) << endl;\n    clog << db(p) << endl;\n    for (auto i : range(0, n)) {\n        int u = p[i];\n        auto res = st.get(i + 1, ranges[u].r);\n        clog << db(i) << db(res) << endl;\n        if (res.first > i) continue;\n        auto b = a;\n        int v = p[res.second];\n        swap(b[u], b[v]);\n        cout << \"NO\\n\";\n        for (auto x : a) cout << x + 1 << ' ';\n        cout << '\\n';\n        for (auto x : b) cout << x + 1 << ' ';\n        cout << '\\n';\n        return 0;\n    }\n    cout << \"YES\\n\";\n    for (auto x : a) cout << x + 1 << ' ';\n    cout << '\\n';\n\n    return 0;\n}\n"
+}

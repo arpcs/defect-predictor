@@ -1,0 +1,36 @@
+{
+    "id": 228393273,
+    "contestId": 955,
+    "creationTimeSeconds": 1697448790,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 955,
+        "index": "D",
+        "name": "Scissors",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2600,
+        "tags": [
+            "brute force",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 955,
+        "members": [
+            {
+                "handle": "vjudge1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1521822900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 82,
+    "timeConsumedMillis": 342,
+    "memoryConsumedBytes": 45056000,
+    "source": "#include<bits/stdc++.h>\n#define ll long long\nusing namespace std;\nconst ll m1=998244353,m2=1e9+7,sd=2333;\nint N,M,K;char s[500005],t[500005];\nstruct Hash{\n\tll h1[500005],h2[500005],pw1[500005],pw2[500005];\n\tvoid build(char *s,int N){\n\t\tpw1[0]=pw2[0]=1ll;\n\t\tfor(int i=1;i<=N;++i)h1[i]=(h1[i-1]*sd+(ll)(s[i]-'a'+1))%m1,h2[i]=(h2[i-1]*sd+(ll)(s[i]-'a'+1))%m2,pw1[i]=pw1[i-1]*sd%m1,pw2[i]=pw2[i-1]*sd%m2;\n\t}\n\tll calc1(int l,int r){\n\t\treturn (h1[r]-h1[l-1]*pw1[r-l+1]%m1+m1)%m1;\n\t}\n\tll calc2(int l,int r){\n\t\treturn (h2[r]-h2[l-1]*pw2[r-l+1]%m2+m2)%m2;\n\t}\n}S,T;\nbool chk(int l1,int r1,int l2,int r2){return (S.calc1(l1,r1)==T.calc1(l2,r2)&&S.calc2(l1,r1)==T.calc2(l2,r2));}\nint lef[500005],rig[500005],v[1000005],tag[1000005];\nvoid pushdown(int p){v[p<<1]=v[p<<1|1]=1;tag[p<<1]=tag[p<<1|1]=1;tag[p]=0;}\nvoid pushup(int p){v[p]=(v[p<<1]|v[p<<1|1]);}\nvoid ins(int p,int l,int r,int a,int b){\n\tif(a<=l&&r<=b){v[p]=tag[p]=1;return;}\n\tif(tag[p])pushdown(p);\n\tint mid=l+r>>1;if(a<=mid)ins(p<<1,l,mid,a,b);if(b>mid)ins(p<<1|1,mid+1,r,a,b);\n\tpushup(p);\n}\nbool res;\nvoid query(int p,int l,int r,int a,int b){\n\tif(res)return;if(a<=l&&r<=b){res|=v[p];return;}if(tag[p])pushdown(p);\n\tint mid=l+r>>1;if(a<=mid)query(p<<1,l,mid,a,b);if(b>mid)query(p<<1|1,mid+1,r,a,b);\n}\nvoid Add(int p){\n\tint L=max(1,K-(N-p)),R=lef[p];\n\tif(L<=R)ins(1,1,M,L,R);\n}\nint main(){\n\tcin>>N>>M>>K;scanf(\"%s%s\",s+1,t+1);\n\tS.build(s,N);T.build(t,M);\n\tfor(int i=1;i<=N;++i){\n\t\tint l=1,r=min(N-i+1,min(M,K)),ans=0;\n\t\twhile(l<=r){\n\t\t\tint mid=l+r>>1;\n\t\t\tif(chk(i,i+mid-1,1,mid))ans=mid,l=mid+1;\n\t\t\telse r=mid-1;\n\t\t} rig[i]=ans;\n\t    l=1,r=min(i,min(M,K)),ans=0;\n\t    while(l<=r){\n\t    \tint mid=l+r>>1;\n\t    \tif(chk(i-mid+1,i,M-mid+1,M))ans=mid,l=mid+1;\n\t    \telse r=mid-1;\n\t\t} lef[i]=ans;\n\t}\n\tif(K>=M){\n\t\tint ans=0;\n\t    for(int i=1;i<=N;++i){\n\t\t   ans+=(lef[i]==M);if(i>=(K-M)+1)ans-=(lef[i-(K-M)-1]==M);\n\t\t   if(i>=K&&ans&&max(N-i,i-K)>=K){\n\t\t        puts(\"Yes\");\n\t\t        if(N-i>=K)cout<<i-K+1<<\" \"<<i+1<<endl;\n\t\t        else cout<<1<<\" \"<<i-K+1<<endl;\n\t\t        return 0;\n\t\t   }\n\t    }\n\t}\n\tint p=-1;\n\tfor(int i=N-M+1;i>=1;--i){\n\t\tAdd(i+M-1);int L=max(1,K-(i-1)),R=rig[i];\n\t\tif(L<=R){\n\t\t\tL=M-L,R=M-R;swap(L,R);\n\t\t\tL=max(L,1);R=min(R,M);\n\t\t\tif(L<=R){\n\t\t\t\tres=0;query(1,1,M,L,R);\n\t\t\t\tif(res){p=i;break;}\n\t\t\t}\n\t\t}\n\t}\n\tif(p==-1){puts(\"No\");return 0;}puts(\"Yes\");\n\tint L=max(1,K-(p-1)),R=rig[p];L=M-L,R=M-R;swap(L,R);L=max(L,1);R=min(R,M);\n\tfor(int i=p+M-1;i<=N;++i){\n\t\tint L1=max(1,K-(N-i)),R1=lef[i];\n\t\tif(L1<=R1&&max(L1,L)<=min(R1,R)){\n\t\t\tint x=max(L1,L);int y=M-x;\n\t\t\tcout<<p+y-K<<\" \"<<i-x+1<<endl;\n\t\t\treturn 0;\n\t\t}\n\t}\n\treturn 0;\n}\n   \t\t  \t\t\t\t\t   \t\t  \t\t\t  \t \t\t\t\t"
+}

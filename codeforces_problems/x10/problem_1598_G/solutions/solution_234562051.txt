@@ -1,0 +1,37 @@
+{
+    "id": 234562051,
+    "contestId": 1598,
+    "creationTimeSeconds": 1701076779,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1598,
+        "index": "G",
+        "name": "The Sum of Good Numbers",
+        "type": "PROGRAMMING",
+        "rating": 3200,
+        "tags": [
+            "hashing",
+            "math",
+            "string suffix structures",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1598,
+        "members": [
+            {
+                "handle": "QAQ_QWQ"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1633856700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 150,
+    "timeConsumedMillis": 358,
+    "memoryConsumedBytes": 25088000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ninline int read(){\r\n\tint sum=0,fh=1;\r\n\tchar c=getchar();\r\n\twhile(c<'0'||c>'9'){\r\n\t\tif(c=='-')fh=-1;\r\n\t\tc=getchar();\r\n\t}\r\n\twhile(c>='0'&&c<='9'){\r\n\t\tsum=sum*10+c-'0';\r\n\t\tc=getchar();\r\n\t}\r\n\treturn sum*fh;\r\n}\r\n#define maxn 500009\r\nchar s[maxn],x[maxn];\r\nint fp(int x,int y,int mod){\r\n\tint sum=1;\r\n\twhile(y){\r\n\t\tif(y&1)sum=1ll*sum*x%mod;\r\n\t\tx=1ll*x*x%mod;y>>=1;\r\n\t}\r\n\treturn sum;\r\n}\r\n#define mp make_pair\r\n#define fi first\r\n#define se second \r\ntypedef pair<int ,int > pii;\r\nstruct hash{\r\n\tint mod,p,hasz[maxn],inv[maxn],pow[maxn],len;\r\n\tvoid build(char *qs,int nlen){\r\n\t\tlen=nlen;\r\n\t\tpow[0]=inv[0]=1;pow[1]=p;inv[1]=fp(p,mod-2,mod);\r\n\t\tfor(int i=2;i<=len;i++)pow[i]=1ll*pow[i-1]*pow[1]%mod,inv[i]=1ll*inv[i-1]*inv[1]%mod;\r\n\t\tfor(int i=len;i;i--){\r\n\t\t\thasz[i]=hasz[i+1]+1ll*(qs[i]-'0')*pow[len-i]%mod;\r\n\t\t\thasz[i]%=mod;\r\n\t\t}\r\n\t\treturn ;\r\n\t}\r\n\tint quer(int l,int r){\r\n\t\treturn 1ll*(hasz[l]-hasz[r+1]+mod)%mod*inv[len-r]%mod;\r\n\t}\r\n}hs1,hs2,hx1,hx2;\r\nint n,m;\r\nint qlcp(int x,int y){\r\n\tint l=1,r=min(m,min(n-x+1,m-y+1)),ans=0;\r\n\twhile(l<=r){\r\n\t\tint mid=(l+r)>>1;\r\n\t\tpii xsub=mp(hs1.quer(x,x+mid-1),hs2.quer(x,x+mid-1));\r\n\t\tpii ysub=mp(hx1.quer(y,y+mid-1),hx2.quer(y,y+mid-1));\r\n\t\tif(xsub==ysub){\r\n\t\t\tans=mid;l=mid+1;\r\n\t\t}\r\n\t\telse r=mid-1;\r\n\t}\r\n\treturn ans;\r\n}\r\nint main(){\r\n//\tfreopen(\".in\",\"r\",stdin);\r\n//\tfreopen(\".out\",\"w\",stdout);\r\n\tscanf(\"%s\",s+1);n=strlen(s+1);\r\n\tscanf(\"%s\",x+1);m=strlen(x+1);\r\n\ths1.mod=hx1.mod=912881939;hs1.p=hx1.p=10;\r\n\ths1.build(s,n);hx1.build(x,m);\r\n\ths2.mod=hx2.mod=998244353;hs2.p=hx2.p=10;\r\n\ths2.build(s,n);hx2.build(x,m);\r\n\tpii hx=mp(hx1.quer(1,m),hx2.quer(1,m));\r\n\tif(m-1)for(int i=1;i<=n-2*m+3;i++){\r\n\t\tpii xsub=mp(hs1.quer(i,i+m-2),hs2.quer(i,i+m-2));\r\n\t\tpii ysub=mp(hs1.quer(i+m-1,i+2*m-3),hs2.quer(i+m-1,i+2*m-3));\r\n\t\txsub.fi=(xsub.fi+ysub.fi)%hs1.mod;\r\n\t\txsub.se=(xsub.se+ysub.se)%hs2.mod;\r\n\t\tif(hx==xsub){\r\n\t\t\tprintf(\"%d %d\\n%d %d\",i,i+m-2,i+m-1,i+2*m-3);\r\n\t\t\treturn 0;\r\n\t\t}\r\n\t}\r\n\tfor(int i=1;i<=n-m+1;i++){\r\n\t\tpii xsub=mp(hs1.quer(i,i+m-1),hs2.quer(i,i+m-1));\r\n\t\tint lcp=qlcp(i,1);\r\n\t\tint qlen=m-lcp;\r\n\t\tif(qlen>0){\r\n\t\t\tif(i+m+qlen-2<=n){\r\n\t\t\t\tpii ysub=xsub;\r\n\t\t\t\tysub.fi=(ysub.fi+hs1.quer(i+m,i+m+qlen-1))%hs1.mod;\r\n\t\t\t\tysub.se=(ysub.se+hs2.quer(i+m,i+m+qlen-1))%hs2.mod;\r\n\t\t\t\tif(hx==ysub){\r\n\t\t\t\t\tprintf(\"%d %d\\n%d %d\",i,i+m-1,i+m,i+m+qlen-1);\r\n\t\t\t\t\treturn 0;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tif(i-qlen>=1){\r\n\t\t\t\tpii ysub=xsub;\r\n\t\t\t\tysub.fi=(ysub.fi+hs1.quer(i-qlen,i-1))%hs1.mod;\r\n\t\t\t\tysub.se=(ysub.se+hs2.quer(i-qlen,i-1))%hs2.mod;\r\n\t\t\t\tif(hx==ysub){\r\n\t\t\t\t\tprintf(\"%d %d\\n%d %d\",i-qlen,i-1,i,i+m-1);\r\n\t\t\t\t\treturn 0;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tqlen=m-lcp-1;\r\n\t\tif(qlen>0){\r\n\t\t\tif(i+m+qlen-2<=n){\r\n\t\t\t\tpii ysub=xsub;\r\n\t\t\t\tysub.fi=(ysub.fi+hs1.quer(i+m,i+m+qlen-1))%hs1.mod;\r\n\t\t\t\tysub.se=(ysub.se+hs2.quer(i+m,i+m+qlen-1))%hs2.mod;\r\n\t\t\t\tif(hx==ysub){\r\n\t\t\t\t\tprintf(\"%d %d\\n%d %d\",i,i+m-1,i+m,i+m+qlen-1);\r\n\t\t\t\t\treturn 0;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tif(i-qlen>=1){\r\n\t\t\t\tpii ysub=xsub;\r\n\t\t\t\tysub.fi=(ysub.fi+hs1.quer(i-qlen,i-1))%hs1.mod;\r\n\t\t\t\tysub.se=(ysub.se+hs2.quer(i-qlen,i-1))%hs2.mod;\r\n\t\t\t\tif(hx==ysub){\r\n\t\t\t\t\tprintf(\"%d %d\\n%d %d\",i-qlen,i-1,i,i+m-1);\r\n\t\t\t\t\treturn 0;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n//\tfclose(stdin);\r\n//\tfclose(stdout);\r\n\treturn 0;\r\n}\r\n"
+}

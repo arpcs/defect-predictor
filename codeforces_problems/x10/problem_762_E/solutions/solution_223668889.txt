@@ -1,0 +1,35 @@
+{
+    "id": 223668889,
+    "contestId": 762,
+    "creationTimeSeconds": 1694900761,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 762,
+        "index": "E",
+        "name": "Radio stations",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 762,
+        "members": [
+            {
+                "handle": "dio_2"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1485354900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 819200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\nusing ll = long long;\r\n\r\nvoid __print(int x) {cerr << x;} void __print(long x) {cerr << x;} void __print(long long x) {cerr << x;} void __print(unsigned x) {cerr << x;} void __print(unsigned long x) {cerr << x;} void __print(unsigned long long x) {cerr << x;} void __print(float x) {cerr << x;} void __print(double x) {cerr << x;} void __print(long double x) {cerr << x;} void __print(char x) {cerr << '\\'' << x << '\\'';} void __print(const char *x) {cerr << '\\\"' << x << '\\\"';} void __print(const string &x) {cerr << '\\\"' << x << '\\\"';} void __print(bool x) {cerr << (x ? \"true\" : \"false\");} template<typename T, typename V> void __print(const pair<T, V> &x) {cerr << '{'; __print(x.first); cerr << ','; __print(x.second); cerr << '}';} template<typename T> void __print(const T &x) {int f = 0; cerr << '{'; for (auto &i: x) cerr << (f++ ? \",\" : \"\"), __print(i); cerr << \"}\";} void _print() {cerr << \"]\\n\";} template <typename T, typename... V> void _print(T t, V... v) {__print(t); if (sizeof...(v)) cerr << \", \"; _print(v...);}\r\n#ifndef ONLINE_JUDGE\r\n#define debug(x...) cerr << \"[\" << #x << \"] = [\"; _print(x)\r\n#else\r\n#define debug(x...)\r\n#endif\r\n\r\ntemplate<typename T> void min_self( T &a, const T b ) { if(b < a) a = b; }\r\ntemplate<typename T> void max_self( T &a, const T b ) { if(b > a) a = b; }\r\n\r\nstruct R{\r\n\tint x, r, f, mn, mx;\r\n};\r\n\r\nbool cmp(const R A, const R B){\r\n\treturn A.x < B.x;\r\n}\r\n\r\nbool cmp2(const R A, const R B){\r\n\treturn A.r < B.r;\r\n}\r\n\r\nconst int F = 1e4 + 10;\r\n\r\nvector<int> ids[F];\r\nvector<int> sums[F];\r\n\r\nint main(){\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(nullptr);\r\n\r\n\tint n, k;\r\n\tcin >> n >> k;\r\n\t\r\n\tvector<R> a(n);\r\n\tvector<int> v;\r\n\tmap<int, int> compressed;\r\n\tvector<int> decompressed(n + 10);\r\n\t\r\n\tfor(int i = 0;i < n;i++){\r\n\t\tcin >> a[i].x >> a[i].r >> a[i].f;\r\n\t\tv.push_back(a[i].x);\r\n\t}\r\n\t\r\n\tsort(v.begin(), v.end());\r\n\t\r\n\tint c = 1;\r\n\tfor(int &x : v){\r\n\t\tcompressed[x] = c;\r\n\t\tdecompressed[c] = x;\r\n\t\tx = c++;\r\n\t}\r\n\t\r\n\tfor(int i = 0;i < n;i++){\r\n\t\ta[i].x = compressed[a[i].x];\r\n\t}\r\n\t\r\n\tfor(int i = 0;i < n;i++){\r\n\t\tids[a[i].f].push_back(i);\r\n\t}\r\n\t\r\n\tvector<vector<pair<int, int>>> reach(n); // I store he ids that are in a use in_f to access them\r\n\tvector<int> in_f(n);\r\n\t\r\n\tfor(int i = 0;i < F;i++){\r\n\t\tsort(ids[i].begin(), ids[i].end(), [&](const int A, const int B){\r\n\t\t  return a[A].x < a[B].x;\t\r\n\t\t});\r\n\t\tfor(int j = 1;j < (int)ids[i].size();j++){\r\n\t\t\tif(decompressed[a[ids[i][j]].x] < decompressed[a[ids[i][j-1]].x]){\r\n\t\t\t\texit(-1);\r\n\t\t\t}\r\n\t\t}\r\n\t\tc = 0;\r\n\t\tfor(int x : ids[i]){\r\n\t\t\tin_f[x] = c++;\r\n\t\t}\r\n\t}\r\n\t\r\n\tfor(int i = 0;i < n;i++){\r\n\t\tfor(int j = a[i].f - k;j <= a[i].f + k;j++){\r\n\t\t\tif(j <= 0 || j >= F){\r\n\t\t\t\treach[i].push_back({-1, -1});\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\tpair<int, int> res = {-1, -1};\r\n\t\t\tint l = 0, r = (int)ids[j].size() - 1, mid, ans = -1;\r\n\t\t\tint rad = a[i].r;\r\n\t\t\t\r\n\t\t\twhile(l <= r){\r\n\t\t\t\tmid = l + (r - l) / 2;\r\n\t\t\t\tint index = ids[j][mid];\r\n\t\t\t\tif(decompressed[index] <= decompressed[i] + rad){\r\n\t\t\t\t\tans = mid;\r\n\t\t\t\t\tl = mid + 1;\r\n\t\t\t\t}else{\r\n\t\t\t\t\tr = mid - 1;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tif(ans == -1 || decompressed[ids[j][ans]] < decompressed[i] - rad){\r\n\t\t\t\treach[i].push_back(res);\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\tassert(decompressed[ids[j][ans]] <= decompressed[i] + rad);\r\n\t\t\tres.second = in_f[ids[j][ans]];\r\n\t\t\tint prev = ans;\r\n\t\t\tl = 0, r = (int)ids[j].size() - 1, ans = -1;\r\n\t\t\twhile(l <= r){\r\n\t\t\t\tmid = l + (r - l) / 2;\r\n\t\t\t\tint index = ids[j][mid];\r\n\t\t\t\tif(decompressed[index] >= decompressed[i] - rad){\r\n\t\t\t\t\tans = mid;\r\n\t\t\t\t\tr = mid - 1;\r\n\t\t\t\t}else{\r\n\t\t\t\t\tl = mid + 1;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tassert(ans <= prev);\r\n\t\t\tassert(decompressed[ids[j][ans]] <= decompressed[ids[j][prev]]);\r\n\t\t\t//~ assert(ans != -1);\r\n\t\t\t//~ assert(decompressed[ids[j][ans]] <= decompressed[i] + rad);\r\n\t\t\tres.first = in_f[ids[j][ans]];\r\n\t\t\treach[i].push_back(res);\r\n\t\t}\r\n\t}\r\n\t\r\n\t// slow O(N^2)\r\n\tfor(int i = 0;i < F;i++){\r\n\t\tsums[i].resize((int)ids[i].size() + 1);\r\n\t\tfor(int x : ids[i]){\r\n\t\t\tsums[i][in_f[x]] += 1;\r\n\t\t}\r\n\t}\r\n\t\r\n\t\r\n\tll ans = 0;\r\n\tvector<int> get_index(n + 10);\r\n\tfor(int i = 0;i < n;i++){\r\n\t\tget_index[a[i].x] = i;\r\n\t}\r\n\r\n\tsort(a.begin(), a.end(), cmp2);\r\n\t\r\n\tfor(int i = 0;i < n;i++){ // r[i] <= r[i + 1]\r\n\t\tint index = get_index[a[i].x];\r\n\t\tsums[a[i].f][in_f[index]] -= 1;\r\n\t\tint type = a[i].f - k - 1;\r\n\t\tfor(auto [l, r] : reach[index]){\r\n\t\t\t++type;\r\n\t\t\tif(l == -1) continue;\r\n\t\t\tfor(int j = l;j <= r;j++){\r\n\t\t\t\tans += sums[type][j];\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\t\r\n\tcout << ans << \"\\n\";\r\n\t\t\t\r\n\treturn 0x0;\r\n}\r\n"
+}

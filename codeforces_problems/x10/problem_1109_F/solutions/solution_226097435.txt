@@ -1,0 +1,36 @@
+{
+    "id": 226097435,
+    "contestId": 1109,
+    "creationTimeSeconds": 1696126820,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1109,
+        "index": "F",
+        "name": "Sasha and Algorithm of Silence's Sounds",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1109,
+        "members": [
+            {
+                "handle": "for_sx_e_1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1550334900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 17,
+    "timeConsumedMillis": 265,
+    "memoryConsumedBytes": 140390400,
+    "source": "// LUOGU_RID: 126802897\n#include<algorithm>\r\n#include<cstdio>\r\n#include<vector>\r\ntypedef long long ll;\r\nconst int maxn=2e3+5;\r\nconst int maxs=1e6+5;\r\nconst int dx[4]={0,1,0,-1};\r\nconst int dy[4]={1,0,-1,0};\r\nstruct node{\r\n\tint ch[2],fa;\r\n\tbool turn;\r\n\t#define l ch[0]\r\n\t#define r ch[1]\r\n}tree[maxs];\r\nint ident(int x){return tree[tree[x].fa].ch[0]==x?0:1;}\r\nbool isroot(int x){return tree[tree[x].fa].l!=x&&tree[tree[x].fa].r!=x;}\r\nvoid con(int x,int f,int tp){\r\n\ttree[x].fa=f,tree[f].ch[tp]=x;\r\n\treturn;\r\n}\r\nvoid pushdown(int x){\r\n\tif(tree[x].turn){\r\n\t\tstd::swap(tree[x].l,tree[x].r);\r\n\t\ttree[tree[x].l].turn^=1,tree[tree[x].r].turn^=1;\r\n\t\ttree[x].turn=false;\r\n\t}\r\n\treturn;\r\n}\r\nvoid rotate(int x){\r\n\tint f=tree[x].fa,ff=tree[f].fa,fson=ident(x),ffson=ident(f),d=tree[x].ch[fson^1];\r\n\ttree[x].fa=ff;\r\n\tif(!isroot(f))con(x,ff,ffson);\r\n\tcon(d,f,fson),con(f,x,fson^1);\r\n\treturn;\r\n}\r\nint stk[maxn],scnt;\r\nvoid splay(int x){\r\n\tint y=x;\r\n\tstk[scnt=1]=x;\r\n\twhile(!isroot(y))y=tree[y].fa,stk[++scnt]=y;\r\n\twhile(scnt)pushdown(stk[scnt--]);\r\n\tfor(int y=tree[x].fa;!isroot(x);y=tree[x].fa){\r\n\t\tif(!isroot(y))rotate(ident(x)==ident(y)?y:x);\r\n\t\trotate(x);\r\n\t}\r\n\treturn;\r\n}\r\nvoid access(int x){\r\n\tfor(int y=0;x;x=tree[y].fa)splay(x),tree[x].r=y,y=x;\r\n\treturn;\r\n}\r\nvoid maker(int x){\r\n\taccess(x),splay(x);\r\n\ttree[x].turn^=1,pushdown(x);\r\n\treturn;\r\n}\r\nint findr(int x){\r\n\taccess(x),splay(x);\r\n\twhile(tree[x].l)x=tree[x].l,pushdown(x);\r\n\tsplay(x);\r\n\treturn x;\r\n}\r\nvoid link(int x,int y){\r\n//\tif(findr(x)==findr(y))printf(\"link???\\n\");\r\n\tmaker(x),tree[x].fa=y;\r\n\treturn;\r\n}\r\nvoid cut(int x,int y){\r\n//\tif(findr(x)!=findr(y))printf(\"cut???\\n\");\r\n\tmaker(x),access(y),splay(y);\r\n\ttree[y].l=tree[x].fa=0;\r\n\treturn;\r\n}\r\n#undef l\r\n#undef r\r\nstruct info{\r\n\tint mi,mic;\r\n\tfriend info operator+(info now,info oth){\r\n\t\tinfo ret=(info){std::min(now.mi,oth.mi),0};\r\n\t\tif(ret.mi==now.mi)ret.mic+=now.mic;\r\n\t\tif(ret.mi==oth.mi)ret.mic+=oth.mic;\r\n\t\treturn ret;\r\n\t}\r\n};\r\nstruct xds{\r\n\tstruct node{\r\n\t\tint l,r;\r\n\t\tinfo v;\r\n\t\tint tag;\r\n\t}tree[maxs*4];\r\n\tvoid update(int i){\r\n\t\ttree[i].v=tree[i*2].v+tree[i*2+1].v;\r\n\t\treturn;\r\n\t}\r\n\tvoid build(int i,int l,int r){\r\n\t\ttree[i].l=l,tree[i].r=r;\r\n\t\tif(l==r){\r\n\t\t\ttree[i].v=(info){0,1};\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint mid=(l+r)>>1;\r\n\t\tbuild(i*2,l,mid),build(i*2+1,mid+1,r);\r\n\t\tupdate(i);\r\n\t\treturn;\r\n\t}\r\n\tvoid put(int x,int v){\r\n\t\ttree[x].v.mi+=v,tree[x].tag+=v;\r\n\t\treturn;\r\n\t}\r\n\tvoid pushdown(int x){\r\n\t\tif(tree[x].tag)put(x*2,tree[x].tag),put(x*2+1,tree[x].tag),tree[x].tag=0;\r\n\t\treturn;\r\n\t}\r\n\tvoid modify(int i,int l,int r,int v){\r\n\t\tif(tree[i].l>=l&&tree[i].r<=r){\r\n\t\t\tput(i,v);\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tpushdown(i);\r\n\t\tif(tree[i*2].r>=l)modify(i*2,l,r,v);\r\n\t\tif(tree[i*2+1].l<=r)modify(i*2+1,l,r,v);\r\n\t\tupdate(i);\r\n\t\treturn;\r\n\t}\r\n\tinfo query(int i,int l,int r){\r\n\t\tif(tree[i].l>=l&&tree[i].r<=r)return tree[i].v;\r\n\t\tpushdown(i);\r\n\t\tif(tree[i*2+1].l>r)return query(i*2,l,r);\r\n\t\tif(tree[i*2].r<l)return query(i*2+1,l,r);\r\n\t\treturn query(i*2,l,r)+query(i*2+1,l,r);\r\n\t}\r\n}sgt;\r\nint n,m;\r\nint mp[maxn][maxn],bx[maxs],by[maxs],id[maxs][4],icnt;\r\nint rig[maxs];\r\nsigned main(){\r\n\tscanf(\"%d%d\",&n,&m);\r\n\tfor(int i=1;i<=n;i++)for(int j=1;j<=m;j++)scanf(\"%d\",mp[i]+j),bx[mp[i][j]]=i,by[mp[i][j]]=j;\r\n\ticnt=n*m;\r\n\tfor(int i=1;i<=n;i++)for(int j=1;j<=m;j++)for(int k=0;k<=3;k++){\r\n\t\tint x=i+dx[k],y=j+dy[k];\r\n\t\tif(x>=1&&x<=n&&y>=1&&y<=m&&mp[x][y]<mp[i][j])id[mp[i][j]][k]=++icnt;\r\n\t}\r\n\tint pos=0;\r\n\tfor(int i=1;i<=n*m;i++){\r\n\t\twhile(pos<n*m){\r\n//\t\t\tprintf(\"i=%d,pos=%d,x=%d,y=%d\\n\",i,pos,bx[pos+1],by[pos+1]);\r\n\t\t\tbool can=true;\r\n\t\t\tfor(int k=0;k<=3;k++){\r\n\t\t\t\tint x=bx[pos+1]+dx[k],y=by[pos+1]+dy[k];\r\n//\t\t\t\tprintf(\"x=%d,y=%d\\n\",x,y);\r\n\t\t\t\tif(mp[x][y]>=i&&mp[x][y]<pos+1){\r\n//\t\t\t\t\tprintf(\"in\\n\");\r\n\t\t\t\t\tif(findr(mp[x][y])==findr(pos+1)){\r\n\t\t\t\t\t\tcan=false;\r\n\t\t\t\t\t\tfor(int p=0;p<=k-1;p++){\r\n\t\t\t\t\t\t\tint ix=bx[pos+1]+dx[p],iy=by[pos+1]+dy[p];\r\n\t\t\t\t\t\t\tif(mp[ix][iy]>=i&&mp[ix][iy]<pos+1)\r\n\t\t\t\t\t\t\t\tcut(mp[ix][iy],id[pos+1][p]),cut(id[pos+1][p],pos+1);\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t\tbreak;\r\n\t\t\t\t\t}\r\n//\t\t\t\t\tprintf(\"link:%d,%d,findr={%d,%d}\\n\",mp[x][y],pos+1,findr(mp[x][y]),findr(pos+1));\r\n\t\t\t\t\tlink(mp[x][y],id[pos+1][k]),link(id[pos+1][k],pos+1);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tif(can)pos++;\r\n\t\t\telse break;\r\n\t\t}\r\n\t\trig[i]=pos;\r\n//\t\tprintf(\"rig[%d]=%d\\n\",i,rig[i]);\r\n\t\tfor(int k=0;k<=3;k++){\r\n\t\t\tint x=bx[i]+dx[k],y=by[i]+dy[k];\r\n\t\t\tif(mp[x][y]>i&&mp[x][y]<=pos)\r\n\t\t\t\tcut(i,id[mp[x][y]][k^2]),cut(id[mp[x][y]][k^2],mp[x][y]);\r\n\t\t}\r\n\t}\r\n\tsgt.build(1,1,n*m);\r\n\tll ans=0;\r\n\tfor(int i=n*m;i;i--){\r\n\t\tsgt.modify(1,i,n*m,1);\r\n\t\tfor(int k=0;k<=3;k++){\r\n\t\t\tint x=bx[i]+dx[k],y=by[i]+dy[k];\r\n//\t\t\tprintf(\"i=%d,x=%d,y=%d\\n\",i,x,y);\r\n\t\t\tif(mp[x][y]>i&&mp[x][y]<=rig[i]){\r\n//\t\t\t\tprintf(\"i=%d,modify:%d,-1\\n\",i,mp[x][y]);\r\n\t\t\t\tsgt.modify(1,mp[x][y],n*m,-1);\r\n\t\t\t}\r\n\t\t}\r\n\t\tinfo got=sgt.query(1,i,rig[i]);\r\n\t\tif(got.mi==1)ans+=got.mic/*,printf(\"i=%d,ans=%d\\n\",i,got.mic)*/;\r\n\t}\r\n\tprintf(\"%lld\",ans);\r\n\treturn 0;\r\n}\r\n//namespace burningContract"
+}

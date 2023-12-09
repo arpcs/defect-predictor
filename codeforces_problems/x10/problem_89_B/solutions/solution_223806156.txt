@@ -1,0 +1,38 @@
+{
+    "id": 223806156,
+    "contestId": 89,
+    "creationTimeSeconds": 1695022636,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 89,
+        "index": "B",
+        "name": "Widget Library",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "expression parsing",
+            "graphs",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 89,
+        "members": [
+            {
+                "handle": "Carlos_SJS"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1308236400
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 29,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 204800,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\n\n#define tcs() int t; cin >> t; while(t--)\n#define pb push_back\n#define f first\n#define s second\n#define ll long long\n#define vi vector<int>\n#define vll vector<long long>\n#define pii pair<int, int>\n#define all(a) a.begin(), a.end()\n\nstruct widget{\n    vector<widget*> parents;\n\n    int type; // 0 -> normal, 1 -> hbox, 2 -> vbox\n    string name;\n\n    int width;\n    int height;\n\n    int r_width;\n    int r_height;\n\n    int spacing;\n    int border;\n\n    int c_count;\n    multiset<int> c_sizes;\n\n    widget(int type, string name) : type(type), name(name){\n        width = height = 0;\n        r_width = r_height = 0;\n        spacing = border = 0;\n        c_count = 0;\n    }\n\n    widget(int w, int h, string name) : width(w), height(h), name(name){\n        spacing = border = 0;\n        type = 0;\n    }\n};\n\nmap<string, widget*> wds;\n\nvoid parse_func(string &func, string &name, string &arg){\n    int ix = 0;\n    while(func[ix] != '(') ix++;\n    name = func.substr(0, ix);\n    arg = func.substr(ix+1, func.size()-ix-2);\n}\n\nvoid update(widget* w){\n    int pw = w->width, ph = w->height;\n    w->width = w->r_width;\n    w->height = w->r_height;\n\n    if(w->c_count){\n        w->width += 2*w->border;\n        w->height += 2*w->border;\n        if(w->type == 1) w->width += w->spacing*(w->c_count-1);\n        else w->height += w->spacing*(w->c_count-1);\n    }\n\n    for(widget* p: w->parents){\n        if(p->type == 1){\n            p->r_width += w->width-pw;\n            p->c_sizes.erase(p->c_sizes.find(ph));\n            p->c_sizes.insert(w->height);\n            p->r_height = *(p->c_sizes.rbegin());\n        }else{\n            p->r_height += w->height-ph;\n            p->c_sizes.erase(p->c_sizes.find(pw));\n            p->c_sizes.insert(w->width);\n            p->r_width = *(p->c_sizes.rbegin());\n        }\n\n        update(p);\n    }\n}\n\nvoid handle_instruction(string &ins){\n    int ix = 0;\n    while(ins[ix] != ' ' && ins[ix] != '.') ix++;\n\n    if(ins[ix] == ' '){ // Constructors\n        string type = ins.substr(0, ix);\n        string name = ins.substr(ix+1, ins.size()-ix-1);\n\n        if(type == \"Widget\"){\n            string sz, tmp;\n            parse_func(name, tmp, sz);\n\n            ix=0;\n            while(sz[ix] != ',') ix++;\n            int w = stoi(sz.substr(0, ix)), h = stoi(sz.substr(ix+1, sz.size()-ix-1));\n            wds[tmp] = new widget(w, h, tmp);\n        }else if(type == \"HBox\")\n            wds[name] = new widget(1, name);\n        else\n            wds[name] = new widget(2, name);\n        \n\n    }else{ // methodes\n        string name = ins.substr(0, ix);\n        string func = ins.substr(ix+1, ins.size()-ix-1);\n        string methode, arg;\n        \n        parse_func(func, methode, arg);\n\n        if(methode == \"pack\"){\n            widget* parent = wds[name], *child = wds[arg];\n\n            if(parent->type==1){\n                parent->r_width += child->width, parent->r_height = max(parent->r_height, child->height);\n                parent->c_sizes.insert(child->height);\n            }else{\n                parent->r_height += child->height, parent->r_width = max(parent->r_width, child->width);\n                parent->c_sizes.insert(child->width);\n            }\n            parent->c_count++;\n\n            child->parents.pb(parent);\n\n            update(parent);\n        }else if(methode == \"set_border\"){\n            widget* w = wds[name];\n            w->border = stoi(arg);\n            update(w);\n        }else{\n            widget* w = wds[name];\n            w->spacing = stoi(arg);\n            update(w);\n        }\n    }\n}\n\nint main(){\n    int n;\n    cin >> n;\n    cin.ignore();\n\n    string ins;\n    for(int i=0; i<n; i++){\n        getline(cin, ins);\n\n        handle_instruction(ins);\n    }\n\n    for(auto w: wds){\n        cout << w.f << \" \" << w.s->width << \" \" << w.s->height << '\\n';\n        //cout << \"\\t-> Border: \" << w.s->border << \", Spacing: \" << w.s->spacing << \", raw width: \" << w.s->r_width << \", raw height: \" << w.s->r_height << \", Child count: \" << w.s->c_count << '\\n';\n    }\n}"
+}
