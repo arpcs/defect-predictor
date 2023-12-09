@@ -12,14 +12,21 @@ with open("../api_key.txt", 'r', encoding='utf-8') as file:
     
 client = openai.OpenAI(api_key = api_key)
 
-def get_request(messages):
-    response = client.chat.completions.create(
-    model="gpt-3.5-turbo-1106",
-    response_format={ "type": "json_object" },
-    messages= messages
-    )
-    return response.choices[0].message.content
-
+def get_request(messages, is_gpt_4 = False):
+    if is_gpt_4 == False:
+        response = client.chat.completions.create(
+        model="gpt-3.5-turbo-1106",
+        response_format={ "type": "json_object" },
+        messages= messages
+        )
+        return response.choices[0].message.content
+    else:
+        response = client.chat.completions.create(
+        model="gpt-4-1106-preview",
+        response_format={ "type": "json_object" },
+        messages= messages
+        )
+        return response.choices[0].message.content
 
 def parse_suggested_categories_json(text):
     try:
@@ -231,15 +238,19 @@ def fill_category_evaluation(file_path, messages):
         except Exception as e:
             print(f"An error occurred: {e}")
 
-def fill_defect_evaluation(file_path, messages):
-    response = get_request(messages)
+def fill_defect_evaluation(file_path, messages, is_gpt_4):
+    response = get_request(messages, is_gpt_4)
     defect_evaluation = parse_defect_evaluation_json(response)
     if defect_evaluation is not None:
         print("Final defect_evaluation: " + str(defect_evaluation))
         try:
             with open(file_path, 'r', encoding='utf-8') as file:
                 data = json.load(file)
-            data['defect_evaluation'] = defect_evaluation
+                print("Actually is: " + data['verdict']+ " is gpt4= "+ str(is_gpt_4))
+            if is_gpt_4 == False: 
+                data['defect_evaluation'] = defect_evaluation
+            else:
+                data['defect_evaluation_gpt_4'] = defect_evaluation
             pass
             with open(file_path, 'w', encoding='utf-8') as file:
                 json.dump(data, file, indent=4)
@@ -280,12 +291,12 @@ def do_category_evaluations(container: helper.ProblemSolutionContainer, packs: L
             else:
                 print(f"Already Done category evaluation: {problem_obj['contestId']} : {solution_obj['id']}")
         
-def do_defect_evaluations(container: helper.ProblemSolutionContainer, packs: List[helper.ProblemPack]):
+def do_defect_evaluations(container: helper.ProblemSolutionContainer, packs: List[helper.ProblemPack], is_gpt_4 = False):
     for pack in packs:
         problem_obj = container.problems[pack.problem_id]
         for solution_id in pack.solution_ids:
             solution_obj = container.solutions[solution_id]
-            if ("defect_evaluation" not in solution_obj):
+            if ((is_gpt_4 == False and "defect_evaluation" not in solution_obj) or (is_gpt_4 == True and "defect_evaluation_gpt_4" not in solution_obj)):
                 messages =[
                 {"role": "system", "content": "You are a helpful assistant designed to output JSON."},
                 {"role": "user", "content": "I will give a programming task and a program."
@@ -294,7 +305,7 @@ def do_defect_evaluations(container: helper.ProblemSolutionContainer, packs: Lis
                 "Give the answer in a JSON format containing a field defect_evaluation, which is a map with category keys and the percentage values."
                 f"Give the JSON only, nothing else, no other text. \nHere is the problem: {problem_obj['desc']} \nHere is the program: {solution_obj['source']}"}
                 ]  
-                fill_defect_evaluation(container.solution_paths[solution_id], messages)
+                fill_defect_evaluation(container.solution_paths[solution_id], messages, is_gpt_4 = False)
             else:
                 print(f"Already Done defect evaluation: {problem_obj['contestId']} : {solution_obj['id']}")
         
@@ -304,6 +315,9 @@ def count_filed_category_evaluation(probs_sols):
 
 def count_filed_defect_evaluation(probs_sols):
     return len([probs_sol for probs_sol in probs_sols if 'defect_evaluation' in probs_sol])
+
+def count_filed_defect_evaluation_gpt_4(probs_sols):
+    return len([probs_sol for probs_sol in probs_sols if 'defect_evaluation_gpt_4' in probs_sol])
 
 def main():
     problems = helper.problem_getter()
@@ -328,6 +342,8 @@ def main():
     defect_evaluation_count = count_filed_defect_evaluation(solutions)
     print(f"Already filled defect evaluations: {defect_evaluation_count}")
 
+    defect_evaluation_gpt_4_count = count_filed_defect_evaluation_gpt_4(solutions)
+    print(f"Already filled defect gpt4 evaluations: {defect_evaluation_gpt_4_count}")
 
     # fill_suggested_categories(200 - problem_suggested_categories_count, problems, problem_paths, "problem")
 
@@ -338,7 +354,7 @@ def main():
 
     # do_category_evaluations(problem_solution_container, problem_packs)
 
-    do_defect_evaluations(problem_solution_container, problem_packs)
+    do_defect_evaluations(problem_solution_container, problem_packs, True)
 
 if __name__ == "__main__":
     main()
