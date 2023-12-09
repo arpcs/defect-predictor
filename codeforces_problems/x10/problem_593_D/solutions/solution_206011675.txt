@@ -1,0 +1,39 @@
+{
+    "id": 206011675,
+    "contestId": 593,
+    "creationTimeSeconds": 1684170075,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 593,
+        "index": "D",
+        "name": "Happy Tree Party",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 593,
+        "members": [
+            {
+                "handle": "wangjunchao"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1446655500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 733,
+    "memoryConsumedBytes": 65433600,
+    "source": "#include <iostream>\r\n#include <cstring>\r\n#include <algorithm>\r\n#include <cmath>\r\n#include <algorithm>\r\n#include <vector>\r\n#include <array>\r\n\r\n#define int long long\r\n\r\nconst int N = 2e5+10;\r\n\r\nstd::vector<std::array<int,2>> h[N], edges;\r\nint l[N], r[N], rk[N], sz[N], son[N], top[N], fa[N], dep[N], cnt;\r\nint a[N], id[N];\r\nint n, m;\r\n\r\nstruct SegTree {\r\n\tstruct Node {\r\n\t\tint l, r;\r\n\t\tint div;\r\n\t} tr[N<<2];\r\n\r\n\tvoid pushup(int u) {\r\n\t\ttr[u].div = tr[u<<1].div*tr[u<<1|1].div;\r\n\t\tif((long double)tr[u<<1].div*tr[u<<1|1].div>1e18) tr[u].div = 0;\r\n\t}\r\n\r\n\tvoid build(int u, int l, int r) {\r\n\t\ttr[u] = {l,r,a[rk[l]]};\r\n\t\tif(l==r) return;\r\n\t\tint mid = (l+r)>>1;\r\n\t\tbuild(u<<1,l,mid), build(u<<1|1,mid+1,r);\r\n\t\tpushup(u);\r\n\t}\r\n\r\n\tvoid modify(int u, int x, int k) {\r\n\t\tif(tr[u].l==tr[u].r) {\r\n\t\t\ttr[u].div = k;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint mid = (tr[u].l+tr[u].r)>>1;\r\n\t\tif(x<=mid) modify(u<<1,x,k);\r\n\t\tif(x>mid) modify(u<<1|1,x,k);\r\n\t\tpushup(u);\r\n\t}\r\n\r\n\tint query(int u, int l, int r) {\r\n\t\tif(l<=tr[u].l&&tr[u].r<=r) {\r\n\t\t\treturn tr[u].div;\r\n\t\t}\r\n\t\tint mid = (tr[u].l+tr[u].r) >> 1;\r\n\t\tlong double res = 1;\r\n\t\tif(l<=mid) res = res*query(u<<1,l,r);\r\n\t\tif(res>1e18) res = 0;\r\n\t\tif(r>mid) res = res*query(u<<1|1,l,r);\r\n\t\tif(res>1e18) res = 0;\r\n\t\treturn (long long)res;\r\n\t}\r\n} T;\r\n\r\nvoid dfs1(int u, int f) {\r\n\tsz[u] = 1, fa[u] = f, dep[u] = dep[f]+1;\r\n\tfor(auto [v,w]:h[u]) if(v!=f) {\r\n\t\tdfs1(v,u);\r\n\t\ta[v] = w;\r\n\t\tsz[u] += sz[v];\r\n\t\tif(sz[son[u]]<sz[v]) son[u] = v;\r\n\t}\r\n}\r\n\r\nvoid dfs2(int u, int t) {\r\n\tl[u] = ++cnt, rk[cnt] = u, top[u] = t;\r\n\tif(son[u]) dfs2(son[u],t);\r\n\r\n\tfor(auto [v,w]:h[u]) if(v!=fa[u]&&v!=son[u]) {\r\n\t\tdfs2(v,v);\r\n\t}\r\n\tr[u] = cnt;\r\n}\r\n\r\nint query(int u, int v, int c) {\r\n\tlong double res = 1;\r\n\twhile(top[u]!=top[v]) {\r\n\t\tif(dep[top[u]]<dep[top[v]]) std::swap(u,v);\r\n\t\tres = res*T.query(1,l[top[u]],l[u]);\r\n\t\tif(res<=0) return 0;\r\n\t\tif(res>1e18) return 0;\r\n\t\tu = fa[top[u]];\r\n\t}\r\n\tif(dep[u]<dep[v]) std::swap(u,v);\r\n\tif(u!=v) res = res*T.query(1,l[v]+1,l[u]);\r\n\r\n\tif(res<=0) return 0;\r\n\tif(res>1e18) return 0;\r\n\r\n\treturn c/res;\r\n}\r\n\r\n\r\nvoid solve()\r\n{\r\n\tstd::cin >> n >> m;\r\n\r\n\tfor(int i=1;i<n;i++) {\r\n\t\tint u, v, w;\r\n\t\tstd::cin >> u >> v >> w;\r\n\t\th[u].push_back({v,w}), h[v].push_back({u,w});\r\n\t\tedges.push_back({u,v});\r\n\t}\r\n\r\n\tdfs1(1,0);\r\n\tdfs2(1,1);\r\n\r\n\tfor(int i=0;i<n-1;i++) {\r\n\t\tid[i+1] = dep[edges[i][0]]>dep[edges[i][1]]?edges[i][0]:edges[i][1];\r\n\t}\r\n\r\n\tT.build(1,1,n);\r\n\r\n\twhile(m --) {\r\n\t\tint op; std::cin >> op;\r\n\r\n\t\tif(op==1) {\r\n\t\t\tint a, b, c;\r\n\t\t\tstd::cin >> a >> b >> c;\r\n\t\t\tstd::cout << query(a,b,c) << \"\\n\";\r\n\t\t} else {\r\n\t\t\tint p, c;\r\n\t\t\tstd::cin >> p >> c;\r\n\t\t\tT.modify(1,l[id[p]],c);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nsigned main()\r\n{\r\n\tstd::ios::sync_with_stdio(false);\r\n\tstd::cin.tie(0);\r\n\r\n\tint t = 1;\r\n\twhile(t --)\r\n\t\tsolve();\r\n\treturn 0;\r\n}"
+}

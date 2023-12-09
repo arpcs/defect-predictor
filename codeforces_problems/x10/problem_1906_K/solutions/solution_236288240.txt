@@ -1,0 +1,35 @@
+{
+    "id": 236288240,
+    "contestId": 1906,
+    "creationTimeSeconds": 1702013713,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1906,
+        "index": "K",
+        "name": "Deck-Building Game",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "divide and conquer",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1906,
+        "members": [
+            {
+                "handle": "ycp20030320"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1701578100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 312,
+    "memoryConsumedBytes": 11468800,
+    "source": "#include<bits/stdc++.h>\r\n#define int long long\r\nusing namespace std;\r\nusing ll = long long;\r\n#define inv2 499122177\r\nconst int mod = 998244353;\r\nconst int N = 1e5 + 10;\r\nll fac[N], ifac[N];\r\nint qpow(int a, int b) {\r\n\tint res = 1;\r\n\tfor (; b; b >>= 1) {\r\n\t\tif(b & 1) res = 1ll * res * a % mod;\r\n\t\ta = 1ll * a * a % mod;\r\n\t}\r\n\treturn res;\r\n}\r\nvoid init(int n = 100000) {\r\n\tfac[0] = 1;\r\n\tfor (int i = 1; i <= n; i++) fac[i] = 1ll * fac[i - 1] * i % mod;\r\n\tifac[n] = qpow(fac[n], mod - 2);\r\n\tfor (int i = n; i; i--) ifac[i - 1] = 1ll * ifac[i] * i % mod;\r\n}\r\nll binom(int n, int m) {\r\n\tif(n < m || m < 0) return 0;\r\n\treturn 1ll * fac[n] * ifac[m] % mod * ifac[n - m] % mod;\r\n}\r\nvector<ll> fwt(vector<ll> a, void (*opr)(ll &, ll &)) {\r\n  int n = a.size();\r\n\tfor (int i = 0; 1 << i < n; i++)\r\n    \tfor (int j = 0; j < n; j++)\r\n    \t\tif (j >> i & 1) opr(a[j - (1 << i)], a[j]);\r\n  return a;\r\n}\r\nvoid fwtxor(ll &a, ll &b) {\r\n\tll x = a + b, y = a - b;\r\n\ta = x % mod, b = y % mod;\r\n}\r\nvoid revxor(ll &a, ll &b) {\r\n\tll x = a + b, y = a - b;\r\n\ta = x * inv2 % mod, b = y * inv2 % mod;\r\n}\r\nvector<ll> mul(vector<ll> a, vector<ll> b) {\r\n\tfor (int i = 0; i < a.size(); i++) a[i] = a[i] * b[i] % mod;\r\n\treturn a;\r\n}\r\nvector<vector<ll>> solve(vector<ll> a) {\r\n\tif(a.size() == 1) {\r\n\t\tint n = a[0];\r\n\t\tvector<vector<ll>> res(2, vector<ll>(1));\r\n\t\tfor (int i = 0; i <= n; i++) {\r\n\t\t\t(res[i & 1][0] += 1ll * qpow(2, i) * binom(n, i) % mod) %= mod;\r\n\t\t}\r\n\t\tres[0][0] %= mod; \r\n\t\tres[1][0] %= mod;\r\n\t\treturn res;\r\n\t}\r\n\tint n = a.size(), m = n / 2;\r\n\tvector<ll> b = {a.begin(), a.begin() + m};\r\n\tvector<ll> c = {a.begin() + m, a.end()};\r\n\tauto cb = solve(b);\r\n\tauto cc = solve(c);\r\n\tvector<vector<ll>> res(2, vector<ll> (n));\r\n\tfor (int i = 0; i < 2; i++) {\r\n\t\tfor (int j = 0; j < 2; j++) {\r\n\t\t\tauto tmp = fwt(mul(fwt(cb[i], fwtxor), fwt(cc[j], fwtxor)), revxor);\r\n\t\t\tint k = i ^ j;\r\n\t\t\tint s = j * m;\r\n\t\t\tfor (int x = 0; x < m; x++) (res[k][x + s] += tmp[x]) %= mod;\r\n\t\t}\r\n\t}\r\n\treturn res;\r\n}\r\nsigned main() {\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(0);\r\n\tinit();\r\n\tint n;\r\n\tcin >> n;\r\n\tvector<ll> a(1 << 17);\r\n\tfor (int i = 0; i < n; i++) {\r\n\t\tint x;\r\n\t\tcin >> x;\r\n\t\ta[x]++;\r\n\t}\r\n\tauto res = solve(a);\r\n\tll ans = (res[0][0] + res[1][0]) % mod;\r\n\tcout << ans << \"\\n\";\r\n\treturn 0;\r\n}"
+}

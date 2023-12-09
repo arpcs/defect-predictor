@@ -1,0 +1,35 @@
+{
+    "id": 198587551,
+    "contestId": 311,
+    "creationTimeSeconds": 1679468327,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 311,
+        "index": "E",
+        "name": "Biologist",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2300,
+        "tags": [
+            "flows"
+        ]
+    },
+    "author": {
+        "contestId": 311,
+        "members": [
+            {
+                "handle": "dark_light"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1369582200
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 31,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 29798400,
+    "source": "// LUOGU_RID: 105490232\n#include <bits/stdc++.h> \r\n#include <assert.h> \r\n#include <unordered_set>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/hash_policy.hpp>\r\nusing namespace __gnu_pbds;\r\nusing namespace std;\r\n#define LL long long\r\n#define pp pair<LL,int>\r\n#define mp make_pair \r\n#define ull unsigned long long\r\nnamespace IO{\r\n    const int sz=1<<22;\r\n    char a[sz+5],b[sz+5],*p1=a,*p2=a,*t=b,p[105];\r\n    inline char gc(){\r\n\t\treturn getchar();\r\n    //    return p1==p2?(p2=(p1=a)+fread(a,1,sz,stdin),p1==p2?EOF:*p1++):*p1++;\r\n    }\r\n    template<class T> void gi(T& x){\r\n        x=0; int f=1;char c=gc();\r\n        if(c=='-')f=-1;\r\n        for(;c<'0'||c>'9';c=gc())if(c=='-')f=-1;\r\n        for(;c>='0'&&c<='9';c=gc())\r\n            x=x*10+(c-'0');\r\n        x=x*f;\r\n    }\r\n    inline void flush(){fwrite(b,1,t-b,stdout),t=b; }\r\n    inline void pc(char x){*t++=x; if(t-b==sz) flush(); }\r\n    template<class T> void pi(T x,char c='\\n'){\r\n        if(x<0)pc('-'),x=-x;\r\n        if(x==0) pc('0'); int t=0;\r\n        for(;x;x/=10) p[++t]=x%10+'0';\r\n        for(;t;--t) pc(p[t]); pc(c);\r\n    }\r\n    struct F{~F(){flush();}}f; \r\n}\r\nusing IO::gi;\r\nusing IO::pi;\r\nusing IO::pc;\r\nusing IO::gc;\r\nconst int mod=1e9+7;\r\nconst int inv2=(mod+1)>>1;\r\ninline int add(int x,int y){\r\n\treturn x+y>=mod?x+y-mod:x+y;\r\n}\r\ninline int dec(int x,int y){\r\n\treturn x-y<0?x-y+mod:x-y;\r\n}\r\ninline int qkpow(int a,int b){\r\n\tint ans=1,base=a;\r\n\twhile(b){\r\n\t\tif(b&1)ans=1ll*ans*base%mod;\r\n\t\tbase=1ll*base*base%mod;\r\n\t\tb>>=1;\r\n\t}\r\n\treturn ans;\r\n}\r\nint fac[1000005],inv[1000005],Invn[1000005];\r\ninline int binom(int n,LL m){\r\n\tif(n<m||m<0)return 0;\r\n\treturn 1ll*fac[n]*inv[m]%mod*inv[n-m]%mod;\r\n}\r\nvoid init_C(int N){\r\n\tfac[0]=1; \r\n\tfor(int i=1;i<=N;i++)fac[i]=1ll*fac[i-1]*i%mod; \r\n\tinv[0]=1;\r\n\tinv[N]=qkpow(fac[N],mod-2);\r\n\tfor(int i=N-1;i>=1;i--)inv[i]=1ll*inv[i+1]*(i+1)%mod;\r\n\tInvn[0]=Invn[1]=1;\r\n\tfor(int i=2;i<=N;i++)Invn[i]=1ll*inv[i]*fac[i-1]%mod;\r\n}     \r\n\r\nint n,m,g,s,t,cnt,nxt[1000005],to[100005],val[1000005],cur[40005],head[40005],dep[40005];\r\nbool vis[40005],ok[40005];\r\nLL ans,Ans;\r\nint a[40005],b[40005],sflow;\r\ninline void add_edge(int u,int v,int w){\r\n\tnxt[++cnt]=head[u];\r\n\tto[cnt]=v;\r\n\tval[cnt]=w;\r\n\thead[u]=cnt;\r\n\tnxt[++cnt]=head[v];\r\n\tto[cnt]=u;\r\n\tval[cnt]=0;\r\n\thead[v]=cnt;\r\n}\r\nqueue<int>q;\r\nconst int INF=1e9;\r\ninline bool bfs(){\r\n\twhile(!q.empty())q.pop();\r\n\tfor(int i=s;i<=t;i++)cur[i]=head[i],vis[i]=0,dep[i]=1e9;\r\n\tdep[s]=1,vis[s]=1;\r\n\tq.push(s);\r\n\twhile(!q.empty()){\r\n\t\tint u=q.front();\r\n\t\tq.pop();\r\n\t\tfor(int i=head[u];i;i=nxt[i]){\r\n\t\t\tint v=to[i];\r\n\t\t\tif(val[i]&&!vis[v]){\r\n\t\t\t\tvis[v]=1;\r\n\t\t\t\tdep[v]=dep[u]+1;\r\n\t\t\t\tq.push(v);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn dep[t]!=1e9;\r\n}\r\ninline int Dinic(int u,int flow){\r\n\tif(u==t)return flow;\r\n\tint used=0;\r\n\tfor(int i=cur[u];i;i=nxt[i]){\r\n\t\tcur[u]=i;\r\n\t\tint v=to[i];\r\n\t\tif(val[i]&&dep[v]==dep[u]+1){\r\n\t\t\tint FLOW=Dinic(v,min(flow-used,val[i]));\r\n\t\t\tval[i]-=FLOW;\r\n\t\t\tval[i^1]+=FLOW;\r\n\t\t\tused+=FLOW;\r\n\t\t\tif(used==flow)return used;\r\n\t\t}\r\n\t}\r\n\tif(used==0)dep[u]=0;\r\n\treturn used;\r\n}\r\nsigned main(){\r\n\tcnt=1;\r\n\tgi(n),gi(m),gi(g);\r\n\ts=0,t=n+m+1;\r\n\tfor(int i=1;i<=n;i++)gi(a[i]);\r\n\tfor(int i=1;i<=n;i++)gi(b[i]);\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tif(!a[i])add_edge(s,i,b[i]);\r\n\t\telse add_edge(i,t,b[i]);\r\n\t}\r\n\tfor(int i=1;i<=m;i++){\r\n\t\tint c,w,k;\r\n\t\tgi(c),gi(w),gi(k);\r\n\t\tans+=w;\r\n\t\twhile(k--){\r\n\t\t\tint x;\r\n\t\t\tgi(x);\r\n\t\t\tif(!c)add_edge(i+n,x,1e9);\r\n\t\t\telse add_edge(x,i+n,1e9);\r\n\t\t} \r\n\t\tint f;\r\n\t\tgi(f);\r\n\t\tif(f)w+=g;\r\n\t\tif(!c)add_edge(s,i+n,w);\r\n\t\telse add_edge(i+n,t,w);\r\n\t}\r\n\twhile(bfs())sflow+=Dinic(s,1e9);\r\n\tpi(ans-sflow);\r\n\treturn 0;\r\n}\r\n/*\r\n*/"
+}

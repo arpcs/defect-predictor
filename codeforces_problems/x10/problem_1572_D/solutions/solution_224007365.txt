@@ -1,0 +1,38 @@
+{
+    "id": 224007365,
+    "contestId": 1572,
+    "creationTimeSeconds": 1695112223,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1572,
+        "index": "D",
+        "name": "Bridge Club",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2800,
+        "tags": [
+            "flows",
+            "graph matchings",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1572,
+        "members": [
+            {
+                "handle": "WaterSL"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631975700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 608,
+    "memoryConsumedBytes": 533606400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define int long long\r\nnamespace IO {\r\n\t#if ONLINE_JUDGE\r\n\t#define getc() (IS == IT && (IT = (IS = ibuf) + fread(ibuf, 1, IL, stdin), IS == IT) ? EOF : *IS++)\r\n\t#else\r\n\t#define getc() getchar()\r\n\t#endif\r\n\tconst int IL = 1 << 21, OL = 1 << 21;\r\n\tint olen = 0;\r\n\tchar ibuf[IL], *IS = ibuf, *IT = ibuf, obuf[OL];\r\n\tinline int read() {\r\n\t\tregister char ch = getc(); register int x = 0, f = 1;\r\n\t\twhile(!isdigit(ch)) { if(ch == '-') f = -1; ch = getc(); }\r\n\t\twhile(isdigit(ch)) x = x * 10 + ch - 48, ch = getc();\r\n\t\treturn x * f;\r\n\t}\r\n\tinline double readdb() {\r\n\t\tregister char ch = getc(); register double x = 0, f = 1;\r\n\t\twhile(!isdigit(ch)) { if(ch == '-') f = -1; ch = getc(); }\r\n\t\twhile(isdigit(ch)) x = x * 10 + ch - 48, ch = getc();\r\n\t\tif(ch == '.') {\r\n\t\t\tregister double b = 0.1;\r\n\t\t\tch = getc();\r\n\t\t\twhile(isdigit(ch)) x += (ch - 48) * b, b *= 0.1, ch = getc();\r\n\t\t}\r\n\t\treturn x * f;\r\n\t}\r\n\tinline int readstr(char *s) {\r\n\t\tregister char ch = getc(); register int len = 0;\r\n\t\twhile(!isalpha(ch)) ch = getc();\r\n\t\twhile(isalpha(ch)) s[++len] = ch, ch = getc();\r\n\t\treturn len;\r\n\t}\r\n\tinline void flush() { fwrite(obuf, 1, olen, stdout); olen = 0; }\r\n\tinline void putc(register char ch) { obuf[olen++] = ch; }\r\n\ttemplate<class T>\r\n\tinline void write(register T x) {\r\n\t\tif(x < 0) obuf[olen++] = '-', x = -x;\r\n\t\tif(x > 9) write(x / 10);\r\n\t\tobuf[olen++] = x % 10 + 48;\r\n\t}\r\n} using namespace IO;\r\n\r\nint n, k;\r\n\r\nconst int N = 2e4 + 10, M = 5e5 + 10, inf = 1e18;\r\nint S, T;\r\nstruct edge {\r\n\tint to, w, c, nxt;\r\n} e[M];\r\nint now[N], head[N], cnt = 1;\r\nvoid add(int u, int v, int w, int c) {\r\n\te[++cnt] = (edge){v, w, c, head[u]};\r\n\thead[u] = cnt;\r\n\te[++cnt] = (edge){u, 0, -c, head[v]};\r\n\thead[v] = cnt;\r\n}\r\nint dis[N]; \r\nbool vis[N];\r\nbool spfa() {\r\n\tqueue<int> q;\r\n\tq.push(S);\r\n\tmemset(dis, -63, sizeof(dis));\r\n\tmemcpy(now, head, sizeof(now));\r\n\tdis[S] = 0;\r\n\twhile(!q.empty()) {\r\n\t\tint u = q.front();\r\n\t\tq.pop();\r\n\t\tvis[u] = 0;\r\n\t\tfor(int i = head[u], v; i; i = e[i].nxt) {\r\n\t\t\tv = e[i].to;\r\n\t\t\tif(e[i].w && dis[v] < dis[u] + e[i].c) {\r\n\t\t\t\tdis[v] = dis[u] + e[i].c;\r\n\t\t\t\tif(!vis[v]) {\r\n\t\t\t\t\tvis[v] = 1;\r\n\t\t\t\t\tq.push(v);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n//\tcout << dis[T] << endl;\r\n\treturn dis[T] > -1e18;\r\n}\r\nint maxflow, mincost;\r\nint dfs(int u, int sum) {\r\n\tif(u == T) return sum;\r\n\tvis[u] = 1;\r\n\tint res = 0, flow;\r\n\tfor(int i = now[u], v; i; i = e[i].nxt) {\r\n\t\tnow[u] = i;\r\n\t\tv = e[i].to;\r\n\t\tif(!vis[v] && e[i].w && dis[v] == dis[u] + e[i].c) {\r\n\t\t\tflow = dfs(v, min(sum, e[i].w));\r\n\t\t\te[i].w -= flow, e[i ^ 1].w += flow;\r\n\t\t\tsum -= flow, res += flow;\r\n\t\t\tmincost += flow * e[i].c;\r\n\t\t\tif(!sum) break;\r\n\t\t}\r\n\t}\r\n\tvis[u] = 0;\r\n\treturn res;\r\n}\r\nstruct Edge {\r\n\tint u, v, w;\r\n\tfriend bool operator < (const Edge &x, const Edge &y) {\r\n\t\treturn x.w > y.w;\r\n\t}\r\n} E[(1 << 20) * 20 + 10];\r\nint tot;\r\nint a[(1 << 20) + 10];\r\nint lsh[N];\r\nbool sss[N];\r\nsigned main() {\r\n\tS = 9998, T = 9999;\r\n\tint Si = 9997, Ti = 9996; \r\n\tn = read(), k = read();\r\n\tk = min(k, (1ll << n) / 2);\r\n\tfor(int i = 0; i < (1 << n); i++)\r\n\t\ta[i] = read();\r\n\tfor(int i = 0; i < (1 << n); i++)\r\n\t\tfor(int j = 0; j < n; j++)\r\n\t\t\tE[++tot] = {i, i ^ (1 << j), a[i] + a[i ^ (1 << j)]};\r\n\tint s = min(k * (2 * n) + 100, tot);\r\n\tnth_element(E + 1, E + s, E + 1 + tot);\r\n\ttot = 0;\r\n\tfor(int i = 1; i <= s; i++)\r\n\t\tlsh[++tot] = E[i].u, lsh[++tot] = E[i].v;\r\n\tsort(lsh + 1, lsh + 1 + tot);\r\n\ttot = unique(lsh + 1, lsh + 1 + tot) - lsh - 1;\r\n\tfor(int i = 1; i <= s; i++) {\r\n\t\tif(__builtin_popcount(E[i].u) & 1) continue;\r\n\t\tE[i].u = lower_bound(lsh + 1, lsh + 1 + tot, E[i].u) - lsh;\r\n\t\tE[i].v = lower_bound(lsh + 1, lsh + 1 + tot, E[i].v) - lsh;\r\n\t\tsss[E[i].u] = 1;\r\n//\t\tcout << E[i].u << \" \" << E[i].v << \" \" << E[i].w << endl;\r\n\t\tadd(E[i].u, E[i].v, 1, E[i].w);\r\n\t}\r\n\tfor(int i = 1; i <= tot; i++)\r\n\t\tif(sss[i]) add(Si, i, 1, 0);\r\n\t\telse add(i, Ti, 1, 0);\r\n\tadd(S, Si, k, 0);\r\n\tadd(Ti, T, k, 0);\r\n\tint ans = 0; \r\n\twhile(spfa()) dfs(S, 1e18);\r\n\tprintf(\"%d\\n\", mincost);\r\n\treturn 0;\r\n}\r\n"
+}

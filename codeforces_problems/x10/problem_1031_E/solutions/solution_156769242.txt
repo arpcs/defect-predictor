@@ -1,0 +1,35 @@
+{
+    "id": 156769242,
+    "contestId": 1031,
+    "creationTimeSeconds": 1652228984,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1031,
+        "index": "E",
+        "name": "Triple Flips",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2600,
+        "tags": [
+            "constructive algorithms"
+        ]
+    },
+    "author": {
+        "contestId": 1031,
+        "members": [
+            {
+                "handle": "_chess_"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1540109400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 105,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 2048000,
+    "source": "#include <queue>\n#include <cstdio>\n#include <cctype>\n#include <cstring>\n#include <algorithm>\nusing namespace std;\n#define FOR(i,j,k) for(int i=j; i<=k; ++i)\n#define ROF(i,j,k) for(int i=j; i>=k; --i)\ninline int read (void) {\n  int x = 0, f = 1, ch = getchar();\n  while(!isdigit(ch)) { if(ch == '-') f = -f; ch = getchar(); }\n  while(isdigit(ch)) { x = x * 10 + ch - '0'; ch = getchar(); }\n  return x * f;\n}\nstruct Node {\n  int a, b, c;\n};\nvector <Node> v;\nconst int maxn = 100005;\nint a[maxn], f[256], p[256];\ninline void work (int x, int y, int z) {\n  v.push_back((Node) {x, y, z});\n  a[x] ^= 1; a[y] ^= 1; a[z] ^= 1;\n}\nint main (void) {\n  int n = read();\n  FOR(i,1,n) a[i] = read();\n  if(n > 8) {\n    int l = 1, r = n;\n    while(1) {\n      while(l <= r && !a[l]) ++ l;\n      while(l <= r && !a[r]) -- r;\n      if(r - l + 1 <= 8) break;\n      if(a[l+1] && a[l+2]) work(l, l+1, l+2);\n      else if(a[l+2]) work (l, l+2, l+4);\n      else if(!a[l+1]) work (l, l+3, l+6);\n      else if(a[r-1] && a[r-2]) work (r-2, r-1, r);\n      else if(a[r-2]) work (r-4, r-2, r);\n      else if(!a[r-1]) work (r-6, r-3, r);\n      else if(r-l&1) {\n        int d = r - l - 1 >> 1;\n        work (l, l+d, l+d+d);\n        work (r-d-d, r-d, r);\n      } else {\n        int d = r - l >> 1;\n        work (l, l + d, r);\n      }\n    }\n    while(r - l + 1 < 8 && l > 1) -- l;\n    while(r - l + 1 < 8 && r < n) ++ r;\n    FOR(i,0,(1<<8)-1) f[i] = 0x3f3f3f3f; f[0] = 0;\n    FOR(i,0,7) FOR(j,i+1,7) FOR(k,j+1,7) if(k - j == j - i) {\n      bool flag;\n      while(1) {\n        flag = 1;\n        for(int x=0; x<(1<<8); ++x) if(f[x^(1<<i)^(1<<j)^(1<<k)] + 1 < f[x])\n          f[x] = f[x^(1<<i)^(1<<j)^(1<<k)] + 1, p[x] = x^(1<<i)^(1<<j)^(1<<k), flag = 0;\n        if(flag) break;\n      }\n    }\n    int x = 0;\n    ROF(i,r,l) x = x * 2 + a[i];\n    printf(\"YES\\n%d\\n\", f[x]+v.size());\n    for(auto&it:v) printf(\"%d %d %d\\n\", it.a, it.b, it.c);\n    while(x) {\n      int d = x ^ p[x];\n      FOR(i,0,7) if(d>>i&1) printf(\"%d \", l+i);\n      printf(\"\\n\"); x = p[x];\n    }\n  } else {\n    FOR(i,0,(1<<n)-1) f[i] = 0x3f3f3f3f; f[0] = 0;\n    FOR(i,0,n-1) FOR(j,i+1,n-1) FOR(k,j+1,n-1) if(k - j == j - i) {\n      bool flag;\n      while(1) {\n        flag = 1;\n        for(int x=0; x<(1<<n); ++x) if(f[x^(1<<i)^(1<<j)^(1<<k)] + 1 < f[x])\n          f[x] = f[x^(1<<i)^(1<<j)^(1<<k)] + 1, p[x] = x^(1<<i)^(1<<j)^(1<<k), flag = 0;\n        if(flag) break;\n      }\n    }\n    int x = 0;\n    ROF(i,n,1) x = x * 2 + a[i];\n    if(f[x] == 0x3f3f3f3f) printf(\"NO\\n\");\n    else {\n      printf(\"YES\\n%d\\n\", f[x]);\n      while(x) {\n        int d = x ^ p[x];\n        FOR(i,0,n-1) if(d>>i&1) printf(\"%d \", i+1);\n        printf(\"\\n\"); x = p[x];\n      }\n    }\n  }\n\n  return 0;\n}"
+}

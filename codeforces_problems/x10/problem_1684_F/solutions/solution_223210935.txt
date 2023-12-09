@@ -1,0 +1,36 @@
+{
+    "id": 223210935,
+    "contestId": 1684,
+    "creationTimeSeconds": 1694607664,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1684,
+        "index": "F",
+        "name": "Diverse Segments",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1684,
+        "members": [
+            {
+                "handle": "AboAbdoMC"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1652970900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 132,
+    "timeConsumedMillis": 374,
+    "memoryConsumedBytes": 87859200,
+    "source": "/*\n           _                   _         _       __  __  _____ \n     /\\   | |            /\\   | |       | |     |  \\/  |/ ____|\n    /  \\  | |__   ___   /  \\  | |__   __| | ___ | \\  / | |     \n   / /\\ \\ | '_ \\ / _ \\ / /\\ \\ | '_ \\ / _` |/ _ \\| |\\/| | |     \n  / ____ \\| |_) | (_) / ____ \\| |_) | (_| | (_) | |  | | |____ \n /_/    \\_\\_.__/ \\___/_/    \\_\\_.__/ \\__,_|\\___/|_|  |_|\\_____|\n*/\n\n// build command:\n// g++ -std=gnu++17 -O3 -DDEBUG -g -fsanitize=signed-integer-overflow -fsanitize=bounds-strict -fsanitize=address -fsanitize=integer-divide-by-zero -fsanitize=float-divide-by-zero -fsanitize=pointer-overflow -fsanitize=shift-exponent -fsplit-stack -Wshadow -Wall -fconcepts -Wno-unused-result\n\n// REMEMBER:\n// BS, Offline, Persistent SegTree, SQRT, Treap, MaxFlow, FFT, Matrices\n\n#include <bits/stdc++.h>\nusing namespace std;\n\n#pragma GCC optimize(\"O3,unroll-loops\")\n\n// DEBUG STUFF\ntemplate<typename A, typename B> ostream& operator<<(ostream &os, const pair<A, B> &p) { return os << '(' << p.first << \", \" << p.second << ')'; }\ntemplate<typename T_container, typename T = typename enable_if<!is_same<T_container, string>::value, typename T_container::value_type>::type> ostream& operator<<(ostream &os, const T_container &v) { os << '{'; string sep; for (const T &x : v) os << sep << x, sep = \", \"; return os << '}'; }\nvoid dbg_out() { cerr << endl; }\ntemplate<typename Head, typename... Tail> void dbg_out(Head H, Tail... T) { cerr << ' ' << H; dbg_out(T...); }\n#ifdef DEBUG\n#define dbg(...) cerr << \"(\" << #__VA_ARGS__ << \"):\", dbg_out(__VA_ARGS__)\n#else\n#define dbg(...)\n#endif\n\n\n#define F first\n#define S second\n#define pb push_back\n#define all(x) (x).begin(), (x).end()\n#define sz(x) ((int)(x).size())\n\ntypedef long long ll;\ntypedef long double ld;\ntypedef pair<int,int> pii;\ntypedef pair<ll,ll> pll;\n\n// RANDOM NUMBER GENERATOR\nmt19937 RNG(chrono::steady_clock::now().time_since_epoch().count());  \n#define SHUF(v) shuffle(all(v), RNG); \n// Use mt19937_64 for 64 bit random numbers.\n\nint getrand(int l,int r) {\n\treturn uniform_int_distribution<int>(l, r)(RNG);\n}\n\nconst ld eps = 1e-9;\nconst int mod = 1e9 + 7;\nconst int oo = 1e9 + 7;\nconst ll lloo = 1e18 + 7;\nconst int N = 1e6 + 7;\n\nint n,m,a[N];\n\nint mxR[N];\nint mnL[N];\n\nint distinctR[N];\nint distinctL[N];\n\nmap<int,vector<int>> vec;\n\nvoid solve(int tc) {\n\tdbg(\"TES\");\n\tvec.clear();\n\tcin >> n >> m;\n\tfor(int i = 0 ; i < n ; i++) {\n\t\tcin >> a[i];\n\t\tvec[a[i]].pb(i);\n\t}\n\t\n\tfor(int i = 0 ; i < n ; i++) mxR[i] = mnL[i] = i;\n\t\n\tset<int> st1;\n\tint r = -1;\n\tfor(int i = 0 ; i < n ; i++) {\n\t\twhile(r < n-1 && st1.count(a[r+1]) == 0) {\n\t\t\tr++;\n\t\t\tst1.insert(a[r]);\n\t\t\tdistinctL[r] = i;\n\t\t}\n\t\tdistinctR[i] = r;\n\t\tst1.erase(a[i]);\n\t}\n\t\n\tint mnR = oo;\n\tint mxL = -1;\n\tint mnmnL = oo;\n\tfor(int i = 0 ; i < m ; i++) {\n\t\tint l,r;\n\t\tcin >> l >> r;\n\t\tl--;r--;\n\t\tif (distinctR[l] >= r) continue;\n\t\tmxR[l] = max(mxR[l],r);\n\t\tmnL[r] = min(mnL[r],l);\n\t\tmnR = min(mnR,r);\n\t\tmxL = max(mxL,l);\n\t\tmnmnL = min(mnmnL,l);\n\t}\n\tif (mxL == -1) {\n\t\tcout << 0 << '\\n';\n\t\treturn;\n\t}\n\tr = -1;\n\tset<pii> st;\n\tint prefmxR = 0;\n\t\n\tint ans = oo;\n\tfor(int i = 0 ; i <= mnR ; i++) {\n\t\tdbg(sz(st));\n\t\twhile(r < mxL || (r >= mxL && distinctR[r+1] < (*st.rbegin()).F)) {\n\t\t\t//dbg(r);\n\t\t\tr++;\n\t\t\tst.insert({mxR[r],r});\n\t\t}\n\t\tdbg(i,r);\n\t\tans = min(ans,r-i+1);\n\t\tprefmxR = max(prefmxR,mxR[i]);\n\t\tint idx = upper_bound(all(vec[a[i]]),prefmxR) - vec[a[i]].begin()-1;\n\t\tidx = vec[a[i]][idx];\n\t\tmxL = max(mxL,idx);\n\t\tst.erase({mxR[i],i});\n\t\t//dbg(\"YES\");\n\t\tif (distinctL[i] > mnmnL) break;\n\t}\n\t\n\tcout << ans << '\\n';\n}\n\nint main() {\n\tios::sync_with_stdio(0);\n\tcin.tie(0);cout.tie(0);\n\t// freopen(\"in\",\"r\",stdin);\n\t// freopen(\"out\",\"w\",stdout);\n\tint T = 1;\n\tcin >> T;\n\tfor(int i = 0 ; i < T ; i++) solve(i+1);\n\treturn 0;\n}\n"
+}

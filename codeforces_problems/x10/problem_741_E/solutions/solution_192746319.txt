@@ -1,0 +1,36 @@
+{
+    "id": 192746319,
+    "contestId": 741,
+    "creationTimeSeconds": 1675865520,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 741,
+        "index": "E",
+        "name": "Arpa\u2019s abnormal DNA and Mehrdad\u2019s deep interest",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3400,
+        "tags": [
+            "data structures",
+            "string suffix structures"
+        ]
+    },
+    "author": {
+        "contestId": 741,
+        "members": [
+            {
+                "handle": "Archaeopteryx"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1481034900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 91,
+    "timeConsumedMillis": 857,
+    "memoryConsumedBytes": 129740800,
+    "source": "#include<algorithm>\n#include<iostream>\n#include<cstring>\n#include<vector>\n#include<cstdio>\n#include<cmath>\n\n#define il inline\n#define ll long long\n#define db double\n\nusing namespace std;\n\nil int read(){\nint x=0,f=1; char ch=getchar();\nwhile(ch<'0'||ch>'9') {if(ch=='-') f=-1; ch=getchar();}\nwhile(ch>='0'&&ch<='9') {x=(x<<1)+(x<<3)+(ch^48); ch=getchar();}\nreturn x*f;\n}\n\nconst int N=4e5+10;\n\nint n,q,S;\nint ls,lt;\nchar s[N],t[N];\nint sa[N<<1],rk[N<<1],oldrk[N<<1],id[N<<1];\nint buc[N];\nint lcp[N][21];\nint st1[N][21];\nint st2[N][21];\nshort lg[N];\nint height[N];\nint b[N],c[N];\nint ans[N];\n\nstruct node{\nint l,r,k,x,y,id;\n};\n\nvector<node> le,gr;\n\nil bool eq(int x,int y,int w){\nreturn oldrk[x]==oldrk[y]&&oldrk[x+w]==oldrk[y+w];\n}\n\nil void get_sa(){\nint m='z';\nfor(int i=1;i<=n;i++) buc[rk[i]=s[i]]++;\nfor(int i=1;i<=m;i++) buc[i]+=buc[i-1];\nfor(int i=n;i>=1;i--) sa[buc[rk[i]]--]=i;\nfor(int p,w=1;w<=n;w<<=1){\np=0;\nfor(int i=n;i>n-w;i--) id[++p]=i;\nfor(int i=1;i<=n;i++) if(sa[i]>w) id[++p]=sa[i]-w;\nfor(int i=1;i<=m;i++) buc[i]=0;\nfor(int i=1;i<=n;i++) buc[rk[id[i]]]++;\nfor(int i=1;i<=m;i++) buc[i]+=buc[i-1];\nfor(int i=n;i>=1;i--) sa[buc[rk[id[i]]]--]=id[i];\nswap(rk,oldrk);\nm=0;\nfor(int i=1;i<=n;i++) rk[sa[i]]=(m+=(eq(sa[i],sa[i-1],w)^1));\nif(m==n) break;\n}\n}\n\nil void get_height(){\nfor(int i=1,k=0;i<=n;i++){\nif(rk[i]==1) k=0;\nelse{\nif(k) k--;\nint j=sa[rk[i]-1];\nwhile(i+k<=n&&j+k<=n&&s[i+k]==s[j+k]) k++;\n}\nheight[rk[i]]=k;\n}\n}\n\nil int LCP(int x,int y){\nif(x>y) swap(x,y);\nx++;\nint l=lg[y-x+1];\nreturn min(lcp[x][l],lcp[y-(1<<l)+1][l]);\n}\n\nil bool cmp(int x,int y){\nif(x==N) return y;\nif(y==N) return x;\nx++;y++;\nint w=0;\nif(x>y) swap(x,y),w=1;\nif(x+lt>=y){\nint l1=y-x,l2=x+lt-y;\nint d1=min(l1,LCP(rk[ls+1],rk[x]));\nint d2=min(l2,LCP(rk[ls+l1+1],rk[ls+1]));\nint d3=min(l1,LCP(rk[x],rk[ls+l2+1]));\nif(d1!=l1) return /*cout<<\"a\"<<endl,*/(rk[ls+1]<rk[x])^w;\nelse if(d2!=l2) return /*cout<<\"b\"<<endl,*/(rk[ls+l1+1]<rk[ls+1])^w;\nelse if(d3!=l1) return /*cout<<\"c\"<<endl,*/(rk[x]<rk[ls+l2+1])^w;\nelse return w^1;\n}\nelse{\nint l1=lt,l2=y-x-lt;\nint d1=min(l1,LCP(rk[ls+1],rk[x]));\nint d2=min(l2,LCP(rk[x],rk[x+l1]));\nint d3=min(l1,LCP(rk[x+l2],rk[ls+1]));\nif(d1!=l1) return /*cout<<\"d\"<<endl,*/(rk[ls+1]<rk[x])^w;\nelse if(d2!=l2) return /*cout<<\"e\"<<endl,*/(rk[x]<rk[x+l1])^w;\nelse if(d3!=l1) return /*cout<<\"f\"<<endl,*/(rk[x+l2]<rk[ls+1])^w;\nelse return w^1;\n}\n}\n\nil void init(int lim,int t){\nint tmp=(ls+1)/lim+(t<=ls%lim);\nfor(int i=0;i<tmp;i++){\nst2[i+1][0]=c[i*lim+t];\n}\nfor(int i=1;(1<<i)<=tmp;i++){\nfor(int j=1;j+(1<<i)-1<=tmp;j++){\nst2[j][i]=min(st2[j][i-1],st2[j+(1<<(i-1))][i-1]);\n}\n}\n}\n\nil int qry1(int x,int y){\nif(x>y) return N;\nint l=lg[y-x+1];\nreturn min(st1[x][l],st1[y-(1<<l)+1][l]);\n}\n\nil int qry2(int x,int y){\nif(x>y) return N;\nint l=lg[y-x+1];\nreturn min(st2[x][l],st2[y-(1<<l)+1][l]);\n}\n\nsigned main(){\nscanf(\"%s%s\",s+1,t+1);\nq=read();\nls=strlen(s+1),lt=strlen(t+1);\nn=ls+lt;\nS=90;\n// cout<<S<<endl;\nfor(int i=ls+1;i<=n;i++) s[i]=t[i-ls];\nget_sa();\nget_height();\n// for(int i=1;i<=n;i++) cout<<rk[i]<<\" \";\n// cout<<endl;\nfor(int i=1;i<=n;i++) lg[i]=lg[i-1]+((1<<(lg[i-1]+1))==i);\nmemset(lcp,63,sizeof(lcp));\nfor(int i=1;i<=n;i++) lcp[i][0]=height[i];\nfor(int i=1;(1<<i)<=n;i++){\nfor(int j=1;j+(1<<i)-1<=n;j++){\nlcp[j][i]=min(lcp[j][i-1],lcp[j+(1<<(i-1))][i-1]);\n}\n}\n// cout<<cmp(0,ls)<<\" \"<<cmp(ls,0)<<endl;\nfor(int i=0;i<=n;i++) b[i]=i;\nsort(b,b+1+n,cmp);\nfor(int i=0;i<=n;i++) c[b[i]]=i;\nfor(int i=1;i<=ls+1;i++) st1[i][0]=c[i-1];\nfor(int i=1;(1<<i)<=ls+1;i++){\nfor(int j=1;j+(1<<i)-1<=ls+1;j++){\nst1[j][i]=min(st1[j][i-1],st1[j+(1<<(i-1))][i-1]);\n}\n}\nfor(int i=1;i<=q;i++){\nint l=read(),r=read(),k=read(),x=read(),y=read();\nif(k<=S) le.push_back((node){l,r,k,x,y,i});\nelse gr.push_back((node){l,r,k,x,y,i});\n}\nsort(le.begin(),le.end(),[&](node x,node y){return x.k<y.k;});\nfor(int i=1;i<=q;i++) ans[i]=N;\nfor(int i=0,l=0,r=0;i<=S;i++){\nif(l>=(int)le.size()) continue;\nwhile(r<(int)le.size()&&le[r].k==i) r++;\nfor(int p=0;p<i;p++){\ninit(i,p);\nfor(int k=l;k<r;k++){\nif(p>=le[k].x&&p<=le[k].y) ans[le[k].id]=min(ans[le[k].id],qry2((le[k].l-p+i-1)/i+1,(le[k].r-p+i)/i));\n}\n}\n// cout<<l<<\" \"<<r<<endl;\nl=r;\n}\nfor(int i=0;i<(int)gr.size();i++){\nfor(int j=0;j*gr[i].k<=ls;j++){\nint l=max(gr[i].l,gr[i].k*j+gr[i].x)+1;\nint r=min(gr[i].r,gr[i].k*j+gr[i].y)+1;\nans[gr[i].id]=min(ans[gr[i].id],qry1(l,r));\n}\n}\nfor(int i=1;i<=q;i++) printf(\"%d \",ans[i]==N?-1:b[ans[i]]);\nreturn 0;\n}\n"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 231997850,
+    "contestId": 150,
+    "creationTimeSeconds": 1699479185,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 150,
+        "index": "E",
+        "name": "Freezing with Style",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3000,
+        "tags": [
+            "binary search",
+            "data structures",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 150,
+        "members": [
+            {
+                "handle": "dmraykhan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1329490800
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 118,
+    "timeConsumedMillis": 6738,
+    "memoryConsumedBytes": 30924800,
+    "source": "#include <bits/stdc++.h>\r\n \r\n// author : aykhn\r\n \r\nusing namespace std;\r\ntypedef long long ll;\r\n \r\n#define pb push_back\r\n#define ins insert\r\n#define mpr make_pair\r\n#define all(v) v.begin(), v.end()\r\n#define bpc __builtin_popcount\r\n#define bpcll __builtin_popcountll\r\n#define pii pair<int, int>\r\n#define pll pair<ll, ll>\r\n#define fi first\r\n#define se second\r\n#define infll 0x3F3F3F3F3F3F3F3F\r\n#define inf 0x3F3F3F3F\r\n\r\nconst int MXN = 1e5 + 5;\r\n\r\nint n, l, r, len;\r\nint mid;\r\npii best;\r\nvector<pii> adj[MXN];\r\nint sz[MXN], used[MXN];\r\nint dist[MXN], sum[MXN];\r\nint getcent[30][MXN];\r\ndeque<pii> dq;\r\nvector<int> bfr, arr, p, rl, p1, rl1;\r\nint cnt = 0;\r\n\r\nvoid getsize(int a, int p)\r\n{\r\n    cnt++;\r\n    sz[a] = 1;\r\n    for (pii v : adj[a])\r\n    {\r\n        if (v.fi == p || used[v.fi]) continue;\r\n        getsize(v.fi, a);\r\n        sz[a] += sz[v.fi];\r\n    }\r\n}\r\n\r\nint findcent(int a, int p, int &curn)\r\n{\r\n    cnt++;\r\n    for (pii v : adj[a])\r\n    {\r\n        if (v.fi == p || used[v.fi]) continue;\r\n        if (sz[v.fi] > curn/2) return findcent(v.fi, a, curn);\r\n    }\r\n    return a;\r\n}\r\n\r\nvoid init(int a, int p)\r\n{\r\n    cnt++;\r\n    arr.pb(a);\r\n    for (pii v : adj[a])\r\n    {\r\n        if (v.fi == p || used[v.fi]) continue;\r\n        v.se = (v.se >= mid ? 1 : -1);\r\n        dist[v.fi] = dist[a] + 1;\r\n        sum[v.fi] = sum[a] + v.se;\r\n        init(v.fi, a);\r\n    }\r\n}\r\n\r\n// sum(u, c) + sum(v, c) >= 0\r\n// sum(v, c) >= -sum(u, c);\r\n// l <= dist(u, c) + dist(v, c) <= r\r\n// l - dist(u, c) <= dist(v, c) <= r - dist(u, c)\r\n\r\nint MAX(int a, int b)\r\n{\r\n    if (sum[a] >= sum[b]) return a;\r\n    return b;\r\n}\r\n\r\nbool maincent(int a, int lvl)\r\n{\r\n    int c = getcent[lvl][a];\r\n    p.clear(); rl.clear();\r\n    p.pb(c); rl.pb(c);\r\n    for (pii v : adj[c])\r\n    {\r\n        if (used[v.fi]) continue;\r\n        v.se = (v.se >= mid ? 1 : -1);\r\n        while (!dq.empty()) dq.pop_back();\r\n        arr.clear();\r\n        dist[v.fi] = 1;\r\n        sum[v.fi] = v.se;\r\n        init(v.fi, c);\r\n        rl1.assign(arr.size() + 1, 0);\r\n        p1.assign(arr.size() + 1, 0);\r\n        for (int i = 0; i < arr.size(); i++)\r\n        {\r\n            int lx = l - dist[arr[i]];\r\n            int rx = r - dist[arr[i]];\r\n            rl1[dist[arr[i]]] = MAX(rl1[dist[arr[i]]], arr[i]);\r\n            p1[dist[arr[i]]] = MAX(p1[dist[arr[i]]], arr[i]);\r\n            if (lx >= rl.size() || rx < 0) continue;\r\n            if (lx < 0)\r\n            {\r\n                if (rx < rl.size() && sum[p[rx]] >= -sum[arr[i]]) \r\n                {\r\n                    best = mpr(p[rx], arr[i]);\r\n                    return true;\r\n                }\r\n            }\r\n            else if (lx >= 0 && sum[rl[lx]] >= -sum[arr[i]])\r\n            {\r\n                best = mpr(rl[lx], arr[i]);\r\n                return true;\r\n            }\r\n        }\r\n        for (int i = (int)rl1.size() - 1; i >= 0; i--)\r\n        {\r\n            while (!dq.empty() && sum[rl1[i]] >= sum[dq.front().fi]) dq.pop_front();\r\n            dq.push_front(mpr(rl1[i], i));\r\n            while (!dq.empty() && dq.back().se >= i + r - l + 1) dq.pop_back();\r\n            rl1[i] = dq.back().fi;\r\n        }\r\n        for (int i = 1; i < p1.size(); i++)\r\n        {\r\n            p1[i] = MAX(p1[i - 1], p1[i]);\r\n        }\r\n        if (rl1.size() < rl.size())\r\n        {\r\n            for (int i = 0; i < rl1.size(); i++) \r\n            {\r\n                rl[i] = MAX(rl[i], rl1[i]);\r\n                p[i] = MAX(p[i], p1[i]);\r\n            }\r\n        }\r\n        else\r\n        {\r\n            for (int i = 0; i < rl.size(); i++)\r\n            {\r\n                rl[i] = MAX(rl[i], rl1[i]);\r\n                p[i] = MAX(p[i], p1[i]);\r\n            }\r\n            for (int i = rl.size(); i < rl1.size(); i++)\r\n            {\r\n                rl.pb(rl1[i]);\r\n                p.pb(p1[i]);\r\n            }\r\n        }\r\n    }\r\n    used[c] = 1;\r\n    for (pii v : adj[c])\r\n    {\r\n        if (used[v.fi]) continue;\r\n        if (maincent(v.fi, lvl + 1)) return true;\r\n    }\r\n    return false;\r\n}\r\n\r\nvoid notmaincent(int a, int lvl)\r\n{\r\n    getsize(a, a);\r\n    int c = findcent(a, a, sz[a]);\r\n    getcent[lvl][a] = c;\r\n    used[c] = 1;\r\n    for (pii v : adj[c])\r\n    {\r\n        if (used[v.fi]) continue;\r\n        notmaincent(v.fi, lvl + 1);\r\n    }\r\n}\r\n\r\nsigned main()\r\n{\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    cin >> n >> l >> r;\r\n    sum[0] = dist[0] = -inf;\r\n    len = r - l + 1;\r\n    for (int i = 0; i + 1 < n; i++)\r\n    {\r\n        int u, v, w;\r\n        cin >> u >> v >> w;\r\n        adj[u].pb(mpr(v, w));\r\n        adj[v].pb(mpr(u, w));\r\n    }\r\n    notmaincent(1, 0);\r\n    for (int i = 0; i < MXN; i++) used[i] = sz[i] = 0;\r\n    int lx = -1;\r\n    int rx = 1e9 + 1;\r\n    while (rx - lx > 1)\r\n    {\r\n        mid = (lx + rx) >> 1;\r\n        for (int i = 0; i <= n; i++) used[i] = sz[i] = 0;\r\n        if (maincent(1, 0)) lx = mid;\r\n        else rx = mid;\r\n    }\r\n    cout << best.fi << \" \" << best.se << '\\n';\r\n}"
+}

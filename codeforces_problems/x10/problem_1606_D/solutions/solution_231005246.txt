@@ -1,0 +1,37 @@
+{
+    "id": 231005246,
+    "contestId": 1606,
+    "creationTimeSeconds": 1698941286,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1606,
+        "index": "D",
+        "name": "Red-Blue Matrix",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "implementation",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1606,
+        "members": [
+            {
+                "handle": "bkifhr6"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1635518100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\n#include <ext/pb_ds/assoc_container.hpp>\n#include <ext/pb_ds/tree_policy.hpp>\n\n//turn on extra precision\n//#pragma GCC target(\"fpmath=387\")\n\nusing namespace std;\nusing namespace __gnu_pbds;\n\nusing str   = string;\nusing ll    = long long;\nusing pii   = pair <int,int>;\nusing pll   = pair <ll,ll>;\nusing vi    = vector <int>;\nusing vll   = vector <ll>;\nusing vpii  = vector <pii>;\nusing vpll  = vector <pll>;\n\ntemplate<class A, class B>\nostream& operator<<(ostream& os, const pair<A, B> &p) {\n    os << '(' << p.first << ',' << p.second << ')';\n    return os;\n}\n\ntemplate<class T>\nostream& operator<<(ostream& os, const vector<T> &v) {\n    bool bonk = 1; os << '{';\n    for(auto &i : v) { if(!bonk) os << \", \"; os << i; bonk = 0; }\n    os << '}'; return os;\n}\n\ntemplate<class T, size_t sz>\nostream& operator<<(ostream&os, const array<T,sz> &arr) {\n    bool fs = 1; os << '{';\n    for(auto &i : arr) { if(!fs) os << \", \"; os << i; fs = 0; }\n    os << '}'; return os;\n}\n\n#define mp make_pair\n#define fi first\n#define se second\n#define fs first.second\n#define ss second.second\n#define ff first.first\n#define sf second.first\n#define newl '\\n'\n#define all(x) x.begin(), x.end()\n#define watch(x) cerr << (#x) << \" is : \" << (x) << newl\n\nmt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());\n\ntemplate <class T>\nll quickpow(ll num1, ll num2, const T MOD) {\n    assert(num2 >= 0); ll ans = 1;\n    for(; num2; num2>>=1, num1 = num1 * num1 % MOD) if(num2 & 1) ans = ans * num1 % MOD;\n    return ans;\n}\n\n// end of Template\n\nint main(){\n\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n\n    int t; cin >> t;\n    for(int n, m; t--; ) {\n        cin >> n >> m;\n        vector<vector<int>> a(n, vector<int>(m));\n        for(int i = 0; i < n; ++i) {\n            for(int j = 0; j < m; ++j) {\n                cin >> a[i][j];\n            }\n        }\n\n        vector<pair<int,int>> fr(n);\n        for(int i = 0; i < n; ++i) fr[i] = {a[i][0], i};\n        sort(all(fr));\n\n        vector<vector<int>> pmx(n, vector<int>(m)), pmn(n, vector<int>(m)),\n                            smx(n, vector<int>(m)), smn(n, vector<int>(m));\n\n        for(int i = 0; i < n; ++i) {\n            int id = fr[i].second;\n            pmx[i][0] = pmn[i][0] = a[id][0];\n            for(int j = 1; j < m; ++j) {\n                pmx[i][j] = max(pmx[i][j-1], a[id][j]);\n                pmn[i][j] = min(pmn[i][j-1], a[id][j]);\n            }\n\n            smx[i][m-1] = smn[i][m-1] = a[id][m-1];\n            for(int j = m - 2; j >= 0; --j) {\n                smx[i][j] = max(smx[i][j+1], a[id][j]);\n                smn[i][j] = min(smn[i][j+1], a[id][j]);\n            }\n        }\n\n        // cut [0, k), [k, m)\n        const auto getcut = [&]() -> pair<int,int> {\n            for(int k = 1; k < m; ++k) {\n                vector<int> lex(n), len(n), rix(n), rin(n);\n                lex[0] = pmx[0][k-1];\n                rin[0] = smn[0][k];\n\n                for(int i = 1; i < n; ++i) {\n                    lex[i] = max(lex[i-1], pmx[i][k-1]);\n                    rin[i] = min(rin[i-1], smn[i][k]);\n                }\n\n                len[n-1] = pmx[n-1][k-1];\n                rix[n-1] = smn[n-1][k];\n                for(int i = n - 2; i >= 0; --i) {\n                    rix[i] = max(rix[i+1], smn[i][k]);\n                    len[i] = min(len[i+1], pmx[i][k-1]);\n                }\n\n                // check if coloring is good\n                for(int i = 1; i < n; ++i) {\n                    if(lex[i-1] < len[i] && rin[i-1] > rix[i]) {\n                        return {k, i};\n                    }\n                }\n            }\n            return {-1, -1};\n        };\n\n        auto [k, r] = getcut();\n        if(k == -1) {cout << \"NO\\n\"; continue; }\n\n        cout << \"YES\\n\";\n        vector<char> ans(n);\n        for(int i = 0; i < n; ++i) {\n            ans[fr[i].second] = (i < r ? 'B' : 'R');\n        }\n        for(auto &i : ans) cout << i; cout << ' ' << k << newl;\n\n    }\n\n    return 0;\n}\n\n\t \t\t \t\t \t \t\t  \t \t\t\t   \t\t\t\t  \t \t"
+}

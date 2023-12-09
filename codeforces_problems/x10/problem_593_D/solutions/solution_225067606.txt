@@ -1,0 +1,39 @@
+{
+    "id": 225067606,
+    "contestId": 593,
+    "creationTimeSeconds": 1695641551,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 593,
+        "index": "D",
+        "name": "Happy Tree Party",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 593,
+        "members": [
+            {
+                "handle": "dinghaochen"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1446655500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 37683200,
+    "source": "// LUOGU_RID: 126094826\n#include<bits/stdc++.h>\r\n#define int long long\r\n#define LIM 200005\r\nusing namespace std;\r\nconst double MX=1e18;\r\nint n;\r\nint q,op,u,v,w;\r\nint U[LIM],V[LIM];\r\nstruct EDGE{\r\n    int to;\r\n    double w;\r\n};\r\nvector<EDGE> edge[LIM];\r\nint Fa[LIM],Big[LIM],Sz[LIM],dep[LIM];\r\nint top[LIM],Pos[LIM],tot,Val[LIM],W[LIM];\r\nvoid DFN(int now,int fa){\r\n\tSz[now]=1,Fa[now]=fa,dep[now]=dep[fa]+1;\r\n\tfor(auto nxt:edge[now]){\r\n        int to=nxt.to,add=nxt.w;\r\n\t\tif(to==fa) continue;\r\n        Val[to]=add;\r\n\t\tDFN(to,now);\r\n\t\tSz[now]+=Sz[to];\r\n\t\tif(!Big[now]||Sz[to]>Sz[Big[now]]) Big[now]=to;\r\n\t}\r\n\treturn;\r\n}\r\nvoid Sub_div(int now,int fa){\r\n\tPos[now]=++tot,W[tot]=Val[now],top[now]=fa;\r\n\tif(Big[now]){\r\n\t\tSub_div(Big[now],fa);\r\n\t}\r\n\tfor(auto nxt:edge[now]){\r\n\t\tint to=nxt.to;\r\n\t\tif(!Pos[to]){\r\n\t\t\tSub_div(to,to);\r\n\t\t}\r\n\t}\r\n}\r\nstruct node{\r\n\tint l,r;\r\n    double mul;\r\n}Seg[LIM<<2];\r\ndouble mul(double x,double y){\r\n    if(!x&&MX/y>=x) return MX;\r\n    return x*y;\r\n}\r\nvoid Cal(int id){\r\n\tSeg[id].mul=mul(Seg[id<<1].mul,Seg[id<<1|1].mul);\r\n}\r\nvoid Build(int id,int l,int r){\r\n\tSeg[id].l=l,Seg[id].r=r;\r\n\tif(l==r){\r\n\t\tSeg[id].mul=W[l];\r\n\t\treturn;\r\n\t}\r\n\tint mid=(l+r)>>1;\r\n\tBuild(id<<1,l,mid);\r\n\tBuild(id<<1|1,mid+1,r);\r\n\tCal(id);\r\n}\r\nvoid Change(int id,int pos,int val){\r\n\tif(Seg[id].l==Seg[id].r){\r\n\t\tSeg[id].mul=val;\r\n\t\treturn;\r\n\t}\r\n\tint mid=(Seg[id].l+Seg[id].r)>>1;\r\n\tif(pos<=mid) Change(id<<1,pos,val);\r\n\telse Change(id<<1|1,pos,val);\r\n\tCal(id);\r\n}\r\ndouble Find_Mul(int id,int ql,int qr){\r\n\tdouble ans=1;\r\n\tif(ql<=Seg[id].l&&Seg[id].r<=qr){\r\n\t\treturn Seg[id].mul;\r\n\t}\r\n\tint mid=(Seg[id].l+Seg[id].r)>>1;\r\n\tif(ql<=mid) ans=mul(ans,Find_Mul(id<<1,ql,qr));\r\n\tif(qr>mid) ans=mul(ans,Find_Mul(id<<1|1,ql,qr));\r\n\treturn ans;\r\n}\r\ndouble Solve_Mul(int l,int r){\r\n\tdouble ans=1;\r\n\twhile(top[l]!=top[r]){\r\n\t\tif(dep[top[l]]<dep[top[r]]) swap(l,r);\r\n\t\tans=mul(ans,Find_Mul(1,Pos[top[l]],Pos[l]));\r\n\t\tl=Fa[top[l]];\r\n\t}\r\n\tif(dep[l]>dep[r]) swap(l,r);\r\n\tans=mul(ans,Find_Mul(1,Pos[l]+1,Pos[r]));\r\n\treturn ans;\r\n}\r\nsigned main(){\r\n\tscanf(\"%lld %lld\",&n,&q);\r\n\tfor(int i=1;i<n;i++){\r\n\t\tscanf(\"%d %d %d\",&U[i],&V[i],&w);\r\n\t\tedge[U[i]].push_back({V[i],(double)w});\r\n\t\tedge[V[i]].push_back({U[i],(double)w});\r\n\t}\r\n\tDFN(1,0);\r\n\tSub_div(1,1);\r\n\tBuild(1,1,n);\r\n\twhile(q--){\r\n\t\tscanf(\"%lld\",&op);\r\n\t\tif(op==1){\r\n            scanf(\"%lld %lld %lld\",&u,&v,&w);\r\n            double res=Solve_Mul(u,v);\r\n            // cerr<<w<<\" \"<<res<<endl;\r\n\t\t\tif(!res) puts(\"0\");\r\n            else printf(\"%lld\\n\",(int)(w/res));\r\n        }\r\n\t\telse{\r\n            scanf(\"%lld %lld\",&u,&v);\r\n            Change(1,(dep[U[u]]>dep[V[u]]?Pos[U[u]]:Pos[V[u]]),v);\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}"
+}

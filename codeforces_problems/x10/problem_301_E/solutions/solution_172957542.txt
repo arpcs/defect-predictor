@@ -1,0 +1,35 @@
+{
+    "id": 172957542,
+    "contestId": 301,
+    "creationTimeSeconds": 1663768576,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 301,
+        "index": "E",
+        "name": "Yaroslav and Arrangements",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2800,
+        "tags": [
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 301,
+        "members": [
+            {
+                "handle": "BlueDiamond"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1367769900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 4096000,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\nconst int M = (int) 1e9 + 7;\r\n\r\nint add(int a, int b) {\r\n  a += b;\r\n  if (a >= M) return a - M;\r\n  if (a < 0) return a + M;\r\n  return a;\r\n}\r\n\r\nint mul(int a, int b) {\r\n  return a * (ll) b % M;\r\n}\r\n\r\nvoid addup(int &a, int b) {\r\n  a = add(a, b);\r\n}\r\n\r\nvoid mulup(int &a, int b) {\r\n  a = mul(a, b);\r\n}\r\n\r\nconst int N = 1007;\r\nint comb[N][N];\r\n\r\nint cnt_at_least0(int n, int sum) {\r\n  /**\r\n  cnt(n, 0) = 1\r\n  cnt(n, 1) = n\r\n  cnt(n, 2) = n * (n + 1) / 2\r\n  **/\r\n\r\n\r\n  return comb[n + sum - 1][sum];\r\n}\r\n\r\nint cnt_at_least1(int n, int sum) {\r\n  if (n < sum) {\r\n    return 0;\r\n  }\r\n  return cnt_at_least0(n, sum - n);\r\n}\r\n\r\nstruct State {\r\n  int len;\r\n  int holes;\r\n  int prod;\r\n};\r\n\r\nbool operator < (State a, State b) {\r\n  if (a.len != b.len) {\r\n    return a.len < b.len;\r\n  }\r\n  if (a.holes != b.holes) {\r\n    return a.holes < b.holes;\r\n  }\r\n  return a.prod < b.prod;\r\n}\r\n\r\nint main() {\r\n#ifdef ONLINE_JUDGE\r\n    ios::sync_with_stdio(0); cin.tie(0); cout.tie(0);\r\n#endif // ONLINE_JUDGE\r\n\r\n#ifndef ONLINE_JUDGE\r\n    freopen (\"___input___.txt\", \"r\", stdin);\r\n#endif // ONLINE_JUDGE\r\n\r\n  for (int i = 0; i < N; i++) {\r\n    comb[i][0] = 1;\r\n    for (int j = 1; j <= i; j++) {\r\n      comb[i][j] = min(N, comb[i - 1][j] + comb[i - 1][j - 1]);\r\n    }\r\n  }\r\n\r\n  int n, m, k;\r\n  cin >> n >> m >> k;\r\n\r\n  map<State, int> dp;\r\n  for (int i = 1; i <= n; i++) {\r\n    addup(dp[{i, i, 1}], +1);\r\n  }\r\n\r\n  int print_sol = 0;\r\n\r\n  for (int x = 1; x <= n; x++) {\r\n    map<State, int> ndp;\r\n    for (auto &itP : dp) {\r\n      State it = itP.first;\r\n      int coef = itP.second;\r\n      if (it.holes == 0) {\r\n        addup(print_sol, coef);\r\n        addup(ndp[it], coef);\r\n        continue;\r\n      }\r\n      assert(it.holes > 0);\r\n      for (int place = it.holes; it.len + place <= n && it.prod * cnt_at_least1(place, it.holes) <= k; place++) {\r\n        addup(ndp[{it.len + place, place - it.holes, it.prod * cnt_at_least1(place, it.holes)}], coef);\r\n      }\r\n    }\r\n    dp = ndp;\r\n  }\r\n  cout << print_sol << \"\\n\";\r\n\r\n  return 0;\r\n}\r\n"
+}

@@ -1,0 +1,40 @@
+{
+    "id": 229718051,
+    "contestId": 1859,
+    "creationTimeSeconds": 1698248429,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1859,
+        "index": "F",
+        "name": "Teleportation in Byteland",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "graphs",
+            "shortest paths",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1859,
+        "members": [
+            {
+                "handle": "chenyihengCF"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1691850900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 3977,
+    "memoryConsumedBytes": 64614400,
+    "source": "#include <bits/stdc++.h>\r\n#define int long long\r\nusing namespace std;\r\n\r\nconst int N = 1e5 + 10, inf = 1e12;\r\nint t, n, q, m, pathlen[N], pathval[N], ans[N], dis[N], depth[N], anc[17][N], mnval[2][17][N];\r\nvector <pair <int, int> > Tree0[N], Tree[N];\r\nbool vis[N];\r\nint from[N], to[N], _lca[N];\r\nchar str[N];\r\n\r\ninline void dfs1(int u, int father) {\r\n\tdepth[u] = depth[father] + 1;\r\n\tanc[0][u] = father;\r\n\tfor (int i = 1; i < 17; ++i) \r\n\t\tanc[i][u] = anc[i - 1][anc[i - 1][u]];\r\n\tfor (auto [v, w]: Tree0[u]) \r\n\t\tif (v ^ father) \r\n\t\t\tpathlen[v] = pathlen[u] + w, dfs1(v, u);\r\n}\r\n\r\ninline void dfs2(int u, int father) {\r\n\tmnval[0][0][u] = dis[u] + pathval[u] - pathlen[u];\r\n\tmnval[1][0][u] = dis[u] + pathlen[u] - pathval[u];\r\n\tfor (int i = 1; i < 17; ++i) {\r\n\t\tmnval[0][i][u] = min(mnval[0][i - 1][u], mnval[0][i - 1][anc[i - 1][u]]);\r\n\t\tmnval[1][i][u] = min(mnval[1][i - 1][u], mnval[1][i - 1][anc[i - 1][u]]);\r\n\t}\r\n\tfor (auto [v, w]: Tree[u])\r\n\t\tif (v ^ father) \r\n\t\t\tpathval[v] = pathval[u] + w, dfs2(v, u);\r\n}\r\n\r\ninline int lca(int u, int v) {\r\n\tif (depth[u] < depth[v]) swap(u, v);\r\n\tfor (int i = 16; ~i; --i) \r\n\t\tif (depth[anc[i][u]] >= depth[v]) \r\n\t\t\tu = anc[i][u];\r\n\tif (u == v) return u;\r\n\tfor (int i = 16; ~i; --i) \r\n\t\tif (anc[i][u] ^ anc[i][v]) \r\n\t\t\tu = anc[i][u], v = anc[i][v];\r\n\treturn anc[0][u];\r\n}\r\n\r\ninline void Dijkstra(int div) {\r\n\tpriority_queue <pair <int, int> > prq;\r\n\tfor (int i = 1; i <= n; ++i) {\r\n\t\tdis[i] = inf, vis[i] = false;\r\n\t\tif (str[i] == '1') \r\n\t\t\tprq.push({dis[i] = 0, i});\r\n\t}\r\n\twhile (!prq.empty()) {\r\n\t\tint u = prq.top().second;\r\n\t\tprq.pop();\r\n\t\tif (vis[u]) continue;\r\n\t\tvis[u] = true;\r\n\t\tfor (auto [v, w]: Tree0[u]) \r\n\t\t\tif (dis[v] > dis[u] + w + (w - 1) / div + 1)\r\n\t\t\t\tdis[v] = dis[u] + w + (w - 1) / div + 1, prq.push({-dis[v], v});\r\n\t}\r\n}\r\n\r\ninline void mian() {\r\n\tcin >> n >> m;\r\n\tfor (int i = 1, u, v, w; i < n; ++i)\r\n\t\tcin >> u >> v >> w, Tree0[u].push_back({v, w}), Tree0[v].push_back({u, w});\r\n\tfor (int i = 1; i <= n; ++i) cin >> str[i];\r\n\tdfs1(1, 0), cin >> q;\r\n\tfor (int i = 1; i <= q; ++i){\r\n\t\tcin >> from[i] >> to[i];\r\n\t\t_lca[i] = lca(from[i], to[i]);\r\n\t}\r\n\tfor (int i = 1; i <= q; ++i) \r\n\t\tans[i] = pathlen[from[i]] + pathlen[to[i]] - 2 * pathlen[_lca[i]];\r\n\tfor (int x = 1, ml = 2; x < 21; ++x, ml <<= 1) {\r\n\t\tfor (int i = 1; i <= n; ++i) {\r\n\t\t\tTree[i].clear();\r\n\t\t\tfor (auto [v, w]: Tree0[i])\r\n\t\t\t\tTree[i].push_back({v, (w - 1) / ml + 1});\r\n\t\t}\r\n\t\tDijkstra(ml);\r\n\t\tdfs2(1, 0);\r\n\t\tfor (int i = 1; i <= q; ++i) {\r\n\t\t\tint curu = from[i], curv = to[i], tmp = inf;\r\n\t\t\tint add = pathlen[from[i]] + pathval[to[i]] - 2 * pathval[_lca[i]];\r\n\t\t\tfor (int j = 16; ~j; --j)\r\n\t\t\t\tif (anc[j][curu] && depth[anc[j][curu]] + 1 >= depth[_lca[i]])\r\n\t\t\t\t\ttmp = min(tmp, mnval[0][j][curu] + add), curu = anc[j][curu];\r\n\t\t\tadd = pathlen[from[i]] + pathval[to[i]] - 2 * pathlen[_lca[i]];\r\n\t\t\tfor (int j = 16; ~j; --j)\r\n\t\t\t\tif (anc[j][curv] && depth[anc[j][curv]] + 1 >= depth[_lca[i]])\r\n\t\t\t\t\ttmp = min(tmp, mnval[1][j][curv] + add), curv = anc[j][curv];\r\n\t\t\ttmp = min(tmp, mnval[1][0][_lca[i]] + add);\r\n\t\t\tans[i] = min(ans[i], tmp + x * m);\r\n\t\t}\r\n\t}\r\n\tfor (int i = 1; i <= q; ++i) \r\n\t\tcout << ans[i] << endl;\r\n\tfor (int i = 1; i <= n; ++i) \r\n\t\tTree0[i].clear();\r\n}\r\n\r\nsigned main() {\r\n\tios_base::sync_with_stdio(false);\r\n\tcin.tie(0), cout.tie(0);\r\n\tcin >> t;\r\n\twhile (t--) mian();\r\n\treturn 0;\r\n}"
+}

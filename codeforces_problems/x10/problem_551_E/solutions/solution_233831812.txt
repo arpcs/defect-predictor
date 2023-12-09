@@ -1,0 +1,37 @@
+{
+    "id": 233831812,
+    "contestId": 551,
+    "creationTimeSeconds": 1700666302,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 551,
+        "index": "E",
+        "name": "GukiZ and GukiZiana",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2500,
+        "tags": [
+            "binary search",
+            "data structures",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 551,
+        "members": [
+            {
+                "handle": "sylvie03"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1434127500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 1013,
+    "memoryConsumedBytes": 14028800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nconst int N = 5e5 + 5;\r\nconst int S = 710;\r\n\r\nint n, q;\r\nlong long a[N];\r\nint idx[N], L[S], R[S], lazy[S];\r\npair<long long, int> b[N];\r\n\r\nvoid down(int u) {\r\n    for (int i = L[u]; i <= R[u]; ++i) {\r\n        a[i] += lazy[u];\r\n    }\r\n    lazy[u] = 0;\r\n}\r\n\r\nvoid brute(int u, int v, int val) {\r\n    down(idx[u]);\r\n    for (int i = u; i <= v; ++i) {\r\n        a[i] += val;\r\n    }\r\n    for (int i = L[idx[u]]; i <= R[idx[u]]; ++i) {\r\n        b[i] = make_pair(a[i], i);\r\n    }\r\n    sort(b + L[idx[u]], b + R[idx[u]] + 1);\r\n}\r\n\r\nvoid update(int u, int v, long long val) {\r\n    if (idx[u] == idx[v]) {\r\n        brute(u, v, val);\r\n        return;\r\n    }\r\n    int l = idx[u] + (u != L[idx[u]]);\r\n    int r = idx[v] - (v != R[idx[v]]);\r\n    for (int i = l; i <= r; ++i) {\r\n        lazy[i] += val;\r\n    }\r\n    brute(u, L[l] - 1, val);\r\n    brute(R[r] + 1, v, val);\r\n}\r\n\r\nint main() {\r\n    // ios::sync_with_stdio(0);\r\n    // cin.tie(0);\r\n    cin >> n >> q;\r\n    for (int i = 1; i <= n; ++i) {\r\n        cin >> a[i];\r\n        b[i] = make_pair(a[i], i);\r\n        idx[i] = i / S;\r\n        if (L[idx[i]] == 0) {\r\n            L[idx[i]] = i;\r\n        }\r\n        R[idx[i]] = i;\r\n    }\r\n    for (int i = 0; i <= idx[n]; ++i) {\r\n        sort(b + L[i], b + R[i] + 1);\r\n    }\r\n\r\n    while (q--) {\r\n        int type;\r\n        cin >> type;\r\n        if (type == 1) {\r\n            int l, r;\r\n            long long x;\r\n            cin >> l >> r >> x;\r\n            update(l, r, x);\r\n        } else {\r\n            long long y;\r\n            cin >> y;\r\n            bool ok = 0;\r\n            int i = 0, res = 0;\r\n            while (i <= idx[n]) {\r\n                int k = lower_bound(b + L[i], b + R[i] + 1, make_pair(y - lazy[i], -1)) - b;\r\n                if (k <= R[i] && b[k].first == y) {\r\n                    res -= b[k].second;\r\n                    // cerr << k << ' ' << b[k].first << ' ' << b[k].second << '\\n';\r\n                    ok = 1;\r\n                    break;\r\n                }\r\n                ++i;\r\n            }\r\n            if (!ok) {\r\n                cout << -1 << '\\n';\r\n                continue;\r\n            }\r\n            i = idx[n];\r\n            while (1) {\r\n                int k = lower_bound(b + L[i], b + R[i] + 1, make_pair(y - lazy[i] + 1, -1)) - b - 1;\r\n                if (b[k].first == y) {\r\n                    res += b[k].second;\r\n                    // cerr << k << ' ' << b[k].first << ' ' << b[k].second << '\\n';\r\n                    break;\r\n                }\r\n                --i;\r\n            }\r\n            cout << res << '\\n';\r\n        }\r\n    }\r\n}\r\n"
+}

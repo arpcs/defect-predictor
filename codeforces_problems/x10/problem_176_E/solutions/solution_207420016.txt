@@ -1,0 +1,37 @@
+{
+    "id": 207420016,
+    "contestId": 176,
+    "creationTimeSeconds": 1685160046,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 176,
+        "index": "E",
+        "name": "Archaeology",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 176,
+        "members": [
+            {
+                "handle": "yzz162534"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1334934300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 592,
+    "memoryConsumedBytes": 36556800,
+    "source": "#include <iostream>\r\n#include <cstring>\r\n#include <cstdio>\r\n#include <algorithm>\r\n#include <cmath>\r\n#include <set>\r\n\r\nusing namespace std;\r\ntypedef long long ll;\r\nconst int N = 1e5 + 10, INF = 2e9;\r\nint sz, dfn[N], num, id[N], euler[N << 1], cnt, pos[N], f[N << 1][21], len[N << 1], n, m, tot = 1, head[N], ver[2 * N], Next[2 * N], edge[2 * N];\r\nll d[N];\r\n\r\nstruct SegmentTree{\r\n\tint l, r, mn, mx;\r\n\tll v;\r\n}tr[N << 2];\r\n\r\nvoid add(int x, int y, int z)\r\n{\r\n\tver[++tot] = y, edge[tot] = z, Next[tot] = head[x], head[x] = tot;\r\n}\r\n\r\nvoid dfs(int x, int fa)\r\n{\r\n\teuler[++cnt] = x;\r\n\tpos[x] = cnt;\r\n\tdfn[x] = ++num;\r\n\tid[num] = x;\r\n\tfor(int i = head[x]; i; i = Next[i])\r\n\t{\r\n\t\tint y = ver[i], z = edge[i];\r\n\t\tif(y != fa)\r\n\t\t{\r\n\t\t\td[y] = d[x] + z;\r\n\t\t\tdfs(y, x);\r\n\t\t\teuler[++cnt] = x;\r\n\t\t}\r\n\t}\r\n}\r\n\r\nvoid init()\r\n{\r\n\tfor(int i = 1; i <= cnt; i++) f[i][0] = euler[i];\r\n\tfor(int j = 1; j <= 20; j++)\r\n\t{\r\n\t\tfor(int i = 1; i + (1 << j) - 1 <= 2 * n; i++)\r\n\t\t{\r\n\t\t\tf[i][j] = pos[f[i][j - 1]] < pos[f[i + (1 << (j - 1))][j - 1]] ? f[i][j - 1] : f[i + (1 << (j - 1))][j - 1];\r\n\t\t}\r\n\t}\r\n\tfor(int i = 1; i <= n << 1; i++)\r\n\t{\r\n\t\tlen[i] = 1 << (len[i - 1] + 1) >= i ? len[i - 1] : len[i - 1] + 1;\r\n\t}\r\n}\r\n\r\nint lca(int x, int y)\r\n{\r\n\tif(pos[x] > pos[y]) swap(x, y);\r\n\tint t = len[pos[y] - pos[x] + 1];\r\n\tif(pos[f[pos[x]][t]] < pos[f[pos[y] - (1 << t) + 1][t]]) return f[pos[x]][t];\r\n\telse return f[pos[y] - (1 << t) + 1][t];\r\n}\r\n\r\nll dis(int x, int y)\r\n{\r\n\treturn d[x] + d[y] - 2ll * d[lca(x, y)];\r\n}\r\n\r\nvoid pushup(int p)\r\n{\r\n\ttr[p].mn = min(tr[p << 1].mn, tr[p << 1 | 1].mn);\r\n\ttr[p].mx = max(tr[p << 1].mx, tr[p << 1 | 1].mx);\r\n\ttr[p].v = tr[p << 1].v + tr[p << 1 | 1].v;\r\n\tif(tr[p << 1].mx > -INF && tr[p << 1 | 1].mn < INF)\r\n\t{\r\n\t\ttr[p].v += dis(id[tr[p << 1].mx], id[tr[p << 1 | 1].mn]); \r\n\t}\r\n}\r\n\r\nvoid build(int p, int l, int r)\r\n{\r\n\ttr[p].l = l, tr[p].r = r, tr[p].mx = -INF, tr[p].mn = INF;\r\n\tif(l == r) return;\r\n\tint mid = l + r >> 1;\r\n\tbuild(p << 1, l, mid), build(p << 1 | 1, mid + 1, r);\r\n}\r\n\r\nvoid change1(int p, int x)\r\n{\r\n\tif(tr[p].l == tr[p].r)\r\n\t{\r\n\t\ttr[p].mn = tr[p].mx = tr[p].l;\r\n\t\treturn;\r\n\t}\r\n\tint mid = tr[p].l + tr[p].r >> 1;\r\n\tif(x <= mid) change1(p << 1, x);\r\n\telse change1(p << 1 | 1, x);\r\n\tpushup(p);\r\n}\r\n\r\nvoid change2(int p, int x)\r\n{\r\n\tif(tr[p].l == tr[p].r)\r\n\t{\r\n\t\ttr[p].mn = INF, tr[p].mx = -INF;\r\n\t\treturn;\r\n\t}\r\n\tint mid = tr[p].l + tr[p].r >> 1;\r\n\tif(x <= mid) change2(p << 1, x);\r\n\telse change2(p << 1 | 1, x);\r\n\tpushup(p);\r\n}\r\n\r\nint main()\r\n{\r\n\tscanf(\"%d\", &n);\r\n\tfor(int i = 1; i < n; i++)\r\n\t{\r\n\t\tint x, y, z;\r\n\t\tscanf(\"%d%d%d\", &x, &y, &z);\r\n\t\tadd(x, y, z), add(y, x, z);\r\n\t}\r\n\tbuild(1, 1, n);\r\n\tdfs(1, -1);\r\n\tinit();\r\n\tscanf(\"%d\", &m);\r\n\tfor(int i = 1; i <= m; i++)\r\n\t{\r\n\t\tchar str[2]; int x;\r\n\t\tscanf(\"%s\", str);\r\n\t\tif(str[0] == '+')\r\n\t\t{\r\n\t\t\tscanf(\"%d\", &x);\r\n\t\t\tchange1(1, dfn[x]);\r\n\t\t\tsz++;\r\n\t\t}\r\n\t\telse if(str[0] == '-')\r\n\t\t{\r\n\t\t\tscanf(\"%d\", &x);\r\n\t\t\tchange2(1, dfn[x]);\r\n\t\t\tsz--;\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tif(sz > 0) printf(\"%lld\\n\", (tr[1].v + dis(id[tr[1].mn], id[tr[1].mx])) / 2ll);\r\n\t\t\telse puts(\"0\");\r\n\t\t}\r\n\t}\r\n}"
+}

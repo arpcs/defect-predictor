@@ -1,0 +1,38 @@
+{
+    "id": 235132969,
+    "contestId": 1426,
+    "creationTimeSeconds": 1701372009,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1426,
+        "index": "E",
+        "name": "Rock, Paper, Scissors",
+        "type": "PROGRAMMING",
+        "rating": 1800,
+        "tags": [
+            "brute force",
+            "constructive algorithms",
+            "flows",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1426,
+        "members": [
+            {
+                "handle": "vjudge3"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601280300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\n#define sz(i) int(i.size())\n#define all(i) i.begin(), i.end()\nusing namespace std;\nusing ll = long long;\n\nconst ll INF = 1E18 + 16;\n\ntemplate <class F>\nstruct Dinic {\n  struct Edge {\n    int v, inv;\n    F cap, flow;\n    Edge(int v, F cap, int inv) : v(v), cap(cap), flow(0), inv(inv) {}\n  };\n\n  F EPS = (F)1e-9;\n  int s, t, n;\n  vector<vector<Edge>> graph;\n  vector<int> dist, ptr;\n\n  Dinic(int n) : n(n), graph(n), dist(n), ptr(n), s(0), t(n - 1) {}\n\n  void add(int u, int v, F cap = INF) {\n    graph[u].push_back(Edge(v, cap, sz(graph[v])));\n    graph[v].push_back(Edge(u, 0, sz(graph[u]) - 1));\n  }\n\n  bool bfs() {\n    fill(all(dist), -1);\n    queue<int> qu({s});\n    dist[s] = 0;\n    while (sz(qu) && dist[t] == -1) {\n      int u = qu.front();\n      qu.pop();\n      for (Edge& e : graph[u])\n        if (dist[e.v] == -1)\n          if (e.cap - e.flow > EPS) {\n            dist[e.v] = dist[u] + 1;\n            qu.push(e.v);\n          }\n    }\n    return dist[t] != -1;\n  }\n\n  F dfs(int u, F flow = numeric_limits<F>::max()) {\n    if (flow <= EPS || u == t)\n      return max<F>(0, flow);\n    for (int& i = ptr[u]; i < sz(graph[u]); i++) {\n      Edge& e = graph[u][i];\n      if (e.cap - e.flow > EPS && dist[u] + 1 == dist[e.v]) {\n        F pushed = dfs(e.v, min<F>(flow, e.cap - e.flow));\n        if (pushed > EPS) {\n          e.flow += pushed;\n          graph[e.v][e.inv].flow -= pushed;\n          return pushed;\n        }\n      }\n    }\n    return 0;\n  }\n\n  F maxFlow() {\n    F flow = 0;\n    while (bfs()) {\n      fill(all(ptr), 0);\n      while (F pushed = dfs(s))\n        flow += pushed;\n    }\n    return flow;\n  }\n\n  bool leftSide(int u) {\n    // left side comes from sink\n    return dist[u] != -1;\n  }\n};\n\nint main () {\n    cin.tie(nullptr) -> sync_with_stdio(false);\n    ll n;\n    cin >> n;\n    ll a1, a2, a3, b1, b2, b3;\n    cin >> a1 >> a2 >> a3 >> b1 >> b2 >> b3;\n    Dinic <ll> d(5);\n    d.add(0, 1, a1);\n    d.add(0, 2, a2);\n    d.add(0, 3, a3);\n    d.add(0, 4, b1);\n    d.add(1, 4, b2);\n    d.add(2, 4, b3);\n    ll maxW = d.maxFlow();\n    Dinic <ll> d2(8);\n    d2.add(0, 1, b1);\n    d2.add(0, 2, b2);\n    d2.add(0, 3, b3);\n    d2.add(1, 4); // draw\n    d2.add(1, 5); // rock beats scissors\n    d2.add(2, 5); // draw\n    d2.add(2, 6); // scissors beat paper\n    d2.add(3, 6); // draw\n    d2.add(3, 4); // paper beats rock\n    d2.add(4, 7, a1);\n    d2.add(5, 7, a2);\n    d2.add(6, 7, a3);\n    ll minW = n - d2.maxFlow();\n    cout << minW << ' ' << maxW << '\\n';\n    return 0;\n}\n\n  \t\t\t\t   \t\t  \t     \t\t  \t \t  \t\t\t"
+}

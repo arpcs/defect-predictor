@@ -1,0 +1,35 @@
+{
+    "id": 227501642,
+    "contestId": 762,
+    "creationTimeSeconds": 1696926248,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 762,
+        "index": "E",
+        "name": "Radio stations",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 762,
+        "members": [
+            {
+                "handle": "Carlos_SJS"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1485354900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 307200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define tcs() int t; cin >> t; while(t--)\r\n#define pb push_back\r\n#define f first\r\n#define s second\r\n#define ll long long\r\n#define vi vector<int>\r\n#define vll vector<long long>\r\n#define pii pair<int, int>\r\n#define all(a) a.begin(), a.end()\r\n#define coutv(v) for(auto a: v) cout << a << ' '\r\n#define cinv(v) for(int i=0; i<v.size(); i++) cin >> v[i]\r\n\r\nstruct item{\r\n    ll key;\r\n    int p, cnt;\r\n    item *l, *r;\r\n    item(){}\r\n    item(ll key): key(key), p(rand()), l(NULL), r(NULL){}\r\n    item(ll key, int p): key(key), p(p), l(NULL), r(NULL){}\r\n};\r\ntypedef item* pitem;\r\n\r\nint cnt(pitem t){\r\n    return t? t->cnt: 0;\r\n}\r\n\r\nvoid upd_cnt(pitem t){\r\n    if(t)\r\n        t->cnt = cnt(t->l) + cnt(t->r) + 1;\r\n}\r\n\r\n// Split treap by value x\r\nvoid split(pitem t, pitem &l, pitem &r, ll x){\r\n    if(!t)\r\n        l = r = NULL;\r\n    else if(t->key <= x)\r\n        split(t->r, t->r, r, x), l = t;\r\n    else\r\n        split(t->l, l, t->l, x), r = t;\r\n}\r\n\r\nvoid insert(pitem &t, pitem it){\r\n    if(!t)\r\n        t = it;\r\n    else if(t->p < it->p)\r\n        split(t, it->l, it->r, it->key), t = it;\r\n    else\r\n        insert((it->key <= t->key? t->l : t->r), it);\r\n    upd_cnt(t);\r\n}\r\n\r\nvoid merge(pitem &t, pitem t1, pitem t2){\r\n    if(!t1||!t2)\r\n        t = t1?t1:t2;    \r\n    else if(t1->p > t2->p)\r\n        merge(t1->r, t1->r, t2), t=t1;\r\n    else\r\n        merge(t2->l, t1, t2->l), t=t2;\r\n\r\n    upd_cnt(t);\r\n}\r\n\r\n/*void erase(pitem &t, ll key){\r\n    pitem l, r;\r\n    split(t, l, r, key);\r\n    if(l->key == key){\r\n        pitem c = l;\r\n        merge(l, l->l, l->r);\r\n        delete(c);\r\n    }\r\n    merge(t, l, r);\r\n    upd_cnt(t);\r\n}*/\r\n\r\nvoid erase (pitem & t, ll key) {\r\n    if (t->key == key) {\r\n        pitem th = t;\r\n        merge (t, t->l, t->r);\r\n        delete th;\r\n    }\r\n    else\r\n        erase (key <= t->key ? t->l : t->r, key);\r\n    upd_cnt(t);\r\n}\r\n\r\nvoid heapify (pitem t) {\r\n    if (!t) return;\r\n    pitem max = t;\r\n    if (t->l != NULL && t->l->p > max->p)\r\n        max = t->l;\r\n    if (t->r != NULL && t->r->p > max->p)\r\n        max = t->r;\r\n    if (max != t) {\r\n        swap (t->p, max->p);\r\n        heapify (max);\r\n    }\r\n}\r\n\r\npitem build (vector<int>::pointer a, int n) {\r\n    // Construct a treap on values {a[0], a[1], ..., a[n - 1]}\r\n    if (n == 0) return NULL;\r\n    int mid = n / 2;\r\n    pitem t = new item (*(a+mid));\r\n    t->l = build (a, mid);\r\n    t->r = build (a + mid + 1, n - mid - 1);\r\n    heapify (t);\r\n    upd_cnt(t);\r\n    return t;\r\n}\r\n\r\npitem unite(pitem a, pitem b){\r\n    if(!a || !b)\r\n        return a?a:b;\r\n    pitem l, r;\r\n    if(a->p < b->p)\r\n        swap(a,b);\r\n    split(b, l, r, a->key);\r\n    a->l = unite(a->l, l);\r\n    a->r = unite(a->r, r);\r\n    return a;\r\n}   \r\n\r\nint lower_bound(pitem t, int x, int add=0){\r\n    if(!t) return add;\r\n    else if(t->key == x) return add + cnt(t->l);\r\n    else if(t->key > x) return lower_bound(t->l, x, add);\r\n    else return lower_bound(t->r, x, add+1+cnt(t->l));\r\n}\r\n\r\nstruct station{\r\n    int f;\r\n    ll x, r;\r\n\r\n    station(){}\r\n    station(ll x, ll r, int f): x(x), r(r), f(f){}\r\n};\r\n\r\nint main(){\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);cout.tie(0);\r\n\r\n    int n, k, f, ans=0;\r\n    ll x, r;\r\n    cin >> n >> k;\r\n    vector<pitem> freq(1e4+20, NULL);\r\n    vector<station> s(n);\r\n\r\n    for(int i=0; i<n; i++){\r\n        cin >> s[i].x >> s[i].r >> s[i].f;\r\n\r\n        pitem nw = new item(s[i].x);\r\n        insert(freq[s[i].f], nw);\r\n    }\r\n    sort(all(s), [](const auto &a, const auto &b){\r\n        return a.r < b.r; \r\n    });\r\n\r\n    for(int i=0; i<n; i++){\r\n        for(int j=-k; j<=k; j++){\r\n            int u = lower_bound(freq[s[i].f+j], s[i].x + s[i].r + 1);\r\n            int l = lower_bound(freq[s[i].f+j], s[i].x - s[i].r);\r\n            ans += u-l;\r\n        }\r\n\r\n        erase(freq[s[i].f], s[i].x);\r\n    }\r\n\r\n    cout << ans-n << '\\n';\r\n}"
+}

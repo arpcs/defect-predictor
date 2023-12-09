@@ -1,0 +1,42 @@
+{
+    "id": 235218784,
+    "contestId": 1633,
+    "creationTimeSeconds": 1701434484,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1633,
+        "index": "E",
+        "name": "Spanning Tree Queries",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "data structures",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "greedy",
+            "math",
+            "sortings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1633,
+        "members": [
+            {
+                "handle": "piratZnachor"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1643639700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 31948800,
+    "source": "#include <bits/stdc++.h>\r\n#include <cassert>\r\n\r\nusing namespace std;\r\n\r\nvoid __print(int x) {cerr << x;}\r\nvoid __print(long x) {cerr << x;}\r\nvoid __print(long long x) {cerr << x;}\r\nvoid __print(unsigned x) {cerr << x;}\r\nvoid __print(unsigned long x) {cerr << x;}\r\nvoid __print(unsigned long long x) {cerr << x;}\r\nvoid __print(float x) {cerr << x;}\r\nvoid __print(double x) {cerr << x;}\r\nvoid __print(long double x) {cerr << x;}\r\nvoid __print(char x) {cerr << '\\'' << x << '\\'';}\r\nvoid __print(const char *x) {cerr << '\\\"' << x << '\\\"';}\r\nvoid __print(const string &x) {cerr << '\\\"' << x << '\\\"';}\r\nvoid __print(bool x) {cerr << (x ? \"true\" : \"false\");}\r\ntemplate<typename T, typename V>\r\nvoid __print(const pair<T, V> &x) {cerr << '{'; __print(x.first); cerr << ','; __print(x.second); cerr << '}';}\r\ntemplate<typename T>\r\nvoid __print(const T &x) {int f = 0; cerr << '{'; for (auto &i: x) cerr << (f++ ? \",\" : \"\"), __print(i); cerr << \"}\";}\r\nvoid _print() {cerr << \"]\\n\";}\r\ntemplate <typename T, typename... V>\r\nvoid _print(T t, V... v) {__print(t); if (sizeof...(v)) cerr << \", \"; _print(v...);}\r\n\r\n#ifndef ONLINE_JUDGE\r\n#define debug(x...) cerr << \"[\" << #x << \"] = [\"; _print(x)\r\n#else\r\n#define debug(x...)\r\n#endif\r\n#define int long long\r\n#define all(x) x.begin(), x.end()\r\n#define pb push_back\r\n#define ii pair<int,int>\r\n#define vi vector<int>\r\n#define vii vector<ii>\r\n#define vvi vector<vi>\r\n#define fi first\r\n#define se second\r\n#define ll long long\r\nvi s, p;\r\nint n;\r\nint get(int u) {\r\n    return (p[u]==u?u:p[u]=get(p[u]));\r\n}\r\nvoid join(int u, int v) {\r\n    int a = p[u], b = p[v];\r\n    if(a == b) return;\r\n    if(s[a] < s[b]) swap(a,b);\r\n    s[a] += s[b];\r\n    p[b] = p[a];\r\n}\r\nvi kruskal(vvi& edges) {\r\n    s.assign(n+1, 1), p.resize(n+1);\r\n    iota(all(p), 0);\r\n    vi ans;\r\n    for(int i = 0; i < (int)edges.size(); i++) {\r\n        int a = get(edges[i][0]), b = get(edges[i][1]);\r\n        if(a != b) {\r\n            join(a,b);\r\n            ans.pb(edges[i][3]);\r\n        }\r\n    }\r\n    return ans;\r\n}\r\nint maxx = 1e8+5;\r\nvoid test_case() {\r\n    int m;\r\n    cin >> n >> m;\r\n    vvi edges(m);\r\n    vi xs{0, maxx};\r\n    for(int i = 0; i < m; i++) {\r\n        int x, y, w;\r\n        cin >> x >> y >> w;\r\n        edges[i] = {x,y,w,i};\r\n    }\r\n    for(int i = 0; i < m; i++) {\r\n        for(int j = 0; j < m; j++) {\r\n            xs.pb((edges[i][2]+edges[j][2])/2);\r\n            xs.pb((edges[i][2]+edges[j][2])/2+1);\r\n        }\r\n        xs.pb(edges[i][2]);\r\n    }\r\n    sort(all(xs));\r\n    xs.resize(unique(all(xs))-xs.begin());\r\n    vvi ys(xs.size());\r\n    for(int i = 0; i < (int)xs.size(); i++) {\r\n        int x = xs[i];\r\n        sort(all(edges), [&](vi &a, vi &b) {\r\n            return abs(x-a[2]) < abs(x-b[2]);\r\n        });\r\n        ys[i] = kruskal(edges);\r\n    }\r\n    sort(all(edges), [&](vi &a, vi &b) {\r\n        return a[3] < b[3];\r\n    });\r\n    int pref, k, a, b, c;\r\n    cin >> pref >> k >> a >> b >> c;\r\n    int prev = -1, ans = 0;\r\n    for(int i = 0; i < k; i++) {\r\n        int x;\r\n        if(i < pref) cin >> x;\r\n        else x = (prev*a+b)%c;\r\n        int idx = lower_bound(all(xs), x) - xs.begin();\r\n        int cur = 0;\r\n        for(auto idx2 : ys[idx])\r\n            cur += abs(edges[idx2][2]-x);\r\n        ans ^= cur;\r\n        prev = x;\r\n    }\r\n    cout << ans << \"\\n\";\r\n}\r\nint32_t main() {\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n\r\n    int tc = 1;\r\n    // cin >> tc;\r\n    while(tc--) {\r\n        test_case();\r\n    }\r\n\r\n    return 0;\r\n}"
+}

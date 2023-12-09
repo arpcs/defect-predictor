@@ -1,0 +1,35 @@
+{
+    "id": 223323350,
+    "contestId": 1017,
+    "creationTimeSeconds": 1694683000,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1017,
+        "index": "H",
+        "name": "The Films",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 3300,
+        "tags": [
+            "brute force"
+        ]
+    },
+    "author": {
+        "contestId": 1017,
+        "members": [
+            {
+                "handle": "ftt2333"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1533737100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 1809,
+    "memoryConsumedBytes": 19558400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nusing ll = long long;\r\n\r\nconstexpr int mod = 998244353;\r\n\r\nstruct modint {\r\n  int v;\r\n  template <class T> int reduce(const T &a) { if (a < 0) return a % mod + mod; if (a >= mod) return a % mod; return a; }\r\n  modint() : v(0) { }\r\n  template <class T> modint(const T &a) : v(reduce(a)) { }\r\n  template <class T> friend T& operator<<(T &os, const modint &rhs) { return os << rhs.v; }\r\n  template <class T> friend T& operator>>(T &is, modint &rhs) { long long x; is >> x; rhs = modint(x); return is; }\r\n  modint& operator+=(const modint &rhs) { v += v < mod - rhs.v ? rhs.v : rhs.v - mod; return *this; }\r\n  modint operator+(const modint &rhs) const { return modint(*this) += rhs; }\r\n  modint& operator-=(const modint &rhs) { v -= v >= rhs.v ? rhs.v : rhs.v - mod; return *this; }\r\n  modint operator-(const modint &rhs) const { return modint(*this) -= rhs; }\r\n  modint operator-() const { if (!v) return *this; return modint{mod - v}; }\r\n  modint& operator*=(const modint &rhs) { v = 1ll * v * rhs.v % mod; return *this; }\r\n  modint operator*(const modint &rhs) const { return modint(*this) *= rhs; }\r\n  template <class T> modint pow(T b) const { modint a(*this), res(1); for (; b; b >>= 1, a *= a) if (b & 1) res *= a; return res; }\r\n  modint inv() const { return pow(mod - 2); }\r\n  modint& operator/=(const modint &rhs) { return *this *= rhs.inv(); }\r\n  modint operator/(const modint &rhs) const { return *this * rhs.inv(); }\r\n  modint operator++() { modint res = *this; *this += 1; return res; }\r\n  modint& operator++(int) { return *this += 1; }\r\n  modint operator--() { modint res = *this; *this -= 1; return res; }\r\n  modint& operator--(int) { return *this -= 1; }\r\n};\r\n\r\nconstexpr int maxn = 3e5 + 10;\r\nint n, m, q, a[maxn], cur[maxn], cnt[maxn];\r\nint b[maxn], t, B, k;\r\nmodint fac[maxn], ifac[maxn], A[maxn], prod, ans[maxn];\r\n\r\nstruct Q { int l, r, id; };\r\nvector<Q> qry[maxn];\r\n\r\nmodint perm(int n, int m) {\r\n  return fac[n] * ifac[n - m];\r\n}\r\nmodint iperm(int n, int m) {\r\n  return ifac[n] * fac[n - m];\r\n}\r\n\r\nvoid modify(int x, int v) {\r\n  prod *= iperm(cnt[x] + k, cur[x]);\r\n  cur[x] += v;\r\n  prod *= perm(cnt[x] + k, cur[x]);\r\n}\r\n\r\nvoid solve() {\r\n  A[0] = 1; for (int i = 1; i <= n; ++i) A[i] = A[i - 1] * (1ll * m * k + i);\r\n  B = n / sqrt(qry[k].size()); B = max(B, 1);\r\n  sort(qry[k].begin(), qry[k].end(), [](Q a, Q b) { return make_pair(a.l / B, a.r) < make_pair(b.l / B, b.r); });\r\n  for (int i = 1; i <= m; ++i) cur[i] = 0;\r\n  int l = 1, r = 0;\r\n  prod = 1;\r\n  for (auto e : qry[k]) {\r\n    while (l > e.l) modify(a[--l], 1);\r\n    while (r < e.r) modify(a[++r], 1);\r\n    while (l < e.l) modify(a[l++], -1);\r\n    while (r > e.r) modify(a[r--], -1);\r\n    ans[e.id] = prod * A[n - (e.r - e.l + 1)];\r\n  }\r\n}\r\n\r\nint main() {\r\n#ifndef LOCAL\r\n  cin.tie(nullptr)->sync_with_stdio(false);\r\n#endif\r\n  cin >> n >> m >> q;\r\n  fac[0] = 1; for (int i = 1; i < maxn; ++i) fac[i] = fac[i - 1] * i;\r\n  ifac[maxn - 1] = fac[maxn - 1].inv(); for (int i = maxn - 1; i; --i) ifac[i - 1] = ifac[i] * i;\r\n  for (int i = 1; i <= n; ++i) cin >> a[i], ++cnt[a[i]];\r\n  for (int i = 1; i <= q; ++i) {\r\n    int l, r, k; cin >> l >> r >> k;\r\n    qry[k].push_back(Q{l, r, i});\r\n    b[++t] = k;\r\n  }\r\n  sort(b + 1, b + 1 + t); t = unique(b + 1, b + 1 + t) - b - 1;\r\n  for (int i = 1; i <= t; ++i) k = b[i], solve();\r\n  for (int i = 1; i <= q; ++i) cout << ans[i] << '\\n';\r\n}"
+}

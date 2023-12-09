@@ -1,0 +1,37 @@
+{
+    "id": 63504992,
+    "contestId": 105,
+    "creationTimeSeconds": 1572114269,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 105,
+        "index": "D",
+        "name": "Entertaining Geodetics",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2700,
+        "tags": [
+            "brute force",
+            "dsu",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 105,
+        "members": [
+            {
+                "handle": "artur.socha"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1313247600
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 67,
+    "timeConsumedMillis": 389,
+    "memoryConsumedBytes": 51404800,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <map>\r\n#include <queue>\r\n#include <algorithm>\r\n\r\n#define fi first\r\n#define se second\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\n\r\nint dx[] = {-1, 0, 1, 0};\r\nint dy[] = {0, 1, 0, -1};\r\n\r\nvector<int> f, col, wlk;\r\n\r\nint Find(int a)\r\n{\r\n    if (f[a] == a)\r\n        return a;\r\n    int fa = Find(f[a]);\r\n    f[a] = fa;\r\n    return fa;\r\n}\r\n\r\nvoid Union(int a, int b)\r\n{\r\n    int fa = Find(a);\r\n    int fb = Find(b);\r\n    if (fa == fb)\r\n        return;\r\n    wlk[fa] += wlk[fb];\r\n    f[fb] = f[fa];\r\n}\r\n\r\nint main()\r\n{\r\n    ios_base::sync_with_stdio(0);\r\n    int n, m;\r\n    cin >> n >> m;\r\n    vector< vector<int> > pan(3 * n, vector<int>(3 * m, 0));\r\n    for (int i = 0; i < n; ++i)\r\n        for (int j = 0; j < m; ++j)\r\n            cin >> pan[n + i][m + j];\r\n    vector< vector<int> > sym(3 * n, vector<int>(3 * m, -1));\r\n    for (int i = 0; i < n; ++i)\r\n        for (int j = 0; j < m; ++j)\r\n            cin >> sym[n + i][m + j];\r\n    int x, y;\r\n    cin >> x >> y;\r\n    x = x - 1 + n;\r\n    y = y - 1 + m;\r\n    vector< vector<int> > spi(3 * n, vector<int>(3 * m));\r\n    spi[x][y] = 0;\r\n    int nr = 1, ileMam = 1, d = 1;\r\n    int akt_x = x, akt_y = y;\r\n    while (ileMam < 9 * n * m)\r\n    {\r\n        for (int kier = 0; kier < 4; ++kier)\r\n        {\r\n            for (int i = 0; i < d; ++i)\r\n            {\r\n                akt_x += dx[kier];\r\n                akt_y += dy[kier];\r\n                if (akt_x >= 0 && akt_x < 3 * n && akt_y >= 0 && akt_y < 3 * m)\r\n                {\r\n                    spi[akt_x][akt_y] = nr;\r\n                    ++ileMam;\r\n                }\r\n                ++nr;\r\n            }\r\n            if (kier == 1 || kier == 3)\r\n                ++d;\r\n        }\r\n    }\r\n    map< int, vector< pair< int, pair<int, int> > > > M;\r\n    map<int, pair<int, int> > gdzieCol;\r\n    for (int i = 0; i < 3 * n; ++i)\r\n    {\r\n        for (int j = 0; j < 3 * m; ++j)\r\n        {\r\n            gdzieCol[pan[i][j]] = make_pair(i, j);\r\n            M[pan[i][j]].push_back(make_pair(-1, make_pair(i, j)));\r\n            int H = i * 3 * m + j;\r\n            f.push_back(H);\r\n            col.push_back(pan[i][j]);\r\n            wlk.push_back(1);\r\n            if (M.find(pan[i][j]) != M.end())\r\n            {\r\n                int Hroot = (M[pan[i][j]][0]).se.fi * 3 * m + (M[pan[i][j]][0]).se.se;\r\n                Union(Hroot, H);\r\n            }\r\n        }\r\n    }\r\n    ll odp = 0;\r\n    queue< pair<int, int> > Q;\r\n    Q.push(make_pair(x, y));\r\n    while (!Q.empty())\r\n    {\r\n        pair<int, int> akt = Q.front();\r\n        Q.pop();\r\n        int colPan = col[Find(akt.fi * 3 * m + akt.se)];\r\n        int colSym = sym[akt.fi][akt.se];\r\n        if (colPan == 0 || colPan == colSym)\r\n            continue;\r\n        if (M[colPan].size() != 0)\r\n        {\r\n            for (int i = 0; i < M[colPan].size(); ++i)\r\n            {\r\n                int wx = akt.fi - x;\r\n                int wy = akt.se - y;\r\n                wx *= -1;\r\n                wy *= -1;\r\n                M[colPan][i].first = spi[M[colPan][i].se.fi + wx][M[colPan][i].se.se + wy];\r\n            }\r\n            sort(M[colPan].begin(), M[colPan].end());\r\n            for (int i = 0; i < M[colPan].size(); ++i)\r\n                if ((M[colPan][i].se.fi != x || M[colPan][i].se.se != y) && sym[M[colPan][i].se.fi][M[colPan][i].se.se] != -1)\r\n                    Q.push(M[colPan][i].se);\r\n            M[colPan].clear();\r\n        }\r\n        odp += wlk[Find(akt.fi * 3 * m + akt.se)];\r\n        if (gdzieCol.find(colSym) != gdzieCol.end() && gdzieCol[colSym].fi != -1)\r\n            Union(gdzieCol[colSym].fi * 3 * m + gdzieCol[colSym].se, akt.fi * 3 * m + akt.se);\r\n        else\r\n        {\r\n            col[Find(akt.fi * 3 * m + akt.se)] = colSym;\r\n            gdzieCol[colSym] = akt;\r\n        }\r\n        gdzieCol[colPan] = make_pair(-1, -1);\r\n    }\r\n    cout << odp;\r\n    return 0;\r\n}\r\n"
+}

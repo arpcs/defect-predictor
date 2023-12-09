@@ -1,0 +1,35 @@
+{
+    "id": 235727467,
+    "contestId": 1906,
+    "creationTimeSeconds": 1701699956,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1906,
+        "index": "K",
+        "name": "Deck-Building Game",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "divide and conquer",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1906,
+        "members": [
+            {
+                "handle": "ArvinCiu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1701578100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 171,
+    "memoryConsumedBytes": 14848000,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\n\r\nconst int MOD = 998244353;\r\nvoid FST(vector<ll> &a, bool inv) {\r\n    for (int n=a.size(), step = 1; step < n; step *= 2) {\r\n        for (int i=0; i<n; i += 2*step) {\r\n            for (int j=i; j<i+step; j++) {\r\n                ll &u = a[j], &v = a[j+step];\r\n                tie(u, v) = make_pair(u+v, u-v);\r\n            }\r\n        }\r\n    }\r\n    if (inv) for (ll& x : a) x /= a.size();\r\n}\r\n\r\nvector<ll> conv(vector<ll> a, vector<ll> b) {\r\n    FST(a, 0); FST(b, 0);\r\n    for (int i=0; i<a.size(); i++) {\r\n        a[i] *= b[i];\r\n        a[i] %= MOD;\r\n    }\r\n    FST(a, 1);\r\n    return a;\r\n}\r\n\r\nconst int MAX_N = 1e5 + 5;\r\n\r\nint n, a[MAX_N], cnt[4*MAX_N];\r\nll ways[4*MAX_N][2];\r\n\r\narray<vector<ll>, 2> solve(int l, int r) {\r\n    if (l == r) {\r\n        array<vector<ll>, 2> res;\r\n        res[0] = {ways[cnt[l]][0]};\r\n        res[1] = {ways[cnt[l]][1]};\r\n        // cout << l << \" --> \" << res[0][0] << \",\" << res[1][0] << \"\\n\";\r\n        return res;\r\n    }\r\n\r\n    int m = (l+r) >> 1;\r\n    array<vector<ll>, 2> lp = solve(l, m);\r\n    array<vector<ll>, 2> rp = solve(m+1, r);\r\n    array<vector<ll>, 2> res;\r\n    for (int i=0; i<2; i++) res[i].resize(r-l+1);\r\n    for (int i=0; i<2; i++) { // [starts from 0 or x^l]\r\n        for (int j=0; j<2; j++) { // [stars from 0 or x^(m+1)]\r\n            vector<ll> v = conv(lp[i], rp[j]);\r\n            int len = (m-l+1);\r\n            for (int k=0; k<v.size(); k++) {\r\n                // cout << l << \",\" << m << \",\" << r << \" ==> \" << i << \",\" << j << \" == \" << v[k] << \"\\n\";\r\n                res[(i+j)%2][(j % 2 == 1 ? len : 0) + k] += v[k];\r\n                if (res[(i+j)%2][(j % 2 == 1 ? len : 0) + k] >= MOD) res[(i+j)%2][(j % 2 == 1 ? len : 0) + k] -= MOD;\r\n            }\r\n        }\r\n    }\r\n    return res;\r\n}\r\n\r\nint main(){\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0); cout.tie(0);\r\n    \r\n    cin >> n;\r\n\r\n    for (int i=0; i<n; i++) {\r\n        cin >> a[i];\r\n    }\r\n\r\n    sort(a, a+n);\r\n\r\n    int k = 1;\r\n    while (k-1 < a[n-1]) k *= 2;\r\n    \r\n    ways[0][0] = 1; // pick even\r\n    for (int i=1; i<=k; i++) {\r\n        ways[i][0] = (ways[i-1][1] * 2 % MOD + ways[i-1][0]) % MOD;\r\n        ways[i][1] = (ways[i-1][0] * 2 % MOD + ways[i-1][1]) % MOD;\r\n    }\r\n\r\n    for (int i=0; i<n; i++) {\r\n        cnt[a[i]]++;\r\n    }\r\n\r\n    array<vector<ll>, 2> ans = solve(0, k-1);\r\n    cout << (ans[0][0]+ans[1][0]) % MOD << \"\\n\";\r\n    \r\n    return 0;\r\n}"
+}

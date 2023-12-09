@@ -1,0 +1,35 @@
+{
+    "id": 221935794,
+    "contestId": 1251,
+    "creationTimeSeconds": 1693918615,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1251,
+        "index": "F",
+        "name": "Red-White Fence",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "combinatorics",
+            "fft"
+        ]
+    },
+    "author": {
+        "contestId": 1251,
+        "members": [
+            {
+                "handle": "vjudge2"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571929500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 107,
+    "timeConsumedMillis": 4586,
+    "memoryConsumedBytes": 53350400,
+    "source": "#include <bits/stdc++.h>\n\nusing namespace std;\n\ntypedef long long ll;\ntypedef long double ld;\ntypedef pair<int, int> pii;\ntypedef pair<ll, ll> pll;\ntypedef vector<int> vi;\n\n#define fi first\n#define se second\n#define pp push_back\n#define all(x) (x).begin(), (x).end()\n#define Ones(n) __builtin_popcount(n)\n#define endl '\\n'\n#define mem(arrr, xx) memset(arrr,xx,sizeof arrr)\n//#define int long long\n#define debug(x) cout << (#x) << \" = \" << x << endl\n\nvoid Gamal() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(nullptr);\n    cout.tie(nullptr);\n#ifdef Clion\n    freopen(\"input.txt\", \"r\", stdin), freopen(\"output.txt\", \"w\", stdout);\n#endif\n}\n\nint dx[] = {+0, +0, -1, +1, +1, +1, -1, -1};\nint dy[] = {-1, +1, +0, +0, +1, -1, +1, -1};\n\nconst double EPS = 1e-9;\nconst ll OO = 0X3F3F3F3F3F3F3F3F;\nconst int N = 2e5 + 5, INF = INT_MAX, MOD = 998244353, LOG = 20;\n\n#define rep(aa, bb, cc) for(int aa = bb; aa < cc;aa++)\n#define sz(a) (int)a.size()\n\nconst ll mod = (119 << 23) + 1, root = 62; // = 998244353\n// For p < 2^30 there is also e.g. 5 << 25, 7 << 26, 479 << 21\n// and 483 << 21 (same root). The last two are > 10^9.\n\n\nll modpow(ll b, ll e) {\n    ll ans = 1;\n    for (; e; b = b * b % mod, e /= 2)\n        if (e & 1) ans = ans * b % mod;\n    return ans;\n}\n\n// Primitive Root of the mod of form 2^a * b + 1\nint generator() {\n    vector<int> fact;\n    int phi = mod - 1, n = phi;\n    for (int i = 2; i * i <= n; ++i)\n        if (n % i == 0) {\n            fact.push_back(i);\n            while (n % i == 0)\n                n /= i;\n        }\n    if (n > 1)\n        fact.push_back(n);\n\n    for (int res = 2; res <= mod; ++res) {\n        bool ok = true;\n        for (size_t i = 0; i < fact.size() && ok; ++i)\n            ok &= modpow(res, phi / fact[i]) != 1;\n        if (ok) return res;\n    }\n    return -1;\n}\n\ntypedef vector<ll> vl;\n\nvoid ntt(vl &a) {\n    int n = sz(a), L = 31 - __builtin_clz(n);\n    static vl rt(2, 1);\n    for (static int k = 2, s = 2; k < n; k *= 2, s++) {\n        rt.resize(n);\n        ll z[] = {1, modpow(root, mod >> s)};\n        rep(i, k, 2 * k) rt[i] = rt[i / 2] * z[i & 1] % mod;\n    }\n    vi rev(n);\n    rep(i, 0, n) rev[i] = (rev[i / 2] | (i & 1) << L) / 2;\n    rep(i, 0, n) if (i < rev[i]) swap(a[i], a[rev[i]]);\n    for (int k = 1; k < n; k *= 2)\n        for (int i = 0; i < n; i += 2 * k)\n            rep(j, 0, k) {\n                ll z = rt[j + k] * a[i + j + k] % mod, &ai = a[i + j];\n                a[i + j + k] = ai - z + (z > ai ? mod : 0);\n                ai += (ai + z >= mod ? z - mod : z);\n            }\n}\n\nvl conv(const vl &a, const vl &b) {\n    if (a.empty() || b.empty()) return {};\n    int s = sz(a) + sz(b) - 1, B = 32 - __builtin_clz(s), n = 1 << B;\n    int inv = modpow(n, mod - 2);\n    vl L(a), R(b), out(n);\n    L.resize(n), R.resize(n);\n    ntt(L), ntt(R);\n    rep(i, 0, n) out[-i & (n - 1)] = (ll) L[i] * R[i] % mod * inv % mod;\n    ntt(out);\n    return {out.begin(), out.begin() + s};\n}\n\nvoid solve() {\n    int n, k;\n    cin >> n >> k;\n    vl a(n), b(k);\n    for (int i = 0; i < n; ++i)cin >> a[i];\n    for (int i = 0; i < k; ++i)cin >> b[i];\n    sort(all(a));\n    sort(all(b));\n    vl ans(12 * 1e5 + 10);\n    for (int i = 0; i < k; ++i) {\n        int j = 0;\n        vector<vl>v;\n        v.push_back({1});\n        while (j < n && a[j] < b[i]) {\n            int cnt = 1;\n            while (j + 1 < n && a[j] == a[j + 1])cnt++, j++;\n            j++;\n            cnt = min(cnt,2);\n            vl p(cnt + 1);\n            p[0] = 1,p[1] = 2;\n            if(cnt == 2)p[2] = 1;\n            v.push_back(p);\n        }\n        while (v.size() > 1){\n            vector<vl>nv;\n            for (int l = 0; l + 1 < v.size(); l += 2) {\n                nv.push_back(conv(v[l],v[l+1]));\n            }\n            if(v.size()&1)nv.push_back(v.back());\n            v = ::move(nv);\n        }\n        auto cur = v.back();\n        for (int l = 0; l < cur.size(); ++l) {\n            ans[2 * b[i] + (l + 1) * 2] = (ans[2 * b[i] + (l + 1) * 2] + cur[l]) % mod;\n        }\n    }\n\n    int q;\n    cin >> q;\n    while (q--) {\n        int x;\n        cin >> x;\n        cout << ans[x] << endl;\n    }\n\n}\n\n\nsigned main() {\n    Gamal();\n    int t = 1;\n//    cin >> t;\n    while (t--) {\n        solve();\n    }\n}\n \t \t  \t\t    \t   \t\t\t  \t\t\t \t\t\t\t"
+}

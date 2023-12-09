@@ -1,0 +1,36 @@
+{
+    "id": 214038316,
+    "contestId": 1427,
+    "creationTimeSeconds": 1689512388,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1427,
+        "index": "G",
+        "name": "One Billion Shades of Grey",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3300,
+        "tags": [
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1427,
+        "members": [
+            {
+                "handle": "jjyakioi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1602341400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 129,
+    "timeConsumedMillis": 2089,
+    "memoryConsumedBytes": 8396800,
+    "source": "// LUOGU_RID: 115911375\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int inf=1e8+93846;\r\nint head[50005],cnt,tot,s,t,n;\r\nstruct qxx{int to,next,c,len;}a[400005];\r\nvoid add(int aa,int bb,int cc,int dd)\r\n{\r\n\ta[++cnt].to=bb;a[cnt].len=cc;\r\n\ta[cnt].next=head[aa];head[aa]=cnt;\r\n\ta[++cnt].to=aa;a[cnt].len=dd;\r\n\ta[cnt].next=head[bb];head[bb]=cnt;\r\n}\r\nstruct lsh{int x,y,val;}b[1005];\r\nbool cmp(lsh x,lsh y){return x.val<y.val;}\r\nint id[205][205],x[205][205],re[1005],num;\r\nint get_id(int x,int y){return (x-1)*n+y;}\r\nint vis[50005];\r\nint dfs(int u,int t)\r\n{\r\n\tif(u==t) return 1;vis[u]=1;\r\n\tfor(int i=head[u];i!=-1;i=a[i].next)\r\n\t{\r\n\t\tint v=a[i].to;\r\n\t\tif(a[i].c||!a[i].len||vis[v]) continue;\r\n\t\t//cout<<i<<\"??????\"<<endl;\r\n\t\tif(dfs(v,t))\r\n\t\t{\r\n\t\t\ta[i].len--;\r\n\t\t\ta[i^1].len++;\r\n\t\t\treturn 1;\r\n\t\t}\r\n\t}\r\n\treturn 0;\r\n}\r\nint main()\r\n{\r\n\tcin>>n;tot=n*n;s=++tot;t=++tot;cnt=-1;\r\n\tmemset(head,-1,sizeof(head));\r\n\tfor(int i=1;i<=n;i++)\r\n\t{\r\n\t\tfor(int j=1;j<=n;j++)\r\n\t\t{\r\n\t\t\tscanf(\"%d\",&x[i][j]);\r\n\t\t\tif(x[i][j]!=-1&&x[i][j])\r\n\t\t\t{\r\n\t\t\t\tb[++num].x=i,b[num].y=j,b[num].val=x[i][j];\r\n\t\t\t\tadd(get_id(i,j),t,inf,0);\r\n\t\t\t\tid[i][j]=cnt;\r\n\t\t\t}\r\n\t\t\tif(x[i][j]==-1) continue;\r\n\t\t\tif(i!=1&&x[i-1][j]!=-1) add(get_id(i,j),get_id(i-1,j),1,1);\r\n\t\t\tif(j!=1&&x[i][j-1]!=-1) add(get_id(i,j),get_id(i,j-1),1,1);\r\n\t\t}\r\n\t}\r\n\tint l=1,r,flow=0,tmp=1;\r\n\tlong long ans=0;\r\n\twhile(tmp)\r\n\t{\r\n\t\tfor(int i=1;i<=tot;i++) vis[i]=0;\r\n\t\ttmp=dfs(s,t);flow+=tmp;\r\n\t\t//cout<<s<<\" \"<<t<<endl;\r\n\t}\r\n\tsort(b+1,b+num+1,cmp);\r\n\twhile(l<=tot)\r\n\t{\r\n\t\tr=l;\r\n\t\twhile(r+1<=num&&b[r].val==b[r+1].val) r++;\r\n\t\tif(r==num) break;\r\n\t\tfor(int i=l;i<=r;i++)\r\n\t\t{\r\n\t\t\t//cout<<b[i].x<<\" \"<<b[i].y<<\":\"<<endl;\r\n\t\t\tint tm=id[b[i].x][b[i].y];\r\n\t\t\ta[tm].c=a[tm^1].c=1;\r\n\t\t\tfor(int k=1;k<=a[tm].len;k++)\r\n\t\t\t{\r\n\t\t\t\tfor(int j=1;j<=tot;j++) vis[j]=0;\r\n\t\t\t\tvis[t]=1;tmp=dfs(a[tm].to,s);flow-=tmp;\r\n\t\t\t\t//cout<<tmp<<endl;\r\n\t\t\t}\r\n\t\t\tadd(s,get_id(b[i].x,b[i].y),inf,0);\r\n\t\t\ttmp=1;while(tmp)\r\n\t\t\t{\r\n\t\t\t\tfor(int i=1;i<=tot;i++) vis[i]=0;\r\n\t\t\t\ttmp=dfs(s,t);flow+=tmp;\r\n\t\t\t\t//cout<<tmp<<endl;\r\n\t\t\t}\r\n\t\t\t//for(int j=1;j<=tot;j++)\r\n\t\t\t//for(int k=head[j];k!=-1;k=a[k].next)\r\n\t\t\t//if(!a[k].c&&a[k].len) cout<<k<<\":\"<<j<<\" \"<<a[k].to<<\" \"<<a[k].len<<endl;\r\n\t\t}\r\n\t\tans+=1ll*flow*(b[r+1].val-b[r].val);\r\n\t\tl=r+1;\r\n\t}\r\n\tcout<<ans;\r\n\treturn 0;\r\n}"
+}

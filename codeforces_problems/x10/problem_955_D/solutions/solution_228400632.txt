@@ -1,0 +1,36 @@
+{
+    "id": 228400632,
+    "contestId": 955,
+    "creationTimeSeconds": 1697453230,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 955,
+        "index": "D",
+        "name": "Scissors",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2600,
+        "tags": [
+            "brute force",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 955,
+        "members": [
+            {
+                "handle": "Leasier"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1521822900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 63078400,
+    "source": "#include <stdio.h>\r\n#include <stdlib.h>\r\n\r\ntypedef long long ll;\r\n\r\nconst int seed = 19260817, mod = 1e9 + 7;\r\nll power[500007];\r\n\r\ntypedef struct {\r\n\tll hash[500007];\r\n\t\r\n\tinline void init(char s[], int n){\r\n\t\tfor (register int i = 1; i <= n; i++){\r\n\t\t\thash[i] = (hash[i - 1] * seed % mod + s[i]) % mod;\r\n\t\t}\r\n\t}\r\n\t\r\n\tinline ll get_hash(int l, int r){\r\n\t\treturn ((hash[r] - hash[l - 1] * power[r - l + 1] % mod) % mod + mod) % mod;\r\n\t}\r\n} Hash;\r\n\r\nHash hashs, hasht;\r\nint _log2[500007], fail[500007], pre[500007], suf[500007], st[20][500007], val[500007];\r\nchar s[500007], t[500007];\r\n\r\ninline void init(int n){\r\n\tpower[0] = 1;\r\n\tfor (register int i = 1; i <= n; i++){\r\n\t\tpower[i] = power[i - 1] * seed % mod;\r\n\t}\r\n\tfor (register int i = 2; i <= n; i++){\r\n\t\t_log2[i] = _log2[i / 2] + 1;\r\n\t}\r\n}\r\n\r\ninline void kmp(char s[], char t[], int n, int m, int k){\r\n\tfor (register int i = 2, j = 0; i <= n; i++){\r\n\t\twhile (j != 0 && s[i] != s[j + 1]) j = fail[j];\r\n\t\tif (s[i] == s[j + 1]) j++;\r\n\t\tfail[i] = j;\r\n\t}\r\n\tfor (register int i = 1, j = 0; i <= m; i++){\r\n\t\twhile (j != 0 && t[i] != s[j + 1]) j = fail[j];\r\n\t\tif (t[i] == s[j + 1]) j++;\r\n\t\tif (j == n){\r\n\t\t\tif (i - n >= k){\r\n\t\t\t\tprintf(\"Yes\");\r\n\t\t\t\tprintf(\"%d %d\", i - n - k, i - n + 1);\r\n\t\t\t\texit(0);\r\n\t\t\t}\r\n\t\t\tif (m - i <= k){\r\n\t\t\t\tprintf(\"Yes\");\r\n\t\t\t\tprintf(\"%d %d\", i - n + 1, i + 1);\r\n\t\t\t\texit(0);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\n\r\ninline int min(int a, int b){\r\n\treturn a < b ? a : b;\r\n}\r\n\r\ninline void chkmin(int l, int r, int k){\r\n\tint t1 = _log2[r - l + 1], t2 = r - (1 << t1) + 1;\r\n\tst[t1][l] = min(st[t1][l], k);\r\n\tst[t1][t2] = min(st[t1][t2], k);\r\n}\r\n\r\ninline int max(int a, int b){\r\n\treturn a > b ? a : b;\r\n}\r\n\r\ninline int get_min(int l, int r){\r\n\tif (l > r) return 0x7fffffff;\r\n\tint t = _log2[r - l + 1];\r\n\treturn min(st[t][l], st[t][r - (1 << t) + 1]);\r\n}\r\n\r\nint main(){\r\n\tint n, m, k;\r\n\tscanf(\"%d %d %d\", &n, &m, &k);\r\n\tscanf(\"%s\", &s[1]);\r\n\tscanf(\"%s\", &t[1]);\r\n\tkmp(t, s, m, n, k);\r\n\tinit(n);\r\n\thashs.init(s, n);\r\n\thasht.init(t, m);\r\n\tfor (register int i = 1; i <= n; i++){\r\n\t\tint l = 1, r = min(k, min(n - i, m - 1));\r\n\t\twhile (l <= r){\r\n\t\t\tint mid = (l + r) >> 1;\r\n\t\t\tif (hashs.get_hash(i, i + mid - 1) == hasht.hash[mid]){\r\n\t\t\t\tl = mid + 1;\r\n\t\t\t\tpre[i] = mid;\r\n\t\t\t} else {\r\n\t\t\t\tr = mid - 1;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tfor (register int i = 1; i <= n; i++){\r\n\t\tint l = 1, r = min(k, min(i, m - 1));\r\n\t\twhile (l <= r){\r\n\t\t\tint mid = (l + r) >> 1;\r\n\t\t\tif (hashs.get_hash(i - mid + 1, i) == hasht.get_hash(m - mid + 1, m)){\r\n\t\t\t\tl = mid + 1;\r\n\t\t\t\tsuf[i] = mid;\r\n\t\t\t} else {\r\n\t\t\t\tr = mid - 1;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tfor (register int i = 0; i <= _log2[n]; i++){\r\n\t\tint t = n - (1 << i) + 1;\r\n\t\tfor (register int j = 1; j <= t; j++){\r\n\t\t\tst[i][j] = 0x7fffffff;\r\n\t\t}\r\n\t}\r\n\tfor (register int i = 1; i <= n; i++){\r\n\t\tif (suf[i] != 0) chkmin(i - suf[i] + 1, i, m - i);\r\n\t}\r\n\tfor (register int i = _log2[n]; i >= 1; i--){\r\n\t\tint id = i - 1, t1 = n - (1 << i) + 1, t2 = 1 << id;\r\n\t\tfor (register int j = 1; j <= t1; j++){\r\n\t\t\tint t3 = j + t2;\r\n\t\t\tst[id][j] = min(st[id][j], st[i][j]);\r\n\t\t\tst[id][t3] = min(st[id][t3], st[i][j]);\r\n\t\t}\r\n\t}\r\n\tfor (register int i = 1; i <= n; i++){\r\n\t\tif (st[0][i] == 0x7fffffff){\r\n\t\t\tval[i] = 0x7fffffff;\r\n\t\t} else {\r\n\t\t\tval[i] = st[0][i] + i;\r\n\t\t}\r\n\t}\r\n\tval[n + 1] = 0x7fffffff;\r\n\tfor (register int i = n; i >= 1; i--){\r\n\t\tval[i] = min(val[i], val[i + 1]);\r\n\t}\r\n\tfor (register int i = 1; i <= n; i++){\r\n\t\tif (val[i] == 0x7fffffff){\r\n\t\t\tst[0][i] = 0x7fffffff;\r\n\t\t} else {\r\n\t\t\tst[0][i] = val[i] - i;\r\n\t\t}\r\n\t}\r\n\tfor (register int i = 1; i <= _log2[n]; i++){\r\n\t\tint id = i - 1, t1 = n - (1 << i) + 1, t2 = 1 << id;\r\n\t\tfor (register int j = 1; j <= t1; j++){\r\n\t\t\tst[i][j] = min(st[id][j], st[id][j + t2]);\r\n\t\t}\r\n\t}\r\n\tfor (register int i = 1; i <= n; i++){\r\n\t\tif (get_min(i + max(k - i, 0) + 1, i + pre[i]) <= 1 - i){\r\n\t\t\tprintf(\"Yes\\n\");\r\n\t\t\tfor (register int j = 1; j <= pre[i]; j++){\r\n\t\t\t\tif (val[i + j] <= j + 1){\r\n\t\t\t\t\tfor (register int x = n; x >= 1; x--){\r\n\t\t\t\t\t\tif (suf[x] >= m - j){\r\n\t\t\t\t\t\t\tprintf(\"%d %d\", i + j - k, x - (m - j) + 1);\r\n\t\t\t\t\t\t\tbreak;\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t\tbreak;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\treturn 0;\r\n\t\t}\r\n\t}\r\n\tprintf(\"No\");\r\n\treturn 0;\r\n}"
+}

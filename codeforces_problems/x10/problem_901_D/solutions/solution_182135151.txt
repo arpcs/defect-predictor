@@ -1,0 +1,37 @@
+{
+    "id": 182135151,
+    "contestId": 901,
+    "creationTimeSeconds": 1669125223,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 901,
+        "index": "D",
+        "name": "Weighting a Tree",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2700,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 901,
+        "members": [
+            {
+                "handle": "BucketPotato"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1513697700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 92,
+    "timeConsumedMillis": 327,
+    "memoryConsumedBytes": 25600000,
+    "source": "#include \"bits/stdc++.h\"\n\nusing namespace std;\n\n#define ll long long\nconst int MAXN = 100100;\n\nint n, m;\nll C[MAXN], a[MAXN];\nvector<int> g[MAXN];\npair<int,int> e[MAXN];\npair<int,int> odd = {-1, -1};\nint dep[MAXN], vis[MAXN], par[MAXN];\nmap<pair<int,int>,ll> tt;\n\nvoid dfs(int c, int l, int d) {\n\n  dep[c] = d;\n  par[c] = l;\n  vis[c] = 1;\n  for (int i : g[c]) {\n    if (i == l) continue;\n    if (vis[i]) {\n      if (abs(dep[i] - dep[c]) % 2 == 0) {\n        odd = {i, c};\n      }\n    }\n    else {\n      // cout << c << \" -> \" << i << endl;\n      dfs(i, c, d + 1);\n    }\n  }\n\n}\n\nll dfs2(int c) {\n\n  vis[c] = 1;\n  for (int i : g[c]) {\n    if (vis[i]) continue;\n    // cout << c << \" -> \" << i << endl;\n    ll ov = dfs2(i);\n    // cout << c << \" -> \" << i << \": \" << ov << endl;\n    tt[{c, i}] += ov;\n    a[c] += ov;\n  }\n\n  // cout << c << \" currently have \" << a[c] << \" need to add \" << (C[c] - a[c]) << endl;\n\n  return (C[c] - a[c]);\n\n}\n\nvoid dfsfill(int c) {\n  vis[c] = 1;\n  // cout << \"fill \" << c << endl;\n  for (int i : g[c]) {\n    if (dep[i] < dep[c]) continue;\n    dfsfill(i);\n  }\n}\n\nvoid print() {\n  cout << \"YES\\n\";\n  for (int i = 0; i < m; i++) {\n    ll tot = tt[e[i]];\n    swap(e[i].first, e[i].second);\n    tot += tt[e[i]];\n    cout << tot << \"\\n\";\n  }\n}\n\nint main() {\n  ios_base::sync_with_stdio(false);\n  cin.tie(NULL);\n  \n  cin >> n >> m;\n  for (int i = 1; i <= n; i++)\n    cin >> C[i];\n\n  for (int i = 0; i < m; i++) {\n    int x, y; cin >> x >> y;\n    g[x].push_back(y);\n    g[y].push_back(x);\n    e[i] = {x, y};\n  }\n\n  dfs(1, 1, 0);\n\n  for (int i = 0; i < m; i++) {\n    tt[e[i]]++;\n  }\n  for (int i = 1; i <= n; i++) {\n    a[i] += g[i].size();\n  }\n\n  if (odd.first != -1) {\n\n    int x = odd.first;\n    int y = odd.second;\n\n    if (y == 1) swap(x, y);\n\n    memset(vis, 0, sizeof(vis));\n    if (x == 1) {\n      ll need = dfs2(x);\n\n      need /= 2;\n\n      tt[{x, y}] += need;\n\n      while (y != x) {\n        need *= -1;\n        tt[{y, par[y]}] += need;\n        y = par[y];\n      }\n    }\n    else {\n\n      ll need = dfs2(1) / 2;\n      if (dep[x] > dep[y]) swap(x, y);\n\n      if (dep[x] % 2 == 1) {\n        need *= -1;\n      }\n\n      tt[{x, y}] += need;\n      while (y != x) {\n        need *= -1;\n        tt[{y, par[y]}] += need;\n        // cout << \"at \" << y << \" \" << par[y] << \": \" << need << endl;\n        y = par[y];\n      }\n      need *= 2;\n      while (y != 1) {\n        need *= -1;\n        tt[{y, par[y]}] += need;\n        // cout << \"at \" << y << \" \" << par[y] << \": \" << need << endl;\n        y = par[y];\n      }\n\n    }\n\n    print();\n\n  }\n  else {\n    memset(vis, 0, sizeof(vis));\n    ll need = dfs2(1);\n    if (need == 0) {\n      print();\n    }\n    else {\n      cout << \"NO\\n\";\n    }\n  }\n\n\n}\n\n// ~ BucketPotato"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 226863750,
+    "contestId": 1824,
+    "creationTimeSeconds": 1696590491,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1824,
+        "index": "E",
+        "name": "LuoTianyi and Cartridge",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3500,
+        "tags": [
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1824,
+        "members": [
+            {
+                "handle": "daduoli"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1683547500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 60108800,
+    "source": "#include<bits/stdc++.h>\r\n#define pi pair<LL,LL>\r\n#define fi first\r\n#define se second\r\ntypedef long long LL;\r\n\r\nusing namespace std;\r\nconst int MAXN=2e5+10,M=2e5;\r\nLL n;\r\nLL a[MAXN];\r\nstruct daduoli {\r\n\tLL x,y,c,i;\r\n}c[MAXN];\r\nstruct ver {\r\n\tLL a,b,i;\r\n}d[MAXN];\r\nbool cmp(daduoli a,daduoli b) {\r\n\treturn a.c<b.c;\r\n}\r\nbool cmp1(ver a,ver b) {\r\n\treturn a.a<b.a;\r\n}\r\nstruct segment {\r\n\tLL c[MAXN<<2],val[MAXN<<2];\r\n\tvoid psup(int u) {\r\n\t\tval[u]=val[(u<<1)]+val[(u<<1|1)];\r\n\t\tc[u]=c[(u<<1)]+c[(u<<1|1)];\r\n\t}\r\n\tvoid update(int u,int l,int r,int x,int y) {\r\n\t\tif(l>x||r<x) return ;\r\n\t\tif(l==r) {\r\n\t\t\tc[u]+=y;\r\n\t\t\tval[u]+=y*l;\r\n\t\t\treturn ;\r\n\t\t}\r\n\t\tint mid=(l+r)/2;\r\n\t\tupdate((u<<1),l,mid,x,y);\r\n\t\tupdate((u<<1|1),mid+1,r,x,y);\r\n\t\tpsup(u);\r\n\t}\r\n\tLL query(int u,int l,int r,LL x) {\r\n\t\tif(l==r) {\r\n\t\t\treturn min(x,c[u])*l;\r\n\t\t}\r\n\t\tint mid=(l+r)/2;\r\n\t\tif(c[(u<<1|1)]>=x) return query((u<<1|1),mid+1,r,x);\r\n\t\treturn query((u<<1),l,mid,x-c[(u<<1|1)])+val[(u<<1|1)];\r\n\t}\r\n}V,E;\r\nLL ans,num,dev;\r\nint fa[MAXN],ban[MAXN];\r\nmultiset<int> s[MAXN];\r\nset<pi> g[MAXN];\r\nint find(int x) {\r\n\treturn (fa[x]==x?x:fa[x]=find(fa[x]));\r\n}\r\nvoid calc(LL x) {\r\n\tLL ls=0,cnt=n-dev-1,cc=n-dev-V.c[1];\r\n\tls=V.query(1,1,M,cnt+1-cc)+E.query(1,1,M,cnt)+num;\r\n\tans=max(ans,ls*x);\r\n}\r\nint res;\r\nvoid pro(int x,int opt) {\r\n\tif(g[x].size()!=1) return;\r\n\tauto it=s[x].end(); --it;\r\n\tnum+=(*it)*opt;\r\n\tV.update(1,1,M,*it,-1*opt);\r\n}\r\nvoid dele(int id,int u,int v) {\r\n\tg[u].erase(g[u].lower_bound({id,0}));\r\n\tg[v].erase(g[v].lower_bound({id,0}));\r\n\tban[id]=1;\r\n\tE.update(1,1,M,a[id],-1);\r\n}\r\nint z[MAXN],zz_len;\r\nvoid zx() {\r\n\tsort(c+1,c+n,cmp);\r\n\tsort(d+1,d+1+n,cmp1);\r\n\tint l=1,L=1;\r\n\tfor(int i=1;i<=M;++i) {\r\n\t\tfor(;l<n;++l) {\r\n\t\t\tif(c[l].c>=i) break;\r\n\t\t\tint x=find(fa[c[l].x]),y=find(fa[c[l].y]);\r\n\t\t\tif(ban[c[l].i]) continue;\r\n\t\t\tpro(x,-1); pro(y,-1);\r\n\t\t\tdele(c[l].i,x,y);\r\n\t\t\tif(s[x].size()<s[y].size()) swap(s[x],s[y]);\r\n\t\t\tif(g[x].size()<g[y].size()) swap(g[x],g[y]);\r\n\t\t\tfor(auto it:s[y]) s[x].insert(it);\r\n\t\t\tfor(auto it:g[y]) g[x].insert(it);\r\n\t\t\tpro(x,1); fa[y]=x;\r\n\t\t}\r\n\t\tfor(;L<=n;++L) {\r\n\t\t\tif(d[L].a>=i) break;\r\n\t\t\tint x=find(fa[d[L].i]);\r\n\t\t\tpro(x,-1); ++dev;\r\n\t\t\ts[x].erase(s[x].find(d[L].b));\r\n\t\t\tV.update(1,1,M,d[L].b,-1);\r\n\t\t\tif(s[x].empty()&&g[x].size()==1) {\r\n\t\t\t\tqueue<int> q;\r\n\t\t\t\tq.push(x);\r\n\t\t\t\twhile(!q.empty()) {\r\n\t\t\t\t\tint u=q.front();\r\n\t\t\t\t\tq.pop();\r\n\t\t\t\t\tzz_len=0;\r\n\t\t\t\t\tfor(auto it:g[u]) {\r\n\t\t\t\t\t\tres=1;\r\n\t\t\t\t\t\tint id=it.fi,t=find(it.se);\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\tg[t].erase(g[t].lower_bound({id,0}));\r\n\t\t\t\t\t\tban[id]=1; \r\n\t\t\t\t\t\tE.update(1,1,M,a[id],-1);\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\tz[++zz_len]=id;\r\n\t\t\t\t\t\tif(g[t].size()==1) {\r\n\t\t\t\t\t\t\tif(s[t].empty()) q.push(t);\r\n\t\t\t\t\t\t\telse pro(t,1);\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t\tfor(int j=1;j<=zz_len;++j) {\r\n\t\t\t\t\t\tg[u].erase(g[u].lower_bound({z[j],0}));\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\telse pro(x,1);\r\n\t\t}\r\n\t\tif(!E.c[1]) break;\r\n\t\tcalc(i);\r\n\t}\r\n}\r\nint main () {\r\n\tscanf(\"%lld\",&n);\r\n\tfor(int i=1;i<=n;++i) {\r\n\t\tint a;\r\n\t\tscanf(\"%d\",&a);\r\n\t\td[i].a=a,d[i].i=i;\r\n\t}\r\n\tfor(int i=1;i<=n;++i) {\r\n\t\tint b;\r\n\t\tscanf(\"%d\",&b);\r\n\t\td[i].b=b;\r\n\t\tans=max(ans,d[i].a*d[i].b);\r\n\t}\r\n\tfor(int i=1;i<n;++i) {\r\n\t\tscanf(\"%lld%lld%lld%lld\",&c[i].x,&c[i].y,&c[i].c,&a[i]);\r\n\t\tc[i].i=i;\r\n\t\tg[c[i].x].insert({i,c[i].y});\r\n\t\tg[c[i].y].insert({i,c[i].x});\r\n\t\tE.update(1,1,M,a[i],1);\r\n\t}\r\n\tfor(int i=1;i<=n;++i) {\r\n\t\tfa[i]=i;\r\n\t\ts[i].insert(d[i].b);\r\n\t\tV.update(1,1,M,d[i].b,1);\r\n\t}//\u5904\u7406\u6240\u6709\u70b9 \r\n\tfor(int i=1;i<=n;++i) {\r\n\t\tif(g[i].size()>1) continue;\r\n\t\tV.update(1,1,M,d[i].b,-1);\r\n\t\tnum+=d[i].b;\r\n\t}//\u5904\u7406\u53f6\u5b50 \r\n\tzx();\r\n\tprintf(\"%lld\\n\",ans);\r\n\treturn 0;\r\n}"
+}

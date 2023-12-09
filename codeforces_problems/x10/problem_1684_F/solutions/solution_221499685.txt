@@ -1,0 +1,36 @@
+{
+    "id": 221499685,
+    "contestId": 1684,
+    "creationTimeSeconds": 1693603124,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1684,
+        "index": "F",
+        "name": "Diverse Segments",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1684,
+        "members": [
+            {
+                "handle": "satyam343"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1652970900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 134,
+    "timeConsumedMillis": 514,
+    "memoryConsumedBytes": 43520000,
+    "source": "#pragma GCC optimize(\"O3,unroll-loops\")\r\n#include <bits/stdc++.h>   \r\n#include <ext/pb_ds/tree_policy.hpp>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\nusing namespace __gnu_pbds;   \r\nusing namespace std;  \r\n#define ll int\r\nconst ll INF_ADD=1e9;\r\n#define pb push_back                   \r\n#define mp make_pair          \r\n#define nline \"\\n\"                             \r\n#define f first                                            \r\n#define s second                                             \r\n#define pll pair<ll,ll>   \r\n#define all(x) x.begin(),x.end()       \r\n#define vl vector<ll>             \r\n#define vvl vector<vector<ll>>          \r\n#define vvvl vector<vector<vector<ll>>>          \r\n#ifndef ONLINE_JUDGE    \r\n#define debug(x) cerr<<#x<<\" \"; _print(x); cerr<<nline;  \r\n#else\r\n#define debug(x);      \r\n#endif  \r\nvoid _print(char x){cerr<<x;}     \r\nvoid _print(string x){cerr<<x;}    \r\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());   \r\ntemplate<class T,class V> void _print(pair<T,V> p) {cerr<<\"{\"; _print(p.first);cerr<<\",\"; _print(p.second);cerr<<\"}\";}\r\ntemplate<class T>void _print(vector<T> v) {cerr<<\" [ \"; for (T i:v){_print(i);cerr<<\" \";}cerr<<\"]\";}\r\ntemplate<class T>void _print(set<T> v) {cerr<<\" [ \"; for (T i:v){_print(i); cerr<<\" \";}cerr<<\"]\";}\r\ntemplate<class T>void _print(multiset<T> v) {cerr<< \" [ \"; for (T i:v){_print(i);cerr<<\" \";}cerr<<\"]\";}\r\ntemplate<class T,class V>void _print(map<T, V> v) {cerr<<\" [ \"; for(auto i:v) {_print(i);cerr<<\" \";} cerr<<\"]\";} \r\ntypedef tree<ll, null_type, less<ll>, rb_tree_tag, tree_order_statistics_node_update> ordered_set;\r\ntypedef tree<ll, null_type, less_equal<ll>, rb_tree_tag, tree_order_statistics_node_update> ordered_multiset;\r\ntypedef tree<pair<ll,ll>, null_type, less<pair<ll,ll>>, rb_tree_tag, tree_order_statistics_node_update> ordered_pset;\r\n//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\r\nconst ll MOD=998244353;\r\nconst ll MAX=500500;\r\nvoid solve(){         \r\n    ll n,m; cin>>n>>m;\r\n    map<ll,ll> pos;\r\n    ll now=1;\r\n    vector<ll> a(n+5);\r\n    for(ll i=1;i<=n;i++){\r\n        cin>>a[i];\r\n        if(pos[a[i]]==0){\r\n            pos[a[i]]=now++;\r\n        }\r\n        a[i]=pos[a[i]];\r\n    }\r\n    vector<ll> track[n+5];\r\n    for(ll i=1;i<=n;i++){\r\n        track[i].push_back(0);\r\n    }\r\n    for(ll i=1;i<=n;i++){\r\n        track[a[i]].push_back(i);\r\n    }\r\n    for(ll i=1;i<=n;i++){  \r\n        track[a[i]].push_back(INF_ADD);\r\n    }\r\n    vector<ll> lft[n+5],rght[n+5];  \r\n    for(ll i=1;i<=m;i++){\r\n        ll l,r; cin>>l>>r;\r\n        lft[l].push_back(r);\r\n        rght[r].push_back(l);\r\n    }\r\n    ll l=0,r=n,ans=n;\r\n    vector<ll> max_right(n+5,0),max_left(n+5,n+5);\r\n    multiset<ll> right_end;\r\n    right_end.insert(0);\r\n    for(ll i=n;i>=1;i--){\r\n        ll consider_right=*right_end.rbegin();\r\n        max_right[i]=consider_right;\r\n        for(auto it:rght[i]){\r\n            right_end.insert(i);\r\n        }\r\n        for(auto it:lft[i]){\r\n            right_end.erase(right_end.find(it));  \r\n        }\r\n    }\r\n    multiset<ll> left_end;  \r\n    left_end.insert(n+5);\r\n    right_end.clear();\r\n    right_end.insert(0);\r\n    for(ll i=1;i<=n;i++){\r\n        max_left[i]=*left_end.begin();\r\n        for(auto it:lft[i]){\r\n            left_end.insert(i);\r\n        }\r\n        for(auto it:rght[i]){\r\n            left_end.erase(left_end.find(it));  \r\n        }\r\n    }\r\n    while(l<=r){\r\n        ll mid=(l+r)/2;\r\n        ll till=n;\r\n        vector<ll> next_occ(n+5,INF_ADD);\r\n        for(ll i=n;i>=1;i--){\r\n            ll consider_right=max_right[i];\r\n            ll compare_to=next_occ[a[i]];\r\n            if(compare_to<=consider_right){\r\n                break;\r\n            }\r\n            till=i;\r\n            next_occ[a[i]]=i;\r\n        }\r\n        ll found=(till==1);\r\n        vector<ll> last(n+5,-INF_ADD);  \r\n        for(ll i=1;i<=n;i++){\r\n            if(i+mid>=till){    \r\n                found=1;\r\n            }\r\n            if(last[a[i]]>=max_left[i]){\r\n                break;\r\n            }\r\n            ll need=0;\r\n            ll consider_right=max_right[i];\r\n            if(consider_right){\r\n                need=*(--upper_bound(all(track[a[i]]),consider_right)); \r\n            }\r\n            if(need<=consider_right){\r\n                till=max(till,need+1); \r\n            }\r\n            last[a[i]]=i;\r\n        }\r\n        if(found){\r\n            ans=mid;\r\n            r=mid-1;\r\n        }\r\n        else{\r\n            l=mid+1;\r\n        }\r\n    }\r\n    cout<<ans<<nline;\r\n    return;        \r\n}                                                                   \r\nint main()                                                                                                             \r\n{              \r\n    ios_base::sync_with_stdio(false);                               \r\n    cin.tie(NULL);    \r\n    #ifndef ONLINE_JUDGE                        \r\n    freopen(\"input.txt\", \"r\", stdin);                                                        \r\n    freopen(\"output.txt\", \"w\", stdout);  \r\n    freopen(\"error.txt\", \"w\", stderr);                          \r\n    #endif                                           \r\n    ll test_cases=1;               \r\n    cin>>test_cases;\r\n    while(test_cases--){\r\n        solve();\r\n    } \r\n    cout<<fixed<<setprecision(10);\r\n    cerr<<\"Time:\"<<1000*((double long)clock())/(double long)CLOCKS_PER_SEC<<\"ms\\n\"; \r\n} "
+}

@@ -1,0 +1,37 @@
+{
+    "id": 89786869,
+    "contestId": 105,
+    "creationTimeSeconds": 1597316720,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 105,
+        "index": "D",
+        "name": "Entertaining Geodetics",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2700,
+        "tags": [
+            "brute force",
+            "dsu",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 105,
+        "members": [
+            {
+                "handle": "xbb0720"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1313247600
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 27,
+    "timeConsumedMillis": 78,
+    "memoryConsumedBytes": 23552000,
+    "source": "#include<algorithm>\r\n#include <iostream>\r\n#include  <cstdlib>\r\n#include  <cstring>\r\n#include   <string>\r\n#include   <vector>\r\n#include   <cstdio>\r\n#include    <queue>\r\n#include    <stack>\r\n#include    <ctime>\r\n#include    <cmath>\r\n#include      <map>\r\n#include      <set>\r\n#define ll long long\r\n#define inf 0x3f3f3f3f\r\n#define pii pair<int,int>\r\n#define INF 0x3f3f3f3f3f3f3f3f\r\n#define mkp(a,b) make_pair(a,b)\r\n#define FOR(i,a,b) for(int i=a;i<b;i++)\r\n#define db1(x) cout<<#x<<\"=\"<<(x)<<endl\r\n#define db2(x,y) cout<<#x<<\"=\"<<(x)<<\", \"<<#y<<\"=\"<<(y)<<endl\r\n#define db3(x,y,z) cout<<#x<<\"=\"<<(x)<<\", \"<<#y<<\"=\"<<(y)<<\", \"<<#z<<\"=\"<<(z)<<endl\r\n#define getchar()(p1==p2&&(p2=(p1=buf)+fread(buf,1,1<<22,stdin),p1==p2)?EOF:*p1++)\r\nusing namespace std;\r\nchar buf[(1<<24)],*p1=buf,*p2=buf;\r\ninline ll read(){\r\n    char c=getchar();ll x=0,f=1;\r\n    while(c<'0'|c>'9'){if(c=='-')f=-1;c=getchar();}\r\n    while(c>='0'&&c<='9')x=x*10+c-'0',c=getchar();\r\n    return x*f;\r\n}\r\nconst int maxn=305;\r\nint n,m,mp[maxn][maxn],color[maxn][maxn];\r\nint cnt[maxn],grads[maxn*maxn];\r\nstruct Symbol{\r\n    int x,y,v,s;\r\n    bool operator < (const Symbol& S)const{\r\n        return s>S.s;\r\n    }\r\n};\r\nvector<int>allc;\r\nint getidx(int x){\r\n    return lower_bound(allc.begin(),allc.end(),x)-allc.begin();\r\n}\r\n//queue<pii>grads[maxn*maxn];\r\nqueue<Symbol>Q;\r\npriority_queue<Symbol>PQ;\r\nvector<Symbol>symbols[maxn*maxn];\r\n\r\nint getstep(int x,int y,int a,int b){\r\n    if(x==a&&y==b)return 1;\r\n\r\n    int layer=max(abs(a-x),abs(b-y))+1;\r\n    int pre_cnt=(2*layer-3)*(2*layer-3);\r\n\r\n    int pre_width=2*layer-3;\r\n    int now_x=x-pre_width/2-1;\r\n    int now_y=y-pre_width/2-1;\r\n    int each_cnt=2*layer-2;\r\n\r\n    if(a==now_x&&b>now_y&&b<=now_y+each_cnt){\r\n        return pre_cnt+b-now_y;\r\n    }else{now_y+=each_cnt;pre_cnt+=each_cnt;}\r\n    if(b==now_y&&a>now_x&&a<=now_x+each_cnt){\r\n        return pre_cnt+a-now_x;\r\n    }else{now_x+=each_cnt;pre_cnt+=each_cnt;}\r\n    if(a==now_x&&b<now_y&&b>=now_y-each_cnt){\r\n        return pre_cnt+now_y-b;\r\n    }else{now_y-=each_cnt;pre_cnt+=each_cnt;}\r\n    if(b==now_y&&a<now_x&&a>=now_x-each_cnt){\r\n        return pre_cnt+now_x-a;\r\n    }else{now_x-=each_cnt;pre_cnt+=each_cnt;}\r\n    return pre_cnt;\r\n\r\n}\r\n\r\nvoid init(){\r\n    allc.push_back(0);\r\n    for(int i=1;i<maxn;i+=2){\r\n        cnt[(i+1)/2]=i*i;\r\n    }\r\n}\r\n\r\nint main(){\r\n    #ifdef LOCAL\r\n    freopen(\"in.txt\",\"r\",stdin);\r\n    //freopen(\"in.txt\",\"w\",stdout);\r\n    clock_t start=clock();\r\n    #endif //LOCAL\r\n\r\n    init();\r\n    scanf(\"%d%d\",&n,&m);\r\n    for(int i=1;i<=n;i++){\r\n        for(int j=1;j<=m;j++){\r\n            scanf(\"%d\",&color[i][j]);\r\n            allc.push_back(color[i][j]);\r\n        }\r\n    }\r\n    for(int i=1;i<=n;i++){\r\n        for(int j=1;j<=m;j++){\r\n            scanf(\"%d\",&mp[i][j]);\r\n            if(mp[i][j]!=-1)\r\n                allc.push_back(mp[i][j]);\r\n        }\r\n    }\r\n\r\n    sort(allc.begin(),allc.end());\r\n    allc.erase(unique(allc.begin(),allc.end()),allc.end());\r\n\r\n    for(int i=1;i<=n;i++){\r\n        for(int j=1;j<=m;j++){\r\n            color[i][j]=getidx(color[i][j]);\r\n            grads[color[i][j]]++;\r\n            if(mp[i][j]!=-1){\r\n                mp[i][j]=getidx(mp[i][j]);\r\n                symbols[color[i][j]].push_back({i,j,mp[i][j],-1});\r\n            }\r\n        }\r\n    }\r\n\r\n    int start_x,start_y;\r\n    scanf(\"%d%d\",&start_x,&start_y);\r\n\r\n    int ans=0,print=color[start_x][start_y];\r\n    Q.push({start_x,start_y,mp[start_x][start_y],-1});\r\n\r\n    while(!Q.empty()){\r\n        int x=Q.front().x;\r\n        int y=Q.front().y;\r\n        int v=Q.front().v;\r\n        Q.pop();\r\n        if(!print||print==v)continue;\r\n\r\n        grads[v]+=grads[print];\r\n        ans+=grads[print];\r\n        grads[print]=0;\r\n\r\n        for(int i=0;i<symbols[print].size();i++){\r\n            Symbol &S=symbols[print][i];\r\n            PQ.push({S.x,S.y,S.v,getstep(x,y,S.x,S.y)});\r\n        }symbols[print].clear();\r\n\r\n        while(!PQ.empty()){\r\n            int nx=PQ.top().x;\r\n            int ny=PQ.top().y;\r\n            int nv=PQ.top().v;\r\n            PQ.pop();\r\n            Q.push({nx,ny,nv,-1});\r\n        }\r\n\r\n        print=v;\r\n    }\r\n\r\n    printf(\"%d\\n\",ans);\r\n\r\n    #ifdef LOCAL\r\n    clockid_t end=clock();\r\n    double endtime=(double)(end-start)/CLOCKS_PER_SEC;\r\n    printf(\"\\n\\n\\n\\n\\n\");\r\n    cout<<\"Total time:\"<<endtime<<\"s\"<<endl;        //s\u03aa\ufffd\ufffd\u03bb\r\n    cout<<\"Total time:\"<<endtime*1000<<\"ms\"<<endl;    //ms\u03aa\ufffd\ufffd\u03bb\r\n    #endif //LOCAL\r\n    return 0;\r\n}\r\n\r\n"
+}

@@ -1,0 +1,40 @@
+{
+    "id": 229940265,
+    "contestId": 1859,
+    "creationTimeSeconds": 1698363207,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1859,
+        "index": "F",
+        "name": "Teleportation in Byteland",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "graphs",
+            "shortest paths",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1859,
+        "members": [
+            {
+                "handle": "Zimo_666"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1691850900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 106188800,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define int long long\r\n\r\nconst int N=2e5+7;\r\n\r\nvector<pair<int,int> > G[N];\r\n\r\nint n,m;\r\n\r\nint fa[N],dep[N],sz[N],dfn[N],dfn_clock;\r\nint top[N],bgs[N];\r\n\r\nchar s[N];\r\nint q;\r\nint ans[N];\r\nint f[N],g[N];\r\nint st[N];\r\n\r\nint dis[N];\r\nbool vis[N];\r\n\r\nstruct node{int x,y;}Q[N];\r\n\r\nstruct node2{\r\n\tint dis,id;\r\n\tnode2(int a = 0, int b = 0) : dis(a), id(b) {}\r\n\tfriend bool operator < (node2 a,node2 b){\r\n\t\treturn a.dis>b.dis;\r\n\t}\r\n};\r\n\r\nnamespace Road{\r\n\r\n\tvoid DJ(int K){\r\n\t\tpriority_queue<node2> pq;\r\n\t\tfor(int i=1;i<=n;i++){\r\n\t\t\tvis[i]=0;s[i]=='1'?f[i]=0:f[i]=0x3f3f3f3f;\r\n\t\t\tif(!f[i]) pq.emplace(0,i);\r\n\t\t}\r\n\t\twhile(!pq.empty()){\r\n\t\t\tint u=pq.top().id;pq.pop();\r\n\t\t\tif(vis[u]) continue;\r\n\t\t\tvis[u]=1;\r\n\t\t\tfor(auto [k,w]:G[u]){\r\n\t\t\t\tw+=(w+K-1)/K;\r\n\t\t\t\tif(f[k]>f[u]+w){\r\n\t\t\t\t\tf[k]=f[u]+w;pq.emplace(f[k],k);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\r\n\tvoid DFS(int u,int father,int K){\r\n\t\tfor(auto [k,w]:G[u]) if(k!=father){\r\n\t\t\tg[k]=g[u]+(w+K-1)/K;\r\n\t\t\tDFS(k,u,K);\r\n\t\t}\r\n\t}\r\n\r\n};\r\n\r\n\r\n\r\nstruct ST{\r\n\r\n\tint f[N][25];\r\n\r\n\tvoid init(){\r\n\t\tfor(int i=1;i<=n;i++)\r\n\t\t\tf[dfn[i]][0]=st[i];\r\n\t\tfor(int j=1;(1<<j)<=n;j++){\r\n\t\t\tfor(int i=1;i+(1<<j)-1<=n;i++){\r\n\t\t\t\tf[i][j]=min(f[i][j-1],f[i+(1<<(j-1))][j-1]);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\r\n\tint Min(int l,int r){\r\n\t\tint _=__lg(r-l+1);\r\n\t\treturn min(f[l][_],f[r-(1<<_)+1][_]);\r\n\t}\r\n\r\n}st1,st2;\r\n\r\nnamespace Tree{\r\n\r\n\tvoid dfs(int u,int father){\r\n\t\tfa[u]=father,dep[u]=dep[father]+1;sz[u]=1;\r\n\t\tfor(auto [k,w]:G[u]) if(k!=father){\r\n\t\t\tdis[k]=dis[u]+w;dfs(k,u);sz[u]+=sz[k];\r\n\t\t\tif(sz[bgs[u]]<sz[k]) bgs[u]=k;\r\n\t\t}\r\n\t}\r\n\r\n\tvoid DFS(int u,int father,int tp){\r\n\t\ttop[u]=tp,dfn[u]=++dfn_clock;\r\n\t\tif(bgs[u]) DFS(bgs[u],u,tp);\r\n\t\tfor(auto [k,w]:G[u]) if(k!=father&&k!=bgs[u]) DFS(k,u,k);\r\n\t}\r\n\r\n\tint LCA(int x,int y){\r\n\t\twhile(top[x]^top[y]) dep[top[x]]<dep[top[y]]?y=fa[top[y]]:x=fa[top[x]];\r\n\t\treturn dep[x]>dep[y]?y:x;\r\n\t}\r\n\r\n\tint PMin(ST &st,int x,int y){\r\n\t\tint res=__LONG_LONG_MAX__;\r\n\t\twhile(top[x]^top[y]){\r\n\t\t\tif(dep[top[x]]<dep[top[y]]) swap(x,y);\r\n\t\t\tres=min(res,st.Min(dfn[top[x]],dfn[x]));\r\n\t\t\tx=fa[top[x]];\r\n\t\t}\r\n\t\tif(dep[x]>dep[y]) swap(x,y);\r\n\t\tres=min(res,st.Min(dfn[x],dfn[y]));\r\n\t\treturn res;\r\n\t}\r\n\r\n};\r\n\r\nvoid solve(){\r\n\tscanf(\"%lld%lld\",&n,&m);\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tfa[i]=dep[i]=sz[i]=dfn[i]=top[i]=bgs[i]=f[i]=g[i]=st[i]=dis[i]=0;\r\n\t}\r\n\tdfn_clock=0;\r\n\tfor(int i=1;i<n;i++){\r\n\t\tint u,v,w;scanf(\"%lld%lld%lld\",&u,&v,&w);\r\n\t\tG[u].emplace_back(v,w),G[v].emplace_back(u,w);\r\n\t}\r\n\tTree::dfs(1,0),Tree::DFS(1,0,1);\r\n\tscanf(\"%s%lld\",s+1,&q);\r\n\tfor(int i=1;i<=q;i++){\r\n\t\tscanf(\"%lld%lld\",&Q[i].x,&Q[i].y);\r\n\t\tint lca=Tree::LCA(Q[i].x,Q[i].y);\r\n\t\t// printf(\"%lld\\n\",lca);\r\n\t\tans[i]=dis[Q[i].x]+dis[Q[i].y]-2*dis[lca];\r\n\t}\r\n\tfor(int k=0;k<=__lg(m)+1;k++){\r\n\t\tRoad::DJ(1<<k);\r\n\t\tRoad::DFS(1,0,1<<k);\r\n\t\tfor(int i=1;i<=n;i++){\r\n\t\t\tst[i]=f[i]-dis[i]+g[i];\r\n\t\t}\r\n\t\tst1.init();\r\n\t\tfor(int i=1;i<=n;i++){\r\n\t\t\tst[i]=f[i]+dis[i]-g[i];\r\n\t\t}\r\n\t\tst2.init();\r\n\t\tfor(int i=1;i<=q;i++){\r\n\t\t\t// printf(\"%lld\\n\",ans[i]);\r\n\t\t\tint x=Q[i].x,y=Q[i].y;\r\n\t\t\tint lca=Tree::LCA(x,y);\r\n\t\t\tint tmp1=dis[x]+g[y]-g[lca]*2+Tree::PMin(st1,x,lca)+m*k;\r\n\t\t\tint tmp2=dis[x]+g[y]-dis[lca]*2+Tree::PMin(st2,y,lca)+m*k;\r\n\t\t\tans[i]=min({ans[i],tmp1,tmp2});\r\n\t\t\t\r\n\t\t}\r\n\t}\r\n\tfor(int i=1;i<=q;i++) printf(\"%lld\\n\",ans[i]);\r\n\tfor(int i=1;i<=n;i++) G[i].clear();\r\n\tfor(int i=1;i<=q;i++) ans[i]=0;\r\n}\r\n\r\nsigned main(){\r\n\tint T;cin>>T;\r\n\twhile(T--) solve();\r\n\treturn 0;\r\n}"
+}

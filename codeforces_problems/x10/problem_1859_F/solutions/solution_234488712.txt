@@ -1,0 +1,40 @@
+{
+    "id": 234488712,
+    "contestId": 1859,
+    "creationTimeSeconds": 1701020754,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1859,
+        "index": "F",
+        "name": "Teleportation in Byteland",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3200,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "graphs",
+            "shortest paths",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1859,
+        "members": [
+            {
+                "handle": "AKG_"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1691850900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 3852,
+    "memoryConsumedBytes": 22835200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n//#define int long long\r\n#define endl '\\n'\r\nvoid solve();\r\nsigned main()\r\n{\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(NULL);\r\n\tcout.tie(NULL);\r\n\tint tt = 1;\r\n\tcin >> tt;\r\n\twhile (tt--)solve();\r\n\treturn 0;\r\n}\r\n\r\nusing ll = long long;\r\n\r\nconst int N = 1e5 + 100;\r\nconst ll inf = 1e18;\r\n\r\n#define pii pair<int, int>\r\n#define ft first\r\n#define sd second\r\n\r\nvector< vector<pii> > v(N, vector<pii>());\r\nvector< vector< array<int, 3> > > qry(N, vector< array<int, 3> >());\r\nvector<ll> ans(N), vis(N), dep1(N), dep2(N), dp1(N), dp2(N), sz(N), bel(N);\r\n\r\nint n, t, q;\r\nstring s;\r\n\r\nvoid init()\r\n{\r\n\tfor (int i = 0; i <= n; i++)\r\n\t{\r\n\t\tvis[i] = 0;\r\n\t\tdep1[i] = dep2[i] = 0;\r\n\t\tdp1[i] = dp2[i] = 0;\r\n\t\tsz[i] = bel[i] = 0;\r\n\t\tv[i].clear();\r\n\t\tqry[i].clear();\r\n\t}\r\n}\r\n\r\nll find(int x, int p, ll s)\r\n{\r\n\tfor (const pii& k : v[x])\r\n\t{\r\n\t\tint y = k.ft;\r\n\t\tint z = k.sd;\r\n\r\n\t\tif (y == p || vis[y] || 2 * sz[y] <= s)\r\n\t\t{\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\treturn find(y, x, s);\r\n\t\t}\r\n\t}\r\n\treturn x;\r\n}\r\n\r\nvoid DFS(int r)\r\n{\r\n\tconst vector< array<int, 3> > Q = move(qry[r]);\r\n\r\n\tr = find(r, -1, sz[r]);\r\n\tvis[r] = true;\r\n\r\n\tfor (int k = 1; k <= 20; k++)\r\n\t{\r\n\t\tauto dfs = [&](auto self, int x, int p, int t) -> void\r\n\t\t{\r\n\t\t\tsz[x] = 1;\r\n\t\t\tfor (const pii& kk : v[x])\r\n\t\t\t{\r\n\t\t\t\tint y = kk.ft;\r\n\t\t\t\tint w = kk.sd;\r\n\t\t\t\tif (y == p || vis[y])\r\n\t\t\t\t{\r\n\t\t\t\t\tcontinue;\r\n\t\t\t\t}\r\n\r\n\t\t\t\tint wk = ((w - 1) >> k) + 1;\r\n\t\t\t\tif (t == 0)\r\n\t\t\t\t{\r\n\t\t\t\t\tbel[y] = x == r ? y : bel[x];\r\n\t\t\t\t\tdep1[y] = dep1[x] + w;\r\n\t\t\t\t\tdep2[y] = dep2[x] + wk;\r\n\t\t\t\t\tdp1[y] = dp1[x] + wk;\r\n\t\t\t\t\tdp2[y] = dp2[x] + w;\r\n\t\t\t\t}\r\n\t\t\t\telse\r\n\t\t\t\t{\r\n\t\t\t\t\tdp1[y] = min(dp1[y], dp1[x] + w);\r\n\t\t\t\t\tdp2[y] = min(dp2[y], dp2[x] + wk);\r\n\t\t\t\t}\r\n\r\n\t\t\t\tself(self, y, x, t);\r\n\t\t\t\tsz[x] += sz[y];\r\n\t\t\t}\r\n\r\n\t\t\tif (t == 0)\r\n\t\t\t{\r\n\t\t\t\tdp1[x] = (s[x] == '1' ? dp1[x] : inf);\r\n\t\t\t\tdp2[x] = (s[x] == '1' ? dp2[x] : inf);\r\n\r\n\t\t\t\tfor (const pii& kk : v[x])\r\n\t\t\t\t{\r\n\t\t\t\t\tint y = kk.ft;\r\n\t\t\t\t\tint w = kk.sd;\r\n\t\t\t\t\tif (y == p || vis[y])\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tcontinue;\r\n\t\t\t\t\t}\r\n\t\t\t\t\tint wk = ((w - 1) >> k) + 1;\r\n\t\t\t\t\tdp1[x] = min(dp1[x], dp1[y] + w);\r\n\t\t\t\t\tdp2[x] = min(dp2[x], dp2[y] + wk);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t};\r\n\r\n\t\tdep1[r] = dep2[r] = 0;\r\n\t\tbel[r] = r;\r\n\t\tdp1[r] = dp2[r] = 0;\r\n\r\n\t\tdfs(dfs, r, -1, 0);\r\n\t\tdfs(dfs, r, -1, 1);\r\n\r\n\t\tfor (auto& kk : Q)\r\n\t\t{\r\n\t\t\tint a = kk[0];\r\n\t\t\tint b = kk[1];\r\n\t\t\tint i = kk[2];\r\n\r\n\t\t\tans[i] = min(ans[i], min(dep1[a] + dp2[b], dp1[a] + dep2[b]) + (ll)t * k);\r\n\t\t}\r\n\r\n\t}\r\n\tfor (auto& kk : Q)\r\n\t{\r\n\t\tint a = kk[0];\r\n\t\tint b = kk[1];\r\n\t\tint i = kk[2];\r\n\r\n\t\tans[i] = min(ans[i], dep1[a] + dep1[b]);\r\n\t\tif (bel[a] == bel[b])\r\n\t\t{\r\n\t\t\tqry[bel[a]].push_back({ a, b, i });\r\n\t\t}\r\n\t}\r\n\r\n\tfor (const pii& kk : v[r])\r\n\t{\r\n\t\tint y = kk.ft;\r\n\t\tint z = kk.sd;\r\n\r\n\t\tif (!vis[y])\r\n\t\t{\r\n\t\t\tDFS(y);\r\n\t\t}\r\n\t}\r\n\r\n}\r\n\r\nvoid solve()\r\n{\r\n\tcin >> n >> t;\r\n\r\n\tinit();\r\n\r\n\tfor (int i = 1; i < n; i++)\r\n\t{\r\n\t\tint a, b, c;\r\n\t\tcin >> a >> b >> c;\r\n\t\ta--, b--;\r\n\t\tv[a].push_back({ b, c });\r\n\t\tv[b].push_back({ a, c });\r\n\t}\r\n\r\n\tcin >> s >> q;\r\n\tfor (int i = 0; i <= q; i++)ans[i] = inf;\r\n\r\n\tfor (int i = 0; i < q; i++)\r\n\t{\r\n\t\tint a, b;\r\n\t\tcin >> a >> b;\r\n\t\ta--, b--;\r\n\t\tqry[0].push_back({ a, b, i });\r\n\t}\r\n\r\n\tDFS(0);\r\n\r\n\tfor (int i = 0; i < q; i++)\r\n\t\tcout << ans[i] << '\\n';\r\n\r\n}\r\n"
+}

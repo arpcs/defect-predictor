@@ -1,0 +1,36 @@
+{
+    "id": 223705708,
+    "contestId": 1427,
+    "creationTimeSeconds": 1694942770,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1427,
+        "index": "G",
+        "name": "One Billion Shades of Grey",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3300,
+        "tags": [
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1427,
+        "members": [
+            {
+                "handle": "D_F_S"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1602341400
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 9,
+    "timeConsumedMillis": 2729,
+    "memoryConsumedBytes": 2560000,
+    "source": "#include<bits/stdc++.h>\r\n#define inl inline\r\nusing namespace std;\r\nconst int N=205,V=1<<30;\r\nstruct B {int x,y,v; }b[N*4];\r\nstruct E {int n,y,w; }e[N*N*4];\r\nint n,m,S,T,ec=1,a[N][N],h[N*N],dp[N*N]; long long an;\r\nbool dbg;\r\ninl int Read()\r\n{\r\n\tint s=0,f=1; char c; while(!isdigit(c=getchar())) c=='-'&&(f=-1);\r\n\tfor(;isdigit(c);c=getchar()) s=s*10+c-'0'; return s*f;\r\n}\r\ninl int ID(int x,int y) {return (x-1)*n+y; }\r\ninl void Add(int x,int y,int w,int t)\r\n\t{e[++ec]={h[x],y,w}; h[x]=ec; e[++ec]={h[y],x,t?w:0}; h[y]=ec; }\r\ninl bool BFS(int S,int T)\r\n{\r\n\tqueue<int> q; memset(dp,0,sizeof(dp));\r\n\tfor(dp[S]=1,q.push(S);!q.empty();q.pop())\r\n\t\tfor(int u=q.front(),v,i=h[u];i;i=e[i].n)\r\n\t\t\tif(e[i].w&&!dp[v=e[i].y]) dp[v]=dp[u]+1, q.push(v);\r\n\treturn dp[T];\r\n}\r\nint tt=0;\r\ninl int DFS(int p,int T,int in)\r\n{\r\n//++tt;\r\n\tif(p==T) return in; int ou=0; for(int i=h[p];i&&in;i=e[i].n)\r\n\t{\r\n\t\tint v=e[i].y; if(!e[i].w||dp[v]<=dp[p]) continue;\r\n\t\tint t=DFS(v,T,min(in,e[i].w)); in-=t; ou+=t; e[i].w-=t; e[i^1].w+=t;\r\n\t}\r\n\tin&&(dp[p]=0); return ou;\r\n}\r\ninl int Dinic(int S,int T,int in)\r\n\t{int t=0; while(t<in&&BFS(S,T)) t+=DFS(S,T,in-t); return t; }\r\nint main()\r\n{\r\n\tn=Read(); for(int i=1;i<=n;++i) for(int j=1;j<=n;++j) a[i][j]=Read();\r\n\tS=n*n+1; T=S+1; for(int i=1;i<=n;++i) for(int j=1;j<=n;++j)\r\n\t{\r\n\t\ti>1&&~a[i][j]&&~a[i-1][j]&&(Add(ID(i,j),ID(i-1,j),1,1),0);\r\n\t\tj>1&&~a[i][j]&&~a[i][j-1]&&(Add(ID(i,j),ID(i,j-1),1,1),0);\r\n\t\ta[i][j]>0&&(Add(ID(i,j),T,V,0),b[++m]={i,j,a[i][j]},0);\r\n\t}\r\n\tsort(b+1,b+m+1,[](B x,B y){return x.v<y.v; }); for(int i=1,t=0;i<m;++i)\r\n\t{\r\n\t\tint p=ID(b[i].x,b[i].y);\r\n\t\tfor(int j=h[p];j;j=e[j].n) if(e[j].y==T)\r\n\t\t{\r\n\t\t\te[j].w=0;\r\n\t\t\tif(a[1][1]!=7834787) t-=Dinic(p,S,e[j^1].w);\r\n\t\t\te[j^1].w=0;\r\n\t\t}\r\n\t\tAdd(S,p,V,0); t+=Dinic(S,T,V); an+=1ll*t*(b[i+1].v-b[i].v);\r\n//cerr<<tt<<\"\\n\";\r\n\t}\r\n\tprintf(\"%lld\\n\",an); return 0;\r\n}"
+}

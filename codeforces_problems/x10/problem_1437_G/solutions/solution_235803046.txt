@@ -1,0 +1,37 @@
+{
+    "id": 235803046,
+    "contestId": 1437,
+    "creationTimeSeconds": 1701758885,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1437,
+        "index": "G",
+        "name": "Death DBMS",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "string suffix structures",
+            "strings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1437,
+        "members": [
+            {
+                "handle": "lizhiqing"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1603809300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 91,
+    "timeConsumedMillis": 1185,
+    "memoryConsumedBytes": 174694400,
+    "source": "// LUOGU_RID: 138283127\n#include<bits/stdc++.h>\r\n#define int long long\r\nusing namespace std;\r\nconst int inf=1e18;\r\ninline int read(){\r\n\tint x=0,f=1;char ch=getchar();\r\n\twhile (!isdigit(ch)){if (ch=='-') f=-1;ch=getchar();}\r\n\twhile (isdigit(ch)){x=x*10+ch-48;ch=getchar();}\r\n\treturn x*f;\r\n}\r\nstruct edge{\r\n\tint v,nxt;\r\n}e[300005];\r\nint tot,head[300005];\r\nvoid add(int u,int v){\r\n\te[++tot]=(edge){v,head[u]},head[u]=tot;\r\n}\r\nint I,ch[300005][28],fail[300005];\r\nvoid build(){\r\n\tqueue<int>q;\r\n\tfor(int i=0;i<26;i++)if(ch[0][i])q.push(ch[0][i]);\r\n\twhile(!q.empty()){\r\n\t\tint u=q.front();q.pop();add(fail[u],u);\r\n\t\tfor(int i=0;i<26;i++){\r\n\t\t\tif(ch[u][i])fail[ch[u][i]]=ch[fail[u]][i],q.push(ch[u][i]);\r\n\t\t\telse ch[u][i]=ch[fail[u]][i];\r\n\t\t}\r\n\t}\r\n}\r\nstruct segtree{\r\n\t#define ls p<<1\r\n\t#define rs p<<1|1\r\n\t#define lson l,mid,ls\r\n\t#define rson mid+1,r,rs\r\n\tstruct Node{\r\n\t\tint mx;\r\n\t}c[1200005];\r\n\tvoid pushup(int p){\r\n\t\tc[p].mx=max(c[ls].mx,c[rs].mx);\r\n\t}\r\n\tvoid build(int l,int r,int p){\r\n\t\tif(l==r){\r\n\t\t\tc[p].mx=-1;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint mid=(l+r)>>1;\r\n\t\tbuild(lson),build(rson);\r\n\t\tpushup(p);\r\n\t}\r\n\tvoid upd(int l,int r,int p,int x,int k){\r\n\t\tif(l==r){c[p].mx=k;return;}\r\n\t\tint mid=(l+r)>>1;\r\n\t\tif(x<=mid)upd(lson,x,k);\r\n\t\telse upd(rson,x,k);\r\n\t\tpushup(p);\r\n\t} \r\n\tint qry(int l,int r,int p,int L,int R){\r\n\t\tif(L>R)return -1;\r\n\t\tif(L<=l&&r<=R)return c[p].mx;\r\n\t\tint mid=(l+r)>>1,res=-1;\r\n\t\tif(L<=mid)res=max(res,qry(lson,L,R));\r\n\t\tif(R>mid)res=max(res,qry(rson,L,R));\r\n\t\treturn res;\r\n\t}\r\n\t#undef ls\r\n\t#undef rs\r\n\t#undef lson\r\n\t#undef rson\r\n}Tr;\r\nint siz[300005],son[300005],dep[300005];\r\nvoid dfs1(int u){\r\n\tsiz[u]=1,son[u]=-1;\r\n\tfor(int i=head[u];i;i=e[i].nxt){\r\n\t\tint v=e[i].v;dep[v]=dep[u]+1;\r\n\t\tdfs1(v);siz[u]+=siz[v];\r\n\t\tif(son[u]==-1||siz[son[u]]<siz[v])son[u]=v;\r\n\t}\r\n}\r\nint cur,dfn[300005],rnk[300005],top[300005];\r\nvoid dfs2(int u,int rt){\r\n\ttop[u]=rt,dfn[u]=++cur,rnk[cur]=u;\r\n\tif(son[u]!=-1)dfs2(son[u],rt);\r\n\tfor(int i=head[u];i;i=e[i].nxt){\r\n\t\tint v=e[i].v;\r\n\t\tif(v!=son[u])dfs2(v,v);\r\n\t}\r\n}\r\nint endpos[300005],a[300005];string s[300005];multiset<int>S[300005];\r\nint ask(int u,int v){\r\n\tint res=-1;\r\n\twhile(top[u]!=top[v]){\r\n\t\tif(dep[top[u]]<dep[top[v]])swap(u,v);\r\n\t\tres=max(res,Tr.qry(1,cur,1,dfn[top[u]],dfn[u]));\r\n\t\tu=fail[top[u]];\r\n\t}\r\n\tif(dep[u]<dep[v])swap(u,v);\r\n\tres=max(res,Tr.qry(1,cur,1,dfn[v],dfn[u]));\r\n\treturn res;\r\n}\r\nsigned main(){\r\n\tint n=read(),m=read();\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tint u=0;cin>>s[i];\r\n\t\tfor(int j=0;j<(int)s[i].size();j++){\r\n\t\t\tif(!ch[u][s[i][j]-'a'])ch[u][s[i][j]-'a']=++I;\r\n\t\t\tu=ch[u][s[i][j]-'a'];\r\n\t\t}\r\n\t\tendpos[i]=u,a[i]=0;\r\n\t}\r\n\tbuild();dfs1(0);dfs2(0,0);Tr.build(1,cur,1);\r\n\tfor(int i=0;i<=I;i++)S[i].insert(-1);\r\n\tfor(int i=1;i<=n;i++)S[endpos[i]].insert(a[i]),Tr.upd(1,cur,1,dfn[endpos[i]],0);\r\n\twhile(m--){\r\n\t\tint op=read();\r\n\t\tif(op==1){\r\n\t\t\tint x=read(),y=read();\r\n\t\t\tS[endpos[x]].erase(S[endpos[x]].find(a[x]));\r\n\t\t\ta[x]=y;S[endpos[x]].insert(a[x]);\r\n\t\t\tTr.upd(1,cur,1,dfn[endpos[x]],*S[endpos[x]].rbegin());\r\n\t\t}\r\n\t\telse{\r\n\t\t\tint u=0,res=-1;string q;cin>>q;\r\n\t\t\tfor(int i=0;i<(int)q.size();i++){\r\n\t\t\t\tu=ch[u][q[i]-'a'];\r\n\t\t\t\tres=max(res,ask(0,u));\r\n\t\t\t}\r\n\t\t\tprintf(\"%lld\\n\",res);\r\n\t\t} \r\n\t}\r\n\treturn 0;\r\n}////"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 204684409,
+    "contestId": 741,
+    "creationTimeSeconds": 1683342472,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 741,
+        "index": "E",
+        "name": "Arpa\u2019s abnormal DNA and Mehrdad\u2019s deep interest",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3400,
+        "tags": [
+            "data structures",
+            "string suffix structures"
+        ]
+    },
+    "author": {
+        "contestId": 741,
+        "members": [
+            {
+                "handle": "vjudge3"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1481034900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 11,
+    "timeConsumedMillis": 264,
+    "memoryConsumedBytes": 19558400,
+    "source": "#include <bits/stdc++.h>\n#define lli long long int\n#define ld long double\n#define forn(i, n) for (int i = 0; i < n; i++)\n#define forr(i, a, n) for (int i = a; i <= n; i++)\n#define fi first\n#define se second\n#define pb push_back\n#define all(v) v.begin(), v.end()\n#define SZ(v) (int)v.size()\n#define endl '\\n'\n#define fastIO()                                                               \\\n  ios_base::sync_with_stdio(0);                                                \\\n  cin.tie(0);                                                                  \\\n  cout.tie(0);\n\nusing namespace std;\n\ntypedef vector<int> vi;\ntypedef pair<int, int> pii;\ntypedef vector<lli> vlli;\n\ntemplate <typename T> struct SparseTable {\n  vector<vector<T>> ST;\n  vector<int> logs;\n  int K, N;\n\n  SparseTable(vector<T> &arr) {\n    if (arr.size() == 0)\n      return;\n    N = arr.size();\n    K = log2(N) + 2;\n    ST.assign(K + 1, vector<T>(N));\n    logs.assign(N + 1, 0);\n    for (int i = 2; i <= N; ++i)\n      logs[i] = logs[i >> 1] + 1;\n    for (int i = 0; i < N; ++i)\n      ST[0][i] = arr[i];\n    for (int j = 1; j <= K; ++j)\n      for (int i = 0; i + (1 << j) <= N; ++i)\n        ST[j][i] = min(ST[j - 1][i], ST[j - 1][i + (1 << (j - 1))]);\n  }\n\n  T query(int l, int r) {\n    if (l > r)\n      return 1e8;\n    int j = logs[r - l + 1];\n    return min(ST[j][l], ST[j][r - (1 << j) + 1]);\n  }\n};\n\nstruct SuffixArray {\n  vector<int> suff;       // Suffix array itself\n  string t;               // String that the suffix array belongs to\n  vector<int> lcp;        // Longest common preffix between i and i+1\n  vector<vector<int>> cl; // Classes of strings of size 2^k (can be used as\n                          // sparse table)\n  int N;                  // size of the string\n\n  SparseTable<int> *st;\n  void count_sort(vector<int> &p, const vector<int> &c) {\n    int n = c.size();\n    vector<int> p_new(n), cnt(n + 1);\n    for (int x : c)\n      cnt[x + 1]++;\n    for (int i = 1; i < n; i++)\n      cnt[i] += cnt[i - 1];\n    for (int x : p)\n      p_new[cnt[c[x]]++] = x;\n    p.swap(p_new);\n  }\n\n  SuffixArray(string s) {\n    t = s + \"#\";\n    N = t.size();\n    suff.assign(N, 0);\n    vector<int> c_new(N);\n    vector<pair<char, int>> a(N);\n    for (int i = 0; i < N; i++)\n      a[i] = {t[i], i};\n    sort(a.begin(), a.end());\n    for (int i = 0; i < N; i++)\n      suff[i] = a[i].second;\n    c_new[suff[0]] = 0;\n    for (int i = 1; i < N; i++) {\n      if (a[i].first == a[i - 1].first)\n        c_new[suff[i]] = c_new[suff[i - 1]];\n      else\n        c_new[suff[i]] = c_new[suff[i - 1]] + 1;\n    }\n    cl.push_back(c_new);\n    int k = 0;\n    while ((1 << k) < N) {\n      auto &c = cl.back();\n      for (int i = 0; i < N; i++)\n        suff[i] = (suff[i] - (1 << k) + N) % N;\n      count_sort(suff, c);\n      c_new[suff[0]] = 0;\n      for (int i = 1; i < N; i++) {\n        pair<int, int> prev = {c[suff[i - 1]], c[(suff[i - 1] + (1 << k)) % N]};\n        pair<int, int> now = {c[suff[i]], c[(suff[i] + (1 << k)) % N]};\n        if (now == prev)\n          c_new[suff[i]] = c_new[suff[i - 1]];\n        else\n          c_new[suff[i]] = c_new[suff[i - 1]] + 1;\n      }\n      cl.push_back(c_new);\n      k++;\n    }\n  }\n\n  void calcLCP() {\n    lcp.assign(N, 0);\n    int k = 0;\n    auto &c = cl.back();\n    for (int i = 0; i < N - 1; i++) {\n      int pi = c[i];\n      int j = suff[(pi - 1 + N) % N];\n      while ((i + k) < N && (j + k) < N && t[i + k] == t[j + k])\n        k++;\n      lcp[pi] = k;\n      k = max(k - 1, 0);\n    }\n    cl.clear();\n    st = new SparseTable<int>(lcp);\n  }\n\n  int get_lcp(int i, int j) {\n    if (i == j)\n      return 1e8;\n    if (i > j)\n      swap(i, j);\n    return st->query(i + 1, j);\n  }\n};\n\nconst int MAG = 300;\n\nint main() {\n  fastIO();\n  string S, T;\n  cin >> S >> T;\n\n  int n = S.size();\n  int m = T.size();\n  vector<int> ord(n + 1);\n  iota(all(ord), 0);\n\n  string aux = S + \"$\" + T;\n  SuffixArray sa(aux);\n  sa.calcLCP();\n  vector<int> pos(sa.suff.size());\n  forn(i, pos.size()) pos[sa.suff[i]] = i;\n\n  sort(all(ord), [&](int i, int j) -> bool {\n    bool rev = i > j;\n    if (i > j)\n      swap(i, j);\n\n    int len = j - i;\n\n    if (sa.get_lcp(pos[n + 1], pos[i]) < len)\n      return (pos[n + 1] < pos[i]) ^ rev;\n\n    int len2 = m - len;\n    if (sa.get_lcp(pos[n + 1 + len], pos[n + 1]) < len2)\n      return (pos[n + 1 + len] < pos[n + 1]) ^ rev;\n\n    int len3 = m - len2;\n    if (sa.get_lcp(pos[i], pos[n + 1 + len2]) < len3)\n      return (pos[i] < pos[n + 1 + len2]) ^ rev;\n\n    int len4 = n - len3;\n    if (sa.get_lcp(pos[i + len3], pos[j]) < len4)\n      return (pos[i + len3] < pos[j]) ^ rev;\n    return !rev;\n  });\n\n  vector<int> inv_ord(ord.size());\n  forn(i, inv_ord.size()) inv_ord[ord[i]] = i;\n  SparseTable<int> big(inv_ord);\n\n  int Q;\n  cin >> Q;\n  vector<int> ans_fin(Q);\n  vector<vector<tuple<int, int, int, int, int>>> sm_q(MAG);\n  forn(q, Q) {\n    int ans = 1e8;\n    int l, r, k, x, y;\n    cin >> l >> r >> k >> x >> y;\n    if (k >= MAG) {\n      int curr_l = x, curr_r = y;\n\n      while (curr_l <= r) {\n        int lo = max(l, curr_l);\n        int ro = min(r, curr_r);\n        if (lo <= ro)\n          ans = min(ans, big.query(lo, ro));\n        curr_l += k;\n        curr_r += k;\n      }\n      ans_fin[q] = ans == 1e8 ? -1 : ord[ans];\n    } else\n      sm_q[k].emplace_back(l, r, x, y, q);\n  }\n  forn(k, MAG) {\n    if (k == 0 || !sm_q[k].size())\n      continue;\n    vector<SparseTable<int> *> st(k);\n    vector<vi> aux(k);\n    forr(i, 0, n) {\n      assert(i < inv_ord.size() && i % k < aux.size());\n      aux[i % k].push_back(inv_ord[i]);\n    }\n\n    forn(i, k) st[i] = new SparseTable<int>(aux[i]);\n\n    for (const auto &[l, r, x, y, idx] : sm_q[k]) {\n      int ans = 1e8;\n      forr(curr_res, x, y) {\n        int lo = l / k + (curr_res < (l % k)),\n            ro = r / k - (curr_res > (r % k));\n        if (lo <= ro)\n          ans = min(ans, st[curr_res]->query(lo, ro));\n      }\n      ans_fin[idx] = ans == 1e8 ? -1 : ord[ans];\n    }\n  }\n\n  for (auto x : ans_fin)\n    cout << x << ' ';\n  cout << endl;\n  return 0;\n}\n\n  \t \t\t  \t \t\t\t\t \t\t \t\t    \t \t\t\t\t\t"
+}

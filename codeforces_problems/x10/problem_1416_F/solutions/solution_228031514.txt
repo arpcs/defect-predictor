@@ -1,0 +1,38 @@
+{
+    "id": 228031514,
+    "contestId": 1416,
+    "creationTimeSeconds": 1697204435,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1416,
+        "index": "F",
+        "name": "Showing Off",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3300,
+        "tags": [
+            "flows",
+            "graph matchings",
+            "greedy",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1416,
+        "members": [
+            {
+                "handle": "wzc_IOI_czw"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1601219100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 7475200,
+    "source": "// LUOGU_RID: 129119695\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef pair<int, int> pii;\r\nconst int maxn = 1e5 + 5;\r\n\r\nvector<int> a[maxn];\r\nbool pri[maxn], vis[maxn];\r\n\r\nint n, m, n1, n2;\r\nint st1[maxn], st2[maxn], dir[maxn], ind[maxn], nxt[maxn];\r\nint dx[4] = {0, 0, 1, -1};\r\nint dy[4] = {1, -1, 0, 0};\r\n\r\nbool cmp(int a, int b)\r\n{\r\n\treturn pri[a] > pri[b];\r\n}\r\n\r\nvoid Fill(int x, int y, bool col)\r\n{\r\n\tvis[(x - 1) * m + y] = 1;\r\n\tif (col) st2[++n2] = (x - 1) * m + y;\r\n\telse st1[++n1] = (x - 1) * m + y;\r\n\t\r\n\tfor (int i = 0; i < 4; i++)\r\n\t{\r\n\t\tint nx = x + dx[i], ny = y + dy[i];\r\n\t\tif (nx <= 0 || nx > n || ny <= 0 || ny > m || a[nx][ny] != a[x][y] || vis[(nx - 1) * m + ny]) continue;\r\n\t\tFill(nx, ny, col ^ 1);\r\n\t}\r\n}\r\n\r\nstruct edge\r\n{\r\n\tint v, next;\r\n}e[maxn << 2];\r\nint head[maxn], tot;\r\n\r\ninline void addedge(int u, int v)\r\n{\r\n\te[++tot] = (edge){v, head[u]};\r\n\thead[u] = tot;\r\n}\r\n\r\nint ans[maxn];\r\nbool gt[maxn];\r\n\r\nbool Find(int u)\r\n{\r\n\tfor (int i = head[u]; i; i = e[i].next)\r\n\t{\r\n\t\tint v = e[i].v - n1;\r\n\t\tif (!gt[v])\r\n\t\t{\r\n\t\t\tgt[v] = 1;\r\n\t\t\tif (!ans[v] || Find(ans[v]))\r\n\t\t\t{\r\n\t\t\t\tans[v] = u;\r\n\t\t\t\treturn true;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn false;\r\n}\r\n\r\nbool Match()\r\n{\r\n\tfor (int i = 1; i <= n1; i++)\r\n\t{\r\n\t\tfor (int j = 1; j <= n2; j++) gt[j] = 0;\r\n\t\tif (!Find(i) && pri[st1[i]]) return false;\r\n\t}\r\n\t\r\n\tfor (int i = 1; i <= n2; i++)\r\n\t\tif (!ans[i] && pri[st2[i]]) return false;\r\n\treturn true;\r\n}\r\n\r\nvoid work()\r\n{\r\n\tcin >> n >> m;\r\n\tfor (int i = 1; i <= n * m; i++) pri[i] = nxt[i] = vis[i] = 0;\r\n\tfor (int i = 1; i <= n; i++)\r\n\t{\r\n\t\ta[i].resize(m + 1);\r\n\t\tfor (int j = 1; j <= m; j++) cin >> a[i][j];\r\n\t}\r\n\t\r\n\tfor (int i = 1; i <= n; i++)\r\n\t\tfor (int j = 1; j <= m; j++)\r\n\t\t{\r\n\t\t\tint fl = 0;\r\n\t\t\tfor (int k = 0; k < 4; k++)\r\n\t\t\t{\r\n\t\t\t\tint x = i + dx[k], y = j + dy[k];\r\n\t\t\t\tif (x <= 0 || x > n || y <= 0 || y > m) continue;\r\n\t\t\t\tif (a[x][y] < a[i][j]) fl = max(fl, 2);\r\n\t\t\t\telse if (a[x][y] == a[i][j]) fl = max(fl, 1);\r\n\t\t\t}\r\n\t\t\t\r\n\t\t\tif (!fl)\r\n\t\t\t{\r\n\t\t\t\tcout << \"NO\\n\";\r\n\t\t\t\treturn;\r\n\t\t\t}\r\n\t\t\telse if (fl == 1) pri[(i - 1) * m + j] = 1;\r\n\t\t}\r\n\t\r\n\t\r\n\tfor (int i = 1; i <= n; i++)\r\n\t\tfor (int j = 1; j <= m; j++)\r\n\t\t{\r\n\t\t\tif (vis[(i - 1) * m + j]) continue;\r\n\t\t\tn1 = n2 = 0;\r\n\t\t\tFill(i, j, 0);\r\n\t\t\tif (!n1 || !n2) continue;\r\n\t\t\t\r\n\t\t\tsort(st1 + 1, st1 + n1 + 1, cmp);\r\n\t\t\tsort(st2 + 1, st2 + n2 + 1, cmp);\r\n\t\t\t\r\n\t\t\tfor (int p = 1; p <= n1 + n2; p++) head[p] = 0;\r\n\t\t\ttot = 0;\r\n\t\t\tfor (int p = 1; p <= n2; p++) ind[st2[p]] = p, ans[p] = 0;\r\n\t\t\tfor (int p = 1; p <= n1; p++)\r\n\t\t\t{\r\n\t\t\t\tint y = (st1[p] - 1) % m + 1, x = (st1[p] - y) / m + 1;\r\n\t\t\t\tfor (int i = 0; i < 4; i++)\r\n\t\t\t\t{\r\n\t\t\t\t\tint nx = x + dx[i], ny = y + dy[i];\r\n\t\t\t\t\tif (nx <= 0 || nx > n || ny <= 0 || ny > m || a[nx][ny] != a[x][y]) continue;\r\n\t\t\t\t\taddedge(p, n1 + ind[(nx - 1) * m + ny]);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\t\r\n\t\t\tif (!Match())\r\n\t\t\t{\r\n\t\t\t\tcout << \"NO\\n\";\r\n\t\t\t\treturn;\r\n\t\t\t}\r\n\t\t\tfor (int k = 1; k <= n2; k++)\r\n\t\t\t\tnxt[st2[k]] = st1[ans[k]], nxt[st1[ans[k]]] = st2[k];\r\n\t\t}\r\n\t\t\r\n\tcout << \"YES\\n\";\r\n\tfor (int i = 1; i <= n; i++, cout << \"\\n\")\r\n\t\tfor (int j = 1; j <= m; j++)\r\n\t\t{\r\n\t\t\tint id = (i - 1) * m + j;\r\n\t\t\tif (nxt[id])\r\n\t\t\t{\r\n\t\t\t\tif (a[i][j] & 1) cout << ((i + j) & 1 ? a[i][j] / 2 : (a[i][j] + 1) / 2);\r\n\t\t\t\telse cout << a[i][j] / 2;\r\n\t\t\t\tcout << \" \";\r\n\t\t\t\tfor (int k = 0; k < 4; k++)\r\n\t\t\t\t{\r\n\t\t\t\t\tint x = i + dx[k], y = j + dy[k];\r\n\t\t\t\t\tif (nxt[id] == (x - 1) * m + y) dir[id] = k;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\telse\r\n\t\t\t{\r\n\t\t\t\tfor (int k = 0; k < 4; k++)\r\n\t\t\t\t{\r\n\t\t\t\t\tint x = i + dx[k], y = j + dy[k];\r\n\t\t\t\t\tif (x <= 0 || x > n || y <= 0 || y > m) continue;\r\n\t\t\t\t\tif (a[x][y] < a[i][j])\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tdir[id] = k;\r\n\t\t\t\t\t\tcout << a[i][j] - a[x][y] << \" \";\r\n\t\t\t\t\t\tbreak;\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\t\t\r\n\tfor (int i = 1; i <= n; i++, cout << \"\\n\")\r\n\t\tfor (int j = 1; j <= m; j++)\r\n\t\t{\r\n\t\t\tint id = (i - 1) * m + j;\r\n\t\t\tif (dir[id] == 0) cout << \"R \";\r\n\t\t\telse if (dir[id] == 1) cout << \"L \";\r\n\t\t\telse if (dir[id] == 2) cout << \"D \";\r\n\t\t\telse cout << \"U \";\r\n\t\t}\r\n}\r\n\r\nint main()\r\n{\r\n\tint T;\r\n\tcin >> T;\r\n\twhile (T--) work();\r\n\treturn 0;\r\n}"
+}

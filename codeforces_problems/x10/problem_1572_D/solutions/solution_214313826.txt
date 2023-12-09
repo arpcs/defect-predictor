@@ -1,0 +1,38 @@
+{
+    "id": 214313826,
+    "contestId": 1572,
+    "creationTimeSeconds": 1689667586,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1572,
+        "index": "D",
+        "name": "Bridge Club",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2800,
+        "tags": [
+            "flows",
+            "graph matchings",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1572,
+        "members": [
+            {
+                "handle": "OccDreamer"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631975700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 514,
+    "memoryConsumedBytes": 186470400,
+    "source": "#include<bits/stdc++.h>\r\n\r\n#define fi first\r\n#define se second\r\n#define ll long long\r\n#define mk make_pair\r\n#define PI pair<int,int>\r\n\r\nusing namespace std;\r\n\r\ninline int read(){\r\n\tint X=0, W=0; char ch=getchar();\r\n\twhile(!isdigit(ch)) W|=ch=='-', ch=getchar();\r\n\twhile(isdigit(ch)) X=(X<<1)+(X<<3)+(ch^48), ch=getchar();\r\n\treturn W?-X:X;\r\n}\r\n\r\nconst int MAXN = 300 * 20 * 120;\r\n\r\nint hd, tl, Q[MAXN*10], lim, SS, TT;\r\nint n, k, a[1 << 21], c[1 << 21], pre[1 << 21], S, T;\r\nint head[1 << 21], ne[MAXN<<1], to[MAXN<<1], weight[MAXN<<1], cost[MAXN<<1], cnt=1;\r\n\r\nbool mch[21][1 << 21], mark[1 << 21], vis[1 << 21];\r\n\r\nll dis[1 << 21], Min[1 << 21];\r\n\r\npriority_queue<pair<int,pair<int,int> > > Qc;\r\n\r\ninline void add(int x, int y, int w, int c){++cnt;to[cnt]=y;ne[cnt]=head[x];head[x]=cnt;weight[cnt]=w;cost[cnt]=c;}\r\n\r\ninline void addedge(int x, int y, int w, int c){add(x,y,w,c), add(y,x,0,-c);}\r\n\r\ninline bool spfa(){\r\n\tQ[hd=tl=1]=S;\r\n\tdis[S]=0; int tmp;\r\n\twhile(hd<=tl){\r\n\t\ttmp=Q[hd++]; vis[tmp]=0;\r\n\t\tfor(int i=head[tmp];i;i=ne[i]){\r\n\t\t\tif(weight[i] && dis[to[i]]>dis[tmp]+cost[i]){\r\n\t\t\t\tMin[to[i]]=min(Min[tmp],(ll)weight[i]);\r\n\t\t\t\tdis[to[i]]=dis[tmp]+cost[i];\r\n\t\t\t\tpre[to[i]]=i;\r\n\t\t\t\tif(vis[to[i]]) continue;\r\n\t\t\t\tQ[++tl]=to[i]; vis[to[i]]=1;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn Min[T]!=1e18;\r\n}\r\n\r\n\r\nint main(){\r\n\tn=read(), k=read(); lim=1<<n; SS=lim, TT=lim+1, S=TT+1, T=S+1;\r\n\tfor(int i=0;i<lim;++i) a[i]=read(), c[i]=__builtin_popcount(i);\r\n\tfor(int i=0;i<lim;++i){\r\n\t\tint maxn=-1, maxid=0;\r\n\t\tfor(int j=0;j<n;++j)\r\n\t\t\tif(maxn<a[i^(1<<j)]) maxn=a[i^(1<<j)], maxid=j;\r\n\t\tQc.push(mk(a[i]+maxn,mk(maxid,i)));\r\n\t}\r\n\tconst int Lim = 2*k*n;\r\n\tfor(int i=1;i<=Lim && Qc.size();++i){\r\n\t\tpair<int,PI> t=Qc.top(); Qc.pop();\r\n\t\tint u=t.se.se, v=t.se.se^(1<<t.se.fi);\r\n\t\tif(c[u]&1) swap(u,v);\r\n\t\taddedge(u,v,1,-a[u]-a[v]); mark[u]=mark[v]=1;\r\n\t\tint maxn=-1, maxid=0; u=t.se.se; mch[t.se.fi][u]=1;\r\n\t\tfor(int j=0;j<n;++j){\r\n\t\t\tif(mch[j][u]) continue;\r\n\t\t\tif(maxn<a[u^(1<<j)]) maxn=a[u^(1<<j)], maxid=j;\r\n\t\t}\r\n\t\tif(maxn!=-1) Qc.push(mk(a[u]+maxn,mk(maxid,u)));\r\n\t}\r\n\tfor(int i=0;i<lim;++i){\r\n\t\tif(!mark[i]) continue;\r\n\t\tif(c[i]&1) addedge(i,TT,1,0);\r\n\t\telse addedge(SS,i,1,0);\r\n\t}\r\n\tll ans=0, res=0; int now, flow=0;\r\n\tfor(int i=0;i<=T;++i) dis[i]=1e18, Min[i]=1e18;\r\n\taddedge(S,SS,1,0);\r\n\taddedge(TT,T,1,0);\r\n\twhile(spfa() && flow<k){\r\n\t\tans-=Min[T]*dis[T];\r\n\t\tnow=T; flow++; addedge(S,SS,1,0), addedge(TT,T,1,0);\r\n\t\twhile(now!=S){\r\n\t\t\tweight[pre[now]]-=Min[T];\r\n\t\t\tweight[pre[now]^1]+=Min[T];\r\n\t\t\tnow=to[pre[now]^1];\r\n\t\t}\r\n\t\tres=max(res,ans);\r\n\t\tfor(int i=1;i<=tl;++i) dis[Q[i]]=Min[Q[i]]=1e18;\r\n\t}\r\n\tcout << res;\r\n\treturn 0;\r\n}\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n"
+}

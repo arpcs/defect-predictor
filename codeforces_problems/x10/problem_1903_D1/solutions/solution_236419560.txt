@@ -1,0 +1,38 @@
+{
+    "id": 236419560,
+    "contestId": 1903,
+    "creationTimeSeconds": 1702066184,
+    "relativeTimeSeconds": 5084,
+    "problem": {
+        "contestId": 1903,
+        "index": "D1",
+        "name": "Maximum And Queries (easy version)",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 1700,
+        "tags": [
+            "binary search",
+            "bitmasks",
+            "brute force",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1903,
+        "members": [
+            {
+                "handle": "kost"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1702061100
+    },
+    "programmingLanguage": "Rust 2021",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 70,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 7475200,
+    "source": "#[allow(unused_imports)]\nuse std::cmp::{max, min};\nuse std::collections::{HashMap, HashSet};\nuse std::io::{self, BufRead};\nuse std::io::{stdin, stdout, BufWriter, Write};\n\n// Min to add\nfn mta(a: u64, b: u64) -> u64 {\n    let aa = a & (a ^ b);\n    let bb = b & (a ^ b);\n    if bb == 0 {\n        return 0;\n    }\n    let mask = !0u64 >> bb.leading_zeros();\n    bb - (aa & mask)\n}\n\nfn can(mut k: u64, targ: u64, a: &[u32]) -> bool {\n    for &x in a {\n        let m = mta(x as u64, targ);\n        if m > k {\n            return false;\n        }\n        k -= m;\n    }\n    true\n}\n\nfn need(targ: u64, a: &[u32]) -> u128 {\n    let mut ans = 0;\n    for &x in a {\n        ans += mta(x as u64, targ) as u128;\n    }\n    ans\n}\n\n\n\nfn main() {\n    let mut sc = Scanner::default();\n    let o = &mut BufWriter::new(stdout());\n    let n = sc.u();\n    let q = sc.u();\n    let a = sc.v::<u32>(n);\n    for _ in 0..q {\n        let k = sc.get::<u64>();\n        let mut targ = 0;\n        for bit in (0..64).rev() {\n            let newtarg = targ | (1 << bit);\n            let nd = need(newtarg, &a);\n            if k as u128 >= nd {\n                targ = newtarg;\n            }\n        }\n        writeln!(o, \"{targ}\");\n    }\n}\n\n#[cfg(test)]\nmod test {\n    use super::*;\n    use rand::{Rng, SeedableRng};\n    #[test]\n    fn test1() {\n        assert_eq!(mta(5, 10), 5);\n        assert_eq!(mta(10, 5), 3);\n        assert_eq!(mta(1, 7), 6);\n        assert_eq!(mta(7, 1), 0);\n    }\n    #[test]\n    fn test_r() {\n        let mut rng = rand::rngs::StdRng::seed_from_u64(1234321);\n        let n = 10usize;\n        let m = 10i32;\n        for t in 0..100 {\n            let a = (0..n)\n                .into_iter()\n                .map(|_| rng.gen_range(0..m))\n                .collect::<Vec<i32>>();\n        }\n    }\n}\n\ntype U = usize;\n\n#[derive(Default)]\nstruct Scanner {\n    buffer: Vec<String>,\n}\nimpl Scanner {\n    fn get<T: std::str::FromStr>(&mut self) -> T {\n        loop {\n            if let Some(token) = self.buffer.pop() {\n                return token.parse().ok().unwrap();\n            }\n            let mut input = String::new();\n            stdin().lock().read_line(&mut input).unwrap();\n            self.buffer = input.split_whitespace().rev().map(String::from).collect();\n        }\n    }\n\n    fn s(&mut self) -> String {\n        self.get()\n    }\n\n    fn svb(&mut self) -> Vec<u8> {\n        self.s().bytes().collect()\n    }\n\n    fn svc(&mut self) -> Vec<char> {\n        self.s().chars().collect()\n    }\n\n    fn u(&mut self) -> U {\n        self.get()\n    }\n\n    fn u2(&mut self) -> (U, U) {\n        (self.u(), self.u())\n    }\n\n    fn u3(&mut self) -> (U, U, U) {\n        (self.u(), self.u(), self.u())\n    }\n\n    fn pair<T: std::str::FromStr, U: std::str::FromStr>(&mut self) -> (T, U) {\n        (self.get(), self.get())\n    }\n\n    fn tripple<T: std::str::FromStr, U: std::str::FromStr, V: std::str::FromStr>(\n        &mut self,\n    ) -> (T, U, V) {\n        (self.get(), self.get(), self.get())\n    }\n\n    fn vec<T: std::str::FromStr>(&mut self, n: usize) -> Vec<T> {\n        let mut result = Vec::with_capacity(n);\n        for i in 0..n {\n            result.push(self.get());\n        }\n        result\n    }\n\n    fn v<T: std::str::FromStr>(&mut self, n: usize) -> Vec<T> {\n        self.vec(n)\n    }\n\n    fn vu(&mut self, n: usize) -> Vec<U> {\n        self.vec(n)\n    }\n\n    fn tree(&mut self, n: usize) -> Vec<Vec<usize>> {\n        let mut edges = vec![vec![]; n + 1];\n        for _ in 1..n {\n            let (u, v) = self.u2();\n            edges[u].push(v);\n            edges[v].push(u);\n        }\n        edges\n    }\n\n    fn tests<F: FnMut(&mut Self)>(&mut self, f: &mut F) {\n        let t = self.u();\n        for _ in 0..t {\n            f(self);\n        }\n    }\n}\n\nfn wv<W: Write, T: std::fmt::Display>(w: &mut W, v: Vec<T>) {\n    write!(\n        w,\n        \"{}\",\n        v.into_iter()\n            .map(|x| x.to_string())\n            .collect::<Vec<_>>()\n            .join(\" \")\n    )\n    .unwrap();\n}\n\ntrait MyIter {\n    type Item;\n    type I: Iterator<Item = Self::Item>;\n    type EI: Iterator<Item = (U, Self::Item)>;\n    type IE: Iterator<Item = (Self::Item, U)>;\n    fn i(self) -> Self::I;\n    fn ei(self) -> Self::EI;\n    fn ie(self) -> Self::IE;\n}\n\nimpl<'a, T: Clone + 'a> MyIter for &'a Vec<T> {\n    type Item = T;\n    type I = std::iter::Cloned<std::slice::Iter<'a, T>>;\n    type EI = std::iter::Enumerate<Self::I>;\n    type IE = std::iter::Zip<Self::I, std::ops::RangeFrom<U>>;\n\n    fn i(self) -> Self::I {\n        self.iter().cloned()\n    }\n\n    fn ei(self) -> Self::EI {\n        self.i().enumerate()\n    }\n\n    fn ie(self) -> Self::IE {\n        self.i().zip(0..)\n    }\n}\n"
+}

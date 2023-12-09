@@ -1,0 +1,37 @@
+{
+    "id": 191192700,
+    "contestId": 176,
+    "creationTimeSeconds": 1675040721,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 176,
+        "index": "E",
+        "name": "Archaeology",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 176,
+        "members": [
+            {
+                "handle": "20Ti_ntson"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1334934300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 840,
+    "memoryConsumedBytes": 15974400,
+    "source": "/// Author : Nguy\u1ec5n Th\u00e1i S\u01a1n - Ti20 - THPT chuy\u00ean L\u01b0\u01a1ng Th\u1ebf Vinh\r\n/// Training VOI 2023\r\n\r\n#include<bits/stdc++.h>\r\n//#include <ext/pb_ds/assoc_container.hpp>\r\n//#include <ext/pb_ds/trie_policy.hpp>\r\n//#include <ext/rope>\r\n\r\n//#pragma GCC optimize(\"Ofast\")\r\n//#pragma GCC optimization(\"unroll-loops, no-stack-protector\")\r\n//#pragma GCC target(\"avx,avx2,fma\")\r\n\r\n//using namespace std;\r\n//using namespace __gnu_pbds;\r\n//using namespace __gnu_cxx;\r\n\r\n#define fi first\r\n#define se second\r\n#define TASK \"test\"\r\n#define pb push_back\r\n#define EL cout << endl\r\n#define Ti20_ntson int main()\r\n#define in(x) cout << x << endl\r\n#define all(x) (x).begin(),(x).end()\r\n#define getbit(x, i) (((x) >> (i)) & 1)\r\n#define cntbit(x) __builtin_popcount(x)\r\n#define FOR(i,l,r) for (int i = l; i <= r; i++)\r\n#define FORD(i,l,r) for (int i = l; i >= r; i--)\r\n#define Debug(a,n) for (int i = 1; i <= n; i++) cout << a[i] << \" \"; cout << endl\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef vector<int> vi;\r\ntypedef pair<int,int> vii;\r\ntypedef unsigned long long ull;\r\ntypedef vector<vector<int>> vvi;\r\nint fastMax(int x, int y) { return (((y-x)>>(32-1))&(x^y))^y; }\r\n\r\nconst int N = 1e5 + 5;\r\nconst int oo = INT_MAX;\r\nconst int mod = 1e9 + 7;\r\nconst int d4x[4] = {-1, 0, 1, 0} , d4y[4] = {0, 1, 0, -1};\r\nconst int d8x[8] = {-1, -1, 0, 1, 1, 1, 0, -1}, d8y[8] = {0, 1, 1, 1, 0, -1, -1, -1};\r\n\r\nint n, Tin[N], par[N][20], h[N], pos;\r\nll Dis[N];\r\nvector<vii> dsk[N];\r\n\r\ninline void Read_Input() {\r\n    cin >> n;\r\n    FOR(i, 2, n) {\r\n        int u, v, w;\r\n        cin >> u >> v >> w;\r\n        dsk[u].push_back(vii(v, w));\r\n        dsk[v].push_back(vii(u, w));\r\n    }\r\n}\r\n\r\ninline void dfs(int u, int p) {\r\n    Tin[u] = ++pos;\r\n    FOR(i, 1, 18)\r\n        par[u][i] = par[par[u][i - 1]][i - 1];\r\n    for (vii x : dsk[u]) if (x.fi != p) {\r\n        int v = x.fi; int w = x.se;\r\n        Dis[v] = Dis[u] + w;\r\n        par[v][0] = u;\r\n        h[v] = h[u] + 1;\r\n        dfs(v, u);\r\n    }\r\n}\r\n\r\ninline int LCA(int u, int v) {\r\n    if (h[u] < h[v]) swap(u, v);\r\n    const int lg = log2(h[u]);\r\n    FORD(i, lg, 0)\r\n        if (h[u] - (1 << i) >= h[v])\r\n            u = par[u][i];\r\n    if (u == v) return u;\r\n    FORD(i, lg, 0)\r\n        if (par[u][i] != par[v][i])\r\n            u = par[u][i],\r\n            v = par[v][i];\r\n    return par[u][0];\r\n}\r\n\r\nll getDis(int u, int v) {\r\n    return Dis[u] + Dis[v] - 2 * Dis[LCA(u, v)];\r\n}\r\n\r\ninline void Solve() {\r\n    dfs(1, 1);\r\n    set<vii> S;\r\n    ll Ans = 0;\r\n    int numQ; cin >> numQ;\r\n    while (numQ -- ) {\r\n        char c; cin >> c;\r\n        if (c == '?')\r\n            cout << Ans / 2 << endl;\r\n        if (c == '+') {\r\n            int u; cin >> u; int luu1 = -1, luu2 = -1;\r\n            auto it = S.lower_bound(vii(Tin[u], mod));\r\n            if (it != S.end()) {\r\n                int v = (*it).se;\r\n                Ans += getDis(u, v);\r\n                luu1 = v;\r\n            }\r\n            if (it != S.begin()) {\r\n                it--;\r\n                int v = (*it).se;\r\n                Ans += getDis(u, v);\r\n                luu2 = v;\r\n            }\r\n//            cout << \"BW \" << luu1 << \" \" << luu2 << endl;\r\n            if (luu1 != -1 && luu2 != -1)\r\n                Ans -= getDis(luu1, luu2);\r\n            if (S.size() >= 2) {\r\n                int v = (*S.begin()).se;\r\n                auto it = S.end();\r\n                it--;\r\n                int d = (*it).se;\r\n                if (Tin[u] <= Tin[v] || Tin[u] >= Tin[d]) {\r\n                    Ans -= getDis(v, d);\r\n                }\r\n            }\r\n            S.insert(vii(Tin[u], u));\r\n            if (S.size() >= 2) {\r\n                int v = (*S.begin()).se;\r\n                auto it = S.end();\r\n                it--;\r\n                int d = (*it).se;\r\n                if (v == u || d == u)\r\n                    Ans += getDis(v, d);\r\n            }\r\n//            cout << Ans << endl;\r\n        }\r\n        if (c == '-') {\r\n            int u; cin >> u;\r\n            auto it = S.upper_bound(vii(Tin[u], mod));\r\n            int luu1 = -1, luu2 = -1;\r\n            if (it != S.end()) {\r\n                int v = (*it).se;\r\n                Ans -= getDis(u, v);\r\n                luu1 = v;\r\n            }\r\n            it--;\r\n            if (it != S.begin()) {\r\n                it--; int v = (*it).se;\r\n                luu2 = v;\r\n//                cout << \"DEL \" << u << \" \" << v << endl;\r\n                Ans -= getDis(u, v);\r\n            }\r\n            if (luu1 != -1 && luu2 != -1)\r\n                Ans += getDis(luu1, luu2);\r\n            if (S.size() >= 2) {\r\n                int v = (*S.begin()).se;\r\n                auto it = S.end();\r\n                it--;\r\n                int d = (*it).se;\r\n                if (v == u || d == u) {\r\n//                    cout << \"DEL \" << v << \" \" << d << endl;\r\n                    Ans -= getDis(v, d);\r\n                }\r\n            }\r\n//            cout << Ans << endl;\r\n            S.erase(vii(Tin[u], u));\r\n            if (S.size() >= 2) {\r\n                int v = (*S.begin()).se;\r\n                auto it = S.end();\r\n                it--;\r\n                int d = (*it).se;\r\n                if (Tin[u] <= Tin[v] || Tin[u] >= Tin[d]) {\r\n//                    cout << \"OKEC \" << v << \" \" << d << endl;\r\n                    Ans += getDis(v, d);\r\n                }\r\n            }\r\n        }\r\n//        cout << \"ANS \" << Ans << endl;\r\n    }\r\n}\r\n\r\nTi20_ntson {\r\n//    freopen(TASK\".INP\",\"r\",stdin);\r\n//    freopen(TASK\".OUT\",\"w\",stdout);\r\n    ios_base::sync_with_stdio(false); cin.tie(0); cout.tie(0);\r\n    int T = 1;\r\n//    cin >> T;\r\n    while (T -- ) {\r\n        Read_Input();\r\n        Solve();\r\n    }\r\n}\r\n\r\n"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 181581080,
+    "contestId": 997,
+    "creationTimeSeconds": 1668845904,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 997,
+        "index": "D",
+        "name": "Cycles in product",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "combinatorics",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 997,
+        "members": [
+            {
+                "handle": "bkifhr7"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530453900
+    },
+    "programmingLanguage": "Ruby 3",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\n#pragma GCC target(\"sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,avx,avx2\")\nusing namespace std;\n\nnamespace IO{\n\tchar ibuf[(1 << 20) + 1], *iS, *iT;\n\t#if ONLINE_JUDGE\n\t#define gh() (iS == iT ? iT = (iS = ibuf) + fread(ibuf, 1, (1 << 20) + 1, stdin), (iS == iT ? EOF : *iS++) : *iS++)\n \t#else\n\t#define gh() getchar()\n\t#endif\n\t#define reg register\n\tinline long long read () {\n\t\treg char ch = gh();\n\t\treg long long x = 0;\n\t\treg char t = 0;\n\t\twhile (ch < '0' || ch > '9')   t |= ch == '-', ch = gh();\n\t\twhile (ch >= '0' && ch <= '9') x = (x << 1) + (x << 3) + (ch ^ 48), ch = gh();\n\t\treturn t ? -x : x;\n\t}\n\tinline void write(long long x) {\n\t\tif (x < 0) {\n\t\t\tx = ~(x - 1);\n\t\t\tputchar('-');\n\t\t}\n\t\tif (x > 9)\n\t\t\twrite(x / 10);\n\t\tputchar(x % 10 + '0');\n\t}\n}\n\nusing IO::read;\nusing IO::write;\n\nconst int maxn(4005), maxk(80), mod(998244353);\nint fac[maxn], inv[maxn], ifac[maxn], ans, k;\n\nstruct Gragh {\n\tint n, head[maxn], tot, f[maxn][maxk], g[maxn][maxk], dp[maxn][maxk], sum[maxn];\n\tstruct edge {\n\t\tint v, nxt;\n\t} e[maxn << 1];\n\tinline void add_edge (int u, int v) {\n\t\te[++tot] = {v, head[u]};\n\t\thead[u] = tot;\n\t}\n\tinline void init () {\n\t\tfor (int i = 1, u, v; i < n; i++) {\n\t\t\tu = read(), v = read();\n\t\t\tadd_edge(u, v);\n\t\t\tadd_edge(v, u);\n\t\t}\n\t}\n\tinline void dfs1 (int u, int fa, int T) {\n\t\tfor (int i = head[u]; i; i = e[i].nxt) {\n\t\t\tint v = e[i].v;\n\t\t\tif (v == fa) continue;\n\t\t\tdfs1(v, u, T);\n\t\t\tfor (int x = 0; x < T; x += 2) f[u][T] = (f[u][T] + 1ll * f[u][x] * f[v][T - x - 2] % mod) % mod;\n\t\t}\n\t}\n\tinline void dfs2 (int u, int fa, int T) {\n\t\tvector <int> s(T + 1);\n\t\tfor (int i = head[u]; i; i = e[i].nxt) {\n\t\t\tint v = e[i].v;\n\t\t\tif (v == fa) \n\t\t\t\tfor (int x = 0; x < T; x += 2) s[x] = (s[x] + g[u][T - x - 2]) % mod;\n\t\t\telse\n\t\t\t\tfor (int x = 0; x < T; x += 2) s[x] = (s[x] + f[v][T - x - 2]) % mod;\n\t\t}\n\t\tfor (int i = head[u]; i; i = e[i].nxt) {\n\t\t\tint v = e[i].v;\n\t\t\tif (v == fa) continue;\n\t\t\tfor (int x = 0; x < T; x += 2) s[x] = (s[x] - f[v][T - x - 2] + mod) % mod;\n\t\t\tfor (int x = 0; x < T; x += 2) g[v][T] = (g[v][T] + 1ll * s[x] * g[v][x]) % mod;\n\t\t\tfor (int x = 0; x < T; x += 2) s[x] = (s[x] + f[v][T - x - 2]) % mod;\n\t\t\tdfs2(v, u, T);\n\t\t}\n\t}\n\tinline void dfs3 (int u, int fa, int T) {\n\t\tfor (int i = head[u]; i; i = e[i].nxt) {\n\t\t\tint v = e[i].v;\n\t\t\tif (v == fa) \n\t\t\t\tfor (int x = 0; x < T; x += 2) dp[u][T] = (dp[u][T] + 1ll * dp[u][T - x - 2] * g[u][x] % mod) % mod;\n\t\t\telse \n\t\t\t\tfor (int x = 0; x < T; x += 2) dp[u][T] = (dp[u][T] + 1ll * dp[u][T - x - 2] * f[v][x] % mod) % mod;\n\t\t\tif (v != fa) dfs3(v, u, T);\n\t\t}\n\t}\n\tinline void solve () {\n\t\tfor (int i = 1; i <= n; i++) dp[i][0] = f[i][0] = g[i][0] = 1;\n\t\tfor (int T = 2; T <= k; T += 2) dfs1(1, 0, T), dfs2(1, 0, T);\n\t\tfor (int T = 2; T <= k; T += 2) dfs3(1, 0, T);\n\t\tfor (int T = 0; T <= k; T += 2) for (int u = 1; u <= n; u++) sum[T] = (sum[T] + 1ll * dp[u][T] * ifac[T] % mod) % mod;\n\t\t\n\t}\n} T1, T2;\n\nint main () {\n\tT1.n = read(), T2.n = read(), k = read();\n\tif (k & 1) return puts(\"0\"), 0;\n\tinv[1] = fac[0] = ifac[0] = 1;\n\tfor (int i = 2; i <= k; i++) inv[i] = 1ll * (mod - mod / i) * inv[mod % i] % mod;\n\tfor (int i = 1; i <= k; i++) fac[i] = 1ll * fac[i - 1] * i % mod, ifac[i] = 1ll * ifac[i - 1] * inv[i] % mod;\n\tT1.init(), T2.init();\n\tT1.solve(), T2.solve();\n\tfor (int T = 0; T <= k; T += 2) ans = (ans + 1ll * T1.sum[T] * T2.sum[k - T] % mod) % mod;\n\twrite(1ll * ans * fac[k] % mod);\n}\n// I love WHQ!\n  \t   \t\t\t\t\t   \t\t \t\t\t\t\t\t\t \t\t  \t"
+}

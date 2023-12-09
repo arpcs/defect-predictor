@@ -1,0 +1,36 @@
+{
+    "id": 154946206,
+    "contestId": 1172,
+    "creationTimeSeconds": 1650894939,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1172,
+        "index": "C1",
+        "name": "Nauuo and Pictures (easy version)",
+        "type": "PROGRAMMING",
+        "points": 750.0,
+        "rating": 2300,
+        "tags": [
+            "dp",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1172,
+        "members": [
+            {
+                "handle": "Bananana."
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1559909100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 75,
+    "timeConsumedMillis": 452,
+    "memoryConsumedBytes": 921600,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nconst int mod = 998244353;\r\nstruct I {\r\n\tint v;\r\n\tI(int v = 0) : v(norm(v)) {}\r\n\tI(long long v) : v(norm(v % mod)) {}\r\n\tint norm(int v) const {\r\n\t\tif (v >= 0 && v < mod) {\r\n\t\t\treturn v;\r\n\t\t} else {\r\n\t\t\treturn v < 0 ? v + mod : v - mod;\r\n\t\t}\r\n\t}\r\n\tI power(long long n) const {\r\n\t\tI res = 1;\r\n\t\tfor (I x = *this; n; x *= x, n >>= 1) {\r\n\t\t\tif (n & 1) {\r\n\t\t\t\tres *= x;\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn res;\r\n\t}\r\n\tint val() const {\r\n\t\treturn v;\r\n\t}\r\n\tI operator - () const {\r\n\t\treturn I(norm(mod - v));\r\n\t}\r\n\tI inv() const {\r\n\t\treturn power(mod - 2);\r\n\t}\r\n\tI &operator += (const I &rhs) {\r\n\t\tv = norm(v + rhs.v);\r\n\t\treturn *this;\r\n\t}\r\n\tI &operator -= (const I &rhs) {\r\n\t\tv = norm(v - rhs.v);\r\n\t\treturn *this;\r\n\t}\r\n\tI &operator *= (const I &rhs) {\r\n\t\tv = 1LL * v * rhs.v % mod;\r\n\t\treturn *this;\r\n\t}\r\n\tI &operator /= (const I &rhs) {\r\n\t\t*this *= rhs.inv();\r\n\t\treturn *this;\r\n\t}\r\n\tfriend I operator + (const I &lhs, const I &rhs) {\r\n\t\tI res = lhs;\r\n\t\tres += rhs;\r\n\t\treturn res;\r\n\t}\r\n\tfriend I operator - (const I &lhs, const I &rhs) {\r\n\t\tI res = lhs;\r\n\t\tres -= rhs;\r\n\t\treturn res;\r\n\t}\r\n\tfriend I operator * (const I &lhs, const I &rhs) {\r\n\t\tI res = lhs;\r\n\t\tres *= rhs;\r\n\t\treturn res;\r\n\t}\r\n\tfriend I operator / (const I &lhs, const I &rhs) {\r\n\t\tI res = lhs;\r\n\t\tres /= rhs;\r\n\t\treturn res;\r\n\t}\r\n\tfriend istream &operator >> (istream &in, I &val) {\r\n\t\tlong long v;\r\n\t\tin >> v;\r\n\t\tval = v;\r\n\t\treturn in;\r\n\t}\r\n};\r\nconst int N = 60;\r\nint n, m;\r\nint arr[N], sum[2];\r\nbool sgn[N];\r\nI dp[N][N][N];\r\nint main() {\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(nullptr);\r\n\tcin >> n >> m;\r\n\tfor (int i = 1; i <= n; i++) {\r\n\t\tcin >> sgn[i];\r\n\t}\r\n\tfor (int i = 1; i <= n; i++) {\r\n\t\tcin >> arr[i];\r\n\t\tsum[sgn[i]] += arr[i];\r\n\t}\r\n\tfor (int o = 1; o <= n; o++) {\r\n\t\tmemset(dp, 0, sizeof dp);\r\n\t\tdp[0][0][0] = 1;\r\n\t\tfor (int i = 0; i < m; i++) {\r\n\t\t\tfor (int j = 0; j <= i; j++) {\r\n\t\t\t\tfor (int k = 0; j + k <= i; k++) {\r\n\t\t\t\t\tif (sgn[o]) {\r\n\t\t\t\t\t\tint now = sum[0] + sum[1] + j + k - (i - j - k);\r\n\t\t\t\t\t\tdp[i + 1][j + 1][k] += dp[i][j][k] * (arr[o] + j) / now;\r\n\t\t\t\t\t\tdp[i + 1][j][k + 1] += dp[i][j][k] * (sum[1] - arr[o] + k) / now;\r\n\t\t\t\t\t\tdp[i + 1][j][k] += dp[i][j][k] * (sum[0] - (i - j - k)) / now;\r\n\t\t\t\t\t} else {\r\n\t\t\t\t\t\tint now = sum[0] + sum[1] - j - k + (i - j - k);\r\n\t\t\t\t\t\tdp[i + 1][j + 1][k] += dp[i][j][k] * (arr[o] - j) / now;\r\n\t\t\t\t\t\tdp[i + 1][j][k + 1] += dp[i][j][k] * (sum[0] - arr[o] - k) / now;\r\n\t\t\t\t\t\tdp[i + 1][j][k] += dp[i][j][k] * (sum[1] + (i - j - k)) / now;\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tI res = 0;\r\n\t\tfor (int i = 0; i <= m; i++) {\r\n\t\t\tfor (int j = 0; i + j <= m; j++) {\r\n\t\t\t\tif (sgn[o]) {\r\n\t\t\t\t\tres += dp[m][i][j] * (arr[o] + i);\r\n\t\t\t\t} else {\r\n\t\t\t\t\tres += dp[m][i][j] * (arr[o] - i);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tcout << res.val() << '\\n';\r\n\t}\r\n\treturn 0;\r\n}"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 230328773,
+    "contestId": 997,
+    "creationTimeSeconds": 1698565121,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 997,
+        "index": "D",
+        "name": "Cycles in product",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "combinatorics",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 997,
+        "members": [
+            {
+                "handle": "wdnmdwrnmmp"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530453900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 9,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 7680000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define int long long\r\n#define rep(i,j,k) for(int i=(j);i<=(k);i++)\r\n#define per(i,j,k) for(int i=(j);i>=(k);i--)\r\n#define pb push_back\r\n#define mp make_pair\r\n#define fi first\r\n#define se second\r\ntypedef vector<int> vi;\r\ntypedef pair<int,int> pi;\r\n\r\nconst int N=4005,K=38,mod=998244353;\r\nvoid Add(int &x,const int &y){\r\n\tx+=y;\r\n\tif(x>=mod){\r\n\t\tx-=mod;\r\n\t}\r\n}\r\nint qpow(int x,int y){\r\n\tint res=1;\r\n\twhile(y){\r\n\t\tif(y%2){\r\n\t\t\tres=res*x%mod;\r\n\t\t}\r\n\t\tx=x*x%mod;\r\n\t\ty/=2;\r\n\t}\r\n\treturn res;\r\n}int inv(int x){return qpow(x,mod-2);}\r\nint fac[K*2],ifac[K*2];\r\nvoid Init(){\r\n\tfac[0]=1;\r\n\trep(i,1,K*2-1){\r\n\t\tfac[i]=fac[i-1]*i%mod;\r\n\t}\r\n\tifac[K*2-1]=inv(fac[K*2-1]);\r\n\tper(i,K*2-1,1){\r\n\t\tifac[i-1]=ifac[i]*i%mod;\r\n\t}\r\n}\r\nint C(int m,int n){\r\n\treturn fac[m]*ifac[n]%mod*ifac[m-n]%mod;\r\n}\r\nint k;\r\nvoid Get_f(array<int,K> &f,const array<int,K> &g){\r\n\tf.fill(0);\r\n\tf[0]=1;\r\n\trep(i,0,k-1){\r\n\t\trep(j,1,k-i){\r\n\t\t\t(f[i+j]+= f[i]*g[j])%=mod;\r\n\t\t}\r\n\t}\r\n}\r\nstruct Tree{\r\n\tint n;\r\n\tvi G[N];\r\n\tarray<int,K> f[N],g[N],ans[N];\r\n\tvoid dp0(int u,int p){\r\n\t\tfor(int v:G[u]){\r\n\t\t\tif(v==p){\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\tdp0(v,u);\r\n\t\t\trep(i,0,k-1){\r\n\t\t\t\tAdd(g[u][i+1],f[v][i]);\r\n\t\t\t}\r\n\t\t}\r\n\t\tGet_f(f[u],g[u]);\r\n\t}\r\n\tvoid dp1(int u,int p){\r\n\t\tans[u]=f[u];\r\n\t\tfor(int v:G[u]){\r\n\t\t\tif(v==p){\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\tarray<int,K> pfu=f[u],pfv=f[v],pgu=g[u],pgv=g[v];\r\n\t\t\trep(i,0,k-1){\r\n\t\t\t\tAdd(g[u][i+1],mod-f[v][i]);\r\n\t\t\t}\r\n\t\t\tGet_f(f[u],g[u]);\r\n\t\t\trep(i,0,k-1){\r\n\t\t\t\tAdd(g[v][i+1],f[u][i]);\r\n\t\t\t}\r\n\t\t\tGet_f(f[v],g[v]);\r\n\t\t\tdp1(v,u);\r\n\t\t\tf[u]=pfu,f[v]=pfv,g[u]=pgu,g[v]=pgv;\r\n\t\t}\r\n\t}\r\n}T[2];\r\nvoid Input(){\r\n\tcin>>T[0].n>>T[1].n>>k;\r\n\trep(i,1,T[0].n-1){\r\n\t\tint u,v;cin>>u>>v;\r\n\t\tT[0].G[u].pb(v);\r\n\t}\r\n\trep(i,1,T[1].n-1){\r\n\t\tint u,v;cin>>u>>v;\r\n\t\tT[1].G[u].pb(v);\r\n\t}\r\n}\r\nvoid solve(){\r\n\tif(k%2==1){\r\n\t\tcout<<0<<endl;\r\n\t\treturn;\r\n\t}\r\n\tk/=2;\r\n\tarray<int,K> Ans[2];\r\n\trep(i,0,1){\r\n\t\tT[i].dp0(1,0);\r\n\t\tT[i].dp1(1,0);\r\n\t\tAns[i].fill(0);\r\n\t\trep(j,1,T[i].n){\r\n\t\t\trep(o,0,k){\r\n\t\t\t\tassert(T[i].ans[j][o]!=0);\r\n\t\t\t\tAdd(Ans[i][o],T[i].ans[j][o]);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tint ans=0;\r\n\trep(i,0,k){\r\n\t\t(ans+= Ans[0][i]*Ans[1][k-i]%mod*C(k*2,i*2) )%=mod;\r\n\t}\r\n\tcout<<ans<<endl;\r\n}\r\nsigned main(){\r\n\t#ifndef ONLINE_JUDGE\r\n\tfreopen(\".in\",\"r\",stdin);\r\n\t#endif\r\n\tios::sync_with_stdio(0);cin.tie(0);cout.tie(0);\r\n\tInit();\r\n\tInput();\r\n\tsolve();\r\n\treturn 0;\r\n}\r\n"
+}

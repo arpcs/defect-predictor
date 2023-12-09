@@ -1,0 +1,36 @@
+{
+    "id": 226813927,
+    "contestId": 1824,
+    "creationTimeSeconds": 1696562586,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1824,
+        "index": "E",
+        "name": "LuoTianyi and Cartridge",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3500,
+        "tags": [
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1824,
+        "members": [
+            {
+                "handle": "intmain111"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1683547500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 51302400,
+    "source": "// LUOGU_RID: 127927739\n#include<bits/stdc++.h>\r\n#define int long long\r\n#define pi pair<int,int>\r\n#define fi first\r\n#define se second\r\n#define rep(i,j,k) for(int i=j;i<=k;i++)\r\nusing namespace std;\r\nconst int N=2e5+5;\r\nint n,ans,a[N],b[N],c[N],d[N],fa[N],p[N],bj[N],jz,zh;\r\nset<pi> v[N];\r\nset<int> se[N];\r\nstruct ed{\r\n    int u,v,id;\r\n    bool operator <(const ed &x)const{return c[id]<c[x.id];}\r\n}e[N];\r\nstruct ss{\r\n    int t[4*N],t1[4*N];\r\n    void gx(int k,int l,int r,int wz,int z){\r\n        t[k]+=z,t1[k]+=wz*z;\r\n        if(l==r) return ;\r\n        int mid=(l+r)/2;\r\n        if(wz<=mid) gx(k*2,l,mid,wz,z);\r\n        else gx(k*2+1,mid+1,r,wz,z);\r\n    }\r\n    int ef(int k,int l,int r,int z){\r\n        if(l==r) return z*l;\r\n        int mid=(l+r)/2;\r\n        if(t[k*2+1]>=z) return ef(k*2+1,mid+1,r,z);\r\n        else return t1[k*2+1]+ef(k*2,l,mid,z-t[k*2+1]);\r\n    }\r\n}T,T1;\r\nbool cmp(int x,int y){return a[x]<a[y];}\r\nint find1(int x){return fa[x]==x?x:fa[x]=find1(fa[x]);}\r\nvoid gx(int id,int opt){if(v[id].size()==1) zh+=opt*(*se[id].rbegin()),T.gx(1,1,n,*(--se[id].end()),-opt);}\r\nvoid del(int id,int x,int y){\r\n    v[x].erase(v[x].lower_bound({id,0})),v[y].erase(v[y].lower_bound({id,0}));\r\n    bj[id]=1,T1.gx(1,1,N,d[id],-1);\r\n}\r\nsigned main(){\r\n    ios::sync_with_stdio(false);\r\n    cin>>n;\r\n    rep(i,1,n) cin>>a[i];\r\n    rep(i,1,n){\r\n        cin>>b[i],se[i].insert(b[i]);\r\n        jz+=b[i],T.gx(1,1,N,b[i],1),ans=max(ans,a[i]*b[i]);\r\n    }\r\n    rep(i,1,n) fa[i]=p[i]=i;\r\n    rep(i,1,n-1){\r\n        int x,y; cin>>x>>y>>c[i]>>d[i];\r\n        v[x].insert({i,y}),v[y].insert({i,x}),e[i]={x,y,i};\r\n        jz+=d[i],T1.gx(1,1,N,d[i],1);\r\n    }\r\n    rep(i,1,n) if(v[i].size()<=1) T.gx(1,1,N,b[i],-1),zh+=b[i];\r\n    sort(e+1,e+n),sort(p+1,p+n+1,cmp); int z1=1,z2=1;\r\n    rep(i,1,N-1){\r\n        int pd=0;\r\n        while(z2<n&&c[e[z2].id]<i){\r\n            int id=e[z2].id,x=find1(e[z2].u),y=find1(e[z2].v);\r\n            if(!bj[id]){\r\n                pd=1,gx(x,-1),gx(y,-1),del(id,x,y);\r\n                if(se[x].size()<se[y].size()) swap(se[x],se[y]);\r\n                if(v[x].size()<v[y].size()) swap(v[x],v[y]);\r\n                for(auto dq:se[y]) se[x].insert(dq);\r\n                for(auto dq:v[y]) v[x].insert(dq); \r\n                fa[y]=x,gx(x,1);\r\n            }z2++;\r\n        }\r\n        while(z1<=n&&a[p[z1]]<i){\r\n            int id=p[z1],d1=find1(id); z1++,pd=1,gx(d1,-1);\r\n            se[d1].erase(se[d1].find(b[id])),T.gx(1,1,N,b[id],-1);\r\n            if(se[d1].empty()&&v[d1].size()==1){\r\n                queue<int> q; q.push(d1);\r\n                while(q.empty()){\r\n                    int d2=q.front(); q.pop();\r\n                    for(auto it=v[d2].begin();it!=v[d2].end();){\r\n                        auto nxt=it; nxt++; int id=(*it).fi,dq=(*it).se;\r\n                        del(id,d2,dq);\r\n                        if(v[dq].size()==1){if(se[dq].empty()) q.push(dq); else gx(dq,1);}\r\n                        it=nxt;\r\n                    }\r\n                }\r\n            }else gx(d1,1);\r\n        }\r\n        if(!T1.t[1]) break;\r\n        if(pd){\r\n            int E=T1.t[1],V=n-z1+1,d1=min(E,V-1),d2=V-T.t[1];\r\n            jz=zh,jz+=T1.ef(1,1,N,d1),jz+=T.ef(1,1,N,d1+1-d2);\r\n        }\r\n    }cout<<ans;\r\n}"
+}

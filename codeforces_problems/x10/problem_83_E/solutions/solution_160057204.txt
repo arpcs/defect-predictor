@@ -1,0 +1,36 @@
+{
+    "id": 160057204,
+    "contestId": 83,
+    "creationTimeSeconds": 1654849618,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 83,
+        "index": "E",
+        "name": "Two Subsequences",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2800,
+        "tags": [
+            "bitmasks",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 83,
+        "members": [
+            {
+                "handle": "radal"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1305299400
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 55,
+    "timeConsumedMillis": 1746,
+    "memoryConsumedBytes": 146022400,
+    "source": "#include <bits/stdc++.h>\n//#pragma GCC target(\"sse,sse2,sse4,avx2\")\n#pragma GCC optimize(\"unroll-loops\")\n#define rep(i,l,r) for (int i = l; i < r; i++)\n#define repr(i,r,l) for (int i = r; i >= l; i--)\n#define X first\n#define Y second\n#define all(x) (x).begin() , (x).end()\n#define pb push_back\n#define endl '\\n'\n#define debug(x) cerr << #x << \" : \" << x << endl;\nusing namespace std;\ntypedef long long ll;\ntypedef long double ld;\ntypedef pair<int,int> pll;\nconstexpr int N = 2e6+20,mod = 1e9+7 ,inf = 1e9+10;\ninline int mkay(int a,int b){\n    if (a+b >= mod) return a+b-mod;\n    if (a+b < 0) return a+b+mod;\n    return a+b;\n}\n \ninline int poww(int a,int k){\n    if (k < 0) return 0;\n    int z = 1;\n    while (k){\n        if (k&1) z = 1ll*z*a%mod;\n        a = 1ll*a*a%mod;\n        k >>= 1;\n    } \n    return z; \n}\nint seg[N*4],lz[N*4],a[N],sz;\nstring s[N];\n\nvoid build(int l,int r,int v = 1){\n    seg[v] = inf;\n    if (r-l == 1) return;\n    int m = (l+r) >> 1,u = (v << 1);\n    build(l,m,u);\n    build(m,r,u|1);\n}\n\ninline void pass(int v){\n    if (!lz[v]) return;\n    int u = (v << 1);\n    lz[u] += lz[v];\n    seg[u] += lz[v];\n    lz[u|1] += lz[v];\n    seg[u|1] += lz[v];\n    lz[v] = 0;\n}\n\nvoid upd(int l,int r,int p,int x,int v = 1){\n    if (r-l == 1){\n        seg[v] = x;\n        return;\n    }\n    int m = (l+r) >> 1,u = (v << 1);\n    pass(v);\n    if (p < m) upd(l,m,p,x,u);\n    else upd(m,r,p,x,u|1);\n    seg[v] = min(seg[u],seg[u|1]);\n}\n\nvoid upd2(int l,int r,int s,int e,int x,int v = 1){\n    if (s >= r || l >= e) return;\n    if (s <= l && r <= e){\n        seg[v] += x;\n        lz[v] += x;\n        return;\n    }\n    int u = (v << 1),m = (l+r) >> 1;\n    pass(v);\n    upd2(l,m,s,e,x,u);\n    upd2(m,r,s,e,x,u|1);\n    seg[v] = min(seg[u],seg[u|1]);\n}\n\nint que(int l,int r,int s,int e,int v = 1){\n    if (s >= r || l >= e) return inf;\n    if (s <= l && r <= e) return seg[v];\n    pass(v);\n    int m = (l+r) >> 1,u = (v <<1);\n    return min(que(l,m,s,e,u),que(m,r,s,e,u|1));\n}\nint f(int i,int j){\n    if (i < 0) return sz;\n    repr(k,sz,1){\n        bool fl = 0;\n        rep(g,0,k){\n            if (s[j][g] != s[i][sz-k+g]){\n                fl = 1;\n                break;\n            }\n        }\n        if (!fl) return sz-k;\n    }\n    return sz;\n}\nint main(){\n    ios :: sync_with_stdio(0); cin.tie(0);\n    int n;\n    cin >> n;\n    rep(i,0,n){\n        cin >> s[i];\n        sz = s[i].size();\n        rep(j,0,sz)\n            if (s[i][j] == '1')\n                a[i] += (1 << j);\n    }\n    int lim = (1 << sz);\n    build(0,lim+1);\n    upd(0,lim+1,lim,sz);\n    rep(i,1,n){\n        int x = f(i-1,i);\n        int l = 0,r = lim+1;\n        int calc = inf;\n        rep(j,0,sz+1){\n            if (j){\n                l = 0;\n                rep(g,0,j){\n                    if(s[i][g] == '1'){\n                        l += (1 << (sz-j+g));\n                    }\n                    r = l+(1 << (sz-j));\n                }\n            }\n            calc = min(calc,sz-j+que(0,lim+1,l,r));\n        }\n        seg[1] += x;\n        lz[1] += x;\n        upd(0,lim+1,a[i-1],calc);\n    }\n    cout << seg[1];\n}\n"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 194877852,
+    "contestId": 831,
+    "creationTimeSeconds": 1677307875,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 831,
+        "index": "C",
+        "name": "Jury Marks",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 1700,
+        "tags": [
+            "brute force",
+            "constructive algorithms"
+        ]
+    },
+    "author": {
+        "contestId": 831,
+        "members": [
+            {
+                "handle": "qwerty1034"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1499958300
+    },
+    "programmingLanguage": "Clang++20 Diagnostics",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 17715200,
+    "source": "#include <iostream>\r\n#include <algorithm>\r\n#include <vector>\r\n#include <set>\r\nusing namespace std;\r\n\r\nint k, n, lower, upper, ind;\r\nint marks[2001];\r\nint points[2001];\r\nint sum[2001];\r\nint score[2001];\r\nbool used[2001];\r\nstruct difference {\r\n  int num, a, b;\r\n};\r\nvector<difference> dif;\r\nset<int> ans;\r\nbool compare(difference a, difference b) {\r\n  return a.num < b.num;\r\n}\r\nint bound(int num) {\r\n  int l = 0;\r\n  int r = dif.size();\r\n  int mid;\r\n  while (l <= r) {\r\n    mid = (l + r) / 2;\r\n    if (dif[mid].num < num)\r\n      l = mid + 1;\r\n    else\r\n      r = mid - 1;\r\n  }\r\n  return min(l, (int)dif.size());\r\n}\r\nbool valid(int num) {\r\n  for (int i = num - 1; i >= 0; i--)\r\n    score[i] = score[i + 1] - marks[i + 1];\r\n  for (int i = num + 1; i <= k; i++)\r\n    score[i] = score[i - 1] + marks[i];\r\n  sort(score + 1, score + k + 1);\r\n  \r\n  for (int i = 1; i <= k; i++)\r\n    used[i] = false;\r\n  for (int i = 0; i < n; i++) {\r\n    ind = lower_bound(score + 1, score + k + 1, points[i]) - score;\r\n    while (used[ind] && ind <= k && score[ind] == points[i])\r\n      ind++;\r\n    if (ind > k || score[ind] != points[i])\r\n      return false;\r\n    else\r\n      used[ind] = true;\r\n  }\r\n  return true;\r\n}\r\nint main() {\r\n  cin >> k >> n;\r\n  for (int i = 1; i <= k; i++) {\r\n    cin >> marks[i];\r\n    sum[i] = sum[i - 1] + marks[i];\r\n  }\r\n  for (int i = 0; i < n; i++)\r\n    cin >> points[i];\r\n\r\n  for (int i = 1; i <= k; i++)\r\n    for (int j = i + 1; j <= k; j++)\r\n      dif.push_back({abs(sum[i] - sum[j]), i, j});\r\n  sort(dif.begin(), dif.end(), compare);\r\n  \r\n  if (n == 1) {\r\n    for (int i = 1; i <= k; i++)\r\n      ans.insert(sum[i]);\r\n  }\r\n  else\r\n    for (int i = 0; i < n; i++)\r\n      for (int j = 0; j < n; j++)\r\n        if (i != j) {\r\n          lower = bound(abs(points[i] - points[j]));\r\n          upper = bound(abs(points[i] - points[j]) + 1);\r\n          for (int k = lower; k < upper; k++) {\r\n            if (sum[dif[k].a] >= sum[dif[k].b])\r\n              ind = dif[k].a;\r\n            else\r\n              ind = dif[k].b;\r\n            score[ind] = max(points[i], points[j]);\r\n            if (valid(ind))\r\n              ans.insert(score[0]);\r\n          }\r\n        }\r\n\r\n  cout << ans.size() << endl;\r\n\r\n  return 0;\r\n}"
+}

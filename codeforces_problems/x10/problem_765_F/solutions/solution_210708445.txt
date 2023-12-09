@@ -1,0 +1,35 @@
+{
+    "id": 210708445,
+    "contestId": 765,
+    "creationTimeSeconds": 1687476804,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 765,
+        "index": "F",
+        "name": "Souvenirs",
+        "type": "PROGRAMMING",
+        "points": 3250.0,
+        "rating": 3100,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 765,
+        "members": [
+            {
+                "handle": "bkifhr7"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1487059500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 857,
+    "memoryConsumedBytes": 33382400,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\ninline int read(){\n\tregister char ch=getchar();register int x=0;\n\twhile(ch<'0'||ch>'9')ch=getchar();\n\twhile(ch>='0'&&ch<='9')x=(x<<1)+(x<<3)+(ch^48),ch=getchar();\n\treturn x;\n}\nvoid print(int x){\n\tif(x/10)print(x/10);\n\tputchar(x%10+48);\n}\nconst int N=1e5+5,M=3e5+5;\nint n,m,uu,a[N],c[N],st[18][N],ts[18][N],ans[M],l[M],r[M],Log[N],t[N<<2],arr[N];\nvector<pair<int,int> >qu[N];\nunordered_map<int,int>mp;\nvoid chg(int x,int v){\n\tx=n-x+1;\n\tfor(;x<=n;x+=x&-x)c[x]=min(c[x],v);\n}\nint qry(int x){\n\tx=n-x+1;\n\tint mn=1e9;\n\tfor(;x;x-=x&-x)mn=min(mn,c[x]);\n\treturn mn;\n}\nvoid chg2(int x,int v){\n\tfor(;x<=n;x+=x&-x)c[x]=min(c[x],v);\n}\nint qry2(int x){\n\tint mn=1e9;\n\tfor(;x;x-=x&-x)mn=min(mn,c[x]);\n\treturn mn;\n}\nint rmnq(int l,int r){\n\treturn min(st[Log[r-l+1]][l],st[Log[r-l+1]][r-(1<<Log[r-l+1])+1]);\n}\nint rmxq(int l,int r){\n\treturn max(ts[Log[r-l+1]][l],ts[Log[r-l+1]][r-(1<<Log[r-l+1])+1]);\n}\nvoid chg1(int p,int v,int l,int r,int k){\n\tif(l==r){t[k]=max(t[k],v);return;}\n\tint mid=l+r>>1;\n\tif(p<=mid)chg1(p,v,l,mid,k<<1);\n\telse chg1(p,v,mid+1,r,k<<1|1);\n\tt[k]=max(t[k<<1],t[k<<1|1]);\n}\nint ask1(int L,int R,int l,int r,int k){\n\tif(L<=arr[l]&&arr[r]<=R)return t[k];\n\tif(l==r)return 0;\n\tint mid=l+r>>1,mx=0;\n\tif(L<=arr[mid])mx=max(mx,ask1(L,R,l,mid,k<<1));\n\tif(R>arr[mid])mx=max(mx,ask1(L,R,mid+1,r,k<<1|1));\n\treturn mx;\n}\nvoid chg2(int p,int v,int l,int r,int k){\n\tif(l==r){t[k]=min(t[k],v);return;}\n\tint mid=l+r>>1;\n\tif(p<=mid)chg2(p,v,l,mid,k<<1);\n\telse chg2(p,v,mid+1,r,k<<1|1);\n\tt[k]=min(t[k<<1],t[k<<1|1]);\n}\nint ask2(int L,int R,int l,int r,int k){\n\tif(L<=arr[l]&&arr[r]<=R)return t[k];\n\tif(l==r)return n+1;\n\tint mid=l+r>>1,mx=1e9;\n\tif(L<=arr[mid])mx=min(mx,ask2(L,R,l,mid,k<<1));\n\tif(R>arr[mid])mx=min(mx,ask2(L,R,mid+1,r,k<<1|1));\n\treturn mx;\n}\nint main(){\n\tmemset(c,0x3f,sizeof c);\n\tmemset(ans,0x3f,sizeof ans);\n\tn=read();\n\tfor(int i=1;i<=n;i++)a[i]=read(),st[0][i]=ts[0][i]=a[i],arr[i]=a[i];\n\tsort(arr+1,arr+n+1),uu=unique(arr+1,arr+n+1)-arr-1;\n\tfor(int i=1;i<=uu;i++)mp[arr[i]]=i;\n\tfor(int i=1;i<=n;i++)a[i]=mp[a[i]];\n\tfor(int i=1;i<=17;i++)for(int j=1;j+(1<<i)-1<=n;j++)\n\t\tst[i][j]=min(st[i-1][j],st[i-1][j+(1<<i-1)]),\n\t\tts[i][j]=max(ts[i-1][j],ts[i-1][j+(1<<i-1)]);\n\tm=read();\n\tfor(int i=1;i<=m;i++){\n\t\tl[i]=read(),r[i]=read();\n\t\tqu[r[i]].emplace_back(l[i],i);\n\t}\n\tfor(int i=2;i<=n;i++)Log[i]=Log[i>>1]+1;\n\tfor(int i=1;i<=n;i++){\n\t\tint L=0,R=i,mid;\n\t\twhile(L<R-1){\n\t\t\tmid=L+R>>1;\n\t\t\tif(rmxq(mid,i-1)>=arr[a[i]])L=mid;\n\t\t\telse R=mid;\n\t\t}\n\t\tint p=L;//cout<<a[i]<<';'<<'\\n';\n\t\twhile(a[p]>=a[i]){\n\t\t\tchg(p,arr[a[p]]-arr[a[i]]);\n\t\t\tif(a[p]==a[i])break;\n\t\t\tint lim;\n\t\t\tif((arr[a[p]]-arr[a[i]])&1)lim=arr[a[i]]+(arr[a[p]]-arr[a[i]])/2;\n\t\t\telse lim=arr[a[i]]+(arr[a[p]]-arr[a[i]])/2-1;\n\t\t\tp=ask1(arr[a[i]],lim,1,uu,1);\n\t\t}//puts(\"\");\n\t\tfor(auto j:qu[i])ans[j.second]=min(ans[j.second],qry(j.first));\n\t\tchg1(a[i],i,1,uu,1);\n\t}\n\tfor(int i=1;i<=n;i++)qu[i].clear();\n\tmemset(c,0x3f,sizeof c);memset(t,0x3f,sizeof t);\n\tfor(int i=1;i<=m;i++){\n\t\tqu[l[i]].emplace_back(r[i],i);\n\t}\n\tfor(int i=n;i;i--){\n\t\tint L=i,R=n+1,mid;\n\t\twhile(L<R-1){\n\t\t\tmid=L+R>>1;\n\t\t\tif(rmxq(i+1,mid)>=arr[a[i]])R=mid;\n\t\t\telse L=mid;\n\t\t}\n\t\tint p=R;//cout<<a[i]<<';'<<'\\n';\n\t\twhile(p<=n&&a[p]>=a[i]){\n\t\t\tchg2(p,arr[a[p]]-arr[a[i]]);\n\t\t\tif(a[p]==a[i])break;\n\t\t\tint lim;\n\t\t\tif((arr[a[p]]-arr[a[i]])&1)lim=arr[a[i]]+(arr[a[p]]-arr[a[i]])/2;\n\t\t\telse lim=arr[a[i]]+(arr[a[p]]-arr[a[i]])/2-1;\n\t\t\tp=ask2(arr[a[i]],lim,1,uu,1);\n\t\t}//puts(\"\");\n\t\tfor(auto j:qu[i])ans[j.second]=min(ans[j.second],qry2(j.first));\n\t\tchg2(a[i],i,1,uu,1);\n\t}\n\tfor(int i=1;i<=m;i++)print(ans[i]),putchar('\\n');\n}\n \t\t  \t\t\t\t \t\t\t \t\t \t \t\t   \t\t\t"
+}

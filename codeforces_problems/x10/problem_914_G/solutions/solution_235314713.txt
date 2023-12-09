@@ -1,0 +1,39 @@
+{
+    "id": 235314713,
+    "contestId": 914,
+    "creationTimeSeconds": 1701489288,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 914,
+        "index": "G",
+        "name": "Sum the Fibonacci",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 2600,
+        "tags": [
+            "bitmasks",
+            "divide and conquer",
+            "dp",
+            "fft",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 914,
+        "members": [
+            {
+                "handle": "NotaKoala"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1516462500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 311,
+    "memoryConsumedBytes": 13107200,
+    "source": "#include <cmath>\r\n#include <cstdio>\r\n#include <cstring>\r\n#include <iostream>\r\n#include <map>\r\n#include <stack>\r\n#include <vector>\r\n#include <algorithm>\r\n#include <queue>\r\n#include <bitset>\r\nusing namespace std;\r\nconst int M = 1e6 + 9, N = 1 << 17, MOD = 1e9 + 7;\r\ntypedef long long ll;\r\n\r\nint n, A[N], B[N], C[N], h[N], F[18][N], cnt[N], fib[N], ans[N];\r\n\r\nint mod_pow(int x, int y) {\r\n  int res = 1;\r\n  for (; y; y >>=1 ){\r\n    if (y & 1)\r\n      res = 1LL * res * x % MOD;\r\n    x = 1LL * x * x % MOD;\r\n  }\r\n  return res;\r\n}\r\n\r\nint inv2 = mod_pow(2, MOD - 2);\r\n\r\nvoid FWTOR(int *f, int sign, int len) {\r\n  for (int o = 2, k = 1; o <= len; o <<= 1, k <<= 1) {\r\n    for (int i = 0; i < len; i += o) {\r\n      for (int j = 0; j < k; ++j) {\r\n        f[i + j + k] += f[i + j] * sign;\r\n        f[i + j + k] %= MOD;\r\n      }\r\n    }\r\n  }\r\n}\r\n\r\nvoid FWTAND(int *f, int sign, int len) {\r\n  for (int o = 2, k = 1; o <= len; o <<= 1, k <<= 1) {\r\n    for (int i = 0; i < len; i += o) {\r\n      for (int j = 0; j < k; ++j) {\r\n        f[i + j] += f[i + j + k] * sign;\r\n        f[i + j] %= MOD;\r\n      }\r\n    }\r\n  }\r\n}\r\n\r\nvoid FWTXOR(int *f, int sign, int len) {\r\n  for (int o = 2, k = 1; o <= len; o <<= 1, k <<= 1) {\r\n    for (int i = 0; i < len; i += o) {\r\n      for (int j = 0; j < k; ++j) {\r\n        f[i + j] += f[i + j + k],\r\n            f[i + j + k] = f[i + j] - f[i + j + k] - f[i + j + k];\r\n        f[i + j] %= MOD;\r\n        f[i + j + k] %= MOD;\r\n        if (sign == -1) {\r\n          f[i + j] = 1LL *  f[i + j]  * inv2 % MOD, f[i + j + k] = 1LL * f[i + j + k] * inv2 % MOD;\r\n        }\r\n      }\r\n    }\r\n  }\r\n}\r\n\r\nint main() {\r\n  ios::sync_with_stdio(false);\r\n\r\n  fib[0] = 0, fib[1] = 1;\r\n  for (int i = 2; i < N; ++i) {\r\n    fib[i] = fib[i - 1] + fib[i - 2];\r\n    if (fib[i] >= MOD)\r\n      fib[i] -= MOD;\r\n  }\r\n  for (int i = 1; i < N; ++i)\r\n    cnt[i] = cnt[i >> 1] + (i & 1);\r\n  cin >> n;\r\n  for (int i = 1; i <= n; ++i) {\r\n    int x;\r\n    cin >> x;\r\n    A[x]++;\r\n    B[x]++;\r\n    C[x]++;\r\n  }\r\n  for (int i = 0; i < N; ++i) {\r\n    F[cnt[i]][i] = A[i];\r\n    A[i] = 0;\r\n  }\r\n  for (int i = 0; i <= 17; ++i)\r\n    FWTOR(F[i], 1, N);\r\n  for (int i = 0; i <= 17; ++i) {\r\n    for (int k = 0; k < N; ++k)\r\n      h[k] = 0;\r\n    \r\n    for (int j = 0; j <= i; ++j) {\r\n      for (int k = 0; k < N; ++k) {\r\n        h[k] += F[j][k] * F[i - j][k] % MOD;\r\n        h[k] %= MOD;\r\n      }\r\n    }\r\n\r\n    FWTOR(h, -1, N);\r\n    for (int k = 0; k < N; ++k) {\r\n      if (cnt[k] == i) {\r\n        A[k] += h[k];\r\n        A[k] %= MOD;\r\n      }\r\n    }\r\n  }\r\n  FWTXOR(C, 1, N);\r\n  for (int i = 0; i < N; ++i)\r\n    C[i] = 1LL * C[i] * C[i] % MOD;\r\n  FWTXOR(C, -1, N);\r\n  for (int i = 0; i < N; ++i) {\r\n    A[i] = 1LL * A[i] * fib[i] % MOD;\r\n    B[i] = 1LL * B[i] * fib[i] % MOD;\r\n    C[i] = 1LL * C[i] * fib[i] % MOD;\r\n  }\r\n  FWTAND(A, 1, N);\r\n  FWTAND(B, 1, N);\r\n  FWTAND(C, 1, N);\r\n  for (int i = 0; i < N; ++i) {\r\n    ans[i] = 1LL * A[i] * B[i] % MOD * C[i] % MOD;\r\n  }\r\n  FWTAND(ans, -1, N);\r\n  int Ans = 0;\r\n  for (int i = 1; i < N; i <<= 1) {\r\n    Ans += ans[i];\r\n    Ans %= MOD;\r\n  }\r\n  Ans = (Ans + MOD) % MOD;\r\n  cout << Ans << '\\n';\r\n  return 0;\r\n}\r\n"
+}

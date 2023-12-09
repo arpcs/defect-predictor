@@ -1,0 +1,37 @@
+{
+    "id": 202716736,
+    "contestId": 997,
+    "creationTimeSeconds": 1681912596,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 997,
+        "index": "D",
+        "name": "Cycles in product",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "combinatorics",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 997,
+        "members": [
+            {
+                "handle": "Daniel_lele"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530453900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 89,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 59392000,
+    "source": "// LUOGU_RID: 108500279\n#include <bits/stdc++.h>\r\n#pragma GCC optimize(2,3,\"Ofast\",\"inline\")\r\n#define int long long\r\n#define double long double\r\nusing namespace std;\r\nconst int mod=998244353;\r\nint qp(int a,int b){\r\n\tif(b<0){\r\n\t\treturn qp(qp(a,mod-2),-b);\r\n\t}\r\n\tint ans=1;\r\n\twhile(b){\r\n\t\tif(b&1) (ans*=a)%=mod;\r\n\t\t(a*=a)%=mod;\r\n\t\tb>>=1;\r\n\t}\r\n\treturn ans;\r\n}\r\nint fac[3000005],inv[3000005];\r\nvoid init(){\r\n\tfac[0]=1; for(int i=1;i<=3000000;i++) fac[i]=fac[i-1]*i%mod;\r\n\tinv[3000000]=qp(fac[3000000],mod-2); for(int i=2999999;i>=0;i--) inv[i]=inv[i+1]*(i+1)%mod;\r\n}\r\nint C(int i,int j){\r\n\tif(i<0||j<0||i<j) return 0;\r\n\treturn fac[i]*inv[j]%mod*inv[i-j]%mod;\r\n}\r\nint dp[4005][80],xs[4005][80];\r\nint f1[4005][80],f2[4005][80];\r\nvector<int> vc1[4005],vc2[4005];\r\nvoid make(int now){\r\n\tmemset(dp[now],0,sizeof(dp[now]));\r\n\tdp[now][0]=1; \r\n\tfor(int i=0;i<=75;i++) for(int j=1;j+i<=75;j++) (dp[now][i+j]+=dp[now][i]*xs[now][j])%=mod;\r\n}\r\nvoid dfs1(int now,int fa){\r\n\tfor(auto v:vc1[now]){\r\n\t\tif(v==fa) continue;\r\n\t\tdfs1(v,now);\r\n\t\tfor(int i=0;i<=75;i++){\r\n\t\t\t(xs[now][i+2]+=dp[v][i])%=mod;\r\n\t\t}\r\n\t}\r\n\tmake(now);\r\n}\r\nvoid adfs1(int now,int fa){\r\n\tfor(int i=0;i<=75;i++) (xs[now][i+2]+=dp[fa][i])%=mod;\r\n\tmake(now);\r\n\tfor(int i=0;i<=75;i++) f1[now][i]=dp[now][i];\r\n\tfor(auto v:vc1[now]){\r\n\t\tif(v==fa) continue;\r\n\t\tfor(int i=0;i<=75;i++) (xs[now][i+2]+=mod-dp[v][i])%=mod;\r\n\t\tmake(now);\r\n\t\tadfs1(v,now);\r\n\t\tfor(int i=0;i<=75;i++) (xs[now][i+2]+=dp[v][i])%=mod;\r\n\t\tmake(now);\r\n\t}\r\n\tfor(int i=0;i<=75;i++) (xs[now][i+2]+=mod-dp[fa][i])%=mod;\r\n\tmake(now);\r\n}\r\nvoid dfs2(int now,int fa){\r\n\tfor(auto v:vc2[now]){\r\n\t\tif(v==fa) continue;\r\n\t\tdfs2(v,now);\r\n\t\tfor(int i=0;i<=75;i++){\r\n\t\t\t(xs[now][i+2]+=dp[v][i])%=mod;\r\n\t\t}\r\n\t}\r\n\tmake(now);\r\n}\r\nvoid adfs2(int now,int fa){\r\n\tfor(int i=0;i<=75;i++) (xs[now][i+2]+=dp[fa][i])%=mod;\r\n\tmake(now);\r\n\tfor(int i=0;i<=75;i++) f2[now][i]=dp[now][i];\r\n\tfor(auto v:vc2[now]){\r\n\t\tif(v==fa) continue;\r\n\t\tfor(int i=0;i<=75;i++) (xs[now][i+2]+=mod-dp[v][i])%=mod;\r\n\t\tmake(now);\r\n\t\tadfs2(v,now);\r\n\t\tfor(int i=0;i<=75;i++) (xs[now][i+2]+=dp[v][i])%=mod;\r\n\t\tmake(now);\r\n\t}\r\n\tfor(int i=0;i<=75;i++) (xs[now][i+2]+=mod-dp[fa][i])%=mod;\r\n\tmake(now);\r\n}\r\nsigned main(){\r\n\tinit();\r\n\tint n1,n2,k; cin>>n1>>n2>>k;\r\n\tfor(int i=1;i<n1;i++){\r\n\t\tint u,v; cin>>u>>v;\r\n\t\tvc1[u].push_back(v);\r\n\t\tvc1[v].push_back(u);\r\n\t}\r\n\tfor(int i=1;i<n2;i++){\r\n\t\tint u,v; cin>>u>>v;\r\n\t\tvc2[u].push_back(v);\r\n\t\tvc2[v].push_back(u);\r\n\t}\r\n\tmemset(dp,0,sizeof(dp));\r\n\tmemset(xs,0,sizeof(xs));\r\n\tdfs1(1,0); adfs1(1,0);\r\n\tmemset(dp,0,sizeof(dp));\r\n\tmemset(xs,0,sizeof(xs));\r\n\tdfs2(1,0); adfs2(1,0);\r\n\tint ans=0;\r\n\tint tot1[k+1],tot2[k+1];\r\n\tfor(int t=0;t<=k;t++) tot1[t]=tot2[t]=0;\r\n\tfor(int i=1;i<=n1;i++) for(int t=0;t<=k;t++) (tot1[t]+=f1[i][t])%=mod;\r\n\tfor(int i=1;i<=n2;i++) for(int t=0;t<=k;t++) (tot2[t]+=f2[i][t])%=mod;\r\n\tfor(int t=0;t<=k;t+=2) (ans+=tot1[t]*tot2[k-t]%mod*C(k,t))%=mod;\r\n\tcout<<ans;\r\n\treturn 0;\r\n}"
+}

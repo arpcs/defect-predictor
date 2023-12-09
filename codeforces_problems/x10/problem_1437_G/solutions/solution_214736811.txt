@@ -1,0 +1,37 @@
+{
+    "id": 214736811,
+    "contestId": 1437,
+    "creationTimeSeconds": 1689938632,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1437,
+        "index": "G",
+        "name": "Death DBMS",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "data structures",
+            "string suffix structures",
+            "strings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1437,
+        "members": [
+            {
+                "handle": "Derike"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1603809300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 91,
+    "timeConsumedMillis": 1622,
+    "memoryConsumedBytes": 517939200,
+    "source": "#include <iostream>\r\n#include <bits/stdc++.h>\r\n\r\n\r\nusing namespace std;\r\n#define LL long long\r\n#define PII pair<int,int>\r\n#define PLI pair<LL,int>\r\n#define VPII vector<PII>\r\n#define QI queue<int>\r\n\r\nconst int MAX = 0x3f3f3f3f;\r\nconst long long INF = 1e18;\r\nconst int N = (3e5 +10) * 6, M = N +10;\r\nconst LL MOD = 998244353, M2 = 1e10;\r\nconst double epx = 1e-9;\r\n\r\nLL n, m, k, V;\r\n\r\nLL qmi(LL a, LL b, LL p){\r\n    LL res = 1;\r\n    while(b){\r\n        if(b & 1) res = res * a % p;\r\n        a = a * a % p;\r\n        b >>= 1;\r\n    }\r\n    return res;\r\n}\r\nint gcd(int a, int b){\r\n    if(b == 0) return a;\r\n    else return gcd(b, a % b);\r\n}\r\n\r\nvoid init(){\r\n}\r\n\r\n//M\u662f\u6700\u5927\u53ef\u80fd\u8282\u70b9\u4e2a\u6570\r\nint tr[M][26], cnt[M], idx = 0, last[N];\r\nint fail[M];\r\n\r\nvoid insert(string s ,int k) {\r\n    int p = 0;\r\n    for (int i = 0; i < s.size(); ++i) {\r\n        int u = s[i] - 'a';\r\n        if (!tr[p][u]) tr[p][u] = ++idx;\r\n        p = tr[p][u];\r\n    }\r\n    last[k] = p;\r\n    ++cnt[p];\r\n}\r\n\r\nint e[M], h[M], ne[M], idxx = 0;\r\nvoid add(int a, int b){\r\n    e[idxx] = b; ne[idxx] = h[a]; h[a] = idxx++;\r\n}\r\nvoid build() {\r\n    QI q;\r\n    for (int i = 0; i < 26; ++i) if(tr[0][i]) q.push(tr[0][i]);\r\n    while (q.size()) {\r\n        int t = q.front(); q.pop();\r\n        for (int i = 0; i < 26; ++i) {\r\n            int p = tr[t][i];\r\n            if (!p) tr[t][i] = tr[fail[t]][i];\r\n            else { fail[p] = tr[fail[t]][i]; q.push(p); }\r\n        }\r\n    }\r\n\r\n    memset(h, -1, sizeof h);\r\n    for(int i = 1; i<=idx; ++i) add(fail[i] + 1, i + 1);//\u5efa\u7acbfail\u6811\uff0c\u4e3a\u65b9\u4fbf\uff0c\u70b9\u5e8f\u53f7+1\uff0c\u53bb\u63890\r\n}\r\n\r\nint dep[M], fa[M], siz[M], son[M];//\u6df1\u5ea6\u3001\u7236\u7ed3\u70b9\u3001\u5927\u5c0f\u3001\u91cd\u5b50\u7ed3\u70b9\r\nint dfn[M], top[M], cur_time = 0;//dfs\u7f16\u53f7\u3001\u91cd\u94fe\u7684\u8d77\u59cb\u8282\u70b9\r\n\r\nvoid dfs1(int u, int p, int depth) {//\u5f97\u5230dep\u3001fa\u3001siz\u3001son\r\n    dep[u] = depth; fa[u] = p; siz[u] = 1;\r\n    for (int pos = h[u]; ~pos; pos = ne[pos]) {\r\n        int x = e[pos];\r\n        if (x != p) {\r\n            dfs1(x, u, depth + 1);\r\n            siz[u] += siz[x];\r\n            if (siz[son[u]] < siz[x]) son[u] = x;\r\n        }\r\n    }\r\n}\r\n\r\nvoid dfs2(int u, int t) {//\u5f97\u5230dfn\u3001top\u548c\u65b0\u7684\u7ed3\u70b9\u503c\u5e8f\u5217\r\n    dfn[u] = ++cur_time; top[u] = t;\r\n    if (son[u] == -1) return;\r\n\r\n    dfs2(son[u], t);//\u5148\u904d\u5386\u91cd\u5b50\u7ed3\u70b9\r\n    for (int pos = h[u]; ~pos; pos = ne[pos]) {\r\n        int x = e[pos];\r\n        if (x != fa[u] && x != son[u]) dfs2(x, x);\r\n    }\r\n}\r\n\r\n\r\nstruct NODE {\r\n    int l, r;\r\n    LL sum;\r\n}seg_tr[N * 4];\r\n\r\nvoid up(int u) {\r\n    seg_tr[u].sum = max(seg_tr[u << 1].sum , seg_tr[u << 1 | 1].sum);\r\n}\r\n\r\nvoid build(int u, int l, int r) {\r\n    seg_tr[u] = { l,r };\r\n    if (l == r) { seg_tr[u].sum = -1; return; }\r\n\r\n    int mid = l + r >> 1;\r\n    build(u << 1, l, mid);\r\n    build(u << 1 | 1, mid + 1, r);\r\n    up(u);\r\n}\r\n\r\nvoid modify(int u, int k, LL x) {//\u628ak\u53f7\u7ed3\u70b9\u7684\u503c\u6539\u6210x\r\n    int ll = seg_tr[u].l, rr = seg_tr[u].r;\r\n    if (ll == rr) { seg_tr[u].sum = x; return; }\r\n\r\n    int mid = ll + rr >> 1;\r\n    if (k <= mid) modify(u << 1, k, x);\r\n    else modify(u << 1 | 1, k, x);\r\n    up(u);\r\n}\r\n\r\nLL query(int u, int l, int r) {\r\n    int ll = seg_tr[u].l, rr = seg_tr[u].r;\r\n    if (l <= ll && rr <= r) return seg_tr[u].sum;\r\n\r\n    int mid = ll + rr >> 1;\r\n    if (r <= mid) return query(u << 1, l, r);//\u53ea\u548c\u5de6\u8fb9\u6709\u4ea4\u70b9\r\n    if (l > mid) return query(u << 1 | 1, l, r);//\u53ea\u548c\u53f3\u8fb9\u6709\u4ea4\u70b9\r\n    //\u548c\u5de6\u53f3\u90fd\u6709\u4ea4\u70b9\r\n    LL res = -1;\r\n    res = max(res, query(u << 1, l, r));\r\n    res = max(res, query(u << 1 | 1, l, r));\r\n    return res;\r\n}\r\n\r\nLL query_path(int u, int v) {//uv\u4e4b\u95f4\u8def\u5f84\u4e0a\u6240\u6709\u7ed3\u70b9\u7684\u6743\u503c\u548c\r\n    LL res = -1;\r\n    while (top[u] != top[v]) {\r\n        if (dep[top[u]] < dep[top[v]]) swap(u, v);\r\n        res = max(res, query(1, dfn[top[u]], dfn[u]));\r\n        u = fa[top[u]];\r\n    }\r\n    if (dep[u] < dep[v]) swap(u, v);//u\u5728\u4e0b\u9762\r\n    res = max(res, query(1, dfn[v], dfn[u]));\r\n    return res;\r\n}\r\n\r\nint val[N];\r\nmultiset<int> vals[M];//\u8bb0\u5f55\u6bcf\u4e2a\u7ec8\u6b62\u8282\u70b9\u5f53\u524d\u62e5\u6709\u7684\u503c\r\n\r\nvoid solve(){\r\n    cin >> n >> m;\r\n    string s;\r\n    for(int i = 1; i<=n; ++i) cin >> s, insert(s, i);\r\n    build();\r\n//    cout <<\"asas  asas\\n\";\r\n\r\n    memset(son, -1, sizeof son);\r\n    dfs1(1, -1, 1);\r\n    dfs2(1, 1);\r\n    build(1, 1, idx + 1);\r\n//    for(int i = 1; i<=idx+1; ++i) cout << seg_tr[i].sum <<\" \";\r\n//    cout <<\"\\n\";\r\n//    cout <<\"SASA  111\\n\";\r\n    for(int i = 1; i<=n; ++i) modify(1, dfn[last[i] + 1], 0), val[i] = 0, vals[last[i] + 1].insert(0);\r\n//    for(int i = 1; i<=n; ++i) cout << last[i] <<\" \";\r\n//    puts(\"\\n\");\r\n//    for(int i = 1; i<=idx+1; ++i) cout << seg_tr[i].sum <<\" \";\r\n//    puts(\"\");\r\n//    for(int i = 1; i<=idx + 1; ++i) cout << dfn[i] <<\" \";\r\n//    puts(\"\");\r\n\r\n\r\n    int op, u, v;\r\n    while(m--){\r\n        cin >> op;\r\n        if(op == 1){\r\n            cin >> u >> v;\r\n            int t = last[u] + 1;\r\n            if(vals[t].count(val[u])) vals[t].erase(vals[t].find(val[u]));\r\n            vals[t].insert(v);\r\n            val[u] = v;\r\n            modify(1, dfn[t], *vals[t].rbegin());\r\n        }\r\n        else{\r\n            cin >> s;\r\n\r\n//            cout <<\"SASA   222\\n\";\r\n\r\n            LL ans = -1;\r\n            for (int i = 0, j = 0; i < s.size(); ++i) {\r\n                u = s[i] - 'a';\r\n                j = tr[j][u];\r\n//                cout <<\"sas  \" << j <<\" \" << dfn[j+1] <<\" \"<< query_path(j +1 , 1) <<\"\\n\";\r\n                ans = max(ans, query_path(j + 1, 1));\r\n            }\r\n            cout << ans << \"\\n\";\r\n        }\r\n    }\r\n}\r\n\r\nint main(){\r\n//    ios::sync_with_stdio(0);\r\n//    cin.tie(0); cout.tie(0);\r\n//    freopen(\"../1.txt\",\"r\", stdin);\r\n\r\n    int TT = 1;\r\n//    cin >> TT;\r\n    init();\r\n    while(TT--){\r\n        solve();\r\n    }\r\n}"
+}

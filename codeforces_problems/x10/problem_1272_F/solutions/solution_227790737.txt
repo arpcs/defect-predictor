@@ -1,0 +1,36 @@
+{
+    "id": 227790737,
+    "contestId": 1272,
+    "creationTimeSeconds": 1697105190,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1272,
+        "index": "F",
+        "name": "Two Bracket Sequences",
+        "type": "PROGRAMMING",
+        "rating": 2200,
+        "tags": [
+            "dp",
+            "strings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1272,
+        "members": [
+            {
+                "handle": "Untrii"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1576157700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 130150400,
+    "source": "#include<bits/stdc++.h>\r\n\r\n#ifndef DEBUG\r\n#pragma GCC optimize(\"O3,unroll-loops\")\r\n#pragma GCC target(\"avx2,bmi,bmi2,lzcnt,popcnt\")\r\n#endif\r\n\r\n//#define endl '\\n'\r\nusing namespace std;\r\n#define use_test_count()int test_count=1;cin>>test_count\r\n#define ignore_test_count()int test_count=1\r\n#define run_test_cases()prepare();while(test_count--)solve()\r\n#define texit(val){cout<<val<<endl;return;}\r\n\r\nconstexpr int64_t MOD = 998244353;\r\nconstexpr int PRIME = 13'463;\r\nconstexpr int MAX_N = 200;\r\nconstexpr int SDECOMP = 1000;\r\n\r\nvoid prepare() {\r\n\r\n}\r\n\r\nstruct source {\r\n    int i, j, bal;\r\n};\r\n\r\nint dp[MAX_N + 1][MAX_N + 1][MAX_N + 1];\r\nsource dp_path[MAX_N + 1][MAX_N + 1][MAX_N + 1];\r\n\r\nvoid solve() {\r\n    string s1, s2;\r\n    cin >> s1 >> s2;\r\n\r\n    if (s1[0] == ')' && s2[0] == ')') s1 = \"(\" + s1;\r\n\r\n    for (int i = 0; i <= MAX_N; ++i) {\r\n        for (int j = 0; j <= MAX_N; ++j) {\r\n            for (int k = 0; k <= MAX_N; ++k) {\r\n                dp[i][j][k] = INT32_MAX / 2;\r\n            }\r\n        }\r\n    }\r\n\r\n    dp[0][0][0] = 0;\r\n    dp_path[0][0][0] = {.i = -1, .j = -1, .bal = -1};\r\n\r\n    auto update_dp = [&](int i, int j, int k, int fi, int fj, int fk) {\r\n        if (dp[fi][fj][fk] + 1 < dp[i][j][k]) {\r\n            dp[i][j][k] = dp[fi][fj][fk] + 1;\r\n            dp_path[i][j][k] = {.i = fi, .j = fj, .bal = fk};\r\n        }\r\n    };\r\n\r\n    for (int i = 0; i <= s1.length(); ++i) {\r\n        for (int j = 0; j <= s2.length(); ++j) {\r\n            for (int k = 0; k < MAX_N; ++k) {\r\n                if (i && k && s1[i - 1] == '(') update_dp(i, j, k, i - 1, j, k - 1);\r\n                if (i && s1[i - 1] == ')') update_dp(i, j, k, i - 1, j, k + 1);\r\n                if (i && k && s1[i - 1] == '(') update_dp(i, j, k, i, j, k - 1);\r\n                if (i && s1[i - 1] == ')') update_dp(i, j, k, i, j, k + 1);\r\n\r\n                if (j && k && s2[j - 1] == '(') update_dp(i, j, k, i, j - 1, k - 1);\r\n                if (j && s2[j - 1] == ')') update_dp(i, j, k, i, j - 1, k + 1);\r\n                if (j && k && s2[j - 1] == '(') update_dp(i, j, k, i, j, k - 1);\r\n                if (j && s2[j - 1] == ')') update_dp(i, j, k, i, j, k + 1);\r\n\r\n                if (i && j && s1[i - 1] == s2[j - 1]) {\r\n                    if (k && s1[i - 1] == '(') update_dp(i, j, k, i - 1, j - 1, k - 1);\r\n                    if (s1[i - 1] == ')') update_dp(i, j, k, i - 1, j - 1, k + 1);\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    int min_str = INT32_MAX;\r\n    int opt_bal = 0;\r\n    for (int i = 0; i <= MAX_N; ++i) {\r\n        if (min_str > dp[s1.length()][s2.length()][i] + i) {\r\n            min_str = dp[s1.length()][s2.length()][i] + i;\r\n            opt_bal = i;\r\n        }\r\n    }\r\n\r\n    string ans;\r\n    source cur = {.i = (int) s1.length(), .j = (int) s2.length(), .bal = opt_bal};\r\n    while (cur.i || cur.j) {\r\n        auto from = dp_path[cur.i][cur.j][cur.bal];\r\n        int delta_bal = cur.bal - from.bal;\r\n\r\n        if (delta_bal > 0) ans.push_back('(');\r\n        else ans.push_back(')');\r\n        cur = from;\r\n    }\r\n\r\n    reverse(ans.begin(), ans.end());\r\n    while (opt_bal--) ans.push_back(')');\r\n\r\n    cout << ans;\r\n}\r\n\r\nint32_t main() {\r\n#ifdef DEBUG\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n    freopen(\"output.txt\", \"w\", stdout);\r\n#endif\r\n\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n    cout.tie(nullptr);\r\n\r\n    ignore_test_count();\r\n    run_test_cases();\r\n    return 0;\r\n}"
+}

@@ -1,0 +1,39 @@
+{
+    "id": 213639596,
+    "contestId": 593,
+    "creationTimeSeconds": 1689247110,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 593,
+        "index": "D",
+        "name": "Happy Tree Party",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 593,
+        "members": [
+            {
+                "handle": "Desh01"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1446655500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nstruct SegmentTree {\r\n  vector<vector<long long>> st;\r\n  int sz;\r\n  void init(int n) {\r\n    sz = n;\r\n    while (sz & sz - 1) ++sz;\r\n    st.resize(sz << 1);\r\n  }\r\n  void pull(int v) {\r\n    if ((st[v << 1].size() && !st[v << 1][0]) || (st[v << 1 | 1].size() && !st[v << 1 | 1][0]) || st[v << 1].size() + st[v << 1 | 1].size() > 60) {\r\n      st[v] = {0};\r\n    } else {\r\n      st[v] = st[v << 1];\r\n      for (const long long &x : st[v << 1 | 1])\r\n        st[v].push_back(x);\r\n    }\r\n  }\r\n  void upd(int u, long long x) {\r\n    for (st[u += sz] = (x > 1 ? vector<long long> (1, x) : vector<long long> ()); u >>= 1;) pull(u);\r\n  }\r\n  void merge(deque<long long> &l, const vector<long long> &r) {\r\n    if (l.size() && !l[0]) return;\r\n    if ((r.size() && !r[0])  || l.size() + r.size() > 60) {\r\n      l = {0};\r\n      return;\r\n    }\r\n    for (const long long &x : r) l.push_back(x);\r\n  }\r\n  void merge2(const vector<long long> &l, deque<long long> &r) {\r\n    if (r.size() && !r[0]) return;\r\n    if ((l.size() && !l[0]) || l.size() + r.size() > 60) {\r\n      r = {0};\r\n      return;\r\n    }\r\n    for (int i = l.size() - 1; i >= 0; i--) r.push_front(l[i]);\r\n  }\r\n  void merge2(const deque<long long> &l, deque<long long> &r) {\r\n    if (r.size() && !r[0]) return;\r\n    if ((l.size() && !l[0]) || l.size() + r.size() > 60) {\r\n      r = {0};\r\n      return;\r\n    }\r\n    for (int i = l.size() - 1; i >= 0; i--) r.push_front(l[i]);\r\n  }\r\n  deque<long long> query(int l, int r) {\r\n    deque<long long> L, R;\r\n    for (l += sz, r += sz + 1; l < r; l >>= 1, r >>= 1) {\r\n      if (l & 1) merge(L, st[l++]);\r\n      if (r & 1) merge2(st[--r], R);\r\n    }\r\n    if (L.size() + R.size() > 60) return {0};\r\n    if ((L.size() && L[0] == 0) || (R.size() && R[0] == 0)) return {0};\r\n    for (const long long &x : R) L.push_back(x);\r\n    return L;\r\n  }\r\n} st;\r\n\r\nvector<vector<pair<int, int>>> g;\r\nvector<vector<int>> up;\r\nvector<long long> w;\r\nvector<int> sz, nxt, in, en, id;\r\nint t, lg;\r\n\r\nvoid dfs(int u) {\r\n  sz[u] = 1;\r\n  for (int i = 1; i < lg; i++) up[i][u] = up[i - 1][up[i - 1][u]];\r\n  for (auto &p : g[u]) {\r\n    auto [v, i] = p;\r\n    auto it = g[v].begin();\r\n    while ((*it).first != u) it++;\r\n    g[v].erase(it);\r\n    id[i] = v;\r\n    up[0][v] = u;\r\n    dfs(v);\r\n    sz[u] += sz[v];\r\n    if (sz[v] > sz[g[u][0].first]) swap(p, g[u][0]);\r\n  }\r\n}\r\n\r\nvoid dfs_hld(int u) {\r\n  in[u] = t++;\r\n  for (auto [v, i] : g[u]) {\r\n    if (v == g[u][0].first) nxt[v] = nxt[u];\r\n    else nxt[v] = v;\r\n    dfs_hld(v);\r\n  }\r\n  en[u] = t;\r\n}\r\n\r\nbool upper(const int &u, const int &v) {\r\n  return in[u] <= in[v] && en[v] <= en[u];\r\n}\r\n\r\nint lca(int u, int v) {\r\n  if (upper(u, v)) return u;\r\n  if (upper(v, u)) return v;\r\n  for (int i = lg - 1; i >= 0; i--)\r\n    if (!upper(up[i][u], v))\r\n      u = up[i][u];\r\n  return up[0][u];\r\n}\r\n\r\ndeque<long long> path_query(int u, int v) {\r\n  deque<long long> r, k;\r\n  while (u ^ v) {\r\n    if (upper(nxt[u], v)) {\r\n      k = st.query(in[v] + 1, in[u]);\r\n      st.merge2(k, r);\r\n      break;\r\n    } else {\r\n      k = st.query(in[nxt[u]], in[u]);\r\n      u = up[0][nxt[u]];\r\n      st.merge2(k, r);\r\n    }\r\n  }\r\n  return r;\r\n}\r\n\r\nlong long query(int u, int v, long long &y) {\r\n  int lc = lca(u, v);\r\n  deque<long long> v1 = path_query(u, lc);\r\n  deque<long long> v2 = path_query(v, lc);\r\n  if (v1.size() && !v1[0]) return 0;\r\n  if (!v2.size() && !v2[0]) return 0;\r\n  if (v1.size() + v2.size() > 60) return 0;\r\n  reverse(v1.begin(), v1.end());\r\n  for (int x : v1) y /= x;\r\n  for (int x : v2) y /= x;\r\n  return y;\r\n}\r\n\r\nvoid update(int i, long long x) {\r\n  st.upd(in[id[i]], x);\r\n}\r\n\r\nvoid init(int n) {\r\n  while ((1 << lg) <= n) ++lg;\r\n  g.resize(n), up.resize(lg, vector<int> (n)), in.resize(n), en.resize(n), w.resize(n), nxt.resize(n), sz.resize(n), id.resize(n - 1), st.init(n);\r\n}\r\n\r\nint main() {\r\n  ios_base::sync_with_stdio(false);\r\n  cin.tie(0);\r\n  int n, q;\r\n  cin >> n >> q;\r\n  init(n);\r\n  for (int i = 0; i < n - 1; i++) {\r\n    int u, v;\r\n    cin >> u >> v >> w[i];\r\n    --u, --v;\r\n    g[u].emplace_back(v, i);\r\n    g[v].emplace_back(u, i);\r\n  }\r\n  dfs(0);\r\n  dfs_hld(0);\r\n  for (int i = 0; i < n - 1; i++) st.upd(in[id[i]], w[i]);\r\n  while (q--) {\r\n    int t;\r\n    cin >> t;\r\n    if (t == 1) {\r\n      int a, b;\r\n      long long y;\r\n      cin >> a >> b >> y;\r\n      cout << query(--a, --b, y) << '\\n';\r\n    } else {\r\n      int p;\r\n      long long c;\r\n      cin >> p >> c;\r\n      update(--p, c);\r\n    }\r\n  }\r\n  return 0;\r\n}\r\n"
+}

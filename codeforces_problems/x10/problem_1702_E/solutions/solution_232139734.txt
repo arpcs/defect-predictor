@@ -1,0 +1,36 @@
+{
+    "id": 232139734,
+    "contestId": 1702,
+    "creationTimeSeconds": 1699552751,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1702,
+        "index": "E",
+        "name": "Split Into Two Sets",
+        "type": "PROGRAMMING",
+        "rating": 1600,
+        "tags": [
+            "dfs and similar",
+            "dsu",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1702,
+        "members": [
+            {
+                "handle": "hemanth6"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1657463700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 78,
+    "memoryConsumedBytes": 11264000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#pragma GCC optimize(\"O3,unroll-loops\")\r\n#pragma GCC target(\"avx2,bmi,bmi2,lzcnt,popcnt\")\r\n\r\n// #define endl '\\n' //comment for interactive\r\n#define PI acos(-1.0)\r\n#define yes cout<<\"YES\"<<endl\r\n#define no cout<<\"NO\"<<endl\r\ntypedef long long ll;\r\ntypedef long double ld;\r\nll mod=(ll)998244353;\r\nll pow(ll a,ll b)\r\n{\r\n    b%=(mod-1);\r\n    if(a==0&&b==0)\r\n    return 1;\r\n    ll ans=1;\r\n    a%=mod;\r\n    while(b>0)\r\n    {\r\n        if(b%2==1)\r\n        {\r\n            ans=(ans*(ll)1*a)%mod;\r\n        }\r\n        a=(a*(ll)1*a)%mod;\r\n        b/=2;\r\n        b=b%mod;\r\n    }\r\n    ans%=mod;\r\n    return ans;\r\n}\r\nll inv(ll a,ll mod)\r\n{\r\n    return (pow(a,mod-2))%mod;\r\n}\r\n// Gets prime numbers upto N, NOT sqrt(N)\r\nvoid sieve(vector<ll>&answer,int n)\r\n{\r\n    vector<bool>prime(n + 1,true);\r\n    for(int i=2;i*i<=n;i++)\r\n    {\r\n        if(prime[i])\r\n        {\r\n            for(int j=i*i;j<=n;j+=i)\r\n            {\r\n                prime[j]=false;\r\n            }\r\n        }\r\n    }\r\n    for(int i=2;i<n+1;i++)\r\n    {\r\n        if(prime[i])\r\n        {\r\n            answer.push_back(i);\r\n        }\r\n    } \r\n}\r\nbool comp(const pair<ll,ll>&a,const pair<ll,ll>&b)\r\n{\r\n    return(a.first-a.second>b.first-b.second);\r\n}\r\nstruct node{\r\n    ll value;\r\n    node *arr[2];\r\n};\r\nnode *newnode()\r\n{\r\n    node *temp = new node;\r\n    temp->value = 0;\r\n    temp->arr[0] = temp->arr[1] = NULL;\r\n    return temp;\r\n}\r\nvoid insert(node *parent, ll xorr)\r\n{\r\n    node *temp = parent;\r\n    for (ll i=10; i>=0; i--)\r\n    {\r\n        bool val = xorr & (1<<i);\r\n        if (temp->arr[val] == NULL)\r\n            temp->arr[val] = newnode();\r\n \r\n        temp = temp->arr[val];\r\n    }\r\n    temp->value = xorr;\r\n}\r\nll query(node *parent, ll xorr)\r\n{\r\n    node *temp = parent;\r\n    for (ll i=10; i>=0; i--)\r\n    {\r\n        bool val = xorr & (1<<i);\r\n        if (temp->arr[1-val]!=NULL)\r\n            temp = temp->arr[1-val];\r\n        else if (temp->arr[val] != NULL)\r\n            temp = temp->arr[val];\r\n    }\r\n    return xorr^(temp->value);\r\n}\r\nll maxSubarrayXOR(ll arr[], ll n)\r\n{\r\n    node *root = newnode();\r\n    insert(root, 0);\r\n    ll result = INT_MIN, xorr =0;\r\n    for (ll i=0; i<n; i++)\r\n    {\r\n        xorr = xorr^arr[i];\r\n        insert(root, xorr);\r\n        result = max(result, query(root, xorr));\r\n    }\r\n    return result;\r\n}\r\nll shortestCycle(ll n,vector<vector<ll>>&adj)\r\n{\r\n    ll ans=1e17;\r\n    ll x;\r\n    for(ll i=0;i<n;i++)\r\n    {\r\n        vector<ll>d(n,1e17);\r\n        vector<ll>p(n,-1);\r\n        d[i]=0;\r\n        queue<ll>q;\r\n        q.push(i);\r\n        while(!q.empty())\r\n        {\r\n            x=q.front();\r\n            q.pop();\r\n            for(auto j:adj[x])\r\n            {\r\n                if(d[j]==1e17)\r\n                {\r\n                    d[j]=d[x]+1;\r\n                    p[j]=x;\r\n                    q.push(j);\r\n                }\r\n                else if(p[x]!=j&&p[j]!=x)\r\n                {\r\n                    ans=min(ans,d[x]+d[j]+1);\r\n                }\r\n            }\r\n        }\r\n    }\r\n    if(ans==1e17)\r\n    ans=-1;\r\n    return ans;\r\n}\r\nll n;\r\nll dfs(ll i,vector<bool>&vis,vector<vector<ll>>&adj)\r\n{\r\n    vis[i]=true;\r\n    for(auto j:adj[i])\r\n    {\r\n        // cout << j<<\" \"<<i<<\" \"<<vis[j] << endl;\r\n        if(!vis[j])\r\n        {\r\n            return (dfs(j,vis,adj)+1);\r\n        }\r\n    }\r\n    return 1;    \r\n}\r\nvoid solve()\r\n{\r\n    ll x,y,z=1;\r\n    cin >> n;\r\n    vector<vector<ll>>adj(n+1);\r\n    for(ll i=0;i<n;i++)\r\n    {\r\n        cin >> x >> y;\r\n        adj[x].push_back(y);\r\n        adj[y].push_back(x);\r\n        if(x==y)\r\n        z=0;\r\n        if(adj[x].size()>2)\r\n        z=0;\r\n        if(adj[y].size()>2)\r\n        z=0;\r\n    }\r\n    if(z==0)\r\n    {\r\n        no;\r\n        return;\r\n    }\r\n    vector<bool>vis(n+1,false);\r\n    for(ll i=1;i<=n;i++)\r\n    {\r\n        if(!vis[i])\r\n        {\r\n            x=dfs(i,vis,adj);\r\n            // cout << x << endl;\r\n            if(x%2==1)\r\n            {\r\n                z=0;\r\n                break;\r\n            }\r\n        }\r\n    }\r\n    if(z==0)\r\n    no;\r\n    else\r\n    yes;\r\n    return;\r\n}\r\nvoid solveTestcases()\r\n{\r\n    ll t=1;\r\n    cin >> t;\r\n    while(t--)\r\n    {\r\n        solve();\r\n    }\r\n}\r\nint main()\r\n{\r\n    // freopen(\"input.txt\", \"r\", stdin);\r\n    // freopen(\"output.txt\", \"w\", stdout);\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n    solveTestcases();\r\n    return 0;\r\n}\r\n\r\n"
+}

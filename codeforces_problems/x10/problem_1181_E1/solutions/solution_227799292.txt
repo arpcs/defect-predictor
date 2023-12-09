@@ -1,0 +1,37 @@
+{
+    "id": 227799292,
+    "contestId": 1181,
+    "creationTimeSeconds": 1697109411,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1181,
+        "index": "E1",
+        "name": "A Story of One Country (Easy)",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2500,
+        "tags": [
+            "brute force",
+            "divide and conquer",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1181,
+        "members": [
+            {
+                "handle": "SoyTony"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560677700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 43,
+    "timeConsumedMillis": 436,
+    "memoryConsumedBytes": 129433600,
+    "source": "// LUOGU_RID: 128953742\n#include<bits/stdc++.h>\nusing namespace std;\n\nconst int maxn=1005;\n\ninline int read(){\n    int x=0,w=1;char c=getchar();\n    while(c<'0'||c>'9'){if(c=='-')w=-1;c=getchar();}\n    while(c<='9'&&c>='0'){x=(x<<3)+(x<<1)+c-'0';c=getchar();}\n    return x*w;\n}\n\nint n;\nstruct Rectangle{\n    int l,r,u,d;\n    Rectangle()=default;\n    Rectangle(int l_,int r_,int u_,int d_):l(l_),r(r_),u(u_),d(d_){}\n}RT[maxn];\nstruct Segment{\n    int x,l,r,k,id;\n    Segment()=default;\n    Segment(int x_,int l_,int r_,int k_,int id_):x(x_),l(l_),r(r_),k(k_),id(id_){}\n    bool operator==(const Segment&rhs)const{\n        return (x==rhs.x)&&(l==rhs.l)&&(r==rhs.r)&&(k==rhs.k)&&(id==rhs.id);\n    }\n    bool operator<(const Segment &rhs)const{\n        if(x==rhs.x){\n            if(k==rhs.k) return id<rhs.id;\n            else return k<rhs.k;\n        }\n        else return x<rhs.x;\n    }\n};\nset<Segment> Sx,Sy;\ninline void insert(set<Segment> &S,int id,bool type){\n    if(!type) S.insert(Segment(RT[id].l,RT[id].u,RT[id].d,1,id)),S.insert(Segment(RT[id].r,RT[id].u,RT[id].d,-1,id));\n    else S.insert(Segment(RT[id].u,RT[id].l,RT[id].r,1,id)),S.insert(Segment(RT[id].d,RT[id].l,RT[id].r,-1,id));\n}\ninline void erase(set<Segment> &S,int id,bool type){\n    if(!type) S.erase(Segment(RT[id].l,RT[id].u,RT[id].d,1,id)),S.erase(Segment(RT[id].r,RT[id].u,RT[id].d,-1,id));\n    else S.erase(Segment(RT[id].u,RT[id].l,RT[id].r,1,id)),S.erase(Segment(RT[id].d,RT[id].l,RT[id].r,-1,id));\n}\nbool solve(set<Segment> nowX,set<Segment> nowY){\n    // cerr<<\"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\"<<endl;\n    // cerr<<\"X:\"<<endl;\n    // for(auto it:nowX) cerr<<it.x<<\" [\"<<it.l<<\",\"<<it.r<<\"] k:\"<<it.k<<\" id:\"<<it.id<<endl;\n    // cerr<<\"Y:\"<<endl;\n    // for(auto it:nowY) cerr<<it.x<<\" [\"<<it.l<<\",\"<<it.r<<\"] k:\"<<it.k<<\" id:\"<<it.id<<endl;\n    // cerr<<\"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\"<<endl;\n    if(nowX.size()==2) return true;\n    int cnt=0;\n    set<Segment> tmpX,tmpY;\n    int tot=0;\n    for(auto it1:nowX){\n        cnt+=it1.k,++tot;\n        if(!cnt&&tot!=nowX.size()){\n            // cerr<<\"X:\"<<it1.x<<endl;\n            for(auto it2:nowX){\n                // cerr<<it2.x<<endl;\n                if(it2.k==1) insert(tmpX,it2.id,0),insert(tmpY,it2.id,1);\n                if(it2==it1) break;\n            }\n            // cerr<<\"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\"<<endl;\n            // cerr<<\"X:\"<<endl;\n            // for(auto it:tmpX) cerr<<it.x<<\" [\"<<it.l<<\",\"<<it.r<<\"] k:\"<<it.k<<\" id:\"<<it.id<<endl;\n            // cerr<<\"Y:\"<<endl;\n            // for(auto it:tmpY) cerr<<it.x<<\" [\"<<it.l<<\",\"<<it.r<<\"] k:\"<<it.k<<\" id:\"<<it.id<<endl;\n            // cerr<<\"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\"<<endl;\n            for(auto it2:tmpX){\n                // cerr<<it2.id<<endl;\n                if(it2.k==1) erase(nowX,it2.id,0),erase(nowY,it2.id,1);\n            }\n            // cerr<<\"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\"<<endl;\n            // cerr<<\"X:\"<<endl;\n            // for(auto it:nowX) cerr<<it.x<<\" [\"<<it.l<<\",\"<<it.r<<\"] k:\"<<it.k<<\" id:\"<<it.id<<endl;\n            // cerr<<\"Y:\"<<endl;\n            // for(auto it:nowY) cerr<<it.x<<\" [\"<<it.l<<\",\"<<it.r<<\"] k:\"<<it.k<<\" id:\"<<it.id<<endl;\n            // cerr<<\"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\"<<endl;\n            return solve(tmpX,tmpY)&&solve(nowX,nowY);\n        }\n    }\n    tot=0;\n    for(auto it1:nowY){\n        cnt+=it1.k,++tot;\n        if(!cnt&&tot!=nowY.size()){\n            // cerr<<\"Y:\"<<it1.x<<endl;\n            for(auto it2:nowY){\n                if(it2.k==1) insert(tmpX,it2.id,0),insert(tmpY,it2.id,1);\n                if(it2==it1) break;\n            }\n            for(auto it2:tmpY){\n                if(it2.k==1) erase(nowX,it2.id,0),erase(nowY,it2.id,1);\n            }\n            return solve(tmpX,tmpY)&&solve(nowX,nowY);\n        }\n    }\n    return false;\n}\n\nint main(){\n    // freopen(\"g.in\",\"r\",stdin);\n    n=read();\n    for(int i=1,l,r,u,d;i<=n;++i){\n        l=read(),u=read(),r=read(),d=read();\n        RT[i]=Rectangle(l,r,u,d);\n        insert(Sx,i,0),insert(Sy,i,1);\n    }\n    if(solve(Sx,Sy)) printf(\"YES\\n\");\n    else printf(\"NO\\n\");\n    return 0;\n}"
+}

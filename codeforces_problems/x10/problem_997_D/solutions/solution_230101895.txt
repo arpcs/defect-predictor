@@ -1,0 +1,37 @@
+{
+    "id": 230101895,
+    "contestId": 997,
+    "creationTimeSeconds": 1698463124,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 997,
+        "index": "D",
+        "name": "Cycles in product",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "combinatorics",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 997,
+        "members": [
+            {
+                "handle": "__chtholly__"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530453900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 89,
+    "timeConsumedMillis": 312,
+    "memoryConsumedBytes": 17203200,
+    "source": "// LUOGU_RID: 131989617\n#include <cstdio>\n#include <cstring>\n#include <algorithm>\n#include <cmath>\n#include <cctype>\n#include <numeric>\n#include <vector>\n#include <set>\n#include <map>\n#include <queue>\n\nnamespace uvu\n{\n#define LOCAL __________________don_t_define_me______________________\n#define ll long long\n//#define int long long\n#define inf 0x3f3f3f3f\n//#define inf 0x3f3f3f3f3f3f3f3f\n#define debug(...) fprintf(stderr, __VA_ARGS__)\n#define gline debug(\"now is #%d\\n\", __LINE__)\n#define pii std::pair <int, int>\n#define mkp std::make_pair\n#define fi first\n#define se second\nchar _ST_;\nconst int BUFSIZE = (1 << 20);\nchar ibuf[BUFSIZE], *iS = ibuf, *iT = ibuf;\nchar obuf[BUFSIZE], *oS = obuf, *oT = obuf + BUFSIZE;\nchar getc()\n{\n#ifdef LOCAL\n\treturn getchar();\n#else\n\tif(iS == iT) iT = (iS = ibuf) + fread(ibuf, 1, BUFSIZE, stdin);\n\treturn iS == iT ? EOF : *iS++;\n#endif\n}\n\nvoid FLUSH()\n{\n\tfwrite(obuf, 1, oS - obuf, stdout);\n\toS = obuf;\n}\nstruct FLUSHER{ ~FLUSHER() { FLUSH(); }}cute;\nvoid putc(char c)\n{\n#ifdef LOCAL\n\tputchar(c);\n#else\n\t*oS++ = c;\n\tif(oS == oT) FLUSH();\n#endif\n}\n\ntemplate <typename T = int> T read()\n{\n\tT x = 0, f = 1; char c = getc();\n\tfor(; !isdigit(c); c = getc()) if(c == '-') f = -1;\n\tfor(;  isdigit(c); c = getc()) x = (x << 3) + (x << 1) + (c ^ 48);\n\treturn x * f;\n}\n\ntemplate <typename T> void print(T x, char c)\n{\nstatic int sta[BUFSIZE], top;\n\ttop = 0;\n\tif(x < 0) putc('-'), x = -x;\n\tif(!x) sta[top = 1] = 0;\n\tfor(; x; x /= 10) sta[++top] = x % 10;\n\twhile(top) putc(sta[top--] ^ 48);\n\tif(c) putc(c);\n}\n\nint readstr(char *s, int base)\n{\n\tint idx = base - 1; char c = getc();\n\tfor(; !isdigit(c) && !isalpha(c) && c != '#' && c != '.' && c != '(' && c != ')' && c != '?'; c = getc());\n\tfor(;  isdigit(c) ||  isalpha(c) || c == '#' || c == '.' || c == '(' || c == ')' || c == '?'; c = getc()) s[++idx] = c;\n\treturn idx - base + 1;\n}\n\ntemplate <typename T> void ckmin(T &x, T y) { x = x < y ? x : y; } \ntemplate <typename T> void ckmax(T &x, T y) { x = x > y ? x : y; } \n#define mod 998244353\n//#define mod 1000000007\nvoid plus_(int &x, int y) { x = x + y >= mod ? x + y - mod : x + y; }\nvoid mul_(int &x, int y) { x = 1ll * x * y % mod; }\nint ksm(int a, int b) { int res = 1; for(; b; b >>= 1, mul_(a, a)) if(b & 1) mul_(res, a); return res; }\nint small_mod(int x) { return x >= mod ? x - mod : x; }\n#define N 5010\nint fac[N], invf[N]; int C(int n, int m) { return 1ll * fac[n] * invf[m] % mod * invf[n - m] % mod; }\nint K;\nstd::vector <int> vec[N];\nint f[N][100], out[N][100], g[N][100];\n\nvoid dfs1(int k, int fa)\n{\n\tfor(int nx : vec[k]) if(nx != fa) dfs1(nx, k);\n\tf[k][0] = 1;\n\tfor(int p = 2; p <= K; p++)\n\t{\n\t\tfor(int nx : vec[k])\n\t\t{\n\t\t\tif(nx == fa) continue;\n\t\t\tfor(int j = 0; j < p; j += 2)\n\t\t\t\tplus_(f[k][p], 1ll * f[k][j] * f[nx][p - j -2] % mod);\n\t\t}\n\t}\n}\nint sta[N], top;\nint pre[N][100], suf[N][100];\nint *res;\nvoid dfs2(int k, int fa)\n{\n\tif(k == 1) { memcpy(g[k], f[k], sizeof(g[k])); }\n\telse\n\t{\n\t\tg[k][0] = 1;\n\t\tfor(int p = 2; p <= K; p++)\n\t\t{\n\t\t\tfor(int nx : vec[k])\n\t\t\t{\n\t\t\t\tif(nx == fa) continue;\n\t\t\t\tfor(int j = 0; j < p; j += 2)\n\t\t\t\t\tplus_(g[k][p], 1ll * g[k][j] * f[nx][p - j -2] % mod);\n\t\t\t}\n\t\t\t\tfor(int j = 0; j < p; j += 2)\n\t\t\t\t\tplus_(g[k][p], 1ll * g[k][j] * out[k][p - j -2] % mod);\n\t\t}\n\t}\n\tfor(int p = 0; p <= K; p++) plus_(res[p], g[k][p]);//, printf(\"g[%d][%d] = %d, f = %d, out = %d\\n\", k, p, g[k][p], f[k][p], out[k][p]);\n\ttop = 0;\n\tfor(int nx : vec[k]) if(nx != fa) sta[++top] = nx;\n\tfor(int i = 0; i <= K; i++) pre[0][i] = suf[top + 1][i] = 0;\n\tfor(int i = 1; i <= top; i++)\n\t\tfor(int j = 0; j <= K; j++)\n\t\t\tpre[i][j] = small_mod(pre[i - 1][j] + f[sta[i]][j]);\n\tfor(int i = top; i; i--)\n\t\tfor(int j = 0; j <= K; j++)\n\t\t\tsuf[i][j] = small_mod(suf[i + 1][j] + f[sta[i]][j]);\n\tfor(int _ = 1; _ <= top; _++)\n\t{\n\t\tint nx = sta[_];\n//\t\tprintf(\"nx = %d\\n\", nx);\n\t\tout[nx][0] = 1;\n\t\tfor(int p = 2; p <= K; p += 2)\n\t\t{\n\t\t\tfor(int j = 0; j < p; j += 2)\n\t\t\t\tplus_(out[nx][p], 1ll * out[nx][j] * out[k][p - j - 2] % mod);\n\t\t\tfor(int j = 0; j < p; j += 2)\n\t\t\t\tplus_(out[nx][p], 1ll * out[nx][j] * small_mod(pre[_ - 1][p - j - 2] + suf[_ + 1][p - j - 2]) % mod);\n\t\t}\n\t}\n\tfor(int nx : vec[k]) if(nx != fa) dfs2(nx, k);\n}\n\nvoid solve(int n, int *r)\n{\n\tres = r;\n//\tfor(int i = 0; i <= K; i++) printf(\"(res[%d] = %d)\\n\", i, res[i]);\n\tfor(int i = 1; i <= n; i++) vec[i].clear();\n\tfor(int i = 1; i <= n; i++) for(int j = 0; j <= K; j++) f[i][j] = out[i][j] = g[i][j] = 0;\n\tfor(int i = 1, x, y; i < n; i++) x = read(), y = read(), vec[x].push_back(y), vec[y].push_back(x);\n\tdfs1(1, 0);\n//\tout[1][0] = 1;\n\tdfs2(1, 0);\n//\tfor(int i = 0; i <= K; i++) printf(\"(res[%d] = %d)\\n\", i, res[i]);\n}\n\nint f1[100], f2[100], ans[100];\n\nvoid solve()\n{\n//\tmemset(h, idx = -1, sizeof(h));\n\tint n1 = read(), n2 = read(); K = read();\n\tif(K & 1) { printf(\"0\\n\"); return; }\n\tsolve(n1, f1);\n\tsolve(n2, f2);\n//\tfor(int i = 0; i <= K; i++) printf(\"f1[%d] = %d\\n\", i, f1[i]);\n//\tfor(int i = 0; i <= K; i++) printf(\"f2[%d] = %d\\n\", i, f2[i]);\n\tfor(int i = 0; i <= K; i++)\n\t\tfor(int j = 0; i + j <= K; j++)\n\t\t\tplus_(ans[i + j], 1ll * f1[i] * f2[j] % mod * C(i + j, i) % mod);\n\tprint(ans[K], '\\n');\n}\nvoid init()\n{\n\tint n = N - 10;\n\tfor(int i = fac[0] = 1; i <= n; i++) fac[i] = 1ll * fac[i - 1] * i % mod;\n\tinvf[n] = ksm(fac[n], mod - 2);\n\tfor(int i = n - 1; ~i; i--) invf[i] = 1ll * invf[i + 1] * (i + 1) % mod; \n}\nchar _ED_;\nvoid mian()\n{\n\tdebug(\"%.3f MB\\n\", abs(&_ST_ - &_ED_) / 1024.0 / 1024);\n\tinit();\n\tfor(int T = 1; T; solve(), T--);\n\treturn;\n}\n\n#ifdef int\n\t#undef int\n#endif\n}\n\nint main()\n{\n//\tfreopen(\"tmp.in\", \"r\", stdin);\n//\tfreopen(\"tmp.out\", \"w\", stdout);\n\tuvu::mian();\n\treturn 0;\n} "
+}
