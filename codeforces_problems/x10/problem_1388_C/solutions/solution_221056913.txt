@@ -1,0 +1,38 @@
+{
+    "id": 221056913,
+    "contestId": 1388,
+    "creationTimeSeconds": 1693383247,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1388,
+        "index": "C",
+        "name": "Uncle Bogdan and Country Happiness",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 1800,
+        "tags": [
+            "dfs and similar",
+            "greedy",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1388,
+        "members": [
+            {
+                "handle": "Actium"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1596119700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 46,
+    "timeConsumedMillis": 249,
+    "memoryConsumedBytes": 5222400,
+    "source": "#include <iostream>\n#include <vector>\n\nusing graph_t = std::vector<std::vector<size_t>>;\n\ntemplate <typename T>\nstd::istream& operator >>(std::istream& input, std::vector<T>& v)\n{\n    for (T& a : v)\n        input >> a;\n\n    return input;\n}\n\nvoid answer(bool v)\n{\n    constexpr const char* s[2] = { \"NO\", \"YES\" };\n    std::cout << s[v] << '\\n';\n}\n\nvoid remove_parents(graph_t& g, size_t u, size_t p)\n{\n    for (size_t& v : g[u]) {\n        if (v == p)\n            v = g[u].back();\n        else\n            remove_parents(g, v, u);\n    }\n\n    if (u != 0)\n        g[u].pop_back();\n}\n\nvoid count_visitors(const graph_t& g, const std::vector<unsigned>& p, size_t u, std::vector<unsigned>& v)\n{\n    v[u] = p[u];\n\n    for (const size_t x : g[u]) {\n        count_visitors(g, p, x, v);\n\n        v[u] += v[x];\n    }\n}\n\nbool validate_hi(const graph_t& g, const std::vector<unsigned>& p, const std::vector<unsigned>& v, const std::vector<int>& h, size_t u)\n{\n    unsigned k = 0;\n    for (const size_t x : g[u]) {\n        if (!validate_hi(g, p, v, h, x))\n            return false;\n\n        const unsigned d = (h[x] < 0 ? v[x] + h[x] : v[x] - h[x]);\n        if (d % 2 != 0)\n            return false;\n\n        k += (h[x] < 0 ? -h[x] : 0) + d / 2;\n    }\n\n    const unsigned d = (h[u] < 0 ? v[u] + h[u] : v[u] - h[u]);\n    if (d % 2 != 0)\n        return false;\n\n    const unsigned q = (h[u] < 0 ? -h[u] : 0) + d / 2;\n    return q <= k + p[u];\n}\n\nvoid solve(graph_t& g, const std::vector<unsigned>& p, const std::vector<int>& h)\n{\n    const size_t n = g.size();\n\n    remove_parents(g, 0, n);\n\n    std::vector<unsigned> v(n);\n    count_visitors(g, p, 0, v);\n\n    answer(validate_hi(g, p, v, h, 0));\n}\n\nvoid test_case()\n{\n    size_t n;\n    std::cin >> n;\n\n    unsigned m;\n    std::cin >> m;\n\n    std::vector<unsigned> p(n);\n    std::cin >> p;\n\n    std::vector<int> h(n);\n    std::cin >> h;\n\n    graph_t g(n);\n    for (size_t i = 1; i < n; ++i) {\n        unsigned x, y;\n        std::cin >> x >> y;\n\n        g[x-1].push_back(y-1);\n        g[y-1].push_back(x-1);\n    }\n\n    solve(g, p, h);\n}\n\nint main()\n{\n    std::cin.tie(nullptr)->sync_with_stdio(false);\n\n    size_t t;\n    std::cin >> t;\n\n    while (t-- > 0)\n        test_case();\n\n    return 0;\n}\n"
+}

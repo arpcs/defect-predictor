@@ -1,0 +1,38 @@
+{
+    "id": 228698537,
+    "contestId": 766,
+    "creationTimeSeconds": 1697641686,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 766,
+        "index": "C",
+        "name": "Mahmoud and a Message",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 1700,
+        "tags": [
+            "brute force",
+            "dp",
+            "greedy",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 766,
+        "members": [
+            {
+                "handle": "fakebot54rus"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1486487100
+    },
+    "programmingLanguage": "Clang++20 Diagnostics",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "//#pragma GCC optimize(\"O3\")\n// #pragma GCC target(\"popcnt\")\n#include <bits/stdc++.h>\n\nusing namespace std;\ntypedef long long ll;\n#define int ll\ntypedef long double ld;\n#define double ld\n\n\n#define all(x) std::begin(x),std::end(x)\n#define rall(x) std::rbegin(x),std::rend(x)\n#define pii std::pair<int, int>\n#define tri std::tuple<int, int, int>\n#define quad std::tuple<int, int, int, int>\n#define pent std::tuple<int, int, int, int, int>\n#define pdd std::pair<double, double>\n#define pb push_back\n#define eb emplace_back\n#define lb lower_bound\n#define ub upper_bound\n#define fi first\n#define se second\n\n\nconst int INF = numeric_limits<int>::max()/3;\nconst int MOD = (int)1e9+7;\nconst int N = (int)26;\n\nint n;\nstring s;\nint a[N];\nvoid read() {\n  cin >> n >> s;\n  for (int i = 0; i < N; i++) {\n    cin >> a[i];\n  }\n  return;\n}\n\n\ntri answ;\nvoid write() {\n  auto[amount,mx,mn] = answ;\n  cout << amount << '\\n' << mx << '\\n' << mn << endl;\n  return;\n}\n\nvoid solve() {\n  answ = {0,0,0};\n  function<void(int, function<void(int,int)>)> check_suffix = [&](int ind, function<void(int,int)> okay) {\n    bool present[N];\n    memset(present,false,sizeof(present));\n    int cnt = 0;\n    for (int bwd = ind; bwd >= 0; bwd--) {\n      cnt++;\n      int cur = s[bwd]-'a';\n      present[cur] = true;\n      bool possible = true;\n      for (int i = 0; i < 26; i++) {\n        if (present[i] && (cnt > a[i])) {\n          possible = false;\n          break;\n        }\n      }\n      if (possible) {\n        okay(bwd,ind);\n      } else {\n        break;\n      }\n    }\n    return;\n  };\n  vector<int> dp(n+1,0);    // dp[i] - \u043a\u043e\u043b\u0438\u0447\u0435\u0441\u0442\u0432\u043e \u0441\u043f\u043e\u0441\u043e\u0431\u043e\u0432 \u0441\u043e\u0441\u0442\u0430\u0432\u0438\u0442\u044c \u043f\u0440\u0435\u0444\u0438\u043a\u0441 \u0434\u043b\u0438\u043d\u044b i\n  dp[0] = 1;  // \u041f\u0440\u0435\u0444\u0438\u043a\u0441 \u0434\u043b\u0438\u043d\u044b 0 \u0432\u0441\u0435\u0433\u0434\u0430 \u043c\u043e\u0436\u043d\u043e \u0441\u043e\u0441\u0442\u0430\u0432\u0438\u0442\u044c \u0438 \u0442\u043e\u043b\u044c\u043a\u043e \u043e\u0434\u0438\u043d\n  int curdp = 0;\n  function<void(int,int)> update_dp = [&](int l, int r) {\n    (curdp+=dp[l])%=MOD;\n    return;\n  };\n  int mx = 0;\n  function<void(int,int)> get_mx = [&](int l, int r) {\n//    cout << \"l,r:  \" << (l+1) << ' ' << (r+1) << endl;\n    mx = max(mx,r-l+1);\n    return;\n  };\n  for (int i = 1; i <= n; i++) {\n    curdp = 0;\n    check_suffix(i-1,update_dp);\n    check_suffix(i-1,get_mx);\n    dp[i] = curdp;\n  }\n  int mn = 1; // \u041f\u043e \u0443\u0441\u043e\u043b\u0447\u0430\u043d\u0438\u044e \u043f\u0440\u0435\u0434\u043f\u043e\u043b\u0430\u0433\u0430\u0435\u043c, \u0447\u0442\u043e \u0443 \u043d\u0430\u0441 \u0435\u0434\u0438\u043d\u044b\u0439 \u043e\u0442\u0440\u0435\u0437\u043e\u043a\n  bool used[N];\n  memset(used,false,sizeof(used));\n  int cnt = 0;\n  for (int i = 0; i < n; i++) {\n    int cur = s[i]-'a';\n    used[cur]=true;\n    cnt++;\n    for (int i = 0; i < 26; i++) {\n      if (used[i] && cnt > a[i]) {\n        mn++;\n        memset(used,0,sizeof(used));\n        cnt = 1;\n        used[cur] = true;\n      }\n    }\n  }\n  answ = make_tuple(dp[n],mx,mn);\n  return;\n}\n\n\nsigned main() {\n  ios_base::sync_with_stdio(0);\n  cin.tie(0);\n  int tt = 1;\n//  cin >> tt;\n  while (tt--) {\n    read();\n    solve();\n    write();\n  }\n\n  return 0;\n}\n\n\n\n\n/*\n\n * \u042f \u043d\u0435 \u0441\u043e\u0432\u0441\u0435\u043c \u043f\u043e\u043d\u044f\u043b \u0440\u0435\u0448\u0435\u043d\u0438\u0435 ._.\n * \u041d\u0443 \u0442\u0438\u043f\u0430 \u043f\u0443\u0441\u0442\u044c \u043d\u0430\u043c \u0438\u0437\u0432\u0435\u0441\u0442\u043d\u043e, \u0441\u043a\u043e\u043b\u044c\u043a\u043e \u0435\u0441\u0442\u044c \u0441\u043f\u043e\u0441\u043e\u0431\u043e\u0432 \u0440\u0430\u0437\u0431\u0438\u0442\u044c \u0441\u0442\u0440\u043e\u043a\u0443. \u041c\u044b \u043f\u0440\u0438\u0434\u0435\u043b\u0430\u043b\u0438 \u043d\u043e\u0432\u044b\u0439 \u0441\u0438\u043c\u0432\u043e\u043b. \u0421\u043a\u043e\u043b\u044c\u043a\u043e \u0440\u0430\u0437\u0431\u0438\u0435\u043d\u0438\u0439 \u0434\u043e\u0431\u0430\u0432\u0438\u043b\u043e\u0441\u044c?\n * \u041f\u043e\u043b\u0443\u0447\u0430\u0435\u0442\u0441\u044f, \u0447\u0442\u043e \u043c\u044b \u043f\u0440\u043e\u0431\u0443\u0435\u043c \u043a\u0430\u0436\u0434\u0443\u044e \u043f\u043e\u0434\u0441\u0442\u0440\u043e\u043a\u0443 \u0441 \u044d\u0442\u0438\u043c \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u043c \u043a\u0430\u043a \u043f\u0440\u0430\u0432\u044b\u043c, \u0438 \u043f\u0440\u0438\u0431\u0430\u0432\u043b\u044f\u0435\u043c \u043a\u043e\u043b\u0438\u0447\u0435\u0441\u0442\u0432\u043e \u0441\u043f\u043e\u0441\u043e\u0431\u043e\u0432 \u0441\u0434\u0435\u043b\u0430\u0442\u044c \u043f\u0440\u0435\u0444\u0438\u043a\u0441, \u043f\u0440\u0435\u0434\u0448\u0435\u0441\u0442\u0432\u0443\u044e\u0449\u0438\u0439\n * \u043f\u043e\u0434\u0441\u0442\u0440\u043e\u043a\u0435. DAmn, \u043a\u0430\u043a \u044f \u0432\u0447\u0435\u0440\u0430-\u0442\u043e \u044d\u0442\u043e \u043d\u0435 \u043f\u043e\u043d\u044f\u043b?\n\n*/"
+}

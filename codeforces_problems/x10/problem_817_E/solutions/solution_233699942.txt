@@ -1,0 +1,36 @@
+{
+    "id": 233699942,
+    "contestId": 817,
+    "creationTimeSeconds": 1700576989,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 817,
+        "index": "E",
+        "name": "Choosing The Commander",
+        "type": "PROGRAMMING",
+        "rating": 2000,
+        "tags": [
+            "bitmasks",
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 817,
+        "members": [
+            {
+                "handle": "luogu_bot1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1497539100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 42,
+    "timeConsumedMillis": 109,
+    "memoryConsumedBytes": 35635200,
+    "source": "// LUOGU_RID: 136268494\n// https://leetcode.cn/problems/maximum-xor-of-two-numbers-in-an-array/\r\n// https://www.luogu.com.cn/problem/CF817E\r\n#include <bits/stdc++.h>\r\n#define int long long\r\n#define endl '\\n'\r\n\r\nusing namespace std;\r\n\r\nstruct Trie01 {\r\n\r\n    // \u5de6\u5b50\u6811\u6307\u5411\u8868\u793a 0 \u7684\u5b50\u8282\u70b9\r\n    Trie01* left = 0;\r\n    // \u53f3\u5b50\u6811\u6307\u5411\u8868\u793a 1 \u7684\u5b50\u8282\u70b9\r\n    Trie01* right = 0;\r\n    // \u6700\u9ad8\u4f4d\u7684\u4e8c\u8fdb\u5236\u4f4d\u7f16\u53f7\u4e3a 30\r\n    static constexpr int HIGH_BIT = 30;\r\n    // \u5f53\u524d\u8282\u70b9\u7684\u4e2a\u6570\r\n    int cnt = 0;\r\n\r\n    Trie01() {}\r\n\r\n    void insert(int num) {  // \u63d2\u5165word\r\n        Trie01* cur = this;\r\n        for (int k = HIGH_BIT; k >= 0; k--) {\r\n            int bit = (num >> k) & 1;\r\n            if (bit == 0) {\r\n                if (!cur->left) {\r\n                    cur->left = new Trie01();\r\n                }\r\n                cur->left->cnt++;\r\n                cur = cur->left;\r\n            } else {\r\n                if (!cur->right) {\r\n                    cur->right = new Trie01();\r\n                }\r\n                cur->right->cnt++;\r\n                cur = cur->right;\r\n            }\r\n        }\r\n    }\r\n\r\n    void del(int num) {\r\n        Trie01* cur = this;\r\n        for (int k = HIGH_BIT; k >= 0; --k) {\r\n            int bit = (num >> k) & 1;\r\n            if (bit == 0) {\r\n                cur->left->cnt--;\r\n                cur = cur->left;\r\n            } else {\r\n                cur->right->cnt--;\r\n                cur = cur->right;\r\n            }\r\n        }\r\n    }\r\n\r\n    int query(int num) {    // \u8ba1\u7b97\u5b57\u5178\u6811\u4e2d\u548cnum\u5f02\u6216\u6700\u5927\u7684\u6570(\u8be2\u95ee\u524d\u5b57\u5178\u6811\u4e2d\u5fc5\u987b\u5b58\u5728\u6570, \u4e0d\u7136\u4f1a\u62a5\u7a7a\u6307\u9488)\r\n        Trie01* cur = this;\r\n        int x = 0;\r\n        for (int k = HIGH_BIT; k >= 0; --k) {\r\n            int bit = (num >> k) & 1;\r\n            if (bit == 0) {\r\n                // a_i \u7684\u7b2c k \u4e2a\u4e8c\u8fdb\u5236\u4f4d\u4e3a 0\uff0c\u5e94\u5f53\u5f80\u8868\u793a 1 \u7684\u5b50\u8282\u70b9 right \u8d70\r\n                if (cur->right && cur->right->cnt) {\r\n                    cur = cur->right;\r\n                    x = x * 2 + 1;\r\n                } else {\r\n                    cur = cur->left;\r\n                    x = x * 2;\r\n                }\r\n            } else {\r\n                // a_i \u7684\u7b2c k \u4e2a\u4e8c\u8fdb\u5236\u4f4d\u4e3a 1\uff0c\u5e94\u5f53\u5f80\u8868\u793a 0 \u7684\u5b50\u8282\u70b9 left \u8d70\r\n                if (cur->left && cur->left->cnt) {\r\n                    cur = cur->left;\r\n                    x = x * 2 + 1;\r\n                } else {\r\n                    cur = cur->right;\r\n                    x = x * 2;\r\n                }\r\n            }\r\n        }\r\n        return x;\r\n    }\r\n\r\n    int query2(int x, int y) {    // \u8ba1\u7b97\u5b57\u5178\u6811\u4e2d\u548cx\u5f02\u6216\u540e\u5c0f\u4e8ey\u7684\u6570\u6709\u51e0\u4e2a\r\n        Trie01* cur = this;\r\n        int res = 0;\r\n        for (int k = HIGH_BIT; k >= 0; k--) {\r\n            int xx = x >> k & 1, yy = y >> k & 1;\r\n            if (yy == 0) {\r\n                if (xx == 0) {\r\n                    if (cur->left == 0) break;\r\n                    cur = cur->left;\r\n                } else {\r\n                    if (cur->right == 0) break;\r\n                    cur = cur->right;\r\n                }\r\n            } else {\r\n                if (xx == 0) {\r\n                    if (cur->left) res += cur->left->cnt;\r\n                    if (cur->right == 0) break;\r\n                    cur = cur->right;\r\n                } else {\r\n                    if (cur->right) res += cur->right->cnt;\r\n                    if (cur->left == 0) break;\r\n                    cur = cur->left;\r\n                }\r\n            }\r\n        }\r\n        return res;\r\n    }\r\n};\r\n\r\nsigned main() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n    cout << fixed << setprecision(15);\r\n    int q;\r\n    cin >> q;\r\n    Trie01 T;\r\n    while (q--) {\r\n        int op, p, l;\r\n        cin >> op;\r\n        if (op == 1) {\r\n            cin >> p;\r\n            T.insert(p);\r\n        } else if (op == 2) {\r\n            cin >> p;\r\n            T.del(p);\r\n        } else {\r\n            cin >> p >> l;\r\n            cout << T.query2(p, l) << endl;\r\n        }\r\n    }\r\n    return 0;\r\n}"
+}

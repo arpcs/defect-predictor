@@ -1,0 +1,36 @@
+{
+    "id": 205279055,
+    "contestId": 1523,
+    "creationTimeSeconds": 1683681697,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1523,
+        "index": "F",
+        "name": "Favorite Game",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3300,
+        "tags": [
+            "bitmasks",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1523,
+        "members": [
+            {
+                "handle": "Icedpiggy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1622385300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 21708800,
+    "source": "// LUOGU_RID: 109961085\nbool stDef;\r\n#include<cstdio>\r\n#include<vector>\r\n#include<cassert>\r\n#include<cstring>\r\n#include<algorithm>\r\nusing namespace std;\r\n#define isDigit(ch) ('0'<=ch&&ch<='9')\r\n#define i64 long long\r\ninline int rd()\r\n{\r\n\tint num=0;char ch=getchar();bool opt=0;\r\n\tfor(;!isDigit(ch);ch=getchar())\r\n\t\tif(ch=='-')opt=1;\r\n\tfor(;isDigit(ch);ch=getchar())\r\n\t\tnum=num*10+(ch-'0');\r\n\treturn opt?-num:num;\r\n}\r\ninline void Max(int &x,int y){if(y>x)x=y;}\r\ninline void Min(int &x,int y){if(y<x)x=y;}\r\nconst int N=16,M=105,W=1<<14|3;\r\nconst int inf=0x3f3f3f3f;\r\n\r\nstruct P{int x,y,t;};\r\ninline bool operator < (const P&A,const P&B){return A.t<B.t;}\r\n\r\nint n,m,w;\r\nint x[N+M],y[N+M],t[M];P tmp[M];\r\ninline int dis(int i,int j){return abs(x[i]-x[j])+abs(y[i]-y[j]);}\r\n\r\nint d[W][N+M];\r\nint F[W][M],G[W][M];\r\n\r\nint Ans=0;\r\n\r\ninline void debug()\r\n{\r\n\tfor(int i=0;i< n;i++)\r\n\t\tprintf(\"%d %d\\n\",x[i],y[i]);\r\n\tfor(int i=0;i< m;i++)\r\n\t\tprintf(\"%d %d %d\\n\",x[n+i],y[n+i],t[i]);\r\n\tfor(int S=0;S<=w;S++)\r\n\t{\r\n\t\tprintf(\"S={\");\r\n\t\tfor(int i=0;i< n;i++)\r\n\t\t\tif((S>>i)&1)printf(\"%d \",i);\r\n\t\tprintf(\"}\\n\");\r\n\t\tfor(int i=0;i<n+m;i++)\r\n\t\t\tprintf(\"d[S][%d]=%d \",i,d[S][i]);\r\n\t\tputchar('\\n');\r\n\t\tfor(int i=0;i<=m;i++)\r\n\t\t\tprintf(\"F[S][%d]=%d \",i,F[S][i]);\r\n\t\tputchar('\\n');\r\n\t\tfor(int i=0;i< m;i++)\r\n\t\t\tprintf(\"G[S][%d]=%d \",i,G[S][i]);\r\n\t\tputchar('\\n');\r\n\t}\r\n}\r\n\r\nbool edDef;\r\nint main()\r\n{\r\n//\tprintf(\"%lf\\n\",(&stDef-&edDef)/1048576.0);\r\n\tn=rd(),m=rd(),w=(1<<n)-1;\r\n\tfor(int i=0;i< n;i++)x[i]=rd(),y[i]=rd();\r\n\tfor(int i=0;i< m;i++)tmp[i]={rd(),rd(),rd()};\r\n\tsort(tmp,tmp+m);\r\n\tfor(int i=0;i< m;i++)x[n+i]=tmp[i].x,y[n+i]=tmp[i].y,t[i]=tmp[i].t;\r\n\tmemset(d,0x3f,sizeof(d));\r\n\tmemset(F,0x3f,sizeof(F));\r\n\tfor(int S=0;S<=w;S++)\r\n\t\tfor(int i=0;i<n+m;i++)\r\n\t\t\tfor(int j=0;j<n;j++)\r\n\t\t\t\tif((S>>j)&1)Min(d[S][i],dis(j,i));\r\n\tfor(int i=0;i< n;i++)F[1<<i][0]=0;\r\n\tfor(int i=0;i< m;i++)G[0][i]=1;\r\n\tfor(int S=0;S<=w;S++)\r\n\t{\r\n\t\tfor(int i=0;i<=m;i++)\r\n\t\t{\r\n\t\t\tif(F[S][i]>=inf)continue;\r\n\t\t\tfor(int j=0;j< n;j++)\r\n\t\t\t\tMin(F[S|(1<<j)][i],F[S][i]+d[S][j]);\r\n\t\t\tfor(int j=0;j< m;j++)\r\n\t\t\t\tif(F[S][i]+d[S][n+j]<=t[j])\r\n\t\t\t\t\tMax(G[S][j],i+1),Max(Ans,G[S][j]);\r\n\t\t}\r\n\t\tfor(int i=0;i< m;i++)\r\n\t\t{\r\n\t\t\tfor(int j=0;j< n;j++)\r\n\t\t\t\tMin(F[S|(1<<j)][G[S][i]],t[i]+min(d[S][j],dis(n+i,j)));\r\n\t\t\tfor(int j=i+1;j< m;j++)\r\n\t\t\t\tif(t[i]+min(d[S][n+j],dis(n+i,n+j))<=t[j])\r\n\t\t\t\t\tMax(G[S][j],G[S][i]+1),Max(Ans,G[S][j]);\r\n\t\t}\r\n\t}\r\n\tprintf(\"%d\",Ans);\r\n\treturn 0;\r\n}\r\n//20230509 21:47:35 ~ (Done!,P)22:10:28 ~ (C)07:49:59 ~ 09:21:10 "
+}

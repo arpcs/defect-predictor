@@ -1,0 +1,36 @@
+{
+    "id": 203791960,
+    "contestId": 91,
+    "creationTimeSeconds": 1682681113,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 91,
+        "index": "E",
+        "name": "Igloo Skyscraper",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2500,
+        "tags": [
+            "data structures",
+            "geometry"
+        ]
+    },
+    "author": {
+        "contestId": 91,
+        "members": [
+            {
+                "handle": "wxhtzdy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1308582000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 80,
+    "timeConsumedMillis": 1559,
+    "memoryConsumedBytes": 101068800,
+    "source": "/**\r\n *    author:  wxhtzdy\r\n *    created: 28.04.2023 13:05:21\r\n**/\r\n#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nconst int MAX = 1e6;\r\n\r\nstruct Line {\r\n  int k, n, i;\r\n  Line(int _k = 0, int _n = 0, int _i = 0) : k(_k), n(_n), i(_i) {}\r\n  long long eval(long long t) {\r\n    return k * t + n;\r\n  }\r\n};\r\n\r\nint cnt, ls[5 * MAX], rs[5 * MAX];\r\nLine st[5 * MAX];\r\n\r\nvoid Modify(int& v, int l, int r, Line ln) {\r\n  if (!v) {\r\n    v = ++cnt;\r\n  }\r\n  int mid = l + r >> 1;\r\n  if (ln.eval(mid) > st[v].eval(mid)) {\r\n    swap(ln, st[v]);\r\n  }\r\n  if (l == r) {\r\n    return;\r\n  }\r\n  if (ln.eval(l) > st[v].eval(l)) {\r\n    Modify(ls[v], l, mid, ln);\r\n  } else {\r\n    Modify(rs[v], mid + 1, r, ln);\r\n  }\r\n} \r\n\r\npair<long long, int> Query(int v, int l, int r, int t) {\r\n  pair<long long, int> f = make_pair(st[v].eval(t), st[v].i);\r\n  if (l == r) {\r\n    return f;\r\n  }                            \r\n  int mid = l + r >> 1;\r\n  if (t <= mid) {\r\n    return max(f, Query(ls[v], l, mid, t));\r\n  } else {\r\n    return max(f, Query(rs[v], mid + 1, r, t));\r\n  }\r\n}\r\n\r\nint main() {\r\n  ios::sync_with_stdio(false);\r\n  cin.tie(0);  \r\n  int n, q;\r\n  cin >> n >> q;\r\n  vector<int> a(n), b(n);\r\n  for (int i = 0; i < n; i++) {\r\n    cin >> a[i] >> b[i];\r\n  }\r\n  const int BLOCK = 1288;\r\n  vector<int> root;\r\n  for (int l = 0; l < n; l += BLOCK) {\r\n    root.push_back(0);\r\n    int r = min(n, l + BLOCK);\r\n    for (int i = l; i < r; i++) {\r\n      Modify(root.back(), 0, MAX, Line(b[i], a[i], i));\r\n    }\r\n  }\r\n  while (q--) {\r\n    int l, r, t;\r\n    cin >> l >> r >> t;\r\n    --l; --r;           \r\n    if (l / BLOCK + 1 >= r / BLOCK) {\r\n      pair<long long, int> ans = {0, 0};\r\n      for (int i = l; i <= r; i++) {\r\n        ans = max(ans, {b[i] * 1LL * t + a[i], i});\r\n      }\r\n      cout << ans.second + 1 << '\\n';\r\n    } else {\r\n      pair<long long, int> ans = {0, 0};\r\n      while (l % BLOCK != 0) {\r\n        ans = max(ans, {b[l] * 1LL * t + a[l], l});\r\n        l++;\r\n      }\r\n      while (r % BLOCK != BLOCK - 1) {\r\n        ans = max(ans, {b[r] * 1LL * t + a[r], r});\r\n        r--;\r\n      }\r\n      for (int i = l / BLOCK; i <= r / BLOCK; i++) {\r\n        ans = max(ans, Query(root[i], 0, MAX, t));\r\n      }\r\n      cout << ans.second + 1 << '\\n';\r\n    }\r\n  }                                        \r\n  return 0;\r\n}"
+}

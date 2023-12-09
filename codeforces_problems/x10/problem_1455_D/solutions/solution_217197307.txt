@@ -1,0 +1,36 @@
+{
+    "id": 217197307,
+    "contestId": 1455,
+    "creationTimeSeconds": 1691209957,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1455,
+        "index": "D",
+        "name": "Sequence and Swaps",
+        "type": "PROGRAMMING",
+        "rating": 1600,
+        "tags": [
+            "dp",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1455,
+        "members": [
+            {
+                "handle": "rli43"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1606746900
+    },
+    "programmingLanguage": "Rust 2021",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#![allow(unused_imports, dead_code, clippy::needless_range_loop, unused_labels)]\nuse std::{\n    cmp::{max, min, Ordering},\n    collections::{BTreeMap, BTreeSet, HashMap, HashSet, VecDeque},\n    fs,\n    io::{stdin, stdout, BufReader},\n    iter,\n    mem::{self, swap},\n    usize,\n};\n\nfn main() {\n    let mut sc = Scanner::new(stdin());\n    let mut pt = Printer::new(stdout());\n    let test_cases = sc.next::<usize>();\n    for _ in 0..test_cases {\n        let n = sc.next::<usize>();\n        let mut x = sc.next::<u32>();\n        let mut arr = sc.next_n::<u32>(n).collect::<Vec<_>>();\n\n        let mut unsorted_indices = VecDeque::new();\n        for i in 0..(arr.len() - 1) {\n            if arr[i] > arr[i + 1] {\n                unsorted_indices.push_back(i);\n            }\n        }\n\n        let mut count = 0;\n        for i in 0..(arr.len() - 1) {\n            if unsorted_indices.is_empty() {\n                break;\n            }\n            if arr[i] > x {\n                if arr[i] > arr[i + 1] {\n                    assert_eq!(unsorted_indices.pop_front().unwrap(), i);\n                }\n                swap(&mut arr[i], &mut x);\n                count += 1;\n            }\n        }\n\n        for i in 1..arr.len() {\n            if arr[i - 1] > arr[i] {\n                count = -1;\n                break;\n            }\n        }\n        pt.println(&count);\n    }\n}\n\nmod io {\n    use std::collections::{HashSet, VecDeque};\n    use std::fmt::Display;\n    use std::io::{BufReader, BufWriter, Lines, Read, Write};\n    use std::marker::PhantomData;\n    use std::{any::type_name, io::BufRead, str::FromStr};\n\n    pub struct ScannerIter<'a, R: Read, T> {\n        remaining: usize,\n        sc: &'a mut Scanner<R>,\n        item: PhantomData<T>,\n    }\n\n    impl<R: Read, T: FromStr> Iterator for ScannerIter<'_, R, T> {\n        type Item = T;\n\n        fn next(&mut self) -> Option<Self::Item> {\n            if self.remaining == 0 {\n                None\n            } else {\n                self.remaining -= 1;\n                Some(self.sc.next::<T>())\n            }\n        }\n    }\n\n    pub struct Scanner<R: Read> {\n        tokens: VecDeque<String>,\n        delimiters: Option<HashSet<char>>,\n        lines: Lines<BufReader<R>>,\n    }\n    impl<R: Read> Scanner<R> {\n        pub fn new(source: R) -> Self {\n            Self {\n                tokens: VecDeque::new(),\n                delimiters: None,\n                lines: BufReader::new(source).lines(),\n            }\n        }\n\n        pub fn with_delimiters(source: R, delimiters: &[char]) -> Self {\n            Self {\n                tokens: VecDeque::new(),\n                delimiters: Some(delimiters.iter().copied().collect()),\n                lines: BufReader::new(source).lines(),\n            }\n        }\n\n        pub fn next<T: FromStr>(&mut self) -> T {\n            let token = loop {\n                let front = self.tokens.pop_front();\n                if let Some(token) = front {\n                    break token;\n                }\n                self.receive_input();\n            };\n            token\n                .parse::<T>()\n                .unwrap_or_else(|_| panic!(\"input {} isn't a {}\", token, type_name::<T>()))\n        }\n\n        pub fn next_n<T: FromStr>(&mut self, n: usize) -> ScannerIter<'_, R, T> {\n            ScannerIter {\n                remaining: n,\n                sc: self,\n                item: PhantomData,\n            }\n        }\n\n        pub fn next_line(&mut self) -> String {\n            assert!(self.tokens.is_empty(), \"You have unprocessed token\");\n            self.lines\n                .next()\n                .and_then(|e| e.ok())\n                .expect(\"Failed to read.\")\n        }\n\n        fn receive_input(&mut self) {\n            let line = self\n                .lines\n                .next()\n                .and_then(|e| e.ok())\n                .expect(\"Failed to read.\");\n            if let Some(delimiters) = &self.delimiters {\n                for token in line.split(|c| delimiters.contains(&c)) {\n                    self.tokens.push_back(token.to_string());\n                }\n            } else {\n                for token in line.split_whitespace() {\n                    self.tokens.push_back(token.to_string());\n                }\n            }\n        }\n    }\n\n    pub struct Printer<W: Write> {\n        writer: BufWriter<W>,\n    }\n    impl<W: Write> Printer<W> {\n        pub fn new(destination: W) -> Self {\n            Self {\n                writer: BufWriter::new(destination),\n            }\n        }\n\n        pub fn print(&mut self, s: &(impl Display + ?Sized)) {\n            self.writer\n                .write_all(s.to_string().as_bytes())\n                .expect(\"print failed.\");\n        }\n\n        pub fn print_bytes(&mut self, b: &[u8]) {\n            self.writer.write_all(b).expect(\"print_bytes failed.\");\n        }\n\n        pub fn println(&mut self, s: &(impl Display + ?Sized)) {\n            self.print(s);\n            self.newline();\n        }\n\n        pub fn newline(&mut self) {\n            self.print_bytes(&[b'\\n']);\n        }\n\n        pub fn print_iter(&mut self, mut iter: impl Iterator<Item = impl Display>) {\n            if let Some(e) = iter.next() {\n                self.print(&e);\n                for e in iter {\n                    self.print_bytes(&[b' ']);\n                    self.print(&e);\n                }\n            }\n            self.newline();\n        }\n    }\n    impl<W: Write> Drop for Printer<W> {\n        fn drop(&mut self) {\n            self.writer\n                .flush()\n                .expect(\"flush failed when dropping Printer.\");\n        }\n    }\n}\n#[allow(unused_imports)]\nuse io::*;\n"
+}

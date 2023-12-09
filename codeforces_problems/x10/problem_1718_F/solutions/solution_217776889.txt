@@ -1,0 +1,37 @@
+{
+    "id": 217776889,
+    "contestId": 1718,
+    "creationTimeSeconds": 1691454544,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1718,
+        "index": "F",
+        "name": "Burenka, an Array and Queries",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3300,
+        "tags": [
+            "data structures",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1718,
+        "members": [
+            {
+                "handle": "houzhiyuan123"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1660660500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 733,
+    "memoryConsumedBytes": 36249600,
+    "source": "#include <bits/stdc++.h>\r\n#define V vector\r\n#define Vi vector<int>\r\n#define sz(a) ((int)a.size())\r\n#define fi first\r\n#define se second\r\n#define Int pair<int, int>\r\n#define Inf ((int)1e9)\r\n#define pb push_back\r\n#define ins insert\r\n#define For(i, x, y) for (auto i = (x); i <= (y); i++)\r\n#define Rep(i, x, y) for (auto i = (x); i >= (y); i--)\r\n#define IO(x) freopen(#x \".in\", \"r\", stdin), freopen(#x \".out\", \"w\", stdout);\r\nusing namespace std;\r\nstruct que {\r\n  int l, r, id;\r\n};\r\nint main() {\r\n  ios::sync_with_stdio(0), cin.tie(0), cout.tie(0);\r\n  int n, m, C, Q;\r\n  cin >> n >> m >> C >> Q;\r\n  Vi b(C + 5), p, id(C + 5), sum(C + 5);\r\n  int B = sqrt(C), Len = 0;\r\n  For(i, 2, C) {\r\n    if (!b[i]) {\r\n      p.pb(i);\r\n      if (i <= B) id[i] = ++Len;\r\n    }\r\n    for (int x : p) {\r\n      if (i * x > C) break;\r\n      b[i * x] = 1;\r\n      if (i % x == 0) break;\r\n    }\r\n  }\r\n  Vi a(n + 5);\r\n  V<Vi> mp(n + 5, Vi(Len + 5));\r\n  map<__int128, int> dp;\r\n  For(i, 1, n) {\r\n    cin >> a[i];\r\n    for (int x : p) {\r\n      if (x > B) break;\r\n      if (a[i] % x == 0) {\r\n        mp[i][id[x]] = 1;\r\n        while (a[i] % x == 0) a[i] /= x;\r\n      }\r\n    }\r\n  }\r\n  For(j, 1, Len) For(i, 1, n) mp[i][j] += mp[i - 1][j];\r\n  V<que> q(Q + 5);\r\n  For(i, 1, Q) cin >> q[i].l >> q[i].r, q[i].id = i;\r\n  int S = sqrt(n);\r\n  Vi bl(n + 5);\r\n  For(i, 1, n) bl[i] = (i - 1) / S + 1;\r\n  sort(&q[1], &q[Q + 1], [&](que x, que y) {\r\n    return bl[x.l] != bl[y.l] ? x.l < y.l : x.r < y.r;\r\n  });\r\n  Vi vis(C + 5), Ans(Q + 5);\r\n  int L = 1, R = 0;\r\n  For(i, 1, Q) {\r\n    while (L > q[i].l)\r\n      if (++vis[a[--L]] == 1 && a[L] != 1) sum[C / a[L]]++;\r\n    while (R < q[i].r)\r\n      if (++vis[a[++R]] == 1 && a[R] != 1) sum[C / a[R]]++;\r\n    while (L < q[i].l)\r\n      if (--vis[a[L++]] == 0 && a[L - 1] != 1) sum[C / a[L - 1]]--;\r\n    while (R > q[i].r)\r\n      if (--vis[a[R--]] == 0 && a[R + 1] != 1) sum[C / a[R + 1]]--;\r\n    Vi gg(B + 5, 1), v;\r\n    gg[0] = 0;\r\n    __int128 bit = 0;\r\n    For(j, 1, Len) {\r\n      if (mp[R][j] - mp[L - 1][j]) {\r\n        int x = p[j - 1];\r\n        bit |= ((__int128)1) << (j - 1);\r\n        v.pb(x);\r\n        for (int t = x; t <= B; t += x) gg[t] = 0;\r\n      }\r\n    }\r\n    int ans = 0;\r\n    For(i, 1, B) {\r\n      gg[i] += gg[i - 1];\r\n      ans -= sum[i] * gg[i];\r\n    }\r\n    auto dfs = [&](auto lf, int x, int ff, int t) -> int {\r\n      if (t == sz(v) || x < v[t]) return x * ff;\r\n      return lf(lf, x, ff, t + 1) + lf(lf, x / v[t], -ff, t + 1);\r\n    };\r\n    ans += dp.count(bit) ? dp[bit] : (dp[bit] = dfs(dfs, C, 1, 0));\r\n    Ans[q[i].id] = ans;\r\n  }\r\n  For(i, 1, Q) cout << Ans[i] << '\\n';\r\n}"
+}

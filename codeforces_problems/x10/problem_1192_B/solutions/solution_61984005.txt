@@ -1,0 +1,38 @@
+{
+    "id": 61984005,
+    "contestId": 1192,
+    "creationTimeSeconds": 1570366557,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "B",
+        "name": "Dynamic Diameter",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "AliShahali1382"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 102,
+    "timeConsumedMillis": 670,
+    "memoryConsumedBytes": 60313600,
+    "points": 100.0,
+    "source": "#include <bits/stdc++.h>\r\n#pragma GCC optimize (\"O2\")\r\n#pragma GCC optimize (\"unroll-loops\")\r\n//#pragma GCC optimize(\"no-stack-protector,fast-math\")\r\n\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef pair<int, int> pii;\r\ntypedef pair<pii, int> piii;\r\ntypedef pair<ll, ll> pll;\r\n#define debug(x) cerr<<#x<<'='<<(x)<<endl;\r\n#define debugp(x) cerr<<#x<<\"= {\"<<(x.first)<<\", \"<<(x.second)<<\"}\"<<endl;\r\n#define debug2(x, y) cerr<<\"{\"<<#x<<\", \"<<#y<<\"} = {\"<<(x)<<\", \"<<(y)<<\"}\"<<endl;\r\n#define debugv(v) cerr<<#v<<\" : \";for (auto x:v) cerr<<x<<' ';cerr<<endl;\r\n#define all(x) x.begin(), x.end()\r\n#define pb push_back\r\n#define kill(x) return cout<<x<<'\\n', 0;\r\n\r\nconst ld eps=1e-7;\r\nconst int inf=1000000010;\r\nconst ll INF=10000000000000010LL;\r\nconst int mod = 1000000007;\r\nconst int MAXN = 100010, LOG=20;\r\n\r\nstruct Node{\r\n\tll a, b, c, ab, bc, abc=0;\r\n\tNode(ll x=0) : a(x), b(-2*x), c(x), ab(-x), bc(-x){}\r\n};\r\n\r\nNode operator +(Node x, Node y){\r\n\tNode out;\r\n\tout.a=max(x.a, y.a);\r\n\tout.b=max(x.b, y.b);\r\n\tout.c=max(x.c, y.c);\r\n\tout.ab=max(max(x.ab, y.ab), x.a+y.b);\r\n\tout.bc=max(max(x.bc, y.bc), x.b+y.c);\r\n\tout.abc=max(max(x.abc, y.abc), max(x.ab+y.c, x.a+y.bc));\r\n\treturn out;\t\r\n}\r\n\r\nll n, m, w, u, v, x, y, t, a, b, last;\r\nll W[MAXN];\r\nint E[MAXN][2];\r\nint id[MAXN];\r\nint stt[MAXN], fnt[MAXN], timer=1;\r\nNode seg[MAXN<<3];\r\nll lazy[MAXN<<3];\r\nvector<pii> G[MAXN];\r\n\r\nvoid add_lazy(int id, ll val){\r\n\tseg[id].a+=val;\r\n\tseg[id].b-=2*val;\r\n\tseg[id].c+=val;\r\n\tseg[id].ab-=val;\r\n\tseg[id].bc-=val;\r\n\tlazy[id]+=val;\r\n}\r\n\r\nvoid shift(int id){\r\n\tif (!lazy[id]) return ;\r\n\tadd_lazy(id<<1, lazy[id]);\r\n\tadd_lazy(id<<1 | 1, lazy[id]);\r\n\tlazy[id]=0;\r\n}\r\n\r\nvoid Add(int id, int tl, int tr, int l, int r, ll val){\r\n\t//if (id==1) cerr<<\"Add \"<<l<<' '<<r<<\"  \"<<val<<'\\n';\r\n\tif (r<=tl || tr<=l) return ;\r\n\tif (l<=tl && tr<=r){\r\n\t\tadd_lazy(id, val);\r\n\t\treturn ;\r\n\t}\r\n\tshift(id);\r\n\tint mid=(tl+tr)>>1;\r\n\tAdd(id<<1, tl, mid, l, r, val);\r\n\tAdd(id<<1 | 1, mid, tr, l, r, val);\r\n\tseg[id]=seg[id<<1] + seg[id<<1 | 1];\r\n}\r\n\r\nvoid dfs(int node, int par){\r\n\tstt[node]=timer++;\r\n\tfor (pii p:G[node]) if (p.first!=par){\r\n\t\tdfs(p.first, node);\r\n\t\tAdd(1, 1, 2*n, stt[p.first], fnt[p.first], W[p.second]);\r\n\t\tid[p.first]=p.second;\r\n\t}\r\n\tfnt[node]=timer++;\r\n}\r\n\r\nint main(){\r\n\tios_base::sync_with_stdio(false);cin.tie(0);cout.tie(0);\r\n\t//freopen(\"input.txt\", \"r\", stdin);\r\n\t//freopen(\"output.txt\", \"w\", stdout);\r\n\tcin>>n>>m>>w;\r\n\tfor (int i=0; i<n-1; i++){\r\n\t\tcin>>E[i][0]>>E[i][1]>>W[i];\r\n\t\tG[E[i][0]].pb({E[i][1], i});\r\n\t\tG[E[i][1]].pb({E[i][0], i});\r\n\t}\r\n\tdfs(1, 1);\r\n\tfor (int i=0; i<n-1; i++) if (stt[E[i][1]]<stt[E[i][0]]) swap(E[i][0], E[i][1]);\r\n\t\r\n\twhile (m--){\r\n\t\tcin>>x>>y;\r\n\t\tx=(x+last)%(n-1);\r\n\t\ty=(y+last)%w;\r\n\t\tAdd(1, 1, 2*n, stt[E[x][1]], fnt[E[x][1]], y-W[x]);\r\n\t\tW[x]=y;\r\n\t\tcout<<(last=seg[1].abc)<<'\\n';\r\n\t}\r\n\t\r\n\treturn 0;\r\n}\r\n/*\r\n4 3 2000\r\n1 2 100\r\n2 3 1000\r\n2 4 1000\r\n2 1030\r\n1 1020\r\n1 890\r\n\r\n\r\n4 3 2000\r\n1 2 100\r\n2 3 1030\r\n2 4 1000\r\n2 1030\r\n1 1020\r\n1 890\r\n\r\n\r\n*/\r\n"
+}

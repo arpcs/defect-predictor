@@ -1,0 +1,37 @@
+{
+    "id": 82028229,
+    "contestId": 1307,
+    "creationTimeSeconds": 1590918310,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "mayaohua2003"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 202,
+    "memoryConsumedBytes": 16076800,
+    "source": "#include <bits/stdc++.h>\r\n#define inf 0x3f3f3f3f\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef double db;\r\n\r\nstruct Edge {\r\n  int t,f,v,next;\r\n  Edge() {}\r\n  Edge(int a,int b,int c,int d):t(a),f(b),v(c),next(d) {}\r\n};\r\n\r\nEdge e[1000005];\r\nint head[55],vs,vt,tot=-1;\r\n\r\ninline void addEdge(int x,int y,int z,int v) {\r\n  e[++tot]=Edge(y,z,v,head[x]);\r\n  head[x]=tot;\r\n  e[++tot]=Edge(x,0,-v,head[y]);\r\n  head[y]=tot;\r\n}\r\n\r\nstruct Point {\r\n  ll x,y;\r\n  Point() {}\r\n  Point(ll a,ll b):x(a),y(b) {}\r\n  Point operator - (Point b) {return Point(x-b.x,y-b.y);}\r\n};\r\n\r\ninline ll cross(Point x,Point y) {\r\n  return x.x*y.y-x.y*y.x;\r\n}\r\n\r\ninline db calc(Point x,ll k) {\r\n  return (db)(k+x.y)/x.x;\r\n}\r\n\r\nPoint p[55],st[55];\r\nint sz;\r\n\r\nvoid gethull() {\r\n  int top=1;\r\n  st[1]=Point(0,0);\r\n  for(int i=1;i<=sz;i++) {\r\n  \twhile (top>1&&cross(p[i]-st[top],st[top]-st[top-1])>=0) top--;\r\n  \tst[++top]=p[i];\r\n  }\r\n  sz=top-1;\r\n  for(int i=1;i<=sz;i++) p[i]=st[i+1];\r\n}\r\n\r\ndb query(ll k) {\r\n  int l=1,r=sz;\r\n  while (r-l>2) {\r\n    int m1=l+(r-l)/3,m2=r-(r-l)/3;\r\n    if (calc(p[m1],k)<=calc(p[m2],k)) r=m2; else l=m1;\r\n  }\r\n  db ans=1e18;\r\n  for(int i=l;i<=r;i++) ans=min(ans,calc(p[i],k));\r\n  return ans;\r\n}\r\n\r\nnamespace Flow {\r\n\r\nint dis[55],cur[55];\r\nbool in[55];\r\nqueue <int> q;\r\n\r\nbool spfa() {\r\n  memset(in,0,sizeof(in));\r\n  memset(dis,0x3f,sizeof(dis));\r\n  dis[vs]=0;in[vs]=1;\r\n  q.push(vs);\r\n  while (!q.empty()) {\r\n  \tint x=q.front();q.pop();\r\n\tin[x]=0;cur[x]=head[x];\r\n  \tfor(int i=head[x];i!=-1;i=e[i].next)\r\n  \t  if (e[i].f&&dis[x]+e[i].v<dis[e[i].t]) {\r\n  \t  \t  int u=e[i].t;\r\n  \t  \t  dis[u]=dis[x]+e[i].v;\r\n  \t  \t  if (!in[u]) {\r\n  \t  \t  \t    in[u]=1;\r\n  \t  \t  \t    q.push(u);\r\n\t\t\t  }\r\n\t\t}\r\n  }\r\n  return dis[vt]<inf;\r\n}\r\n\r\nint vis[55],cnt;\r\n\r\nint dfs(int x,int a) {\r\n  if (x==vt||!a) return a;\r\n  vis[x]=cnt;\r\n  int ans=0;\r\n  for(int &i=cur[x];i!=-1;i=e[i].next)\r\n    if (e[i].f&&vis[e[i].t]<cnt&&dis[x]+e[i].v==dis[e[i].t]) {\r\n    \tint u=e[i].t;\r\n    \tint f=dfs(u,min(a,e[i].f));\r\n    \tif (f) {\r\n    \t\te[i].f-=f;\r\n    \t\te[i^1].f+=f;\r\n    \t\tans+=f;\r\n    \t\ta-=f;\r\n    \t\tif (!a) break;\r\n\t\t}\r\n\t}\r\n  return ans;\r\n}\r\n\r\nvoid msmf() {\r\n  ll s1=0,s2=0;\r\n  while (spfa()) {\r\n  \tint t;\r\n  \tdo {\r\n  \t\tcnt++;\r\n  \t\tt=dfs(vs,inf);\r\n  \t\ts1+=t;\r\n  \t\ts2+=(ll)t*dis[vt];\r\n\t  } while (t);\r\n\tp[++sz]=Point(s1,s2);\r\n  }\r\n}\r\n\r\n}\r\n\r\nint main() {\r\n  memset(head,255,sizeof(head));\r\n  int n,m;\r\n  scanf(\"%d%d\",&n,&m);\r\n  vs=1;vt=n;\r\n  for(int i=1;i<=m;i++) {\r\n  \tint x,y,z;\r\n  \tscanf(\"%d%d%d\",&x,&y,&z);\r\n  \taddEdge(x,y,1,z);\r\n  }\r\n  Flow::msmf();\r\n  gethull();\r\n  int k;\r\n  scanf(\"%d\",&k);\r\n  for(int i=1;i<=k;i++) {\r\n  \tint x;\r\n  \tscanf(\"%d\",&x);\r\n  \tprintf(\"%.10f\\n\",query(x));\r\n  }\r\n  return 0;\r\n}"
+}

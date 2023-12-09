@@ -1,0 +1,40 @@
+{
+    "id": 235278143,
+    "contestId": 79,
+    "creationTimeSeconds": 1701458346,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 79,
+        "index": "C",
+        "name": "Beaver",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 1800,
+        "tags": [
+            "data structures",
+            "dp",
+            "greedy",
+            "hashing",
+            "strings",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 79,
+        "members": [
+            {
+                "handle": "daohuyenchi21"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1304175600
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 37,
+    "timeConsumedMillis": 156,
+    "memoryConsumedBytes": 21401600,
+    "source": "#include <bits/stdc++.h>\r\n#define ull unsigned long long\r\n#define db double\r\n#define fi first\r\n#define se second\r\n#define PB push_back\r\n#define ll long long\r\n#define int long long\r\n#define ii pair<int, int>\r\n#define vi vector<int>\r\n#define vii vector<ii>\r\n#define vvi vector<vi>\r\n#define vvvi vector<vvi>\r\n#define  FOR(i, a, b) for (int i = (a), _b = (b); i <= _b; ++i)\r\n#define FORD(i, b, a) for (int i = (b), _a = (a); i >= _a; --i)\r\n#define FORV(v, H) for(auto &v: H)\r\n#define reset(c, x) memset(c, x, sizeof(c))\r\n#define BIT(mask, i) ((mask >> i) & 1)\r\n#define ONBIT(mask, i) (mask  (1LL << (i)))\r\n#define OFFBIT(mask, i) (mask &~ (1LL << (i)))\r\n#define REV(mask, i) (mask ^ (1LL << (i)))\r\n#define CBIT __builtin_popcountll\r\n#define lwb lower_bound\r\n#define upb upper_bound\r\n#define all(v) v.begin(), v.end()\r\n#define task \"79C\"\r\n\r\nusing namespace std;\r\n\r\nconst long long oo = 1e18 + 7;\r\nconst int MAXN     = 1e5 + 7;\r\nconst int MOD      = 1e9 + 7;\r\nconst int MAXV     = 1e6 + 7;\r\nconst int BASE     = 311;\r\ntemplate <class X, class Y> bool maximize(X &a, const Y &b) {\r\n    if(a < b) return a = b, true;\r\n    return false;\r\n}\r\n\r\ntemplate <class X, class Y> bool minimize(X &a, const Y &b) {\r\n    if(a > b) return a = b, true;\r\n    return false;\r\n}\r\n\r\nmt19937 rng(chrono::steady_clock().now().time_since_epoch().count());\r\n\r\nint N;\r\nstring s;\r\nstring b[15];\r\nint HashS[MAXN], HashB[15][MAXN];\r\nint pwBase[MAXN];\r\n\r\nint getS(int i, int j) {\r\n    return (HashS[j] - HashS[i - 1] * pwBase[j - i + 1] + MOD * MOD) % MOD;\r\n}\r\n\r\nint getB(int i, int l, int r) {\r\n    return (HashB[i][r] - HashB[i][l - 1] * pwBase[r - l + 1] + MOD * MOD) % MOD;\r\n}\r\n\r\nstruct IT {\r\n    #define lef(id) (id << 1)\r\n    #define rig(id) ((id << 1) | 1)\r\n\r\n    int it[MAXN * 4], lz[MAXN * 4];\r\n\r\n    void Init() {\r\n        FOR(i, 1, (s.size() - 1) * 4 + 100) it[i] = s.size() - 1, lz[i] = oo;\r\n    }\r\n\r\n    void down(int id, int l, int r) {\r\n        if(l == r) return;\r\n        int val = lz[id];\r\n        lz[id] = oo;\r\n        if(val < oo) {\r\n            FOR(j, lef(id), rig(id)) {\r\n                minimize(it[j], val);\r\n                minimize(lz[j], val);\r\n            }\r\n        }\r\n    }\r\n\r\n    void update(int id, int l, int r, int u, int v, int val) {\r\n        if(l > v || r < u) return;\r\n        if(u <= l && r <= v) {\r\n            minimize(it[id], val);\r\n            minimize(lz[id], val);\r\n            down(id, l, r);\r\n            return;\r\n        }\r\n        int mid = (l + r) >> 1;\r\n        down(id, l, r);\r\n        update(lef(id), l, mid, u, v, val);\r\n        update(rig(id), mid + 1, r, u, v, val);\r\n        it[id] = min(it[lef(id)], it[rig(id)]);\r\n    }\r\n\r\n    int get(int id, int l, int r, int u, int v) {\r\n        if(l > v || r < u) return s.size();\r\n        if(u <= l && r <= v) return it[id];\r\n        int mid = (l + r) >> 1;\r\n        down(id, l, r);\r\n        return min(get(lef(id), l, mid, u, v), get(rig(id), mid + 1, r, u, v));\r\n    }\r\n} IT;\r\n\r\nint res[MAXN];\r\n\r\n\r\n\r\nsigned main() {\r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n\r\n    // freopen(task\".INP\", \"r\", stdin);\r\n    // freopen(task\".OUT\", \"w\", stdout);\r\n\r\n    cin >> s;\r\n    s = ' ' + s;\r\n    pwBase[0] = 1;\r\n    FOR(i, 1, s.size() - 1) {\r\n        HashS[i] = (HashS[i - 1] * BASE + s[i] - 'A' + 1) % MOD;\r\n        pwBase[i] = (pwBase[i - 1] * BASE) % MOD;\r\n    }\r\n    \r\n    IT.Init();\r\n\r\n    cin >> N;\r\n    FOR(i, 1, N) {\r\n        cin >> b[i];\r\n        b[i] = ' ' + b[i];\r\n        FOR(j, 1, b[i].size() - 1) {\r\n            HashB[i][j] = (HashB[i][j - 1] * BASE + b[i][j] - 'A' + 1) % MOD;\r\n        }\r\n    }\r\n\r\n    // cout << s.size() - 1 << '\\n';\r\n// \r\n    \r\n\r\n    FOR(i, 1, s.size() - 1) {\r\n        res[i] = s.size() - 1;\r\n        IT.update(1, 1, s.size() - 1, i, i, s.size() - 1);\r\n    }\r\n\r\n    // FOR(i, 1, s.size() - 1) {\r\n    //     cout << IT.get(1, 1, s.size() - 1, i, i) << ' ';\r\n    // }\r\n    // cout << '\\n';\r\n\r\n    FOR(i, 1, s.size() - 1) {\r\n        res[i] = IT.get(1, 1, s.size() - 1, i, i);\r\n        FOR(j, 1, N) {\r\n            if(i + b[j].size() - 2 <= s.size() - 1 && getS(i, i + b[j].size() - 2) == getB(j, 1, b[j].size() - 1)) {\r\n                minimize(res[i], i + b[j].size() - 3);\r\n            }\r\n        }\r\n        // cout << i << ' ' << res[i] << '\\n';\r\n            IT.update(1, 1, s.size() - 1, 1, i, res[i]);\r\n    }\r\n\r\n    int MaxLen = 0;\r\n    bool x = false;\r\n    int ans = 0;\r\n    FOR(i, 1, s.size() - 1) {\r\n        int cur = IT.get(1, 1, s.size() - 1, i, i) - i + 1;\r\n        if(cur < 0) continue;\r\n        if(maximize(MaxLen, cur)) {\r\n            ans = i - 1;\r\n            x = true;\r\n        }\r\n    }\r\n\r\n    // cerr << ('_' < 'A') <<'\\n';\r\n    // if(!x) cout << -1 << ' ';\r\n    cout << MaxLen << ' ' << ans << '\\n';\r\n\r\n\r\n\r\n    cerr << \"Time elapsed: \" << (1.0 * clock() / CLOCKS_PER_SEC) << \" s.\\n\";\r\n\r\n    return 0;\r\n}\r\n"
+}

@@ -1,0 +1,48 @@
+{
+    "id": 226476717,
+    "contestId": 1213,
+    "creationTimeSeconds": 1696352326,
+    "relativeTimeSeconds": 7006,
+    "problem": {
+        "contestId": 1213,
+        "index": "F",
+        "name": "Unstable String Sort",
+        "type": "PROGRAMMING",
+        "rating": 2100,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "greedy",
+            "implementation",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1213,
+        "members": [
+            {
+                "handle": "algohary"
+            },
+            {
+                "handle": "ahmed.elbakly"
+            },
+            {
+                "handle": "ahmedtawfik"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "teamId": 133479,
+        "teamName": "Dragon Ball AAA",
+        "ghost": false,
+        "startTimeSeconds": 1696345320
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 14,
+    "timeConsumedMillis": 265,
+    "memoryConsumedBytes": 24166400,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\nusing ll = long long;\n\nstruct DSU {\n    int n;\n    vector<int> par, size;\n\n    DSU(int n) : n(n) {\n        par.assign(n, 0);\n        size.assign(n, 1);\n        iota(begin(par), end(par), 0);\n    }\n\n    int find(int v) {\n        return (v == par[v] ? v : par[v] = find(par[v]));\n    }\n\n    bool unite(int a, int b) {\n        a = find(a), b = find(b);\n        if (a == b) return false;\n        if (size[a] < size[b]) swap(a, b);\n        par[b] = a;\n        size[a] += size[b];\n        return true;\n    }\n\n    int sz(int v) {\n        return size[find(v)];\n    }\n\n    vector<vector<int>> comp() {\n        vector<int> leader(n), compSize(n);\n        for (int i = 0; i < n; i++) {\n            leader[i] = find(i);\n            compSize[leader[i]]++;\n        }\n        vector<vector<int>> ans(n);\n        for (int i = 0; i < n; i++) {\n            ans[leader[i]].reserve(compSize[i]);\n        }\n        for (int i = 0; i < n; i++) {\n            ans[leader[i]].push_back(i);\n        }\n        auto pred = [&](const vector<int> &v) {\n            return v.empty();\n        };\n        ans.erase(remove_if(begin(ans), end(ans), pred), end(ans));\n        return ans;\n    }\n};\n\nvoid solve() {\n    int n, k;\n    cin >> n >> k;\n    vector<int> a(n), b(n);\n    for (auto& i : a) cin >> i, i--;\n    for (auto& i : b) cin >> i, i--;\n\n    map<int, int> mp;\n    for (int i = 0; i < n; i++) {\n        mp[a[i]] = i;\n    }\n    vector<int> v(n);\n    for (int i = 0; i < n; i++) {\n        v[i] = mp[b[i]];\n    }\n\n    DSU dsu(n);\n    vector<int> mark(n+1);\n    for(int i = 0; i<n; i++){\n        if(i < v[i]){\n            mark[i]++;\n            mark[v[i]+1]--;\n        }\n    }\n    for (int i = 1; i <= n; ++i) {\n        mark[i] += mark[i-1];\n    }\n    for (int i = 1; i < n; i++) {\n        int mn = min(mark[i], mark[i-1]);\n        if(mn!=0){\n            dsu.unite(i-1,i);\n        }\n    }\n\n    auto comps = dsu.comp();\n    if (comps.size() < k) {\n        cout << \"NO\\n\";\n        return;\n    }\n    string ans(n, '.');\n    char c = 'a';\n    for (const auto& comp : comps) {\n        for (int x : comp) {\n            ans[a[x]] = c;\n        }\n        if (c != 'z') c++;\n    }\n    cout << \"YES\\n\";\n    cout << ans << \"\\n\";\n}\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    solve();\n}"
+}

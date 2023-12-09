@@ -1,0 +1,34 @@
+{
+    "id": 57806566,
+    "contestId": 1192,
+    "creationTimeSeconds": 1564154645,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "GyojunYoun"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "points": 0.0,
+    "source": "#include <bits/stdc++.h>\n#define eb emplace_back\n#define allv(V) ((V).begin()),((V).end())\n#define sorv(V) sort(allv(V))\n#define univ(V) (V).erase(unique(allv(V)),(V).end())\n#define INF (0x3f3f3f3f)\nusing namespace std;\ntypedef pair<int, int> pii;\nconst int dx[] = {0, 1, 1, 1, 0, -1, -1, -1}, dy[] = {1, 1, 0, -1, -1, -1, 0, 1};\n\nconst int MAXN = 150005;\n\npriority_queue<int> HP, HQ;\nvector<int> TV;\n\nvector<int> UV[MAXN*9];\nint ud[MAXN*9], uc[MAXN*9];\n\nint C[MAXN*9][8];\nint A[MAXN*9], B[MAXN*9];\nbitset<MAXN> chk, isp;\nbitset<8> PS[8];\n\nint Ans[MAXN];\nint N, T, Rt;\n\nint isokS[8], isokE[8];\nbool isok(int v) {\n\tint dg = 0;\n\tbool flag = false;\n\tfor(int dr = 0, j; dr < 8; dr++) {\n\t\tj = C[v][dr];\n\t\tif(N < j || !chk[j]) {\n\t\t\tif(!(dr&1) && uf(Rt) == uf(j)) flag = true;\n\t\t\tcontinue;\n\t\t}\n\t\tif(dg && PS[isokE[dg-1]][dr]) isokE[dg-1] = dr;\n\t\telse { isokS[dg] = isokE[dg] = dr; dg++; }\n\t}\n\tif(1 < dg && PS[isokE[dg-1]][isokS[0]]) {\n\t\tdg--;\n\t\tisokS[0] = isokS[dg];\n\t}\n\tif(!flag) return false;\n\tfor(int a = 0; a < 8; a++) for(int b = a+1; b < 8; b++) {\n\t\tint i = C[v][a], j = C[v][b];\n\t\tif(N < i || !chk[i] || N < j || !chk[j]) continue;\n\t\tif(PS[a][b]) continue;\n\t\ti = C[v][(a+1)&7]; j = C[v][(b+1)&7];\n\t\tif(i <= N && chk[i]) continue;\n\t\tif(j <= N && chk[j]) continue;\n\t\tif(ud[i] == ud[j]) return false;\n\t}\n\treturn true;\n}\n\nvoid merge(int a, int b) {\n\ta = ud[a]; b = ud[b];\n\tif(a == b) return;\n\tif(uc[a] < uc[b]) swap(a, b);\n\tuc[a] += uc[b];\n\tfor(int v : UV[b]) { ud[v] = a; UV[a].eb(v); }\n\tfor(int v : UV[b]) {\n\t//for(int v : UV[a]) {\n\t\tfor(int dr = 0, j; dr < 8; dr++) {\n\t\t\tj = C[v][dr];\n\t\t\tif(!j || N < j || !chk[j]) continue;\n\t\t\tTV.eb(j);\n\t\t}\n\t}\n\tUV[b].clear();\n}\n\nint uf(int i) { return i == ud[i] ? i : (ud[i] = uf(ud[i])); }\nvoid normH() { for(; !HQ.empty() && HP.top() == HQ.top(); HP.pop(), HQ.pop()); }\n\nvoid process() {\n\tfor(int t = N, i; t; t--) {\n\t\tnormH();\n\t\tif(HP.empty()) {\n\t\t\tputs(\"NO\");\n\t\t\texit(0);\n\t\t}\n\t\tAns[t] = i = HP.top(); HP.pop();\n\t\tchk[i] = false;\n\t\tfor(int dr = 0, j; dr < 8; dr += 2) {\n\t\t\tj = C[i][dr];\n\t\t\tif(j <= N && chk[j]) continue;\n\t\t\tmerge(i, j);\n\t\t}\n\t\tfor(int dr = 0, j; dr < 8; dr++) {\n\t\t\tj = C[i][dr];\n\t\t\tif(j <= N && chk[j]) TV.eb(j);\n\t\t}\n\t\tsorv(TV); univ(TV);\n\t\tfor(int j : TV) {\n\t\t\tif(isp[j] != isok(j)) {\n\t\t\t\tif(isp[j]) {\n\t\t\t\t\tisp[j] = false;\n\t\t\t\t\tHQ.push(j);\n\t\t\t\t} else {\n\t\t\t\t\tisp[j] = true;\n\t\t\t\t\tHP.push(j);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tTV.clear();\n\t}\n}\n\nvoid precal() {\n\tmap<pii, int> MP;\n\tT = N;\n\tfor(int i = 1; i <= N; i++) MP[{A[i], B[i]}] = i;\n\tfor(int i = 1, y, x; i <= N; i++) {\n\t\ty = A[i]; x = B[i];\n\t\tfor(int dr = 0, ny, nx, t; dr < 8; dr++) {\n\t\t\tny = y+dy[dr]; nx = x+dx[dr];\n\t\t\tt = MP[{ny, nx}];\n\t\t\tif(!t) {\n\t\t\t\tt = MP[{ny, nx}] = ++T;\n\t\t\t\tA[T] = ny; B[T] = nx;\n\t\t\t}\n\t\t\tC[i][dr] = t;\n\t\t}\n\t}\n\tfor(int i = N+1; i <= T; i++) {\n\t\tfor(int dr = 0, ny, nx; dr < 8; dr++) {\n\t\t\tny = A[i]+dy[dr]; nx = B[i]+dx[dr];\n\t\t\tauto it = MP.find({ny, nx});\n\t\t\tif(MP.end() != it)\n\t\t\t\tC[i][dr] = it->second;\n\t\t}\n\t}\n\tchk[1] = true;\n\t{\n\t\tvector<int> V(1, 1);\n\t\tfor(int i; !V.empty();) {\n\t\t\ti = V.back(); V.pop_back();\n\t\t\tfor(int dr = 0, j; dr < 8; dr++) {\n\t\t\t\tj = C[i][dr];\n\t\t\t\tif(!j || N < j || chk[j]) continue;\n\t\t\t\tchk[j] = true;\n\t\t\t\tV.eb(j);\n\t\t\t}\n\t\t}\n\t}\n\tfor(int i = 2; i <= N; i++) if(!chk[i]) {\n\t\tputs(\"NO\");\n\t\texit(0);\n\t}\n\tiota(ud, ud+T+1, 0);\n\tfor(int i = N+1; i <= T; i++) {\n\t\tfor(int dr = 0, j; dr < 8; dr += 2) {\n\t\t\tj = C[i][dr];\n\t\t\tif(N < j) ud[uf(j)] = uf(i);\n\t\t}\n\t}\n\tfor(int i = 1, a; i <= T; i++) {\n\t\ta = uf(i);\n\t\tuc[a]++;\n\t\tUV[a].eb(i);\n\t}\n\tfor(int a = 0; a < 8; a++) for(int b = 0; b < 8; b++)\n\t\tPS[a][b] = abs(dx[a]-dx[b]) < 2 && abs(dy[a]-dy[b]) < 2;\n\t{\n\t\tint mn = INF;\n\t\tfor(int i = N+1; i <= T; i++) if(A[i] < mn) {\n\t\t\tmn = A[i];\n\t\t\tRt = i;\n\t\t}\n\t}\n\tfor(int i = 1; i <= N; i++) if(isok(i)) {\n\t\tisp[i] = true;\n\t\tHP.push(i);\n\t}\n}\n\nint main() {\n\tios_base::sync_with_stdio(0); cin.tie(0);\n\n\tcin >> N >> T;\n\tif(200 < N) return -1;\n\tfor(int i = 1; i <= N; i++) cin >> A[i] >> B[i];\n\tprecal();\n\tprocess();\n\tputs(\"YES\");\n\tfor(int i = 1; i <= N; i++)\n\t\tprintf(\"%d\\n\", Ans[i]);\n\treturn 0;\n}\n"
+}

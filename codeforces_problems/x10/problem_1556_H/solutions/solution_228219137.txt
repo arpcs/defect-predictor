@@ -1,0 +1,38 @@
+{
+    "id": 228219137,
+    "contestId": 1556,
+    "creationTimeSeconds": 1697314506,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1556,
+        "index": "H",
+        "name": "DIY Tree",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3300,
+        "tags": [
+            "graphs",
+            "greedy",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1556,
+        "members": [
+            {
+                "handle": "cristea"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1630247700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 22,
+    "timeConsumedMillis": 5990,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\r\n#include <cstring>\r\n#include <vector>\r\n#include <deque>\r\n#include <queue>\r\n#include <set>\r\n#include <map>\r\n#include <algorithm>\r\n#include <iomanip>\r\n#include <cmath>\r\n#include <ctime>\r\n#include <chrono>\r\n#include <random>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\n#define ordered_set __gnu_pbds::tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update>\r\nusing namespace std;\r\n\r\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\r\nint rnd(int l, int r)\r\n{\r\n    return uniform_int_distribution<int>(l, r)(rng);\r\n}\r\n\r\nusing ll = long long;\r\n//#define int ll\r\nusing pi = pair<int,int>;\r\nusing pll = pair<ll, ll>;\r\n\r\n#define pb push_back\r\n#define x first\r\n#define y second\r\n\r\nconst ll MOD = 1e9+7, INF = 1e9, NMAX = 55;\r\nll d[NMAX], w[NMAX][NMAX], p[NMAX], sz[NMAX], deg[NMAX];\r\nvector<pi> v;\r\nint root(int u)\r\n{\r\n    if(u == p[u])\r\n        return u;\r\n    p[u] = root(p[u]);\r\n    return p[u];\r\n}\r\nvoid join(int a, int b)\r\n{\r\n    a = root(a);\r\n    b = root(b);\r\n    if(a != b)\r\n    {\r\n        if(sz[a] < sz[b])\r\n            swap(a, b);\r\n        p[b] = a;\r\n        sz[a] += sz[b];\r\n    }\r\n}\r\ndouble prb()\r\n{\r\n    int x = rnd(1, (1 << 30)), y = rnd(1, (1 << 30));\r\n    x %= y;\r\n    return (double) x / y;\r\n}\r\nvoid solve()\r\n{\r\n    ll n, i, k, j, curr, prv, pos, prva, prvb, nxta, nxtb, best;\r\n    double t = 1e9;\r\n    cin >> n >> k;\r\n    for(i = 1; i <= k; i++)\r\n        cin >> d[i];\r\n    for(i = k + 1; i <= n; i++)\r\n        d[i] = n-1;\r\n    for(i = 1; i <= n; i++)\r\n        for(j = i + 1; j <= n; j++)\r\n        {\r\n            cin >> w[i][j];\r\n            w[j][i] = w[i][j];\r\n        }\r\n    if(n == 2)\r\n    {\r\n        cout << w[1][2];\r\n        return;\r\n    }\r\n    for(i = 1; i <= n; i++)\r\n    {\r\n        p[i] = i;\r\n        sz[i] = 1;\r\n    }\r\n    prv = 0;\r\n    for(i = 1; i <= k; i++)\r\n    {\r\n        nxta = i;\r\n        nxtb = rnd(k + 1, n);\r\n        while(deg[nxta] + 1 > d[nxta] || deg[nxtb] + 1 > d[nxtb] || root(nxta) == root(nxtb))\r\n            nxtb = rnd(1, n);\r\n        join(nxta, nxtb);\r\n        deg[nxta]++;\r\n        deg[nxtb]++;\r\n        v.pb({nxta, nxtb});\r\n        prv += w[nxta][nxtb];\r\n    }\r\n    for(i = k + 1; i < n; i++)\r\n    {\r\n        nxta = rnd(i, n - 1);\r\n        nxtb = rnd(nxta + 1, n);\r\n        join(nxta, nxtb);\r\n        deg[nxta]++;\r\n        deg[nxtb]++;\r\n        v.pb({nxta, nxtb});\r\n        prv += w[nxta][nxtb];\r\n    }\r\n    best = prv;\r\n    while(clock() / (double) CLOCKS_PER_SEC <= 5.98)\r\n    {\r\n        best = min(best, prv);\r\n        pos = rnd(0, n-2);\r\n        prva = v[pos].x;\r\n        prvb = v[pos].y;\r\n        nxta = rnd(1, n);\r\n        nxtb = rnd(1, n);\r\n        if((nxta == prva && nxtb == prvb) || (nxta == prvb && nxtb == prva))\r\n            continue;\r\n        deg[prva]--;\r\n        deg[prvb]--;\r\n        for(i = 1; i <= n; i++)\r\n        {\r\n            p[i] = i;\r\n            sz[i] = 1;\r\n        }\r\n        for(i = 0; i <= n - 2; i++)\r\n            if(i != pos)\r\n                join(v[i].x, v[i].y);\r\n        while(root(nxta) == root(nxtb) || d[nxta] < deg[nxta] + 1 || d[nxtb] < deg[nxtb] + 1)\r\n        {\r\n            nxta = rnd(1, n);\r\n            nxtb = rnd(1, n);\r\n        }\r\n        curr = prv - w[prva][prvb] + w[nxta][nxtb];\r\n        if(curr < prv || exp(-abs(curr-prv)/t) >= prb())\r\n        {\r\n            v[pos] = {nxta, nxtb};\r\n            deg[nxta]++;\r\n            deg[nxtb]++;\r\n            prv = curr;\r\n        }\r\n        else\r\n        {\r\n            deg[prva]++;\r\n            deg[prvb]++;\r\n        }\r\n        t = t * 0.999;\r\n    }\r\n    cout << best;\r\n}\r\nint main()\r\n{\r\n    cin.tie(0)->sync_with_stdio(0);\r\n    cout.tie(0);\r\n    cin.exceptions(cin.failbit);\r\n    int T;\r\n    T = 1;\r\n    while(T--)\r\n        solve();\r\n    return 0;\r\n}\r\n"
+}

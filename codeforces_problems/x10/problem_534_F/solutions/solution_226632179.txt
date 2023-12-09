@@ -1,0 +1,38 @@
+{
+    "id": 226632179,
+    "contestId": 534,
+    "creationTimeSeconds": 1696437987,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 534,
+        "index": "F",
+        "name": "Simplified Nonogram",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2400,
+        "tags": [
+            "bitmasks",
+            "dp",
+            "hashing",
+            "meet-in-the-middle"
+        ]
+    },
+    "author": {
+        "contestId": 534,
+        "members": [
+            {
+                "handle": "kian_nouri"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1428854400
+    },
+    "programmingLanguage": "GNU C11",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\nconst int MAXN = 6, MAXM = 21;\n\nint  mark[MAXM][MAXM / 2][MAXM / 2][MAXM / 2][MAXM / 2][MAXM / 2][(1 << MAXN)], par[MAXM][MAXM / 2][MAXM / 2][MAXM / 2][MAXM / 2][MAXM / 2][(1 << MAXN)], ans[MAXN][MAXM], a[MAXN], b[MAXM], n, m;\n\nbool has_bit(int mask, int bit) {\n\treturn (mask >> bit) & 1;\n}\n\nint cmp(int mask) {\n\tbool flag = false;\n\tint res = 0;\n\tfor (int i = 0; i < n; i++)\n\t\tif (has_bit(mask, i)) {\n\t\t\tres += !flag;\n\t\t\tflag = true;\n\t\t}\n\t\telse\n\t\t\tflag = false;\n\treturn res;\n}\n\nvoid read_input() {\n\tcin >> n >> m;\n\tfor (int i = 0; i < n; i++)\n\t\tcin >> a[i];\n\tfor (int i = 1; i <= m; i++)\n\t\tcin >> b[i];\n}\n\nint val(int mask1, int mask2, int idx) {\n\tif (!has_bit(mask1, idx) && has_bit(mask2, idx))\n\t\treturn 1;\n\telse\n\t\treturn 0;\n}\n\nvoid update(int i, int s1, int s2, int s3, int s4, int s5, int mask1, int mask2) {\n\tmark[i + 1][s1 + val(mask1, mask2, 0)][s2 + val(mask1, mask2, 1)][s3 + val(mask1, mask2, 2)][s4 + val(mask1, mask2, 3)][s5 + val(mask1, mask2, 4)][mask2] = true;\n\tpar[i + 1][s1 + val(mask1, mask2, 0)][s2 + val(mask1, mask2, 1)][s3 + val(mask1, mask2, 2)][s4 + val(mask1, mask2, 3)][s5 + val(mask1, mask2, 4)][mask2] = mask1;\n}\n\nvoid back_track() {\n\tmark[0][0][0][0][0][0][0] = true;\n\tpar[0][0][0][0][0][0][0] = -1;\n\tfor (int i = 0; i < m; i++)\n\t\tfor (int s1 = 0; s1 <= i / 2 + i % 2; s1++)\n\t\t\tfor (int s2 = 0; s2 <= i / 2 + i % 2; s2++)\n\t\t\t\tfor (int s3 = 0; s3 <= i / 2 + i % 2; s3++)\n\t\t\t\t\tfor (int s4 = 0; s4 <= i / 2 + i % 2; s4++)\n\t\t\t\t\t\tfor (int s5 = 0; s5 <= i / 2 + i % 2; s5++)\n\t\t\t\t\t\t\tfor (int mask1 = 0; mask1 < (1 << n); mask1++)\n\t\t\t\t\t\t\t\tif (mark[i][s1][s2][s3][s4][s5][mask1])\n\t\t\t\t\t\t\t\t\tfor (int mask2 = 0; mask2 < (1 << n); mask2++)\n\t\t\t\t\t\t\t\t\t\tif (cmp(mask2) == b[i + 1])\n\t\t\t\t\t\t\t\t\t\t\tupdate(i, s1, s2, s3, s4, s5, mask1, mask2);\n}\n\nvoid output() {\n\tint i = m, s1 = a[0], s2 = a[1], s3 = a[2], s4 = a[3], s5 = a[4], mask = 0;\n\tfor (mask = 0; mask < (1 << n); mask++)\n\t\tif (mark[i][s1][s2][s3][s4][s5][mask]) \n\t\t\tbreak;\n\twhile (i) {\n\t\tint lastmask = mask;\n\t\tfor (int l = 0; l < n; l++)\n\t\t\tif (has_bit(mask, l)) \n\t\t\t\tans[l + 1][i] = 1;\n\t\tmask = par[i][s1][s2][s3][s4][s5][mask];\n\t\ts1 -= has_bit(lastmask, 0) && !has_bit(mask, 0);\n\t\ts2 -= has_bit(lastmask, 1) && !has_bit(mask, 1);\n\t\ts3 -= has_bit(lastmask, 2) && !has_bit(mask, 2);\n\t\ts4 -= has_bit(lastmask, 3) && !has_bit(mask, 3);\n\t\ts5 -= has_bit(lastmask, 4) && !has_bit(mask, 4);\n\t\ti--;\n\t}\n\tfor (int i = 1; i <= n; i++) {\n\t\tfor (int j = 1; j <= m; j++)\n\t\t\tif (ans[i][j] == '*')\n\t\t\t\tcout << \"*\";\n\t\t\telse\n\t\t\t\tcout << \".\";\n\t\tcout << endl;\n\t}\n}\n\nint main() {\n\tread_input();\n\tback_track();\n\toutput();\n}\n"
+}

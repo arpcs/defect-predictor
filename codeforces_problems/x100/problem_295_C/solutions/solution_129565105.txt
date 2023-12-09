@@ -1,0 +1,38 @@
+{
+    "id": 129565105,
+    "contestId": 295,
+    "creationTimeSeconds": 1632299482,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "LeoPro"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 248,
+    "memoryConsumedBytes": 23449600,
+    "source": "fun main() {\r\n    val (n, k50) = readLine()!!.split(' ').map { it.toInt() }\r\n    precomputeFactorials(n + 1)\r\n    val k = k50 / 50\r\n    val w = readLine()!!.split(' ').map { it.toInt() / 50 }.toIntArray()\r\n    val ones = w.count { it == 1 }\r\n    val twos = w.count { it == 2 }\r\n    fun code(a: Int, b: Int, opposite: Boolean) = a * (n + 1) + b + (if (opposite) (n + 1) * (n + 1) else 0)\r\n    val graph = List(code(n, n, true) + 1) { mutableListOf<Edge>() }\r\n\r\n    run { // our shore\r\n        for (a in 0..ones) {\r\n            for (b in 0..twos) {\r\n                for (remA in 0..a) {\r\n                    for (remB in 0..b) {\r\n                        if (remA == a && remB == b) continue\r\n                        if ((a - remA) + 2 * (b - remB) > k) continue\r\n                        fun link(u: Int, v: Int, cnt: ModInt) {\r\n                            graph[u].add(Edge(v, cnt))\r\n                            graph[v].add(Edge(u, cnt))\r\n                        }\r\n                        link(code(a, b, false), code(remA, remB, true), c(a, remA) * c(b, remB))\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n    val initial = code(ones, twos, false)\r\n    val dist = bfs(graph, initial)\r\n    val verticesWithDist = List(dist.filter { it <= graph.size }.maxOf { it } + 1) { mutableListOf<Int>() }\r\n    for (vertex in graph.indices) {\r\n        if (dist[vertex] > graph.size) continue\r\n        verticesWithDist[dist[vertex]].add(vertex)\r\n    }\r\n    val count = Array(graph.size) { 0.toModInt() }\r\n    count[initial] = 1.toModInt()\r\n    for (lvl in 0 until verticesWithDist.lastIndex) {\r\n        for (cur in verticesWithDist[lvl]) {\r\n            for ((next, localCount) in graph[cur]) {\r\n                count[next] += count[cur] * localCount\r\n            }\r\n        }\r\n    }\r\n    val finish = code(0, 0, true)\r\n    println(dist[finish].let { if (it >= graph.size) -1 else it })\r\n    println(count[finish])\r\n}\r\n\r\ndata class Edge(val next: Int, val cnt: ModInt)\r\n\r\nfun bfs(graph: List<MutableList<Edge>>, source: Int): IntArray {\r\n    val dist = IntArray(graph.size) { Int.MAX_VALUE }\r\n    dist[source] = 0\r\n    val bfs = ArrayDeque<Int>()\r\n    bfs.addLast(source)\r\n    while (bfs.isNotEmpty()) {\r\n        val cur = bfs.removeFirst()\r\n        for ((next, _) in graph[cur]) {\r\n            if (dist[next] > dist[cur] + 1) {\r\n                dist[next] = dist[cur] + 1\r\n                bfs.addLast(next)\r\n            }\r\n        }\r\n    }\r\n    return dist\r\n}\r\n\r\nval fact = mutableListOf<ModInt>()\r\nval inv = mutableListOf<ModInt>()\r\n\r\nfun c(n: Int, k: Int) = fact[n] * inv[k] * inv[n - k]\r\n\r\nfun precomputeFactorials(max: Int) {\r\n    fact.add(1.toModInt())\r\n    inv.add(1.toModInt())\r\n    for (i in 1 until max) {\r\n        fact.add(fact.last() * i)\r\n        inv.add(1.toModInt() / fact.last())\r\n    }\r\n}\r\n\r\nconst val MOD: Int = 1e9.toInt() + 7\r\n\r\nfun Int.toModInt() = ModInt(this % MOD)\r\nfun Long.toModInt() = ModInt(this % MOD)\r\n\r\ninline class ModInt(private val value: Int) {\r\n    fun toInt() = value\r\n    override fun toString() = \"$value\"\r\n\r\n    constructor(value: Long) : this(value.toInt())\r\n\r\n    operator fun plus(other: ModInt) = ModInt((value + other.value).let { if (it >= MOD) it - MOD else it })\r\n    operator fun minus(other: ModInt) = ModInt((value - other.value).let { if (it < 0) it + MOD else it })\r\n    operator fun times(other: ModInt) = ModInt((value * 1L * other.value) % MOD)\r\n    operator fun div(other: ModInt) = this * other.inverse()\r\n\r\n    operator fun plus(other: Int) = plus(other.toModInt())\r\n    operator fun minus(other: Int) = minus(other.toModInt())\r\n    operator fun times(other: Int) = times(other.toModInt())\r\n    operator fun div(other: Int) = div(other.toModInt())\r\n\r\n    fun inverse() = power(MOD - 2)\r\n    fun power(exp: Int): ModInt = when {\r\n        exp == 0 -> ModInt(1)\r\n        exp % 2 == 0 -> power(exp / 2).let { it * it }\r\n        else -> this * power(exp - 1)\r\n    }\r\n}\r\n"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 90004799,
+    "contestId": 295,
+    "creationTimeSeconds": 1597482694,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "HynDuf"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\n\r\n#define task \"C\"\r\n#define all(v) (v).begin(), (v).end()\r\n#define rep(i, l, r) for (int i = (l); i <= (r); ++i)\r\n#define Rep(i, r, l) for (int i = (r); i >= (l); --i)\r\n#define DB(X) { cerr << #X << \" = \" << (X) << '\\n'; }\r\n#define DB1(A, _) { cerr << #A << \"[\" << _ << \"] = \" << (A[_]) << '\\n'; }\r\n#define DB2(A, _, __) { cerr << #A << \"[\" << _ << \"][\" << __ << \"] = \" << (A[_][__]) << '\\n'; }\r\n#define DB3(A, _, __, ___) { cerr << #A << \"[\" << _ << \"][\" << __ << \"][\" << ___ << \"] = \" << (A[_][__][___]) << '\\n'; }\r\n#define PR(A, l, r) { cerr << '\\n'; rep(_, l, r) DB1(A, _); cerr << '\\n';}\r\n#define SZ(x) ((int)(x).size())\r\n#define pb push_back\r\n#define eb emplace_back\r\n#define pf push_front\r\n#define F first\r\n#define S second\r\n#define by(x) [](const auto& a, const auto& b) { return a.x < b.x; } // sort(arr, arr + N, by(a));\r\n#define next ___next\r\n#define prev ___prev\r\n#define y1 ___y1\r\n#define left ___left\r\n#define right ___right\r\n#define y0 ___y0\r\n#define div ___div\r\n#define j0 ___j0\r\n#define jn ___jn\r\n\r\nusing ll = long long;\r\nusing ld = long double;\r\nusing ull = unsigned long long;\r\nusing namespace std;\r\ntypedef pair<int, int> ii;\r\ntypedef pair<ii, int> iii;\r\ntypedef vector<int> vi;\r\ntypedef vector<ii> vii;\r\ntypedef vector<ll> vl;\r\nconst int N = 53, mod = 1e9 + 7;\r\nint n, k, cnt50, cnt100, cnt[N][N], d[N][N], c[N][N];\r\nint main()\r\n{\r\n#ifdef HynDuf\r\n    freopen(task\".in\", \"r\", stdin);\r\n    //freopen(task\".out\", \"w\", stdout);\r\n#else\r\n    ios_base::sync_with_stdio(false); cin.tie(nullptr);\r\n#endif\r\n    cin >> n >> k;\r\n    rep(i, 1, n)\r\n    {\r\n        int x;\r\n        cin >> x;\r\n        if (x == 50) cnt50++;\r\n        else cnt100++;\r\n    }\r\n    if (k < 50 || (k < 100 && cnt100 > 0)) cout << \"-1\\n0\";\r\n    rep(i, 0, n) c[0][i] = 1;\r\n    rep(i, 1, n) rep(j, i, n) c[i][j] = c[i - 1][j - 1] + c[i][j - 1];\r\n    fill(&d[0][0], &d[0][0] + N * N, 1e9);\r\n    d[0][0] = 0;\r\n    cnt[0][0] = 1;\r\n    queue<ii> q;\r\n    rep(ni, 0, cnt50)\r\n    {\r\n        rep(nj, 0, cnt100)\r\n        {\r\n            if (ni == 0 && nj == 0) continue;\r\n            int sum = ni * 50 + nj * 100;\r\n            if (sum > k) break;\r\n            d[ni][nj] = 1;\r\n            cnt[ni][nj] = c[ni][cnt50] * 1LL * c[nj][cnt100] % mod;\r\n            q.push({ni, nj});\r\n        }\r\n    }\r\n    while (!q.empty())\r\n    {\r\n        int i = q.front().F, j = q.front().S;\r\n        q.pop();\r\n        rep(ni, 0, cnt50 - i)\r\n        {\r\n            rep(nj, 0, cnt100 - j)\r\n            {\r\n                if (ni == 0 && nj == 0) continue;\r\n                int sum = ni * 50 + nj * 100;\r\n                if (sum > k) break;\r\n                // not return with\r\n                if (i > 0)\r\n                {\r\n                    if (d[i + ni - 1][j + nj] == 1e9)\r\n                    {\r\n                        cnt[i + ni - 1][j + nj] = cnt[i][j] * 1LL * i % mod * c[ni][cnt50 - i] % mod * c[nj][cnt100 - j] % mod;\r\n                        d[i + ni - 1][j + nj] = d[i][j] + 2;\r\n                        q.push({i + ni - 1, j + nj});\r\n                    }\r\n                    else if (d[i + ni - 1][j + nj] == d[i][j] + 2)\r\n                        (cnt[i + ni - 1][j + nj] += cnt[i][j] * 1LL * i % mod * c[ni][cnt50 - i] % mod * c[nj][cnt100 - j] % mod) %= mod;\r\n                }\r\n\r\n                // not return with\r\n                if (j > 0)\r\n                {\r\n                    if (d[i + ni][j + nj - 1] == 1e9)\r\n                    {\r\n                        cnt[i + ni][j + nj - 1] = cnt[i][j] * 1LL * j % mod * c[ni][cnt50 - i] % mod * c[nj][cnt100 - j] % mod;\r\n                        d[i + ni][j + nj - 1] = d[i][j] + 2;\r\n                        q.push({i + ni, j + nj - 1});\r\n                    }\r\n                    else if (d[i + ni][j + nj - 1] == d[i][j] + 2)\r\n                        (cnt[i + ni][j + nj - 1] += cnt[i][j] * 1LL * j % mod * c[ni][cnt50 - i] % mod * c[nj][cnt100 - j] % mod) %= mod;\r\n                }\r\n\r\n\r\n                if (sum <= k - 50 && i > 0) // return by a 50\r\n                {\r\n                    // return with that 50\r\n                    if (d[i + ni][j + nj] == 1e9)\r\n                    {\r\n                        cnt[i + ni][j + nj] = cnt[i][j] * 1LL * i % mod * c[ni][cnt50 - i] % mod * c[nj][cnt100 - j] % mod;\r\n                        d[i + ni][j + nj] = d[i][j] + 2;\r\n                        q.push({i + ni, j + nj});\r\n                    }\r\n                    else if (d[i + ni][j + nj] == d[i][j] + 2)\r\n                        (cnt[i + ni][j + nj] += cnt[i][j] * 1LL * i % mod * c[ni][cnt50 - i] % mod * c[nj][cnt100 - j] % mod) %= mod;\r\n\r\n                }\r\n                if (sum <= k - 100 && j > 0) // return by a 100\r\n                {\r\n                    // return with that 100\r\n                    if (d[i + ni][j + nj] == 1e9)\r\n                    {\r\n                        cnt[i + ni][j + nj] = cnt[i][j] * 1LL * j % mod * c[ni][cnt50 - i] % mod * c[nj][cnt100 - j] % mod;\r\n                        d[i + ni][j + nj] = d[i][j] + 2;\r\n                        q.push({i + ni, j + nj});\r\n                    }\r\n                    else if (d[i + ni][j + nj] == d[i][j] + 2)\r\n                        (cnt[i + ni][j + nj] += cnt[i][j] * 1LL * j % mod * c[ni][cnt50 - i] % mod * c[nj][cnt100 - j] % mod) %= mod;\r\n                }\r\n            }\r\n        }\r\n\r\n    }\r\n\r\n    if (d[cnt50][cnt100] == 1e9) cout << \"-1\\n0\";\r\n    else cout << d[cnt50][cnt100] << '\\n' << cnt[cnt50][cnt100];\r\n    return 0;\r\n}\r\n"
+}

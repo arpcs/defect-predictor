@@ -1,0 +1,35 @@
+{
+    "id": 232846011,
+    "contestId": 1677,
+    "creationTimeSeconds": 1700046443,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1677,
+        "index": "E",
+        "name": "Tokitsukaze and Beautiful Subsegments",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1677,
+        "members": [
+            {
+                "handle": "wangzirui123"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1652020500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 70,
+    "timeConsumedMillis": 2058,
+    "memoryConsumedBytes": 244326400,
+    "source": "// LUOGU_RID: 135244919\n#include<bits/stdc++.h>\r\n#define ll long long\r\n#define pb push_back\r\n#define max(a,b) ((a)>(b)? (a):(b))\r\n#define min(a,b) ((a)<(b)? (a):(b))\r\n#define pir pair<ll,ll>\r\n#define mkp make_pair\r\n#define x first\r\n#define y second \r\nusing namespace std;\r\nconst ll maxn=2e5+10;\r\nll n,m,st[20][maxn],a[maxn],b[maxn],Log[maxn],wt,ans[maxn*5],tree[4][maxn];\r\nvector<ll>fac[maxn];\r\npir lsm[maxn];\r\nvoid add(ll ty,ll x,ll v)\r\n{\r\n\twhile(x<=n)\r\n\t{\r\n\t\ttree[ty][x]+=v; x+=x&-x;\r\n\t}\r\n}\r\nll ask(ll ty,ll x)\r\n{\r\n\tll v=0;\r\n\twhile(x)\r\n\t{\r\n\t\tv+=tree[ty][x]; x-=x&-x;\r\n\t}\r\n\treturn v;\r\n}\r\nstruct node\r\n{\r\n\tll l,r,v;\r\n};\r\nstruct query\r\n{\r\n\tll l,r,id,v;\r\n};\r\nvector<query>Qry[maxn];\r\nvector<node>vec[maxn];\r\nll Max(ll x,ll y)\r\n{\r\n\treturn a[x]>a[y]? x:y;\r\n}\r\nll qry(ll l,ll r)\r\n{\r\n\tll k=Log[r-l+1];\r\n\treturn Max(st[k][l],st[k][r-(1<<k)+1]);\r\n}\r\nvoid solve(ll l,ll r)\r\n{\r\n\tif(l>r) return;\r\n\tll x=qry(l,r), y=a[x];\r\n\tsolve(l,x-1);\r\n\tsolve(x+1,r);\r\n\twt=0;\r\n\tfor(ll i:fac[y])\r\n\t{\r\n\t\tif(i*i>=y) break;\r\n\t\tll p=min(min(b[i],b[y/i]),x), q=max(max(b[i],b[y/i]),x);\r\n\t\tif(l<=p&&q<=r) lsm[++wt]=mkp(-p,q);\r\n\t}\r\n\tsort(lsm+1,lsm+wt+1);\r\n\tll wf=0;\r\n\tfor(ll i=1;i<=wt;i++)\r\n\t\tif(!wf||lsm[wf].y>lsm[i].y) lsm[++wf]=lsm[i], lsm[wf].x*=-1;\r\n\treverse(lsm+1,lsm+1+wf);\r\n\twt=wf;\r\n\tfor(ll i=1;i<=wt;i++)\r\n\t{\r\n\t\tll kl=(i==1? l:lsm[i-1].x+1);\r\n\t\tvec[kl].pb((node){lsm[i].y,r,1});\r\n\t\tvec[lsm[i].x+1].pb((node){lsm[i].y,r,-1});\r\n\t}\r\n}\r\nll Ask(ll ty,ll l,ll r)\r\n{\r\n\t--l;\r\n\treturn (ask(ty*2,r)*(r+1)-ask(ty*2+1,r))-(ask(ty*2,l)*(l+1)-ask(ty*2+1,l));\r\n}\r\nint main()\r\n{\r\n\tscanf(\"%lld%lld\",&n,&m);\r\n\tfor(ll i=1;i<=n;i++)\r\n\t\tfor(ll j=i;j<=n;j+=i)\r\n\t\t\tfac[j].pb(i);\r\n\tfor(ll i=1;i<=n;i++)\r\n\t{\r\n\t\tscanf(\"%lld\",a+i);\r\n\t\tst[0][i]=i; b[a[i]]=i;\r\n\t}\r\n\tfor(ll i=2;i<=n;i++) Log[i]=Log[i>>1]+1;\r\n\tfor(ll i=1;(1<<i)<=n;i++)\r\n\t\tfor(ll j=1;j+(1<<i)-1<=n;j++)\r\n\t\t\tst[i][j]=Max(st[i-1][j],st[i-1][j+(1<<i-1)]);\r\n\tsolve(1,n);\r\n\tfor(ll i=1;i<=m;i++)\r\n\t{\r\n\t\tll l,r; scanf(\"%lld%lld\",&l,&r);\r\n\t\tQry[r].pb((query){l,r,i,1});\r\n\t\tQry[l-1].pb((query){l,r,i,-1});\r\n\t}\r\n\tfor(ll i=1;i<=n;i++)\r\n\t{\r\n\t\tfor(node nd:vec[i])\r\n\t\t{\r\n//\t\t\tprintf(\"add(%lld,%lld,%lld,%lld)\\n\",i,nd.l,nd.r,nd.v);\r\n\t\t\tadd(0,nd.l,nd.v);\r\n\t\t\tadd(0,nd.r+1,-nd.v);\r\n\t\t\tadd(1,nd.l,nd.v*nd.l);\r\n\t\t\tadd(1,nd.r+1,-nd.v*(nd.r+1));\r\n\t\t\tadd(2,nd.l,nd.v*(i-1));\r\n\t\t\tadd(2,nd.r+1,-nd.v*(i-1));\r\n\t\t\tadd(3,nd.l,nd.v*nd.l*(i-1));\r\n\t\t\tadd(3,nd.r+1,-nd.v*(nd.r+1)*(i-1));\r\n\t\t}\r\n\t\tfor(query qr:Qry[i])\r\n\t\t{\r\n\t\t\tans[qr.id]+=qr.v*(Ask(0,qr.l,qr.r)*i-Ask(1,qr.l,qr.r));\r\n\t\t}\r\n\t}\r\n\tfor(ll i=1;i<=m;i++) printf(\"%lld\\n\",ans[i]);\r\n\treturn 0;\r\n}"
+}

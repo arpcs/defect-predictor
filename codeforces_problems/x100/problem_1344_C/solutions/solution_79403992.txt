@@ -1,0 +1,38 @@
+{
+    "id": 79403992,
+    "contestId": 1344,
+    "creationTimeSeconds": 1588960607,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1344,
+        "index": "C",
+        "name": "Quantifier Question",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1344,
+        "members": [
+            {
+                "handle": "lohit_97"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1588775700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 38,
+    "timeConsumedMillis": 295,
+    "memoryConsumedBytes": 24166400,
+    "source": "#include <iostream>\r\n#include <vector>\r\n#include <algorithm>\r\nusing namespace std;\r\nusing ll = long long;\r\n\r\nconst int N = 2 * (int)1e5;\r\nvector<int> conns[N][2];\r\nint used[N][2];\r\n\r\nbool checkCycles(int i, int s) {\r\n\tif (used[i][s] != 0) return (used[i][s] != 1); // false = fail\r\n\tused[i][s] = 1;\r\n\tfor (auto t : conns[i][s]) {\r\n\t\tif (! checkCycles(t, s)) return false;\r\n\t}\r\n\tused[i][s] = 2;\r\n\treturn true;\r\n}\r\nvoid dfs(int i, int s) {\r\n\tif (used[i][s] == 0) return;\r\n\tused[i][s] = 0;\r\n\tfor (auto t : conns[i][s]) dfs(t, s);\r\n}\r\n\r\nint main() {\r\n\tios_base::sync_with_stdio(false);\r\n\tcin.tie(0);\r\n\r\n\t// Make a DAG of the conditions\r\n\t// If A has a path to B, and A appears before B, then B MUST NOT be given quantifier \"FOR ALL\"\r\n\t// The same holds if B has a path to A.\r\n\t// Otherwise, we can assign arbitrarily\r\n\r\n\tint n, m;\r\n\tcin >> n >> m;\r\n\tfor (int i = 0; i < m; ++i) {\r\n\t\tint a, b;\r\n\t\tcin >> a >> b;\r\n\t\t--a; --b;\r\n\t\tconns[a][0].push_back(b);\r\n\t\tconns[b][1].push_back(a);\r\n\t}\r\n\t\r\n\t// 1. Check if there are cycles. If there are, answer \"IMPOSSIBLE\"\r\n\t// \tTo check for cycles, just DFS, and upon spotting a active vertex, return FALSE\r\n\r\n\tbool fail = false;\r\n\tfor (int i = 0; i < n; ++i) {\r\n\t\tfor (int s = 0; s < 2; ++s) {\r\n\t\t\tif (! checkCycles(i, s)) fail = 1;\r\n\t\t}\r\n\t}\r\n\r\n\tif (fail) cout << -1 << '\\n';\r\n\telse {\r\n\t\tint cou = 0;\r\n\t\tstring res(n, '_');\r\n\t\tfor (int i = 0; i < n; ++i) {\r\n\t\t\tif (used[i][0] && used[i][1]) {\r\n\t\t\t\t++cou;\r\n\t\t\t\tres[i] = 'A';\r\n\t\t\t} else {\r\n\t\t\t\tres[i] = 'E';\r\n\t\t\t}\r\n\t\t\tdfs(i, 0);\r\n\t\t\tdfs(i, 1);\r\n\t\t}\r\n\t\tcout << cou << '\\n' << res << '\\n';\r\n\t}\r\n}\r\n"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 86242866,
+    "contestId": 1346,
+    "creationTimeSeconds": 1594181812,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1346,
+        "index": "G",
+        "name": "Two IP Cameras",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "*special",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1346,
+        "members": [
+            {
+                "handle": "wuchaojie925"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1590762900
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 140,
+    "memoryConsumedBytes": 21606400,
+    "source": "fun main() {\r\n    val (k, n) = readLine()!!.split(\" \").map { it.toInt() }\r\n    val p = readLine()!!.split(\" \").map { it.toInt() }\r\n    val x = readLine()!!.split(\" \").map { it.toInt() }\r\n\r\n    val c = solveCam(n, p, x)\r\n    if (c == null) {\r\n        println(\"NO\")\r\n    } else {\r\n        println(\"YES\")\r\n        println(\"${c.s1} ${c.p1}\")\r\n        println(\"${c.s2} ${c.p2}\")\r\n    }\r\n}\r\n\r\nclass Cam(val s1: Int, val p1: Int, val s2: Int, val p2: Int)\r\n\r\ntailrec fun gcd(x: Int, y: Int): Int = if (y == 0) x else gcd(y, x % y)\r\n\r\nfun solveCam(n: Int, p: List<Int>, x: List<Int>): Cam? {\r\n\r\n    fun searchS2P2(s1: Int, p1: Int): Cam? {\r\n\r\n        // true -> cam1 can capture, false -> cam1 can not capture\r\n        val s = List<Boolean>(n) { it -> (x[it] - s1) % p1 == 0 }\r\n\r\n        // Find first element that cam1 can not capture\r\n        val i = s.indexOf(false)\r\n\r\n        // All element can be cam1 capture, find a result and return it.\r\n        if (i<0){\r\n            return Cam(s1, p1, s1, p1)\r\n        }\r\n\r\n        // First element that cam1 can not capture\r\n        val s2 = x[i]\r\n        \r\n        // Find second element that cam1 can not capture\r\n        var j = i+1\r\n        while (s[j]){\r\n            j++\r\n        }\r\n\r\n        // Only one element cam1 can not capture\r\n        if (j==n){\r\n            return Cam(s1, p1, s2, p[0])\r\n        }\r\n\r\n        // More than two element cam1 can not capture, find the gcd of the period\r\n        var p2m = x[j]-s2\r\n        (j+1 until n).forEach {\r\n            if (!s[it])\r\n                p2m = gcd(p2m, x[it]-s2)\r\n        }\r\n\r\n        // Check p2m is or is not multiple of something in p.\r\n        for (p2 in p) {\r\n            if (p2m % p2 == 0)\r\n                return Cam(s1, p1, s2, p2)\r\n        }\r\n\r\n        return null\r\n\r\n    }\r\n\r\n    fun searchP1(s1: Int, p1m: Int): Cam? {\r\n        for (p1 in p) {\r\n            if (p1m % p1 == 0) {\r\n                searchS2P2(s1, p1)?.let { return it }\r\n            }\r\n        }\r\n        return null\r\n    }\r\n\r\n    for (i in 1..2) {\r\n        searchP1(x[0], x[i] - x[0])?.let { return it }\r\n    }\r\n    return searchP1(x[1], x[2] - x[1])\r\n\r\n}"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 72288776,
+    "contestId": 295,
+    "creationTimeSeconds": 1583219393,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "tnakao"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 2969600,
+    "source": "/* -*- coding: utf-8 -*-\r\n *\r\n * 0295C.cc: C. Greg and Friends\r\n */\r\n\r\n#include<cstdio>\r\n#include<cstdlib>\r\n#include<cstring>\r\n#include<cmath>\r\n#include<iostream>\r\n#include<string>\r\n#include<vector>\r\n#include<map>\r\n#include<set>\r\n#include<stack>\r\n#include<list>\r\n#include<queue>\r\n#include<deque>\r\n#include<algorithm>\r\n#include<numeric>\r\n#include<utility>\r\n#include<complex>\r\n#include<functional>\r\n \r\nusing namespace std;\r\n\r\n/* constant */\r\n\r\nconst int MAX_N = 50;\r\nconst int MAX_GN = (MAX_N + 1) * (MAX_N + 1) * 2;\r\nconst int KG = 50;\r\nconst int INF = 1 << 30;\r\nconst int MOD = 1000000007;\r\n\r\n/* typedef */\r\n\r\ntypedef long long ll;\r\ntypedef queue<int> qi;\r\ntypedef pair<int,int> pii;\r\ntypedef vector<pii> vpii;\r\n\r\n/* global variables */\r\n\r\nint cbs[MAX_N + 1][MAX_N + 1];\r\nvpii nbrs[MAX_GN];\r\nint ds[MAX_GN], cs[MAX_GN];\r\n\r\n/* subroutines */\r\n\r\ninline int pqr2id(int p, int q, int r, int pn, int qn) {\r\n  return (p * (qn + 1) + q) * 2 + r;\r\n}\r\n\r\ninline void id2pqr(int id, int pn, int qn, int &p, int &q, int &r) {\r\n  p = (id >> 1) / (qn + 1);\r\n  q = (id >> 1) % (qn + 1);\r\n  r = id & 1;\r\n}\r\n\r\n/* main */\r\n\r\nint main() {\r\n  //freopen(\"input.txt\", \"r\", stdin);\r\n  //freopen(\"output.txt\", \"w\", stdout);\r\n\r\n  int n, k;\r\n  scanf(\"%d%d\", &n, &k);\r\n  k /= KG;\r\n\r\n  int pn = 0, qn = 0;\r\n  for (int i = 0; i < n; i++) {\r\n    int ai;\r\n    scanf(\"%d\", &ai);\r\n    if (ai == KG) pn++;\r\n    else qn++;\r\n  }\r\n  //printf(\"pn=%d, qn=%d\\n\", pn, qn);\r\n\r\n  for (int i = 0; i <= n; i++) {\r\n    cbs[i][0] = cbs[i][i] = 1;\r\n    for (int j = 1; j < i; j++)\r\n      cbs[i][j] = (cbs[i - 1][j - 1] + cbs[i - 1][j]) % MOD;\r\n  }\r\n\r\n  for (int p = 0; p <= pn; p++)\r\n    for (int q = 0; q <= qn; q++)\r\n      for (int r = 0; r < 2; r++) {\r\n\tint id = pqr2id(p, q, r, pn, qn);\r\n\tfor (int dp = 0; dp <= p; dp++)\r\n\t  for (int dq = 0; dq <= q; dq++)\r\n\t    if (dp + dq > 0 && dp + dq * 2 <= k) {\r\n\t      int vid = pqr2id(pn - p + dp, qn - q + dq, r ^ 1, pn, qn);\r\n\t      int vc = (ll)cbs[p][dp] * cbs[q][dq] % MOD;\r\n\t      nbrs[id].push_back(pii(vid, vc));\r\n\t    }\r\n      }\r\n\r\n  int st = pqr2id(pn, qn, 0, pn, qn);\r\n  int gl = pqr2id(pn, qn, 1, pn, qn);\r\n\r\n  int gn = (pn + 1) * (qn + 1) * 2;\r\n  fill(ds, ds + gn, INF);\r\n  ds[st] = 0, cs[st] = 1;\r\n\r\n  qi q;\r\n  q.push(st);\r\n\r\n  while (! q.empty()) {\r\n    int u = q.front(); q.pop();\r\n    if (u == gl) continue;\r\n\r\n    int vd = ds[u] + 1, uc = cs[u];\r\n    vpii &nbru = nbrs[u];\r\n    for (vpii::iterator vit = nbru.begin(); vit != nbru.end(); vit++) {\r\n      int v = vit->first, vc = (ll)uc * vit->second % MOD;\r\n      if (ds[v] > vd) {\r\n\tds[v] = vd;\r\n\tcs[v] = vc;\r\n\tq.push(v);\r\n      }\r\n      else if (ds[v] == vd) {\r\n\tcs[v] = (cs[v] + vc) % MOD;\r\n      }\r\n    }\r\n  }\r\n\r\n  if (ds[gl] >= INF) puts(\"-1\\n0\");\r\n  else printf(\"%d\\n%d\\n\", ds[gl], cs[gl]);\r\n  return 0;\r\n}\r\n"
+}

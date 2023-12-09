@@ -1,0 +1,36 @@
+{
+    "id": 179134344,
+    "contestId": 772,
+    "creationTimeSeconds": 1667531245,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 772,
+        "index": "D",
+        "name": "Varying Kibibits",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2700,
+        "tags": [
+            "bitmasks",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 772,
+        "members": [
+            {
+                "handle": "dwtAKIOI"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1492356900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 69,
+    "timeConsumedMillis": 498,
+    "memoryConsumedBytes": 113561600,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\n#define int long long\r\n#define fi first\r\n#define se second\r\ninline int read()\r\n{\r\n\tint s = 0, w = 1;\r\n\tchar ch = getchar();\r\n\twhile (!isdigit(ch))\r\n\t{\r\n\t\tif (ch == '-')\r\n\t\t\tw = -1;\r\n\t\tch = getchar();\r\n\t}\r\n\twhile (isdigit(ch))\r\n\t{\r\n\t\ts = s * 10 + ch - '0';\r\n\t\tch = getchar();\r\n\t}\r\n\treturn s * w;\r\n}\r\n\r\nconst int mod = 1e9 + 7;\r\ninline int Add(int x, int y) {\r\n\treturn (x + y) >= mod ? (x + y - mod) : (x + y);\r\n} \r\ninline int Dec(int x, int y) {\r\n\treturn (x - y) < 0 ? (x - y + mod) : (x - y);\r\n}\r\ninline int Mul(int x, int y) {\r\n\treturn 1ll * x * y % mod;\r\n}\r\ninline int qpow(int x, int y) {\r\n\tint res = 1; while(y) {\r\n\t\tif(y & 1) res = Mul(res, x);\r\n\t\tx = Mul(x, x); y >>= 1;\r\n\t}\r\n\treturn res;\r\n}\r\nconst int N = 1e6 + 10;\r\nint pw[N], Sum[N], S[N], cnt[N];\r\nint n, a[N], res[N];\r\nint p10[10];\r\nvector <int> vec[10][10];\r\nvoid Push(int x) {\r\n\tint c = 0;\r\n\tint X = x;\r\n\twhile(c <= 5) {\r\n\t\tint vl = x % 10;\r\n\t\tvec[c][vl].push_back(X);\r\n\t\tx /= 10; c = c + 1;\r\n\t}\r\n}\r\nsigned main() {\r\n\tn = read();\r\n\tfor(int i = 1; i <= n; ++i) a[i] = read();\r\n\tfor(int i = 1; i <= n; ++i) {\r\n\t\tSum[a[i]] = Add(Sum[a[i]], a[i]);\r\n\t\tS[a[i]] = Add(S[a[i]], Mul(a[i], a[i]));\r\n\t\tcnt[a[i]] = Add(cnt[a[i]], 1);\r\n\t}\r\n\tfor(int i = 0; i < 1000000; ++i) Push(i);\r\n\tpw[0] = 1;\r\n\tfor(int i = 1; i <= n; ++i) pw[i] = Add(pw[i - 1], pw[i - 1]);\r\n\tp10[0] = 1;\r\n\tfor(int i = 1; i <= 6; ++i) p10[i] = p10[i - 1] * 10;\r\n\tfor(int i = 0; i < 6; ++i) {\r\n\t\tfor(int j = 8; ~j; --j) {\r\n\t\t\tfor(auto tmp : vec[i][j]) {\r\n\t\t\t\tSum[tmp] = Add(Sum[tmp], Sum[tmp + p10[i]]);\r\n\t\t\t\tS[tmp] = Add(S[tmp], S[tmp + p10[i]]);\r\n\t\t\t\tcnt[tmp] = Add(cnt[tmp], cnt[tmp + p10[i]]);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tfor(int i = 0; i < 1000000; ++i) {\r\n//\t\tif(cnt[i]) {\r\n//\t\t\tcout << \"i = \" << i << \" sum = \" << Sum[i] << \" S = \" << S[i] << \" cnt = \" << cnt[i] << '\\n';\r\n//\t\t}\r\n\t\tres[i] = Add(Mul(Sum[i], Sum[i]), S[i]);\r\n\t\tif(cnt[i] - 2 >= 0) res[i] = Mul(res[i], pw[cnt[i] - 2]);\r\n\t\telse {\r\n\t\t\tres[i] = Mul(res[i], qpow(pw[2 - cnt[i]], mod - 2));\r\n\t\t}\r\n//\t\tif(cnt[i]) {\r\n//\t\t\tcout << \"res = \" << res[i] << '\\n';\r\n//\t\t}\r\n\t}\r\n\tfor(int i = 0; i < 6; ++i) {\r\n\t\tfor(int j = 0; j < 9; ++j) {\r\n\t\t\tfor(auto tmp : vec[i][j]) {\r\n\t\t\t\tres[tmp] = Dec(res[tmp], res[tmp + p10[i]]);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tint ans = 0;\r\n\tfor(int i = 1; i < 1000000; ++i) {\r\n//\t\tif(res[i] != 0) {\r\n//\t\t\tcout << \"i = \" << i << \" res = \" << res[i] << '\\n';\r\n//\t\t}\r\n\t\tans ^= 1ll * i * res[i];\r\n\t}\r\n\tcout << ans << '\\n';\r\n\treturn 0;\r\n}"
+}

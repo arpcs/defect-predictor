@@ -1,0 +1,38 @@
+{
+    "id": 153433679,
+    "contestId": 685,
+    "creationTimeSeconds": 1649746321,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 685,
+        "index": "E",
+        "name": "Travelling Through the Snow Queen's Kingdom",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2800,
+        "tags": [
+            "bitmasks",
+            "brute force",
+            "divide and conquer",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 685,
+        "members": [
+            {
+                "handle": "BlueDiamond"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1466699700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 1247,
+    "memoryConsumedBytes": 20992000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\n\r\nstruct Question {\r\n  int l;\r\n  int r;\r\n  int s;\r\n  int t;\r\n};\r\n\r\nconst int N=1000+7;\r\nconst int M=(int)2e5+7;\r\nconst int INF=(int)1e9+7;\r\n\r\nint n;\r\nint m;\r\nint q;\r\npair<int, int> edges[M];\r\nQuestion questions[M];\r\nvector<int> qhere[M];\r\nint is_yes[M];\r\nbitset<N> reachable[N];\r\nbitset<N> change;\r\n\r\nint max_pos[N][N];\r\nint min_pos[N][N];\r\n\r\nbool cmpQL(int i,int j){\r\n  return questions[i].r<questions[j].r;\r\n}\r\n\r\nvoid solve(int low,int high){\r\n  assert(low<=high);\r\n\r\n  if(high-low+1<=n){\r\n    return;\r\n  }\r\n\r\n  if(low==high){\r\n    while(!qhere[low].empty()){\r\n      int i=qhere[low].back();\r\n      qhere[low].pop_back();\r\n\r\n\r\n      assert(questions[i].l==low&&questions[i].r==low);\r\n\r\n      if(questions[i].s==questions[i].t){\r\n        is_yes[i]=1;\r\n      }else{\r\n        if(min(questions[i].s,questions[i].t)==min(edges[low].first,edges[low].second)&&max(questions[i].s,questions[i].t)==max(edges[low].first,edges[low].second)){\r\n          is_yes[i]=1;\r\n        }\r\n      }\r\n    }\r\n\r\n    return;\r\n  }\r\n\r\n\r\n  assert(low<high);\r\n  int mid=(low+high)/2;\r\n\r\n  {\r\n    for(int i=1;i<=n;i++){\r\n      reachable[i].reset();\r\n      reachable[i][i]=1;\r\n\r\n      for(int j=1;j<=n;j++){\r\n        max_pos[i][j]=-INF;\r\n      }\r\n\r\n      max_pos[i][i]=mid;\r\n    }\r\n  }\r\n\r\n  {\r\n    for(int pos=mid;pos>=low;pos--){\r\n      int x=edges[pos].first,y=edges[pos].second;\r\n      change=reachable[x]&(~reachable[y]);\r\n      while(1){\r\n        int i=change._Find_first();\r\n        if(i==N) break;\r\n        change[i]=0;\r\n        max_pos[y][i]=pos;\r\n      }\r\n      change=reachable[y]&(~reachable[x]);\r\n      while(1){\r\n        int i=change._Find_first();\r\n        if(i==N) break;\r\n        change[i]=0;\r\n        max_pos[x][i]=pos;\r\n      }\r\n      reachable[x]=reachable[y]=reachable[x]|reachable[y];\r\n    }\r\n  }\r\n\r\n  if(n<10){\r\n\r\n    {\r\n      for(int i=1;i<=n;i++){\r\n        reachable[i]=0;\r\n        reachable[i][i]=1;\r\n\r\n        for(int j=1;j<=n;j++){\r\n          min_pos[i][j]=INF;\r\n        }\r\n\r\n        min_pos[i][i]=mid+1;\r\n      }\r\n    }\r\n\r\n    {\r\n      for(int pos=mid+1;pos<=high;pos++){\r\n        int x=edges[pos].first,y=edges[pos].second;\r\n        change=reachable[x]&(~reachable[y]);\r\n        while(1){\r\n          int i=change._Find_first();\r\n          if(i==N) break;\r\n          change[i]=0;\r\n          min_pos[y][i]=pos;\r\n        }\r\n        change=reachable[y]&(~reachable[x]);\r\n        while(1){\r\n          int i=change._Find_first();\r\n          if(i==N) break;\r\n          change[i]=0;\r\n          min_pos[x][i]=pos;\r\n\r\n        }\r\n        reachable[x]=reachable[y]=reachable[x]|reachable[y];\r\n      }\r\n    }\r\n  }\r\n\r\n  for(int l=low;l<=mid;l++){\r\n    while(!qhere[l].empty()){\r\n      int i=qhere[l].back();\r\n\r\n      assert(questions[i].r<=high);\r\n\r\n      if(questions[i].r<=mid) break;\r\n      qhere[l].pop_back();\r\n\r\n      int x=questions[i].s,y=questions[i].t;\r\n\r\n      for(int intermediate=1;intermediate<=n;intermediate++){\r\n\r\n\r\n        if(questions[i].l<=max_pos[x][intermediate]&&min_pos[y][intermediate]<=questions[i].r){\r\n          is_yes[i]=1;\r\n        }\r\n      }\r\n    }\r\n  }\r\n\r\n  solve(low,mid);\r\n  solve(mid+1,high);\r\n}\r\n\r\nbool do_r[N];\r\n\r\nsigned main(){\r\n  ios::sync_with_stdio(0); cin.tie(0);\r\n\r\n\r\n  ///freopen (\"input.txt\", \"r\", stdin);\r\n\r\n  cin>>n>>m>>q;\r\n  for(int i=1;i<=m;i++){\r\n    cin>>edges[i].first>>edges[i].second;\r\n  }\r\n\r\n  for(int i=1;i<=q;i++){\r\n    cin>>questions[i].l>>questions[i].r>>questions[i].s>>questions[i].t;\r\n    if(questions[i].r-questions[i].l+1<=n){\r\n      for(int j=1;j<=n;j++) do_r[j]=0;\r\n      do_r[questions[i].s]=1;\r\n      for(int k=questions[i].l;k<=questions[i].r;k++){\r\n        int x=edges[k].first,y=edges[k].second;\r\n        do_r[x]=do_r[y]=(do_r[x]|do_r[y]);\r\n      }\r\n      is_yes[i]=do_r[questions[i].t];\r\n    }else{\r\n      qhere[questions[i].l].push_back(i);\r\n    }\r\n  }\r\n\r\n  for(int i=1;i<=m;i++){\r\n    sort(qhere[i].begin(),qhere[i].end(),cmpQL);\r\n  }\r\n\r\n  solve(1,m);\r\n\r\n  for(int i=1;i<=m;i++){\r\n    assert(qhere[i].empty());\r\n  }\r\n\r\n  for(int i=1;i<=q;i++){\r\n    if(is_yes[i]==-1){\r\n      cout<<\"??\\n\";\r\n      continue;\r\n    }\r\n    cout<<(is_yes[i]?\"Yes\":\"No\")<<\"\\n\";\r\n  }\r\n\r\n  return 0;\r\n}\r\n"
+}

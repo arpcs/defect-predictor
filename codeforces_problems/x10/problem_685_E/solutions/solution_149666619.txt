@@ -1,0 +1,38 @@
+{
+    "id": 149666619,
+    "contestId": 685,
+    "creationTimeSeconds": 1647313097,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 685,
+        "index": "E",
+        "name": "Travelling Through the Snow Queen's Kingdom",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2800,
+        "tags": [
+            "bitmasks",
+            "brute force",
+            "divide and conquer",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 685,
+        "members": [
+            {
+                "handle": "kimoyami"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1466699700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 47,
+    "timeConsumedMillis": 670,
+    "memoryConsumedBytes": 19558400,
+    "source": "#pragma GCC optimize(2)\n#pragma GCC optimize(3)\n#include <bits/stdc++.h>\nusing namespace std;\n\nvoid debug_out() {cerr << endl;}\ntemplate <typename Head, typename... Tail> void debug_out(Head H, Tail... T)\n{\n    cerr << \" \" << H;\n    debug_out(T...);\n}\n#ifndef ONLINE_JUDGE\n    #define debug(...) cerr << \"{\" << #__VA_ARGS__ << \"}:\", debug_out(__VA_ARGS__)\n#else\n    #define debug(...) 42\n#endif\n\nint n, m, q;\n\nint main(){\n    ios::sync_with_stdio(false), cin.tie(0), cout.tie(0);\n    cin >> n >> m >> q;\n    vector<pair<int, int> > G[n + 1];\n    vector<array<int, 2> > edge(m + 1);\n    for (int i = 1; i <= m; i += 1) {\n        cin >> edge[i][0] >> edge[i][1];\n        G[edge[i][0]].emplace_back(edge[i][1], i);\n        G[edge[i][1]].emplace_back(edge[i][0], i);\n    }\n    vector<int> res(q);\n    vector<array<int, 4> > ask[n + 1];\n    for (int i = 0; i < q; i += 1) {\n        int x, y, l, r;\n        cin >> l >> r >> x >> y;\n        ask[x].emplace_back(array<int, 4>{r, l, y, i});\n    }\n\n    auto solve = [&](int s) {\n        vector<int> dp(n + 1);\n        sort(ask[s].begin(), ask[s].end());\n        reverse(ask[s].begin(), ask[s].end());\n        vector<pair<int, int> > go;\n        for (int i = 0; i < G[s].size(); i += 1) {\n            auto [v, id] = G[s][i];\n            go.emplace_back(id, v);\n        }\n        reverse(go.begin(), go.end());\n        for (int i = 1; i <= m; i += 1) {\n            while(!go.empty() && go.back().first == i) {\n                dp[go.back().second] = max(dp[go.back().second], i);\n                go.pop_back();\n            }\n            auto [u, v] = edge[i];\n            int t1 = dp[u];\n            int t2 = dp[v];\n            dp[u] = max(dp[u], t2);\n            dp[v] = max(dp[v], t1);\n            //debug(u, v, t1, t2);\n            while(!ask[s].empty() && ask[s].back()[0] == i) {\n                auto [r, l, x, id] = ask[s].back();\n                //debug(l, r, x, id);\n                ask[s].pop_back();\n                res[id] = dp[x] >= l; \n            }\n        }\n    };\n    for (int i = 1; i <= n; i += 1){\n        solve(i);\n    }\n    for (int i = 0; i < q; i += 1) {\n        cout << (res[i] ? \"Yes\" : \"No\") << \"\\n\";\n    }\n    return 0;\n}"
+}

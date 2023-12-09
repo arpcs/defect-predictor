@@ -1,0 +1,38 @@
+{
+    "id": 229392696,
+    "contestId": 1657,
+    "creationTimeSeconds": 1698050765,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1657,
+        "index": "F",
+        "name": "Words on Tree",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "2-sat",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1657,
+        "members": [
+            {
+                "handle": "wangyu0915"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1647960300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 242,
+    "timeConsumedMillis": 826,
+    "memoryConsumedBytes": 138649600,
+    "source": "// LUOGU_RID: 131197692\n#include<bits/stdc++.h>\nusing namespace std;\nnamespace IO{\n\ttemplate<typename T> inline void write(T x){\n\t\tif(x<0) putchar('-'),x=-x;\n\t\tif(x==0){\n\t\t\tputchar('0'); return ;\n\t\t}\n\t\tif(x>9) write(x/10);\n\t\tputchar(x%10+'0');\n\t\treturn ;\n\t}\n\ttemplate<typename T> inline void read(T &x){\n\t\tx=0; int w=1; char ch=getchar();\n\t\twhile(!isdigit(ch)){\n\t\t\tif(ch=='-') w=-1; ch=getchar();\n\t\t}\n\t\twhile(isdigit(ch))\n\t\t\tx=(x<<1)+(x<<3)+(ch^48),ch=getchar();\n\t\tx*=w; return ;\n\t}\n}\nusing namespace IO;\n#define writesp(x) write(x),putchar(' ')\n#define writeln(x) write(x),putchar('\\n')\n#define inf 0x3f3f3f3f\n#define mod 998244353\n#define maxm 1600010\n#define maxn 400010\n#define pb emplace_back\n// #define int long long\nstruct edge{int v,nxt;}eg[maxm<<1];\nint n,q,x,y,dep[maxn],f[maxn];\nint tot=0,hd[maxm],scc=0,cnt=0,dfn[maxm],low[maxm],bl[maxm],in[maxm];\nchar c[maxn][2]; string s[maxn];\nvector<int> g[maxn],p[maxn],v;\nstack<int> stk;\nvoid add(int x,int y){\n    eg[++tot].v=y,eg[tot].nxt=hd[x],hd[x]=tot;\n}\nvoid dfs(int x,int fa){\n    f[x]=fa,dep[x]=dep[fa]+1;\n    for(int y:g[x])\n        if(y!=fa) dfs(y,x);\n    return ;\n}\nvoid upd(int x,int y){add(x^1,y),add(y^1,x);}\nvoid tarjan(int x){\n    dfn[x]=low[x]=++cnt,stk.push(x),in[x]=1;\n    for(int i=hd[x];i;i=eg[i].nxt){\n        int y=eg[i].v;\n        if(!dfn[y]){\n            tarjan(y); low[x]=min(low[x],low[y]);\n        }\n        else if(in[y]) low[x]=min(low[x],dfn[y]);\n    }\n    if(dfn[x]==low[x]){\n        bl[x]=++scc;\n        while(stk.top()!=x){\n            bl[stk.top()]=scc;\n            in[stk.top()]=0,stk.pop();\n        }\n        stk.pop(),in[x]=0;\n    }\n    return ;\n}\nsigned main(){\n\t// freopen(\"tmp.in\",\"r\",stdin);\n\t// freopen(\".out\",\"w\",stdout);\n\t// ios::sync_with_stdio(false);\n\t// cin.tie(0); cout.tie(0);\n\tread(n),read(q);\n    for(int i=1;i<n;++i){\n        read(x),read(y); g[x].pb(y),g[y].pb(x);\n    }\n    dep[0]=0,dfs(1,0); memset(c,0,sizeof(c));\n    for(int t=1;t<=q;++t){\n        read(x),read(y); cin>>s[t];\n        if(dep[x]<dep[y]) swap(x,y);\n        int len=s[t].length();\n        while(dep[x]>dep[y]) p[t].pb(x),x=f[x];\n        while(x!=y){\n            p[t].pb(x),v.pb(y); x=f[x],y=f[y];\n        }\n        p[t].pb(x);\n        while(v.size()) p[t].pb(v.back()),v.pop_back();\n        for(int i=0;i<p[t].size();++i)\n            c[p[t][i]][0]=s[t][i],c[p[t][i]][1]=s[t][len-i-1];\n    }\n    for(int i=1;i<=q;++i)\n        for(int j=0;j<p[i].size();++j){\n            int len=p[i].size(),x=p[i][j];\n            char c0=s[i][j],c1=s[i][len-j-1];\n            if(c0!=c[x][0]) upd(2*x,2*n+2*i);\n            if(c0!=c[x][1]) upd(2*x+1,2*n+2*i);\n            if(c1!=c[x][0]) upd(2*x,2*n+2*i+1);\n            if(c1!=c[x][1]) upd(2*x+1,2*n+2*i+1);\n        }\n    for(int i=2;i<=2*n+1+2*q;++i)\n        if(!dfn[i]) tarjan(i);\n    for(int i=2;i<=2*n+1+2*q;i+=2)\n        if(bl[i]==bl[i^1]){puts(\"NO\");return 0;}\n    puts(\"YES\");\n    for(int i=2;i<=2*n;i+=2){\n        if(!c[i>>1][0]) putchar('a');\n        else if(bl[i]<bl[i^1]) putchar(c[i>>1][1]);\n            else putchar(c[i>>1][0]);\n    }\n    putchar('\\n');\n\treturn 0;\n}\n"
+}

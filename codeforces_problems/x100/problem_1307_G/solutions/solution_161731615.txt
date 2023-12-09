@@ -1,0 +1,37 @@
+{
+    "id": 161731615,
+    "contestId": 1307,
+    "creationTimeSeconds": 1656166682,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "Aaeria"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 265,
+    "memoryConsumedBytes": 1433600,
+    "source": "#include <cstdio>\r\n#include <queue>\r\n#include <vector>\r\n#include <stdint.h>\r\n#include <algorithm>\r\n\r\nconst long long INF=1e9+7;\r\n\r\nconst long long MAXV=50;\r\nconst long long MAXE=MAXV*(MAXV-1);\r\n\r\nlong long SRC,SNK;\r\n\r\nlong long elist[MAXE*2];\r\nlong long next[MAXE*2];\r\nlong long head[MAXV];\r\nlong long cap[MAXE*2];\r\nlong long cost[MAXE*2];\r\nlong long tot=0;\r\n\r\nvoid add(long long x,long long c,long long w){\r\n  elist[tot]=x;\r\n  cap[tot]=c;\r\n  cost[tot]=w;\r\n  next[tot]=head[x];\r\n  head[x]=tot++;\r\n}\r\n\r\nlong long dist[MAXV];\r\nlong long prev[MAXV];\r\nstd::queue<long long> q;\r\n\r\nlong long total_cost=0;\r\nlong long total_flow=0;\r\n\r\nint main(){\r\n  long long N,M;\r\n  scanf(\"%lld %lld\",&N,&M);\r\n  SRC=0,SNK=N-1;\r\n  std::fill(head,head+N,-1);\r\n  for(long long i=0;i<M;i++){\r\n    long long A,B,C;\r\n    scanf(\"%lld %lld %lld\",&A,&B,&C);\r\n    A--,B--;\r\n    add(A,1,C);\r\n    add(B,0,-C);\r\n  }\r\n  std::vector<std::pair<long long,long long> > crit;\r\n  crit.push_back({0,0});\r\n  while(true){\r\n    std::fill(dist,dist+N,INF);\r\n    dist[SRC]=0;\r\n    prev[SRC]=-1;\r\n    q.push(SRC);\r\n    while(!q.empty()){\r\n      long long node=q.front();\r\n      q.pop();\r\n      for(long long e=head[node];e!=-1;e=next[e]){\r\n\tlong long i=elist[e^1];\r\n\tif(cap[e]){\r\n\t  if(dist[i]>dist[node]+cost[e]){\r\n\t    dist[i]=dist[node]+cost[e];\r\n\t    prev[i]=e;\r\n\t    q.push(i);\r\n\t  }\r\n\t}\r\n      }\r\n    }\r\n    crit.push_back({1LL*total_flow*dist[SNK]-total_cost,dist[SNK]});\r\n    if(dist[SNK]==INF) break;\r\n    long long aug=INF;\r\n    for(long long x=SNK;x!=SRC;x=elist[prev[x]]){\r\n      aug=std::min(aug,cap[prev[x]]);\r\n    }\r\n    for(long long x=SNK;x!=SRC;x=elist[prev[x]]){\r\n      cap[prev[x]]-=aug;\r\n      cap[prev[x]^1]+=aug;\r\n    }\r\n    total_flow+=aug;\r\n    total_cost+=1LL*dist[SNK]*aug;\r\n  }\r\n  long long Q;\r\n  scanf(\"%lld\",&Q);\r\n  while(Q--){\r\n    long long X;\r\n    scanf(\"%lld\",&X);\r\n    auto it=std::lower_bound(crit.begin(),crit.end(),std::pair<long long,long long>{X+1,0});\r\n    double D=(long double)((X-(it-1)->first)*it->second+(it->first-X)*((it-1)->second))/(it->first-(it-1)->first);\r\n    printf(\"%.10lf\\n\",D);\r\n  }\r\n  return 0;\r\n}\r\n/*\r\nonly consider edges that are part of a shortest path\r\nfor all other edges, calculate difference between edge length and shortest path between the two nodes\r\nfind min cut\r\nincrease all those edges, until another edge becomes relevant\r\nthen recalculate\r\n\r\nmin cut is at most n, so recalculate at most n times\r\n\r\ncomplexity is n^2m or something\r\n\r\nwtf the editorial is so complicated, i think it means the same thing though\r\n*/"
+}

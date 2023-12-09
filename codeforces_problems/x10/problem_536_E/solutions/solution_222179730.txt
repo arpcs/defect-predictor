@@ -1,0 +1,37 @@
+{
+    "id": 222179730,
+    "contestId": 536,
+    "creationTimeSeconds": 1694077635,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 536,
+        "index": "E",
+        "name": "Tavas on the Path",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 536,
+        "members": [
+            {
+                "handle": "wsyear"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1429029300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 101,
+    "timeConsumedMillis": 514,
+    "memoryConsumedBytes": 41574400,
+    "source": "#include <bits/stdc++.h>\r\n#ifdef dbg\r\n#define D(...) fprintf(stderr, __VA_ARGS__)\r\n#define DD(...) D(#__VA_ARGS__ \" = \"), debug_helper::debug(__VA_ARGS__), D(\"\\n\")\r\n#include \"C:\\Users\\wsyear\\Desktop\\OI\\templates\\debug.hpp\"\r\n#else\r\n#define D(...) ((void)0)\r\n#define DD(...) ((void)0)\r\n#endif\r\n#define rep(i, j, k) for (int i = (j); i <= (k); ++i)\r\n#define per(i, j, k) for (int i = (j); i >= (k); --i)\r\n#define SZ(v) int((v).size())\r\n#define ALL(v) (v).begin(),(v).end()\r\n#define fi first\r\n#define se second\r\nusing ll = long long;\r\nusing pii = std::pair<int, int>;\r\nusing pll = std::pair<ll, ll>;\r\n\r\nusing namespace std;\r\n\r\nconst int N = 100010;\r\n\r\nstruct edge {\r\n  int u, v, w;\r\n} ed[N];\r\n\r\nstruct info {\r\n  int u, v, l, id;\r\n} que[N];\r\n\r\nint n, m, val[N], f[N], dep[N], top[N], fa[N];\r\nint dfn[N], sz[N], son[N], timer;\r\nll ans[N];\r\nvector<pii> e[N];\r\n\r\nstruct node {\r\n  int l, r, full;\r\n  ll sum;\r\n  ll val() {\r\n    if (full) return f[l];\r\n    return sum + f[l] + f[r];\r\n  }\r\n  friend node operator+(node x, node y) {\r\n    node res;\r\n    res.sum = x.sum + y.sum;\r\n    res.full = x.full & y.full;\r\n    res.l = (x.full ? x.l + y.l : x.l);\r\n    res.r = (y.full ? y.r + x.r : y.r);\r\n    if (!x.full && !y.full) res.sum += f[x.r + y.l];\r\n    return res;\r\n  }\r\n} tl[N << 2], tr[N << 2];\r\n\r\n#define mid ((l + r) >> 1)\r\n\r\nvoid build(int c, int l, int r) {\r\n  if (l == r) return tl[c] = tr[c] = (node){1, 1, 1, 0}, void();\r\n  build(c << 1, l, mid), build(c << 1 | 1, mid + 1, r);\r\n  tl[c] = tl[c << 1] + tl[c << 1 | 1], tr[c] = tr[c << 1 | 1] + tr[c << 1];\r\n}\r\n\r\nvoid upd(int c, int l, int r, int x) {\r\n  if (l == r) return tl[c] = tr[c] = (node){0, 0, 0, 0}, void();\r\n  if (x <= mid) upd(c << 1, l, mid, x);\r\n  else upd(c << 1 | 1, mid + 1, r, x);\r\n  tl[c] = tl[c << 1] + tl[c << 1 | 1], tr[c] = tr[c << 1 | 1] + tr[c << 1];\r\n}\r\n\r\nnode qryl(int c, int l, int r, int x, int y) {\r\n  if (l == x && r == y) return tl[c];\r\n  if (y <= mid) return qryl(c << 1, l, mid, x, y);\r\n  else if (x > mid) return qryl(c << 1 | 1, mid + 1, r, x, y);\r\n  else return qryl(c << 1, l, mid, x, mid) + qryl(c << 1 | 1, mid + 1, r, mid + 1, y);\r\n}\r\n\r\nnode qryr(int c, int l, int r, int x, int y) {\r\n  if (l == x && r == y) return tr[c];\r\n  if (y <= mid) return qryr(c << 1, l, mid, x, y);\r\n  else if (x > mid) return qryr(c << 1 | 1, mid + 1, r, x, y);\r\n  else return qryr(c << 1 | 1, mid + 1, r, mid + 1, y) + qryr(c << 1, l, mid, x, mid);\r\n}\r\n\r\n#undef mid\r\n\r\nvoid dfs(int u) {\r\n  sz[u] = 1, dep[u] = dep[fa[u]] + 1;\r\n  for (auto [v, w] : e[u]) {\r\n    if (v == fa[u]) continue;\r\n    fa[v] = u, dfs(v), sz[u] += sz[v];\r\n    if (sz[v] > sz[son[u]]) son[u] = v;\r\n  }\r\n}\r\n\r\nvoid dfs2(int u, int t) {\r\n  top[u] = t, dfn[u] = ++timer;\r\n  if (!son[u]) return;\r\n  dfs2(son[u], t);\r\n  for (auto [v, w] : e[u]) {\r\n    if (v == fa[u] || v == son[u]) continue;\r\n    dfs2(v, v);\r\n  }\r\n}\r\n\r\nnode query(int u, int v) {\r\n  node resl = (node){0, 0, 1, 0}, resr = (node){0, 0, 1, 0};\r\n  while (top[u] != top[v]) {\r\n    if (dep[top[u]] > dep[top[v]]) {\r\n      node cur = qryr(1, 1, n, dfn[top[u]], dfn[u]);\r\n      resl = resl + cur, u = fa[top[u]];\r\n    } else {\r\n      node cur = qryl(1, 1, n, dfn[top[v]], dfn[v]);\r\n      resr = cur + resr, v = fa[top[v]];\r\n    }\r\n  }\r\n  if (dep[u] < dep[v]) return resl + qryl(1, 1, n, dfn[u] + 1, dfn[v]) + resr;\r\n  if (dep[u] > dep[v]) return resl + qryr(1, 1, n, dfn[v] + 1, dfn[u]) + resr;\r\n  return resl + resr;\r\n}\r\n\r\nint main() {\r\n  cin.tie(nullptr) -> ios::sync_with_stdio(false);\r\n  cin >> n >> m;\r\n  rep (i, 1, n - 1) cin >> f[i];\r\n  rep (i, 1, n - 1) {\r\n    int u, v, w;\r\n    cin >> u >> v >> w;\r\n    e[u].emplace_back(v, i);\r\n    e[v].emplace_back(u, i);\r\n    ed[i] = (edge){u, v, w};\r\n  }\r\n  sort(ed + 1, ed + n, [&](edge x, edge y) { return x.w < y.w; });\r\n  dfs(1), dfs2(1, 1);\r\n  rep (i, 1, n - 1) {\r\n    if (dep[ed[i].u] < dep[ed[i].v]) swap(ed[i].u, ed[i].v);\r\n    val[ed[i].u] = i;\r\n  }\r\n  build(1, 1, n);\r\n  rep (i, 1, m) cin >> que[i].u >> que[i].v >> que[i].l, que[i].id = i;\r\n  sort(que + 1, que + m + 1, [&](info x, info y) { return x.l < y.l; });\r\n  int pos = 0;\r\n  rep (i, 1, m) {\r\n    while (pos < n - 1 && ed[pos + 1].w < que[i].l) upd(1, 1, n, dfn[ed[++pos].u]);\r\n    ans[que[i].id] = query(que[i].u, que[i].v).val();\r\n  }\r\n  rep (i, 1, m) cout << ans[i] << '\\n';\r\n}"
+}

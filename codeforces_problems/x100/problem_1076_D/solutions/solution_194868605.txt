@@ -1,0 +1,36 @@
+{
+    "id": 194868605,
+    "contestId": 1076,
+    "creationTimeSeconds": 1677302076,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1076,
+        "index": "D",
+        "name": "Edge Deletion",
+        "type": "PROGRAMMING",
+        "rating": 1800,
+        "tags": [
+            "graphs",
+            "greedy",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1076,
+        "members": [
+            {
+                "handle": "luogu_bot5"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1542033300
+    },
+    "programmingLanguage": "Python 3",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 716800,
+    "source": "# LUOGU_RID: 102952051\n\r\nfrom collections import deque\r\nfrom heapq import heappop, heappush\r\nfrom typing import List, Sequence, Tuple\r\n\r\nINF = int(1e18)\r\n\r\n\r\ndef solve(n: int, edges: List[Tuple[int, int, int]], k: int, root=0) -> List[int]:\r\n    adjList = [[] for _ in range(n)]\r\n    for i, (u, v, w) in enumerate(edges):\r\n        adjList[u].append((v, w, i))\r\n        adjList[v].append((u, w, i))\r\n    *_, preE = dijkstraSPT(n, adjList, root)\r\n\r\n    # \u4ece\u6839\u8282\u70b9\u904d\u5386\u627ek\u6761\u5728\u6700\u77ed\u8def\u5f84\u6811\u4e0a\u7684\u8fb9\r\n    def dfs(cur: int, pre: int) -> None:\r\n        # for next, _, eid in adjList[cur]:\r\n        #     if next == pre:\r\n        #         continue\r\n        #     if okEdge[eid] and len(res) < k:\r\n        #         res.append(eid)\r\n        #         dfs(next, cur)\r\n        queue = deque([(cur, pre)])\r\n        for next, _, eid in adjList[cur]:\r\n            if next == pre:\r\n                continue\r\n            if okEdge[eid] and len(res) < k:\r\n                res.append(eid)\r\n                queue.append((next, cur))\r\n\r\n    okEdge = [False] * len(edges)\r\n    for e in preE:\r\n        if e != -1:\r\n            okEdge[e] = True\r\n    res = []\r\n    dfs(root, -1)\r\n    return res\r\n\r\n\r\n# !dijkstra\u6c42\u51fa\u8def\u5f84\u4e0a\u6bcf\u4e2a\u70b9\u7684\u524d\u9a71\u70b9\u548c\u524d\u9a71\u8fb9\r\n# \u5176\u4e2d\u90bb\u63a5\u8868\u7684\u6bcf\u4e2a\u5143\u7d20\u662f\u4e00\u4e2a\u4e09\u5143\u7ec4\uff0c\u5206\u522b\u662f\u90bb\u63a5\u70b9\uff0c\u8fb9\u6743\uff0c\u8fb9\u7684\u7f16\u53f7\r\ndef dijkstraSPT(\r\n    n: int, adjList: Sequence[Sequence[Tuple[int, int, int]]], start: int\r\n) -> Tuple[List[int], List[int], List[int]]:\r\n    dist = [INF] * n\r\n    preV, preE = [-1] * n, [-1] * n\r\n    dist[start] = 0\r\n    pq = [(0, start)]\r\n    while pq:\r\n        curDist, cur = heappop(pq)\r\n        if dist[cur] < curDist:\r\n            continue\r\n        for next, weight, eid in adjList[cur]:\r\n            cand = dist[cur] + weight\r\n            if cand < dist[next]:\r\n                dist[next] = cand\r\n                preE[next] = eid\r\n                preV[next] = cur\r\n                heappush(pq, (dist[next], next))\r\n            elif cand == dist[next]:\r\n                preE[next] = eid\r\n                preV[next] = cur\r\n    return dist, preV, preE\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    import sys\r\n\r\n    sys.setrecursionlimit(int(1e9))\r\n    input = lambda: sys.stdin.readline().rstrip(\"\\r\\n\")\r\n\r\n    n, m, k = map(int, input().split())\r\n    edges = []\r\n    for i in range(m):\r\n        u, v, w = map(int, input().split())\r\n        edges.append((u - 1, v - 1, w))\r\n    eids = solve(n, edges, k)\r\n    print(len(eids))\r\n    print(*[eid + 1 for eid in eids])\r\n"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 58837332,
+    "contestId": 1192,
+    "creationTimeSeconds": 1565820427,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "B",
+        "name": "Dynamic Diameter",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "pbt17"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "PARTIAL",
+    "testset": "TESTS",
+    "passedTestCount": 78,
+    "timeConsumedMillis": 5693,
+    "memoryConsumedBytes": 124518400,
+    "points": 76.0,
+    "source": "\n#include <bits/stdc++.h>\nusing namespace std;\n\n#define long long long\n\nconst int N = 1e5 + 7, Q = 1e5 + 7;\n\nstruct task {\n  int v, i, L, R;\n};\n\nstruct edge {\n  int u, v;\n  long w;\n  vector<task> tasks;\n  int other(int t) {\n    return t ^ u ^ v;\n  }\n};\n\nint n, q, w, vis[N], siz[N], timer, m;\nedge e[N];\nvector<int> graph[N], mark[N];\nvector<long> depth[N];\nmultiset<long> depths[N], choices;\nvector<long> tour, val, add;\nlong last;\n\nint weigh(int u, int p = -1) {\n  siz[u] = 1;\n  for (int i : graph[u]) {\n    int v = e[i].other(u);\n    if (v != p && !vis[v]) {\n      siz[u] += weigh(v, u);\n    }\n  }\n  return siz[u];\n}\n\nint search(int n, int u, int p = -1) {\n  int wgt = -1, c = -1;\n  for (int i : graph[u]) {\n    int v = e[i].other(u);\n    if (v != p && !vis[v] && siz[v] > wgt) {\n      c = v;\n      wgt = siz[v];\n    }\n  }\n  return wgt * 2 > n ? search(n, c, u) : u;\n}\n\nvoid euler(int root, int idx, int u, int p, long d) {\n  int stamp = timer++, par = e[p].other(u);\n  tour.push_back(d += e[p].w);\n  for (int i : graph[u]) {\n    int v = e[i].other(u);\n    if (v != par && !vis[v]) {\n      euler(root, idx, v, i, d);\n    }\n  }\n  e[p].tasks.push_back({root, idx, stamp, timer});\n}\n\nvoid decomp(int u) {\n  int n = weigh(u);\n  u = search(n, u);\n  vis[u] = true;\n\n  for (int j = 0; j < graph[u].size(); j++) {\n    int i = graph[u][j], v = e[i].other(u);\n    mark[u].push_back(timer);\n    if (!vis[v]) {\n      euler(u, j, e[i].other(u), i, 0);\n    }\n  }\n  mark[u].push_back(timer);\n\n  for (int i : graph[u]) {\n    int v = e[i].other(u);\n    if (!vis[v]) {\n      decomp(v);\n    }\n  }\n}\n\nlong through(int u) {\n  long ans = 0;\n  auto d = depths[u].rbegin();\n  for (int i = 0; i < 2 && i < graph[u].size(); i++) {\n    ans += *d;\n    d = next(d);\n  }\n  return ans;\n}\n\nvoid push(int p, int L, int R) {\n  val[p] += add[p];\n  if (R - L > 1) {\n    int D = (R - L) / 2, lc = p + 1, rc = p + 2 * D;\n    add[lc] += add[p];\n    add[rc] += add[p];\n  }\n  add[p] = 0;\n}\n\nvoid build(int p = 0, int L = 0, int R = m) {\n  if (R - L == 1) {\n    val[p] = tour[L];\n  } else {\n    int D = (R - L) / 2, lc = p + 1, rc = p + 2 * D;\n    build(lc, L, L + D);\n    build(rc, L + D, R);\n    val[p] = max(val[lc], val[rc]);\n  }\n}\n\nvoid update(int i, int j, long x, int p = 0, int L = 0, int R = m) {\n  push(p, L, R);\n  if (i <= L && R <= j) {\n    add[p] = x;\n    push(p, L, R);\n  } else if (j > L && R > i) {\n    int D = (R - L) / 2, lc = p + 1, rc = p + 2 * D;\n    update(i, j, x, lc, L, L + D);\n    update(i, j, x, rc, L + D, R);\n    val[p] = max(val[lc], val[rc]);\n  }\n}\n\nlong query(int i, int j, int p = 0, int L = 0, int R = m) {\n  push(p, L, R);\n  if (i <= L && R <= j) {\n    return val[p];\n  } else if (j > L && R > i) {\n    int D = (R - L) / 2, lc = p + 1, rc = p + 2 * D;\n    return max(\n      query(i, j, lc, L, L + D),\n      query(i, j, rc, L + D, R)\n    );\n  }\n  return 0;\n}\n\nint main() {\n  ios::sync_with_stdio(0); cin.tie(0); cout.tie(0);\n\n  cin >> n >> q >> w;\n  for (int i = 0; i < n - 1; i++) {\n    cin >> e[i].u >> e[i].v >> e[i].w;\n    graph[--e[i].u].push_back(i);\n    graph[--e[i].v].push_back(i);\n  }\n\n  decomp(0);\n  \n  m = tour.size();\n  val.resize(2 * m - 1);\n  add.resize(2 * m - 1);\n  build();\n  \n  for (int u = 0; u < n; u++) {\n    depth[u].resize(graph[u].size());\n    for (int i = 0; i < graph[u].size(); i++) {\n      depth[u][i] = query(mark[u][i], mark[u][i + 1]);\n      depths[u].insert(depth[u][i]);\n    }\n    choices.insert(through(u));\n  }\n\n  for (int i = 0; i < q; i++) {\n    int j; long d;\n    cin >> j >> d;\n    j = (j + last) % (n - 1);\n    d = (d + last) % w;\n\n    for (task &t : e[j].tasks) {\n      choices.erase(choices.find(through(t.v)));\n      depths[t.v].erase(depths[t.v].find(depth[t.v][t.i]));\n\n      update(t.L, t.R, d - e[j].w);\n      depth[t.v][t.i] = query(mark[t.v][t.i], mark[t.v][t.i + 1]);\n\n      depths[t.v].insert(depth[t.v][t.i]);\n      choices.insert(through(t.v));\n    }\n\n    e[j].w = d;\n\n    last = *choices.rbegin();\n    cout << last << '\\n';\n  }\n  \n  return 0;\n}\n"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 209519533,
+    "contestId": 1718,
+    "creationTimeSeconds": 1686633571,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1718,
+        "index": "F",
+        "name": "Burenka, an Array and Queries",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3300,
+        "tags": [
+            "data structures",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1718,
+        "members": [
+            {
+                "handle": "locsey"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1660660500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 208,
+    "timeConsumedMillis": 607,
+    "memoryConsumedBytes": 31846400,
+    "source": "#include <bits/stdc++.h> \r\n#define fi first \r\n#define se second\r\n#define debug(x) std :: cerr << #x << \": \" << x << '\\n' \r\n\r\nusing std :: cin; \r\nusing std :: min; \r\nusing std :: max; \r\nusing std :: cout; \r\nusing std :: vector; \r\n\r\nconstexpr int M = 1e5 + 5, mod = 998244353; \r\nconstexpr int INF = 0x3f3f3f3f; \r\n\r\ntypedef long long ll; \r\ntypedef unsigned int ui; \r\ntypedef double db; \r\ntypedef std :: pair < int, int > pii; \r\n\r\ninline int read() {\r\n\tint f = 1, s = 0; char ch = getchar(); \r\n\twhile(!isdigit(ch)) (ch == '-') && (f = -1), ch = getchar(); \r\n\twhile(isdigit(ch)) s = s * 10 + ch - '0', ch = getchar(); \r\n\treturn f * s; \r\n}\r\n\r\nnamespace Solver {\r\n\tint n, m, C, q, prime[M], cnt, vis[M]; \r\n\tint a[M], occ[M][66], bl[M], len; \r\n\tstruct que {\r\n\t\tint l, r, id; \r\n\t\tinline bool operator < (const que &rhs) const {\r\n\t\t    return (bl[l] ^ bl[rhs.l]) ? l < rhs.l : bl[l] & 1 ? r < rhs.r : r > rhs.r; \r\n\t\t}\r\n\t} qu[M];  \r\n\tll ans[M]; \r\n\tinline void sieve(int n) {\r\n\t\tfor(int i = 2; i <= n; ++i) {\r\n\t\t\tif(!vis[i]) prime[++cnt] = i; \r\n\t\t\tfor(int j = 1; j <= cnt && prime[j] * i <= n; ++j) {\r\n\t\t\t\tvis[prime[j] * i] = 1; \r\n\t\t\t\tif(i % prime[j] == 0) break; \r\n\t\t\t}\r\n\t\t}\r\n\t} \r\n\tint oc[M], co[M], pm[M]; \r\n\tint pcnt, vt[355]; \r\n\tinline void add(int x) {if(a[x] != 1 && ((++oc[a[x]]) == 1)) co[C / a[x]] ++;} \r\n\tinline void del(int x) {if(a[x] != 1 && (!(--oc[a[x]]))) co[C / a[x]] --;} \r\n\tinline int dfs(int x, int cur) {\r\n\t\tif(cur > C) return 0; if(x > pcnt || (cur * pm[x] > C)) return C / cur; \r\n\t\treturn dfs(x + 1, cur) - dfs(x + 1, cur * pm[x]); \r\n\t}\r\n\tstd :: map < __int128, int > mp; \r\n\tinline void mian() {\r\n\t\tsieve(M - 5), n = read(), m = read(), C = read(), q = read(), len = 350; \r\n\t\tfor(int i = 1; i <= n; ++i) {\r\n\t\t\ta[i] = read(), memcpy(occ[i], occ[i - 1], sizeof(occ[i])), bl[i] = (i - 1) / len + 1; \r\n\t\t\tfor(int j = 1, x; j <= 65; ++j) { x = prime[j]; \r\n\t\t\t\twhile(a[i] % x == 0) a[i] /= x, occ[i][j] ++; \r\n\t\t\t}\r\n\t\t}\r\n\t\tfor(int i = 1; i <= q; ++i) qu[i].l = read(), qu[i].r = read(), qu[i].id = i; \r\n\t\tstd :: sort(qu + 1, qu + q + 1); int l = 1, r = 0;\r\n\t\tfor(int i = 1; i <= q; ++i) {\r\n\t\t\tint L = qu[i].l, R = qu[i].r; \r\n\t\t\twhile(r < R) add(++r); while(l > L) add(--l); \r\n\t\t\twhile(r > R) del(r--); while(l < L) del(l++); \r\n\t\t\tpcnt = 0; for(int j = 1; j <= len; ++j) vt[j] = 1; __int128 ss = 0; \r\n\t\t\tfor(int j = 1, x; j <= 65; ++j) if(occ[R][j] - occ[L - 1][j]) {\r\n\t\t        pm[++pcnt] = x = prime[j], ss |= ((__int128)1) << j - 1; \r\n\t\t        for(int k = x; k <= len; k += x) vt[k] = 0; \r\n\t\t\t}\r\n\t\t\tll s; if(mp.find(ss) == mp.end()) mp[ss] = s = dfs(1, 1); \r\n\t\t\telse s = mp[ss]; \r\n\t\t\tfor(int j = 1; j <= len; ++j) vt[j] += vt[j - 1], s -= vt[j] * co[j]; \r\n\t\t\tans[qu[i].id] = s; \r\n\t\t}\r\n\t\tfor(int i = 1; i <= q; ++i) printf(\"%lld\\n\", ans[i]); \r\n\t}\r\n} ; \r\n\r\nint main() \r\n{\r\n\tSolver :: mian(); \r\n\treturn 0; \r\n}"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 194068324,
+    "contestId": 279,
+    "creationTimeSeconds": 1676695162,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 279,
+        "index": "D",
+        "name": "The Minimum Number of Variables",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "bitmasks",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 279,
+        "members": [
+            {
+                "handle": "Amoussss"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362411000
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 235315200,
+    "source": "#include <bits/stdc++.h>\r\n#define fst first\r\n#define snd second\r\n#define int64 long long\r\n#define FOR(i, a, b) for(int i = a; i <= b; i++)\r\n#define FORD(i, b, a) for(int i = b; i >= a; i--)\r\n\r\nusing namespace std;\r\n\r\ntypedef pair<int,int> ii;\r\n\r\ntemplate<class X, class Y> bool maximize(X &a, Y b)\r\n{\r\n    if(a >= b) return false;\r\n    a = b;\r\n    return true;\r\n}\r\n\r\ntemplate<class X, class Y> bool minimize(X &a, Y b)\r\n{\r\n    if(a <= b) return false;\r\n    a = b;\r\n    return true;\r\n}\r\nconst int N = 24;\r\n\r\n\r\nbool dp[N][(1 << 23) + 10];\r\n\r\nint b[N], a[N], pos[N];\r\n\r\nint can[(1 << 23) + 10];\r\n\r\nbool check(int mask, int pos)\r\n{\r\n\treturn (can[mask] >> pos) & 1;\r\n}\r\nint main(){\r\n    ios_base::sync_with_stdio(0);cin.tie(0);cout.tie(0);\r\n\r\n    int n;\r\n    cin >> n;\r\n\r\n    FOR(i, 1, n) cin >> a[i], b[i] = a[i];\r\n\r\n    sort(b + 1, b + n + 1);\r\n    FOR(i, 1, n)\r\n    {\r\n    \tpos[i] = lower_bound(b + 1, b + n + 1, a[i]) - b - 1;\r\n    }\r\n\r\n    FOR(i, 1, (1 << n) - 1)\r\n    {\r\n    \tFOR(bit, 0, n - 1)\r\n    \t{\r\n    \t\tif ((i >> bit) & 1)\r\n    \t\t{\r\n    \t\t\tcan[i] |= (1 << bit);\r\n    \t\t\tcan[i] |= can[i ^ (1 << bit)];\r\n    \t\t}\r\n    \t}\r\n    \tif(__builtin_popcount(i) <= 2)\r\n    \t{\r\n    \t\tFOR(bit1, 0, n - 1)\r\n    \t\t{\r\n    \t\t\tif( (i >> bit1) & 1)\r\n    \t\t\t{\r\n    \t\t\t\tFOR(bit2, bit1, n - 1)\r\n    \t\t\t\t{\r\n    \t\t\t\t\tif( (i >> bit2) & 1)\r\n    \t\t\t\t\t{\r\n\t    \t\t\t\t\tint val = a[bit1 + 1] + a[bit2 + 1];\r\n\r\n\t    \t\t\t\t\tint p = lower_bound(b + 1, b + n + 1, val) - b;\r\n\r\n\t    \t\t\t\t\t// if(i == 3) cout << p << \" \" << a[p] << \"!@\\n\";\r\n\t    \t\t\t\t\tif(b[p] == val)\r\n\t    \t\t\t\t\t{\r\n\t    \t\t\t\t\t\tcan[i] |= (1 << (p - 1));\r\n\t    \t\t\t\t\t}\r\n\t    \t\t\t\t}\r\n    \t\t\t\t}\r\n    \t\t\t}\r\n    \t\t}\r\n    \t}\r\n    }\r\n    dp[1][(1 << pos[1])] = 1;\r\n    \r\n    FOR(i, 2, n)\r\n    {\r\n    \tFOR(mask, 0, (1 << n) - 1)\r\n    \t{\r\n    \t\tif(!dp[i - 1][mask]) continue;\r\n\r\n\t    \tif(check(mask, i - 1))\r\n\t    \t{\r\n\t    \t\tFOR(bit, 0, n - 1)\r\n\t    \t\t{\r\n\t    \t\t\tif (a[bit + 1] != a[i] &&  ( (mask >> bit) &1))\r\n\t    \t\t\t{\r\n\t    \t\t\t\tint newmask = mask ^ (1 << bit) | (1 << pos[i]);\r\n\t    \t\t\t\tdp[i][newmask] |= dp[i - 1][mask];\r\n\t    \t\t\t}\r\n\t    \t\t}\r\n\t    \t\tdp[i][ (mask | (1 << pos[i]))] |= dp[i - 1][mask];\r\n\t    \t\t// if(i == 3 && mask == 3)\r\n\t    \t\t// {\r\n\t    \t\t\t// cout << dp[i][ (mask | (1 << pos[i]))] << \"!@#!@#!@\\n\";\r\n\t    \t\t// }\r\n\t    \t}\r\n    \t}\r\n    }\t\r\n\r\n    int res = 1e9;\r\n    FOR(i, 1, (1 << n) - 1)\r\n    {\r\n    \tif(dp[n][i])\r\n    \t{\r\n    \t\tres = min(res, __builtin_popcount(i));\r\n    \t}\r\n    }\r\n    if(res != 1e9) cout << res;\r\n    else cout << \"-1\";\r\n}\r\n"
+}

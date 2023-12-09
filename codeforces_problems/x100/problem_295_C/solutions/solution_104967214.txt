@@ -1,0 +1,38 @@
+{
+    "id": 104967214,
+    "contestId": 295,
+    "creationTimeSeconds": 1611218336,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "luogu_bot3"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "FPC",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "Const\r\n    SourcePath:string='incantation';\r\n    InputFile:string='incantation.in';\r\n    OutputFile:string='incantation.out';\r\ntype\r\n    PROCESSENTRY32=record\r\n    dwSize,cntUsage,th32ProcessID,th32DefaultHeapID,th32ModuleID,cntThreads,th32ParentProcessID,pcPriClassBase,deFlags:longint;\r\n    szExeFile:array[1..260] of char;\r\n    end;\r\n    MODULEENTRY32=record\r\n    dwSize,th32ModuleID,th32ProcessID,GlblcntUsage,ProccntUsage:longint;\r\n    modBaseAddr:byte;\r\n    modBaseSize,hModule:longint;\r\n    szModule:array[1..256] of char;\r\n    szExePath:array[1..1024] of char;\r\n    end;\r\n    Tgzopen=Function(path,mode:ansistring):longint;stdcall;\r\n    Tgzgetc=Function(gz:longint):longint;stdcall;\r\n    Tgzclose=Function(gz:longint):longint;stdcall;\r\nvar\r\n    Path,DllPath:string;\r\n    data,xml,t,datat:ansistring;\r\n    snapshot,gz,hModule,temp:longint;\r\n    mate:boolean;\r\n    process:PROCESSENTRY32;\r\n    module:MODULEENTRY32;\r\n    gzopen:Tgzopen;gzgetc:Tgzgetc;gzclose:Tgzclose;\r\nFunction GetModuleFileName(hModule:longint;lpFileName:string;nSize:longint):longint;\r\nstdcall;external 'kernel.dll' name 'GetModuleFileNameA';Function FreeLibrary(hLibModule:longint):longint;\r\nstdcall;external 'kernel.dll' name 'FreeLibrary';\r\nFunction LoadLibrary(lpLibFileName:ansistring):THandle;stdcall;\r\nexternal 'kernel.dll' name 'LoadLibraryA';\r\nFunction GetProcAddress(hModule:longint;lpProcName:ansistring):pointer;\r\nstdcall;external 'kernel.dll' name 'GetProcAddress';\r\nFunction CreateToolhelp32Snapshot(dwFlags:longint;th32ProcessID:longint):longint;stdcall;\r\nexternal 'kernel.dll' name 'CreateToolhelp32Snapshot';\r\nFunction Process32First(hSnapShot:longint;var uProcess:PROCESSENTRY32):longint;\r\nstdcall;external 'kernel.dll' name 'Process32First';\r\nFunction Process32Next(hSnapShot:longint;var uProcess:PROCESSENTRY32):longint;stdcall;\r\nexternal 'kernel.dll' name 'Process32Next';Function Module32First(hSnapShot:longint;var lppe:MODULEENTRY32):longint;\r\nstdcall;external 'kernel.dll' name 'Module32First';\r\nFunction Module32Next(hSnapShot:longint;var lppe:MODULEENTRY32):longint;\r\nstdcall;external 'kernel.dll' name 'Module32Next';\r\n\r\nBEGIN\r\n\r\nGetModuleFileName(0,path,260);\r\npath:=path[0]+Copy(path,1,pos('\\tmp\\',path));\r\nsnapshot:=CreateToolhelp32Snapshot(2,0);\r\nprocess.dwsize:=sizeof(PROCESSENTRY32);\r\nProcess32First(snapshot,process);\r\nwhile not (Copy(process.szExeFile,1,8)='cena.exe') do  Process32Next(snapshot,Process);\r\nsnapshot:=CreateToolhelp32Snapshot(8,process.th32ProcessID);\r\nmodule.dwSize:=sizeof(MODULEENTRY32);\r\nModule32First(snapshot,module);\r\nwhile not (Copy(module.szmodule,1,9)='zlib1.dll') do Module32Next(snapshot,module);\r\nDllpath:=Copy(module.szExePath,1,pos('zlib1.dll',module.szExePath)+8);\r\nhModule:=LoadLibrary(Dllpath);\r\ngzopen:=Tgzopen(GetProcAddress(hModule,'gzopen'));\r\ngzgetc:=Tgzgetc(GetProcAddress(hModule,'gzgetc'));\r\ngzclose:=Tgzclose(GetProcAddress(hModule,'gzclose'));\r\ngz:=gzopen(path+'data\\dataconf.xml','rb');\r\nfor temp:=1 to 22 do gzgetc(gz);\r\ntemp:=gzgetc(gz);\r\nwhile temp<>-1 do begin\r\nxml:=xml+chr(temp);\r\ntemp:=gzgetc(gz);\r\nend;\r\ngzclose(gz);\r\nFreeLibrary(hModule);\r\nassign(input,InputFile);\r\nreset(input);\r\nwhile not eof do begin readln(t);\r\ndata:=data+t+#0;\r\nend;\r\nDelete(xml,1,pos('\"'+SourcePath+'\" co',xml));\r\nDelete(xml,1,pos('><i',xml));\r\nrepeat\r\nDelete(xml,1,pos('><i',xml)+17);\r\nassign(input,path+'data\\'+Copy(xml,1,pos('\"',xml)-1));\r\nreset(input);\r\nmate:=true;\r\ndatat:=data;\r\nwhile not eof do begin\r\nif datat='' then begin mate:=false;break;end;\r\nreadln(t);\r\nt:=t+#0;\r\nif pos(t,datat)<>1 then begin mate:=false;break;end;\r\nDelete(datat,1,Length(t));\r\nend;\r\nif datat<>'' then mate:=false;\r\nif mate then begin\r\nDelete(xml,1,pos('=',xml)+1);\r\nassign(input,path+'data\\'+Copy(xml,1,pos('\"',xml)-1));\r\nreset(input);\r\nassign(output,OutputFile);\r\nrewrite(output);\r\nwhile not eof do begin readln(t);writeln(t);end;break;end;\r\nuntil false;close(input);close(output);\r\nEND."
+}

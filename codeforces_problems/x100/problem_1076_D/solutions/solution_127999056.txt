@@ -1,0 +1,36 @@
+{
+    "id": 127999056,
+    "contestId": 1076,
+    "creationTimeSeconds": 1630880980,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1076,
+        "index": "D",
+        "name": "Edge Deletion",
+        "type": "PROGRAMMING",
+        "rating": 1800,
+        "tags": [
+            "graphs",
+            "greedy",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1076,
+        "members": [
+            {
+                "handle": "robosapien"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1542033300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 30,
+    "timeConsumedMillis": 2012,
+    "memoryConsumedBytes": 101376000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define i64 int64_t\r\n#define ll long long int\r\n#define pb push_back\r\n#define all(x) x.begin(),x.end()\r\n#define pii pair<int,int>\r\n#define sz(x) ((int)x.size())\r\ntemplate<typename T, typename U> inline void amin(T &a,U b) { a = (a > b ? b : a);}\r\ntemplate<typename T, typename U> inline void amax(T &a,U b) { a = (a > b ? a : b);}\r\n\r\n#ifndef DEBUG_NOW\r\n    #define debug(...) do {} while(0)\r\n#else\r\n    #include \"debug.h\"\r\n#endif\r\n\r\nconst int N = 3e5 + 9;\r\nconst i64 INF = 1e18L;\r\n\r\nvector<pii> adj[N], new_adj[N];\r\nset<int> chosen;\r\nvector<int> in(N);\r\nmap<pii,int> pos;\r\n\r\nint f[N], sz[N];\r\nvoid init(int n) {\r\n   for(int i = 0; i < n; ++i)\r\n      f[i] = i,\r\n      sz[i] = 1;\r\n}\r\n\r\nint root(int x) {\r\n   while(x != f[x]) {\r\n      f[x] = f[f[x]];\r\n      x = f[x];\r\n   }\r\n   return x;\r\n}\r\n\r\nbool merge(int x, int y) {\r\n   int a = root(x), b = root(y);\r\n   if(a == b)\r\n      return true;\r\n   if(sz[a] > sz[b])\r\n      swap(a, b);\r\n\r\n   f[a] = b;\r\n   sz[b] += sz[a];\r\n   return false;\r\n}\r\n\r\nbool isConnected(int x, int y) {\r\n   if(root(x) == root(y)) return true;\r\n   else return false;\r\n}\r\n\r\nvector<i64> get_min_dist(int n) {\r\n    priority_queue<array<i64,2>> pq;\r\n    vector<i64> d(n, INF);\r\n    vector<int> vis(n, 0);\r\n    d[0] = 0;\r\n    pq.push({0, 0});\r\n    while(!pq.empty()) {\r\n        auto [dis, v] = pq.top();\r\n        pq.pop();\r\n        if(vis[v]) continue;\r\n        vis[v] = 1;\r\n        for(auto &[u, w]: adj[v]) {\r\n            if(d[v] + w < d[u]) {\r\n                d[u] = d[v] + w;\r\n                pq.push({-d[u], u});\r\n            }\r\n        }\r\n    }\r\n    return d;\r\n}\r\n\r\nvoid select(vector<i64> &d) {\r\n    queue<int> nodes;\r\n    nodes.push(0);\r\n    vector<int> vis(sz(d), 0);\r\n    vis[0] = 1;\r\n    while(!nodes.empty()) {\r\n        auto v = nodes.front(); nodes.pop();\r\n        for(auto &[u, w]: adj[v]) {\r\n            if(!vis[u] && d[v] + w == d[u] && !merge(u, v)) {\r\n                chosen.insert(pos[{u, v}]);\r\n                new_adj[u].push_back({v, w});\r\n                new_adj[v].push_back({u, w});\r\n                ++in[u], ++in[v];\r\n                nodes.push(u);\r\n                vis[u] = 1;\r\n            }\r\n        }\r\n    }\r\n    debug(chosen);\r\n}\r\n\r\nvoid solve(){\r\n    int n, m, k; cin >> n >> m >> k;\r\n    init(n);\r\n    int id = 0;\r\n    vector<array<int,3>> edges(m);\r\n    for(auto &[w, u, v]: edges) {\r\n        cin >> u >> v >> w;\r\n        --u, --v;\r\n        adj[u].push_back({v, w});\r\n        adj[v].push_back({u, w});\r\n        ++id;\r\n        pos[{u, v}] = pos[{v, u}] = id;\r\n    }\r\n    vector<i64> d = get_min_dist(n);\r\n    select(d);\r\n    queue<int> nodes;\r\n    if(sz(chosen) <= k) {\r\n        cout << sz(chosen) << '\\n';\r\n        for(int e: chosen) cout << e << \" \";\r\n        return;\r\n    }\r\n    for(int i = 0; i < n; ++i) {\r\n        if(in[i] == 1)\r\n            nodes.push(i);\r\n    }\r\n    while(sz(chosen) > k && !nodes.empty()) {\r\n        auto v = nodes.front(); nodes.pop();\r\n        for(auto &[u, w]: new_adj[v]) {\r\n            --in[u];\r\n            if(in[u] == 1) \r\n                nodes.push(u);\r\n            chosen.erase(pos[{u, v}]);\r\n            if(sz(chosen) == k) break;\r\n        }\r\n    }\r\n    cout << sz(chosen) << \"\\n\";\r\n    for(int e: chosen) cout << e << \" \";\r\n}\r\n\r\nint main()\r\n{\r\n    ios::sync_with_stdio(false);\r\n     cin.tie(NULL);\r\n     cout.tie(NULL);\r\n    int tests = 1; \r\n    // cin >> tests;\r\n    while(tests--){\r\n       solve(); \r\n    }\r\n    #ifdef LOCAL_DEFINE\r\n    cerr << \"Time elapsed: \" << 1.0 * clock() / CLOCKS_PER_SEC << \" s.\\n\";\r\n    #endif\r\n}\r\n/* stuff you should look for\r\n    * int overflow, array bounds\r\n    * special cases (n=1?)\r\n    * DON'T GET STUCK ON ONE APPROACH\r\n*/"
+}

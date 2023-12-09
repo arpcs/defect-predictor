@@ -1,0 +1,34 @@
+{
+    "id": 57758430,
+    "contestId": 1192,
+    "creationTimeSeconds": 1564074379,
+    "relativeTimeSeconds": 10879,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "ijxjdjd"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "Java 8",
+    "verdict": "PARTIAL",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 3500,
+    "memoryConsumedBytes": 17305600,
+    "points": 0.0,
+    "source": "import java.util.*;\r\n\r\npublic class BuildingSkyscrapers {\r\n    static int xmin = Integer.MAX_VALUE;\r\n    static int ymin = Integer.MAX_VALUE;\r\n    static int xmax = Integer.MIN_VALUE;\r\n    static int ymax = Integer.MIN_VALUE;\r\n    static int[][] skyscrapers;\r\n    public static void main(String[] args) {\r\n        Scanner in = new Scanner(System.in);\r\n        int N = in.nextInt();\r\n        int T = in.nextInt();\r\n        LinkedList<Integer>[] adjList = new LinkedList[N+1];\r\n        skyscrapers = new int[N+1][2];\r\n        HashMap<Integer, HashMap<Integer, Integer>> coords = new HashMap<>();\r\n        for (int i = 0; i <= N; i++) {\r\n            adjList[i] = new LinkedList<>();\r\n        }\r\n        for (int i = 1; i <= N; i++) {\r\n            int[] thesecoords = new int[]{in.nextInt(), in.nextInt()};\r\n            xmin = Math.min(thesecoords[0], xmin);\r\n            ymin = Math.min(thesecoords[1], ymin);\r\n            xmax = Math.max(thesecoords[0], xmax);\r\n            ymax = Math.max(thesecoords[1], ymax);\r\n            skyscrapers[i] = thesecoords;\r\n            for (int x = -1; x <= 1; x++) {\r\n                for (int y = -1; y <= 1; y++) {\r\n                    if (x != 0 || y != 0) {\r\n                        try {\r\n                            int val = coords.get(thesecoords[0] + x).get(thesecoords[1]+y);\r\n                            if (val != 0) {\r\n                                adjList[i].add(val);\r\n                                adjList[val].add(i);\r\n                            }\r\n                        } catch (NullPointerException e) {\r\n                            continue;\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n            if (!coords.containsKey(thesecoords[0])) {\r\n                coords.put(thesecoords[0], new HashMap<>());\r\n            }\r\n            coords.get(thesecoords[0]).put(thesecoords[1], i);\r\n        }\r\n        PriorityQueue<Integer> queue = new PriorityQueue<Integer>();\r\n        int[] inOrder = new int[N];\r\n        queue.add(1);\r\n        int index = 0;\r\n        boolean[] visited = new boolean[N];\r\n        visited[0] = true;\r\n        while (!queue.isEmpty()) {\r\n            int next = queue.remove();\r\n            inOrder[index] = next;\r\n            index++;\r\n            for (int val : adjList[index]) {\r\n                if (!visited[val-1]) {\r\n                    visited[val-1] = true;\r\n                    queue.add(val);\r\n                }\r\n            }\r\n        }\r\n        if (inOrder[N-1] == 0) {\r\n            System.out.println(\"NO\"); //not fully connected\r\n        }\r\n        else if (!reachEdge()) {\r\n            System.out.println(\"NO\");\r\n        }\r\n        else {\r\n            System.out.println(\"YES\");\r\n            for (int i = 0; i < N; i++) {\r\n                System.out.println(inOrder[i]);\r\n            }\r\n        }\r\n    }\r\n    //flood fill from maximum rectangle?\r\n    public static boolean reachEdge() {\r\n        xmin--;\r\n        xmax++;\r\n        ymin--;\r\n        ymax++;\r\n        int changeX = 0 - xmin;\r\n        int changeY = 0-ymin; //bottom left to 0, 0\r\n        ymax += changeY;\r\n        xmax += changeX;\r\n        int[][] graph = new int[ymax][xmax+1];\r\n        for (int i = 1; i < skyscrapers.length; i++) {\r\n            graph[skyscrapers[i][1]+changeY][skyscrapers[i][0]+changeX] = 1;\r\n        }\r\n        Queue<int[]> queue = new LinkedList<>();\r\n        queue.add(new int[]{0, 0});\r\n        int counter = 0;\r\n        while (!queue.isEmpty()) {\r\n            int[] next = queue.remove();\r\n\r\n            int r = next[0];\r\n            int c = next[1];\r\n            if (graph[r][c]== 1) {\r\n                counter++;\r\n            }\r\n            else {\r\n                if (r - 1 >= 0 && graph[r - 1][c] != -1) {\r\n                    graph[next[0]-1][next[1]] = -1;\r\n                }\r\n                if (r + 1 < graph.length && graph[r + 1][c] != -1) {\r\n                    queue.add(new int[]{r + 1, c});\r\n                    graph[next[0]+1][next[1]] = -1;\r\n\r\n                }\r\n                if (c + 1 < graph[0].length && graph[r][c + 1] != -1) {\r\n                    queue.add(new int[]{r, c + 1});\r\n                    graph[next[0]][next[1]+1] = -1;\r\n\r\n                }\r\n                if (c - 1 >= 0 && graph[r][c - 1] != -1) {\r\n                    queue.add(new int[]{r, c - 1});\r\n                    graph[next[0]][next[1]-1] = -1;\r\n\r\n                }\r\n            }\r\n        }\r\n\r\n        if (counter == skyscrapers.length-1) {\r\n            return true;\r\n        }\r\n        return false; //CHANGE\r\n    }\r\n}\r\n"
+}

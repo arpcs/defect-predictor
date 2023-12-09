@@ -1,0 +1,36 @@
+{
+    "id": 105222127,
+    "contestId": 1000,
+    "creationTimeSeconds": 1611490193,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "Dio"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 1762,
+    "memoryConsumedBytes": 110592000,
+    "source": "// Call my Name and Save me from The Dark\n#include <bits/stdc++.h>\n \nusing namespace std;\n\ntypedef long long int ll;\ntypedef pair<int, int> pii;\n \n#define SZ(x)                       (int) x.size()\n#define F                           first\n#define S                           second\n\nconst int N = 3e5 + 10;\nll dp1[N], dp2[N], Sa[N], Sw[N], dp[20][N], A[N]; int P[20][N], H[N], n, q;\nvector<pii> adj[N];\n\nvoid preDFS(int v, int p = -1) {\n    if (!~p) P[0][v] = v; \n    for (int i = 1; i < 20; i++) P[i][v] = P[i - 1][P[i - 1][v]];\n    for (pii u : adj[v]) {\n        if (u.F != p)  {\n            P[0][u.F] = v;\n            H[u.F] = H[v] + 1; Sw[u.F] = Sw[v] + u.S, Sa[u.F] = Sa[v] + A[u.F];\n            preDFS(u.F, v);\n        }\n    }\n}\n\nint getpar(int v, int h) {\n    for (int i = h; i; i -= i & -i) v = P[__builtin_ctz(i)][v];\n    return v; \n}\n\nint LCA(int u, int v) {\n    if (H[u] < H[v]) swap(u, v);\n    u = getpar(u, H[u] - H[v]);\n    if (u == v) return v;\n    for (int i = 19; ~i; i--) if (P[i][u] != P[i][v]) u = P[i][u], v = P[i][v];\n    return P[0][v];\n}\n\nvoid DFSdn(int v, int p = -1) {\n    for (pii u : adj[v]) {\n        if (u.F != p) DFSdn(u.F, v), dp1[v] += max(0ll, dp1[u.F] - 2 * u.S + A[u.F]);\n    }\n}\n\nvoid DFSup(int v, int p = -1) {\n    for (pii u : adj[v]) {\n        if (u.F != p) {\n            dp2[u.F] = max(0ll, A[v] + dp2[v] + dp1[v] - max(0ll, dp1[u.F] - 2 * u.S + A[u.F]));\n            dp2[u.F] = max(0ll, dp2[u.F] - 2 * u.S);\n            DFSup(u.F, v);\n        }\n    }\n}\n\nvoid NIMA(int v, int p = -1) {\n    for (pii u : adj[v]) {\n        if (u.F != p) {\n            dp[0][u.F] = dp1[v] - max(0ll, dp1[u.F] - 2 * u.S + A[u.F]);\n            NIMA(u.F, v);\n        }\n    }\n}\n\nll get(int v, int h) {\n    ll ret = 0;\n    for (int i = h; i; i -= i & -i) ret += dp[__builtin_ctz(i)][v], v = P[__builtin_ctz(i)][v];\n    return ret;\n}\n\nint main() {\n    scanf(\"%d%d\", &n, &q);\n    for (int i = 1; i <= n; i++) scanf(\"%lld\", &A[i]);\n    for (int i = 1; i < n; i++) {\n        int u, v, w; scanf(\"%d%d%d\", &u, &v, &w);\n        adj[u].push_back({v, w});\n        adj[v].push_back({u, w});\n    }\n    preDFS(1);\n    DFSdn(1);\n    DFSup(1);\n    NIMA(1);\n    for (int i = 1; i < 20; i++) for (int j = 1; j <= n; j++) dp[i][j] = dp[i - 1][j] + dp[i - 1][P[i - 1][j]];\n    for (; q; q--) {\n        int u, v; scanf(\"%d%d\", &u, &v);\n        if (H[u] < H[v]) swap(u, v);\n        if (u == v) {\n            printf(\"%lld\\n\", dp1[u] + dp2[u] + A[u]);\n            continue;\n        }\n        int p = LCA(u, v); ll a = get(u, H[u] - H[p]), b = get(v, H[v] - H[p]); \n        ll ret = Sa[u] - Sa[p] + A[p] + Sa[v] - Sa[p] - (Sw[u] - Sw[p] + Sw[v] - Sw[p]);\n        if (p == v) {\n            printf(\"%lld\\n\", ret + dp2[v] + a + b + dp1[u]);\n        } else {\n            printf(\"%lld\\n\", a + b + dp2[p] - dp1[p] + ret + dp1[u] + dp1[v]);\n        }\n    }\n    return 0;\n}\n"
+}

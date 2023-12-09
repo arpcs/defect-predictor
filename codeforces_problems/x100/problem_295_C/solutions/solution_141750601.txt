@@ -1,0 +1,38 @@
+{
+    "id": 141750601,
+    "contestId": 295,
+    "creationTimeSeconds": 1641398377,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "Dyln"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\n#define ll long long\nconst int N = 55;\nconst int INF = 1e9;\nconst int M = 1e9 + 7;\n#define endl '\\n'\n\nint n, k, cnt50, cnt100, f[N][N][2], vis[N][N][2];\nll cnt[N][N][2], C[N][N];\n\nvoid dfs(int m, int a, bool side) {\n    vis[m][a][side] = 1;\n    int b = m - a;\n    \n    int &curF = f[m][a][side];\n    ll &curCnt = cnt[m][a][side];\n    // int curF = INF;\n    // ll curCnt = 0;\n\n    for (int i = a; i >= 0; i--)\n        for (int j = b; j >= 0 + (i == 0); j--)\n            if (50 * i + 100 * j <= k) {\n                // if (m == 2 && a == 1 && side)\n                //     cerr << n - m + i + j << ' ' << cnt50 - a + i << ' ' << cnt100 - b + j << endl;\n                // if (vis[n - m + i + j][cnt50 - a + i][1 ^ side] == 1)\n                //     continue;\n                if (!vis[n - m + i + j][cnt50 - a + i][1 ^ side])\n                    dfs(n - m + i + j, cnt50 - a + i, 1 ^ side); \n                \n                if (m == 2 && a == 1 && !side)\n                    cerr << n - m + i + j << ' ' << cnt50 - a + i << ' ' << cnt100 - b + j << endl;\n\n                int nxtF = f[n - m + i + j][cnt50 - a + i][1 ^ side];\n                ll nxtCnt = ((cnt[n - m + i + j][cnt50 - a + i][1 ^ side] * C[a][i]) % M * C[b][j]) % M;\n\n                if (curF ==  nxtF + 1) \n                    curCnt = (curCnt + nxtCnt) % M;\n                else if (curF > nxtF + 1) {\n                    curF = nxtF + 1;\n                    curCnt = nxtCnt;\n                }\n            }\n    // f[m][a][side] = curF;\n    // cnt[m][a][side] = curCnt;\n    vis[m][a][side] = 2;\n}\n\nsigned main() {\n    #ifndef ONLINE_JUDGE\n        freopen(\"nhap.inp\", \"r\", stdin);\n        freopen(\"nhap.out\", \"w\", stdout);\n    #endif\n\n    cin >> n >> k;\n    for (int i = 1; i <= n; i++) {\n        int a; cin >> a;\n        (a == 50) ? cnt50++ : cnt100++;\n    }\n\n    for (int i = 0; i <= n; i++)\n        C[i][0] = 1;\n    for (int i = 1; i <= n; i++)\n        for (int j = 1; j <= i; j++)\n            C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % M;\n\n    for (int i = 0; i <= n; i++)\n        for (int j = 0; j <= cnt50; j++)\n            for (int side = 0; side < 2; side++)\n                f[i][j][side] = INF;\n    f[n][cnt50][1] = 0;\n    cnt[n][cnt50][1] = 1;\n    vis[n][cnt50][1] = 2;\n\n    dfs(n, cnt50, 0);\n\n    cerr << cnt[2][1][1];\n\n    if (f[n][cnt50][0] == INF)\n        f[n][cnt50][0] = -1;\n\n    cout << f[n][cnt50][0] << endl << cnt[n][cnt50][0];\n    return 0;\n}"
+}

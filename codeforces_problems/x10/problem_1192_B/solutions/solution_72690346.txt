@@ -1,0 +1,38 @@
+{
+    "id": 72690346,
+    "contestId": 1192,
+    "creationTimeSeconds": 1583613292,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "B",
+        "name": "Dynamic Diameter",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "Mr.Robot_28"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 102,
+    "timeConsumedMillis": 592,
+    "memoryConsumedBytes": 65433600,
+    "points": 100.0,
+    "source": "#include<bits/stdc++.h>\r\n \r\nusing namespace std;\r\n#define int long long\r\nint n, q, W;\r\nint N = 2e5 + 10;\r\nint timer = 0;\r\nvector <vector <pair <int, int> > > g;\r\nvector <int> in, out, ind, d, pred;\r\nstruct edge{\r\n\tint x, y, w;\r\n\tedge(int x, int y, int w):\r\n\t\tx(x),\r\n\t\ty(y),\r\n\t\tw(w){}\r\n};\r\nvector <edge> edges;\r\nstruct node{\r\n\tint m, val, lm, mr, lmr, tag;\r\n\tnode friend operator+(node a, node b)\r\n\t{\r\n\t\tnode c;\r\n\t\tc.m = max(a.m, b.m);\r\n\t\tc.val = max(a.val, b.val);\r\n\t\tc.lm = max(max(a.lm, b.lm), a.val + b.m);\r\n\t\tc.mr = max(max(a.mr, b.mr), b.val + a.m);\r\n\t\tc.lmr = max(max(a.lmr, b.lmr), max(a.val + b.mr, b.val + a.lm));\r\n\t\tc.tag =0;\r\n\t\treturn c;\r\n\t}\r\n};\r\nvector <node> T;\r\nvoid dfs(int v)\r\n{\r\n\tind[++timer] = v;\r\n\tin[v] = out[v] = timer;\r\n\tfor(int i = 0; i < g[v].size(); i++)\r\n\t{\r\n\t\tint to = g[v][i].first;\r\n\t\tif(to == pred[v])\r\n\t\t{\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tpred[to] = v;\r\n\t\td[to] = d[v] + g[v][i].second;\r\n\t\tdfs(to);\r\n\t\tind[++timer] = v;\r\n\t\tout[v] = timer;\r\n\t}\r\n}\r\nvoid build(int v, int l, int r)\r\n{\r\n\tif(l == r)\r\n\t{\r\n\t\tT[v] = (node){-2 * d[ind[l]], d[ind[l]], -d[ind[l]], -d[ind[l]], 0, 0};\r\n\t\treturn ;\r\n\t}\r\n\tint midd = (r + l) / 2;\r\n\tbuild(v * 2, l, ( r+ l) / 2);\r\n\tbuild(v * 2 + 1, (r + l) / 2 + 1, r);\r\n\tT[v] = T[v * 2] + T[v * 2 + 1]; \r\n}\r\nvoid doit(int v, int w)\r\n{\r\n\tT[v].m += -2 * w;\r\n\tT[v].val += w;\r\n\tT[v].lm -= w;\r\n\tT[v].mr -= w;\r\n\tT[v].tag += w;\r\n}\r\nvoid push(int v)\r\n{\r\n\tif(T[v].tag == 0)return;\r\n\tdoit(v * 2, T[v].tag);\r\n\tdoit(v * 2 + 1, T[v].tag);\r\n\tT[v].tag = 0;\r\n}\r\nvoid modify(int v, int l, int r, int al, int ar, int w)\r\n{\r\n\tif(al <= l && ar >= r)\r\n\t{\r\n\t\tdoit(v, w);\r\n\t\treturn;\r\n\t}\r\n\tif(l != r)\r\n\t{\r\n\tpush(v);\r\n\t}\r\n\tint midd = l + r >> 1;\r\n\tif(al <= midd)\r\n\t{\r\n\t\tmodify(v * 2, l, midd, al, ar, w);\r\n\t}\r\n\tif(ar > midd)\r\n\t{\r\n\t\tmodify(v * 2 + 1, midd + 1, r, al, ar, w);\r\n\t}\r\n\tif(l != r)\r\n\t{\r\n\t\tT[v] = T[v * 2] + T[v * 2 + 1];\r\n\t}\r\n}\r\nsigned main()\r\n{\r\n\tios_base::sync_with_stdio(false);\r\n\tcin.tie(NULL);\r\n\tcout.tie(NULL);\r\n\tcin >> n >> q >> W;\r\n\tg.resize(N);\r\n\tin.resize(N);\r\n\tout.resize(N);\r\n\tind.resize(N);\r\n\td.resize(N);\r\n\tT.resize(N << 2);\r\n\tpred.resize(N);\r\n\tfor(int i = 0; i < n - 1; i++)\r\n\t{\r\n\t\tint x, y, w;\r\n\t\tcin >> x >> y >> w;\r\n\t\tg[x].push_back({y, w});\r\n\t\tg[y].push_back({x, w});\r\n\t\tedges.push_back(edge(x, y, w));\r\n\t}\r\n\tdfs(1);\r\n\tbuild(1, 1, timer);\r\n\tint last = 0;\r\n\twhile(q--)\r\n\t{\r\n\t\tint d, e;\r\n\t\tcin >> d >> e;\r\n\t\td = (d + last) % (n -1);\r\n\t\te = (e + last) % W;\r\n\t\tint x = edges[d].x;\r\n\t\tint y = edges[d].y;\r\n\t\tif(pred[y] == x)\r\n\t\t{\r\n\t\t\tswap(x, y);\r\n\t\t}\r\n\t\tmodify(1, 1, timer, in[x], out[x], e - edges[d].w);\r\n\t\tedges[d].w = e;\r\n\t\tlast = T[1].lmr;\r\n\t\tcout << last << \"\\n\";\r\n\t}\r\n\treturn 0;\r\n}"
+}

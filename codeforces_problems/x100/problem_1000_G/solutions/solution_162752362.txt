@@ -1,0 +1,36 @@
+{
+    "id": 162752362,
+    "contestId": 1000,
+    "creationTimeSeconds": 1656942999,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "Biot_DucToan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 42086400,
+    "source": "#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define task \"sol\"\r\n#define lb lower_bound\r\n#define ub upper_bound\r\n#define fi first\r\n#define se second\r\n#define pb push_back\r\n#define mp make_pair\r\n#define zs(v) ((int)(v).size())\r\n#define BIT(x, i) (((x) >> (i)) & 1)\r\n#define CNTBIT __builtin_popcountll\r\n#define ALL(v) (v).begin(),(v).end()\r\n#define endl '\\n'\r\n\r\ntypedef long double ld;\r\ntypedef long long ll;\r\ntypedef pair<int, int> pii;\r\n\r\nconst int dx[4]={-1, 0, 1, 0}, dy[4]={0, 1, 0, -1};\r\nconst int dxx[8]={-1, -1, 0, 1, 1, 1, 0, -1}, dyy[8]={0, 1, 1, 1, 0, -1, -1, -1};\r\nconst ll mod = 1000000007; /// 998244353\r\nconst ll base = 331;\r\nconst int N = 3e5 + 5;\r\n\r\nint n, q, b[N], dep[N];\r\nvector<pii> adj[N];\r\nint anc[N][20];\r\nll dp[N], f[N], h[N], a[N], dp1[N];\r\n\r\nvoid dfs(int u, int pre) {\r\n    for (int i = 1; i < 19; ++i) {\r\n        anc[u][i] = anc[anc[u][i - 1]][i - 1];\r\n    }\r\n    vector<ll> vec;\r\n    for (pii node : adj[u]) if (node.fi != pre) {\r\n        int v = node.fi;\r\n        int w = node.se;\r\n        dep[v] = dep[u] + 1;\r\n        anc[v][0] = u;\r\n        h[v] = h[u] + w;\r\n        b[v] += b[u];\r\n\r\n        dfs(v, u);\r\n\r\n        vec.push_back(dp[v] - 2 * w);\r\n    }\r\n    sort(ALL(vec), greater<ll>());\r\n    for (ll i : vec) \r\n        if (i > 0)\r\n            dp[u] += i;\r\n        else \r\n            break;\r\n    dp[u] += a[u];\r\n}\r\nvoid dfs1(int u, int pre) {\r\n    ll sum = a[u];\r\n    for (pii node : adj[u]) {\r\n        int v = node.fi, w = node.se;\r\n        sum += max(0LL, f[v] - w * 2);\r\n    }\r\n    // if (u == 2)  cout << sum << ' ' << f[1] << ' ' << f[3] << '\\n';\r\n    ll backup = f[u];\r\n    f[u] = sum;\r\n    for (pii node : adj[u]) if (node.fi != pre) {\r\n        int v = node.fi , w = node.se;\r\n        f[u] -= max(0LL, f[v] - w * 2);\r\n        dp1[v] = a[v] + max(0LL, f[u] - w * 2);\r\n        dfs1(v, u);\r\n\r\n        f[u] += max(0LL, f[v] - w * 2);\r\n    }\r\n    f[u] = backup;\r\n}\r\nint LCA(int u, int v) {\r\n    if (dep[u] < dep[v]) \r\n        swap(u, v);\r\n    int k = log2(dep[u]);\r\n    for (int i = k; i >= 0; --i) {\r\n        if (dep[u] - (1 << i) >= dep[v]) \r\n            u = anc[u][i];\r\n    }\r\n    if (u == v)\r\n        return u;\r\n    for (int i = k; i >= 0; --i) {\r\n        if (anc[u][i] != anc[v][i]) {\r\n            u = anc[u][i];\r\n            v = anc[v][i];\r\n        }\r\n    }\r\n    return anc[v][0];\r\n}\r\nvoid gogo() {\r\n    cin >> n >> q;\r\n    for (int i = 1; i <= n; ++i)\r\n        cin >> a[i], b[i] = a[i];\r\n    for (int i = 1; i < n; ++i) {\r\n        int u, v, w;\r\n        cin >> u >> v >> w;\r\n        adj[u].push_back(mp(v, w));\r\n        adj[v].push_back(mp(u, w));\r\n    }\r\n\r\n    dfs(1, 1);\r\n    for (int i = 1; i <= n; ++i) \r\n        f[i] = dp[i];\r\n    dfs1(1, 1);\r\n\r\n    // for (int i = 1; i <= n; ++i)\r\n    //     cout << dp[i] << ' ';\r\n    //     cout << '\\n';\r\n    // for (int i = 1; i <= n; ++i)\r\n    //     cout << dp1[i] << ' ';\r\n    //     cout << '\\n';\r\n\r\n    dp1[1] = a[1];\r\n    \r\n    while (q--) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        int r = LCA(u, v);\r\n        if (dep[u] < dep[v]) \r\n            swap(u, v);\r\n\r\n        ll sumdp = 0;\r\n\r\n        if (r == u) {\r\n            sumdp += dp1[u];\r\n            sumdp += dp[v];\r\n        } else {\r\n            sumdp = dp[u] + dp[v] + dp1[r]; \r\n        }\r\n        // if (u == v && v == 4) cout << sumdp << '\\n';\r\n        sumdp += b[v] + b[u] - 2 * b[r];\r\n        sumdp -= a[u];\r\n\r\n        if (u != v) \r\n            sumdp -= a[v];\r\n        sumdp -= h[u] + h[v] - 2 * h[r];\r\n        cout << sumdp << '\\n';\r\n    }\r\n}   \r\nint main() {\r\n    ios_base::sync_with_stdio(0); cin.tie(0);\r\n    if (fopen(task\".inp\", \"r\")) {\r\n        freopen(task\".inp\", \"r\", stdin);\r\n        freopen(task\".out\", \"w\", stdout);\r\n    }\r\n    gogo();\r\n}\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n"
+}

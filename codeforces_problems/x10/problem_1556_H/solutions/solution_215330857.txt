@@ -1,0 +1,38 @@
+{
+    "id": 215330857,
+    "contestId": 1556,
+    "creationTimeSeconds": 1690190524,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1556,
+        "index": "H",
+        "name": "DIY Tree",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3300,
+        "tags": [
+            "graphs",
+            "greedy",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1556,
+        "members": [
+            {
+                "handle": "HoanggDuc"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1630247700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 0,
+    "source": "\r\n#pragma GCC optimize(\"Ofast\")\r\n#pragma GCC target(\"avx,avx2,fma\")\r\n#pragma GCC optimize(\"unroll-loops\")\r\n\r\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define all(x) x.begin(), x.end()\r\n#define len(x) ll(x.size())\r\n#define eb emplace_back\r\n#define PI acos(-1.0)\r\n#define fi first\r\n#define se second\r\n#define mp make_pair\r\n#define pb push_back\r\n#define MIN(v) *min_element(all(v))\r\n#define MAX(v) *max_element(all(v))\r\n#define BIT(x,i) (1&((x)>>(i)))\r\n#define MASK(x) (1LL<<(x))\r\n#define task \"tnc\"  \r\ntypedef long long ll;\r\ntypedef long double ld;\r\nconst ll INF=1e18;\r\nconst int maxn=1e6+5;\r\nconst int mod=1e9+7;\r\nconst int mo=998244353;\r\nusing pi=pair<ll,ll>;\r\nusing vi=vector<ll>;\r\nusing pii=pair<pair<ll,ll>,ll>;\r\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\r\nconstexpr int TL = 100;\r\nint n,k;\r\nint a[55][55];\r\nint max_deg[55];\r\nint u[55];\r\nint v[55];\r\nint cur_deg[55];\r\nint d[55];\r\nint fin(int u){\r\n\tif(d[u]<0)return u;\r\n\treturn d[u]=fin(d[u]);\r\n}\r\nbool join(int u,int v){\r\n\tu=fin(u);\r\n\tv=fin(v);\r\n\tif(u==v){\r\n\t\treturn true;\r\n\t}\r\n\tif(-d[u]<-d[v]){\r\n\t\tswap(u,v);\r\n\t}\r\n\td[u]+=d[v];\r\n\td[v]=u;\r\n\treturn false;\r\n}\r\nsigned main()\r\n{\r\n\tcin.tie(0),cout.tie(0)->sync_with_stdio(0);\r\n    cin >> n >> k;\r\n    for(int i=1;i<=k;i++)cin>>max_deg[i];\r\n    for(int i=k+1;i<=n;i++)max_deg[i]=n;\r\n    for(int i=1;i<=n;i++){\r\n    \tfor(int j=i+1;j<=n;j++){\r\n    \t\tcin>>a[i][j];\r\n    \t\ta[j][i]=a[i][j];\r\n    \t}\r\n    }\r\n    int ans=0;\r\n    for(int i=1;i<n;i++){\r\n    \tu[i]=i;\r\n    \tv[i]=n;\r\n    \tcur_deg[i]++;\r\n    \tcur_deg[n]++;\r\n    \tans+=a[i][n];\r\n    }\r\n    auto start=chrono::high_resolution_clock::now();\r\n    auto elasped_time=[&]() -> int{\r\n    \tauto now=chrono::high_resolution_clock::now();\r\n    \treturn chrono::duration_cast<chrono::milliseconds>(now-start).count();\r\n    };\r\n    auto rand_int_n_2=[&]() ->int{\r\n    \tstatic uniform_int_distribution<int>engine(1,n-1);\r\n    \treturn engine(rng);\r\n    };\r\n    auto rand_int=[&]()->int{\r\n    \tstatic uniform_int_distribution<int>engine(1,n);\r\n    \treturn engine(rng);\r\n    };\r\n    auto rand_real=[&]()->double{\r\n    \tstatic uniform_real_distribution<double>engine(0,1);\r\n    \treturn engine(rng);\r\n    };\r\n    int best=ans;\r\n    \t\r\n    for(auto T=100000;elasped_time()<TL;T*=0.99997){\r\n    \t\r\n    \tint id=rand_int_n_2();\r\n    \tint cur=ans-a[u[id]][v[id]];\r\n    \tmemset(d,-1,sizeof(d));\r\n    \tcur_deg[u[id]]--;\r\n    \tcur_deg[v[id]]--;\r\n    \tfor(int i=1;i<=n-1;i++){\r\n    \t\tif(i!=id){\r\n    \t\t\tjoin(u[i],v[i]);\r\n    \t\t}\r\n    \t}\r\n    \t\r\n    \tint neu;\r\n    \tint nev;\r\n    \tdo{\r\n    \t\tneu=rand_int();\r\n    \t\tnev=rand_int();\r\n    \t}while(fin(neu)==fin(nev) || cur_deg[nev]==max_deg[nev] || cur_deg[neu]==max_deg[neu]);\r\n    \t\r\n    \tif(neu>nev)swap(neu,nev);\r\n    \tcur+=a[neu][nev];\r\n    \tbest=min(best,ans);\r\n    \tif(ans>cur || exp((ans-cur)/T)>=rand_real()){\r\n    \t\tans=cur;\r\n    \t\tu[id]=neu;\r\n    \t\tv[id]=nev;\r\n    \t}\t\r\n    \tcur_deg[u[id]]++;\r\n    \tcur_deg[v[id]]++;\r\n    \t\r\n    \t\r\n    }\r\n\r\n    cout<<best<<\"\\n\";\r\n    \r\n    return 0;\r\n}\r\n\r\n"
+}

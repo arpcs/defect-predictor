@@ -1,0 +1,36 @@
+{
+    "id": 102377578,
+    "contestId": 1000,
+    "creationTimeSeconds": 1608970422,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "retah"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 32460800,
+    "source": "#include<bits/stdc++.h>  \r\n#define rg register \r\n#define i60 long long \r\n#define dou double \r\n#define fp( i , x , y ) for( rg int i=(x); i<=(y); ++i ) \r\n#define fq( i , x , y ) for( rg int i=(y); i>=(x); --i )  \r\n#define ls k<<1 \r\n#define rs k<<1|1  \r\nusing namespace std ; \r\nconst int N = 3e5+10 ; \r\nvector <int> v[N] , edge[N] ;  \r\nvoid add( int x , int y , int z ) { \r\n  v[x].push_back(y) ; edge[x].push_back(z) ; \r\n} \r\ni60 fs[N] , fe[N] , gout[N] , sfs[N] , sfe[N] , sw[N] ;   \r\nint dep[N] , sz[N] , son[N] , pre[N] , top[N] , fro[N] , a[N] ;   \r\nint n , q , in_li[N] , in_tr[N] , tot ;  \r\nvoid dfs1( int x , int fa ) { \r\n  pre[x] = fa ; \r\n  sz[x] = 1 ; \r\n  dep[x] = dep[fa]+1 ; \r\n  int l = v[x].size() , y ; \r\n  fs[x] = a[x] ;  \r\n  fp( i , 0 , l-1 ) { \r\n    y = v[x][i] ; \r\n    if( y == fa ) continue ; \r\n    dfs1( y , x ) ; fro[y] = edge[x][i] ; \r\n    fs[x] += max( 0ll , fs[y] - 2*fro[y] ) ; \r\n    sz[x] += sz[y] ; \r\n    if( sz[son[x]] < sz[y] ) \r\n     son[x] = y ; \r\n  } \r\n} \r\nvoid dfs2( int x ) { \r\n  if( x == 1 ) gout[x] = a[x] ; \r\n  else { \r\n    i60 tp = gout[pre[x]] + fs[pre[x]] - max( 0ll , fs[x]-2*fro[x] ) - a[pre[x]] ; \r\n    gout[x] = a[x] + max( 0ll , tp-2*fro[x] ) ; \r\n    fe[x] = fs[pre[x]] - max( 0ll , fs[x]-2*fro[x] ) ; \r\n  } \r\n  sfs[x] = sfs[pre[x]] + fs[x] ; \r\n  sfe[x] = sfe[pre[x]] + fe[x] ;   \r\n  sw[x] = sw[pre[x]] + fro[x] ; \r\n  int l = v[x].size() , y ; \r\n  fp( i , 0 , l-1 ) { \r\n    y = v[x][i] ; \r\n    if( y == pre[x] ) continue ; \r\n    dfs2( y ) ; \r\n  } \r\n} \r\nvoid dfs3( int x ) { \r\n  if( son[x] ) { \r\n    in_li[son[x]] = ++tot ; in_tr[tot] = son[x] ;  \r\n    top[son[x]] = top[x] ; dfs3( son[x] ) ; \r\n  } \r\n  int l = v[x].size() , y ; \r\n  fp( i , 0 , l-1 ) { \r\n    y = v[x][i] ; \r\n    if( y == pre[x] || y == son[x] ) continue ; \r\n    in_li[y] = ++tot ; in_tr[tot] = y ; \r\n\ttop[y] = y ; dfs3( y ) ;  \r\n  } \r\n} \r\nint lca( int x , int y ) { \r\n  int fx = top[x] , fy = top[y] ; \r\n  while( fx != fy ) { \r\n    if( dep[fx] < dep[fy] ) swap( x , y ) , swap( fx , fy ) ; \r\n\tx = pre[fx] ; fx = top[x] ;  \r\n  } \r\n  if( dep[x] > dep[y] ) swap( x , y ) ; \r\n  return x ; \r\n} \r\nint jump( int x , int z ) {  \r\n  if( x == z ) return -1 ; \r\n  int fx = top[x] ; \r\n  while( fx != top[z] ) { \r\n    if( pre[fx] == z ) return fx ; \r\n    x = pre[fx] ; fx = top[x] ; \r\n  } \r\n  return in_tr[in_li[z]+1] ; \r\n} \r\ni60 query( int x , int y ) { \r\n  int z = lca( x , y ) , fx = jump( x , z ) , fy = jump( y , z ) ; \r\n  i60 ans = gout[z] + fs[z] - a[z] ; \r\n // cout << x << ' ' << fx << ' ' << y << ' ' << fy << ' ' << z << '\\n' ; \r\n  if( x != z ) { \r\n    ans += fs[x] + sfe[x] - sfe[fx] - ( (x!=fx)*fe[fx] ) ; \r\n\tans -= ( sw[x] - sw[z] ) ; \r\n\tans -= max( 0ll , fs[fx]-2*fro[fx] ) ;  \r\n  } \r\n  if( y != z ) { \r\n    ans += fs[y] + sfe[y] - sfe[fy] - ( (y!=fy)*fe[fy] ) ; \r\n\tans -= ( sw[y] - sw[z] ) ; \r\n\tans -= max( 0ll , fs[fy]-2*fro[fy] ) ;  \r\n  } \r\n  return ans ; \r\n} \r\nsigned main( ) { \r\n  ios::sync_with_stdio(false) ; \r\n  cin.tie(0) ; \r\n  int x , y , z ;  \r\n  cin >> n >> q ;  \r\n  fp( i , 1 , n ) cin >> a[i] ; \r\n  fp( i , 1 , n-1 ) { \r\n    cin >> x >> y >> z ; \r\n\tadd( x , y , z ) ; add( y , x , z ) ;  \r\n  } \r\n  dfs1( 1 , 0 ) ; dfs2( 1 ) ; \r\n  top[1] = in_li[1] = in_tr[1] = tot = 1 ; \r\n  dfs3( 1 ) ; \r\n  while( q -- ) \r\n    cin >> x >> y , cout << query( x , y ) << '\\n' ; \r\n  return 0 ; \r\n} "
+}

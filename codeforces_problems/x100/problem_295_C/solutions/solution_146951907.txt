@@ -1,0 +1,38 @@
+{
+    "id": 146951907,
+    "contestId": 295,
+    "creationTimeSeconds": 1645286217,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "Mehdi_Farhadian"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <bits/stdc++.h>\r\n#define pb push_back\r\n#define endl '\\n'\r\n#pragma GCC optimize(\"unroll-loops\")\r\n#pragma GCC optimize(\"Ofast\")\r\n#pragma GCC optimize(\"O0\")\r\n#pragma GCC optimize(\"O1\")\r\nusing namespace std;\r\ntypedef long long ll;\r\n\r\nconst int N = 60;\r\nconst int mod = 1e9 + 7;\r\nint n, k, f, s, dp[N][N][2][2];\r\nll fac[N], inv[N], facinv[N];\r\n\r\nvoid pre()\r\n{\r\n    inv[0] = inv[1] = fac[0] = fac[1] = facinv[0] = facinv[1] = 1;\r\n    for (int i = 2; i < N; i++) {\r\n        fac[i] = (fac[i - 1] * i) % mod;\r\n        inv[i] = inv[mod % i] * (mod - mod / i) % mod;\r\n        facinv[i] = (facinv[i - 1] * inv[i]) % mod;\r\n    }\r\n}\r\n\r\nll comb(int n, int k)\r\n{\r\n    if (k > n) {\r\n        return 0;\r\n    }\r\n    return ((fac[n] * facinv[k]) % mod * facinv[n - k]) % mod;\r\n}\r\n\r\nvoid solve()\r\n{\r\n    for (int i = 0; i < N; i++) {\r\n        for (int j = 0; j < N; j++) {\r\n            dp[i][j][0][0] = dp[i][j][1][0] = 1e9;\r\n        }\r\n    }\r\n    dp[f][s][0][0] = 0;\r\n    dp[f][s][0][1] = 1;\r\n    queue<pair<pair<int, int>, int>> q;\r\n    q.push({{f, s}, 0});\r\n    while (q.size()) {\r\n        int a = q.front().first.first, b = q.front().first.second, c = q.front().second;\r\n        q.pop();\r\n        if (c == 1) {\r\n            for (int i = 0; i <= f - a; i++) {\r\n                for (int j = 0; j <= s - b; j++) {\r\n                    if (i == 0 && j == 0) {\r\n                        continue;\r\n                    }\r\n                    int ta = a + i, tb = b + j;\r\n                    if (i + 2 * j <= k) {\r\n                        if (dp[a][b][c][0] + 1 < dp[ta][tb][1 - c][0]) {\r\n                            dp[ta][tb][1 - c][0] = dp[a][b][c][0] + 1;\r\n                            dp[ta][tb][1 - c][1] = ((dp[a][b][c][1] * comb(f - a, i)) % mod) * comb(s - b, j) % mod;\r\n                            q.push({{ta, tb}, 1 - c});\r\n                        }\r\n                        else if (dp[a][b][c][0] + 1 == dp[ta][tb][1 - c][0]) {\r\n                            dp[ta][tb][1 - c][1] += ((dp[a][b][c][1] * comb(f - a, i)) % mod) * comb(s - b, j) % mod;\r\n                            dp[ta][tb][1 - c][1] %= mod;\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n        }\r\n        else {\r\n            for (int i = 0; i <= a; i++) {\r\n                for (int j = 0; j <= b; j++) {\r\n                    if (i == 0 && j == 0) {\r\n                        continue;\r\n                    }\r\n                    int ta = a - i, tb = b - j;\r\n                    if (i + 2 * j <= k) {\r\n                        if (dp[a][b][c][0] + 1 < dp[ta][tb][1 - c][0]) {\r\n                            dp[ta][tb][1 - c][0] = dp[a][b][c][0] + 1;\r\n                            dp[ta][tb][1 - c][1] = ((dp[a][b][c][1] * comb(a, i)) % mod) * comb(b, j) % mod;\r\n                            q.push({{ta, tb}, 1 - c});\r\n                        }\r\n                        else if (dp[a][b][c][0] + 1 == dp[ta][tb][1 - c][0]) {\r\n                            dp[ta][tb][1 - c][1] += ((dp[a][b][c][1] * comb(a, i)) % mod) * comb(b, j) % mod;\r\n                            dp[ta][tb][1 - c][1] %= mod;\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n    if (dp[0][0][1][0] == 1e9) {\r\n        cout << -1 << endl\r\n             << 0;\r\n    }\r\n    else {\r\n        cout << dp[0][0][1][0] << endl\r\n             << dp[0][0][1][1];\r\n    }\r\n}\r\n\r\nint main()\r\n{\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    pre();\r\n    int x;\r\n    cin >> n >> k;\r\n    k /= 50;\r\n    for (int i = 0; i < n; i++) {\r\n        cin >> x;\r\n        x /= 50;\r\n        if (x == 1) {\r\n            f++;\r\n        }\r\n        else {\r\n            s++;\r\n        }\r\n    }\r\n    solve();\r\n}"
+}

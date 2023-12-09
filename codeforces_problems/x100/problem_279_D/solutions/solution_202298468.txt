@@ -1,0 +1,36 @@
+{
+    "id": 202298468,
+    "contestId": 279,
+    "creationTimeSeconds": 1681592192,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 279,
+        "index": "D",
+        "name": "The Minimum Number of Variables",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2200,
+        "tags": [
+            "bitmasks",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 279,
+        "members": [
+            {
+                "handle": "YENGOYAN"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1362411000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 102400,
+    "source": "/*\r\n                                    //\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\\\\r\n                                    \\\\                                    //\r\n                                    //  271828___182845__904523__53602__  \\\\\r\n                                    \\\\  87___47____13______52____66__24_  //\r\n                                    //  97___75____72______47____09___36  \\\\\r\n                                    \\\\  999595_____74______96____69___67  //\r\n                                    //  62___77____24______07____66__30_  \\\\\r\n                                    \\\\  35___35____47______59____45713__  //\r\n                                    //                                    \\\\\r\n                                    \\\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\//\r\n*/\r\n#include <algorithm>\r\n#include <bitset>\r\n#include <chrono>\r\n#include <climits>\r\n#include <cmath>\r\n#include <cstdio>\r\n#include <ctime>\r\n#include <deque>\r\n#include <fstream>\r\n#include <functional>\r\n#include <iomanip>\r\n#include <iostream>\r\n#include <map>\r\n#include <queue>\r\n#include <random>\r\n#include <set>\r\n#include <stack>\r\n#include <string>\r\n#include <tuple>\r\n#include <unordered_map>\r\n#include <unordered_set>\r\n#include <vector>\r\n\r\nusing namespace std;\r\nusing LL = long long;\r\nconst int N = 1e5 + 5;\r\nconst LL mod = 1e9 + 7, inf = 1e18;\r\n\r\nvector<int> dx = {1, 0, 0, -1, 1, 1, -1, -1};\r\nvector<int> dy = {0, 1, -1, 0, 1, -1, 1, -1};\r\n\r\nint cnt(int mask) {\r\n  int c = 0;\r\n  while (mask) {\r\n    c += mask % 2;\r\n    mask /= 2;\r\n  }\r\n  return c;\r\n}\r\n\r\nint frst(int mask) {\r\n  for (int i = 0; i < 23; ++i) {\r\n    if ((mask >> i) & 1) return i;\r\n  }\r\n  return 24;\r\n}\r\n\r\nint lst(int mask) {\r\n  for (int i = 23; i >= 0; --i) {\r\n    if ((mask >> i) & 1) return i;\r\n  }\r\n  return 0;\r\n}\r\n\r\nvoid solve() {\r\n  int n; cin >> n;\r\n  vector<int> v(n);\r\n  for(int i = 0; i < n; ++i) {\r\n    cin >> v[i];\r\n  } \r\n  int c = 0;\r\n  for (int i = 1; i < n; ++i) {\r\n    bool f = 0;\r\n    for (int j = 0; j < i; ++j) {\r\n      for (int k = j; k < i; ++k) {\r\n        if (v[j] + v[k] == v[i]) {\r\n          f = 1;\r\n        }\r\n      }\r\n    }\r\n    if (!f) {\r\n      cout << \"-1\\n\";\r\n      return;\r\n    }\r\n  }\r\n  vector<vector<bool>> F(1 << n, vector<bool>(n));\r\n  for (int i = n - 1; i>=0; --i) {\r\n    for (int mask = 0; mask < (1 << n); ++mask) {\r\n      for (int j = 0; j < i; ++j) {\r\n        for (int k = j; k < i; ++k) {\r\n          if (v[j] + v[k] == v[i] && ((mask >> j) & 1) == 0 && ((mask >> k) & 1) == 0) {\r\n            F[mask][i] = 1;\r\n          }\r\n        }\r\n      }\r\n    }\r\n  }\r\n  vector<vector<bool>> dp(1 << n, vector<bool>(n));\r\n  for (int i = n - 1; i >= 0; --i) {\r\n    for (int mask = 0; mask < (1 << n); ++mask) {\r\n      if (i == n - 1) dp[mask][i] = F[mask][i];\r\n      else dp[mask][i] = (dp[mask][i + 1] & F[mask][i]);\r\n    }\r\n  }\r\n  int ans = 0, msk = 0, used = (1 << n) - 1;\r\n  for (int i = 0; i < n - 1; ++i) {\r\n    for (int mask = 1; mask < (1 << n); ++mask) {\r\n      if (dp[mask][i + 1] && lst(mask) <= i) {\r\n        msk |= mask;\r\n      }\r\n    }\r\n    msk &= used;\r\n    if (!msk) ++ans;\r\n    else {\r\n      int bit = lst(msk);\r\n      used -= (1 << bit);\r\n      msk ^= (1 << bit);\r\n    }\r\n  }\r\n  cout << ans << \"\\n\";\r\n}\r\n\r\nint main() {\r\n  ios_base::sync_with_stdio(false);\r\n  cin.tie(NULL);\r\n // int t; cin >> t; while(t--)\r\n    solve();\r\n}\r\n"
+}

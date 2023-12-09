@@ -1,0 +1,37 @@
+{
+    "id": 112989135,
+    "contestId": 1307,
+    "creationTimeSeconds": 1618388462,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "sdcgvhgj"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 373,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nconst int N = 55;\r\nnamespace MCMF{\r\n\ttypedef int ll;\r\n    typedef pair<ll,int> pii;\r\n    const ll INF = 0x3f3f3f3f;\r\n    int cnt = 1, S, T, pre[N], id[N], b[N];\r\n    ll dis[N], h[N];\r\n    bool vis[N];\r\n    struct node{\r\n        int v, c; ll w; int nex;\r\n    } e[N*4];\r\n    void addedge(int u, int v, int c, ll w){\r\n        e[++cnt] = node{v, c, w, b[u]}; b[u] = cnt;\r\n        e[++cnt] = node{u, 0, -w, b[v]}; b[v] = cnt;\r\n    }\r\n    void init(int n){\r\n        cnt = 1;\r\n        S = 0, T = n - 1;\r\n        for(int i=0;i<n;i++) b[i] = -1;\r\n    }\r\n    vector<int> mcmf(){\r\n        priority_queue<pii, vector<pii >, greater<pii > > Q;\r\n        int maxflow = 0; ll cost = 0;\r\n        vector<int> ans;\r\n        while (1){\r\n            for(int i=S;i<=T;i++) dis[i] = INF;\r\n            Q.push(pii{0, S}); dis[S] = 0;\r\n            while (!Q.empty()){\r\n                pii q = Q.top(); Q.pop();\r\n                int now = q.second;\r\n                if (dis[now] < q.first) continue;\r\n                for (int i = b[now]; i != -1; i = e[i].nex){\r\n                    if(e[i].c<0) continue;\r\n                    if (e[i].c > 0 && dis[e[i].v] > dis[now] + e[i].w + h[now] - h[e[i].v]){\r\n                        dis[e[i].v] = dis[now] + e[i].w + h[now] - h[e[i].v];\r\n                        pre[e[i].v] = now;\r\n                        id[e[i].v] = i;\r\n                        Q.push(pii{dis[e[i].v], e[i].v});\r\n                    }\r\n                }\r\n            }\r\n            if (dis[T] == INF) break;\r\n            int flow = 1;\r\n            for (int i = T; i != S; i = pre[i]) flow = min(flow, e[id[i]].c);\r\n            maxflow += flow; cost += flow * (dis[T] - h[S] + h[T]);\r\n        \tans.push_back(cost);\r\n            for (int i = T; i != S; i = pre[i]){\r\n                e[id[i]].c -= flow;\r\n                e[id[i] ^ 1].c += flow;\r\n            }\r\n            for (int i = S; i <= T; ++i){\r\n                h[i] += dis[i];\r\n            }\r\n        }\r\n        return ans;\r\n    }\r\n};\r\nint main(){\r\n\tios::sync_with_stdio(0);\r\n\tint n,m; cin>>n>>m;\r\n\tMCMF::init(n);\r\n\twhile(m--){\r\n\t\tint u,v,w; cin>>u>>v>>w;\r\n\t\tMCMF::addedge(u-1,v-1,1,w);\r\n\t}\r\n\tvector<int> res = MCMF::mcmf();\r\n\tfor(int i=1;i<(int)res.size();i++) res[i] -= res[i-1];\r\n\tvector<double> vec = {0};\r\n\tfor(int i=1;i<(int)res.size();i++){\r\n\t\tvec.push_back(vec.back()+1.0*(res[i]-res[i-1])*i);\r\n\t}\r\n\tint q; cin>>q;\r\n\twhile(q--){\r\n\t\tint x; cin>>x;\r\n\t\tint pos = upper_bound(vec.begin(),vec.end(),x) - vec.begin() - 1;\r\n\t\tcout<<fixed<<setprecision(10);\r\n\t\tcout<<res[pos]+(x-vec[pos])/(pos+1)<<endl;\r\n\t}\r\n}"
+}

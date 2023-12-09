@@ -1,0 +1,36 @@
+{
+    "id": 113529943,
+    "contestId": 1000,
+    "creationTimeSeconds": 1618846085,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "VLADO"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 85504000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nusing ll = long long;\r\nusing pii = pair<int, ll>;\r\n\r\nconst int N = 300010;\r\nconst int LOGN = 19;\r\n\r\nint n, q;\r\nvector<pii> graph[N];\r\nll a[N];\r\nll weightup[N];\r\n\r\nll contrib[N];\r\nll dpdown[N];\r\nll dpup[N];\r\n\r\nint depth[N];\r\nint parent[N][LOGN]; // 2^i-th ancestor\r\nll OLBAP[N][LOGN];\r\n\r\nvoid dfs1(int node, int par, int dep) {\r\n\tdepth[node] = dep;\r\n\tparent[node][0] = par;\r\n\tdpdown[node] = a[node];\r\n\tfor (auto to : graph[node]) {\r\n\t\tif (to.first == par) continue;\r\n\t\tdfs1(to.first, node, dep+1);\r\n\t\tweightup[to.first] = to.second;\r\n\t\tcontrib[to.first] = max((ll)0, -2*to.second + dpdown[to.first]);\r\n\t\tdpdown[node] += contrib[to.first];\r\n\t}\r\n\tfor (auto to : graph[node]) {\r\n\t\tif (to.first == par) continue;\r\n\t\tOLBAP[to.first][0] = dpdown[to.first] - to.second + dpdown[node] - contrib[to.first];\r\n\t}\r\n}\r\n\r\nvoid dfs2(int node, int par) {\r\n\tfor (auto to : graph[node]) {\r\n\t\tif (to.first == par) continue;\r\n\t\tdpup[to.first] = max((ll)0, -2*to.second + dpup[node] + dpdown[node] - contrib[to.first]);\r\n\t\tdfs2(to.first, node);\r\n\t}\r\n}\r\n\r\nint main() {\r\n\tcin.tie(0)->sync_with_stdio(0);\r\n\tcin >> n >> q;\r\n\tfor (int i = 1; i <= n; ++i) {\r\n\t\tcin >> a[i];\r\n\t}\r\n\tfor (int i = 0; i < n-1; ++i) {\r\n\t\tint a, b, w;\r\n\t\tcin >> a >> b >> w;\r\n\t\tgraph[a].emplace_back(b, w);\r\n\t\tgraph[b].emplace_back(a, w);\r\n\t}\r\n\tdfs1(1, -1, 0);\r\n\tdpup[1] = 0;\r\n\tdfs2(1, -1);\r\n\tfor (int i = 1; i < LOGN; ++i) {\r\n\t\tfor (int node = 1; node <= n; ++node) {\r\n\t\t\tparent[node][i] = -1;\r\n\t\t\tint anc = parent[node][i-1];\r\n\t\t\tif (anc != -1) {\r\n\t\t\t\tparent[node][i] = parent[anc][i-1];\r\n\t\t\t\tOLBAP[node][i] = OLBAP[node][i-1] - dpdown[anc] + OLBAP[anc][i-1];\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n//\tfor (int node=1;node<=n;++node){\r\n//\t\tcout<<\"node=\"<<node<<\" down=\"<<dpdown[node]<<\" up=\"<<dpup[node]<<\" contrib=\"<<contrib[node]<<\" weightup=\"<<weightup[node]<<\"\\n\";\r\n//\t}\r\n//\tfor (int i = 0; i < LOGN; ++i) {\r\n//\t\tfor(int node=1;node<=n;++node){\r\n//\t\t\tint anc = parent[node][i];\r\n//\t\t\tif(anc==-1)continue;\r\n//\t\t\tcout<<\"n=\"<<node<<\" i=\"<<i<<\" p=\"<<anc<<\" olb=\"<<OLBAP[node][i]<<\"\\n\";\r\n//\t\t}\r\n//\t}\r\n\twhile (q--) {\r\n\t\tint a, b;\r\n\t\tcin >> a >> b;\r\n\t\tif (depth[a] < depth[b]) {\r\n\t\t\tswap(a, b);\r\n\t\t}\r\n//\t\tcout<<\"query(\"<<a<<\",\"<<b<<\")\\n\";\r\n\t\tif (a == b) {\r\n//\t\t\tcout<<\"equal\\n--> res: \";\r\n\t\t\tcout << dpdown[a] + dpup[a] << '\\n';\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tll ans = 0;\r\n\t\tif (depth[a] > depth[b]) {\r\n//\t\t\tcout<<\"bringing a to 1 below b\\n\";\r\n\t\t\tfor (int i = LOGN-1; i >= 0; --i) {\r\n\t\t\t\tif (depth[a] - (1<<i) >= depth[b]+1) {\r\n//\t\t\t\t\tcout<<\"a=\"<<a<<\" i=\"<<i<<\" olb=\"<<OLBAP[a][i]<<\"\\n\";\r\n\t\t\t\t\tans += OLBAP[a][i] - dpdown[a];\r\n\t\t\t\t\ta = parent[a][i];\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tif (parent[a][0] == b) {\r\n//\t\t\t\tcout<<\"a=\"<<a<<\", b=\"<<b<<\", B is LCA\\n\";\r\n//\t\t\t\tcout<<\"--> res: \";\r\n\t\t\t\t// LCA was B all along!\r\n\t\t\t\tans += OLBAP[a][0];\r\n\t\t\t\tans += dpup[b];\r\n\t\t\t\tcout << ans << '\\n';\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\ta = parent[a][0];\r\n\t\t}\r\n\t\t// same depth\r\n//\t\tcout<<\"a=\"<<a<<\", b=\"<<b<<\", bring up gradually\\n\";\r\n\t\tfor (int i = LOGN-1; i >= 0; --i) {\r\n\t\t\tif (parent[a][i] != -1 && parent[a][i] != parent[b][i]) {\r\n//\t\t\t\tcout<<\"a=\"<<a<<\" i=\"<<i<<\" olb=\"<<OLBAP[a][i]<<\"\\n\";\r\n//\t\t\t\tcout<<\"b=\"<<b<<\" i=\"<<i<<\" olb=\"<<OLBAP[b][i]<<\"\\n\";\r\n\t\t\t\tans += OLBAP[a][i] - dpdown[a];\r\n\t\t\t\ta = parent[a][i];\r\n\t\t\t\tans += OLBAP[b][i] - dpdown[b];\r\n\t\t\t\tb = parent[b][i];\r\n\t\t\t}\r\n\t\t}\r\n\t\tint lca = parent[a][0]; // = parent[b][0];\r\n//\t\tcout<<\"a=\"<<a<<\", b=\"<<b<<\", lca=\"<<lca<<\"\\n\";\r\n//\t\tcout<<\"aolb=\"<<OLBAP[a][0]<<\" bolb=\"<<OLBAP[b][0]<<\"\\n\";\r\n//\t\tcout<<\"--> res: \";\r\n\t\tans += OLBAP[a][0];\r\n\t\tans += OLBAP[b][0];\r\n\t\tans += -dpdown[lca] + dpup[lca];\r\n\t\tcout << ans << '\\n';\r\n\t}\r\n}\r\n"
+}

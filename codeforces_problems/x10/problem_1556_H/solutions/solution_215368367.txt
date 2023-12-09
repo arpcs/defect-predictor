@@ -1,0 +1,38 @@
+{
+    "id": 215368367,
+    "contestId": 1556,
+    "creationTimeSeconds": 1690208110,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1556,
+        "index": "H",
+        "name": "DIY Tree",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3300,
+        "tags": [
+            "graphs",
+            "greedy",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1556,
+        "members": [
+            {
+                "handle": "hminh"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1630247700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 143,
+    "timeConsumedMillis": 5881,
+    "memoryConsumedBytes": 0,
+    "source": "// copy of generic_placeholder_name\r\n//#pragma GCC optimize(\"Ofast,unroll-loops\")\r\n//#pragma GCC target(\"avx2,fma,bmi,bmi2,sse4.2,popcnt,lzcnt\")\r\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define taskname \"template\"\r\n#define ll long long\r\n#define ld double\r\n#define fi first\r\n#define se second\r\n#define vi vector<int>\r\n#define pii pair<int,int> \r\n#define vii vector<pii>\r\n#define vvi vector<vi>\r\n#define pb push_back\r\n#define eb emplace_back\r\n#define PI acos((ld)-1)\r\n\r\ntypedef complex<ld> base;\r\ntypedef vector<base> vb;\r\n\r\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\r\n\r\nint n;\r\nauto start=chrono::high_resolution_clock::now();\r\n\r\nauto elapsed_time = [&]() -> int {\r\n    auto now = std::chrono::high_resolution_clock::now();\r\n    return chrono::duration_cast<chrono::milliseconds>(now - start).count();\r\n};\r\nauto rand_int_n_1 = [&]() -> int {\r\n    static uniform_int_distribution<int> engine(1, n - 1);\r\n    return engine(rng);\r\n};\r\nauto rand_int = [&]() -> int {\r\n    static uniform_int_distribution<int> engine(1, n );\r\n    return engine(rng);\r\n};\r\nauto rand_real = [&]() -> double {\r\n    static uniform_real_distribution<double> engine(0, 1);\r\n    return engine(rng);\r\n};\r\n\r\nconst int MN=50;\r\nconst int inf=1e9+7;\r\nconst auto TL=5900.00;\r\n\r\nint k;\r\nint max_deg[MN+5],cur_deg[MN+5];\r\nint weight[MN+5][MN+5];\r\nint par[MN+5];\r\npair<int,int> edges[MN+5];\r\nint max_edge;\r\nint ans;\r\n\r\nvoid build(){\r\n    for(int i=1;i<=n;++i){\r\n        par[i]=-1;\r\n    }\r\n}\r\n\r\nint find(int u){\r\n    return (par[u]<0 ? u : par[u]=find(par[u]));\r\n}\r\nvoid unionn(int a,int b){\r\n    a=find(a); b=find(b);\r\n    if(a!=b){\r\n        par[a]+=par[b];\r\n        par[b]=a;\r\n    }\r\n}\r\n\r\nsigned main(){\r\n    ios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0);\r\n    // freopen(taskname\".inp\",\"r\",stdin);\r\n    // freopen(taskname\".out\",\"w\",stdout);\r\n\r\n    cin>>n>>k;\r\n    for(int i=1;i<=k;++i){\r\n        cin>>max_deg[i];\r\n    }\r\n    for(int i=k+1;i<=n;++i) max_deg[i]=n-1;\r\n\r\n    for(int i=1;i<n;++i){\r\n        for(int j=i+1;j<=n;++j){\r\n            cin>>weight[i][j];\r\n            max_edge=max(max_edge,weight[i][j]);\r\n        }\r\n    }\r\n\r\n    for(int i=1;i<n;++i){\r\n        ans+=weight[i][n];\r\n        edges[i].fi=i; edges[i].se=n;\r\n        ++cur_deg[i]; ++cur_deg[n];\r\n    }\r\n    // for(int i=1;i<=n;++i){\r\n    //     cout<<cur_deg[i]<<' ';\r\n    // }cout<<'\\n';\r\n    \r\n    int best=inf;\r\n    for(double T = 1e3 * sqrt(100. / max_edge); elapsed_time()<TL && T >= 1e-7; T *= 0.999995 + 0.000002 * max_edge / 100){  \r\n        auto id=rand_int_n_1();\r\n        int cur=ans-weight[edges[id].fi][edges[id].se];\r\n\r\n        --cur_deg[edges[id].fi]; --cur_deg[edges[id].se];\r\n        build();\r\n\r\n        for(int i=1;i<n;++i){\r\n            if(i!=id) unionn(edges[i].fi,edges[i].se);\r\n        }\r\n\r\n        int new_u,new_v;\r\n        do{\r\n            new_u=rand_int();\r\n            new_v=rand_int();\r\n        }while(find(new_u)==find(new_v)||cur_deg[new_u]==max_deg[new_u]||cur_deg[new_v]==max_deg[new_v]);\r\n\r\n        if(new_u>new_v) swap(new_u,new_v);\r\n        \r\n        cur+=weight[new_u][new_v];\r\n        best=min(best,cur);\r\n\r\n        if(ans>cur||exp((ans-cur)/T)>=rand_real()){\r\n            edges[id].fi=new_u;\r\n            edges[id].se=new_v;\r\n            ans=cur;\r\n        }\r\n        ++cur_deg[edges[id].fi]; ++cur_deg[edges[id].se];\r\n        // ++cnt;\r\n        // if(cnt==100){\r\n        //     cout<<id<<'\\n';\r\n        //     break;\r\n        // }\r\n    }\r\n\r\n    // for(int i=1;i<n;++i){\r\n    //     cout<<edges[i].fi<<' '<<edges[i].se<<'\\n';\r\n    //     // cout<<find(edges[i].fi)<<' '<<find(edges[i].se)<<'\\n';\r\n    // }\r\n    // for(int i=1;i<=n;++i){\r\n    //     cout<<cur_deg[i]<<' ';\r\n    // }cout<<'\\n';\r\n    cout<<best;\r\n}"
+}

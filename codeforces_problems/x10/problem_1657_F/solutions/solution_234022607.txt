@@ -1,0 +1,38 @@
+{
+    "id": 234022607,
+    "contestId": 1657,
+    "creationTimeSeconds": 1700822245,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1657,
+        "index": "F",
+        "name": "Words on Tree",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "2-sat",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1657,
+        "members": [
+            {
+                "handle": "Giggity-"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1647960300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 168,
+    "timeConsumedMillis": 1715,
+    "memoryConsumedBytes": 571084800,
+    "source": "/*\r\n    Mayoeba Yabureru\r\n*/\r\n#pragma GCC optimize(\"O3,unroll-loops\")\r\n#pragma GCC target(\"avx2,bmi,bmi2,lzcnt,popcnt\")\r\n#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nint n , q , k , num [3000006] , wt [400005][30][3] , qrwt [400005][3] , dp [400005] , fath [400005];\r\nbool vis [3000006];\r\nvector < int > gr [3000006] , rgr [3000006] , ord , tree [400005];\r\n\r\nint NOT ( int x ) {return 2 * x + 1;}\r\nint X ( int x ) {return 2 * x;}\r\n\r\nvoid add ( int x , int y ) {gr [x] . push_back ( y );}\r\n\r\nvoid dfs ( int x )\r\n{\r\n    vis [x] = 1;\r\n    for ( auto u : gr [x] )\r\n    {\r\n        if ( vis [u] ) continue;\r\n        dfs ( u );\r\n    }\r\n    ord . push_back ( x );\r\n}\r\n\r\nvoid scc ( int x )\r\n{\r\n    vis [x] = 1;\r\n    num [x] = k;\r\n    for ( auto u : rgr [x] )\r\n    {\r\n        if ( vis [u] ) continue;\r\n        scc ( u );\r\n    }\r\n}\r\n\r\nvoid go ( int x , int p )\r\n{\r\n    dp [x] = dp [p] + 1;\r\n    fath [x] = p;\r\n\r\n    for ( auto u : tree [x] )\r\n    {\r\n        if ( u == p ) continue;\r\n        go ( u , x );\r\n    }\r\n}\r\n\r\nint main()\r\n{\r\n    cin >> n >> q;\r\n\r\n    for ( int i = 1 ; i <= n ; i ++ )\r\n    {\r\n        for ( int j = 0 ; j < 26 ; j ++ )\r\n        {\r\n            wt [i][j][0] = ++ k;\r\n            wt [i][j][1] = ++ k;\r\n        }\r\n\r\n        for ( int j = 0 ; j < 26 ; j ++ )\r\n        {\r\n            for ( int z = 0 ; z < 26 ; z ++ )\r\n            {\r\n                if ( j == z ) continue;\r\n                add ( wt [i][j][0] , wt [i][z][1] );\r\n            }\r\n        }\r\n    }\r\n\r\n    for ( int i = 1 ; i <= q ; i ++ )\r\n    {\r\n        qrwt [i][0] = ++ k;\r\n        qrwt [i][1] = ++ k;\r\n    }\r\n\r\n    for ( int i = 0 ; i < n - 1 ; i ++ )\r\n    {\r\n        int x , y;\r\n        cin >> x >> y;\r\n        tree [x] . push_back ( y );\r\n        tree [y] . push_back ( x );\r\n    }\r\n\r\n    go ( 1 , 0 );\r\n\r\n    for ( int i = 1 ; i <= q ; i ++ )\r\n    {\r\n        int x , y;\r\n        string s;\r\n        cin >> x >> y >> s;\r\n\r\n        vector < int > path , v;\r\n\r\n        while ( x != y )\r\n        {\r\n            if ( dp [x] >= dp [y] )\r\n            {\r\n                path . push_back ( x );\r\n                x = fath [x];\r\n            }\r\n            else\r\n            {\r\n                v . push_back ( y );\r\n                y = fath [y];\r\n            }\r\n        }\r\n\r\n        path . push_back ( x );\r\n        reverse ( v . begin () , v . end () );\r\n        for ( auto x : v ) path . push_back ( x );\r\n\r\n        for ( int j = 0 ; j < s . size () ; j ++ )\r\n        {\r\n            int x = path [j] , c = s [j] - 'a';\r\n            add ( qrwt [i][0] , wt [x][c][0] );\r\n            add ( wt [x][c][1] , qrwt [i][1] );\r\n\r\n            x = path [ s . size () - 1 - j ];\r\n            add ( qrwt [i][1] , wt [x][c][0] );\r\n            add ( wt [x][c][1] , qrwt [i][0] );\r\n        }\r\n    }\r\n\r\n    int nn = k;\r\n    k = 1;\r\n    for ( int i = 1 ; i <= nn ; i ++ )\r\n    {\r\n        if ( vis [i] ) continue;\r\n        dfs ( i );\r\n    }\r\n\r\n    reverse ( ord . begin () , ord . end () );\r\n    memset ( vis , 0 , sizeof vis );\r\n\r\n    for ( int i = 1 ; i <= nn ; i ++ )\r\n    {\r\n        for ( auto u : gr [i] ) rgr [u] . push_back ( i );\r\n        gr [i] . clear ();\r\n    }\r\n\r\n    for ( auto x : ord )\r\n    {\r\n        if ( vis [x] ) continue;\r\n        scc ( x );\r\n        k ++;\r\n    }\r\n\r\n    for ( int i = 1 ; i <= n ; i ++ )\r\n    {\r\n        for ( int j = 0 ; j < 26 ; j ++ )\r\n        {\r\n            if ( num [ wt [i][j][0] ] == num [ wt [i][j][1] ] )\r\n            {\r\n                cout << \"NO\";\r\n                return 0;\r\n            }\r\n        }\r\n    }\r\n    for ( int i = 1 ; i <= q ; i ++ )\r\n    {\r\n        if ( num [ qrwt [i][0] ] == num [ qrwt [i][1] ] )\r\n        {\r\n            cout << \"NO\";\r\n            return 0;\r\n        }\r\n    }\r\n\r\n    cout << \"YES\" << endl;\r\n\r\n    for ( int i = 1 ; i <= n ; i ++ )\r\n    {\r\n        for ( int j = 0 ; j < 26 ; j ++ )\r\n        {\r\n            if ( num [ wt [i][j][0] ] > num [ wt [i][j][1] ] ) cout << ( char ) ( 'a' + j );\r\n        }\r\n    }\r\n}\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n"
+}

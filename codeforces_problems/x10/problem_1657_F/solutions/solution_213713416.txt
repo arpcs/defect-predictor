@@ -1,0 +1,38 @@
+{
+    "id": 213713416,
+    "contestId": 1657,
+    "creationTimeSeconds": 1689304543,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1657,
+        "index": "F",
+        "name": "Words on Tree",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "2-sat",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1657,
+        "members": [
+            {
+                "handle": "lfxxx"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1647960300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 242,
+    "timeConsumedMillis": 717,
+    "memoryConsumedBytes": 103424000,
+    "source": "// LUOGU_RID: 115419993\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n#ifdef IAKIOI\r\n\t#define cin fin\r\n\tifstream cin(\"in.txt\");\r\n#endif\r\nconstexpr int N = 4e5 + 5;\r\nvector<int>e[N], ee[N * 4];\r\nint a[N], dep[N], fa[N], cnt, stk[N * 4], top, tot, dfn[N * 4], low[N * 4], in[N * 4];\r\nchar s[N], x[N], y[N];\r\nbool ha[N], vis[N * 4];\r\nvoid dfs(int u, int f)\r\n{\r\n\tfa[u] = f;\r\n\tdep[u] = dep[f] + 1;\r\n\tfor (int v : e[u]) {\r\n\t\tif (v != f) {\r\n\t\t\tdfs(v ,u);\r\n\t\t}\r\n\t}\r\n}\r\nvoid geta(int u, int v, int n)\r\n{\r\n\tint cnt = 0;\r\n\tif (dep[u] < dep[v]) swap(u, v);\r\n\twhile (dep[u] > dep[v]) {\r\n\t\ta[++cnt] = u;\r\n\t\tu = fa[u];\r\n\t}\r\n\twhile (u != v) {\r\n\t\ta[++cnt] = u;\r\n\t\ta[n--] = v;\r\n\t\tu = fa[u], v = fa[v];\r\n\t}\r\n\ta[++cnt] = u;\r\n}\r\nvoid tarjan(int u)\r\n{\r\n\tdfn[u] = low[u] = ++cnt;\r\n\tstk[++top] = u, vis[u] = 1;\r\n\tfor (int v : ee[u]) {\r\n\t\tif (!dfn[v]) {\r\n\t\t\ttarjan(v);\r\n\t\t\tlow[u] = min(low[u], low[v]);\r\n\t\t}\r\n\t\telse if(vis[v]) low[u] = min(low[u], dfn[v]);\r\n\t}\r\n\tif (dfn[u] == low[u]) {\r\n\t\tin[u] = ++tot;\r\n\t\tvis[u] = 0;\r\n\t\twhile (stk[top] != u) {\r\n\t\t\tin[stk[top]] = tot;\r\n\t\t\tvis[stk[top--]] = 0;\r\n\t\t}\r\n\t\t--top;\r\n\t}\r\n}\r\nint main()\r\n{\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(nullptr);\r\n\tint n, q, u, v;\r\n\tcin >> n >> q;\r\n\tfor (int i = 1, u, v; i < n; ++i) {\r\n\t\tcin >> u >> v;\r\n\t\te[u].emplace_back(v);\r\n\t\te[v].emplace_back(u);\r\n\t}\r\n\tdfs(1, 1);\r\n\tfor (int i = 1; i <= q; ++i) {\r\n\t\tcin >> u >> v >> s + 1;\r\n\t\tint m = strlen(s + 1);\r\n\t\tgeta(u, v, m);\r\n\t\tfor (int j = 1; j <= m; ++j) {\r\n\t\t\tu = a[j];\r\n\t\t\tif (!ha[u]) {\r\n\t\t\t\tha[u] = 1;\r\n\t\t\t\tx[u] = s[j], y[u] = s[m - j + 1];\r\n\t\t\t}\r\n\t\t\tif (x[u] != s[j]) ee[u].emplace_back(2 * n + q + i), ee[2 * n + i].emplace_back(u + n);\r\n\t\t\tif (y[u] != s[j]) ee[u + n].emplace_back(2 * n + q + i), ee[2 * n + i].emplace_back(u);\r\n\t\t\tif (x[u] != s[m - j + 1]) ee[u].emplace_back(2 * n + i), ee[2 * n + q + i].emplace_back(u + n);\r\n\t\t\tif (y[u] != s[m - j + 1]) ee[u + n].emplace_back(2 * n + i), ee[2 * n + q + i].emplace_back(u);\r\n\t\t}\r\n\t}\r\n\tfor (int i = 1; i <= 2 * (n + q); ++i)\r\n\t\tif (!dfn[i])\r\n\t\t\ttarjan(i);\r\n\tfor (int i = 1; i <= n; ++i)\r\n\t\tif (in[i] == in[i + n]) {\r\n\t\t\tcout << \"NO\\n\";\r\n\t\t\treturn 0;\r\n\t\t}\r\n\tfor (int i = 1; i <= q; ++i)\r\n\t\tif (in[2 * n + i] == in[2 * n + i + q]) {\r\n\t\t\tcout << \"NO\\n\";\r\n\t\t\treturn 0;\r\n\t\t}\r\n\tcout << \"YES\\n\";\r\n\tfor (int i = 1; i <= n; ++i) {\r\n\t\tif (!ha[i]) cout << 'a';\r\n\t\telse cout << (in[i] < in[i + n] ? x[i] : y[i]);\r\n\t}\r\n\treturn 0;\r\n}"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 129579671,
+    "contestId": 1000,
+    "creationTimeSeconds": 1632310904,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "lijunyi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 124518400,
+    "source": "#include<bits/stdc++.h>\r\n#define maxn 1000000 \r\nusing namespace std;\r\nint n,q,u,v,w;\r\nint tot=0,pre[maxn],now[maxn],son[maxn],val[maxn],dist[maxn],dep[maxn];\r\nint f[maxn],g[maxn],fa[maxn][20],ans[maxn]; \r\nint a[maxn];\r\nvoid put(int x,int y,int z)\r\n{\r\n\tpre[++tot]=now[x];\r\n\tnow[x]=tot;\r\n\tson[tot]=y;\r\n\tval[tot]=z;\r\n}\r\nvoid dfs_tree(int x,int ff,int deep,int Dep,int V)\r\n{\r\n\tfa[x][0]=ff;dep[x]=Dep;\r\n\tfor(int i=1;i<=19;i++)\r\n\t\tfa[x][i]=fa[fa[x][i-1]][i-1];\r\n\tdist[x]=deep;f[x]=a[x];\r\n\tfor(int p=now[x];p;p=pre[p])\r\n\t{\r\n\t\tint t=son[p];\r\n\t\tif(t==ff)\r\n\t\t\tcontinue;\r\n\t\tdfs_tree(t,x,deep+val[p],Dep+1,val[p]);\r\n\t\tf[x]+=max(0,f[t]-2*val[p]);\r\n\t}\r\n}\r\nvoid dfs_ans(int x,int V)\r\n{\r\n\tif(x==1)\r\n\t\tans[x]=a[x];\r\n\telse\r\n\t\tans[x]=a[x]+ans[fa[x][0]]-V;\r\n\tfor(int p=now[fa[x][0]];p;p=pre[p])\r\n\t{\r\n\t\tint t=son[p];\r\n\t\tif(t==fa[fa[x][0]][0]||t==x)\r\n\t\t\tcontinue;\r\n\t\tans[x]+=max(0,f[t]-2*val[p]);\r\n\t}\r\n\tfor(int p=now[x];p;p=pre[p])\r\n\t{\r\n\t\tint t=son[p];\r\n\t\tif(t==fa[x][0])\r\n\t\t\tcontinue;\r\n\t\tdfs_ans(t,val[p]);\r\n\t}\r\n } \r\nvoid dfs_fa(int x,int V)\r\n{\r\n\tint Fa=fa[x][0],mx=g[Fa];\r\n\tfor(int p=now[Fa];p;p=pre[p])\r\n\t{\r\n\t\tint t=son[p];\r\n\t\tif(t==fa[Fa][0]||t==x)\r\n\t\t\tcontinue;\r\n\t\tmx+=max(f[t]-2*val[p],0);\r\n\t}\r\n\tg[x]=a[x]+max(0,mx-2*V);\r\n\tfor(int p=now[x];p;p=pre[p])\r\n\t{\r\n\t\tint t=son[p];\r\n\t\tif(t==Fa)\r\n\t\t\tcontinue;\r\n\t\tdfs_fa(t,val[p]);\r\n\t}\r\n}\r\nint lca(int x,int y)\r\n{\r\n\tif(x==y)\r\n\t\treturn x;\r\n\tif(dep[x]<dep[y])\r\n\t\tswap(x,y);\r\n\tfor(int i=19;i>=0;i--)\r\n\t\tif(dep[fa[x][i]]>=dep[y])\r\n\t\t\tx=fa[x][i];\r\n\tif(x==y)\r\n\t\treturn x;\r\n\tfor(int i=19;i>=0;i--)\r\n\t\tif(fa[x][i]!=fa[y][i])\r\n\t\t\tx=fa[x][i],y=fa[y][i];\r\n\treturn fa[x][0];\r\n}\r\nint main()\r\n{\r\n\tscanf(\"%d%d\",&n,&q);\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tscanf(\"%d\",&a[i]);\r\n\tfor(int i=1;i<n;i++)\r\n\t{\r\n\t\tscanf(\"%d%d%d\",&u,&v,&w);\r\n\t\tput(u,v,w);put(v,u,w);\r\n\t}\r\n\tdfs_tree(1,0,0,1,0);dfs_fa(1,0);dfs_ans(1,0);\r\n\tfor(int i=1;i<=q;i++)\r\n\t{\r\n\t\tscanf(\"%d%d\",&u,&v);\r\n\t\tint Lca=lca(u,v);\r\n\t\tif(u!=Lca&&v!=Lca)\r\n\t\t\tprintf(\"%d\\n\",ans[u]+ans[v]-ans[Lca]-ans[fa[Lca][0]]+g[Lca]-a[Lca]-a[u]-a[v]+f[u]+f[v]);\r\n\t\telse if(u==Lca&&v==Lca)\r\n\t\t\tprintf(\"%d\\n\",f[u]+g[u]-a[u]);\r\n\t\telse\r\n\t\t{\r\n\t\t\tif(v==Lca)\r\n\t\t\t\tswap(u,v);\r\n\t\t\tprintf(\"%d\\n\",ans[v]-ans[u]+g[u]-a[v]+f[v]);\r\n\t\t}\r\n\t}\r\n\t\r\n\treturn 0;\r\n}"
+}

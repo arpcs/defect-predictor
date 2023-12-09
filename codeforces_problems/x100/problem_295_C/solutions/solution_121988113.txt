@@ -1,0 +1,38 @@
+{
+    "id": 121988113,
+    "contestId": 295,
+    "creationTimeSeconds": 1625934183,
+    "relativeTimeSeconds": 2283,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "-is-this-fft-"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1625931900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <iostream>\n#include <queue>\n\nusing namespace std;\n\ntypedef long long ll;\n\nconst int MOD = 1e9 + 7; \n\nstruct Modint {\n  ll val;\n  \n  Modint (ll _val = 0)\n    : val(_val % MOD) {}\n\n  Modint operator+ (Modint other) const {\n    return Modint(val + other.val);\n  }\n\n  void operator+= (Modint other) {\n    val += other.val;\n    val %= MOD;\n  }\n\n  Modint operator- () const {\n    return Modint(MOD - val);\n  }\n\n  Modint operator- (Modint other) const {\n    return Modint(val + MOD - other.val);\n  }\n\n  void operator-= (Modint other) {\n    val += MOD - other.val;\n    val %= MOD;\n  }\n\n  Modint operator* (Modint other) const {\n    return Modint(val * other.val);\n  }\n\n  void operator*= (Modint other) {\n    val *= other.val;\n    val %= MOD;\n  }\n\n  bool operator== (Modint other) const {\n    return val == other.val;\n  }\n\n  bool operator!= (Modint other) const {\n    return val != other.val;\n  }\n};\n\nModint exp (Modint a, int k) {\n  if (k == 0) {\n    return Modint(1);\n  } else if (k % 2 == 0) {\n    Modint half = exp(a, k / 2);\n    return half * half;\n  } else {\n    return a * exp(a, k - 1);\n  }\n}\n\nModint inv (Modint a) {\n  return exp(a, MOD - 2);\n}\n\nostream& operator<< (ostream& out, Modint p) {\n  out << p.val;\n  return out;\n}\n\nconst int MAX_P = 55;\nconst int MAX_S = 6000;\n\nstruct State {\n  int skinny_l, fat_l, boat_l;\n\n  int to_idx () {\n    int idx = skinny_l;\n    idx *= MAX_P;\n    idx += fat_l;\n    idx *= 2;\n    idx += boat_l;\n    return idx;\n  }\n};\n\nState parse_state (int idx) {\n  State s;\n  s.boat_l = idx % 2;\n  idx /= 2;\n  s.fat_l = idx % MAX_P;\n  idx /= MAX_P;\n  s.skinny_l = idx;\n  return s;\n}\n\nModint choose [MAX_P][MAX_P];\n\nint dist [MAX_S];\nModint ways [MAX_S];\n\nint main () {\n  ios::sync_with_stdio(false);\n\n  choose[0][0] = Modint(1);\n  for (int i = 1; i < MAX_P; i++) {\n    choose[i][0] = Modint(1);\n    for (int j = 1; j < MAX_P; j++) {\n      choose[i][j] = choose[i - 1][j - 1] + choose[i - 1][j];\n    }\n  }\n\n  int n, capac;\n  cin >> n >> capac;\n  capac /= 50;\n\n  int skinny_t = 0, fat_t = 0;\n  for (int i = 0; i < n; i++) {\n    int x;\n    cin >> x;\n\n    if (x == 50) skinny_t++;\n    else fat_t++;\n  }\n\n  for (int i = 0; i < MAX_S; i++) {\n    dist[i] = MAX_S;\n  }\n  \n  State src;\n  src.skinny_l = skinny_t;\n  src.fat_l = fat_t;\n  src.boat_l = 1;\n  dist[src.to_idx()] = 0;\n  ways[src.to_idx()] = Modint(1);\n  \n  queue<State> Q;\n  Q.push(src);\n\n  while (!Q.empty()) {\n    auto cur = Q.front();\n    Q.pop();\n\n    int cur_dist = dist[cur.to_idx()];\n    Modint cur_ways = ways[cur.to_idx()];\n\n    int skinny_c = cur.boat_l ? cur.skinny_l : skinny_t - cur.skinny_l;\n    int fat_c = cur.boat_l ? cur.fat_l : fat_t - cur.fat_l;\n\n    for (int i = 0; i <= skinny_c; i++) {\n      for (int j = 0; j <= fat_c; j++) {\n        if (i + j == 0) continue;\n        if (i + 2 * j > capac) continue;\n\n        State nxt;\n        nxt.boat_l = !cur.boat_l;\n        if (cur.boat_l) {\n          nxt.skinny_l = cur.skinny_l - i;\n          nxt.fat_l = cur.fat_l - j;\n        } else {\n          nxt.skinny_l = cur.skinny_l + i;\n          nxt.fat_l = cur.fat_l + j;\n        }\n\n        int nxt_dist = dist[nxt.to_idx()];\n        if (nxt_dist == MAX_S) {\n          dist[nxt.to_idx()] = cur_dist + 1;\n          Q.push(nxt);\n        }\n\n        if (dist[nxt.to_idx()] == cur_dist + 1) {\n          ways[nxt.to_idx()] += cur_ways * choose[skinny_c][i] * choose[fat_c][j];\n        }\n      }\n    }\n  }\n\n  if (dist[0] == MAX_S) {\n    cout << -1 << endl << 0 << endl;\n    return 0;\n  }\n\n  cout << dist[0] << endl << ways[0] << endl;\n}\n"
+}

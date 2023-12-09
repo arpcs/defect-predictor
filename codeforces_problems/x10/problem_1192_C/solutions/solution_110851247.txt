@@ -1,0 +1,37 @@
+{
+    "id": 110851247,
+    "contestId": 1192,
+    "creationTimeSeconds": 1616541473,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "C",
+        "name": "Cubeword",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "brute force",
+            "dp",
+            "meet-in-the-middle"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "Bashca"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 90,
+    "timeConsumedMillis": 1652,
+    "memoryConsumedBytes": 84684800,
+    "points": 100.0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nint char_id(char c) {\r\n\tif (islower(c)) return c-'a';\r\n\tif (isupper(c)) return c-'A'+26;\r\n\treturn c-'0'+52;\r\n}\r\n\r\nconst int mod = 998244353;\r\nint n;\r\nint cnt[11][65][65];\r\nint dp[65][65][65];\r\nint rot[1<<24];\r\nint se[5];\r\n\r\nbool unpack(int s) {\r\n\tfor (int i = 0; i < 4; ++i) {\r\n\t\tse[3-i] = s & 63;\r\n\t\tif (se[3-i] > 61) return 0;\r\n\t\ts >>= 6;\r\n\t}\r\n\treturn 1;\r\n}\r\n\r\nint pack(int s[]) {\r\n\tint res = 0;\r\n\tfor (int i = 0; i < 4; ++i) {\r\n\t\tres = (res << 6) | s[i];\r\n\t}\r\n\treturn res;\r\n}\r\n\r\nint main() {\r\n\tios_base::sync_with_stdio(false);\r\n\tcin.tie(nullptr);\r\n\tcin >> n;\r\n\tset<string> s; \r\n\tfor (int i=0; i<n; ++i) {\r\n\t\tstring w;\r\n\t\tcin >> w;\r\n\t\ts.insert(w);\r\n\t\treverse(w.begin(), w.end());\r\n\t\ts.insert(w);\r\n\t}\r\n\tfor (auto w : s) {\r\n\t\tcnt[w.size()][char_id(w[0])][char_id(w.back())]++;\r\n\t}\r\n\tfor (int ms = 0; ms < 1<<24; ++ms) {\r\n\t\tif (unpack(ms)) {\r\n\t\t\tsort(se, se+4);\r\n\t\t\trot[pack(se)]++;\r\n\t\t}\r\n\t}\r\n\tint ans = 0;\r\n\tfor (int i = 3; i <= 10; ++i) {\r\n\t\tmemset(dp, 0, sizeof dp);\r\n\t\tfor (int ms = 0; ms < 1<<24; ++ms) {\r\n \t\t\tif (!unpack(ms)) continue;\r\n\t\t\tlong long prod = 1;\r\n\t\t\tfor (int j = 0; j < 3; ++j) {\r\n\t\t\t\tprod *= cnt[i][se[j]][se[3]];\r\n\t\t\t}\r\n\t\t\tprod %= mod;\r\n\t\t\tint& r = (dp[se[0]][se[1]][se[2]] += prod);\r\n\t\t\tif (r >= mod) r -= mod;\r\n\t\t}\r\n\t\tfor (int ms = 0; ms < 1<<24; ++ms) {\r\n\t\t\tif (!rot[ms]) continue;\r\n\t\t\tunpack(ms);\r\n\t\t\tlong long prod = rot[ms];\r\n\t\t\tprod = prod*dp[se[0]][se[1]][se[2]]%mod;\r\n\t\t\tprod = prod*dp[se[0]][se[1]][se[3]]%mod;\r\n\t\t\tprod = prod*dp[se[0]][se[2]][se[3]]%mod;\r\n\t\t\tprod = prod*dp[se[1]][se[2]][se[3]]%mod;\r\n\t\t\tans += prod;\r\n\t\t\tif (ans >= mod) ans -= mod;\r\n\t\t}\r\n\t}\r\n\tcout << ans << endl;\r\n\treturn 0;\r\n}"
+}

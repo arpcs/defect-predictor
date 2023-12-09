@@ -1,0 +1,38 @@
+{
+    "id": 232843636,
+    "contestId": 1593,
+    "creationTimeSeconds": 1700044996,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1593,
+        "index": "F",
+        "name": "Red-Black Number",
+        "type": "PROGRAMMING",
+        "rating": 2100,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "implementation",
+            "math",
+            "meet-in-the-middle"
+        ]
+    },
+    "author": {
+        "contestId": 1593,
+        "members": [
+            {
+                "handle": "xutianlan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1634135700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 1228800,
+    "source": "// LUOGU_RID: 135240071\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define int long long\r\nconst int maxn=45;\r\nint inf=1ll<<62;\r\nint t,n,a,b,N,ans,fsta1,fsta2;\r\nchar ch;\r\nint dig[maxn],lg1[maxn],lg2[maxn],lg3[maxn];\r\n\r\nstruct Node{\r\n\tint l,r,sta;\r\n};\r\nvector<Node> P[1605][25];\t//\u4f59\u6570 \u4e58\u4e86\u51e0\u4f4d \r\n\r\nvoid dfs1(int x,int sum1,int sum2,int sta){\r\n\tif(x>N){\r\n\t\tfor(int i=0;i<=n-N;i++){\r\n\t\t\tint u=(sum1*lg3[i])%a;\r\n\t\t\tint v=(sum2*lg3[n-N-i])%b;\r\n\t\t\tint p=u*b+v;\r\n\t\t\t//printf(\"%lld %lld\\n\",u,v);\r\n\t\t\tP[p][i].push_back({sum1,sum2,sta});\r\n\t\t}\r\n\t\treturn;\r\n\t}\r\n\tdfs1(x+1,sum1*10+dig[x],sum2,sta|(1<<(x-1)));\r\n\tdfs1(x+1,sum1,sum2*10+dig[x],sta);\r\n}\r\n\r\nvoid dfs2(int x,int sum1,int sum2,int d,int sta){\r\n\tif(x>n){\r\n\t\tint u=sum1%a;u=a-u;\r\n\t\tif(u==a) u=0;\r\n\t\tint v=sum2%b;v=b-v;\r\n\t\tif(v==b) v=0;\r\n\t\tint p=u*b+v;\r\n\t\t//printf(\"%lld %lld %lld %lld!!!\\n\",sum1,sum2,u,v);\r\n\t\tfor(int i=0;i<P[p][d].size();i++){\r\n\t\t\tNode V=P[p][d][i];\r\n\t\t\tif(V.l==0 && sum1==0) continue;\r\n\t\t\tif(V.r==0 && sum2==0) continue;\r\n\t\t\tint now=abs((V.l*lg3[d]+sum1)-(V.r*lg3[n-N-d]+sum2));\r\n\t\t\t//printf(\"%lld %lld??????\\n\",V.l*lg3[d],V.r*lg3[n-N-d]);\r\n\t\t\tif(now<ans){\r\n\t\t\t\tans=now;\r\n\t\t\t\tfsta1=V.sta;\r\n\t\t\t\tfsta2=sta;\r\n\t\t\t\t//printf(\"%lld %lld %lld %lld\\n\",fsta1,fsta2,sum1,sum2);\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn;\r\n\t}\r\n\tdfs2(x+1,sum1*10+dig[x],sum2,d+1,sta|(1<<(x-N-1)));\r\n\tdfs2(x+1,sum1,sum2*10+dig[x],d,sta);\r\n}\r\n\r\nvoid solve(){\r\n\tscanf(\"%d%d%d\",&n,&a,&b);\r\n\tmemset(dig,0,sizeof(dig));\r\n\tans=inf;\r\n\tlg1[0]=lg2[0]=lg3[0]=1ll;\r\n\tfor(int i=1;i<=n/2+2;i++){\r\n\t\tlg1[i]=(lg1[i-1]*10)%a;\r\n\t\tlg2[i]=(lg2[i-1]*10)%b;\r\n\t\tlg3[i]=lg3[i-1]*10;\r\n\t}\r\n\tfor(int i=1;i<=n;i++){\r\n\t\tcin>>ch;\r\n\t\tdig[i]=ch-'0';\r\n\t}\r\n\tN=n/2;\r\n\tdfs1(1,0,0,0);\r\n\tdfs2(N+1,0,0,0,0);\r\n\tif(ans==inf){\r\n\t\tprintf(\"-1\\n\");\r\n\t\treturn;\r\n\t}\r\n\tfor(int i=0;i<N;i++){\r\n\t\tif(fsta1&(1<<i)) printf(\"R\");\r\n\t\telse printf(\"B\");\r\n\t}\r\n\tfor(int i=0;i<n-N;i++){\r\n\t\tif(fsta2&(1<<i)) printf(\"R\");\r\n\t\telse printf(\"B\");\r\n\t}\r\n\tprintf(\"\\n\");\r\n\treturn;\r\n}\r\n//1278 3456\r\n//1678 2345\r\nsigned main(){\r\n\t//freopen(\"nb.in\",\"r\",stdin);\r\n\tscanf(\"%d\",&t); \r\n\twhile(t--){\r\n\t\tsolve();\r\n\t\tfor(int i=0;i<(a-1)*b;i++){\r\n\t\t\tfor(int j=0;j<N*N+5;j++){\r\n\t\t\t\tP[i][j].clear();\r\n\t\t\t}\r\n\t\t}\r\n\t}\t\r\n\treturn 0;\r\n}"
+}

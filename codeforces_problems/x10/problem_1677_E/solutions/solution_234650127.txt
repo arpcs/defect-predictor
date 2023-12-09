@@ -1,0 +1,35 @@
+{
+    "id": 234650127,
+    "contestId": 1677,
+    "creationTimeSeconds": 1701131200,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1677,
+        "index": "E",
+        "name": "Tokitsukaze and Beautiful Subsegments",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1677,
+        "members": [
+            {
+                "handle": "LipArcanjo"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1652020500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 70,
+    "timeConsumedMillis": 2074,
+    "memoryConsumedBytes": 121344000,
+    "source": "#pragma GCC optimize(\"Ofast\")\r\n#pragma GCC target(\"avx,avx2,fma\")\r\n#pragma GCC optimize(\"unroll-loops\")\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define pb push_back\r\n#define mp make_pair\r\n#define fi first\r\n#define se second\r\n#define int long long\r\nvoid dbg_out() { cerr << endl; }\r\ntemplate <typename H, typename... T>\r\nvoid dbg_out(H h, T... t) { cerr << ' ' << h; dbg_out(t...); }\r\n#define dbg(...) { cerr << #__VA_ARGS__ << ':'; dbg_out(__VA_ARGS__); }\r\nusing ll = long long;\r\nmt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());\r\n\r\nconst int MAXN = 2e5 + 5;\r\nconst int MOD = 1e9+7; //998244353;\r\nconst int INF = 0x3f3f3f3f;\r\nconst ll INF64 = ll(4e18) + 5;\r\n\r\nint seg[4*MAXN];\r\nint lazy[4*MAXN];\r\n\r\nvoid build(int r, int i, int j){\r\n\tseg[r] = lazy[r] = 0;\r\n\tif(i == j){\r\n\t\treturn;\r\n\t}\r\n\tint m = (i+j)/2;\r\n\tbuild(2*r,i,m);\r\n\tbuild(2*r+1,m+1,j);\r\n}\r\n\r\nvoid propaga(int r, int i, int j){\r\n\tseg[r] += lazy[r]*(j-i+1);\r\n\tif(i != j){\r\n\t\tlazy[2*r] += lazy[r];\r\n\t\tlazy[2*r+1] += lazy[r];\r\n\t}\r\n\tlazy[r] = 0;\r\n}\r\n\r\nvoid update(int r, int i, int j, int a, int b, int v){\r\n\tpropaga(r,i,j);\r\n\tif(i > b || a > j) return;\r\n\tif(a <= i && j <= b){\r\n\t\tlazy[r] = v;\r\n\t\tpropaga(r,i,j);\r\n\t\treturn;\r\n\t}\r\n\tint m = (i+j)/2;\r\n\tupdate(2*r,i,m,a,b,v);\r\n\tupdate(2*r+1,m+1,j,a,b,v);\r\n\tseg[r] = seg[2*r] + seg[2*r+1];\r\n}\r\n\r\nint query(int r, int i, int j, int a, int b){\r\n\tpropaga(r,i,j);\r\n\tif(i > b || a > j) return 0;\r\n\tif(a <= i && j <= b) return seg[r];\r\n\tint m = (i+j)/2;\r\n\tint L = query(2*r,i,m,a,b);\r\n\tint R = query(2*r+1,m+1,j,a,b);\r\n\treturn L+R;\r\n}\r\n\r\nvector<pair<int,int>> add[MAXN];\r\nvector<pair<int,int>> g[MAXN];\r\n\r\nvoid solve(){\r\n\tint n,q;\r\n\tcin >> n >> q;\r\n\tvector<int> a(n);\r\n\tfor(int i = 0; i < n; i++){\r\n\t\tcin >> a[i];\r\n\t\ta[i]--;\r\n\t}\r\n\tvector<int> l(q), r(q);\r\n\tfor(int i = 0; i < q; i++){\r\n\t\tcin >> l[i] >> r[i];\r\n\t\tl[i]--;\r\n\t\tr[i]--;\r\n\t}\r\n\tvector<int> ans(q);\r\n\t\r\n\tfor(int wtf = 0; wtf < 2; wtf++){\r\n\t\tbuild(1,0,n-1);\r\n\r\n\t\tvector<int> b(n);\r\n\t\tfor(int i = 0; i < n; i++){\r\n\t\t\tb[a[i]] = i;\r\n\t\t}\r\n\t\t\r\n\t\tvector<int> esq(n,0);\r\n\t\tvector<int> dir(n,n-1);\r\n\t\tvector<pair<int,int>> stk;\r\n\t\tfor(int i = 0; i < n; i++){\r\n\t\t\twhile(!stk.empty() && stk.back().fi < a[i]) stk.pop_back();\r\n\t\t\tif(!stk.empty()) esq[i] = stk.back().se+1;\r\n\t\t\tstk.push_back({a[i],i});\r\n\t\t}\r\n\t\tstk.clear();\r\n\t\tfor(int i = n-1; i >= 0; i--){\r\n\t\t\twhile(!stk.empty() && stk.back().fi < a[i]) stk.pop_back();\r\n\t\t\tif(!stk.empty()) dir[i] = stk.back().se-1;\r\n\t\t\tstk.push_back({a[i],i});\r\n\t\t}\r\n\r\n\t\tfor(int x = 1; x <= n; x++){\r\n\t\t\tfor(int z = x; z <= n; z+=x){\r\n\t\t\t\tint y = z/x;\r\n\t\t\t\tif(y <= x) continue;\r\n\t\t\t\tint posx = b[x-1];\r\n\t\t\t\tint posy = b[y-1];\r\n\t\t\t\tint posz = b[z-1];\r\n\t\t\t\tint liL = min({posx,posy,posz});\r\n\t\t\t\tint liR = max({posx,posy,posz});\r\n\t\t\t\tg[z-1].pb({liL,liR});\r\n\t\t\t}\r\n\t\t}\r\n\r\n\t\tfor(int i = 0; i < n; i++){\r\n\t\t\tint L = esq[i];\r\n\t\t\tint R = dir[i];\r\n\t\t\tint tamL = i-L;\r\n\t\t\tint tamR = R-i;\r\n\t\t\tbool faz = tamL < tamR || (tamL == tamR && wtf == 0);\r\n\t\t\tif(!faz) continue;\r\n\r\n\t\t\tauto &oks = g[a[i]];\r\n\t\t\tsort(oks.rbegin(),oks.rend());\r\n\t\t\tint sz = oks.size();\r\n\t\t\tint k = 0;\r\n\t\t\tint cons = INF;\r\n\t\t\tfor(int j = i; j >= L; j--){\r\n\t\t\t\twhile(k < sz && oks[k].fi >= j){\r\n\t\t\t\t\tcons = min(cons,oks[k].se);\r\n\t\t\t\t\tk++;\r\n\t\t\t\t}\r\n\t\t\t\tif(cons > R) continue;\r\n\t\t\t\tadd[j].pb({cons,R});\r\n\t\t\t}\r\n\t\t}\r\n\r\n\t\tvector<array<int,3>> queries(q);\r\n\t\tfor(int i = 0; i < q; i++){\r\n\t\t\tqueries[i] = {l[i],r[i],i};\r\n\t\t}\r\n\t\tsort(queries.rbegin(),queries.rend());\r\n\t\tint pro = n;\r\n\t\tfor(int i = 0; i < q; i++){\r\n\t\t\tauto [x,y,id] = queries[i];\r\n\t\t\twhile(pro > x){\r\n\t\t\t\tpro--;\r\n\t\t\t\tfor(auto [u,v] : add[pro]){\r\n\t\t\t\t\tupdate(1,0,n-1,u,v,1);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tans[id] += query(1,0,n-1,x,y);\r\n\t\t}\r\n\r\n\t\treverse(a.begin(),a.end());\r\n\t\tfor(int i = 0; i < q; i++){\r\n\t\t\tint auxL = n-1-r[i];\r\n\t\t\tint auxR = n-1-l[i];\r\n\t\t\tl[i] = auxL;\r\n\t\t\tr[i] = auxR;\r\n\t\t}\r\n\t\tfor(int i = 0; i < n; i++){\r\n\t\t\tg[i].clear();\r\n\t\t\tadd[i].clear();\r\n\t\t}\r\n\t}\r\n\tfor(int i = 0; i < q; i++){\r\n\t\tcout << ans[i] << '\\n';\r\n\t}\r\n}\r\n\r\nsigned main(){\r\n\r\n\tios::sync_with_stdio(false); cin.tie(NULL);\r\n\r\n\tint t = 1;\r\n\t//cin >> t;\r\n\twhile(t--){\r\n\t\tsolve();\r\n\t}\r\n\r\n\treturn 0;\r\n}\r\n\r\n/*\r\nMakefile:\r\nCXXFLAGS=-Wall -Wextra -Wshadow -g -pedantic -fsanitize=address,undefined -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUGPEDANTIC -std=gnu++17\r\n */\r\n"
+}

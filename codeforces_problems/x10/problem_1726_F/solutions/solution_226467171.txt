@@ -1,0 +1,38 @@
+{
+    "id": 226467171,
+    "contestId": 1726,
+    "creationTimeSeconds": 1696347821,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "F",
+        "name": "Late For Work (submissions are not allowed)",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 2900,
+        "tags": [
+            "data structures",
+            "greedy",
+            "schedules",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "samSamy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nusing lol=long long int;\r\nconst lol inf=1e18+8;\r\n \r\nstruct IntervalUnion{\r\n    set<int> lf,ri;\r\n    map<int,int> lr,rl;\r\n    void add(int l,int r)\r\n    {\r\n        if(!ri.empty())\r\n        {\r\n            auto it=ri.lower_bound(r);\r\n            if(it!=ri.end() && rl[*it]<=l)  return;\r\n        }\r\n        while(!lf.empty())\r\n        {\r\n            auto it=lf.lower_bound(l);\r\n            if(it==lf.end() || r<*it)    break;\r\n            int nl=*it;\r\n            r=max(r,lr[nl]);\r\n            rl.erase(lr[nl]);\r\n            ri.erase(lr[nl]);\r\n            lr.erase(nl);\r\n            lf.erase(nl);\r\n        }\r\n        while(!ri.empty())\r\n        {\r\n            auto it=ri.lower_bound(l);\r\n            if(it==ri.end() || r<rl[*it])   break;\r\n            int nl=rl[*it];\r\n            l=min(l,nl);\r\n            rl.erase(lr[nl]);\r\n            ri.erase(lr[nl]);\r\n            lr.erase(nl);\r\n            lf.erase(nl);\r\n        }\r\n        lf.insert(l);\r\n        ri.insert(r);\r\n        lr[l]=r;\r\n        rl[r]=l;\r\n    }\r\n    bool contains(int x)\r\n    {\r\n        auto it=ri.upper_bound(x);\r\n        if(it==ri.end())    return false;\r\n        return rl[*it]<=x;\r\n    }\r\n};\r\n \r\nint main()\r\n{\r\nios_base::sync_with_stdio(false);\r\ncin.tie(NULL);\r\nint n,t;\r\ncin>>n>>t;\r\nvector<pair<int,int>> gc(n);\r\nfor(auto& [g,c]:gc) cin>>g>>c;\r\nlol sum=0;\r\nfor(int i=1;i<n;i++)\r\n{\r\n    int d;\r\n    cin>>d;\r\n    sum+=d;\r\n    gc[i].second=(gc[i].second+(sum%t))%t;\r\n}\r\nvector<vector<pair<int,int>>> gr(2*n+2);\r\nmultiset<pair<int,int>> ms;\r\nIntervalUnion iu;\r\nfor(int i=0;i<n;i++)\r\n{\r\n    auto [g,c]=gc[i];\r\n    int l=(g-c+t)%t,r=t-c;\r\n    if(l<r)\r\n    {\r\n        while(!ms.empty())\r\n        {\r\n            auto it=ms.lower_bound({l,-1});\r\n            if(it==ms.end() || it->first>=r)    break;\r\n            gr[2*i].push_back({it->second,r-it->first});\r\n            ms.erase(it);\r\n        }\r\n    }else\r\n    {\r\n        while(!ms.empty())\r\n        {\r\n            auto it=ms.lower_bound({l,-1});\r\n            if(it==ms.end() || it->first>=t)    break;\r\n            gr[2*i].push_back({it->second,r+t-it->first});\r\n            ms.erase(it);\r\n        }\r\n        while(!ms.empty())\r\n        {\r\n            auto it=ms.lower_bound({0,-1});\r\n            if(it==ms.end() || it->first>=r)    break;\r\n            gr[2*i].push_back({it->second,r-it->first});\r\n            ms.erase(it);\r\n        }\r\n    }\r\n    ms.insert({r%t,2*i});\r\n    ms.insert({(l-1+t)%t,2*i+1});\r\n    if(!iu.contains(r%t)) gr[2*i].push_back({2*n+1,0});\r\n    if(!iu.contains((l-1+t)%t)) gr[2*i+1].push_back({2*n+1,0});\r\n    if(l<r) iu.add(l,r);\r\n    else\r\n    {\r\n        iu.add(l,t);\r\n        iu.add(0,r);\r\n    }\r\n}\r\nwhile(!ms.empty())\r\n{\r\n    auto it=ms.begin();\r\n    gr[2*n].push_back({it->second,0});\r\n    ms.erase(it);\r\n}\r\n//do dijkstra on this graph\r\nvector<lol> sp(2*n+2,inf);\r\npriority_queue<pair<lol,int>,vector<pair<lol,int>>,greater<pair<lol,int>>> pq;\r\npq.push({0,2*n});\r\nsp[2*n]=0;\r\nwhile(!pq.empty())\r\n{\r\n    auto [dist,u]=pq.top();\r\n    pq.pop();\r\n    if(dist>sp[u])   continue;\r\n    for(auto [v,w]:gr[u])\r\n    {\r\n        if(dist+w<sp[v])\r\n        {\r\n            sp[v]=dist+w;\r\n            pq.push({sp[v],v});\r\n        }\r\n    }\r\n}\r\ncout<<sum+sp[2*n+1];\r\nreturn 0;\r\n}"
+}

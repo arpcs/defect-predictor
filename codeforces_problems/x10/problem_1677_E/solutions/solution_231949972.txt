@@ -1,0 +1,35 @@
+{
+    "id": 231949972,
+    "contestId": 1677,
+    "creationTimeSeconds": 1699452915,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1677,
+        "index": "E",
+        "name": "Tokitsukaze and Beautiful Subsegments",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1677,
+        "members": [
+            {
+                "handle": "WetwareMainFrame"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1652020500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 40243200,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nusing i64 = long long;\r\nconstexpr int M = 201000;\r\n\r\n#define lc (n << 1)\r\n#define rc (n << 1 | 1)\r\n#define mid ((l + r) >> 1)\r\nstruct Data {\r\n    i64 his;\r\n    int mn, cnt;\r\n};\r\nstruct Tag {\r\n    int hv, h1, tg;\r\n};\r\ninline Tag circ(Tag a, Tag b) {\r\n    if (!a.tg) return {a.hv + b.hv, a.h1 + b.h1, b.tg};\r\n    if (a.tg < 0) return {b.hv, a.hv + a.h1 + b.h1, a.tg + b.tg};\r\n    return {a.hv, a.h1 + b.hv + b.h1, a.tg + b.tg};\r\n}\r\nstruct Node {\r\n    i64 his;\r\n    int mn, cnt;\r\n    Tag tg;\r\n} t[M << 2];\r\n\r\ninline void update(int n, Tag tg, int len) {\r\n    t[n].his += 1ll * (tg.h1 + tg.hv) * len;\r\n    if (!t[n].mn) t[n].his -= 1ll * tg.hv * t[n].cnt;\r\n    t[n].mn += tg.tg, t[n].tg = circ(t[n].tg, tg);\r\n}\r\ninline void pushup(int n) {\r\n    t[n].his = t[lc].his + t[rc].his;\r\n    t[n].mn = min(t[lc].mn, t[rc].mn), t[n].cnt = 0;\r\n    if (t[lc].mn == t[n].mn) t[n].cnt += t[lc].cnt;\r\n    if (t[rc].mn == t[n].mn) t[n].cnt += t[rc].cnt;\r\n}\r\ninline void pushdown(int n, int l, int r) {\r\n    update(lc, t[n].tg, mid - l + 1);\r\n    update(rc, t[n].tg, r - mid);\r\n    t[n].tg = {};\r\n}\r\nvoid modify(int n, int l, int r, int dl, int dr, int v) {\r\n    if (l == dl && r == dr) return update(n, {.tg = v}, r - l + 1);\r\n    pushdown(n, l, r);\r\n    if (dr <= mid) modify(lc, l, mid, dl, dr, v);\r\n    else if (dl > mid) modify(rc, mid + 1, r, dl, dr, v);\r\n    else modify(lc, l, mid, dl, mid, v), modify(rc, mid + 1, r, mid + 1, dr, v);\r\n    pushup(n);\r\n}\r\ni64 query(int n, int l, int r, int dl, int dr) {\r\n    if (l == dl && r == dr) return t[n].his;\r\n    pushdown(n, l, r);\r\n    if (dr <= mid) return query(lc, l, mid, dl, dr);\r\n    if (dl > mid) return query(rc, mid + 1, r, dl, dr);\r\n    return query(lc, l, mid, dl, mid) + query(rc, mid + 1, r, mid + 1, dr);\r\n}\r\nvoid build(int n, int l, int r) {\r\n    t[n].cnt = r - l + 1;\r\n    if (l != r) build(lc, l, mid), build(rc, mid + 1, r);\r\n}\r\n\r\nint n, q, p[M], l[M], r[M], pos[M];\r\nstack<int> stk, _;\r\nvector<tuple<int, int, int>> opt[M];\r\nvector<pair<int, int>> qry[M];\r\ni64 ans[M];\r\n\r\ninline void insert(int a, int b, int c, int d) { // [a, b] * [c, d]\r\n    // printf(\"insert [%d %d] * [%d %d]\\n\", a, b, c, d);\r\n    assert(a <= b && b < c && c <= d);\r\n    opt[c].push_back({a, b, 1}), opt[d + 1].push_back({a, b, -1});\r\n}\r\n\r\nint main() {\r\n    assert(scanf(\"%d%d\", &n, &q)), p[0] = p[n + 1] = INT_MAX;\r\n    for (int i = 1; i <= n; i++) assert(scanf(\"%d\", p + i)), pos[p[i]] = i;\r\n    stk.push(0), build(1, 1, n);\r\n    for (int i = 1; i <= n; i++) {\r\n        while (p[stk.top()] < p[i]) stk.pop();\r\n        l[i] = stk.top() + 1, stk.push(i);\r\n    }\r\n    stk.swap(_), stk.push(n + 1);\r\n    for (int i = n; i >= 1; i--) {\r\n        while (p[stk.top()] < p[i]) stk.pop();\r\n        r[i] = stk.top() - 1, stk.push(i);\r\n    }\r\n    for (int i = 1; i <= n; i++)\r\n        for (int j = i + 1; i * j <= n; j++) {\r\n            int u = pos[i], v = pos[j], w = pos[i * j];\r\n            // printf(\"!!! %d %d %d\\n\", u, v, w);\r\n            if (u > v) swap(u, v);\r\n            if (u < l[w] || v > r[w]) continue;\r\n            int lb = min(w, u), rb = max(w, v);\r\n            insert(l[w], lb, rb, r[w]);\r\n        }\r\n    for (int i = 1, l, r; i <= q; i++) assert(scanf(\"%d%d\", &l, &r)), qry[r].push_back({l, i});\r\n    for (int i = 1; i <= n; i++) {\r\n        for (auto [l, r, v] : opt[i]) modify(1, 1, n, l, r, v);\r\n        update(1, {.hv = 1}, n);\r\n        for (auto [l, id] : qry[i]) ans[id] = query(1, 1, n, l, i);\r\n    }\r\n    for (int i = 1; i <= q; i++) printf(\"%lld\\n\", ans[i]);\r\n    return 0;\r\n}"
+}

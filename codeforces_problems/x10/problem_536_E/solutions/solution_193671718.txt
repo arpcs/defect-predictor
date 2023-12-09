@@ -1,0 +1,37 @@
+{
+    "id": 193671718,
+    "contestId": 536,
+    "creationTimeSeconds": 1676431296,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 536,
+        "index": "E",
+        "name": "Tavas on the Path",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 536,
+        "members": [
+            {
+                "handle": "ComplexPlanck"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1429029300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 101,
+    "timeConsumedMillis": 1404,
+    "memoryConsumedBytes": 31129600,
+    "source": "// LUOGU_RID: 102173696\n#include <bits/stdc++.h>\r\n#include <bits/extc++.h>\r\n#define gnu __gnu_pbds\r\n#define ENDQ fflush(stdout)\r\n#define popcount(x) __builtin_popcount(x)\r\nusing i64 = long long;\r\nusing u64 = unsigned long long;\r\nusing i128 = __int128;\r\nusing u128 = __uint128_t;\r\nusing PII = std::pair<int, int>;\r\nusing TI3 = std::tuple<int, int, int>;\r\n\r\nstruct FSIO\r\n{\r\n#define gc() getchar()\r\n#define pc(x) putchar(x)\r\n\ttemplate<typename types>\r\n\tFSIO operator >>(types &x)\r\n\t{\r\n\t\tx = 0; bool neg = false; char ch = gc();\r\n\t\twhile (!isdigit(ch)) neg = (neg || ch == '-'), ch = gc();\r\n\t\twhile (isdigit(ch)) x = x * 10 + ch - 48, ch = gc();\r\n\t\tx = (neg ? (-x) : x); return *this;\r\n\t}\r\n\ttemplate<typename types>\r\n\tFSIO operator <<(types x)\r\n\t{\r\n\t\tstatic char bit[130]; int tot = 0;\r\n\t\tif (x < 0) pc('-'), x = -x;\r\n\t\tif (!x) pc('0');\r\n\t\twhile (x) bit[tot] = x % 10 + '0', x /= 10, ++ tot;\r\n\t\twhile (tot) -- tot, pc(bit[tot]);\r\n\t\treturn *this;\r\n\t} \r\n\tFSIO operator <<(bool x) {pc(x ? '1' : '0'); return *this;}\r\n\tFSIO operator <<(char x) {pc(x); return *this;}\r\n\tFSIO operator <<(const char *x) {int len = strlen(x); for (int i = 0; i < len; ++ i) pc(x[i]); return *this;}\r\n}fio;\r\n\r\nconst int N = 100010;\r\nint n, m;\r\nint f[N], w[N];\r\nstd::vector<PII > edges[N];\r\nint fa[N], dep[N], large[N];\r\nstruct Compression\r\n{\r\n    int gson[N];\r\n    int top[N], dfn[N], ids[N], tsp = 0;\r\n    \r\n    void prev_dfsearch(int u, int father)\r\n    {\r\n        for (PII ed : edges[u])\r\n        {\r\n            if (ed.first == father) continue;\r\n            int e = ed.first, wt = ed.second;\r\n            fa[e] = u, dep[e] = dep[u] + 1, w[e] = wt;\r\n            prev_dfsearch(e, u);\r\n            if (!gson[u] || large[gson[u]] < large[e])\r\n                gson[u] = e;\r\n            large[u] += large[e];\r\n        }\r\n        return;\r\n    }\r\n    void next_dfsearch(int u, int nowtop)\r\n    {\r\n        top[u] = nowtop;\r\n        ++ tsp, dfn[u] = tsp, ids[tsp] = u;\r\n        if (gson[u]) next_dfsearch(gson[u], nowtop);\r\n        for (PII ed : edges[u])\r\n        {\r\n            int e = ed.first;\r\n            if (e == gson[u] || e == fa[u]) continue;\r\n            next_dfsearch(e, e);\r\n        }\r\n        return;\r\n    }\r\n    void init(void)\r\n    {\r\n        dep[1] = 1;\r\n        prev_dfsearch(1, -1);\r\n        next_dfsearch(1, 1); return;\r\n    }\r\n}lt;\r\nstruct Segment_Node\r\n{\r\n    int ldat, rdat, sum, all;\r\n    Segment_Node(void) {ldat = rdat = sum = all = 0; return;}\r\n    Segment_Node(int x) {ldat = rdat = x, sum = x ? f[x] : 0, all = 1; return;}\r\n};\r\nstruct Segment_Tree\r\n{\r\n    int l[N << 2], r[N << 2];\r\n    Segment_Node dat[N << 2];\r\n    \r\n    void pushup(Segment_Node &x, const Segment_Node &y, const Segment_Node &z)\r\n    {\r\n        if (!y.all) {x = z; return;}\r\n        if (!z.all) {x = y; return;}\r\n        x.all = y.all + z.all;\r\n        if (y.ldat == y.all) x.ldat = y.all + z.ldat;\r\n        else x.ldat = y.ldat;\r\n        if (z.rdat == z.all) x.rdat = y.rdat + z.all;\r\n        else x.rdat = z.rdat;\r\n        if (y.rdat && z.ldat) x.sum = y.sum + z.sum - f[y.rdat] - f[z.ldat] + f[y.rdat + z.ldat];\r\n        else x.sum = y.sum + z.sum;\r\n        return;\r\n    }\r\n    void build(int p, int inl, int inr)\r\n    {\r\n        l[p] = inl, r[p] = inr;\r\n        if (inl == inr) {dat[p] = Segment_Node(1); return;}\r\n        int mid = (inl + inr) >> 1;\r\n        build(p << 1, inl, mid), build(p << 1 | 1, mid + 1, inr);\r\n        pushup(dat[p], dat[p << 1], dat[p << 1 | 1]); return;\r\n    }\r\n    void update(int p, int x)\r\n    {\r\n        if (l[p] == r[p]) {dat[p] = Segment_Node(0); return;}\r\n        int mid = (l[p] + r[p]) >> 1;\r\n        if (x <= mid) update(p << 1, x);\r\n        else update(p << 1 | 1, x);\r\n        pushup(dat[p], dat[p << 1], dat[p << 1 | 1]); return;\r\n    }\r\n    Segment_Node ask(int p, int x, int y)\r\n    {\r\n        if (x <= l[p] && r[p] <= y) return dat[p];\r\n        int mid = (l[p] + r[p]) >> 1;\r\n        if (x <= mid && y > mid)\r\n        {\r\n            Segment_Node here;\r\n            pushup(here, ask(p << 1, x, y), ask(p << 1 | 1, x, y));\r\n            return here;\r\n        }\r\n        else if (x <= mid) return ask(p << 1, x, y);\r\n        else if (y > mid) return ask(p << 1 | 1, x, y);\r\n        puts(\"ERROR\"), exit(0); return Segment_Node();\r\n    }\r\n}t;\r\nstruct Questions\r\n{\r\n    int u, v, l, id;\r\n    bool operator <(const Questions &ano) const\r\n    {\r\n        return l < ano.l;\r\n    }\r\n}qrs[N];\r\nint p[N], ans[N];\r\n\r\nvoid add(int u, int v, int w)\r\n{\r\n    edges[u].push_back(std::make_pair(v, w)); return;\r\n}\r\nSegment_Node ask_road(int x, int y)\r\n{\r\n    Segment_Node L, R, temp;\r\n    while (lt.top[x] != lt.top[y])\r\n    {\r\n        if (dep[lt.top[x]] > dep[lt.top[y]])\r\n            std::swap(x, y), std::swap(L, R);\r\n        t.pushup(temp, t.ask(1, lt.dfn[lt.top[y]], lt.dfn[y]), R), R = temp;\r\n        y = fa[lt.top[y]];\r\n    }\r\n    if (dep[x] > dep[y]) std::swap(x, y), std::swap(L, R);\r\n    std::swap(L.ldat, L.rdat);\r\n    if (x == y)\r\n        {t.pushup(temp, L, R); return temp;}\r\n    t.pushup(temp, t.ask(1, lt.dfn[x] + 1, lt.dfn[y]), R), R = temp;\r\n    t.pushup(temp, L, R);\r\n    return temp;\r\n}\r\n\r\nint main(void)\r\n{\r\n    fio >> n >> m;\r\n    for (int i = 1; i < n; ++ i)\r\n        fio >> f[i];\r\n    for (int i = 1, inpu, inpv, inpw; i < n; ++ i)\r\n        fio >> inpu >> inpv >> inpw, add(inpu, inpv, inpw), add(inpv, inpu, inpw);\r\n    lt.init(), t.build(1, 1, n);\r\n    for (int i = 1; i <= m; ++ i)\r\n        fio >> qrs[i].u >> qrs[i].v >> qrs[i].l, qrs[i].id = i;\r\n    std::sort(qrs + 1, qrs + m + 1);\r\n    for (int i = 2; i <= n; ++ i)\r\n        p[i] = i;\r\n    std::sort(p + 2, p + n + 1, [&](int x, int y){return w[x] < w[y];});\r\n    int it = 2;\r\n    for (int i = 1; i <= m; ++ i)\r\n    {\r\n        while (it <= n && w[p[it]] < qrs[i].l) t.update(1, lt.dfn[p[it]]), ++ it;\r\n        ans[qrs[i].id] = ask_road(qrs[i].u, qrs[i].v).sum;\r\n    }\r\n    for (int i = 1; i <= m; ++ i)\r\n        fio << ans[i] << '\\n';\r\n    \r\n\treturn 0;\r\n}\r\n// dfishidvnsoudfhoishvosihdbv"
+}

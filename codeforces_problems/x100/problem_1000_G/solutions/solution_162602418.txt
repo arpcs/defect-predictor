@@ -1,0 +1,36 @@
+{
+    "id": 162602418,
+    "contestId": 1000,
+    "creationTimeSeconds": 1656820520,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "Forza_Ferrari"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<iostream>\r\n#include<cstdio>\r\n#include<vector>\r\nusing namespace std;\r\n#define int long long\r\nstruct edge\r\n{\r\n    int node,val1,val2;\r\n    edge(int node_,int val1_,int val2_):\r\n        node(node_),val1(val1_),val2(val2_){}\r\n};\r\nvector<edge> v[200001];\r\n//0~1 dp0~1 2\u70b9\u6743 3\u4e0b\u884c 4\u4e0a\u884c\r\nint n,m,a[200001],dp[200001][3],w[200001][3],sum[3][200001],dep[200001],fa[200001],s[200001],son[200001],top[200001],dfn[200001],cnt;\r\ninline int read()\r\n{\r\n    int x=0;\r\n    char c=getchar();\r\n    while(c<'0'||c>'9')\r\n        c=getchar();\r\n    while(c>='0'&&c<='9')\r\n    {\r\n        x=(x<<1)+(x<<3)+(c^48);\r\n        c=getchar();\r\n    }\r\n    return x;\r\n}\r\ninline int lowbit(int x)\r\n{\r\n    return x&-x;\r\n}\r\ninline void update(int x,int val,int tag)\r\n{\r\n    for(;x<=n;x+=lowbit(x))\r\n        sum[tag][x]+=val;\r\n}\r\ninline int query(int x,int tag)\r\n{\r\n    int res=0;\r\n    for(;x;x-=lowbit(x))\r\n        res+=sum[tag][x];\r\n    return res;\r\n}\r\ninline void dfs1(int k,int f,int deep)\r\n{\r\n    dep[k]=deep;\r\n    fa[k]=f;\r\n    s[k]=1;\r\n    dp[k][0]=a[k];\r\n    for(auto i:v[k])\r\n    {\r\n        if(i.node==f)\r\n            continue;\r\n        dfs1(i.node,k,deep+1);\r\n        s[k]+=s[i.node];\r\n        if(s[i.node]>s[son[k]])\r\n            son[k]=i.node;\r\n        dp[k][0]+=max(dp[i.node][0]-i.val1-i.val2,0);\r\n    }\r\n    for(auto i:v[k])\r\n    {\r\n        if(i.node==f)\r\n            continue;\r\n        dp[i.node][1]=dp[k][0]-max(dp[i.node][0]-i.val1-i.val2,0);\r\n    }\r\n}\r\ninline void dfs2(int k,int f,int t,int val1,int val2)\r\n{\r\n    top[k]=t;\r\n    dfn[k]=++cnt;\r\n    if(k==1)\r\n        dp[k][2]=dp[k][0];\r\n    else\r\n        dp[k][2]=dp[k][0]+max(dp[f][2]-max(dp[k][0]-val1-val2,0)-val1-val2,0);\r\n    w[cnt][0]=dp[k][1];\r\n    w[cnt][1]=val1;\r\n    w[cnt][2]=val2;\r\n    if(!son[k])\r\n        return;\r\n    for(auto i:v[k])\r\n        if(i.node==son[k])\r\n        {\r\n            dfs2(son[k],k,t,i.val1,i.val2);\r\n            break;\r\n        }\r\n    for(auto i:v[k])\r\n    {\r\n        if(i.node==son[k]||i.node==fa[k])\r\n            continue;\r\n        dfs2(i.node,k,i.node,i.val1,i.val2);\r\n    }\r\n}\r\ninline int LCA(int x,int y)\r\n{\r\n    while(top[x]^top[y])\r\n    {\r\n        if(dep[top[x]]<dep[top[y]])\r\n            x^=y^=x^=y;\r\n        x=fa[top[x]];\r\n    }\r\n    if(dep[x]>dep[y])\r\n        x^=y^=x^=y;\r\n    return x;\r\n}\r\ninline int find(int x,int y)\r\n{\r\n    while(top[x]^top[y])\r\n    {\r\n        if(fa[top[y]]==x)\r\n            return top[y];\r\n        y=fa[top[y]];\r\n    }\r\n    return son[x];\r\n}\r\n//0 dp1 1\u4e0b\u884c 2\u4e0a\u884c\r\ninline int q(int x,int y)\r\n{\r\n    if(x==y)\r\n        return dp[x][2];\r\n    int lca=LCA(x,y),res=0;\r\n    if(lca==x)\r\n    {\r\n        int node=find(x,y);\r\n        res=dp[y][0]+(dp[x][2]-max(dp[node][0]-w[dfn[node]][1]-w[dfn[node]][2],0))-dp[node][1];\r\n        while(top[x]^top[y])\r\n        {\r\n            res-=query(dfn[y],1)-query(dfn[top[y]]-1,1);\r\n            res+=query(dfn[y],0)-query(dfn[top[y]]-1,0);\r\n            y=fa[top[y]];\r\n        }\r\n        res-=query(dfn[y],1)-query(dfn[x],1);\r\n        res+=query(dfn[y],0)-query(dfn[x],0);\r\n        return res;\r\n    }\r\n    if(lca==y)\r\n    {\r\n        int node=find(y,x);\r\n        res=dp[x][0]+(dp[y][2]-max(dp[node][0]-w[dfn[node]][1]-w[dfn[node]][2],0))-dp[node][1];\r\n        while(top[x]^top[y])\r\n        {\r\n            res-=query(dfn[x],2)-query(dfn[top[x]]-1,2);\r\n            res+=query(dfn[x],0)-query(dfn[top[x]]-1,0);\r\n            x=fa[top[x]];\r\n        }\r\n        res-=query(dfn[x],2)-query(dfn[y],2);\r\n        res+=query(dfn[x],0)-query(dfn[y],0);\r\n        return res;\r\n    }\r\n    int node1=find(lca,x),node2=find(lca,y);\r\n    res=dp[x][0]+dp[y][0]+(dp[lca][2]-max(dp[node1][0]-w[dfn[node1]][1]-w[dfn[node1]][2],0)-max(dp[node2][0]-w[dfn[node2]][1]-w[dfn[node2]][2],0))-dp[node1][1]-dp[node2][1];\r\n    while(top[x]^top[lca])\r\n    {\r\n        res-=query(dfn[x],2)-query(dfn[top[x]]-1,2);\r\n        res+=query(dfn[x],0)-query(dfn[top[x]]-1,0);\r\n        x=fa[top[x]];\r\n    }\r\n    res-=query(dfn[x],2)-query(dfn[lca],2);\r\n    res+=query(dfn[x],0)-query(dfn[lca],0);\r\n    while(top[lca]^top[y])\r\n    {\r\n        res-=query(dfn[y],1)-query(dfn[top[y]]-1,1);\r\n        res+=query(dfn[y],0)-query(dfn[top[y]]-1,0);\r\n        y=fa[top[y]];\r\n    }\r\n    res-=query(dfn[y],1)-query(dfn[lca],1);\r\n    res+=query(dfn[y],0)-query(dfn[lca],0);\r\n    return res;\r\n}\r\nsigned main()\r\n{\r\n    n=read(),m=read();\r\n    for(int i=1;i<=n;++i)\r\n        a[i]=read();\r\n    for(int i=1;i<n;++i)\r\n    {\r\n        int x=read(),y=read(),w=read();\r\n        v[x].emplace_back(y,w,w);\r\n        v[y].emplace_back(x,w,w);\r\n    }\r\n    dfs1(1,0,1);\r\n    dfs2(1,0,1,0,0);\r\n    for(int i=1;i<=n;++i)\r\n    {\r\n        update(i,w[i][0],0);\r\n        update(i,w[i][1],1);\r\n        update(i,w[i][2],2);\r\n    }\r\n    while(m--)\r\n    {\r\n        int x=read(),y=read();\r\n        cout<<q(x,y)<<'\\n';\r\n    }\r\n    return 0;\r\n}"
+}

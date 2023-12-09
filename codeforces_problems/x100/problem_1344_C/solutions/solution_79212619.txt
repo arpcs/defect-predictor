@@ -1,0 +1,38 @@
+{
+    "id": 79212619,
+    "contestId": 1344,
+    "creationTimeSeconds": 1588804486,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1344,
+        "index": "C",
+        "name": "Quantifier Question",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1344,
+        "members": [
+            {
+                "handle": "minato"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1588775700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 38,
+    "timeConsumedMillis": 358,
+    "memoryConsumedBytes": 55500800,
+    "source": "#pragma GCC optimize(\"Ofast\")\n#include <bits/stdc++.h>\n#include <ext/pb_ds/assoc_container.hpp>\n#include <ext/pb_ds/tree_policy.hpp>\nusing namespace std;\nusing namespace __gnu_pbds;\nusing ll = long long;\nusing ull = unsigned long long; \nusing pii =  pair<int, int>;\nusing pll =  pair<long long, long long>;\n#define rep(i, n) for(int i = 0; i < (n); ++i)\n#define all(x) (x).begin(),(x).end()\nconstexpr char ln =  '\\n';\nconstexpr long long MOD = 1000000007LL;\n//constexpr long long MOD = 998244353LL;\ntemplate<class T, class U> inline bool chmax(T &a, U b) { if (a < b) { a = b; return true;} return false; }\ntemplate<class T, class U> inline bool chmin(T &a, U b) { if (a > b) { a = b; return true;} return false; }\n////////////////////////////////////////////////////////////////////////////////////////////////////////////\n\nstruct StronglyConnectedComponent {\n    vector<vector<int>> G,R,T,C;\n    vector<int> vs,used,blg;\n    StronglyConnectedComponent() {}\n    StronglyConnectedComponent(int N) : G(N), R(N), used(N), blg(N) {}\n\n    void add_edge(int u,int v){\n        G[u].emplace_back(v);\n        R[v].emplace_back(u);\n    }\n\n    void dfs(int v){\n        used[v] = 1;\n        for(int u:G[v]) {\n            if(!used[u]) dfs(u);\n        }\n        vs.emplace_back(v);\n    }\n\n    void rdfs(int v, int k) {\n        used[v] = 1;\n        blg[v] = k;\n        C[k].emplace_back(v);\n        for(int u:R[v]) {\n            if(!used[u]) rdfs(u,k);\n        }\n    }\n\n    int build() {\n        int N = G.size();\n        for(int v = 0; v < N; v++) {\n            if(!used[v]) dfs(v);\n        }\n\n        fill(used.begin(),used.end(),0);\n        int k = 0;\n        for(int i = N-1; i >= 0; i--) {\n            if(!used[vs[i]]) {\n                T.emplace_back();\n                C.emplace_back();\n                rdfs(vs[i], k++);\n            }\n        }\n\n        for(int v = 0; v < N; v++) {\n            for(int u:G[v]) {\n                if(blg[v] != blg[u]) T[blg[v]].emplace_back(blg[u]);\n            }\n        }\n\n        for(int i = 0; i < k; i++) {\n            sort(T[i].begin(),T[i].end());\n            T[i].erase(unique(T[i].begin(),T[i].end()),T[i].end());\n        }\n        return k;\n    }\n\n    int operator[](int k) const{return blg[k];}\n};\n\nint main() {\n    ios::sync_with_stdio(false); cin.tie(nullptr);\n    int N,M; cin >> N >> M;\n    StronglyConnectedComponent SCC(N);\n    rep(i,M) {\n        int u,v; cin >> u >> v;\n        --u; --v;\n        SCC.add_edge(u,v);\n    }\n    int K = SCC.build();\n    if (N != K) {\n        cout << -1 << ln;\n        return 0;\n    }\n    string ans = \"\";\n    rep(i,N) ans += 'E';\n\n    vector<int> deg1(N),deg2(N);\n    rep(v,N) {\n        for (auto nv : SCC.G[v]) {\n            deg1[nv]++;\n        }\n        for (auto nv : SCC.R[v]) {\n            deg2[nv]++;\n        }\n    }\n    queue<pii> que;\n    rep(i,N) {\n        if (!deg1[i]) que.emplace(i,i);\n    }\n    vector<int> dp1(N),dp2(N);\n    iota(all(dp1),0);\n    iota(all(dp2),0);\n    while (!que.empty()) {\n        int v,m;\n        tie(v,m) = que.front(); que.pop();\n        for (auto nv : SCC.G[v]) {\n            chmin(dp1[nv],m);\n            deg1[nv]--;\n            if (!deg1[nv]) que.emplace(nv,dp1[nv]);\n        }\n    }\n    rep(i,N) {\n        if (!deg2[i]) que.emplace(i,i);\n    }\n    while (!que.empty()) {\n        int v,m;\n        tie(v,m) = que.front(); que.pop();\n        for (auto nv : SCC.R[v]) {\n            chmin(dp2[nv],m);\n            deg2[nv]--;\n            if (!deg2[nv]) que.emplace(nv,dp2[nv]);\n        }\n    }\n    int cnt = 0;\n    rep(i,N) {\n        if (dp1[i]==i and dp2[i]==i) {\n            cnt++;\n            ans[i] = 'A';\n        }\n    }\n    cout << cnt << ln;\n    cout << ans << ln;\n}\n"
+}

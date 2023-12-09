@@ -1,0 +1,36 @@
+{
+    "id": 216954230,
+    "contestId": 1000,
+    "creationTimeSeconds": 1691050353,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "C2024liuhongyi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 264,
+    "memoryConsumedBytes": 161894400,
+    "source": "// LUOGU_RID: 118812616\n#include <bits/stdc++.h>\r\n#define ll long long\r\nusing namespace std;\r\nconst int MAXN = 4e5 + 5;\r\nint head[MAXN] , cnt = 1 , n , q;\r\nll dp[MAXN] , a[MAXN] , dp2[MAXN][30] , DP[MAXN];\r\nint Fa[MAXN][30] , dep[MAXN];\r\nstruct edge {\r\n\tint to , w , nxt;\r\n} e[MAXN];\r\nvoid add(int u , int v , int w) {\r\n\te[++ cnt].to = v;\r\n\te[cnt].w = w;\r\n\te[cnt].nxt = head[u];\r\n\thead[u] = cnt;\r\n}\r\nvoid Tree_dp1(int u , int fa) {\r\n\tdp[u] = a[u];\r\n\tfor(int i = head[u] ; i ; i = e[i].nxt) {\r\n\t\tint v = e[i].to;\r\n\t\tif(v == fa) continue;\r\n\t\tTree_dp1(v , u);\r\n\t\tdp[u] += max(0ll , dp[v] - e[i].w - e[i ^ 1].w);\r\n\t}\r\n}\r\nvoid Tree_dp2(int u , int fa) {\r\n\tFa[u][0] = fa;\r\n\tdep[u] = dep[fa] + 1;\r\n\tfor(int i = 1 ; i <= 25 ; i ++) {\r\n\t\tFa[u][i] = Fa[Fa[u][i - 1]][i - 1];\r\n\t\tdp2[u][i] = dp2[u][i - 1] + dp2[Fa[u][i - 1]][i - 1] - dp[Fa[u][i - 1]];\r\n\t}\r\n\tfor(int i = head[u] ; i ; i = e[i].nxt) {\r\n\t\tint v = e[i].to;\r\n\t\tif(v == fa) continue;\r\n\t\tdp2[v][0] = dp[v] + dp[u] - e[i ^ 1].w;\r\n\t\tif(dp[v] - e[i].w - e[i ^ 1].w > 0) dp2[v][0] -= dp[v] - e[i].w - e[i ^ 1].w;\r\n\t\tDP[v] = max(DP[v] , DP[u] + dp2[v][0] - e[i].w - dp[v]);\r\n\t\tTree_dp2(v , u);\r\n\t}\r\n}\r\nint main() {\r\n\tscanf(\"%d %d\", &n , &q);\r\n\tfor(int i = 1 ; i <= n ; i ++) scanf(\"%lld\", &a[i]);\r\n\tfor(int i = 1 , u , v , w1 , w2 ; i < n ; i ++) {\r\n\t\tscanf(\"%d %d %d\", &u , &v , &w1);\r\n\t\tadd(u , v , w1);\r\n\t\tadd(v , u , w1);\r\n\t}\r\n\tTree_dp1(1 , 0);\r\n\tTree_dp2(1 , 0);\r\n\twhile(q --) {\r\n\t\tint u , v;\r\n\t\tscanf(\"%d %d\", &u , &v);\r\n\t\tll ans = 0;\r\n\t\tint x = u , y = v;\r\n\t\tif(dep[v] > dep[u]) swap(u , v);\r\n\t\tfor(int i = 25 ; i >= 0 ; i --) {\r\n\t\t\tif(dep[Fa[u][i]] >= dep[v]) {\r\n\t\t\t\tans += dp2[u][i] - dp[u];\r\n\t\t\t\tu = Fa[u][i];\r\n\t\t\t}\r\n\t\t}\r\n\t\tif(u == v) {\r\n\t\t\tif (dep[x] > dep[y]) ans += dp[x];\r\n\t\t\telse ans += dp[y];\r\n\t\t\tprintf(\"%lld\\n\", ans + DP[u]);\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tfor(int i = 25 ; i >= 0 ; i --) {\r\n\t\t\tif(Fa[u][i] != Fa[v][i]) {\r\n\t\t\t\tans += dp2[u][i] - dp[u] + dp2[v][i] - dp[v];\r\n\t\t\t\tu = Fa[u][i];\r\n\t\t\t\tv = Fa[v][i];\r\n\t\t\t}\r\n\t\t}\r\n\t\tprintf(\"%lld\\n\", ans + dp2[u][0] - dp[u] + dp2[v][0] - dp[v] - dp[Fa[u][0]] + dp[x] + dp[y] + DP[Fa[u][0]]);\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

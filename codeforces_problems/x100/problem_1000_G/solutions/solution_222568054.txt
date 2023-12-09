@@ -1,0 +1,36 @@
+{
+    "id": 222568054,
+    "contestId": 1000,
+    "creationTimeSeconds": 1694250069,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "redproject"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 919,
+    "memoryConsumedBytes": 107724800,
+    "source": "#include <bits/stdc++.h>\r\n#define pb push_back\r\n#define sz(x) (int)x.size()\r\nusing namespace std;\r\n#define int long long\r\nusing ll = long long;\r\nconst int N = 3e5 + 1;\r\nint n, q, a[N], up[N][18], tin[N], tout[N], timer, qu[N], qv[N];\r\nll dp[N], ans[N], rt[N];\r\nvector <int> qq[N];\r\nvector <pair <int, int> > g[N];\r\nvoid calc1(int v, int p = 0) {\r\n\tdp[v] = a[v];\r\n\ttin[v] = ++timer;\r\n\tup[v][0] = p;\r\n\tfor (int i = 1; i < 18; ++i)\r\n\t\tup[v][i] = up[up[v][i - 1]][i - 1];\r\n\tfor (auto [to, w] : g[v]) {\r\n\t\tif (to != p) {\r\n\t\t\tcalc1(to, v);\r\n\t\t\tdp[v] += max(0ll, dp[to] - 2 * w);\r\n\t\t}\r\n\t}\r\n\ttout[v] = ++timer;\r\n}\r\nbool ancestor(int u, int v) {\r\n\treturn tin[u] <= tin[v] && tout[u] >= tout[v];\r\n}\r\nint lca(int u, int v) {\r\n\tif (ancestor(u, v))\r\n\t\treturn u;\r\n\tif (ancestor(v, u))\r\n\t\treturn v;\r\n\tfor (int i = 17; i >= 0; i--) {\r\n\t\tif (up[u][i] && !ancestor(up[u][i], v))\r\n\t\t\tu = up[u][i];\r\n\t}\r\n\treturn up[u][0];\r\n}\r\nint sub(int u, int p) {\r\n\tfor (int i = 17; i >= 0; i--) {\r\n\t\tif (up[u][i] && !ancestor(up[u][i], p))\r\n\t\t\tu = up[u][i];\r\n\t}\r\n\treturn u;\r\n}\r\nvoid calc2(int v, int p = 0) {\r\n\trt[v] = dp[v];\r\n\tfor (auto [to, w] : g[v]) {\r\n\t\tif (to != p) {\r\n\t\t\tdp[v] -= max(0ll, dp[to] - 2 * w);\r\n\t\t\tdp[to] += max(0ll, dp[v] - 2 * w);\r\n\t\t\tcalc2(to, v);\r\n\t\t\tdp[to] -= max(0ll, dp[v] - 2 * w);\r\n\t\t\tdp[v] += max(0ll, dp[to] - 2 * w);\r\n\t\t}\r\n\t}\r\n}\r\nll f[N * 2];\r\nvoid upd(int p, ll x) {\r\n\tfor (int i = p; i <= 2 * n; i |= i + 1)\r\n\t\tf[i] += x;\r\n}\r\nll query(ll p) {\r\n\tll res = 0;\r\n\tfor (int i = p; i > 0; i &= i + 1, --i)\r\n\t\tres += f[i];\r\n\treturn res;\r\n}\r\nll mda[N], edge[N];\r\nvoid dfs(int v, int p = 0) {\r\n\tfor (auto [to, w] : g[v]) {\r\n\t\tif (to != p) \r\n\t\t\tdfs(to, v);\r\n\t}\r\n\tfor (auto [to, w] : g[v]) {\r\n\t\tedge[to] = w;\r\n\t\tmda[to] = max(0ll, dp[to] - 2 * w);\r\n\t}\r\n\tfor (auto i : qq[v]) {\r\n\t\tif (qu[i] == v || qv[i] == v) {\r\n\t\t\tint to = (qu[i] ^ qv[i] ^ v);\r\n\t\t\tint pr = sub(to, v);\r\n\t\t\tans[i] = query(tin[to]) + rt[v] - mda[pr] - edge[pr] + dp[to];\r\n\t\t}\r\n\t\telse {\r\n\t\t\tint p1 = sub(qu[i], v);\t\r\n\t\t\tint p2 = sub(qv[i], v);\r\n\t\t\tans[i] = query(tin[qu[i]]) + query(tin[qv[i]]) + rt[v] - mda[p1] - mda[p2] - edge[p1] - edge[p2] + dp[qu[i]] + dp[qv[i]];\r\n\t\t}\r\n\t}\r\n\tfor (auto [to, w] : g[v]) {\r\n\t\tif (to != p) {\r\n\t\t\tupd(tin[to], dp[v] - max(0ll, dp[to] - 2 * w) - w);\r\n\t\t\tupd(tout[to] + 1, -(dp[v] - max(0ll, dp[to] - 2 * w) - w));\t\r\n\t\t}\r\n\t}\r\n}\r\nmain() {\r\n\tios :: sync_with_stdio(0), cin.tie(0);\r\n\tcout.tie(0);\r\n\tcin >> n >> q;\r\n\tfor (int i = 1; i <= n; ++i)\r\n\t\tcin >> a[i];\r\n\tfor (int i = 1, u, v, w; i < n; ++i) {\r\n\t\tcin >> u >> v >> w;\r\n\t\tg[u].pb({v, w});\r\n\t\tg[v].pb({u, w});\r\n\t}\r\n\tcalc1(1);\r\n\tcalc2(1);\r\n\tfor (int i = 0; i < q; ++i) {\r\n\t\tcin >> qu[i] >> qv[i];\r\n\t\tif (qu[i] == qv[i]) {\r\n\t\t\tans[i] = rt[qu[i]];\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tint l = lca(qu[i], qv[i]);\r\n\t\tqq[l].pb(i);\r\n\t}\r\n\tdfs(1);\r\n\tfor (int i = 0; i < q; ++i) cout << ans[i] << '\\n';\r\n\treturn 0;\r\n}\r\n"
+}

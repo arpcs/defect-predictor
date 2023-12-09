@@ -1,0 +1,36 @@
+{
+    "id": 212945263,
+    "contestId": 1000,
+    "creationTimeSeconds": 1688895417,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "tomas_fang"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 40857600,
+    "source": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nconst int N = 3e5 + 5;\nint n, q, u, v, w;\nint a[N];\nvector<int> adj[N];\nlong long dpU[N], dpD[N];\n\nint tb[19][N], lvl[N];\nlong long sv1[N], sv2[N], sv3[N];\n\nvoid dfs0(int u, int p) {\n    tb[0][u] = p;\n    for (int i = 1; i < 19; i++)\n        tb[i][u] = tb[i - 1][tb[i - 1][u]];\n    for (auto v : adj[u])\n        if (v != p) {\n            lvl[v] = lvl[u] + 1;\n            dfs0(v, u);\n        }\n}\n\nint LCA(int u, int v) {\n    int d = lvl[v] - lvl[u];\n    for (int i = 0; i < 19; i++)\n        if (d >> i & 1)\n            v = tb[i][v];\n    if (u == v)\n        return u;\n    for (int i = 18; i >= 0; i--)\n        if (tb[i][v] != tb[i][u])\n            v = tb[i][v], u = tb[i][u];\n    return tb[0][u];\n}\n\nvoid dfs1(int u, int p) {\n    dpD[u] = a[u];\n    for (auto v : adj[u])\n        if (v != p) {\n            dfs1(v, u);\n            dpD[u] += max(0ll, dpD[v] - 2 * w);\n        }\n}\n\nvoid dfs2(int u, int p) {\n    for (auto v : adj[u])\n        if (v != p) {\n            dpU[v] = max(0ll, dpU[u] + dpD[u] - max(0ll, dpD[v] - 2 * w) - 2 * w);\n            dfs2(v, u);\n        }\n}\n\nvoid dfs3(int u, int p) {\n    for (auto v : adj[u])\n        if (v != p) {\n            sv2[v] = sv2[u] - w;\n            sv3[v] = sv3[u] + (dpD[u] - max(0ll, dpD[v] - 2 * w));\n            dfs3(v, u);\n        }\n}\n\nlong long getExclusion(int from, int to) {\n    swap(from, to);\n    long long ret = sv2[to] - sv2[from];\n    ret += sv3[to] - sv3[from];\n    return ret;\n}\n\nint main() {\n    ios_base::sync_with_stdio(0);\n    cin.tie(0);\n    cin >> n >> q;\n    for (int i = 1; i <= n; i++)\n        cin >> a[i];\n    for (int i = 1; i < n; i++) {\n        cin >> u >> v >> w;\n        adj[u].push_back(v);\n        adj[v].push_back(u);\n    }\n    dfs0(1, 0);\n    dfs1(1, 0);\n    dfs2(1, 0);\n    dfs3(1, 0);\n    for (int i = 0; i < q; i++) {\n        cin >> u >> v;\n        if (lvl[u] > lvl[v])\n            swap(u, v);\n        if (LCA(u, v) == u)\n            cout << dpU[u] + dpD[v] + getExclusion(v, u) << endl;\n        else\n            cout << dpU[LCA(u, v)] + dpD[u] + dpD[v] + getExclusion(u, LCA(u, v)) + getExclusion(v, LCA(u, v)) - dpD[LCA(u, v)] << endl;\n    }\n    return 0;\n}\n// RazNsbCzowYDBTCOQiEBaylwIWbCZUaBmxhhIuZWexvXEDrnCaNuRUxepCRKvANRaWBPMaGvIPIBEuaFBpycuFBgDsbbPjQkPoyhLsuWwBreXJtIzoXlMvdXcnShjwxh"
+}

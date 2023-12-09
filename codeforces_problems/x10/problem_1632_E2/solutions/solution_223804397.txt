@@ -1,0 +1,38 @@
+{
+    "id": 223804397,
+    "contestId": 1632,
+    "creationTimeSeconds": 1695021397,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1632,
+        "index": "E2",
+        "name": "Distance Tree (hard version)",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2700,
+        "tags": [
+            "binary search",
+            "dfs and similar",
+            "shortest paths",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1632,
+        "members": [
+            {
+                "handle": "zlxFTH"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1643553300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 295,
+    "memoryConsumedBytes": 40243200,
+    "source": "// LUOGU_RID: 125085143\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nvoid solve() {\r\n  int N;\r\n  cin >> N;\r\n  vector<vector<int>> g(N);\r\n  for (int i = 0; i < N - 1; i++) {\r\n    int u, v;\r\n    cin >> u >> v;\r\n    u--, v--;\r\n    g[u].push_back(v);\r\n    g[v].push_back(u);\r\n  }\r\n  int ti = 0;\r\n  vector<int> dfn(N, -1), dep(N);\r\n  vector<array<int, 12>> a(N);\r\n  auto dfs = [&](auto dfs, int u, int fa)->void {\r\n    a[dfn[u] = ti++][0] = fa;\r\n    for (auto v : g[u]) {\r\n      if (v != fa) {\r\n        dep[v] = dep[u] + 1;\r\n        dfs(dfs, v, u);\r\n      }\r\n    }\r\n  };\r\n  dfs(dfs, 0, -1);\r\n  auto get = [&](int u, int v) {\r\n    return dfn[u] < dfn[v] ? u : v;\r\n  };\r\n  for (int j = 1; j < 12; j++) {\r\n    for (int i = 1; i + (1 << j) - 1 < N; i++) {\r\n      a[i][j] = get(a[i][j - 1], a[i + (1 << j - 1)][j - 1]);\r\n    }\r\n  }\r\n  auto lca = [&](int u, int v) {\r\n    if (u == v) return u;\r\n    if ((u = dfn[u]) > (v = dfn[v])) swap(u, v);\r\n    int h = __lg(v - u++);\r\n    return get(a[u][h], a[v - (1 << h) + 1][h]);\r\n  };\r\n  int cur = max_element(dep.begin(), dep.end()) - dep.begin();\r\n  int mx = dep[cur];\r\n  assert(mx != 137588);\r\n  vector<int> o(N);\r\n  iota(o.begin(), o.end(), 0);\r\n  sort(o.begin(), o.end(), [&](auto &u, auto &v) {\r\n    return dep[u] > dep[v];\r\n  });\r\n  int val = INT_MIN;\r\n  auto add = [&](int u) {\r\n    int x = lca(cur, u);\r\n    val = max(val, dep[cur] + dep[u] - 2 * dep[x]);\r\n  };\r\n  auto check = [&](int d) {\r\n    return val <= 2 * d;\r\n  };\r\n  vector<int> ans(N + 1, INT_MAX);\r\n  for (int lim = mx, pos = 0; lim >= 0; lim--) {\r\n    while (pos < N && dep[o[pos]] > lim) {\r\n      add(o[pos++]);\r\n    }\r\n    int l = 1, r = N, res = -1;\r\n    while (l <= r) {\r\n      int mid = (l + r) / 2;\r\n      if (check(lim - mid)) {\r\n        res = mid;\r\n        l = mid + 1;\r\n      } else {\r\n        r = mid - 1;\r\n      }\r\n    }\r\n    if (~res) {\r\n      ans[res] = lim;\r\n    }\r\n  }\r\n  for (int i = N - 1; i; i--) {\r\n    ans[i] = min(ans[i], ans[i + 1]);\r\n  }\r\n  for (int i = 1; i <= N; i++) {\r\n    cout << ans[i] << \" \\n\"[i == N];\r\n  }\r\n}\r\n\r\nint main() {\r\n  cin.tie(0)->sync_with_stdio(0);\r\n  int t;\r\n  cin >> t;\r\n  while (t--) {\r\n    solve();\r\n  }\r\n  return 0;\r\n}"
+}

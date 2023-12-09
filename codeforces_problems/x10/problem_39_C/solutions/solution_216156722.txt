@@ -1,0 +1,35 @@
+{
+    "id": 216156722,
+    "contestId": 39,
+    "creationTimeSeconds": 1690594447,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 39,
+        "index": "C",
+        "name": "Moon Craters",
+        "type": "PROGRAMMING",
+        "rating": 2100,
+        "tags": [
+            "dp",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 39,
+        "members": [
+            {
+                "handle": "guoyunfeng"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1287904200
+    },
+    "programmingLanguage": "PyPy 3-64",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 139,
+    "memoryConsumedBytes": 10854400,
+    "source": "import sys\nfrom collections import defaultdict\nfrom functools import cache\n\nreadline = sys.stdin.readline\nN = int(readline().strip())\n\nintervals = []\nit2idx = {}\nleft = defaultdict(list)\npoints = []\ntree = {}\nfor i in range(N):\n    c, r = [int(w) for w in readline().split()]\n    intervals.append([c - r, c + r])\n    points.append(c - r)\n    points.append(c + r)\n\npoints = sorted(set(points))\np2p = {p:i for i,p in enumerate(points)}\nM = len(points)\nfor i, (l, r) in enumerate(intervals):\n    l, r = p2p[l], p2p[r]\n    it2idx[l, r] = i + 1\n    left[l].append(r)\n\nfor l in left:\n    left[l].sort()\n\n@cache\ndef dfs(l:int, r:int) -> int:\n    if l >= r:\n        return 0\n    if not (l, r) in tree:\n        tree[l, r] = []\n    result = dfs(l + 1, r)\n    tree[l, r] = [[l + 1, r]] if l + 1 < r else []\n\n    for k in left[l]:\n        if k >= r:\n            continue\n        a = dfs(l, k)\n        b = dfs(k, r)\n        # if k > left[l][-1]:\n        if a + b > result:\n            result = a + b\n            tree[l, r] = [[l, k], [k, r]]\n    return result + int((l, r) in it2idx)\n\ndef travel(l: int, r: int) -> list:\n    result = [it2idx[l, r]] if (l, r) in it2idx else []\n    for l1, r1 in tree[l, r]:\n        result.extend(travel(l1, r1))\n    return result\n\n# print(left)\nprint(dfs(0, M - 1))\nprint(*sorted(travel(0, M - 1)))"
+}

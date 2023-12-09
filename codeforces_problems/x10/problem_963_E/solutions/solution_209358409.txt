@@ -1,0 +1,35 @@
+{
+    "id": 209358409,
+    "contestId": 963,
+    "creationTimeSeconds": 1686561835,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 963,
+        "index": "E",
+        "name": "Circles of Waiting",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 963,
+        "members": [
+            {
+                "handle": "Acestar"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1523973900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 123,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 5222400,
+    "source": "// LUOGU_RID: 112591117\n#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define vi vector<int>\r\n\r\nconst int N = 105;\r\nconst int R = 51;\r\nconst int mod = 1e9 + 7;\r\n\r\nint add(int x) {return x < mod ? x : x - mod;}\r\nint sub(int x) {return x < 0 ? x + mod : x;}\r\nint qpow(int a, int b = mod - 2)\r\n{\r\n\tint res = 1;\r\n\tfor(; b; a = 1ll * a * a % mod, b >>= 1)\r\n\t\tif(b & 1) res = 1ll * res * a % mod;\r\n\treturn res;\r\n}\r\n\r\nint r, p1, p2, p3, p4;\r\nint n, id[N][N];\r\nbool in[N][N];\r\nvi a[N][N];\r\n\r\nvi operator - (vi x, vi y)\r\n{\r\n\tfor(int i = 0; i <= n; i++) x[i] = sub(x[i] - y[i]);\r\n\treturn x;\r\n}\r\nvi operator - (vi x, int y)\r\n{\r\n\tx[0] = sub(x[0] - y);\r\n\treturn x;\r\n}\r\nvi operator * (vi x, int y)\r\n{\r\n\tfor(int i = 0; i <= n; i++) x[i] = 1ll * x[i] * y % mod;\r\n\treturn x;\r\n}\r\n\r\nint f[N][N];\r\n\r\nvoid gauss()\r\n{\r\n\tfor(int i = 1; i <= n; i++)\r\n\t{\r\n\t\tfor(int j = i + 1; j <= n && !f[i][i]; j++)\r\n\t\t\tif(f[j][i]) swap(f[i], f[j]);\r\n\t\tint inv = qpow(f[i][i]);\r\n\t\tfor(int j = i + 1; j <= n; j++)\r\n\t\t{\r\n\t\t\tint tmp = 1ll * f[j][i] * inv % mod;\r\n\t\t\tfor(int k = i; k <= n + 1; k++)\r\n\t\t\t\tf[j][k] = sub(f[j][k] - 1ll * f[i][k] * tmp % mod);\r\n\t\t}\r\n\t}\r\n\tfor(int i = n; i >= 1; i--)\r\n\t{\r\n\t\tfor(int j = i + 1; j <= n; j++)\r\n\t\t\tf[i][n + 1] = sub(f[i][n + 1] - 1ll * f[i][j] * f[j][n + 1] % mod);\r\n\t\tf[i][n + 1] = 1ll * f[i][n + 1] * qpow(f[i][i]) % mod;\r\n\t}\r\n\treturn;\r\n}\r\n\r\nint main()\r\n{\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(nullptr), cout.tie(nullptr);\r\n\r\n\tcin >> r >> p1 >> p2 >> p3 >> p4;\r\n\tint sum = (1ll * p1 + p2 + p3 + p4) % mod; sum = qpow(sum);\r\n\tp1 = 1ll * p1 * sum % mod, p2 = 1ll * p2 * sum % mod, p3 = 1ll * p3 * sum % mod, p4 = 1ll * p4 * sum % mod;\r\n\r\n\tfor(int i = -r; i <= r; i++)\r\n\t\tfor(int j = -r; j <= r; j++)\r\n\t\t\tif(i * i + j * j <= r * r)\r\n\t\t\t\tin[R + i][R + j] = 1;\r\n\tfor(int i = -r; i <= r; i++)\r\n\t\tfor(int j = -r; j <= r; j++)\r\n\t\t\tif(in[R + i][R + j] && !in[R + i][R + j + 1])\r\n\t\t\t\tid[R + i][R + j] = ++n;\r\n\tfor(int i = -r - 1; i <= r + 1; i++)\r\n\t\tfor(int j = -r - 1; j <= r + 1; j++)\r\n\t\t{\r\n\t\t\ta[R + i][R + j].resize(n + 1);\r\n\t\t\tif(id[R + i][R + j]) a[R + i][R + j][id[R + i][R + j]] = 1;\r\n\t\t}\r\n\tint cnt = 0;\r\n\tfor(int j = r; j >= -r - 1; j--)\r\n\t\tfor(int i = -r; i <= r; i++)\r\n\t\t\tif(!id[R + i][R + j] && (in[R + i][R + j] || in[R + i][R + j + 1]))\r\n\t\t\t{\r\n\t\t\t\ta[R + i][R + j] = (a[R + i][R + j + 1] - (a[R + i - 1][R + j + 1] * p1) - (a[R + i][R + j + 2] * p4) - (a[R + i + 1][R + j + 1] * p3) - 1) * qpow(p2);\r\n\t\t\t\tif(!in[R + i][R + j])\r\n\t\t\t\t{\r\n\t\t\t\t\tcnt++; f[cnt][n + 1] = add(mod - a[R + i][R + j][0]);\r\n\t\t\t\t\tfor(int k = 1; k <= n; k++) f[cnt][k] = a[R + i][R + j][k];\r\n\t\t\t\t}\r\n\t\t\t}\r\n\tassert(cnt == n);\r\n\tgauss(); f[0][n + 1] = 1;\r\n\r\n\tint ans = 0;\r\n\tfor(int i = 0; i <= n; i++)\r\n\t\tans = add(ans + 1ll * a[R][R][i] * f[i][n + 1] % mod);\r\n\tcout << ans << '\\n';\r\n\treturn 0;\r\n}"
+}

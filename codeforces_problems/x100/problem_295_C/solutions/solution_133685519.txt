@@ -1,0 +1,38 @@
+{
+    "id": 133685519,
+    "contestId": 295,
+    "creationTimeSeconds": 1635612562,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "5AP"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 1331200,
+    "source": "#include<iostream>\r\n#include<vector>\r\n#include<map>\r\n#include<math.h>\r\n#include<set>\r\n#include<algorithm>\r\n#include<stdio.h>\r\n#include<string.h>\r\n#include<iomanip>\r\n#include<queue>\r\n\r\nusing namespace std;\r\n\r\n#pragma GCC optimize (\"Ofast\")\r\n\r\n#define all(x) x.begin() , x.end()\r\n#define sze(x) (ll)(x.size())\r\n#define MP(x , y) make_pair(x , y)\r\n#define wall cerr<<\"--------------------------------------\"<<endl\r\n#define PB(x) push_back(x)\r\n#define F fist\r\n#define S second\r\n#define Rep(i , a , b) for(int i = a ; i < b ; i++)\r\n\r\ntypedef long long int ll;\r\ntypedef vector<ll> vl;\r\ntypedef vector<int> vi;\r\ntypedef pair<ll , ll> pll;\r\ntypedef pair<int , int> pii;\r\ntypedef long double db;\r\ntypedef pair<pll , ll> plll;\r\ntypedef pair<int , pii> piii;\r\ntypedef pair<pll , pll> pllll;\r\n\r\nconst ll maxn = 55 , maxk = 105, md = 1e9 + 7 , inf = 2e16;\r\n\r\nll n , k , a50 = 0 , a100 = 0 ;\r\nll c[maxn][maxn] = {0} , dp[maxn][maxn][2] = {0} , num[maxn][maxn][2] = {0};\r\n\r\nstruct trio\r\n{\r\n    ll b50 , b100 , side;\r\n    \r\n};\r\n\r\nvoid solveC()\r\n{\r\n    for (int i = 0; i < maxn; i++)\r\n    {\r\n        c[i][0] = 1;\r\n        c[i][i] = 1;\r\n    }\r\n    \r\n    for (int i = 1; i < maxn; i++)\r\n    {\r\n        for (int j = 1; j < i; j++)\r\n        {\r\n            c[i][j] = c[i-1][j] + c[i-1][j-1];\r\n            c[i][j] %= md;\r\n        }\r\n    }\r\n    return;\r\n}\r\n\r\nvoid solveDP()\r\n{\r\n    queue<trio> q;\r\n\r\n    num[a50][a100][0] = 1;\r\n    q.push({a50 , a100 , 0});\r\n\r\n    while(!q.empty())\r\n    {\r\n        // cout<<q.size()<<'\\n';\r\n        trio h = q.front() ; \r\n        q.pop();\r\n        // cout<<h.b50<<' '<<h.b100<<' '<<h.side<<'\\n';\r\n        for (int i = 0; i <= h.b50 && 50*i <= k; i++)\r\n        {\r\n            for (int j = 0; j <= h.b100 && 50*i + 100*j <= k; j++)\r\n            {\r\n                if (i || j)\r\n                {\r\n                    trio nxt = {a50 - h.b50 + i , a100 - h.b100 + j , (h.side+1)%2};\r\n                    if (num[nxt.b50][nxt.b100][nxt.side])\r\n                    {\r\n                        // cout<<\"hey\"<<'\\n';\r\n                        // cout<<nxt.b50<<' '<<nxt.b100<<' '<<nxt.side<<'\\n';\r\n                        if (dp[nxt.b50][nxt.b100][nxt.side] == dp[h.b50][h.b100][h.side] + 1)\r\n                        {\r\n                            num[nxt.b50][nxt.b100][nxt.side] = num[nxt.b50][nxt.b100][nxt.side] + ((1ll * num[h.b50][h.b100][h.side] * c[h.b50][i])%md * c[h.b100][j]) %md;\r\n                            num[nxt.b50][nxt.b100][nxt.side] %= md;\r\n                        }\r\n                    }\r\n                    else\r\n                    {\r\n                        // cout<<\"heyyyyy\"<<'\\n';\r\n                        // cout<<nxt.b50<<' '<<nxt.b100<<' '<<nxt.side<<'\\n';\r\n                        dp[nxt.b50][nxt.b100][nxt.side] = dp[h.b50][h.b100][h.side] + 1;\r\n                        num[nxt.b50][nxt.b100][nxt.side] = ((1ll * num[h.b50][h.b100][h.side] * c[h.b50][i])%md * c[h.b100][j]) %md;\r\n                        q.push(nxt);\r\n                    }   \r\n                }                \r\n            }   \r\n        }\r\n    }\r\n    return;\r\n}\r\n\r\nvoid solve()\r\n{\r\n\tcin>>n>>k;\r\n\r\n    for (int i = 0; i < n; i++)\r\n    {\r\n        ll l; cin>>l;\r\n        if(l == 50)a50 += 1;\r\n        else a100 +=1;\r\n    }\r\n    // cout<<a50<<' '<<a100<<'\\n';\r\n    solveC();\r\n    solveDP();\r\n    // for (int i = 0; i <= a50; i++)\r\n    // {\r\n    //     for (int j = 0; j <= a100; j++)\r\n    //     {\r\n    //         cout<<dp[i][j][1]<<' '<<num[i][j][1]<<' ';\r\n    //     }\r\n    //     cout<<'\\n';\r\n    // }\r\n    \r\n    if (!dp[a50][a100][1]) cout<<-1<<'\\n'<<0;\r\n    else cout<<dp[a50][a100][1]<<'\\n'<<num[a50][a100][1];\r\n}\r\n\r\n\r\nint main()\r\n{\r\n\t// foropen(\"input.txt\" , \"r\" , stdin);\r\n\t// foropen(\"output.txt\" , \"w\" , stdout);\r\n\r\n\tios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0);\r\n\r\n\tsolve();\r\n\t\r\n\treturn 0;\t\r\n}"
+}

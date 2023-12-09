@@ -1,0 +1,38 @@
+{
+    "id": 215153060,
+    "contestId": 1556,
+    "creationTimeSeconds": 1690104781,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1556,
+        "index": "H",
+        "name": "DIY Tree",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3300,
+        "tags": [
+            "graphs",
+            "greedy",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1556,
+        "members": [
+            {
+                "handle": "hitonanode"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1630247700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#pragma once\r\n\r\n#include <cassert>\r\n#include <queue>\r\n#include <vector>\r\n\r\n// Find maximum weight size k + 1 intersection of two matroids using Dijkstra's algorithm\r\n// Return `true` iff larger intersection is found.\r\n// Complexity: O(Cn + nk log n) (C: circuit query)\r\ntemplate <class Matroid1, class Matroid2, class T = int>\r\nbool augment_matroid_intersection_dijkstra(\r\n    Matroid1 &m1,                 // Matroid, size n, updated\r\n    Matroid2 &m2,                 // Matroid, size n, updated\r\n    std::vector<bool> &I,         // Size k maximum weight intersection, size n, updated\r\n    const std::vector<T> &weight, // Weights of elements, size n\r\n    std::vector<T> &potential     // Potential, size n + 2, updated\r\n) {\r\n    const int n = I.size();\r\n\r\n    assert((int)m1.size() == n);\r\n    assert((int)m2.size() == n);\r\n    assert((int)weight.size() == n);\r\n    assert(potential.empty() or ((int)potential.size() == n) or ((int)potential.size() == n + 2));\r\n\r\n    m1.set(I);\r\n    m2.set(I);\r\n\r\n    potential.resize(n + 2);\r\n\r\n    auto l = [&](int e) -> T { return e < n ? (I.at(e) ? weight.at(e) : -weight.at(e)) : T(); };\r\n    auto edge_len = [&](int s, int t) -> T { return l(t) - potential.at(t) + potential.at(s); };\r\n\r\n    {\r\n        int arghi = -1;\r\n        for (int e = 0; e < n; ++e) {\r\n            if (I.at(e)) continue;\r\n            if (arghi < 0 or weight.at(arghi) < weight.at(e)) arghi = e;\r\n        }\r\n        if (arghi < 0) return false;\r\n        if (m1.circuit(arghi).empty() and m2.circuit(arghi).empty()) {\r\n            potential.at(arghi) -= l(arghi);\r\n            I.at(arghi) = true;\r\n            return true;\r\n        }\r\n    }\r\n\r\n    // Find minimum length (& minimum num. of vertices) gs-gt path\r\n    const int gs = n, gt = n + 1;\r\n    std::vector<std::vector<int>> to(gt + 1);\r\n\r\n    bool has_gs_edge = false, has_gt_edge = false;\r\n\r\n    for (int e = 0; e < n; ++e) {\r\n        if (I.at(e)) continue;\r\n\r\n        const auto c1 = m1.circuit(e), c2 = m2.circuit(e);\r\n\r\n        if (c1.empty()) {\r\n            to.at(e).push_back(gt);\r\n            if (!has_gt_edge) {\r\n                has_gt_edge = true;\r\n                potential.at(gt) = potential.at(e);\r\n            }\r\n            if (T el = edge_len(e, gt); el < T()) potential.at(gt) += el;\r\n        }\r\n        for (int f : c1) {\r\n            if (f != e) to.at(e).push_back(f);\r\n        }\r\n\r\n        if (c2.empty()) {\r\n            to.at(gs).push_back(e);\r\n            if (!has_gs_edge) {\r\n                has_gs_edge = true;\r\n                potential.at(gs) = potential.at(e) - l(e);\r\n            }\r\n            if (T el = edge_len(gs, e); el < T()) potential.at(gs) -= el;\r\n        }\r\n        for (int f : c2) {\r\n            if (f != e) to.at(f).push_back(e);\r\n        }\r\n    }\r\n\r\n    if (const T e0 = potential.at(gs); e0 != T()) {\r\n        for (auto &p : potential) p -= e0;\r\n    }\r\n\r\n    if (!has_gs_edge or !has_gt_edge) return false;\r\n\r\n    std::vector<bool> potential_fixed(gt + 1);\r\n\r\n    T potential_add_unfixed_es = T();\r\n\r\n    auto fix_potential = [&](int e) -> void {\r\n        assert(!potential_fixed.at(e));\r\n        potential_fixed.at(e) = true;\r\n        potential.at(e) += potential_add_unfixed_es;\r\n    };\r\n\r\n    std::priority_queue<std::pair<T, int>, std::vector<std::pair<T, int>>, std::greater<>> pq;\r\n    std::vector<T> dijkstra(gt + 1);\r\n    std::vector<int> prv(gt + 1, -1);\r\n\r\n    pq.emplace(T(), gs);\r\n\r\n    while (!pq.empty()) {\r\n        const int e = pq.top().second;\r\n        pq.pop();\r\n        if (potential_fixed.at(e)) continue;\r\n        if (e != gs) potential_add_unfixed_es = edge_len(prv.at(e), e);\r\n\r\n        std::vector<std::pair<int, int>> push_cands;\r\n\r\n        auto rec = [&](auto &&self, int cur) -> bool {\r\n            if (cur == gt) return true;\r\n            fix_potential(cur);\r\n\r\n            for (int nxt : to.at(cur)) {\r\n                if (potential_fixed.at(nxt)) continue;\r\n\r\n                const T len = edge_len(cur, nxt) - potential_add_unfixed_es;\r\n                // if (len < T()) std::cerr << cur << ' ' << nxt << ' ' << len << std::endl;\r\n                assert(len >= T());\r\n\r\n                if (len == T()) {\r\n                    prv.at(nxt) = cur;\r\n                    if (self(self, nxt)) return true;\r\n                } else {\r\n                    if (prv.at(nxt) == -1 or potential_add_unfixed_es + len < dijkstra.at(nxt)) {\r\n                        dijkstra.at(nxt) = potential_add_unfixed_es + len;\r\n                        prv.at(nxt) = cur;\r\n                        push_cands.emplace_back(nxt, cur);\r\n                    }\r\n                }\r\n            }\r\n            return false;\r\n        };\r\n        if (rec(rec, e)) break;\r\n\r\n        for (auto [nxt, now] : push_cands) {\r\n            if (prv.at(nxt) == now) pq.emplace(dijkstra.at(nxt), nxt);\r\n        }\r\n    }\r\n\r\n    for (int e = 0; e < gt + 1; ++e) {\r\n        if (!potential_fixed.at(e)) fix_potential(e);\r\n    }\r\n\r\n    if (prv.at(gt) < 0) return false;\r\n\r\n    prv.assign(gt + 1, -1);\r\n    std::queue<int> q;\r\n    q.push(gs);\r\n\r\n    for (int now = q.front(); now != gt; now = q.front()) {\r\n        q.pop();\r\n        for (int nxt : to.at(now)) {\r\n            if (prv.at(nxt) == -1 and edge_len(now, nxt) == T()) {\r\n                prv.at(nxt) = now;\r\n                q.push(nxt);\r\n            }\r\n        }\r\n    }\r\n\r\n    for (int e = prv.at(gt); e != gs; e = prv.at(e)) {\r\n        potential.at(e) -= l(e);\r\n        I.at(e) = !I.at(e);\r\n    }\r\n\r\n    return true;\r\n}\r\n"
+}

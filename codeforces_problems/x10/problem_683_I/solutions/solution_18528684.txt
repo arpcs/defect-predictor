@@ -1,0 +1,35 @@
+{
+    "id": 18528684,
+    "contestId": 683,
+    "creationTimeSeconds": 1466100705,
+    "relativeTimeSeconds": 7905,
+    "problem": {
+        "contestId": 683,
+        "index": "I",
+        "name": "Loader",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "*special",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 683,
+        "members": [
+            {
+                "handle": "I_love_Hoang_Yen"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1466092800
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 50,
+    "timeConsumedMillis": 2277,
+    "memoryConsumedBytes": 146329600,
+    "source": "import java.util.*\r\n\r\nfun di(dir: Int): Int {\r\n    when (dir) {\r\n        0 -> return -1\r\n        1 -> return 1\r\n        2 -> return 0\r\n        3 -> return 0\r\n    }\r\n    return 0\r\n}\r\nfun dj(dir: Int): Int {\r\n    when (dir) {\r\n        0 -> return 0\r\n        1 -> return 0\r\n        2 -> return -1\r\n        3 -> return 1\r\n    }\r\n    return 0\r\n}\r\n\r\nfun dc(dir: Int): Char {\r\n    when (dir) {\r\n        0 -> return 'n'\r\n        1 -> return 's'\r\n        2 -> return 'w'\r\n        3 -> return 'e'\r\n    }\r\n    return ' '\r\n}\r\n\r\nclass State(var x: Int, var y: Int, var u: Int, var v: Int, var f: Int, var tr: Char): Comparable<State> {\r\n    override fun compareTo(other: State) = when {\r\n        f < other.f -> -1\r\n        f > other.f -> 1\r\n        else -> 0\r\n    }\r\n}\r\n\r\nvar a = Array(44, { i: Int -> \"\"})\r\nvar M = 0\r\nvar N = 0\r\nvar mark = Array(44, { Array(44, { Array(44, { IntArray(44) } )}) })\r\n\r\nvar tx = Array(44, { Array(44, { Array(44, { IntArray(44) } )}) })\r\nvar ty = Array(44, { Array(44, { Array(44, { IntArray(44) } )}) })\r\nvar tu = Array(44, { Array(44, { Array(44, { IntArray(44) } )}) })\r\nvar tv = Array(44, { Array(44, { Array(44, { IntArray(44) } )}) })\r\nvar td = Array(44, { Array(44, { Array(44, { CharArray(44) } )}) })\r\n\r\nfun outside(u: Int, v: Int): Boolean {\r\n    return u < 0 || v < 0 || u >= M || v >= N\r\n}\r\n\r\nfun go(cur: State, dir: Int): State {\r\n    val next = State(cur.x + di(dir), cur.y + dj(dir), cur.u, cur.v, cur.f + 1, dc(dir))\r\n    if (outside(next.x, next.y) || a[next.x][next.y] == 'X') {\r\n        next.f = -1\r\n        return next\r\n    }\r\n\r\n    if (next.u == next.x && next.v == next.y) {\r\n        next.tr = next.tr.toUpperCase()\r\n        next.u += di(dir)\r\n        next.v += dj(dir)\r\n\r\n        if (outside(next.u, next.v) || a[next.u][next.v] == 'X') next.f = -1\r\n        else next.f += 9999\r\n    }\r\n    return next\r\n}\r\n\r\nfun trace(cur: State) {\r\n    if (td[cur.x][cur.y][cur.u][cur.v] == ' ') {\r\n        return\r\n    }\r\n    var next = State(\r\n            tx[cur.x][cur.y][cur.u][cur.v],\r\n            ty[cur.x][cur.y][cur.u][cur.v],\r\n            tu[cur.x][cur.y][cur.u][cur.v],\r\n            tv[cur.x][cur.y][cur.u][cur.v],\r\n            0, ' ')\r\n    trace(next)\r\n    print(td[cur.x][cur.y][cur.u][cur.v])\r\n}\r\n\r\nfun main(args: Array<String>) {\r\n    val (m, n) = readLine()!!.split(' ').map(String::toInt)\r\n    M = m\r\n    N = n\r\n    for (i in 0..m-1) {\r\n        a[i] = readLine()!!\r\n    }\r\n\r\n    var yi = -1\r\n    var yj = -1\r\n    var bi = -1\r\n    var bj = -1\r\n    var targeti = -1\r\n    var targetj = -1\r\n\r\n    for (i in 0..m-1)\r\n        for (j in 0..n-1)\r\n            if (a[i][j] == 'Y') {\r\n                yi = i\r\n                yj = j\r\n            } else if (a[i][j] == 'B') {\r\n                bi = i\r\n                bj = j\r\n            } else if (a[i][j] == 'T') {\r\n                targeti = i\r\n                targetj = j\r\n            }\r\n\r\n    val start = State(yi, yj, bi, bj, 0, ' ')\r\n    var q = PriorityQueue<State>()\r\n    q.add(start)\r\n\r\n    for (x in 0..43)\r\n        for (y in 0..43)\r\n            for (i in 0..43)\r\n                for (j in 0..43) {\r\n                    mark[x][y][i][j] = 1000111000\r\n                    td[x][y][i][j] = ' '\r\n                }\r\n\r\n    mark[yi][yj][bi][bj] = 0\r\n\r\n    while (!q.isEmpty()) {\r\n        val cur = q.remove()\r\n        if (cur.u == targeti && cur.v == targetj) {\r\n            println(\"YES\")\r\n            trace(cur)\r\n            return\r\n        }\r\n        for (dir in 0..3) {\r\n            val next = go(cur, dir)\r\n            if (next.f >= 0 && next.f < mark[next.x][next.y][next.u][next.v]) {\r\n                mark[next.x][next.y][next.u][next.v] = next.f\r\n                tx[next.x][next.y][next.u][next.v] = cur.x\r\n                ty[next.x][next.y][next.u][next.v] = cur.y\r\n                tu[next.x][next.y][next.u][next.v] = cur.u\r\n                tv[next.x][next.y][next.u][next.v] = cur.v\r\n                td[next.x][next.y][next.u][next.v] = next.tr\r\n                q.add(next)\r\n            }\r\n        }\r\n    }\r\n    println(\"NO\")\r\n}\r\n"
+}

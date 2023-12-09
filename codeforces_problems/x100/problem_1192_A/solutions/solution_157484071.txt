@@ -1,0 +1,34 @@
+{
+    "id": 157484071,
+    "contestId": 1192,
+    "creationTimeSeconds": 1652795417,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "fhnal"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 185,
+    "timeConsumedMillis": 2854,
+    "memoryConsumedBytes": 102502400,
+    "points": 100.0,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nstruct point {\r\n    int x, y;\r\n\r\n    point(int x = 0, int y = 0): x(x), y(y) {}\r\n\r\n    point& operator += (const point &o) {\r\n        x += o.x; y += o.y; return *this;\r\n    }\r\n\r\n    point& operator -= (const point &o) {\r\n        x -= o.x; y -= o.y; return *this;\r\n    }\r\n\r\n    point operator + (const point &o) const {\r\n        return point(*this) += o;\r\n    }\r\n\r\n    point operator - (const point &o) const {\r\n        return point(*this) -= o;\r\n    }\r\n\r\n    bool operator < (const point &o) const {\r\n        return x < o.x || (x == o.x && y < o.y);\r\n    }\r\n};\r\n\r\npoint d[8] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1},\r\n{1, 1}, {-1, 1}, {-1, -1}, {1, -1}};\r\n\r\nconst int N = 150005;\r\n\r\npoint a[N]; int cnt;\r\nmap<point, int> idx, cmp;\r\nset<int> can;\r\n\r\nvoid dfs1(point u) {\r\n    if (!idx.count(u) || !cmp[u]) return;\r\n    cmp[u] = 0;\r\n    for (int k = 0; k < 8; k++)\r\n        dfs1(u + d[k]);\r\n}\r\n\r\nvoid dfs2(point u) {\r\n    if (cnt == 1 && idx.count(u))\r\n        can.insert(idx[u]);\r\n    if (!cmp.count(u) || !cmp[u] || cmp[u] == cnt) return;\r\n    cmp[u] = cnt;\r\n    for (int k = 0; k < 4; k++)\r\n        dfs2(u + d[k]);\r\n}\r\n\r\nbool check(point u) {\r\n    vector<int> lst;\r\n    for (int k = 0; k < 4; k++)\r\n        if (!cmp[u + d[k]] || !cmp[u + d[k + 4]]) {    \r\n            bool has = true;\r\n            for (int j = 0; j < 4; j++) {\r\n                k = (k + 1) % 4;\r\n                int tmp = cmp[u + d[k]];\r\n                if (has && tmp) {\r\n                    if (count(lst.begin(), lst.end(), tmp))\r\n                        return false;\r\n                    lst.push_back(tmp); has = false;\r\n                }\r\n                has |= !tmp || !cmp[u + d[k + 4]];    \r\n            }\r\n            break;\r\n        }\r\n    idx.erase(u); cmp[u] = -1; dfs2(u);\r\n\tfor (int i = 4; i < 8; i++){\r\n\t\tif (!cmp[u + d[i]]){\r\n\t\t\tfor (int j = 0; j < 4; j++) {\r\n\t\t\t\tif (cmp[u + d[i] + d[j]] == 1){\r\n\t\t\t\t\tcan.insert(idx[u + d[i]]); break;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n    return true;\r\n}\r\n\r\nint main() {\r\n    cin.tie(0)->sync_with_stdio(0);\r\n    int n, t; cin >> n >> t;\r\n    for (int i = 0; i < n; i++) {\r\n        cin >> a[i].x >> a[i].y;\r\n        idx[a[i]] = i;\r\n        cmp[a[i]] = -1;\r\n        for (int k = 0; k < 8; k++)\r\n            cmp[a[i] + d[k]] = -1;\r\n    }\r\n    dfs1(a[0]);\r\n    for (int i = 0; i < n; i++)\r\n        if (cmp[a[i]]) return cout << \"NO\\n\", 0;\r\n    for (auto p : cmp)\r\n        if (p.second < 0) {\r\n            ++cnt; dfs2(p.first);\r\n        }\r\n    cnt = 1; vector<int> ans;\r\n    while (can.size()) {\r\n        int i = *can.rbegin(); can.erase(i);\r\n        if (check(a[i])) ans.push_back(i + 1);\r\n    }\r\n    cout << \"YES\\n\";\r\n    for (int k = n - 1; k >= 0; k--)\r\n        cout << ans[k] << '\\n';\r\n}"
+}

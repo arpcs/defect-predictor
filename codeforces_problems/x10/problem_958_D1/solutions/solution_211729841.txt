@@ -1,0 +1,35 @@
+{
+    "id": 211729841,
+    "contestId": 958,
+    "creationTimeSeconds": 1688222233,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 958,
+        "index": "D1",
+        "name": "Hyperspace Jump (easy)",
+        "type": "PROGRAMMING",
+        "rating": 1400,
+        "tags": [
+            "expression parsing",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 958,
+        "members": [
+            {
+                "handle": "waterproofsodium"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1523689500
+    },
+    "programmingLanguage": "Rust 2021",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 16,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 14336000,
+    "source": "#![allow(non_snake_case)]\r\n#[allow(dead_code)] fn lock_stdout() -> std::io::BufWriter<Box<dyn std::io::Write>> { let stdout = std::io::stdout().lock(); std::io::BufWriter::new(Box::new(stdout)) }\r\n#[allow(dead_code)] fn get_file_buf(file: &str) -> std::io::BufWriter<Box<dyn std::io::Write>> {let fsin = std::fs::File::create(file).unwrap();std::io::BufWriter::new(Box::new(fsin))}\r\n#[allow(dead_code)] struct OutpWriter<T: std::io::Write> {wr: std::io::BufWriter<T>} #[allow(dead_code)] impl<T: std::io::Write> OutpWriter<T> {fn flush(&mut self) {std::io::Write::flush(&mut self.wr).expect(\"flush failed\")}fn log(&mut self, s: &str) {std::io::Write::write(&mut self.wr, s.as_bytes()).expect(\"error writing stdout\");std::io::Write::write(&mut self.wr, \"\\n\".as_bytes()).expect(\"error writing stdout\");}}\r\n#[allow(dead_code)] struct InpReader<T: std::io::Read> {lines: std::io::Lines<std::io::BufReader<T>>} impl<T: std::io::Read> InpReader<T> {#[allow(dead_code)] fn read2<K:std::str::FromStr+Copy>(&mut self)->[K;2] where K::Err:std::fmt::Debug{let v=self.read_vec();[v[0],v[1]]}#[allow(dead_code)] fn read3<K:std::str::FromStr+Copy>(&mut self)->[K;3] where K::Err:std::fmt::Debug{let v=self.read_vec();[v[0],v[1],v[2]]}#[allow(dead_code)] fn read4<K:std::str::FromStr+Copy>(&mut self)->[K;4] where K::Err:std::fmt::Debug{let v=self.read_vec();[v[0],v[1],v[2],v[3]]}#[allow(dead_code)] fn read_line(&mut self)->String {let line = self.lines.next(); let line=line.expect(\"no more lines\"); line.expect(\"failed to read line\")}#[allow(dead_code)] fn read<K : std::str::FromStr>(&mut self)->K where K::Err: std::fmt::Debug { self.read_line().trim().parse::<K>().expect(\"failed to read value\") }#[allow(dead_code)]fn read_vec<K : std::str::FromStr>(&mut self)->Vec<K> where K::Err: std::fmt::Debug { self.read_line().split_whitespace().map(|x| x.parse::<K>().expect(\"failed to read values\")).collect() }}pub enum IOConf<'a> {Stdio,Files(&'a str, &'a str)} #[allow(dead_code)] macro_rules! init {($inp_name: ident, $outp_name: ident, $io_conf: expr) => {let x:std::io::BufReader<Box<dyn std::io::Read>> = match $io_conf {IOConf::Stdio=>{std::io::BufReader::new(Box::new(std::io::stdin().lock()))},IOConf::Files(infile,_)=>{std::io::BufReader::new(Box::new(std::fs::File::open(infile).expect(\"input file not found\")))}};#[allow(unused_mut)]let mut $inp_name=InpReader {lines: std::io::BufRead::lines(x)};#[allow(unused_mut)]let mut $outp_name=OutpWriter{wr: match $io_conf {IOConf::Stdio=>lock_stdout(),IOConf::Files(_,outfile)=>get_file_buf(&outfile)}};}}\r\n#[allow(dead_code)] const MOD: u64 = u64::pow(10,9)+7;\r\n#[allow(dead_code)] static mut CTR:usize = 0;\r\n#[allow(dead_code)] fn it_to_string<T:ToString>(sl:impl Iterator<Item=T>, sep:Option<&str>) -> String {sl.map(|x|x.to_string()).collect::<Vec<_>>().join(sep.unwrap_or(\"\"))}\r\n\r\nfn main() {\r\n    init!(inp, _outp, IOConf::Stdio);\r\n\r\n    let psns = (0..inp.read::<usize>()).map(|i|{\r\n        let s = inp.read_line();\r\n        let mut it = s.chars();\r\n        let n0 = it.by_ref().skip(1).take_while(|ch|ch.is_digit(10)).collect::<String>().parse::<i32>().unwrap();\r\n        let n1 = it.by_ref().take_while(|ch|ch.is_digit(10)).collect::<String>().parse::<i32>().unwrap();\r\n        let n2 = it.by_ref().skip(1).take_while(|ch|ch.is_digit(10)).collect::<String>().parse::<i32>().unwrap();\r\n        let mut p = (n0+n1,n2);\r\n        loop {let gcd=gcd(p.0,p.1); if gcd==1{break} p.0/=gcd;p.1/=gcd}\r\n        p\r\n    }).collect::<Vec<_>>();\r\n    // println!(\"{:?}\", psns);\r\n    let mut idxs = (0..psns.len()).collect::<Vec<_>>(); idxs.sort_by_key(|&i|psns[i]);\r\n    let mut i=0; let mut j=0;\r\n    let mut cnts = vec![0;psns.len()];\r\n    // println!(\"{:?}\", idxs);\r\n    while i<idxs.len() {\r\n        while j<idxs.len()&&psns[idxs[i]]==psns[idxs[j]] {j+=1}\r\n        for k in i..j {cnts[idxs[k]]=j-i}\r\n        i=j;\r\n    }\r\n\r\n    println!(\"{}\", it_to_string(cnts.iter(), Some(\" \")));\r\n}\r\nfn gcd(a:i32,b:i32) -> i32 {\r\n    if b==0 {a}\r\n    else {gcd(b,a%b)}\r\n}\r\n"
+}

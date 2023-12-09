@@ -1,0 +1,35 @@
+{
+    "id": 222896033,
+    "contestId": 1677,
+    "creationTimeSeconds": 1694435311,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1677,
+        "index": "E",
+        "name": "Tokitsukaze and Beautiful Subsegments",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1677,
+        "members": [
+            {
+                "handle": "hhoppitree"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1652020500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 70,
+    "timeConsumedMillis": 2355,
+    "memoryConsumedBytes": 134451200,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nconst int N = 2e5 + 5, Q = 1e6 + 5;\r\n\r\nint p[N], q[N], L[N], R[N];\r\nvector< pair< pair<int, int>, int> > md[N];\r\nlong long res[Q];\r\nvector< pair< pair<int, int>, int> > qr[N];\r\n\r\nstruct op\r\n{\r\n    long long s[1 << 19], lazy[1 << 19];\r\n\r\n    void build(int k, int l, int r)\r\n    {\r\n        lazy[k] = 0;\r\n        if (l == r) {\r\n            s[k] = 0;\r\n            return;\r\n        }\r\n        int mid = (l + r) >> 1;\r\n        build(k << 1, l, mid);\r\n        build(k << 1 | 1, mid + 1, r);\r\n        s[k] = s[k << 1] + s[k << 1 | 1];\r\n        return;\r\n    }\r\n\r\n    void pushdown(int k, int l, int r)\r\n    {\r\n        if (!lazy[k]) {\r\n            return;\r\n        }\r\n        int mid = (l + r) >> 1;\r\n        s[k << 1] += (mid - l + 1) * lazy[k];\r\n        lazy[k << 1] += lazy[k];\r\n        s[k << 1 | 1] += (r - mid) * lazy[k];\r\n        lazy[k << 1 | 1] += lazy[k];\r\n        lazy[k] = 0;\r\n        return;\r\n    }\r\n\r\n    void modify(int k, int l, int r, int x, int y, int v)\r\n    {\r\n        if (l > y || r < x) {\r\n            return;\r\n        }\r\n        if (l >= x && r <= y) {\r\n            s[k] += 1ll * (r - l + 1) * v;\r\n            lazy[k] += v;\r\n            return;\r\n        }\r\n        pushdown(k, l, r);\r\n        int mid = (l + r) >> 1;\r\n        modify(k << 1, l, mid, x, y, v);\r\n        modify(k << 1 | 1, mid + 1, r, x, y, v);\r\n        s[k] = s[k << 1] + s[k << 1 | 1];\r\n        return;\r\n    }\r\n\r\n    long long query(int k, int l, int r, int x, int y)\r\n    {\r\n        if (l > y || r < x) {\r\n            return 0ll;\r\n        }\r\n        if (l >= x && r <= y) {\r\n            return s[k];\r\n        }\r\n        pushdown(k, l, r);\r\n        int mid = (l + r) >> 1;\r\n        return query(k << 1, l, mid, x, y) +\r\n               query(k << 1 | 1, mid + 1, r, x, y);\r\n    }\r\n} s1, s2;\r\n\r\nvector< pair< pair<int, int>, pair<int, int> > > z[N];\r\n\r\nsigned main()\r\n{\r\n    int n, qz;\r\n    scanf(\"%d%d\", &n, &qz);\r\n    for (int i = 1; i <= n; ++i) {\r\n        scanf(\"%d\", &p[i]);\r\n        q[p[i]] = i;\r\n    }\r\n    p[0] = p[n + 1] = n + 1;\r\n    stack<int> S;\r\n    S.push(0);\r\n    for (int i = 1; i <= n; ++i) {\r\n        while (!S.empty() && p[i] > p[S.top()]) {\r\n            S.pop();\r\n        }\r\n        L[i] = S.top();\r\n        S.push(i);\r\n    }\r\n    while (!S.empty()) {\r\n        S.pop();\r\n    }\r\n    S.push(n + 1);\r\n    for (int i = n; i >= 1; --i) {\r\n        while (!S.empty() && p[i] > p[S.top()]) {\r\n            S.pop();\r\n        }\r\n        R[i] = S.top();\r\n        S.push(i);\r\n    }\r\n    for (int i = 1; i * (i + 1) <= n; ++i) {\r\n        for (int j = i + 1; i * j <= n; ++j) {\r\n            if (q[i] > L[q[i * j]] && q[i] < R[q[i * j]] && q[j] > L[q[i * j]] && q[j] < R[q[i * j]]) {\r\n                z[q[i * j]].push_back(make_pair(make_pair(L[q[i * j]] + 1, min(min(q[i], q[j]), q[i * j])),\r\n                                                make_pair(max(max(q[i], q[j]), q[i * j]), R[q[i * j]] - 1)));\r\n            }\r\n        }\r\n    }\r\n    for (int i = 1; i <= n; ++i) {\r\n        if (z[i].empty()) {\r\n            continue;\r\n        }\r\n        vector< pair<int, int> > r;\r\n        for (int j = 0; j < z[i].size(); ++j) {\r\n            r.push_back(make_pair(z[i][j].first.second, z[i][j].second.first));\r\n        }\r\n        sort(r.begin(), r.end());\r\n        reverse(r.begin(), r.end());\r\n        int _p = z[i][0].first.first, _q = z[i][0].second.second;\r\n        int mn = _q + 1;\r\n        for (int j = 0; j < r.size(); ++j) {\r\n            if (r[j].second < mn) {\r\n                int a = _p, b = r[j].first, c = r[j].second, d = mn - 1;\r\n                mn = r[j].second;\r\n                md[c].push_back(make_pair(make_pair(a, b), 1));\r\n                md[d + 1].push_back(make_pair(make_pair(a, b), -1));\r\n            }\r\n        }\r\n    }\r\n    for (int i = 1; i <= qz; ++i) {\r\n        int l, r;\r\n        scanf(\"%d%d\", &l, &r);\r\n        qr[r].push_back(make_pair(make_pair(l, r), i));\r\n    }\r\n    for (int i = 1; i <= n; ++i) {\r\n        for (int j = 0; j < md[i].size(); ++j) {\r\n            s1.modify(1, 1, n, md[i][j].first.first, md[i][j].first.second, md[i][j].second);\r\n            s2.modify(1, 1, n, md[i][j].first.first, md[i][j].first.second, -(i - 1) * md[i][j].second);\r\n        }\r\n        for (int j = 0; j < qr[i].size(); ++j) {\r\n            int l = qr[i][j].first.first, r = qr[i][j].first.second;\r\n            res[qr[i][j].second] = s1.query(1, 1, n, l, r) * i + s2.query(1, 1, n, l, r);\r\n        }\r\n    }\r\n    for (int i = 1; i <= qz; ++i) {\r\n        printf(\"%lld\\n\", res[i]);\r\n    }\r\n    return 0;\r\n}"
+}

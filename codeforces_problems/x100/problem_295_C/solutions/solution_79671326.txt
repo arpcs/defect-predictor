@@ -1,0 +1,38 @@
+{
+    "id": 79671326,
+    "contestId": 295,
+    "creationTimeSeconds": 1589127178,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "vjudge2"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 4300800,
+    "source": "// God put a smile upon your face <3\n \n#include <bits/stdc++.h>`\n \n#define slld(longvalue) scanf(\"%lld\", &longvalue)\n \n#define ll long long\n#define ull unsigned long long\n#define pll pair < long long, long long >\n \n#define fastio ios_base:: sync_with_stdio(false); cin.tie(0); cout.tie(0)\n \n#define pb(x) push_back(x)\n \n#define bug printf(\"BUG\\n\")\n \n#define mxlld LLONG_MAX\n#define mnlld -LLONG_MAX\n \n#define mxd 2e8\n#define mnd -2e8\n \n#define pi 3.14159265359\n \n#define mod 1000000007\n \n#define base 2001487\n \nusing namespace std;\n \nbool check(ll n, ll pos)\n{\n\treturn n & (1LL << pos);\n}\n \nll Set(ll n, ll pos)\n{\n\treturn n = n | (1LL << pos);\n}\n \nll dist[100][100][2];\nll nr[100][100];\nll comb[100][100][2];\n \nll ncr(ll n, ll r)\n{\n\tif(r > n) return 0;\n\tif(r == 0) return 1;\n\tif(r == n) return 1;\n \n\tif(nr[n][r] != -1) return nr[n][r];\n \n\treturn nr[n][r] = (ncr(n-1,r) + ncr(n - 1, r - 1)) % mod;\n}\n \nll n, k, small, big;\n \nstruct node\n{\n\tll small, big, state, val;\n \n\tnode(ll a, ll b, ll c, ll d)\n\t{\n\t\tsmall = a;\n\t\tbig = b;\n\t\tstate = c;\n\t\tval = d;\n\t}\n};\n \nconst bool operator < (const node &a, const node &b)\n{\n\treturn a.val < b.val;\n}\n \nll calc(ll x, ll y, ll z)\n{\n//\tcout << x << \" \" << y << \" \" << z << endl;\n\treturn (x * ((y * z) % mod)) % mod;\n}\n \npll solve()\n{\n\tqueue < node > st;\n \n\tst.push(node(small,big,0,0));\n \n\tcomb[small][big][0] = 1;\n\tdist[small][big][0] = 0;\n \n\twhile(!st.empty())\n\t{\n//\t\tset < node > :: iterator it = st.begin();\n \n\t\tnode top = st.front();\n\t\tst.pop();\n \n//\t\tcout << top.small << \" \" << top.big << \" \" << \" \" << top.state << \" \" << top.val << endl;\n \n\t\tfor(ll i = 0; i <= top.small; i++)\n\t\t{\n\t\t\tfor(ll j = 0; j <= top.big; j++)\n\t\t\t{\n\t\t\t\tif(i + j == 0) continue;\n \n\t\t\t\tif(i * 50 + j * 100 > k) continue;\n \n\t\t\t\tnode nd = node(0,0,0,0);\n \n\t\t\t\tnd.state = top.state ^ 1;\n\t\t\t\tnd.small = small - (top.small - i);\n\t\t\t\tnd.big = big - (top.big - j);\n\t\t\t\tnd.val = top.val + 1;\n \n//\t\t\t\tcout << nd.small << \" ~~ \" << nd.big << \" \" <<  dist[nd.small][nd.big][nd.state] <<endl;\n \n\t\t\t\tif(dist[nd.small][nd.big][nd.state] > top.val + 1)\n\t\t\t\t{\n//\t\t\t\t\tbug;\n//\t\t\t\t\tst.erase(node(nd.small,nd.big,nd.state,dist[nd.small][nd.big][nd.state]));\n \n\t\t\t\t\tdist[nd.small][nd.big][nd.state] = top.val + 1;\n \n\t\t\t\t\tcomb[nd.small][nd.big][nd.state] = calc(comb[top.small][top.big][top.state],ncr(top.small,i),ncr(top.big,j));\n \n//\t\t\t\t\tbug;\n \n//\t\t\t\t\tcout << nd.small << \" @@ \" << nd.big << \" @@ \" <<  dist[nd.small][nd.big][nd.state] <<endl;\n\t\t\t\t\tst.push(nd);\n\t\t\t\t}\n\t\t\t\telse if(dist[nd.small][nd.big][nd.state] == top.val + 1)\n\t\t\t\t{\n\t\t\t\t\tcomb[nd.small][nd.big][nd.state] += calc(comb[top.small][top.big][top.state],ncr(top.small,i),ncr(top.big,j));\n\t\t\t\t\tcomb[nd.small][nd.big][nd.state] %= mod;\n\t\t\t\t}\n \n//\t\t\t\tcout << \"!! \" << st.size() << endl;\n \n\t\t\t}\n\t\t}\n\t}\n \n\tif(dist[small][big][1] == mxlld) return {-1,0};\n \n\treturn {dist[small][big][1], comb[small][big][1]};\n}\n \n \nint main()\n{\n    ll i, j, o, r, q;\n    ll testcase;\n    ll input, flag, tag;\n \n//    freopen(\"input.txt\", \"r\", stdin);\n \n//    freopen(\"output.txt\", \"w\", stdout);\n \n\tmemset(nr,-1,sizeof nr);\n    while(cin >> n >> k)\n    {\n\t\tsmall = 0;\n\t\tbig = 0;\n \n\t\tfor(i = 0; i <= n; i++) for(j = 0; j <= n; j++) for(r = 0; r <= 1; r++) dist[i][j][r] = mxlld, comb[i][j][r] = 0;\n \n\t\tfor(i = 1; i <= n; i++)\n\t\t{\n\t\t\tslld(input);\n \n\t\t\tif(input == 50) small++;\n\t\t\telse big++;\n\t\t}\n \n\t\tpll ans = solve();\n \n\t\tprintf(\"%lld\\n%lld\\n\", ans.first,ans.second);\n    }\n \n \n}\n \n\t \t\t  \t\t\t   \t\t\t\t\t \t\t\t    \t  \t"
+}

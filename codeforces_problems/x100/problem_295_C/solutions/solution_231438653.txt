@@ -1,0 +1,38 @@
+{
+    "id": 231438653,
+    "contestId": 295,
+    "creationTimeSeconds": 1699175475,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "Hamed_Ghaffari"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 60,
+    "memoryConsumedBytes": 4505600,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef long long       ll;\r\ntypedef pair<int, int>  pii;\r\n\r\n#define FastIO          cin.tie(NULL); cout.tie(NULL); ios_base::sync_with_stdio(false);\r\n#define FileIO          freopen(\"input.txt\", \"r\", stdin); freopen(\"output.txt\", \"w\", stdout);\r\n#define F               first\r\n#define S               second\r\n#define max_heap(T)     priority_queue<T>\r\n#define min_heap(T)     priority_queue<T, vector<T>, greater<T>>\r\n#define fr(i,a,b)       for(int i=a;i<b;i++)\r\n#define frr(i,a,b)      for(int i=a;i>b;i--)\r\n#define frin(i,A)       for(auto &i : A)\r\n#define sz(x)           (int)x.size()\r\n#define all(A)          A.begin(), A.end()\r\n#define mins(a,b)       a = min(a,b)\r\n#define maxs(a,b)       a = max(a,b)\r\n#define pb              push_back\r\n#define popcnt          __builtin_popcount\r\n#define setprec(x)      cout << fixed << setprecision(x)\r\n#define kill(x)         cout << x << '\\n', exit(0)\r\n#define killt(x)        cout << x << '\\n', return\r\n#define md(a)           (a%MOD+MOD)%MOD\r\n\r\nconst ll  INF  = 2e9;\r\nconst ll  MOD  = 1e9 + 7;\r\nconst int MAXN = 53;\r\nconst int LOG  = 30;\r\n\r\nint ADD(int a, int b) { return md(a+b); } \r\nint MUL(int a, int b) { return md(1ll*a*b); }\r\nint POW(int a, int b) {\r\n    int res = 1;\r\n    while(b>0) {\r\n        if(b&1) res = MUL(res, a);\r\n        a = MUL(a, a);\r\n        b >>= 1;\r\n    }\r\n    return res;\r\n}\r\nint DIV(int a, int b) { return MUL(a, POW(b, MOD-2)); }\r\nint fac[MAXN], inv[MAXN];\r\nvoid preproc() {\r\n    fac[0] = 1;\r\n    fr(i, 1, MAXN) fac[i] = MUL(fac[i-1], i);\r\n    inv[MAXN-1] = DIV(1, fac[MAXN-1]);\r\n    frr(i, MAXN-2, -1)\r\n        inv[i] = MUL(inv[i+1], i+1);\r\n}\r\nint C(int n, int r) {\r\n    if(r < 0 || r > n) return 0;\r\n    return MUL(fac[n], MUL(inv[r], inv[n-r]));\r\n}\r\n\r\n#define T third\r\nstruct state { int first, second; bool third; };\r\nint n, k, c1, c2, dis[MAXN][MAXN][2], dp[MAXN][MAXN][2];\r\nvector<state> dag[MAXN][MAXN][2], rdag[MAXN][MAXN][2];\r\nbool good[MAXN][MAXN][2], vis[MAXN][MAXN][2];\r\n\r\nvector<state> adj(state st) {\r\n    vector<state> res;\r\n    if(st.T == 0) {\r\n        fr(j, 0, st.S+1)\r\n            if(2*j > k)\r\n                break;\r\n            else\r\n                fr(i, 0, st.F+1)\r\n                    if(i+2*j > k)\r\n                        break;\r\n                    else if(i+j > 0)\r\n                        res.pb({st.F-i, st.S-j, 1});\r\n    }\r\n    else if(st.T == 1) {\r\n        fr(j, 0, c2-st.S+1)\r\n            if(2*j > k)\r\n                break;\r\n            else\r\n                fr(i, 0, c1-st.F+1)\r\n                    if(i+2*j > k)\r\n                        break;\r\n                    else if(i+j > 0)\r\n                        res.pb({st.F+i, st.S+j, 0});\r\n    }\r\n    return res;\r\n}\r\n\r\nvoid bfs(state st) {\r\n    fr(i, 0, MAXN)\r\n        fr(j, 0, MAXN)\r\n            fr(b, 0, 2)\r\n                dis[i][j][b] = INF;\r\n    dis[st.F][st.S][st.T] = 0;\r\n    queue<state> q; q.push(st);\r\n    while(sz(q)>0) {\r\n        state v = q.front(); q.pop();\r\n        vector<state> g = adj(v);\r\n        frin(u, g)\r\n            if(dis[u.F][u.S][u.T] == INF) {\r\n                dis[u.F][u.S][u.T] = dis[v.F][v.S][v.T]+1;\r\n                q.push(u);\r\n                dag[v.F][v.S][v.T].pb(u);\r\n                rdag[u.F][u.S][u.T].pb(v);\r\n            }\r\n            else if(dis[u.F][u.S][u.T] == dis[v.F][v.S][v.T]+1) {\r\n                dag[v.F][v.S][v.T].pb(u);\r\n                rdag[u.F][u.S][u.T].pb(v);\r\n            }\r\n    }\r\n}\r\n\r\nvoid findGood(state v) {\r\n    good[v.F][v.S][v.T] = 1;\r\n    frin(u, rdag[v.F][v.S][v.T])\r\n        if(!good[u.F][u.S][u.T])\r\n            findGood(u);\r\n}\r\n\r\nint calc(state s1, state s2) {\r\n    if(s1.T == 0) return MUL(C(s1.F, s1.F-s2.F), C(s1.S, s1.S-s2.S));\r\n    else return MUL(C(c1-s1.F, s2.F-s1.F), C(c2-s1.S, s2.S-s1.S));\r\n}\r\n\r\nvoid dfs(state v) {\r\n    vis[v.F][v.S][v.T] = 1;\r\n    frin(u, dag[v.F][v.S][v.T])\r\n        if(!vis[u.F][u.S][u.T]) {\r\n            dfs(u);\r\n            dp[v.F][v.S][v.T] = ADD(dp[v.F][v.S][v.T], MUL(dp[u.F][u.S][u.T], calc(v, u)));\r\n        }\r\n        else\r\n            dp[v.F][v.S][v.T] = ADD(dp[v.F][v.S][v.T], MUL(dp[u.F][u.S][u.T], calc(v, u)));\r\n}\r\n\r\nvoid solve() {\r\n    cin >> n >> k; k /= 50;\r\n    int x;\r\n    fr(i, 1, n+1) {\r\n        cin >> x;\r\n        x /= 50;\r\n        if(x == 1) c1++;\r\n        else c2++;\r\n    }\r\n    bfs({c1, c2, 0});\r\n    findGood({0, 0, 1});\r\n    if(!good[c1][c2][0])\r\n        kill(\"-1\\n0\");\r\n    cout << dis[0][0][1] << '\\n';\r\n    dp[0][0][1] = 1;\r\n    vis[0][0][1] = 1;\r\n    dfs({c1, c2, 0});\r\n    cout << dp[c1][c2][0] << '\\n';\r\n}\r\n\r\nint32_t main() {\r\n    FastIO\r\n    preproc();\r\n    int T = 1;\r\n    // cin >> T;\r\n    while(T--)\r\n        solve();\r\n    return 0;\r\n}"
+}

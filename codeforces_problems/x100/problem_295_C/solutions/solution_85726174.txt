@@ -1,0 +1,38 @@
+{
+    "id": 85726174,
+    "contestId": 295,
+    "creationTimeSeconds": 1593652071,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "gerard.onats"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 102400,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n \r\n#define fi first\r\n#define se second\r\n#define pb push_back\r\n#define all(x) x.begin(), x.end()\r\n#define mp make_pair\r\n \r\ntypedef long long ll;\r\ntypedef unsigned long long int ull;\r\ntypedef long double ld;\r\n \r\ntypedef pair<int, int> pii;\r\ntypedef pair<int, pii> piii;\r\n \r\ntypedef vector<ll> vll;\r\ntypedef vector<pii> vpii;\r\ntypedef vector<int> vi;\r\ntypedef vector<vi> vvi;\r\ntypedef vector<pair<int, pii>> vpiii;\r\n \r\ntypedef map<string, int> msi;\r\ntypedef map<int, int> mii;\r\ntypedef map<int, ll> mill;\r\ntypedef map<int, vi> mivi;\r\ntypedef map<int, vpii> mivpii;\r\n\r\nconst int MAXN = 50;\r\nconst int MOD = 1e9 + 7;\r\nconst int INF = 0x3F3F3F3F;\r\nconst int SMALL = 50;\r\nconst int BIG = 100;\r\n\r\nstruct State {\r\n\tint l, r, R;\r\n\tState(int l, int r, int R) : l(l), r(r), R(R) {};\r\n};\r\n\r\nint dist[MAXN + 1][MAXN + 1][2];\r\nint dp[MAXN + 1][MAXN + 1][2];\r\nint nCr[MAXN + 1][MAXN + 1];\r\n\r\nvoid fast_io() {\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(NULL);\r\n}\r\n\r\nvoid add(int &a, int b) {\r\n\ta += b;\r\n\tif(a >= MOD) a -= MOD;\r\n}\r\n\r\nint mult(int a, int b) {\r\n\treturn (1LL * a * b) % MOD;\r\n}\r\n\r\nvoid prepare() {\r\n\tfor(int i = 0; i <= MAXN; i++) {\r\n\t\tnCr[i][0] = 1;\r\n\t}\r\n\tfor(int i = 1; i <= MAXN; i++) {\r\n\t\tfor(int j = 1; j <= MAXN; j++) {\r\n\t\t\tnCr[i][j] = nCr[i - 1][j];\r\n\t\t\tadd(nCr[i][j], nCr[i - 1][j - 1]);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nvoid BFS(int l, int r, int k) {\r\n\tmemset(dist, INF, sizeof(dist));\r\n\r\n\tqueue<State> q;\r\n\tq.push(State(l, r, 0));\r\n\r\n\tdist[l][r][0] = 0;\r\n\tdp[l][r][0] = 1;\r\n\r\n\twhile(!q.empty()) {\r\n\t\tState top = q.front();\r\n\t\tq.pop(); \r\n\r\n\t\tfor(int i = 0; i <= top.l; i++) {\r\n\t\t\tif(SMALL * i > k) break;\r\n\r\n\t\t\tfor(int j = 0; j <= top.r; j++) {\r\n\t\t\t\tif(!i and !j) continue;\r\n\t\t\t\tif(SMALL * i + BIG * j > k) continue;\r\n\t\t\t\t\r\n\t\t\t\tint nl = l - top.l + i, nr = r - top.r + j; \r\n\t\t\t\tint nR = !top.R, ways = mult(nCr[top.l][i], nCr[top.r][j]);\r\n\t\t\t\t\r\n\t\t\t\tif(dist[nl][nr][nR] == INF) {\r\n\t\t\t\t\tdist[nl][nr][nR] = 1 + dist[top.l][top.r][top.R];\r\n\t\t\t\t\tadd(dp[nl][nr][nR], mult(dp[top.l][top.r][top.R], ways));\r\n\t\t\t\t\tq.push(State(nl, nr, nR));\r\n\t\t\t\t}\r\n\t\t\t\telse if(dist[nl][nr][nR] == 1 + dist[top.l][top.r][top.R]) {\r\n\t\t\t\t\tadd(dp[nl][nr][nR], mult(dp[top.l][top.r][top.R], ways));\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\n\r\nint main() {\r\n\tfast_io();\r\n//\tfreopen(\"input/295C.txt\", \"r\", stdin);\r\n\t\r\n\tint n, k, w;\r\n\tint l = 0, r = 0;\r\n\t\r\n\tprepare();\r\n\r\n\tcin >> n >> k;\r\n\tfor(int i = 1; i <= n; i++) {\r\n\t\tcin >> w;\r\n\t\tif(w == 50) l++;\r\n\t\telse r++;\r\n\t}\r\n\r\n\tBFS(l, r, k);\r\n\t\r\n\tcout << (dist[l][r][1] != INF ? dist[l][r][1] : -1) << '\\n';\r\n\tcout << dp[l][r][1] << '\\n';\r\n\t\r\n\treturn 0;\r\n}"
+}

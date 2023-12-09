@@ -1,0 +1,35 @@
+{
+    "id": 161046517,
+    "contestId": 54,
+    "creationTimeSeconds": 1655562771,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 54,
+        "index": "E",
+        "name": "Vacuum \u0421leaner",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2700,
+        "tags": [
+            "geometry"
+        ]
+    },
+    "author": {
+        "contestId": 54,
+        "members": [
+            {
+                "handle": "Zabumafu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1294733700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <algorithm>\r\n#include <iostream>\r\n#include <iomanip>\r\n#include <cmath>\r\n#include <utility>\r\n#include <vector>\r\n#define INF 1e18\r\n\r\nint n;\r\nstd::vector<long double> pre, area;\r\nlong double ans = __DBL_MAX__;\r\n\r\n////////////////////////////////////////////////////////////\r\n\r\nstruct point2d {\r\n    long double x, y;\r\n    point2d() {}\r\n    point2d(long double x, long double y): x(x), y(y) {}\r\n    point2d& operator+=(const point2d &t) {\r\n        x += t.x;\r\n        y += t.y;\r\n        return *this;\r\n    }\r\n    point2d& operator-=(const point2d &t) {\r\n        x -= t.x;\r\n        y -= t.y;\r\n        return *this;\r\n    }\r\n\r\n    point2d operator+(const point2d &t) const {\r\n        return point2d(*this) += t;\r\n    }\r\n    point2d operator-(const point2d &t) const {\r\n        return point2d(*this) -= t;\r\n    }\r\n};\r\n\r\nlong double len(const point2d &a) {\r\n    return sqrt(a.x * a.x + a.y * a.y);\r\n}\r\n\r\nlong double dot(const point2d &a, const point2d &b) {\r\n    return a.x * b.x + a.y * b.y;\r\n}\r\n\r\nlong double cross(const point2d &a, const point2d &b) {\r\n    return a.x * b.y - b.x * a.y;\r\n}\r\n\r\nlong double angle(const point2d &a, const point2d &b) {\r\n    return (long double) acos(dot(a, b) / len(a) / len(b));\r\n}\r\n\r\nlong double area_sum(int l, int r, int n) {\r\n    return r >= l ? pre[r] - pre[l] : pre[r] + pre[n - 1] - pre[l];\r\n}\r\n\r\nlong double triangle_area(point2d &a, point2d &b, point2d &c) {\r\n    long double aci = angle(b - a, c - b);\r\n    long double x = len(c - b);\r\n    // std::cout << fabs(x * x * sin(aci) * cos(aci) / 2) << \"+++\\n\";\r\n    return fabs(x * x * sin(aci) * cos(aci) / 2); \r\n}\r\n\r\nbool dar(long double x) {\r\n    return (x < M_PI / 2.0 + 1e-7);\r\n}\r\n\r\n////////////////////////////////////////////////////////////\r\n\r\nstd::vector<point2d> point;\r\npoint2d center(0, 0);\r\n\r\nint main() {\r\n\r\n    std::ios_base::sync_with_stdio(false);\r\n    std::cin.tie(NULL);\r\n\r\n    std::cin >> n;\r\n\r\n    point.resize(n);\r\n    pre.resize(n);\r\n    area.resize(n);\r\n\r\n    for(int i = 0;n > i;i++){\r\n        std::cin >> point[i].x >> point[i].y;\r\n        center.x += point[i].x;\r\n        center.y += point[i].y;\r\n    }\r\n\r\n    center.x /= n;\r\n    center.y /= n;\r\n\r\n    for(int i = 0;n > i;i++) {\r\n        area[i] = fabs(cross(point[i] - center, point[(i + 1) % n] - center)) / 2;\r\n        if(i == 0) {\r\n            pre[i] = area[i];\r\n        } else {\r\n            pre[i] = pre[i - 1] + area[i];\r\n        }\r\n    }\r\n\r\n    int j = 1;\r\n    for(int i = 0;n > i;i++) {\r\n        while(dar(angle(point[(i + 1) % n] - point[i], point[(j + 1) % n] - point[j]))) {\r\n            j++;\r\n            j += n;\r\n            j %= n;\r\n        }\r\n\r\n        if((i + 1) % n == j) {\r\n            std::cout << 0;\r\n            return 0;\r\n        }\r\n\r\n        long double polygon_area = fabs(area_sum(i, (j - 1 + n) % n, n) - fabs(cross(point[(i + 1) % n] - center, point[j] - center)) / 2);\r\n        ans = std::min(ans, triangle_area(point[i], point[(i + 1) % n], point[j]) - polygon_area);\r\n        // std::cout << i << \" \" << ans << \"\\n\"\r\n    }\r\n\r\n    std::reverse(point.begin(), point.end());\r\n    \r\n    for(int i = 0;n > i;i++) {\r\n        area[i] = fabs(cross(point[i] - center, point[(i + 1) % n] - center)) / 2;\r\n        if(i == 0) {\r\n            pre[i] = area[i];\r\n        } else {\r\n            pre[i] = pre[i - 1] + area[i];\r\n        }\r\n    }\r\n\r\n    j = 1;\r\n    for(int i = 0;n > i;i++) {\r\n        while(dar(angle(point[(i + 1) % n] - point[i], point[(j + 1) % n] - point[j]))) {\r\n            j++;\r\n            j += n;\r\n            j %= n;\r\n        }\r\n\r\n        if((i + 1) % n == j) {\r\n            std::cout << 0;\r\n            return 0;\r\n        }\r\n\r\n        long double polygon_area = fabs(area_sum(i, (j - 1 + n) % n, n) - fabs(cross(point[(i + 1) % n] - center, point[j] - center)) / 2);\r\n        ans = std::min(ans, triangle_area(point[i], point[(i + 1) % n], point[j]) - polygon_area);\r\n        // std::cout << i << \" \" << ans << \"\\n\"\r\n    }\r\n\r\n    if(ans < 1e-7) {\r\n        ans = 0;\r\n    }\r\n\r\n    std::cout << std::setprecision(9) << ans;\r\n\r\n}"
+}

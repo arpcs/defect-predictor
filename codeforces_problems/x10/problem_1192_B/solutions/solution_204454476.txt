@@ -1,0 +1,38 @@
+{
+    "id": 204454476,
+    "contestId": 1192,
+    "creationTimeSeconds": 1683204453,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "B",
+        "name": "Dynamic Diameter",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "Jadebo1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 102,
+    "timeConsumedMillis": 311,
+    "memoryConsumedBytes": 69017600,
+    "points": 100.0,
+    "source": "// LUOGU_RID: 109580839\n#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\nusing i64 = long long;\r\nconst int mod = 998244353;\r\nconst int N = 1e6 + 10;\r\n#define endl '\\n'\r\nstruct Seg\r\n{\r\n#define ls (u << 1)\r\n#define rs (ls | 1)\r\n#define mid ((l + r) >> 1)\r\n#define mx(u) tr[u].mx\r\n#define mn(u) tr[u].mn\r\n#define lmx(u) tr[u].lmx\r\n#define rmx(u) tr[u].rmx\r\n#define tag(u) tr[u].tag\r\n    struct info\r\n    {\r\n        i64 mx, mn, lmx, rmx, dia, tag;\r\n        info() { mx = mn =  lmx = rmx = tag = 0; }\r\n        info operator+(const info& a) const{\r\n            info now;\r\n            now.mx = max(mx, a.mx);\r\n            now.mn = min(mn, a.mn);\r\n            now.lmx = max({lmx, a.lmx, mx - 2 * a.mn});\r\n            now.rmx = max({rmx, a.rmx, a.mx - 2 * mn});\r\n            now.dia = max({dia, a.dia, mx + a.rmx, lmx + a.mx});\r\n            return now;\r\n        }\r\n    };\r\n    vector<info> tr;\r\n    Seg(int n) : tr((n << 2) + 10) {}\r\n    void pushup(int u) { tr[u] = tr[ls] + tr[rs]; }\r\n    void make_tag(int u, i64 val)\r\n    {\r\n        mx(u) += val, mn(u) += val;\r\n        lmx(u) -= val, rmx(u) -= val;\r\n        tag(u) += val;\r\n    }\r\n    void build(int u, int l, int r, vector<i64>& E, vector<i64>& dep)\r\n    {\r\n        if(l == r) {\r\n            make_tag(u, dep[E[l]]);\r\n            return;\r\n        }\r\n        build(ls, l, mid, E, dep), build(rs, mid + 1, r, E, dep);\r\n        pushup(u);\r\n    }\r\n    void pushdown(int u)\r\n    {\r\n        if(!tag(u)) return;\r\n        make_tag(ls, tag(u)), make_tag(rs, tag(u));\r\n        tag(u) = 0;\r\n    }\r\n    void add(int u, int l, int r, int L, int R, i64 x)\r\n    {\r\n        if(l > R || r < L) return;\r\n        if(l >= L && r <= R) {\r\n            make_tag(u, x);\r\n            return;\r\n        }\r\n        pushdown(u);\r\n        add(ls, l, mid, L, R, x), add(rs, mid + 1, r, L, R, x);\r\n        pushup(u);\r\n    }\r\n};\r\n\r\n\r\n\r\nvoid solve()\r\n{\r\n    i64 n, q, w;\r\n    cin >> n >> q >> w;\r\n    vector<vector<tuple<int, i64, int>>> e(n + 1);\r\n    vector<i64> val(n);\r\n    for(int i = 1; i < n; i++) {\r\n        i64 u, v, x;\r\n        cin >> u >> v >> x;\r\n        e[u].push_back({v, x, i});\r\n        e[v].push_back({u, x, i});\r\n        val[i] = x;\r\n    }\r\n    vector<i64> E((n << 1) + 10), dep(n + 1), L(n + 1), R(n + 1), tid(n + 1);\r\n    int tot = 0;\r\n    function<void(int, int, i64)> dfs = [&](int now, int fa, i64 val) {\r\n        E[++tot] = now;\r\n        L[now] = tot;\r\n        dep[now] = dep[fa] + val;\r\n        for(auto [v, x, z] : e[now]) {\r\n            if(v == fa) continue;\r\n            dfs(v, now, x);\r\n            tid[z] = v;\r\n            E[++tot] = now;\r\n        }\r\n        R[now] = tot;\r\n    };\r\n    dfs(1, 0, 0);\r\n    Seg s(tot);\r\n    s.build(1, 1, tot, E, dep);\r\n    i64 las = 0;\r\n    while(q--) {\r\n        i64 x, y; cin >> x >> y;\r\n        x = (x + las) % (n - 1) + 1, y = (y + las) % w;\r\n        s.add(1, 1, tot, L[tid[x]], R[tid[x]], y - val[x]);\r\n        val[x] = y, las = s.tr[1].dia;\r\n        cout << las << endl;\r\n    }\r\n}\r\nint main()\r\n{\r\n#ifdef ONLINE_JUDGE\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(nullptr), cout.tie(nullptr);\r\n#endif\r\n    int _ = 1;\r\n    //cin >> _;\r\n    while (_--)\r\n        solve();\r\n}\r\n"
+}

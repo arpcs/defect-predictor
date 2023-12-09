@@ -1,0 +1,36 @@
+{
+    "id": 162524562,
+    "contestId": 1000,
+    "creationTimeSeconds": 1656752184,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "b6e0"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 30105600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ninline int read()\r\n{\r\n\tchar c=getchar();\r\n\tint x=0;\r\n\twhile(c<'0'||c>'9')\r\n\t\tc=getchar();\r\n\twhile(c>='0'&&c<='9')\r\n\t{\r\n\t\tx=(x<<3)+(x<<1)+c-'0';\r\n\t\tc=getchar();\r\n\t}\r\n\treturn x;\r\n}\r\nvoid output(long long x)\r\n{\r\n\tif(x>9)\r\n\t\toutput(x/10);\r\n\tputchar(x%10+'0');\r\n}\r\ninline void write(long long x)\r\n{\r\n\tif(x<0)\r\n\t{\r\n\t\tputchar('-');\r\n\t\tx=-x;\r\n\t}\r\n\toutput(x);\r\n\tputchar('\\n');\r\n}\r\nstruct edge\r\n{\r\n\tint to,nxt,wei;\r\n}e[600005];\r\nint cnt=1,h[300005],fa[300005],dep[300005],siz[300005],hson[300005],dfn[300005],tp[300005];\r\nlong long w[300005],gx[300005],dp[300005],dpfrf[300005],sw[300005],sdp[300005];\r\ninline void adde(int x,int y,int z)\r\n{\r\n\te[++cnt].to=y;\r\n\te[cnt].wei=z;\r\n\te[cnt].nxt=h[x];\r\n\th[x]=cnt;\r\n}\r\nvoid dfs1(int x,int f)\r\n{\r\n\tfa[x]=f;\r\n\tdep[x]=dep[f]+1;\r\n\tsiz[x]=1;\r\n\tfor(int i=h[x];i;i=e[i].nxt)\r\n\t\tif(e[i].to!=f)\r\n\t\t{\r\n\t\t\tw[e[i].to]=e[i].wei;\r\n\t\t\tdfs1(e[i].to,x);\r\n\t\t\tsiz[x]+=siz[e[i].to];\r\n\t\t\tif(siz[e[i].to]>siz[hson[x]])\r\n\t\t\t\thson[x]=e[i].to;\r\n\t\t\tgx[e[i].to]=max(0ll,dp[e[i].to]-e[i].wei*2);\r\n\t\t\tdp[x]+=gx[e[i].to];\r\n\t\t}\r\n}\r\nvoid dfs2(int x,int t)\r\n{\r\n\tdfn[x]=++cnt;\r\n\ttp[x]=t;\r\n\tif(!hson[x])\r\n\t\treturn;\r\n\tfor(int i=h[x];i;i=e[i].nxt)\r\n\t\tif(e[i].to!=fa[x])\r\n\t\t\tdpfrf[e[i].to]=max(0ll,dpfrf[x]+dp[x]-gx[e[i].to]-e[i].wei*2);\r\n\tdfs2(hson[x],t);\r\n\tfor(int i=h[x];i;i=e[i].nxt)\r\n\t\tif(e[i].to!=fa[x]&&e[i].to!=hson[x])\r\n\t\t\tdfs2(e[i].to,e[i].to);\r\n}\r\ninline int ask(int u,int v)\r\n{\r\n\tint res=0,preu=0,prev=0;\r\n\twhile(tp[u]!=tp[v])\r\n\t\tif(dep[tp[u]]>dep[tp[v]])\r\n\t\t{\r\n\t\t\tres+=sdp[dfn[u]]-sdp[dfn[tp[u]]-1]+gx[hson[u]]-gx[preu];\r\n\t\t\tres-=sw[dfn[u]]-sw[dfn[tp[u]]-1];\r\n\t\t\tpreu=tp[u];\r\n\t\t\tu=fa[tp[u]];\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tres+=sdp[dfn[v]]-sdp[dfn[tp[v]]-1]+gx[hson[v]]-gx[prev];\r\n\t\t\tres-=sw[dfn[v]]-sw[dfn[tp[v]]-1];\r\n\t\t\tprev=tp[v];\r\n\t\t\tv=fa[tp[v]];\r\n\t\t}\r\n\tif(u==v)\r\n\t\treturn res+dpfrf[u]+dp[u]-gx[preu]-gx[prev];\r\n\tif(dep[u]>dep[v])\r\n\t{\r\n\t\tswap(u,v);\r\n\t\tswap(preu,prev);\r\n\t}\r\n\tres-=sw[dfn[v]]-sw[dfn[u]];\r\n\tres+=sdp[dfn[v]]-sdp[dfn[u]]+gx[hson[v]]-gx[prev];\r\n\treturn res+dpfrf[u]+dp[u]-gx[preu]-gx[hson[u]];\r\n}\r\nint main()\r\n{\r\n\tint n=read(),q=read(),i,x,y,z;\r\n\tfor(i=1;i<=n;i++)\r\n\t\tdp[i]=read();\r\n\tfor(i=1;i<n;i++)\r\n\t{\r\n\t\tx=read();\r\n\t\ty=read();\r\n\t\tz=read();\r\n\t\tadde(x,y,z);\r\n\t\tadde(y,x,z);\r\n\t}\r\n\tcnt=0;\r\n\tdfs1(1,0);\r\n\tdfs2(1,1);\r\n\tfor(i=1;i<=n;i++)\r\n\t{\r\n\t\tsw[dfn[i]]=w[i];\r\n\t\tsdp[dfn[i]]=dp[i]-gx[hson[i]];\r\n\t}\r\n\tfor(i=1;i<=n;i++)\r\n\t{\r\n\t\tsw[i]+=sw[i-1];\r\n\t\tsdp[i]+=sdp[i-1];\r\n\t}\r\n\twhile(q--)\r\n\t{\r\n\t\tx=read();\r\n\t\twrite(ask(x,read()));\r\n\t}\r\n\treturn 0;\r\n}"
+}

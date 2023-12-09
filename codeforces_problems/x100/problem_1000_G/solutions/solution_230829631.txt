@@ -1,0 +1,36 @@
+{
+    "id": 230829631,
+    "contestId": 1000,
+    "creationTimeSeconds": 1698844263,
+    "relativeTimeSeconds": 6663,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "programmingysx"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1698837600
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 141824000,
+    "source": "#include<bits/stdc++.h>\r\n#define ll long long\r\nusing namespace std;\r\n\r\ninline int read(){\r\n\tint s=0,k=1;\r\n\tchar c=getchar();\r\n\twhile(c>'9'||c<'0'){\r\n\t\tif(c=='-') k=-1;\r\n\t\tc=getchar();\r\n\t}\r\n\twhile(c>='0'&&c<='9'){\r\n\t\ts=(s<<3)+(s<<1)+(c^48);\r\n\t\tc=getchar();\r\n\t}\r\n\treturn s*k;\r\n}\r\n\r\nconst int N=3e5+10;\r\nint n,q,fa[N][20],dep[N];\r\nll dis[N][20],W[N][20],a[N];\r\nint head[N],cnt;\r\nll f[N],g[N],ans,faw[N];\r\nstruct edge{\r\n\tint v,nxt;\r\n\tll w;\r\n}e[N<<1];\r\n\r\nvoid add(int u,int v,ll w){\r\n\te[++cnt].v=v;\r\n\te[cnt].w=w;\r\n\te[cnt].nxt=head[u];\r\n\thead[u]=cnt;\r\n}\r\n\r\nvoid dfs1(int x,int fat){\r\n\tfa[x][0]=fat;\r\n\tf[x]=a[x];\r\n\tfor(int i=head[x];i;i=e[i].nxt){\r\n\t\tint v=e[i].v;\r\n\t\tif(v==fat) continue;\r\n\t\tfaw[v]=e[i].w;\r\n\t\tW[v][0]=e[i].w;\r\n\t\tdep[v]=dep[x]+1;\r\n\t\tdfs1(v,x);\r\n\t\tf[x]+=max(0ll,f[v]-2*e[i].w);\r\n\t}\r\n}\r\n\r\nvoid dfs2(int x,int fat){\r\n\tfor(int i=head[x];i;i=e[i].nxt){\r\n\t\tint v=e[i].v;\r\n\t\tif(v==fat) continue;\r\n\t\tg[v]=max(0ll,g[x]+max(0ll,f[x]-max(0ll,f[v]-2*e[i].w))-2*e[i].w);\r\n//\t\tif(v==2){\r\n//\t\t\tcout<<g[x]<<' '<<f[x]<<' '<<f[x]-max(0ll,f[v]-2*e[i].w)<<' '<<a[x]<<endl;\r\n//\t\t}\r\n\t\tdfs2(v,x);\r\n\t}\r\n}\r\n\r\nvoid dfs3(int x,int fat){\r\n\tfor(int i=head[x];i;i=e[i].nxt){\r\n\t\tint v=e[i].v;\r\n\t\tif(v==fat) continue;\r\n\t\tdis[v][0]=max(0ll,f[x]-max(0ll,f[v]-2*e[i].w));\r\n\t\tdfs3(v,x);\r\n\t}\r\n}\r\n\r\nint LCA(int &x,int &y){\r\n\tif(dep[x]>dep[y]) swap(x,y);\r\n\tfor(int i=19;i>=0;i--) \r\n\t\tif(dep[fa[y][i]]>dep[x]) ans-=W[y][i],ans+=dis[y][i],y=fa[y][i];\r\n\tif(x==fa[y][0]) return x;\r\n\tfor(int i=19;i>=0;i--) \r\n\t\tif(fa[x][i]!=fa[y][i]) \r\n\t\t\tans+=dis[x][i]+dis[y][i],ans-=W[x][i]+W[y][i],x=fa[x][i],y=fa[y][i];\r\n\treturn fa[x][0];\r\n}\r\n\r\nvoid solve(){\r\n\tn=read();q=read();\r\n\tfor(int i=1;i<=n;i++) a[i]=read();\r\n\tfor(int i=1;i<n;i++){\r\n\t\tint u=read(),v=read(),w=read();\r\n\t\tadd(u,v,w);\r\n\t\tadd(v,u,w);\r\n\t}\r\n\tdfs1(1,0);\r\n\tfor(int j=1;j<20;j++)\r\n\t\tfor(int i=1;i<=n;i++) fa[i][j]=fa[fa[i][j-1]][j-1];\r\n\tdfs2(1,0);\r\n\tdfs3(1,0);\r\n\tfor(int j=1;j<20;j++)\r\n\t\tfor(int i=1;i<=n;i++) \r\n\t\t\tdis[i][j]=dis[i][j-1]+dis[fa[i][j-1]][j-1],W[i][j]=W[i][j-1]+W[fa[i][j-1]][j-1];\r\n//\tcout<<g[1]<<' '<<g[2]<<\"ejskldf\"<<endl;\r\n//\tfor(int i=1;i<=n;i++) cout<<f[i]<<' '<<g[i]<<endl;\r\n\twhile(q--){\r\n\t\tint x=read(),y=read();\r\n\t\tint tx=x,ty=y;\r\n\t\tif(dep[x]>dep[y]) ans=f[x];\r\n\t\telse ans=f[y];\r\n\t\tif(x==y){\r\n\t\t\tprintf(\"%lld\\n\",f[x]+g[x]);\r\n//\t\t\tcout<<f[x]<<' '<<g[x]<<endl;\r\n\t\t}\r\n\t\telse{\r\n\t\t\tint lca=LCA(x,y);\r\n\t\t\tif(x==lca){\r\n//\t\t\t\tcout<<x<<' '<<y<<endl;\r\n\t\t\t\tprintf(\"%lld\\n\",ans+max(0ll,f[x]-max(0ll,f[y]-2*faw[y]))+g[x]-faw[y]);\r\n//\t\t\t\tcout<<ans<<' '<<max(0ll,f[x]-max(0ll,f[y]-2*faw[y]))<<' '<<g[x]-faw[y]<<endl;\r\n\t\t\t}\r\n\t\t\telse{\r\n//\t\t\t\tcout<<ans<<' ';\r\n//\t\t\t\tcout<<\"assaass\"<<lca<<' '<<f[tx]<<' '<<faw[x]<<' '<<faw[y]<<' '<<g[lca]<<endl;\r\n\t\t\t\tans+=f[tx];\r\n\t\t\t\tans-=faw[x]+faw[y];\r\n\t\t\t\tans+=g[lca];\r\n\t\t\t\tans+=max(0ll,f[lca]-max(0ll,f[y]-2*faw[y])-max(0ll,f[x]-2*faw[x]));\r\n\t\t\t\tprintf(\"%lld\\n\",ans);\r\n\t\t\t}\r\n\t\t}\r\n\t\t\r\n\t}\r\n}\r\n\r\nint main(){\r\n\tll T=1;\r\n\twhile(T--) solve();\r\n}\r\n"
+}

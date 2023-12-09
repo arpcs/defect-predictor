@@ -1,0 +1,35 @@
+{
+    "id": 216192774,
+    "contestId": 39,
+    "creationTimeSeconds": 1690618703,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 39,
+        "index": "C",
+        "name": "Moon Craters",
+        "type": "PROGRAMMING",
+        "rating": 2100,
+        "tags": [
+            "dp",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 39,
+        "members": [
+            {
+                "handle": "guoyunfeng"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1287904200
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 15,
+    "timeConsumedMillis": 61,
+    "memoryConsumedBytes": 48640000,
+    "source": "#include <bits/stdc++.h>\n\nusing namespace std;\n\nint dp[2001][2001], tree[2001][2001], N, M, it2idx[2001][2001]{};\n// const int SCALE = 3000;\n\nvector<vector<int>> lefts;\n\nint dfs(int l, int r) {\n    if (l >= r) return 0;\n    if (dp[l][r] >= 0) return dp[l][r];\n    int result = dfs(l + 1, r);\n    if (r > l + 1) tree[l][r] = l + 1;\n\n    for (auto &k:lefts[l]) {\n        if (k >= r) break;\n        if (dfs(l, k) + dfs(k, r) > result) {\n            result = dp[l][k] + dp[k][r];\n            tree[l][r] = k;\n        }\n    }\n    dp[l][r] = result + int(it2idx[l][r] > 0);\n    return dp[l][r];\n}\n\nvector<int> travel(int i, int j) {\n    // printf(\"traveling : %d, %d\\n\", i, j);\n    vector<int> result;\n    if (i > j) return {};\n    if (it2idx[i][j] > 0) {\n        result.push_back(it2idx[i][j]);\n        if (it2idx[i][j] == 2002)\n            printf(\"cached, %d %d %d\\n\", i, j, it2idx[i][j]);\n    };\n    if (tree[i][j] > i) {\n        auto t = travel(i, tree[i][j]);\n        for (auto n: t) result.push_back(n);\n        t = travel(tree[i][j], j);\n        for (auto n: t) result.push_back(n);\n    }\n    return result;\n}\n\nint main() {\n    vector<pair<int, int>> intervals;\n    vector<int> points;\n    unordered_map<int, int> p2idx;\n    // unordered_map<int, int> it2idx;\n    memset(dp, -1, sizeof(dp));\n    memset(it2idx, 0, sizeof(it2idx));\n    memset(tree, -1, sizeof(tree));\n\n    scanf(\"%d\", &N);\n    for (int i = 0; i < N; i ++) {\n        int c, r;\n        scanf(\"%d%d\", &c, &r);\n        intervals.push_back({c - r, c + r});\n        points.push_back(c - r);\n        points.push_back(c + r);\n    }\n    sort(points.begin(), points.end());\n    auto it = unique(points.begin(), points.end());\n    points.erase(it, points.end());\n    M = points.size();\n    for (int i = 0; i < M; i ++) {\n        p2idx[points[i]] = i;\n        // printf(\" %d , %d \\n\", i, points[i]);\n    }\n    lefts.resize(M);\n\n    for (int i = 0; i < N; i ++) {\n        auto &p = intervals[i];\n        p.first = p2idx[p.first], p.second = p2idx[p.second];\n        it2idx[p.first][p.second] = i + 1;\n        // printf(\"it2idx [%d][%d] = %d\\n\", p.first, p.second, i + 1);\n        lefts[p.first].push_back(p.second);\n    }\n\n    for (int i = 0; i < M; i ++) sort(lefts[i].begin(), lefts[i].end());\n    auto result = dfs(0, M - 1);\n    cout << result << endl;\n    auto trace = travel(0, M - 1);\n    sort(trace.begin(), trace.end());\n    for (int i = 0; i < trace.size(); i++) cout << trace[i] << \" \\n\"[int(i == result - 1)];\n\n    return 0;\n}"
+}

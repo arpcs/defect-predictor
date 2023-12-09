@@ -1,0 +1,38 @@
+{
+    "id": 200383737,
+    "contestId": 295,
+    "creationTimeSeconds": 1680443879,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "cry"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 590,
+    "memoryConsumedBytes": 5734400,
+    "source": "// Author: envy <3 uwu\r\n// Problem: C. Greg and Friends\r\n// Attempted: 2023-04-02 07:44:03 EST\r\n\r\n#include <bits/stdc++.h>\r\n#ifndef LOCAL\r\n#define debug(...) 0\r\n#else\r\n#include \"C:\\programmingfunnyxd\\debug.cpp\"\r\n#endif\r\n\r\nusing namespace std;\r\nconst int MOD = 1e9 + 7;\r\nusing ll = long long;\r\n#define all(x) x.begin(), x.end()\r\n#define sz(x) (int)x.size()\r\n\r\ntemplate<ll M>\r\nstruct modint {\r\n \r\n    static ll _pow(ll n, ll k) {\r\n        ll r = 1;\r\n        for (; k > 0; k >>= 1, n = (n*n)%M)\r\n            if (k&1) r = (r*n)%M;\r\n        return r;\r\n    }\r\n \r\n    ll v; modint(ll n = 0) : v(n%M) { v += (M&(0-(v<0))); }\r\n    \r\n    friend string to_string(const modint n) { return to_string(n.v); }\r\n    friend istream& operator>>(istream& i, modint& n) { return i >> n.v; }\r\n    friend ostream& operator<<(ostream& o, const modint n) { return o << n.v; }\r\n    template<typename T> explicit operator T() { return T(v); }\r\n \r\n    friend bool operator==(const modint n, const modint m) { return n.v == m.v; }\r\n    friend bool operator!=(const modint n, const modint m) { return n.v != m.v; }\r\n    friend bool operator<(const modint n, const modint m) { return n.v < m.v; }\r\n    friend bool operator<=(const modint n, const modint m) { return n.v <= m.v; }\r\n    friend bool operator>(const modint n, const modint m) { return n.v > m.v; }\r\n    friend bool operator>=(const modint n, const modint m) { return n.v >= m.v; }\r\n \r\n    modint& operator+=(const modint n) { v += n.v; v -= (M&(0-(v>=M))); return *this; }\r\n    modint& operator-=(const modint n) { v -= n.v; v += (M&(0-(v<0))); return *this; }\r\n    modint& operator*=(const modint n) { v = (v*n.v)%M; return *this; }\r\n    modint& operator/=(const modint n) { v = (v*_pow(n.v, M-2))%M; return *this; }\r\n    friend modint operator+(const modint n, const modint m) { return modint(n) += m; }\r\n    friend modint operator-(const modint n, const modint m) { return modint(n) -= m; }\r\n    friend modint operator*(const modint n, const modint m) { return modint(n) *= m; }\r\n    friend modint operator/(const modint n, const modint m) { return modint(n) /= m; }\r\n    modint& operator++() { return *this += 1; }\r\n    modint& operator--() { return *this -= 1; }\r\n    modint operator++(int) { modint t = *this; return *this += 1, t; }\r\n    modint operator--(int) { modint t = *this; return *this -= 1, t; }\r\n    modint operator+() { return *this; }\r\n    modint operator-() { return modint(0) -= *this; }\r\n \r\n    modint pow(const ll k) const {\r\n        return k < 0 ? _pow(v, M-1-(-k%(M-1))) : _pow(v, k);\r\n    }\r\n    modint inv() const { return _pow(v, M-2); }\r\n};\r\n \r\nusing mint = modint<int(MOD)>;\r\n\r\n// returns (n choose k) in O(k) time.\r\ntemplate<typename T>\r\nT ncr_k(T n, T k) {\r\n    if (k < 0 || k > n) return 0;\r\n    T a = 1, b = 1, r = n;\r\n    for (T d = 1; d <= min(k, n-k); d++, r--)\r\n        a *= r, b *= d;\r\n    return a/b;\r\n}\r\n\r\nstruct choose{\r\n\tint n;\r\n\tvector<mint> facts, inverse;\r\n\tchoose(int _n): n(2*_n){\r\n\t\tfacts.resize(n+1, 1);\r\n\t\tinverse.resize(n+1, 1);\r\n\t\tfor(int i = 2; i <= n; i++){\r\n\t\t\tfacts[i] = facts[i-1] * i;\r\n\t\t\tinverse[i] = facts[i].inv();\r\n\t\t}\r\n\t}\r\n\tmint operator()(int _n, int _k){\r\n\t\tif(_k > _n) return 0;\r\n\t\tassert(_n >= 0 && _k >= 0);\r\n\t\treturn facts[_n] * inverse[_k] * inverse[_n-_k];\r\n\t}\r\n};\r\n\r\nconst int N = 52;\r\nmint dp[5 * N + 1][N][N];\r\n// dp[number of trips][number of 50s][number 100s]\r\n\r\nchoose ncr(1000);\r\n\r\nvoid solve(){\r\n\tint n, limit; cin >> n >> limit;\r\n\tint fifty = 0, hundred = 0;\r\n\tfor(int i = 0; i < n; i++){\r\n\t\tint x; cin >> x;\r\n\t\tif(x == 50) fifty++;\r\n\t\telse hundred++;\r\n\t}\r\n\t\r\n\tdp[0][fifty][hundred] = 1;\r\n\tfor(int i = 0; i < 5 * N; i++){\r\n\t\tfor(int j = 0; j <= fifty; j++){\r\n\t\t\tfor(int k = 0; k <= hundred; k++){\r\n\t\t\t\tfor(int take_fifty = 0; take_fifty <= j; take_fifty++){\r\n\t\t\t\t\tfor(int take_hundred = 0; take_hundred <= k; take_hundred++){\r\n\t\t\t\t\t\tif(take_fifty * 50 + take_hundred * 100 > limit) continue;\r\n\t\t\t\t\t\tif(take_fifty + take_hundred == 0) continue;\r\n\t\t\t\t\t\t// switch to the other side\r\n\t\t\t\t\t\tauto& ref = dp[i+1][fifty - j + take_fifty][hundred - k + take_hundred];\r\n\t\t\t\t\t\tref += dp[i][j][k] * ncr(j, take_fifty) * ncr(k, take_hundred);\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tfor(int i = 1; i < 5 * N; i += 2){\r\n\t\tif(dp[i][fifty][hundred] > 0){\r\n\t\t\tcout << i << endl;\r\n\t\t\tcout << dp[i][fifty][hundred] << endl;\r\n\t\t\treturn;\r\n\t\t}\r\n\t}\r\n\tcout << -1 << endl << 0 << endl;\r\n}\r\n\r\nint main(){\r\n\tcin.tie(0) -> sync_with_stdio(0);\r\n\tint T = 1;\r\n\t// cin >> T;\r\n\tfor(int _ = 0; _ < T; _++){\r\n\t\tsolve();\r\n\t}\r\n}\r\n\r\n/*   /\\_/\\\r\n*   (= ._.)\r\n*   / >  \\>\r\n*/"
+}

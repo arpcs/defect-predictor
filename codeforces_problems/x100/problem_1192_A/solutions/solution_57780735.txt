@@ -1,0 +1,34 @@
+{
+    "id": 57780735,
+    "contestId": 1192,
+    "creationTimeSeconds": 1564120333,
+    "relativeTimeSeconds": 8533,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "GyojunYoun"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1564111800
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "points": 0.0,
+    "source": "#include <bits/stdc++.h>\n#define eb emplace_back\n#define sz(V) ((int)(V).size())\n#define allv(V) ((V).begin()),((V).end())\n#define INFLL (0x3f3f3f3f3f3f3f3fll)\nusing namespace std;\ntypedef long long ll;\ntypedef pair<int, int> pii;\nconst int dx[] = {0, 1, 0, -1}, dy[] = {1, 0, -1, 0};\n\nconst int MAXN = 2005;\nconst int MAXK = MAXN*MAXN;\n\nstruct DJF {\n\tDJF() { init(); }\n\tint ud[MAXK];\n\n\tvoid init() { iota(ud, ud+MAXK, 0); }\n\tint uf(int i) { return i == ud[i] ? i : (ud[i] = uf(ud[i])); }\n\tvoid uf(int a, int b) { ud[uf(b)] = uf(a); }\n} djf;\n\nbitset<MAXN> D[MAXN];\nbitset<MAXN> E[MAXN];\n\nint A[MAXN], B[MAXN];\n\nint Ans[MAXN];\nint N, T;\n\nint hsh(int y, int x) { return y*MAXN + x; }\nvoid spread(int y, int x) {\n\tE[y][x] = true;\n\tdjf.uf(0, hsh(y, x));\n\tfor(int dr = 0, ny, nx; dr < 4; dr++) {\n\t\tny = y+dy[dr];\n\t\tnx = x+dx[dr];\n\t\tif(ny < 0 || nx < 0 || N+1 < ny || N+1 < nx || E[ny][nx] || D[ny][nx]) continue;\n\t\tspread(ny, nx);\n\t}\n}\n\nvoid spreadnew(int y, int x) {\n\tdjf.uf(0, hsh(y, x));\n\tfor(int dr = 0, ny, nx; dr < 4; dr++) {\n\t\tny = y+dy[dr];\n\t\tnx = x+dx[dr];\n\t\tif(ny < 0 || nx < 0 || N+1 < ny || N+1 < nx || D[ny][nx] || djf.uf(0) == djf.uf(hsh(ny, nx))) continue;\n\t\tspread(ny, nx);\n\t}\n}\n\nvoid predfs(int y, int x) {\n\tE[y][x] = true;\n\tfor(int ny : {y-1, y, y+1}) for(int nx : {x-1, x, x+1}) {\n\t\tif(!D[ny][nx] || E[ny][nx]) continue;\n\t\tpredfs(ny, nx);\n\t}\n}\n\nbool isok(int i) {\n\tfor(int h = 0; h < MAXN; h++) E[h].reset();\n\tD[A[i]][B[i]] = false;\n\tint j = 1;\n\tfor(; j <= N && !D[A[j]][B[j]]; j++);\n\tif(N < j) return true;\n\tpredfs(A[j], B[j]);\n\tfor(int k = 1; k <= N; k++) if(D[A[k]][B[k]] && !E[A[k]][B[k]])\n\t\treturn false;\n\treturn true;\n}\n\nvoid solve() {\n\tfor(int oi = N; oi; oi--) {\n\t\tint i = N;\n\t\tfor(; i; i--) {\n\t\t\tif(!D[A[i]][B[i]]) continue;\n\t\t\tif(!isok(i)) {\n\t\t\t\tD[A[i]][B[i]] = true;\n\t\t\t\tcontinue;\n\t\t\t}\n\t\t\tbool flag = false;\n\t\t\tfor(int dr = 0, ny, nx; dr < 4; dr++) {\n\t\t\t\tny = A[i]+dy[dr];\n\t\t\t\tnx = B[i]+dx[dr];\n\t\t\t\tif(djf.uf(0) == djf.uf(hsh(ny, nx))) {\n\t\t\t\t\tflag = true;\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\t\t\tif(flag) {\n\t\t\t\tD[A[i]][B[i]] = true;\n\t\t\t\tspreadnew(A[i], B[i]);\n\t\t\t\tbreak;\n\t\t\t}\n\t\t}\n\t\tif(!i) {\n\t\t\tputs(\"NO\");\n\t\t\texit(0);\n\t\t}\n\t\tAns[oi] = i;\n\t\tD[A[i]][B[i]] = false;\n\t}\n}\n\nvoid precal() {\n\tint amn = *min_element(A+1, A+N+1);\n\tint bmn = *min_element(B+1, B+N+1);\n\tfor(int i = 1; i <= N; i++) {\n\t\tA[i] -= amn - 1;\n\t\tB[i] -= bmn - 1;\n\t}\n\tif(N < max(*max_element(A+1, A+N+1), *max_element(B+1, B+N+1))) {\n\t\tputs(\"NO\");\n\t\texit(0);\n\t}\n\tfor(int i = 1; i <= N; i++) D[A[i]][B[i]] = true;\n\tpredfs(A[1], B[1]);\n\tfor(int i = 2; i <= N; i++) if(!E[A[i]][B[i]]) {\n\t\tputs(\"NO\");\n\t\texit(0);\n\t}\n\tfor(int i = 0; i < MAXN; i++) chk[i].reset();\n\tspread(0, 0);\n}\n\nint main() {\n\tcin >> N >> T;\n\tif(2000 < N) return -1;\n\tfor(int i = 1; i <= N; i++) cin >> A[i] >> B[i];\n\tprecal();\n\tsolve();\n\tputs(\"YES\");\n\tfor(int i = 1; i <= N; i++) printf(\"%d\\n\", Ans[i]);\n\treturn 0;\n}\n"
+}

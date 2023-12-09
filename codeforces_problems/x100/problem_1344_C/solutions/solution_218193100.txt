@@ -1,0 +1,38 @@
+{
+    "id": 218193100,
+    "contestId": 1344,
+    "creationTimeSeconds": 1691684877,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1344,
+        "index": "C",
+        "name": "Quantifier Question",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1344,
+        "members": [
+            {
+                "handle": "Sakuyalove"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1588775700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 38,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 28979200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\nstatic struct FastInput {\r\n  static constexpr int BUF_SIZE = 1 << 20;\r\n  char buf[BUF_SIZE];\r\n  size_t chars_read = 0;\r\n  size_t buf_pos = 0;\r\n  FILE *in = stdin;\r\n  char cur = 0;\r\n \r\n  inline char get_char() {\r\n    if (buf_pos >= chars_read) {\r\n      chars_read = fread(buf, 1, BUF_SIZE, in);\r\n      buf_pos = 0;\r\n      buf[0] = (chars_read == 0 ? -1 : buf[0]);\r\n    }\r\n    return cur = buf[buf_pos++];\r\n  }\r\n \r\n  inline void tie(int) {}\r\n \r\n  inline explicit operator bool() {\r\n    return cur != -1;\r\n  }\r\n \r\n  inline static bool is_blank(char c) {\r\n    return c <= ' ';\r\n  }\r\n \r\n  inline bool skip_blanks() {\r\n    while (is_blank(cur) && cur != -1) {\r\n      get_char();\r\n    }\r\n    return cur != -1;\r\n  }\r\n \r\n  inline FastInput& operator>>(char& c) {\r\n    skip_blanks();\r\n    c = cur;\r\n    return *this;\r\n  }\r\n  \r\n  inline FastInput& operator>>(string& s) {\r\n    if (skip_blanks()) {\r\n      s.clear();\r\n      do {\r\n        s += cur;\r\n      } while (!is_blank(get_char()));\r\n    }\r\n    return *this;\r\n  }\r\n \r\n  template <typename T>\r\n  inline FastInput& read_integer(T& n) {\r\n    // unsafe, doesn't check that characters are actually digits\r\n    n = 0;\r\n    if (skip_blanks()) {\r\n      int sign = +1;\r\n      if (cur == '-') {\r\n        sign = -1;\r\n        get_char();\r\n      }\r\n      do {\r\n        n += n + (n << 3) + cur - '0';\r\n      } while (!is_blank(get_char()));\r\n      n *= sign;\r\n    }\r\n    return *this;\r\n  }\r\n \r\n  template <typename T>\r\n  inline typename enable_if<is_integral<T>::value, FastInput&>::type operator>>(T& n) {\r\n    return read_integer(n);\r\n  }\r\n  \r\n  #if !defined(_WIN32) || defined(_WIN64)\r\n  inline FastInput& operator>>(__int128& n) {\r\n    return read_integer(n);\r\n  }\r\n  #endif\r\n \r\n  template <typename T>\r\n  inline typename enable_if<is_floating_point<T>::value, FastInput&>::type operator>>(T& n) {\r\n    // not sure if really fast, for compatibility only\r\n    n = 0;\r\n    if (skip_blanks()) {\r\n      string s;\r\n      (*this) >> s;\r\n      sscanf(s.c_str(), \"%lf\", &n);\r\n    }\r\n    return *this;\r\n  }\r\n} fast_input;\r\n \r\n#define cin fast_input\r\n\r\nstatic struct FastOutput {\r\n  static constexpr int BUF_SIZE = 1 << 20;\r\n  char buf[BUF_SIZE];\r\n  size_t buf_pos = 0;\r\n  static constexpr int TMP_SIZE = 1 << 20;\r\n  char tmp[TMP_SIZE];\r\n  FILE *out = stdout;\r\n \r\n  inline void put_char(char c) {\r\n    buf[buf_pos++] = c;\r\n    if (buf_pos == BUF_SIZE) {\r\n      fwrite(buf, 1, buf_pos, out);\r\n      buf_pos = 0;\r\n    }\r\n  }\r\n \r\n  inline void tie(int) {}\r\n\r\n  ~FastOutput() {\r\n    fwrite(buf, 1, buf_pos, out);\r\n  }\r\n \r\n  inline FastOutput& operator<<(char c) {\r\n    put_char(c);\r\n    return *this;\r\n  }\r\n \r\n  inline FastOutput& operator<<(const char* s) {\r\n    while (*s) {\r\n      put_char(*s++);\r\n    }\r\n    return *this;\r\n  }\r\n \r\n  inline FastOutput& operator<<(const string& s) {\r\n    for (int i = 0; i < (int) s.size(); i++) {\r\n      put_char(s[i]);\r\n    }\r\n    return *this;\r\n  }\r\n \r\n  template <typename T>\r\n  inline char* integer_to_string(T n) {\r\n    // beware of TMP_SIZE\r\n    char* p = tmp + TMP_SIZE - 1;\r\n    if (n == 0) {\r\n      *--p = '0';\r\n    } else {\r\n      bool is_negative = false;\r\n      if (n < 0) {\r\n        is_negative = true;\r\n        n = -n;\r\n      }\r\n      while (n > 0) {\r\n        *--p = (char) ('0' + n % 10);\r\n        n /= 10;\r\n      }\r\n      if (is_negative) {\r\n        *--p = '-';\r\n      }\r\n    }\r\n    return p;\r\n  }\r\n \r\n  template <typename T>\r\n  inline typename enable_if<is_integral<T>::value, char*>::type stringify(T n) {\r\n    return integer_to_string(n);\r\n  }\r\n \r\n  #if !defined(_WIN32) || defined(_WIN64)\r\n  inline char* stringify(__int128 n) {\r\n    return integer_to_string(n);\r\n  }\r\n  #endif\r\n \r\n  template <typename T>\r\n  inline typename enable_if<is_floating_point<T>::value, char*>::type stringify(T n) {\r\n    sprintf(tmp, \"%.17f\", n);\r\n    return tmp;\r\n  }\r\n \r\n  template <typename T>\r\n  inline FastOutput& operator<<(const T& n) {\r\n    auto p = stringify(n);\r\n    for (; *p != 0; p++) {\r\n      put_char(*p);\r\n    }\r\n    return *this;\r\n  }\r\n} fast_output;\r\n \r\n#define cout fast_output\r\n#define endl '\\n'\r\n\r\n#define pii pair<int, int>\r\n#define mp make_pair\r\n\r\nconst int _ = 2e5 + 5;\r\n\r\nint n, m;\r\nint vis[_];\r\nvector<int> to[_];\r\nint in[_];\r\nint tag[_];\r\nint mi[_];\r\n\r\nvoid dfs(int u) {\r\n  for (auto v : to[u]) {\r\n    if (!vis[v]) {\r\n      vis[v] = 1;\r\n      dfs(v);\r\n    }\r\n    mi[u] = min(mi[u], mi[v]);\r\n  }\r\n  return ;\r\n}\r\n\r\nvoid solve() {\r\n  cin >> n >> m;\r\n  for (int i = 1; i <= m; i++) {\r\n    int u, v;\r\n    cin >> u >> v;\r\n    to[u].push_back(v);\r\n    in[v] += 1;\r\n  }\r\n  queue<int> q;\r\n  for (int i = 1; i <= n; i++) {\r\n    if (in[i] == 0) q.push(i);\r\n  }\r\n  while (!q.empty()) {\r\n    int u = q.front();\r\n    q.pop();\r\n    vis[u] = 1;\r\n    for (auto v : to[u]) {\r\n      in[v] -= 1;\r\n      if (in[v] == 0) q.push(v);\r\n    }\r\n  }\r\n  for (int i = 1; i <= n; i++) {\r\n    if (vis[i] == 0) {\r\n      cout << -1 << endl;\r\n      return ;\r\n    }\r\n    vis[i] = 0;\r\n    mi[i] = i;\r\n  }\r\n  for (int i = 1; i <= n; i++) {\r\n    if (!vis[i]) {\r\n      vis[i] = 1;\r\n      dfs(i);\r\n    }\r\n  }\r\n  for (int i = 1; i <= n; i++) {\r\n    vis[i] = 0;\r\n  }\r\n  for (int i = 1; i <= n; i++) {\r\n    if (mi[i] < i) tag[i] = 1;\r\n    if (!vis[i]) q.push(i);\r\n    vis[i] = 1;\r\n    while (!q.empty()) {\r\n      int u = q.front();\r\n      q.pop();\r\n      for (auto v : to[u]) {\r\n        if (v > i) tag[v] = 1;\r\n        if (!vis[v]) {\r\n          vis[v] = 1;\r\n          q.push(v);\r\n        }\r\n      }\r\n    }\r\n  }\r\n  int sum = 0;\r\n  for (int i = 1; i <= n; i++) sum += 1 - tag[i];\r\n  cout << sum << endl;\r\n  for (int i = 1; i <= n; i++) {\r\n    cout << \"AE\"[tag[i]];\r\n  }\r\n  cout << endl;\r\n  return ;\r\n}\r\n\r\nsigned main() {\r\n  #ifdef Sakuyalove\r\n    freopen(\"in.in\", \"r\", stdin);\r\n    freopen(\"out.out\", \"w\", stdout);\r\n  #endif\r\n  ios::sync_with_stdio(false);\r\n  cin.tie(0);\r\n  cout.tie(0);\r\n  int T = 1;\r\n  // cin >> T;\r\n  while (T--) solve();\r\n  return 0;\r\n}"
+}

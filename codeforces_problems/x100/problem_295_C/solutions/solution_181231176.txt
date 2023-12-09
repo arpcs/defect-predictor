@@ -1,0 +1,38 @@
+{
+    "id": 181231176,
+    "contestId": 295,
+    "creationTimeSeconds": 1668619971,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "Shayan86"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 8601600,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef pair<ll, ll> pll;\r\ntypedef pair<int, int> pii;\r\n\r\n#define Mp          make_pair\r\n#define sep         ' '\r\n#define endl        '\\n'\r\n#define F\t        first\r\n#define S\t        second\r\n#define pb          push_back\r\n#define all(x)      (x).begin(),(x).end()\r\n#define kill(res)\tcout << res << '\\n';\r\n#define set_dec(x)\tcout << fixed << setprecision(x);\r\n#define fast_io     ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);\r\n#define file_io     freopen(\"input.txt\", \"r\", stdin) ; freopen(\"output.txt\", \"w\", stdout);\r\n\r\nconst int N = 55;\r\nconst int inf = 1e9;\r\nconst int Mod = 1e9 + 7;\r\n\r\nll n, k, d[N][N][2], cnt1, cnt2, c[N][N], dp[N][N][2];\r\n\r\nbool mark[N][N][2];\r\nvector<pair<pll, bool>> adj[N][N][2];\r\n\r\nll mod(ll n, ll md = Mod){\r\n    return (n%md + md)%md;\r\n}\r\n\r\nvoid comb(){\r\n    for(int i = 0; i < N; i++) c[0][i] = 1;\r\n\r\n    for(int i = 1; i < N; i++){\r\n        for(int j = i; j < N; j++){\r\n            if(!c[i][j]) c[i][j] = mod(c[i-1][j-1] + c[i][j-1]);\r\n        }\r\n    }\r\n}\r\n\r\nvoid bfs(pair<pll, bool> s){\r\n\r\n    mark[s.F.F][s.F.S][s.S] = true;\r\n    queue<pair<pll, bool>> q; q.push(s);\r\n\r\n    while(!q.empty()){\r\n        auto v = q.front(); q.pop();\r\n\r\n        for(auto u: adj[v.F.F][v.F.S][v.S]){\r\n            ll c1 = u.F.F, c2 = u.F.S, w = u.S;\r\n            if(mark[c1][c2][w] && d[c1][c2][w] + 1 == d[v.F.F][v.F.S][v.S]){\r\n                if(v.S){\r\n                    dp[v.F.F][v.F.S][v.S] += dp[c1][c2][w] * c[c1-v.F.F][c1] * c[c2-v.F.S][c2];\r\n                    dp[v.F.F][v.F.S][v.S] = mod(dp[v.F.F][v.F.S][v.S]);\r\n                }\r\n                else{\r\n                    dp[v.F.F][v.F.S][v.S] += dp[c1][c2][w] * c[v.F.F-c1][cnt1-c1] * c[v.F.S-c2][cnt2-c2];\r\n                    dp[v.F.F][v.F.S][v.S] = mod(dp[v.F.F][v.F.S][v.S]);\r\n                }\r\n            }\r\n        }\r\n\r\n        for(auto u: adj[v.F.F][v.F.S][v.S]){\r\n            int c1 = u.F.F, c2 = u.F.S, w = u.S;\r\n            if(!mark[c1][c2][w]){\r\n                q.push(u);\r\n                d[c1][c2][w] = d[v.F.F][v.F.S][v.S] + 1;\r\n                mark[c1][c2][w] = true;\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\nint main(){\r\n    fast_io;\r\n\r\n    comb();\r\n\r\n    cin >> n >> k;\r\n\r\n    int x;\r\n    for(int i = 1; i <= n; i++){\r\n        cin >> x;\r\n        if(x == 100) cnt1++;\r\n        else cnt2++;\r\n    }\r\n\r\n    for(int i = 0; i <= cnt1; i++){\r\n        for(int j = 0; j <= cnt2; j++){\r\n            pair<pll, bool> v1 = Mp(Mp(i, j), 0);\r\n            pair<pll, bool> v2 = Mp(Mp(i, j), 1);\r\n\r\n            for(int x = 0; x <= cnt1; x++){\r\n                for(int y = 0; y <= cnt2; y++){\r\n                    if(x == i && y == j) continue;\r\n\r\n                    pair<pll, bool> u1 = Mp(Mp(x, y), 0);\r\n                    pair<pll, bool> u2 = Mp(Mp(x, y), 1);\r\n\r\n                    if((i-x) >= 0 && (j-y) >= 0 && ((i-x) * 100 + (j-y) * 50) <= k){\r\n                        adj[i][j][0].pb(u2);\r\n                        adj[x][y][1].pb(v1);\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    dp[cnt1][cnt2][0] = 1;\r\n    bfs(Mp(Mp(cnt1, cnt2), 0));\r\n\r\n    if(!d[0][0][1]){\r\n        cout << -1 << endl << 0;\r\n        return 0;\r\n    }\r\n\r\n    cout << d[0][0][1] << endl;\r\n    cout << dp[0][0][1];\r\n\r\n}\r\n"
+}

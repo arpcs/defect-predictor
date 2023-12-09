@@ -1,0 +1,37 @@
+{
+    "id": 218520520,
+    "contestId": 536,
+    "creationTimeSeconds": 1691852192,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 536,
+        "index": "E",
+        "name": "Tavas on the Path",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 536,
+        "members": [
+            {
+                "handle": "NeroZein"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1429029300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 101,
+    "timeConsumedMillis": 467,
+    "memoryConsumedBytes": 35123200,
+    "source": "#include \"bits/stdc++.h\"\r\nusing namespace std;\r\n\r\n#ifdef Nero\r\n#include \"Deb.h\"\r\n#else\r\n#define deb(...)\r\n#endif\r\n\r\nconst int Log = 18;\r\nconst int N = 1e5 + 5;\r\n\r\nusing T = array<int, 4>;\r\n\r\nstruct node {\r\n  int ans = 0, pref = 0, suf = 0, len = 0; \r\n};\r\n\r\nint n, q;\r\nint f[N]; \r\nint low[N]; \r\nnode seg[N * 2]; \r\nint idd, id[N], top[N]; \r\nint sz[N], pr[N], dep[N], dp[Log][N];\r\nvector<array<int, 3>> g[N]; \r\n\r\ninline void assign (int v, int p) {\r\n  sz[v] = 1; \r\n  for (auto [u, w, i] : g[v]) {\r\n    if (u == p) {\r\n      continue; \r\n    }\r\n    pr[u] = v; \r\n    dep[u] = dep[v] + 1; \r\n    low[i] = u; \r\n    dp[0][u] = v;\r\n    for (int j = 1; j < Log; ++j) {\r\n      dp[j][u] = dp[j - 1][dp[j - 1][u]];\r\n    }\r\n    assign(u, v); \r\n    sz[v] += sz[u]; \r\n  }\r\n}\r\n\r\ninline void dfs_hld (int v, int p, int tp) {\r\n  id[v] = idd++;\r\n  top[v] = tp; \r\n  int big = 0;\r\n  for (auto [u, w, i] : g[v]) {\r\n    if (u != p && sz[u] > sz[big]) {\r\n      big = u; \r\n    }\r\n  } \r\n  if (big) {\r\n    dfs_hld(big, v, tp);\r\n  }\r\n  for (auto [u, w, i] : g[v]) {\r\n    if (u != p && u != big) {\r\n      dfs_hld(u, v, u); \r\n    }\r\n  }\r\n}\r\n\r\ninline int jump (int v, int k) {\r\n  for (int i = 0; i < Log; ++i) {\r\n    if (k >> i & 1) {\r\n      v = dp[i][v];\r\n    }\r\n  }\r\n  return v;\r\n}\r\n\r\ninline int lca (int u, int v) {\r\n  if (dep[u] < dep[v]) {\r\n    swap(u, v);\r\n  }\r\n  u = jump(u, dep[u] - dep[v]);\r\n  if (u == v) {\r\n    return v;\r\n  }\r\n  for (int i = Log - 1; i >= 0; --i) {\r\n    if (dp[i][u] != dp[i][v]) {\r\n      u = dp[i][u], v = dp[i][v];\r\n    }\r\n  }\r\n  return dp[0][v];\r\n}\r\n\r\ninline void build (int nd, int l, int r) {\r\n  seg[nd].len = r - l + 1;\r\n  if (l == r) {\r\n    return;\r\n  }\r\n  int mid = (l + r) >> 1;\r\n  int rs = nd + ((mid - l + 1) << 1);\r\n  build(nd + 1, l, mid);\r\n  build(rs, mid + 1, r); \r\n}\r\n\r\ninline node merge (node lx, node rx) {\r\n  node ret;\r\n  ret.len = lx.len + rx.len;\r\n  ret.pref = lx.pref + (lx.pref == lx.len ? rx.pref : 0);\r\n  ret.suf = rx.suf + (rx.suf == rx.len ? lx.suf : 0);\r\n  ret.ans = lx.ans + rx.ans - f[lx.suf] - f[rx.pref] + f[lx.suf + rx.pref];\r\n  return ret;\r\n}\r\n\r\ninline void upd (int nd, int l, int r, int idx) {\r\n  if (l == r) {\r\n    seg[nd].ans = f[1]; \r\n    seg[nd].pref = seg[nd].suf = 1;\r\n    return;\r\n  }\r\n  int mid = (l + r) >> 1;\r\n  int rs = nd + ((mid - l + 1) << 1);\r\n  if (idx <= mid) {\r\n    upd(nd + 1, l, mid, idx);\r\n  } else {\r\n    upd(rs, mid + 1, r, idx); \r\n  }\r\n  seg[nd] = merge(seg[nd + 1], seg[rs]); \r\n} \r\n\r\ninline node qry (int nd, int l, int r, int s, int e) {\r\n  if (l >= s && r <= e) {\r\n    return seg[nd];\r\n  }\r\n  int mid = (l + r) >> 1;\r\n  int rs = nd + ((mid - l + 1) << 1);\r\n  if (mid >= e) {\r\n    return qry(nd + 1, l, mid, s, e); \r\n  } else {\r\n    if (mid < s) {\r\n      return qry(rs, mid + 1, r, s, e); \r\n    } else {\r\n      return merge(qry(nd + 1, l, mid, s, e), qry(rs, mid + 1, r, s, e)); \r\n    }\r\n  }\r\n}\r\n\r\ninline node query (int v, int l) {\r\n  node ret;//len is useless here \r\n  while (top[v] != top[l]) {\r\n    ret = merge(qry(0, 0, n - 1, id[top[v]], id[v]), ret);\r\n    v = pr[top[v]];\r\n  }\r\n  ret = merge(qry(0, 0, n - 1, id[l], id[v]), ret);\r\n  return ret; \r\n}\r\n\r\nint main() {\r\n  ios::sync_with_stdio(false);\r\n  cin.tie(nullptr);\r\n  cin >> n >> q;\r\n  for (int i = 1; i < n; ++i) {\r\n    cin >> f[i];\r\n  }\r\n  vector<T> weighted_edges(n - 1);\r\n  for (int i = 0; i < n - 1; ++i) {\r\n    int u, v, w;\r\n    cin >> u >> v >> w;\r\n    g[u].push_back({v, w, i});\r\n    g[v].push_back({u, w, i}); \r\n    weighted_edges[i] = {w, u, v, i};\r\n  }\r\n  build(0, 0, n - 1); \r\n  vector<T> qs(q);\r\n  for (int i = 0; i < q; ++i) {\r\n    int u, v, w;\r\n    cin >> u >> v >> w;\r\n    qs[i] = {w, u, v, i}; \r\n  }\r\n  sort(qs.begin(), qs.end(), greater<T>());\r\n  sort(weighted_edges.begin(), weighted_edges.end(), greater<T>());\r\n  assign(1, 1);\r\n  dfs_hld(1, 1, 1); \r\n  vector<int> ans(q);\r\n  int j = 0;\r\n  for (int i = 0; i < q; ++i) {\r\n    auto [w, v, u, idx] = qs[i]; \r\n    while (j < n - 1 && weighted_edges[j][0] >= w) {\r\n      upd(0, 0, n - 1, id[low[weighted_edges[j][3]]]);\r\n      j++; \r\n    }\r\n    int l = lca(u, v);\r\n    if (v == l) {\r\n      int cu = jump(u, dep[u] - dep[l] - 1);\r\n      ans[idx] = query(u, cu).ans;\r\n      continue;\r\n    }\r\n    if (u == l) {\r\n      int cv = jump(v, dep[v] - dep[l] - 1);\r\n      ans[idx] = query(v, cv).ans;\r\n      continue;\r\n    }\r\n    int cv = jump(v, dep[v] - dep[l] - 1);\r\n    int cu = jump(u, dep[u] - dep[l] - 1);\r\n    node lx = query(v, cv);\r\n    node rx = query(u, cu); \r\n    swap(lx.pref, lx.suf);\r\n    ans[idx] = merge(lx, rx).ans;\r\n  }\r\n  for (int i = 0; i < q; ++i) {\r\n    cout << ans[i] << '\\n'; \r\n  }\r\n  return 0;\r\n}\r\n"
+}

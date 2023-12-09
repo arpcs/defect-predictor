@@ -1,0 +1,37 @@
+{
+    "id": 95705954,
+    "contestId": 1307,
+    "creationTimeSeconds": 1602907813,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "vjudge4"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\n\nconst int maxN = 100;\nconst int INF = 0x3f3f3f3f;\n\ninline int min(int a, int b){ return a < b ? a : b; }\n\nstruct Edge{\n\tint from, to, cap, flow;\n\tEdge(int u = 0, int v = 0, int c = 0, int f = 0){\n\t\tfrom = u;\n\t\tto = v;\n\t\tcap = c;\n\t\tflow = f;\n\t}\n};\n\nstruct Dinic{\n\tint n, m, s, t;\n\tint d[maxN], cur[maxN];\n\tvector<Edge> edges;\n\tvector<int> G[maxN];\n\tbool vis[maxN];\n\tvoid init(int n){\n\t\tint i;\n\t\tthis->n = n;\n\t\tfor(i = 0; i < n; ++i) G[i].clear();\n\t\tedges.clear();\n\t}\n\tvoid clear(){\n\t\tint i;\n\t\tfor(i = 0; i < edges.size(); ++i)\n\t\t\tedges[i].flow = 0;\n\t}\n\tvoid AddEdge(int from, int to, int cap){\n\t\tedges.push_back(Edge(from, to, cap, 0));\n\t\tedges.push_back(Edge(to, from, 0, 0));\n\t\tm = edges.size();\n\t\tG[from].push_back(m - 2);\n\t\tG[to].push_back(m - 1);\n\t}\n\tbool BFS(){\n\t\tmemset(vis, 0, sizeof vis);\n\t\tqueue<int> Q;\n\t\tQ.push(s);\n\t\td[s] = 0;\n\t\tvis[s] = 1;\n\t\twhile(!Q.empty()){\n\t\t\tint x = Q.front(); Q.pop();\n\t\t\tfor(int i = 0; i < G[x].size(); ++i){\n\t\t\t\tEdge& e = edges[G[x][i]];\n\t\t\t\tif(!vis[e.to] && e.cap > e.flow){\n\t\t\t\t\tvis[e.to] = 1;\n\t\t\t\t\td[e.to] = d[x] + 1;\n\t\t\t\t\tQ.push(e.to);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn vis[t];\n\t}\n\tint DFS(int x, int a){\n\t\tif(x == t || a == 0) return a;\n\t\tint flow = 0, f;\n\t\tfor(int& i = cur[x]; i < G[x].size(); ++i){\n\t\t\tEdge& e = edges[G[x][i]];\n\t\t\tif(d[x] + 1 == d[e.to] && (f = DFS(e.to, min(a, e.cap - e.flow))) > 0){\n\t\t\t\te.flow += f;\n\t\t\t\tedges[G[x][i] ^ 1].flow -= f;\n\t\t\t\tflow += f;\n\t\t\t\ta -= f;\n\t\t\t\tif(a == 0) break;\n\t\t\t}\n\t\t}\n\t\treturn flow;\n\t}\n\tint Maxflow(int s, int t){\n\t\tthis->s = s;\n\t\tthis->t = t;\n\t\tint flow = 0;\n\t\tclear();\n\t\twhile(BFS()){\n\t\t\tmemset(cur, 0, sizeof cur);\n\t\t\tflow += DFS(s, INF);\n\t\t}\n\t\treturn flow;\n\t}\n}proc;\n\nstruct Edge1{\n\tint from, to, dist;\n\tEdge1(int a = 0, int b = 0, int c = 0) : from(a), to(b), dist(c) {}\n};\n\nstruct HeapNode{\n\tint d, u;\n\tHeapNode(int a = 0, int b = 0) : d(a), u(b) {}\n\tbool operator<(const HeapNode& rhs) const {\n\t\treturn d > rhs.d;\n\t}\n};\n\nstruct Dijkstra {\n\tint n, m;\n\tvector<Edge1> edges;\n\tvector<int> G[maxN];\n\tbool done[maxN];\n\tint d[maxN];\n\tint p[maxN];\n\tvoid init(int n){\n\t\tthis->n = n;\n\t\tint i;\n\t\tfor(i = 1; i <= n; ++i)\n\t\t\tG[i].clear();\n\t\tedges.clear();\n\t}\n\tvoid Add_Edge(int from, int to, int dist){\n\t\tedges.push_back(Edge1(from, to, dist));\n\t\tm = edges.size();\n\t\tG[from].push_back(m - 1);\n\t}\n\tvoid dijkstra(int s){\n\t\tint i;\n\t\tpriority_queue<HeapNode> Q;\n\t\tfor(i = 1; i <= n; ++i)\n\t\t\td[i] = INF;\n\t\td[s] = 0;\n\t\tmemset(done, 0, sizeof(done));\n\t\tQ.push(HeapNode(0, s));\n\t\twhile(!Q.empty()){\n\t\t\tHeapNode x = Q.top(); Q.pop();\n\t\t\tint u = x.u;\n\t\t\tif(done[u]) continue;\n\t\t\tdone[u] = 1;\n\t\t\tfor(i = 0; i < G[u].size(); ++i){\n\t\t\t\tEdge1& e = edges[G[u][i]];\n\t\t\t\tif(d[e.to] > d[u] + e.dist){\n\t\t\t\t\td[e.to] = d[u] + e.dist;\n\t\t\t\t\tp[e.to] = G[u][i];\n\t\t\t\t\tQ.push(HeapNode(d[e.to], e.to));\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}proc1[2];\n\nint ea[5000], eb[5000], ec[5000];\nvector <int> temp;\n\nint main() {\n\tios::sync_with_stdio(0);\n\tcin.tie(0); cout.tie(0);\n\tint n, m, a, b, c;\n\tcin >> n >> m;\n\tproc.init(n + 5);\n\tproc1[0].init(n + 5);\n\tproc1[1].init(n + 5);\n\tfor (int i = 0; i < m; i++) {\n\t\tcin >> a >> b >> c;\n\t\tea[i] = a, eb[i] = b, ec[i] = c;\n\t\tproc1[0].Add_Edge(a, b, c);\n\t\tproc1[1].Add_Edge(a, b, c);\n\t\tproc.AddEdge(a, b, 1);\n\t\tint calc = proc.Maxflow(1, n);\n\t}\n\tproc1[0].dijkstra(1);\n\tproc1[1].dijkstra(n);\n\tfor (int i = 0; i < m; i++) {\n\t\tif (proc.vis[ea[i]] && !proc.vis[eb[i]]) {\n\t\t\ttemp.push_back(proc1[0].d[ea[i]] + ec[i] + proc1[1].d[eb[i]]);\n\t\t}\n\t}\n\tint q;\n\tcin >> q;\n\twhile (q--) {\n\t\tint dd;\n\t\tcin >> dd;\n\t\tdouble st = 0, ed = 1e9;\n\t\tfor (int i = 0; i < 70; i++) {\n\t\t\tbool flag = 0;\n\t\t\tdouble mid = (st + ed) / 2, val = 0;\n\t\t\tfor (auto u : temp) {\n\t\t\t\tval += max(0.0, mid - u);\n\t\t\t\tif (mid > u) flag = 1;\n\t\t\t}\n\t\t\tif (val < dd || !flag) st = mid;\n\t\t\telse ed = mid;\n\t\t}\n\t\tcout << fixed << setprecision(10) << st << \"\\n\";\n\t}\n\treturn 0;\n}\n  \t \t    \t\t   \t\t   \t  \t \t\t\t\t\t"
+}

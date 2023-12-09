@@ -1,0 +1,37 @@
+{
+    "id": 229418966,
+    "contestId": 1718,
+    "creationTimeSeconds": 1698063230,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1718,
+        "index": "F",
+        "name": "Burenka, an Array and Queries",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3300,
+        "tags": [
+            "data structures",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1718,
+        "members": [
+            {
+                "handle": "Smallbasic"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1660660500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 701,
+    "memoryConsumedBytes": 31334400,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nconst int prime[66] = {0, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313};\r\n\r\ninline int read() {\r\n\tregister int s = 0, f = 1; register char ch = getchar();\r\n\twhile (!isdigit(ch)) f = (ch == '-' ? -1 : 1), ch = getchar();\r\n\twhile (isdigit(ch)) s = (s * 10) + (ch & 15), ch = getchar();\r\n\treturn s * f;\r\n}\r\n\r\nconst int N = 1e5 + 5, B = 300;\r\n\r\nint n, m, C, q, a[N];\r\nint b[N], c[N], res[N], vis[N];\r\nmap<__int128, int> f;\r\n\r\ninline void add(int x) {\r\n\tif (x == 1) return ;\r\n\t++vis[x]; if (vis[x] == 1) ++b[C / x];\r\n}\r\n\r\ninline void del(int x) {\r\n\tif (x == 1) return ;\r\n\t--vis[x]; if (!vis[x]) --b[C / x];\r\n}\r\n\r\nint p[N], cnt = 0;\r\n\r\ninline int dfs(int now, int pp, int fl) {\r\n\tif (now > cnt) return C / pp * fl;\r\n\tint res = dfs(now + 1, pp, fl);\r\n\tif (pp <= C / p[now]) res += dfs(now + 1, pp * p[now], -fl);\r\n\treturn res;\r\n}\r\n\r\nstruct Query {\r\n\tint id, l, r;\r\n} Q[N];\r\n\r\ninline bool cmp(Query a, Query b) {\r\n\treturn (a.l / B) == (b.l / B) ? (a.r > b.r) : (a.l < b.l);\r\n}\r\n\r\nbitset<66> d[N];\r\nint sum[66][N];\r\n\r\nint main() {\r\n\tn = read(); m = read(); C = read(); q = read();\r\n\tfor (int i = 1; i <= n; ++i) a[i] = read();\r\n\tfor (int i = 1; i <= n; ++i) {\r\n\t\tfor (int j = 1; j <= 65; ++j) {\r\n\t\t\tif (!(a[i] % prime[j])) {\r\n\t\t\t\td[i][j] = 1;\r\n\t \t\t\twhile (!(a[i] % prime[j])) a[i] /= prime[j];\r\n\t \t\t}\r\n\t \t\tsum[j][i] = d[i][j] + sum[j][i - 1];\r\n\t\t}\r\n\t}\r\n\tfor (int i = 1; i <= q; ++i) {\r\n\t\tQ[i].id = i; Q[i].l = read(); Q[i].r = read();\r\n\t}\r\n\tsort(Q + 1, Q + q + 1, cmp);\r\n\tint l = 1, r = 0;\r\n\tfor (int i = 1; i <= q; ++i) {\r\n\t\twhile (r < Q[i].r) add(a[++r]);\r\n\t\twhile (r > Q[i].r) del(a[r--]);\r\n\t\twhile (l < Q[i].l) del(a[l++]);\r\n\t\twhile (l > Q[i].l) add(a[--l]);\r\n\t\tcnt = 0; __int128 st = 0;\r\n\t\tfor (int j = 1; j <= 65; ++j) {\r\n\t\t\tif (sum[j][l - 1] != sum[j][r]) {\r\n\t\t\t\tst |= 1 << j;\r\n\t\t\t\tp[++cnt] = prime[j];\r\n\t\t\t}\r\n\t\t} int &ans = res[Q[i].id]; ans = 0;\r\n\t\tif (f.find(st) == f.end()) f[st] = dfs(1, 1, 1);\r\n\t\tans = f[st];\r\n\t\tfor (int j = 1; j <= 320; ++j) c[j] = 1;\r\n\t\tfor (int j = 1; j <= cnt; ++j)\r\n\t\t\tfor (int k = p[j]; k <= 320; k += p[j]) c[k] = 0;\r\n\t\tfor (int j = 1; j <= 320; ++j) {\r\n\t\t\tc[j] += c[j - 1];\r\n\t\t\tans -= b[j] * c[j];\r\n\t\t} \r\n\t}\r\n\tfor (int i = 1; i <= q; ++i) printf(\"%d\\n\", res[i]);\r\n\treturn 0;\r\n} "
+}

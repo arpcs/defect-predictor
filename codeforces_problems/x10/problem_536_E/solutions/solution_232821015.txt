@@ -1,0 +1,37 @@
+{
+    "id": 232821015,
+    "contestId": 536,
+    "creationTimeSeconds": 1700030755,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 536,
+        "index": "E",
+        "name": "Tavas on the Path",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 536,
+        "members": [
+            {
+                "handle": "Spouter_27"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1429029300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 101,
+    "timeConsumedMillis": 888,
+    "memoryConsumedBytes": 36044800,
+    "source": "// LUOGU_RID: 135192526\n#include<bits/stdc++.h>\r\nusing namespace std;\r\n//#define int long long\r\n#define debug(x) cerr<<\"Line: \"<<__LINE__<<\", val= \"<<x<<\"; \\n\"\r\ntypedef long long ll;\r\n#define pii pair<ll,ll>\r\n#define mp make_pair\r\n#define fi first\r\n#define se second\r\nconst ll N=1e5+10;\r\ninline ll read(){\r\n\tll a=0,x=1;\r\n\tchar c=getchar();\r\n\twhile(!isdigit(c)){\r\n\t\tif(c=='-')\tx=-x;\r\n\t\tc=getchar();\r\n\t}\r\n\twhile(isdigit(c)){\r\n\t\ta=a*10+c-'0';\r\n\t\tc=getchar();\r\n\t}\r\n\treturn a*x;\r\n}\r\nll n,m,f[N],v[N],p[N],ans[N];\r\nll wt[N<<1],nt[N<<1],hd[N],to[N<<1],tt;\r\nll fa[N],sz[N],bs[N],tp[N],de[N],dfn[N],seq[N],dfa=0;\r\nvoid push(ll u,ll v,ll l){\r\n\tto[++tt]=v,wt[tt]=l;\r\n\tnt[tt]=hd[u];hd[u]=tt;\r\n} \r\nvoid dfs1(ll nw,ll en){\r\n\tfa[nw]=en;\r\n\tsz[nw]=1;\r\n\tde[nw]=de[en]+1;\r\n\tfor(int i=hd[nw];i;i=nt[i]){\r\n\t\tif(to[i]==en)\tcontinue;\r\n\t\tv[to[i]]=wt[i];\r\n\t\tdfs1(to[i],nw);\r\n\t\tsz[nw]+=sz[to[i]];\r\n\t\tif(!bs[nw]||sz[bs[nw]]<sz[to[i]])\tbs[nw]=to[i];\r\n\t}\r\n}\r\nvoid dfs2(ll nw,ll top){\r\n\ttp[nw]=top;\r\n\tdfn[nw]=++dfa;\r\n\tseq[dfa]=nw;\r\n\tif(bs[nw])\tdfs2(bs[nw],top);\r\n\tfor(int i=hd[nw];i;i=nt[i]){\r\n\t\tif(to[i]==fa[nw]||to[i]==bs[nw])\tcontinue;\r\n\t\tdfs2(to[i],to[i]);\r\n\t}\r\n}\r\nbool cmp(const ll &a1,const ll &a2){\r\n\treturn v[a1]<v[a2];\r\n}\r\nstruct Q{\r\n\tll u,v,l,id;\r\n\tbool operator<(const Q &a1) const{\r\n\t\treturn l<a1.l;\r\n\t}\r\n}q[N];\r\nstruct node{\r\n\tll lf,rf,sum;\r\n\tbool al;\r\n\tnode(){lf=rf=sum=0,al=false;}\r\n}t[N<<2];\r\nnode merge(node a,node b){\r\n\tnode c;\r\n\tif(a.al&&b.al){\r\n\t\tc.al=true;\r\n\t\tc.lf=c.rf=a.lf+b.lf;\r\n\t}else if(a.al){\r\n\t\tc.lf=a.lf+b.lf,c.rf=b.rf,c.sum=b.sum;\r\n\t}else if(b.al){\r\n\t\tc.lf=a.lf,c.rf=a.rf+b.rf,c.sum=a.sum;\r\n\t}else{\r\n\t\tc.lf=a.lf,c.rf=b.rf;c.sum=a.sum+b.sum+f[a.rf+b.lf];\r\n\t}\r\n\treturn c;\r\n}\r\nnode rev(node a){\r\n\tswap(a.lf,a.rf);\r\n\treturn a;\r\n}\r\n#define ls (nw<<1)\r\n#define rs ((nw<<1)|1)\r\n#define mid ((l+r)>>1)\r\nvoid pushup(ll nw){\r\n\tt[nw]=merge(t[ls],t[rs]);\r\n}\r\nvoid update(ll nw,ll l,ll r,ll x){\r\n\tif(l==r){\r\n\t\tt[nw].lf=t[nw].rf=1;\r\n\t\tt[nw].al=true;\r\n\t\treturn;\r\n\t}\r\n\tif(x<=mid)\tupdate(ls,l,mid,x);\r\n\telse update(rs,mid+1,r,x);\r\n\tpushup(nw);\r\n}\r\nnode query(ll nw,ll l,ll r,ll x,ll y){\r\n\tif(x<=l&&r<=y){\r\n\t\treturn t[nw];\r\n\t}\r\n\tif(y<=mid)\treturn query(ls,l,mid,x,y);\r\n\tif(x>mid)\treturn query(rs,mid+1,r,x,y);\r\n\treturn merge(query(ls,l,mid,x,y),query(rs,mid+1,r,x,y));\r\n}\r\nsigned main(){\r\n//\tfreopen(\"1.in\",\"r\",stdin);\r\n//\tfreopen(\"out.out\",\"w\",stdout);\r\n\tn=read(),m=read();\r\n\tfor(int i=1;i<n;i++){\r\n\t\tf[i]=read();\r\n\t}\r\n\tfor(int i=1;i<n;i++){\r\n\t\tll u=read(),v=read(),l=read();\r\n\t\tpush(u,v,l),push(v,u,l);\r\n\t}\r\n\tfor(int i=2;i<=n;i++)\tp[i]=i;\r\n\tdfs1(1,0);\r\n\tdfs2(1,1);\r\n\tsort(p+2,p+n+1,cmp);\r\n\tfor(int i=1;i<=m;i++){\r\n\t\tq[i].id=i;q[i].u=read(),q[i].v=read(),q[i].l=read();\r\n\t}\r\n\tsort(q+1,q+m+1);\r\n\tfor(int i=m,it=n;i>=1;i--){\r\n\t\twhile(v[p[it]]>=q[i].l)\tupdate(1,1,n,dfn[p[it]]),it--;\r\n\t\tnode res,a[2];\r\n\t\tll flag=0,x=q[i].u,y=q[i].v;\r\n\t\twhile(tp[x]!=tp[y]){\r\n\t\t\tif(de[tp[x]]<de[tp[y]])\tswap(x,y),flag^=1;\r\n\t\t\ta[flag]=merge(query(1,1,n,dfn[tp[x]],dfn[x]),a[flag]);\r\n\t\t\tx=fa[tp[x]];\r\n\t\t}\r\n\t\tif(x==y)\tres=merge(rev(a[0]),a[1]);\r\n\t\telse{\r\n\t\t\tif(de[x]<de[y])\tswap(x,y),flag^=1;\r\n\t\t\tif(!flag)\tres=merge(merge(rev(a[0]),rev(query(1,1,n,dfn[y]+1,dfn[x]))),a[1]);\r\n\t\t\telse \t\t\tres=merge(merge(rev(a[0]),query(1,1,n,dfn[y]+1,dfn[x])),a[1]);\r\n\t\t}\r\n\t\tif(res.al)\tans[q[i].id]=f[res.lf];\r\n\t\telse ans[q[i].id]=f[res.lf]+f[res.rf]+res.sum;\r\n\t}\r\n\tfor(int i=1;i<=m;i++){\r\n\t\tprintf(\"%lld\\n\",ans[i]);\r\n\t}\r\n\treturn 0;\r\n}"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 75984291,
+    "contestId": 295,
+    "creationTimeSeconds": 1586431831,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "islammohsen"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 248,
+    "memoryConsumedBytes": 221286400,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\n\r\nconst int mod = 1e9 + 7;\r\nconst int N = 51;\r\nint level[N][N][N][N][2], fact[N], inv[N], total_50, total_100, k;\r\nvector<tuple<int, int, int, int, int, bool>> g[N][N][N][N][2];\r\n\r\nint add(int a, int b)\r\n{\r\n\treturn (a + b) % mod;\r\n}\r\n\r\nint mul(int a, int b)\r\n{\r\n\treturn (1ll * a * b) % mod;\r\n}\r\n\r\nint fastpow(int b, int p)\r\n{\r\n\tif(!p)\r\n\t\treturn 1;\r\n\tint ret = fastpow(b, p / 2);\r\n\tret = mul(ret, ret);\r\n\tif(p & 1)\r\n\t\tret = mul(ret, b);\r\n\treturn ret;\r\n}\r\n\r\nvoid pre()\r\n{\r\n\tfact[0] = inv[0] = 1;\r\n\tfor(int i = 1; i < N; i++)\r\n\t\tfact[i] = mul(fact[i - 1], i), inv[i] = fastpow(fact[i], mod - 2);\r\n}\r\n\r\nint ncr(int n, int r)\r\n{\r\n\tif(r > n)\r\n\t\treturn 0;\r\n\treturn mul(fact[n], mul(inv[r], inv[n - r]));\r\n}\r\n\r\nvoid bfs()\r\n{\r\n\tfor(int i1 = 0; i1 < N; i1++)\r\n\t\tfor(int i2 = 0; i2 < N; i2++)\r\n\t\t\tfor(int i3 = 0; i3 < N; i3++)\r\n\t\t\t\tfor(int i4 = 0; i4 < N; i4++)\r\n\t\t\t\t\tfor(int i5 = 0; i5 < 2; i5++)\r\n\t\t\t\t\t\tlevel[i1][i2][i3][i4][i5] = 1e9;\r\n\tlevel[total_50][total_100][0][0][0] = 0;\r\n\tqueue<tuple<int, int, int, int, bool>> que;\r\n\tque.push(make_tuple(total_50, total_100, 0, 0, 0));\r\n\twhile(que.size())\r\n\t{\r\n\t\tint left_50, left_100, right_50, right_100;\r\n\t\tbool right;\r\n\t\ttie(left_50, left_100, right_50, right_100, right) = que.front();\r\n\t\tque.pop();\r\n\t\tif(!right)\r\n\t\t{\r\n\t\t\tfor(int tk1 = 0; tk1 <= left_50; tk1++)\r\n\t\t\t\tfor(int tk2 = 0; tk2 <= left_100; tk2++)\r\n\t\t\t\t{\r\n\t\t\t\t\tif(tk1 + tk2 == 0 || tk1 * 50 + tk2 * 100 > k)\r\n\t\t\t\t\t\tcontinue;\r\n\t\t\t\t\tint nwl_50 = left_50 - tk1, nwl_100 = left_100 - tk2, nwr_50 = right_50 + tk1, nwr_100 = right_100 + tk2;\r\n\t\t\t\t\tif(level[left_50][left_100][right_50][right_100][0] + 1 <= level[nwl_50][nwl_100][nwr_50][nwr_100][1])\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tif(level[left_50][left_100][right_50][right_100][0] + 1 < level[nwl_50][nwl_100][nwr_50][nwr_100][1])\r\n\t\t\t\t\t\t\tque.push(make_tuple(nwl_50, nwl_100, nwr_50, nwr_100, 1));\r\n\t\t\t\t\t\tg[left_50][left_100][right_50][right_100][0].push_back(make_tuple(mul(ncr(left_50, tk1), ncr(left_100, tk2)),nwl_50, nwl_100, nwr_50, nwr_100, 1));\r\n\t\t\t\t\t\tlevel[nwl_50][nwl_100][nwr_50][nwr_100][1] = level[left_50][left_100][right_50][right_100][0] + 1;\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tfor(int tk1 = 0; tk1 <= right_50; tk1++)\r\n\t\t\t\tfor(int tk2 = 0; tk2 <= right_100; tk2++)\r\n\t\t\t\t{\r\n\t\t\t\t\tif(tk1 + tk2 == 0 || tk1 * 50 + tk2 * 100 > k)\r\n\t\t\t\t\t\tcontinue;\r\n\t\t\t\t\tint nwl_50 = left_50 + tk1, nwl_100 = left_100 + tk2, nwr_50 = right_50 - tk1, nwr_100 = right_100 - tk2;\r\n\t\t\t\t\tif(level[left_50][left_100][right_50][right_100][1] + 1 <= level[nwl_50][nwl_100][nwr_50][nwr_100][0])\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tif(level[left_50][left_100][right_50][right_100][1] + 1 < level[nwl_50][nwl_100][nwr_50][nwr_100][0])\r\n\t\t\t\t\t\t\tque.push(make_tuple(nwl_50, nwl_100, nwr_50, nwr_100, 0));\r\n\t\t\t\t\t\tg[left_50][left_100][right_50][right_100][1].push_back(make_tuple(mul(ncr(right_50, tk1), ncr(right_100, tk2)),nwl_50, nwl_100, nwr_50, nwr_100, 0));\r\n\t\t\t\t\t\tlevel[nwl_50][nwl_100][nwr_50][nwr_100][0] = level[left_50][left_100][right_50][right_100][1] + 1;\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\n\r\nint dp[N][N][2];\r\n\r\nint solve(int left_50, int left_100, int right_50, int right_100, bool right)\r\n{\r\n\tif(right_50 == total_50 && right_100 == total_100)\r\n\t\treturn 1;\r\n\tint &ans = dp[left_50][left_100][right];\r\n\tif(~ans)\r\n\t\treturn ans;\r\n\tans = 0;\r\n\tfor(auto &v: g[left_50][left_100][right_50][right_100][right])\r\n\t{\r\n\t\tint ways, nwl_50, nwl_100, nwr_50, nwr_100;\r\n\t\tbool nwr;\r\n\t\ttie(ways, nwl_50, nwl_100, nwr_50, nwr_100, nwr) = v;\r\n\t\tans = add(ans, mul(solve(nwl_50, nwl_100, nwr_50, nwr_100, nwr), ways));\r\n\t}\r\n\treturn ans;\r\n}\r\n\r\nint main()\r\n{\r\n\tios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);\r\n\tpre();\r\n\tint n;\r\n\tcin >> n >> k;\r\n\tfor(int i = 0; i < n; i++)\r\n\t{\r\n\t\tint a;\r\n\t\tcin >> a;\r\n\t\ta == 50 ? total_50++ : total_100++;\r\n\t}\r\n\tbfs();\r\n\tif(level[0][0][total_50][total_100][1] == 1e9)\r\n\t\tcout << -1 << '\\n';\r\n\telse\r\n\t\tcout << level[0][0][total_50][total_100][1] << '\\n';\r\n\tmemset(dp, -1, sizeof dp);\r\n\tcout << solve(total_50, total_100, 0, 0, 0);\r\n\treturn 0;\r\n}\r\n"
+}

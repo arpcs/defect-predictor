@@ -1,0 +1,39 @@
+{
+    "id": 174216438,
+    "contestId": 516,
+    "creationTimeSeconds": 1664609715,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 516,
+        "index": "D",
+        "name": "Drazil and Morning Exercise",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2800,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "trees",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 516,
+        "members": [
+            {
+                "handle": "LLLLLLLLLLZ"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1424190900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 42,
+    "timeConsumedMillis": 390,
+    "memoryConsumedBytes": 11059200,
+    "source": "#include <bits/stdc++.h>\r\n#define LL long long\r\nusing namespace std;\r\ntemplate <typename T> void read(T &x){\r\n\tx = 0; int f = 1; char ch = getchar();\r\n\twhile (!isdigit(ch)) {if (ch == '-') f = -1; ch = getchar();}\r\n\twhile (isdigit(ch)) {x = x * 10 + ch - '0'; ch = getchar();}\r\n\tx *= f;\r\n}\r\ninline void write(int x){if (x > 9) write(x/10); putchar(x%10+'0'); }\r\n\r\nconst int N = 100050;\r\nint To[N<<1],Ne[N<<1],Dis[N<<1],He[N],_;\r\ninline void add(int x,int y,int w){\r\n\t++_; To[_] = y,Ne[_] = He[x],Dis[_] = w,He[x] = _;\r\n\t++_; To[_] = x,Ne[_] = He[y],Dis[_] = w,He[y] = _;\r\n}\r\nint n; LL a[N]; int p[N],fa[N],dpt[N]; vector<int>ch[N];\r\ninline bool cmp(int x,int y){ return (a[x] != a[y]) ? (a[x] > a[y]) : (dpt[x] > dpt[y]); }\r\n\r\nstruct DS{\r\n\tint cnt[N],ans,fa[N],size[N];\r\n\tinline void init(){ memset(cnt,0,(n+1)<<2),ans = 0; for (int i = 1; i <= n; ++i) fa[i] = i,size[i] = 1,++cnt[1]; }\r\n\tinline int Find(int x){ return x == fa[x] ? x : (fa[x] = Find(fa[x])); }\r\n\tinline void Merge(int x,int y){\r\n\t\tx = Find(x),y = Find(y); if (x == y) return;\r\n\t\tif (size[x] > size[y]) swap(x,y);\r\n\t\t--cnt[size[x]],--cnt[size[y]]; size[y] += size[x]; ++cnt[size[y]];\r\n\t\tans = max(ans,size[y]);\r\n\t\tfa[x] = y;\r\n\t}\r\n\tinline void Dec(int x){\r\n\t\tx = Find(x); --cnt[size[x]];\r\n\t\tif (size[x] == ans && !cnt[size[x]]) --ans;\r\n\t\t--size[x]; ++cnt[size[x]];\r\n\t}\r\n\tinline int Ans(){ return ans; }\r\n}T;\r\n\r\nnamespace subtask1{\r\n\tLL dis[N];\r\n\tinline void dfs(int x,int f){ if (f == -1) dis[x] = 0; for (int y,p = He[x]; p ; p = Ne[p]) if ((y=To[p])^f) dis[y] = dis[x] + Dis[p],dfs(y,x); }\r\n\tinline void solve(){\r\n\t\tint i,mx,x,y;\r\n\t\tdfs(1,-1); for (mx = 1,i = 2; i <= n; ++i) if (dis[i] > dis[mx]) mx = i;\r\n\t\tx = mx,dfs(x,-1); for (mx = 1,i = 2; i <= n; ++i) if (dis[i] > dis[mx]) mx = i; y = mx;\r\n\t\tfor (i = 1; i <= n; ++i) a[i] = dis[i];\r\n\t\tdfs(y,-1); for (i = 1; i <= n; ++i) a[i] = max(a[i],dis[i]);\r\n\t}\r\n}\r\n\r\ninline void dfs(int x){\r\n\tdpt[x] = dpt[fa[x]]+1;\r\n\tfor (int y,p = He[x]; p ; p = Ne[p]) if ((y=To[p])^fa[x]) fa[y] = x,dfs(y),ch[x].push_back(y);\r\n}\r\n\r\ninline int solve(LL d){\r\n\tint ans = 1,l,r,x,i;\r\n\tT.init();\r\n\tfor (l = r = 1; l <= n; ++l){\r\n\t\twhile (r < n && a[p[l]]-a[p[r+1]] <= d){\r\n\t\t\t++r; x = p[r];\r\n\t\t\tfor (i = 0; i < ch[x].size(); ++i) T.Merge(x,ch[x][i]);\r\n\t\t}\r\n\t\tans = max(ans,T.Ans());\r\n\t\tT.Dec(p[l]);\r\n\t}\r\n\treturn ans;\r\n}\r\n\r\nint main(){\r\n\tint i,x,y,z,Rt;\r\n\tread(n);\r\n\tfor (i = 1; i < n; ++i) read(x),read(y),read(z),add(x,y,z);\r\n\tsubtask1::solve();\r\n\tfor (Rt = 1,i = 2; i <= n; ++i) if (a[i] < a[Rt]) Rt = i;\r\n\tdfs(Rt);\r\n\tfor (i = 1; i <= n; ++i) p[i] = i;\r\n\tsort(p+1,p+n+1,cmp);\r\n\tint q; LL v;\r\n\tread(q); while (q--) read(v),write(solve(v)),putchar('\\n');\r\n\treturn 0;\r\n}\r\n"
+}

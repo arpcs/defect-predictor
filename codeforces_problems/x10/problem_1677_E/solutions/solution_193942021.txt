@@ -1,0 +1,35 @@
+{
+    "id": 193942021,
+    "contestId": 1677,
+    "creationTimeSeconds": 1676594453,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1677,
+        "index": "E",
+        "name": "Tokitsukaze and Beautiful Subsegments",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1677,
+        "members": [
+            {
+                "handle": "David713"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1652020500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 70,
+    "timeConsumedMillis": 3821,
+    "memoryConsumedBytes": 232345600,
+    "source": "// LUOGU_RID: 102283587\n#include <bits/stdc++.h>\n#define pb push_back\n#define mp make_pair\n#define lob lower_bound\n#define upb upper_bound\n#define fi first\n#define se second\nusing namespace std;\nconst int N = 2e5 + 10, M = 1e6 + 10;\nconst int inf = 0x3f3f3f3f;\ntypedef long long ll;\ntypedef pair <int, int> pii;\ninline int read ()\n{\n\tint x = 0, f = 1;\n\tchar c = getchar ();\n\twhile (c < '0' || c > '9') { if (c == '-') f = -1; c = getchar (); }\n\twhile (c >= '0' && c <= '9') { x = (x << 1) + (x << 3) + (c ^ 48); c = getchar (); }\n\treturn x * f;\n}\nint n, m;\nint a[N], pos[N];\nint L[N], R[N];\nstack <int> st;\nstruct scanline {\n\tint x, l, r, op;\n\tbool operator < (const scanline &A) const {\n\t\treturn (x == A.x) ? l < A.l : x < A.x;\n\t}\n} line[N]; int cntl;\nvector <scanline> vec[N];\nll ans[M];\nvector<pair<pii, pii> > v[N];\nmultiset <int> s;\ninline int find () { return *s.begin(); }\nbool cmp(pair<pii, pii> x, pair<pii, pii> y) {return abs(x.fi.fi) < abs(y.fi.fi);}\nvoid area (int x)\n{\n\tsort (vec[x].begin (), vec[x].end ());\n\tint lst = 0, l, r = R[pos[x]];\n\tfor (auto i : vec[x])\n\t{\n\t\tif (i.op == 1) s.insert (i.l), lst = i.x;\n\t\telse\n\t\t{\n\t\t\tl = find();\n\t\t\ts.erase (s.find(i.l));\n\t\t\tif (i.x > lst)\n\t\t\t{\n\t\t\t\tv[lst].push_back(mp(mp(1, 114514), mp(l, r)));\n\t\t\t\tv[i.x].push_back(mp(mp(-1, 114514), mp(l, r)));\n\t\t\t\t// line[++cntl] = (scanline) {lst, l, r, 1};\n\t\t\t\t// line[++cntl] = (scanline) {i.x, l, r, -1};\n\t\t\t\t// cout << lst << \" \" << i.x - 1 << \" \" << l << \" \" << r << \"\\n\";\n\t\t\t}\n\t\t\tlst = i.x;\n\t\t}\n\t}\n}\nstruct sgt\n{\n    struct node\n    {\n        int l, r;\n        ll sum, sumh;\n        int tagx, tag1, v;\n    }t[N * 4];\n    void pushup(int p)\n    {\n        t[p].sum = t[p << 1].sum + t[p << 1 | 1].sum;\n        t[p].sumh = t[p << 1].sumh + t[p << 1 | 1].sumh;\n    }\n    void pushdown(int p)\n    {\n        t[p << 1].v += t[p].v;\n        t[p << 1 | 1].v += t[p].v;\n        t[p << 1].tag1 -= t[p << 1].tagx * t[p].v;\n        t[p << 1 | 1].tag1 -= t[p << 1 | 1].tagx * t[p].v;\n        t[p << 1].tag1 += t[p].tag1;\n        t[p << 1 | 1].tag1 += t[p].tag1;\n        t[p << 1].tagx += t[p].tagx;\n        t[p << 1 | 1].tagx += t[p].tagx;\n        t[p << 1].sum += (t[p << 1].r - t[p << 1].l + 1) * t[p].v;\n        t[p << 1 | 1].sum += (t[p << 1 | 1].r - t[p << 1 | 1].l + 1) * t[p].v;\n        t[p << 1].sumh += t[p].tagx * t[p << 1].sum + t[p].tag1 * (t[p << 1].r - t[p << 1].l + 1);\n        t[p << 1 | 1].sumh += t[p].tagx * t[p << 1 | 1].sum + t[p].tag1 * (t[p << 1 | 1].r - t[p << 1 | 1].l + 1);\n        t[p].tag1 = t[p].tagx = t[p].v = 0;\n    }\n    void build(int p, int l, int r)\n    {\n        t[p].l = l; t[p].r = r;\n        t[p].sum = t[p].sumh = t[p].v = t[p].tag1 = t[p].tagx = 0;\n        if (l == r)\n        {\n            t[p].sum = 0;\n            return ;\n        }\n        int mid = (l + r) >> 1;\n        build(p << 1, l, mid);\n        build(p << 1 | 1, mid + 1, r);\n        pushup(p);\n    }\n    void modify(int p, int l, int r, int d)\n    {\n        if (t[p].l >= l && t[p].r <= r)\n        {\n            t[p].sum += (t[p].r - t[p].l + 1) * d;\n            t[p].tag1 -= d * t[p].tagx;\n            t[p].v += d;\n            return ;\n        }\n        pushdown(p);\n        int mid = (t[p].l + t[p].r) >> 1;\n        if (l <= mid) modify(p << 1, l, r, d);\n        if (r > mid) modify(p << 1 | 1, l, r, d);\n        pushup(p);\n    }\n    ll query(int p, int l, int r)\n    {\n        if (t[p].l >= l && t[p].r <= r) return t[p].sumh;\n        pushdown(p);\n        int mid = (t[p].l + t[p].r) >> 1;\n        ll res = 0;\n        if (l <= mid) res += query(p << 1, l, r);\n        if (r > mid) res += query(p << 1 | 1, l, r);\n        return res;\n    }\n}T;\nsigned main ()\n{\n\tn = read (), m = read ();\n\tfor (int i = 1; i <= n; i++) a[i] = read (), pos[a[i]] = i;\n    for (int i = 1; i <= n; i++)\n    {\n        while (!st.empty () && a[st.top()] < a[i]) st.pop();\n        L[i] = (st.empty() ? 1 : st.top() + 1);\n        st.push (i);\n    } while (!st.empty ()) st.pop ();\n    for (int i = n; i >= 1; i--)\n    {\n        while (!st.empty () && a[st.top()] < a[i]) st.pop();\n        R[i] = (st.empty() ? n : st.top() - 1);\n        st.push (i);\n    }\n\tfor (int i = 1; i * i <= n; i++)\n\t{\n\t\tfor (int j = i + 1; i * j <= n; j++)\n\t\t{\n\t\t\tint l = min (min (pos[i], pos[j]), pos[i * j]);\n\t\t\tint r = max (max (pos[i], pos[j]), pos[i * j]);\n\t\t\tif (L[pos[i * j]] <= l && r <= R[pos[i * j]])\n\t\t\t{\n\t\t\t\tvec[i * j].pb ((scanline) {L[pos[i * j]], r, R[pos[i * j]], 1});\n\t\t\t\tvec[i * j].pb ((scanline) {l + 1, r, R[pos[i * j]], -1});\n\t\t\t}\n\t\t}\n\t}\n\tfor (int i = 1; i <= n; i++) if (vec[i].size ()) area (i);\n\tfor (int i = 1; i <= m; i++)\n\t{\n\t\tint l = read (), r = read ();\n\t\tv[l - 1].push_back(mp(mp(-2, i), mp(l, r)));\n\t\tv[r].push_back(mp(mp(2, i), mp(l, r)));\n\t}\n\tT.build(1, 1, n);\n\tfor (int i = 1; i <= n; i++)\n\t{\n\t\tsort(v[i].begin(), v[i].end(), cmp);\n        int flag = 1;\n\t\tfor (auto j : v[i])\n\t\t{\n            // cout << i << ' ' << j.fi.fi << ' ' << j.fi.se << ' ' << j.se.fi << ' ' << j.se.se << endl;\n\t\t\tif (abs(j.fi.fi) == 1)\n\t\t\t{\n\t\t\t\tT.modify(1, j.se.fi, j.se.se, j.fi.fi);\n\t\t\t}\n\t\t\telse\n\t\t\t{\n                if (flag)\n                {\n                    flag = 0, T.t[1].tagx++;\n                    T.t[1].sumh += T.t[1].sum;\n                }\n\t\t\t\tans[j.fi.se] += (j.fi.fi / 2) * T.query(1, j.se.fi, j.se.se);\n\t\t\t}\n\t\t}\n        if (flag)\n        {\n            T.t[1].tagx++;\n            T.t[1].sumh += T.t[1].sum;\n        }\n        // cout << T.t[1].sumh << endl;\n\t}\n\tfor (int i = 1; i <= m; i++) printf(\"%lld\\n\", ans[i]);\n\treturn 0;\n}"
+}

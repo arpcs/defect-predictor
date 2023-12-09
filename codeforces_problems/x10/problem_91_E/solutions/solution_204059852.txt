@@ -1,0 +1,36 @@
+{
+    "id": 204059852,
+    "contestId": 91,
+    "creationTimeSeconds": 1682868802,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 91,
+        "index": "E",
+        "name": "Igloo Skyscraper",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2500,
+        "tags": [
+            "data structures",
+            "geometry"
+        ]
+    },
+    "author": {
+        "contestId": 91,
+        "members": [
+            {
+                "handle": "xindubawukong"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1308582000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <algorithm>\r\n#include <any>\r\n#include <array>\r\n#include <bit>\r\n#include <bitset>\r\n#include <cassert>\r\n#include <climits>\r\n#include <cmath>\r\n#include <cstdio>\r\n#include <cstdlib>\r\n#include <cstring>\r\n#include <ctime>\r\n#include <functional>\r\n#include <iomanip>\r\n#include <iostream>\r\n#include <iterator>\r\n#include <list>\r\n#include <map>\r\n#include <numeric>\r\n#include <optional>\r\n#include <queue>\r\n#include <random>\r\n#include <set>\r\n#include <sstream>\r\n#include <stack>\r\n#include <string>\r\n#include <thread>\r\n#include <tuple>\r\n#include <type_traits>\r\n#include <unordered_map>\r\n#include <unordered_set>\r\n#include <utility>\r\n#include <vector>\r\n\r\n#ifdef LOCAL\r\n#include \"debug.h\"\r\n#else\r\n#define debug(...) 19980723\r\n#endif\r\n\r\nusing namespace std;\r\n\r\nusing int64 = long long;\r\n#if _WIN64 || __x86_64__\r\nusing int128 = __int128_t;\r\nusing uint128 = __uint128_t;\r\n#endif\r\nusing uint = unsigned int;\r\nusing uint64 = unsigned long long;\r\n\r\n// mt19937 rng(0);\r\n// mt19937 rng(chrono::high_resolution_clock::now().time_since_epoch().count());\r\n\r\n// ----------------------------------------------------------------------\r\n\r\n#include \"segment_tree.h\"\r\n#include \"tpoint.h\"\r\n\r\nusing Point = TPoint<int64>;\r\n\r\nstruct Info {\r\n  vector<pair<Point, int>> all, c;\r\n  SegmentTree<Info>::Node* node;\r\n  Info() {}\r\n  bool NeedPushDown() { return false; }\r\n  void PushDown() {}\r\n  void Update() {\r\n    if (node->lch) {\r\n      for (auto p : node->lch->info.all) {\r\n        all.push_back(p);\r\n      }\r\n    }\r\n    if (node->rch) {\r\n      for (auto p : node->rch->info.all) {\r\n        all.push_back(p);\r\n      }\r\n    }\r\n    sort(all.begin(), all.end());\r\n    reverse(all.begin(), all.end());\r\n    for (auto [p, id] : all) {\r\n      while (c.size() >= 2) {\r\n        auto& A = c[c.size() - 2].first;\r\n        auto& B = c[c.size() - 1].first;\r\n        if ((p - A) % (B - A) >= 0) {\r\n          c.pop_back();\r\n        } else {\r\n          break;\r\n        }\r\n      }\r\n      if (c.empty() || p.y > c.back().first.y) {\r\n        c.push_back({p, id});\r\n      }\r\n    }\r\n  }\r\n};\r\n\r\nvoid Main() {\r\n  int n, m;\r\n  cin >> n >> m;\r\n  vector<int64> a(n), b(n);\r\n  for (int i = 0; i < n; i++) {\r\n    cin >> a[i] >> b[i];\r\n  }\r\n  SegmentTree<Info> tree(0, n - 1, false);\r\n  tree.root = tree.BuildTree(0, n - 1, [&](int i, Info& info) {\r\n    info.all.push_back({Point(b[i], a[i]), i});\r\n    info.c.push_back({Point(b[i], a[i]), i});\r\n  });\r\n  debug(tree.root->info.all);\r\n  debug(tree.root->info.c);\r\n\r\n  vector<array<int, 4>> q;\r\n  for (int i = 0; i < m; i++) {\r\n    int t, l, r;\r\n    cin >> l >> r >> t;\r\n    l--, r--;\r\n    q.push_back({t, l, r, i});\r\n  }\r\n  sort(q.begin(), q.end());\r\n  debug(q);\r\n  vector<int> ans(m);\r\n  for (auto [t, l, r, id] : q) {\r\n    int64 res = 0;\r\n    for (auto node : tree.GetAllNodes(l, r)) {\r\n      auto& c = node->info.c;\r\n      while (c.size() >= 2) {\r\n        auto& A = c[c.size() - 2].first;\r\n        auto& B = c[c.size() - 1].first;\r\n        if (t * (A.x - B.x) >= B.y - A.y) {\r\n          c.pop_back();\r\n        } else {\r\n          break;\r\n        }\r\n      }\r\n      int p = c.back().second;\r\n      if (a[p] + b[p] * t > res) {\r\n        res = a[p] + b[p] * t;\r\n        ans[id] = p;\r\n      }\r\n    }\r\n  }\r\n  for (int i = 0; i < m; i++) {\r\n    cout << ans[i] + 1 << '\\n';\r\n  }\r\n}\r\n\r\nint main(int argc, char* argv[]) {\r\n  std::ios::sync_with_stdio(false);\r\n  std::cin.tie(nullptr);\r\n#ifdef LOCAL\r\n  freopen(\"../problem_A/A.in\", \"r\", stdin);\r\n  // freopen(\"../problem_A/A.out\", \"w\", stdout);\r\n#endif\r\n  Main();\r\n  return 0;\r\n}\r\n"
+}

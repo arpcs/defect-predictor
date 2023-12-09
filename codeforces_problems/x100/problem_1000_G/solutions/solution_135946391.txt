@@ -1,0 +1,36 @@
+{
+    "id": 135946391,
+    "contestId": 1000,
+    "creationTimeSeconds": 1637136885,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "pzc2004"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 21299200,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\nnamespace IO {\n#define sz (1 << 21 | 1)\n\tchar ibuff[sz], *iS, *iT, c;\n\tinline char gc() { return iS == iT ? iT= (iS= ibuff) + fread(ibuff, 1, sz, stdin), iS == iT ? EOF : *iS++ : *iS++; }\n\ttemplate <class T> inline void read(T &x) {\n\t\tx= 0, c= gc();\n\t\twhile(!isdigit(c)) c= gc();\n\t\twhile(isdigit(c)) x= x * 10 + (c & 15), c= gc();\n\t}\n#undef sz\n}  // namespace IO\nusing IO::read;\n#define N 200001\nint n, q, a[N], head[N], cnt, dep[N], fa[N], top[N], son[N], sz[N], b[N];\nlong long f[N], g[N], h[N], sum[N], dis[N], ans;\nstruct Edge {\n\tint a, b, c;\n} e[N << 1];\ninline void add(int a, int b, int c) {\n\te[++cnt].a= head[a], e[cnt].b= b, e[cnt].c= c, head[a]= cnt;\n}\ninline void dfs1(int x, int y) {\n\tdep[x]= dep[y] + 1, fa[x]= y, sz[x]= 1;\n\tfor(int i= head[x]; i; i= e[i].a) {\n\t\tif(e[i].b == y) continue;\n\t\tdfs1(e[i].b, x), sz[x]+= sz[e[i].b];\n\t\tif(sz[e[i].b] > sz[son[x]]) son[x]= e[i].b;\n\t}\n}\ninline void dfs2(int x, int y) {\n\ttop[x]= y;\n\tif(!son[x]) return;\n\tdfs2(son[x], y);\n\tfor(int i= head[x]; i; i= e[i].a) {\n\t\tif(e[i].b == fa[x] || e[i].b == son[x]) continue;\n\t\tdfs2(e[i].b, e[i].b);\n\t}\n}\ninline int lca(int x, int y) {\n\twhile(top[x] != top[y]) dep[top[x]] > dep[top[y]] ? x= fa[top[x]] : y= fa[top[y]];\n\treturn dep[x] < dep[y] ? x : y;\n}\ninline void dfs3(int x, int y) {\n\tf[x]= a[x];\n\tfor(int i= head[x]; i; i= e[i].a) {\n\t\tif(e[i].b == y) continue;\n\t\tb[e[i].b]= e[i].c * 2, dis[e[i].b]= dis[x] + e[i].c, dfs3(e[i].b, x), f[x]+= max(0ll, f[e[i].b] - b[e[i].b]);\n\t}\n\tfor(int i= head[x]; i; i= e[i].a) {\n\t\tif(e[i].b == y) continue;\n\t\tg[e[i].b]= f[x] - max(0ll, f[e[i].b] - b[e[i].b]);\n\t}\n}\ninline void dfs4(int x, int y) {\n\tsum[x]= sum[y] + g[x];\n\tfor(int i= head[x]; i; i= e[i].a) {\n\t\tif(e[i].b == y) continue;\n\t\th[e[i].b]= max(0ll, h[x] + g[e[i].b] - b[e[i].b]), dfs4(e[i].b, x);\n\t}\n}\nint main() {\n\tread(n), read(q);\n\tfor(int i= 1; i <= n; i++) read(a[i]);\n\tfor(int i= 1, x, y, z; i < n; i++) read(x), read(y), read(z), add(x, y, z), add(y, x, z);\n\tdfs1(1, 0), dfs2(1, 1);\n\tdfs3(1, 0), dfs4(1, 0);\n\twhile(q--) {\n\t\tint x, y, l;\n\t\tread(x), read(y), l= lca(x, y), ans= 0;\n\t\tans= -dis[x] + dis[l] - dis[y] + dis[l] + f[x] + f[y] + sum[x] + sum[y] - 2 * sum[l] - f[l] + h[l];\n\t\tprintf(\"%lld\\n\", ans);\n\t}\n\treturn 0;\n}"
+}

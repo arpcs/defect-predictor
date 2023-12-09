@@ -1,0 +1,38 @@
+{
+    "id": 232658375,
+    "contestId": 1556,
+    "creationTimeSeconds": 1699893310,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1556,
+        "index": "H",
+        "name": "DIY Tree",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3300,
+        "tags": [
+            "graphs",
+            "greedy",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1556,
+        "members": [
+            {
+                "handle": "MidoriFuse"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1630247700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 143,
+    "timeConsumedMillis": 3150,
+    "memoryConsumedBytes": 1843200,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define rep(i, a, b) for(int i = a; i < (b); ++i)\r\n#define all(x) begin(x), end(x)\r\n#define sz(x) (int)(x).size()\r\ntypedef long long ll;\r\ntypedef pair<int, int> pii;\r\ntypedef vector<int> vi;\r\ntemplate<typename T> using min_heap = priority_queue<T, vector<T>, greater<T>>;\r\n\r\ntemplate<class M1, class M2> struct WeightedMatroidIsect {\r\n\tint n;\r\n\tll cost = 0, inf = 1e18;\r\n\tvi iset; // true if included in answer\r\n\tvector<ll> s1, s2; // split weight/potential functions\r\n\tM1 m1; M2 m2;\r\n\tWeightedMatroidIsect(M1 m1, M2 m2, vector<ll> w)\r\n\t\t: n(sz(w)), iset(n), s1(w), s2(n+1), m1(m1), m2(m2) {\r\n\t\t\tiset.push_back(1); // for dummy source/sink node\r\n\t\t\ts1.push_back(0);\r\n\t\t}\r\n\tvi nei(auto& m, int x) {\r\n\t\tvi res; m.clear(); \r\n\t\t// possible speed-up: precompute circuits  /// exclude-line\r\n\t\trep(y,0,n) if(y != x && iset[y]) m.add(y);\r\n\t\trep(y,0,n) if(!iset[y] && m.check(y)) res.push_back(y);\r\n\t\treturn res;\r\n\t}\r\n\tbool augment() {\r\n\t\tvector<vector<pair<int,ll>>> g(n+1);\r\n\t\trep(x,0,n+1) if (iset[x]) {\r\n\t\t\tfor (int y: nei(m1,x)) g[y].emplace_back(x, s1[x]-s1[y]);\r\n\t\t\tfor (int y: nei(m2,x)) g[x].emplace_back(y, s2[x]-s2[y]);\r\n\t\t}\r\n \r\n\t\tvector<ll> dist(n+1, inf);\r\n\t\tvi dad(n+1, -1);\r\n\t\tpriority_queue<pair<ll,int>> q;\r\n\t\tq.emplace(0,n); // when unweighted, consider replacing\r\n\t\twhile(!q.empty()) { // dijkstra with bfs, and ignore s1/s2\r\n\t\t\tauto [d, x] = q.top();\r\n\t\t\tq.pop();\r\n\t\t\td = -d;\r\n\t\t\tif (x == n && dad[n] != -1) continue;\r\n\t\t\tif (d > dist[x]) continue;\r\n\t\t\tfor (auto [y, w]: g[x]) if (dist[y] > d + w) {\r\n\t\t\t\tdist[y] = d + w;\r\n\t\t\t\tdad[y] = x;\r\n\t\t\t\tq.emplace(-dist[y], y);\r\n\t\t\t}\r\n\t\t}\r\n \r\n\t\tif (dad[n] == -1) return false;\r\n\t\tcost -= dist[n];\r\n\t\trep(x,0,n) if (dad[x] != -1) {\r\n\t\t\ts1[x] -= dist[x];\r\n\t\t\ts2[x] += dist[x];\r\n\t\t}\r\n\t\tfor (int x = dad[n]; x != n; x = dad[x]) iset[x] ^= 1;\r\n\t\treturn true;\r\n\t}\r\n\tpair<int, ll> solve() { // (sz, cost)\r\n\t\t// >= 2*speedup for unweighted:\r\n\t\t// rep(i,0,n) if(m1.check(i) && m2.check(i))\r\n\t\t//   m1.add(i), m2.add(i), iset[i] = 1;\r\n\t\twhile (augment()); // increases intersection size by 1\r\n\t\treturn {count(all(iset)-1,1), cost};\r\n\t}\r\n};\r\n\r\nstruct UF {\r\n\tvi e;\r\n\tUF(int n = 0) : e(n, -1) {}\r\n\tbool sameSet(int a, int b) { return find(a) == find(b); }\r\n\tint size(int x) { return -e[find(x)]; }\r\n\tint find(int x) { return e[x] < 0 ? x : e[x] = find(e[x]); }\r\n\tbool join(int a, int b) {\r\n\t\ta = find(a), b = find(b);\r\n\t\tif (a == b) return false;\r\n\t\tif (e[a] > e[b]) swap(a, b);\r\n\t\te[a] += e[b]; e[b] = a;\r\n\t\treturn true;\r\n\t}\r\n};\r\n\r\nstruct Matroid1{\r\n\tUF ufbase, uf;\r\n\tvector<pii> e;\r\n\tMatroid1(vector<pii> ed, UF bs, int n) {\r\n\t\te = ed;\r\n\t\tufbase = bs; uf = bs;\r\n\t}\r\n\tbool check(int x) {\r\n\t\tauto [u, v] = e[x];\r\n\t\treturn !uf.sameSet(u, v);\r\n\t}\r\n\tvoid add(int x) {\r\n\t\tauto [u, v] = e[x];\r\n\t\tuf.join(u, v);\r\n\t}\r\n\tvoid clear() {\r\n\t\tuf = ufbase;\r\n\t}\r\n};\r\n\r\nstruct Matroid2{\r\n\tvector<pii> e;\r\n\tvi d, cur;\r\n\tMatroid2(vector<pii> ed, vi cons) {\r\n\t\te = ed; d = cons; cur.resize(cons.size());\r\n\t}\r\n\tbool check(int x) {\r\n\t\tauto [u, v] = e[x];\r\n\t\tif (u < d.size() && cur[u] == d[u]) return 0;\r\n\t\tif (v < d.size() && cur[v] == d[v]) return 0;\r\n\t\treturn 1;\r\n\t}\r\n\tvoid add(int x) {\r\n\t\tauto [u, v] = e[x];\r\n\t\tif (u < d.size()) cur[u]++;\r\n\t\tif (v < d.size()) cur[v]++;\r\n\t}\r\n\tvoid clear() {\r\n\t\tfill(all(cur), 0);\r\n\t}\r\n};\r\n\r\nsigned main() {\r\n\tios::sync_with_stdio(0); cin.tie(0);\r\n\t\r\n\tint n, k; cin >> n >> k;\r\n\tvector<int> d(k);\r\n\tfor (int &i: d) cin >> i;\r\n\r\n\tvector<pii> ed, ed2; vector<ll> w, w2;\r\n\tvector<tuple<ll, int, int>> edges;\r\n\tfor (int i = 0; i < n; i++) {\r\n\t\tfor (int j = i+1; j < n; j++) {\r\n\t\t\tint x; cin >> x;\r\n\t\t\tif (i < k && j < k) {\r\n\t\t\t\ted2.emplace_back(i, j);\r\n\t\t\t\tw2.push_back(x);\r\n\t\t\t} else if (i >= k && j >= k) {\r\n\t\t\t\tedges.emplace_back(x, i, j);\r\n\t\t\t} else {\r\n\t\t\t\ted.emplace_back(i, j);\r\n\t\t\t\tw.push_back(-x);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\r\n\tUF ufc(n);\r\n\tsort(edges.begin(), edges.end());\r\n\tfor (auto [x, u, v]: edges) {\r\n\t\tif (ufc.join(u, v)) {\r\n\t\t\ted.emplace_back(u, v);\r\n\t\t\tw.push_back(-x);\r\n\t\t}\r\n\t}\r\n\r\n\tint m = ed2.size(); ll ans = 1e18;\r\n\tfor (int i = 0; i < (1 << m); i++) {\r\n\t\tif (__builtin_popcount(i) > k-1) continue;\r\n\r\n\t\tUF uff(n); ll tmp = 0; bool ok = 1; vector<int> icd = d;\r\n\t\tfor (int j = 0; j < m; j++) {\r\n\t\t\tif (i & (1 << j)) {\r\n\t\t\t\tauto [u, v] = ed2[j];\r\n\t\t\t\tif (!uff.join(u, v)) {\r\n\t\t\t\t\tok = 0; break;\r\n\t\t\t\t}\r\n\t\t\t\ticd[u]--; icd[v]--;\r\n\t\t\t\tif (icd[u] < 0) {\r\n\t\t\t\t\tok = 0; break;\r\n\t\t\t\t}\r\n\t\t\t\tif (icd[v] < 0) {\r\n\t\t\t\t\tok = 0; break;\r\n\t\t\t\t}\r\n\t\t\t\ttmp += w2[j];\r\n\t\t\t}\r\n\t\t}\r\n\t\tif (!ok) continue;\r\n\r\n\t\tMatroid1 m1(ed, uff, n);\r\n\t\tMatroid2 m2(ed, icd);\r\n\t\tWeightedMatroidIsect wmi(m1, m2, w);\r\n\t\tauto [cnt, ww] = wmi.solve();\r\n\r\n\t\tif (cnt+__builtin_popcount(i) == n-1) ans = min(ans, tmp + (-ww));\r\n\t}\r\n\tcout << ans << '\\n';\r\n\r\n\treturn 0;\r\n}\r\n"
+}

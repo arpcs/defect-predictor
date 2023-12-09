@@ -1,0 +1,35 @@
+{
+    "id": 18532817,
+    "contestId": 683,
+    "creationTimeSeconds": 1466118977,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 683,
+        "index": "I",
+        "name": "Loader",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "*special",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 683,
+        "members": [
+            {
+                "handle": "udalov"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1466092800
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 50,
+    "timeConsumedMillis": 3587,
+    "memoryConsumedBytes": 225075200,
+    "source": "import java.io.File\r\nimport java.util.*\r\nimport kotlin.comparisons.compareBy\r\nimport kotlin.system.measureNanoTime\r\n\r\ndata class Cell(val x: Int, val y: Int)\r\n\r\ndata class State(val crateX: Int, val crateY: Int, val loaderX: Int, val loaderY: Int) {\r\n    private val hashCode = ((crateX * 31 + crateY) * 31 + loaderX) * 31 + loaderY\r\n\r\n    override fun hashCode() = hashCode\r\n}\r\n\r\nclass DistanceMap {\r\n    val arr = IntArray(40 * 40 * 40 * 40)\r\n\r\n    private val State.key: Int\r\n        get() = crateX * 64000 + crateY * 1600 + loaderX * 40 + loaderY\r\n\r\n    operator fun get(state: State): Int {\r\n        return arr[state.key]\r\n    }\r\n\r\n    operator fun set(state: State, value: Int) {\r\n        arr[state.key] = value\r\n    }\r\n}\r\n\r\nenum class Direction(val dx: Int, val dy: Int) {\r\n    NORTH(-1, 0),\r\n    EAST(0, 1),\r\n    SOUTH(1, 0),\r\n    WEST(0, -1);\r\n\r\n    companion object {\r\n        val ALL = values()\r\n    }\r\n}\r\n\r\nclass Solution(val n: Int, val m: Int, val board: List<String>) {\r\n    fun isFree(x: Int, y: Int): Boolean =\r\n            0 <= x && x < n && 0 <= y && y < m && board[x][y] != 'X'\r\n\r\n    fun solve(): String? {\r\n        val startCrate = findCell('B')\r\n        val startLoader = findCell('Y')\r\n        val start = State(startCrate.x, startCrate.y, startLoader.x, startLoader.y)\r\n        val goal = findCell('T')\r\n\r\n        val dist = DistanceMap()\r\n        val queue = PriorityQueue<State>(compareBy { dist[it] })\r\n        val prev = HashMap<State, State>()\r\n        dist[start] = 0\r\n        prev[start] = start\r\n        queue.add(start)\r\n\r\n        var finalState: State? = null\r\n\r\n        while (queue.isNotEmpty()) {\r\n            val state = queue.poll()\r\n            val (crateX, crateY, loaderX, loaderY) = state\r\n            if (crateX == goal.x && crateY == goal.y) {\r\n                finalState = state\r\n                break\r\n            }\r\n            val curDist = dist[state]\r\n\r\n            for (direction in Direction.ALL) {\r\n                val newLoaderX = loaderX + direction.dx\r\n                val newLoaderY = loaderY + direction.dy\r\n                if (!isFree(newLoaderX, newLoaderY)) continue\r\n\r\n                var newDist = curDist + 1\r\n                val next =\r\n                        if (newLoaderX == crateX && newLoaderY == crateY) {\r\n                            val newCrateX = crateX + direction.dx\r\n                            val newCrateY = crateY + direction.dy\r\n                            if (!isFree(newCrateX, newCrateY)) continue\r\n                            newDist += 1 shl 16\r\n                            State(newCrateX, newCrateY, newLoaderX, newLoaderY)\r\n                        }\r\n                        else State(crateX, crateY, newLoaderX, newLoaderY)\r\n\r\n                val notEncountered = !prev.containsKey(next)\r\n                if (notEncountered || dist[next] > newDist) {\r\n                    prev[next] = state\r\n                    dist[next] = newDist\r\n                    if (notEncountered) {\r\n                        queue.add(next)\r\n                    }\r\n                }\r\n            }\r\n        }\r\n\r\n        var state = finalState ?: return null\r\n        val ans = StringBuilder()\r\n        while (true) {\r\n            val previous = prev[state]!!\r\n            if (previous == state) break\r\n            val direction = Direction.ALL.single {\r\n                it.dx == state.loaderX - previous.loaderX && it.dy == state.loaderY - previous.loaderY\r\n            }\r\n            val char = direction.name.first().toString()\r\n            ans.append(if (previous.crateX != state.crateX || previous.crateY != state.crateY) char.toUpperCase() else char.toLowerCase())\r\n            state = previous\r\n        }\r\n\r\n        return ans.toString().reversed()\r\n    }\r\n\r\n    fun findCell(char: Char): Cell {\r\n        for (i in board.indices) {\r\n            for (j in board[i].indices) {\r\n                if (board[i][j] == char) return Cell(i, j)\r\n            }\r\n        }\r\n        error(\"No cell with $char found\")\r\n    }\r\n}\r\n\r\nfun main(args: Array<String>) {\r\n    val (n, m) = readLine()!!.split(' ').map(String::toInt)\r\n    val board = (1..n).map { readLine()!! }\r\n    Solution(n, m, board).solve()?.let { result ->\r\n        println(\"YES\")\r\n        println(result)\r\n    } ?: println(\"NO\")\r\n}\r\n"
+}

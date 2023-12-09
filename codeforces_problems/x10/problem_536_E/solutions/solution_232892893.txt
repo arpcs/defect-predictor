@@ -1,0 +1,37 @@
+{
+    "id": 232892893,
+    "contestId": 536,
+    "creationTimeSeconds": 1700072437,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 536,
+        "index": "E",
+        "name": "Tavas on the Path",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 536,
+        "members": [
+            {
+                "handle": "Iliya"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1429029300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 561,
+    "memoryConsumedBytes": 25292800,
+    "source": "//IN THE NAME OF GOD\n#include<bits/stdc++.h>\n#pragma GCC optimize(\"O2,unroll-loops\")\n#define endl        '\\n'\n#define F           first\n#define S           second\n#define all(x)      x.begin(),x.end()\n#define pb          push_back\nusing namespace std;\ntypedef long long ll; \n\nconst int N = 1e5+7;\nstruct dat{int pre = 0, suf = 0, ans = 0, siz = 0;};\ndat seg[N<<2];\nvector<pair<int,int>> g[N], yal;\nvector<pair<int,pair<int,int>>> ch[N];\nvector<pair<pair<int,int>,pair<int,int>>> vec, Q; \nint f[N], e[N][3], mark[N], siz[N], par[N], st[N], now, pl[N], up[N],ans[N];\n\nvoid pre(int v){\n     mark[v] = 1; \n     siz[v] = 1; \n     for(pair<int,int> cur : g[v]){\n          int u = cur.F, id = cur.S; \n          if (mark[u]) continue;\n          pre(u); \n          par[u] = v; \n          siz[v] += siz[u];\n          ch[v].pb({siz[u],{u,id}});\n     }\n     sort(all(ch[v]));\n     reverse(all(ch[v]));\n}\n\nvoid dfs(int v){\n     st[v] = ++now; \n     for(int i=0; i<int(ch[v].size()); i++){\n          int u = ch[v][i].S.F, id = ch[v][i].S.S;\n          pl[id] = u; \n          up[u] = (i == 0 ? up[v] : u);\n          dfs(u); \n     }\n}\n\ndat merge(dat a, dat b){\n     dat make;\n     make.siz = a.siz + b.siz; \n     make.ans += a.ans  - f[a.pre] - f[a.suf] + (a.pre == a.siz ? f[a.pre] : 0);\n     make.ans += b.ans - f[b.pre] - f[b.suf] + (b.pre == b.siz ? f[b.pre] : 0);\n     if (a.suf != a.siz && b.pre != b.siz) make.ans += f[a.suf + b.pre];\n     make.pre = a.pre + (a.pre == a.siz ? b.pre : 0); \n     make.suf = b.suf + (b.suf == b.siz ? a.suf : 0);\n     make.ans += f[make.pre] + f[make.suf] - (make.pre == make.siz ? f[make.pre] : 0);\n     return make;\n}\n\nvoid build(int ind, int l, int r){\n     if (l == r){\n          seg[ind].ans = seg[ind].pre = seg[ind].suf = 0;\n          seg[ind].siz = 1; \n          return;\n     }\n     int mid = (l+r)>>1;\n     build(2*ind,l,mid);\n     build(2*ind+1,mid+1,r);\n     seg[ind] = merge(seg[2*ind],seg[2*ind+1]);\n}\n\nvoid upd(int ind, int l, int r, int id){\n     if (l == r){\n          seg[ind].ans = f[1]; \n          seg[ind].pre = seg[ind].suf = seg[ind].siz = 1; \n          return; \n     }\n     int mid = (l+r)>>1;\n     if (id <= mid) upd(2*ind,l,mid,id); \n     else upd(2*ind+1,mid+1,r,id); \n     seg[ind] = merge(seg[2*ind],seg[2*ind+1]); \n}\n\ndat get(int ind, int l, int r, int st, int en){\n     if (l > en || st > r){\n          dat emp;\n          return emp;\n     }\n     if (l == r || (l >= st && r <= en)) return seg[ind]; \n     int mid = (l+r)>>1; \n     return merge(get(2*ind,l,mid,st,en),get(2*ind+1,mid+1,r,st,en));\n}\n\nint32_t main(){\n     ios::sync_with_stdio(false); cin.tie(0); cout.tie(0);\n\n     int n,q; cin >> n >> q; \n     for(int i=1; i<n; i++) cin >> f[i]; \n     for(int i=1; i<n; i++){\n          int v,u,w; cin >> v >> u >> w; \n          e[i][0] = v; \n          e[i][1] = u; \n          e[i][2] = w; \n          g[v].pb({u,i});\n          g[u].pb({v,i});\n          yal.pb({w,i}); \n     }\n     pre(1); \n     fill(mark+1,mark+n+1,0);\n     up[1] = 1; \n     dfs(1);\n     for(int i=1; i<=q; i++){\n          int v,u,l; cin >> v >> u >> l;\n          Q.pb({{l,i},{v,u}}); \n     }\n     sort(all(Q));\n     reverse(all(Q));\n     sort(all(yal));\n     reverse(all(yal));\n     build(1,1,n);\n     int ind = 0; \n     for(pair<pair<int,int>,pair<int,int>> cur : Q){\n          while(ind < int(yal.size()) && yal[ind].F >= cur.F.F){\n               upd(1,1,n,st[pl[yal[ind].S]]);\n               ind++;\n          }\n          dat vv,uu; \n          int v = cur.S.F, u = cur.S.S;\n          while(up[v] != up[u]){\n               if (st[up[u]] < st[up[v]]){\n                    swap(v,u);\n                    swap(vv,uu);\n               }\n               uu = merge(uu,get(1,1,n,st[up[u]],st[u]));\n               u = par[up[u]];\n          }\n          if (st[v] > st[u]){\n               swap(v,u);\n               swap(vv,uu); \n          }\n          if (st[v] + 1 <= st[u]) uu = merge(uu,get(1,1,n,st[v]+1,st[u]));\n          ans[cur.F.S] = merge(uu,vv).ans; \n     }\n     for(int i=1; i<=q; i++) cout << ans[i] << endl;\n\n     return 0;\n}"
+}

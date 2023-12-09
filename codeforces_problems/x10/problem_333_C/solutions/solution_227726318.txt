@@ -1,0 +1,36 @@
+{
+    "id": 227726318,
+    "contestId": 333,
+    "creationTimeSeconds": 1697050548,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 333,
+        "index": "C",
+        "name": "Lucky Tickets",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2700,
+        "tags": [
+            "brute force",
+            "constructive algorithms"
+        ]
+    },
+    "author": {
+        "contestId": 333,
+        "members": [
+            {
+                "handle": "Be_dos"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1374913800
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 32,
+    "timeConsumedMillis": 4351,
+    "memoryConsumedBytes": 26009600,
+    "source": "#include <iostream>\n#include <cmath>\n#include <cctype>\n#include <vector>\n#include <algorithm>\n#include <set>\n#include <map>\n#include <deque>\n#include <stack>\n#include <unordered_set>\n#include <sstream>\n#include <cstring>\n#include <iomanip>\n#include <queue>\n#include <unordered_map>\n#include <random>\n#include <cfloat>\n#include <chrono>\n#include <bitset>\n#include <complex>\n#include <functional>\n#include <immintrin.h>\n\nstd::set<std::string> ans;\nint32_t** num_variants;\nstd::vector<int32_t>* divisors;\nstd::string* number_strings;\n\nvoid generate_as_product(int32_t x, int32_t digits, std::set<std::string>& res, std::string cur) {\n    if(digits < 0)\n        return;\n    if(x == 1 && digits == 0) {\n        res.insert(cur);\n        return;\n    }\n    for(int32_t d : divisors[x]) {\n        generate_as_product(x / d, digits - number_strings[d].size(), res, cur + number_strings[d]);\n    }\n}\n\nvoid generate_ans(std::vector<std::set<std::string> >& variants, int32_t step, const std::string& cur) {\n    if(step == variants.size()) {\n        ans.insert(cur);\n        return;\n    }\n    for(auto it = variants[step].begin(); it != variants[step].end(); it++)\n        generate_ans(variants, step + 1, cur + *it);\n}\n\nvoid enumerate(int32_t sum, int32_t digits_remain, std::vector<std::pair<int32_t, int32_t> >& vals_cur) {\n    if(sum < 0 || digits_remain < 0)\n        return;\n    if(sum == 0 && digits_remain == 0) {\n        std::vector<std::set<std::string> > variants;\n        for(std::pair<int32_t, int32_t> x : vals_cur) {\n            variants.emplace_back();\n            if(x.first > 0)\n                generate_as_product(x.first, x.second, variants.back(), \"\");\n            else\n                variants.back() = {std::string(x.second, '0')};\n        }\n        generate_ans(variants, 0, \"\");\n        return;\n    }\n    if(digits_remain == 0)\n        return;\n    int32_t max_for_remain = 9;\n    for(int32_t i = 1; i < digits_remain; i++)\n        max_for_remain = max_for_remain * 10 + 9;\n    if(max_for_remain < sum)\n        return;\n    for(int32_t i = 0; i <= std::min(sum, max_for_remain); i++) {\n        for(int32_t j = number_strings[i].size(); j <= digits_remain; j++) {\n            vals_cur.emplace_back(i, j);\n            enumerate(sum - i, digits_remain - j, vals_cur);\n            vals_cur.pop_back();\n            if(ans.size() > 300'000)\n                return;\n        }\n    }\n}\n\nvoid solve_large(int32_t k, int32_t m) {\n    divisors = new std::vector<int32_t>[10'005];\n    for(int32_t i = 1; i <= 10'000; i++) {\n        for(int32_t j = i; j < 10'005; j+=i)\n            divisors[j].push_back(i);\n    }\n\n    number_strings = new std::string[10'005];\n    for(int32_t i = 0; i < 10'005; i++)\n        number_strings[i] = std::to_string(i);\n\n    std::vector<std::pair<int32_t, int32_t> > vals_cur;\n    enumerate(k, 8, vals_cur);\n\n    for(auto it = ans.begin(); it != ans.end() && m > 0; it++) {\n        std::cout << *it << \"\\n\";\n        m--;\n    }\n}\n\nvoid solve_small(int32_t k, int32_t m) {\n    std::mt19937 rng;\n    while(ans.size() < m) {\n        std::string cand = std::to_string(rng() % 100'000'000);\n        while(cand.size() < 8)\n            cand = \"0\" + cand;\n\n        bool good = false;\n        for(int32_t i = 0; i < (1 << 8); i++) {\n            int32_t sum = 0;\n            for(int32_t j = 0; j < 8; j++)\n                if(i & (1 << j))\n                    sum += cand[j] - '0';\n                else\n                    sum -= cand[j] - '0';\n            if(sum == k) {\n                good = true;\n                break;\n            }\n        }\n\n        if(good)\n            ans.insert(cand);\n    }\n\n    for(auto it = ans.begin(); it != ans.end() && m > 0; it++) {\n        std::cout << *it << \"\\n\";\n        m--;\n    }\n}\n\nint main() {\n    std::ios::sync_with_stdio(false);\n    std::cin.tie(0);\n\n    int32_t k, m;\n    std::cin >> k >> m;\n\n    if(k >= 13)\n        solve_large(k, m);\n    else\n        solve_small(k, m);\n    return 0;\n}\n"
+}

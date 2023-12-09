@@ -1,0 +1,34 @@
+{
+    "id": 57799730,
+    "contestId": 1192,
+    "creationTimeSeconds": 1564145374,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "cerberus97"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 185,
+    "timeConsumedMillis": 2292,
+    "memoryConsumedBytes": 293478400,
+    "points": 100.0,
+    "source": "/* cerberus97 - Hanit Banga */\r\n\r\n#include <iostream>\r\n#include <iomanip>\r\n#include <cassert>\r\n#include <cmath>\r\n#include <cstdio>\r\n#include <cstring>\r\n#include <cstdlib>\r\n#include <map>\r\n#include <set>\r\n#include <queue>\r\n#include <stack>\r\n#include <vector>\r\n#include <algorithm>\r\n\r\nusing namespace std;\r\n\r\n#define pb push_back\r\n#define fast_cin() ios_base::sync_with_stdio(false); cin.tie(NULL)\r\n\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef pair <int, int> pii;\r\ntypedef pair <ll, ll> pll;\r\n\r\nconst int N = 1.5e5 + 10, V = 10 * N;\r\n\r\nbool seen[N], is_building[V];\r\nmap<pii, int> all_cells;\r\npriority_queue<int> pq;\r\nint rx[V], ry[V];\r\nvector<int> node_list[V], cyc_nb[V];\r\nint par[V], sz[V];\r\nbool is_free[V];\r\nint cx[8] = {1, 0, -1, -1, -1, 0, 1, 1};\r\nint cy[8] = {1, 1, 1, 0, -1, -1, -1, 0};\r\n\r\nint get_root(int u);\r\nvoid merge(int u, int v, bool ch);\r\nbool check_outside(int x, int y, set<pii> &s);\r\nbool check(int i);\r\nint dfs(int u);\r\n\r\nint main() {\r\n\tfast_cin();\r\n\tint n, t;\r\n\tcin >> n >> t;\r\n\tfor (int i = 1; i <= n; ++i) {\r\n\t\tcin >> rx[i] >> ry[i];\r\n\t\tall_cells[{rx[i], ry[i]}] = i;\r\n\t\tis_building[i] = true;\r\n\t\tfor (int d = 0; d < 8; ++d) {\r\n\t\t\tall_cells[{rx[i] + cx[d], ry[i] + cy[d]}];\r\n\t\t}\r\n\t}\r\n\tint m = n, leftmost = 1;\r\n\tfor (auto &i : all_cells) {\r\n\t\tif (!i.second) {\r\n\t\t\ti.second = ++m;\r\n\t\t}\r\n\t\ttie(rx[i.second], ry[i.second]) = i.first;\r\n\t\tif (rx[i.second] < rx[leftmost]) {\r\n\t\t\tleftmost = i.second;\r\n\t\t}\r\n\t}\r\n\tis_free[leftmost] = true;\r\n\tfor (int i = 1; i <= m; ++i) {\r\n\t\tsz[i] = 1;\r\n\t\tpar[i] = i;\r\n\t\tnode_list[i] = {i};\r\n\t\tfor (int d = 0; d < 8; ++d) {\r\n\t\t\tint x = rx[i] + cx[d];\r\n\t\t\tint y = ry[i] + cy[d];\r\n\t\t\tcyc_nb[i].pb(all_cells[{x, y}]);\r\n\t\t}\r\n\t}\r\n\tfor (int i = 1; i <= m; ++i) {\r\n\t\tfor (int d = 1; d < 8; d += 2) {\r\n\t\t\tint j = cyc_nb[i][d];\r\n\t\t\tif (j and !is_building[i] and !is_building[j]) {\r\n\t\t\t\tmerge(i, j, false);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tif (dfs(1) != n) {\r\n\t\tcout << \"NO\\n\";\r\n\t\treturn 0;\r\n\t}\r\n\tmemset(seen, 0, sizeof(seen));\r\n\tfor (int i = 1; i <= n; ++i) {\r\n\t\tif (check(i)) {\r\n\t\t\tseen[i] = true;\r\n\t\t\tpq.push(i);\r\n\t\t}\r\n\t}\r\n\tvector<int> ans;\r\n\twhile (!pq.empty()) {\r\n\t\tint u = pq.top();\r\n\t\tpq.pop();\r\n\t\tif (!check(u)) {\r\n\t\t\tseen[u] = false;\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tans.pb(u);\r\n\t\tis_building[u] = false;\r\n\t\tfor (int d = 1; d < 8; d += 2) {\r\n\t\t\tint v = cyc_nb[u][d];\r\n\t\t\tif (!is_building[v]) {\r\n\t\t\t\tmerge(u, v, true);\r\n\t\t\t}\r\n\t\t}\r\n\t\tfor (int d = 0; d < 8; ++d) {\r\n\t\t\tint v = cyc_nb[u][d];\r\n\t\t\tif (is_building[v] and !seen[v] and check(v)) {\r\n\t\t\t\tseen[v] = true;\r\n\t\t\t\tpq.push(v);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tif (ans.size() == n) {\r\n\t\tcout << \"YES\\n\";\r\n\t\treverse(ans.begin(), ans.end());\r\n\t\tfor (auto &i : ans) {\r\n\t\t\tcout << i << '\\n';\r\n\t\t}\r\n\t} else {\r\n\t\tcout << \"NO\\n\";\r\n\t}\r\n}\r\n\r\nint get_root(int u) {\r\n\tif (par[u] != u) {\r\n\t\tpar[u] = get_root(par[u]);\r\n\t}\r\n\treturn par[u];\r\n}\r\n\r\nvoid merge(int u, int v, bool ch) {\r\n\tu = get_root(u);\r\n\tv = get_root(v);\r\n\tif (u == v) {\r\n\t\treturn;\r\n\t}\r\n\tif (is_free[v]) {\r\n\t\tswap(u, v);\r\n\t}\r\n\tif (is_free[u] and !is_free[v]) {\r\n\t\tfor (auto &i : node_list[v]) {\r\n\t\t\tis_free[i] = true;\r\n\t\t\tif (ch) {\r\n\t\t\t\tfor (auto &j : cyc_nb[i]) {\r\n\t\t\t\t\tif (is_building[j] and !seen[j] and check(j)) {\r\n\t\t\t\t\t\tseen[j] = true;\r\n\t\t\t\t\t\tpq.push(j);\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tif (sz[u] < sz[v]) {\r\n\t\tswap(u, v);\r\n\t}\r\n\tsz[u] += sz[v];\r\n\tpar[v] = par[u];\r\n\tfor (auto &i : node_list[v]) {\r\n\t\tnode_list[u].pb(i);\r\n\t}\r\n\tnode_list[v].clear();\r\n}\r\n\r\nbool check(int i) {\r\n\tbool free = false;\r\n\tfor (int d = 1; d < 8; d += 2) {\r\n\t\tif (is_free[cyc_nb[i][d]]) {\r\n\t\t\tfree = true;\r\n\t\t\tbreak;\r\n\t\t}\r\n\t}\r\n\tif (!free) {\r\n\t\treturn false;\r\n\t}\r\n\tfor (int d1 = 1; d1 < 8; d1 += 2) {\r\n\t\tfor (int d2 = (d1 + 2); d2 < 8; d2 += 2) {\r\n\t\t\tint u = cyc_nb[i][d1], v = cyc_nb[i][d2];\r\n\t\t\tif (is_building[u] or get_root(u) != get_root(v)) {\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\tbool b1 = false, b2 = false;\r\n\t\t\tfor (int j = (d1 + 1); j < d2; ++j) {\r\n\t\t\t\tif (is_building[cyc_nb[i][j]]) {\r\n\t\t\t\t\tb1 = true;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tfor (int j = (d2 + 1) % 8; j != d1; j = (j + 1) % 8) {\r\n\t\t\t\tif (is_building[cyc_nb[i][j]]) {\r\n\t\t\t\t\tb2 = true;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tif (b1 and b2) {\r\n\t\t\t\treturn false;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn true;\r\n}\r\n\r\nint dfs(int u) {\r\n\tif (seen[u]) {\r\n\t\treturn 0;\r\n\t}\r\n\tseen[u] = true;\r\n\tint ans = 1;\r\n\tfor (auto &v : cyc_nb[u]) {\r\n\t\tif (is_building[v]) {\r\n\t\t\tans += dfs(v);\r\n\t\t}\r\n\t}\r\n\treturn ans;\r\n}"
+}

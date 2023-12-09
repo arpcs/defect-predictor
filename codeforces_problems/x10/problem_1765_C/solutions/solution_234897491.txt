@@ -1,0 +1,36 @@
+{
+    "id": 234897491,
+    "contestId": 1765,
+    "creationTimeSeconds": 1701247389,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1765,
+        "index": "C",
+        "name": "Card Guessing",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1765,
+        "members": [
+            {
+                "handle": "zfs732"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1669545300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 60,
+    "timeConsumedMillis": 1824,
+    "memoryConsumedBytes": 96358400,
+    "source": "// LUOGU_RID: 137406326\n#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define REP(i, l, r) for (int i = l; i <= r; i++)\r\n#define PER(i, r, l) for (int i = r; i >= l; i--)\r\n\r\nmt19937 engine(chrono::steady_clock::now().time_since_epoch().count());\r\n\r\ntemplate<class T>\r\nT rand(T l, T r) { return uniform_int_distribution<>(l, r)(engine); }\r\n\r\nconst int maxN = 2e3 + 1, pMod = 998244353;\r\n\r\ninline void add(int &x, int y) { x = (x + y) % pMod; }\r\n\r\ninline void mul(int &x, int y) { x = int(1LL * x * y % pMod); }\r\n\r\nint qPow(int x, int k) {\r\n\tint res = 1;\r\n\twhile (k) {\r\n\t\tif (k & 1) res = int(1LL * res * x % pMod);\r\n\t\tx = int(1LL * x * x % pMod), k >>= 1;\r\n\t}\r\n\treturn res;\r\n}\r\n\r\nint qPow(int x, int k, int p) {\r\n\tint res = 1;\r\n\twhile (k) {\r\n\t\tif (k & 1) res = int(1LL * res * x % p);\r\n\t\tx = int(1LL * x * x % p), k >>= 1;\r\n\t}\r\n\treturn res;\r\n}\r\n\r\nint C[maxN][maxN], fInv[maxN], dp[maxN][maxN][5];\r\n\r\nint inv(int x) { return fInv[x]; }\r\n\r\nvoid initFac() {\r\n\tREP(i, 0, maxN - 1) {\r\n\t\tC[i][0] = 1, fInv[i] = qPow(i, pMod - 2);\r\n\t\tREP(j, 1, i) C[i][j] = (C[i - 1][j - 1] + C[i - 1][j]) % pMod;\r\n\t}\r\n}\r\n\r\nint choose(int n, int m) { return m > n || m < 0 ? 0 : C[n][m]; }\r\n\r\nstring sss(int s) {\r\n\tint V = 1000;\r\n\tREP(i, 1, V) {\r\n\t\tif (1LL * s * i % pMod <= V)\r\n\t\t\treturn to_string(1LL * s * i % pMod) + '/' + to_string(i);\r\n\t}\r\n\treturn \"error\";\r\n}\r\n\r\nint solve(int n, int k) {\r\n\tint res = 0;\r\n//\tcout << n << ' ' << k << '\\n';\r\n\tREP(mi, 0, k) {\r\n\t\tint tmp = 0;\r\n\r\n\t\tif (k >= mi) add(tmp, int(1LL * choose(4, 1) * qPow(C[n][mi], 1) % pMod *\r\n\t\t\t\t             (dp[mi + 1][k - mi][3]) % pMod + pMod) % pMod);\r\n\r\n//\t\tcout << tmp << ' ';\r\n\r\n\t\tif (k >= mi * 2) add(tmp, int(1LL * choose(4, 2) * qPow(C[n][mi], 2) % pMod *\r\n\t\t             (dp[mi + 1][k - mi * 2][2]) % pMod + pMod) % pMod);\r\n//\t\tcout << tmp << ' ';\r\n\r\n\t\tif (k >= mi * 3) add(tmp, int(1LL * choose(4, 3) * qPow(C[n][mi], 3) % pMod *\r\n\t\t             (dp[mi + 1][k - mi * 3][1]) % pMod + pMod) % pMod);\r\n//\t\tcout << tmp << ' ';\r\n\r\n\t\tif (mi * 4 == k) add(tmp, qPow(C[n][mi], 4));\r\n//\t\tcout << tmp << ' ' << mi << ' ';\r\n\t\tmul(tmp, n - mi), mul(tmp, inv(4 * n - k));\r\n//\t\tcout << sss(tmp) << '\\n';\r\n\t\tadd(res, tmp);\r\n\t}\r\n\tmul(res, qPow(C[4 * n][k], pMod - 2));\r\n//\tcout << sss(res) << ' ' << C[4 * n][k] << '\\n';\r\n//\tcout << \"---\\n\";\r\n\treturn res;\r\n}\r\n\r\nint main() {\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(nullptr);\r\n\r\n\tinitFac();\r\n\tint n, k, ans = 0;\r\n\tcin >> n >> k, k = min(k, 4 * n - 1);\r\n\r\n\tREP(mi, 1, n) {\r\n\t\tdp[mi][0][0] = 1;\r\n\t\tREP(step, 1, 4) REP(i, mi, n) REP(j, i, 4 * n) add(dp[mi][j][step], int(1LL * dp[mi][j - i][step - 1] * C[n][i] % pMod));\r\n\t}\r\n\r\n\tREP(i, 0, k - 1) add(ans, solve(n, i));\r\n\tint tmp = solve(n, k);\r\n\tmul(tmp, 4 * n - k), add(ans, tmp);\r\n\tadd(ans, pMod), cout << ans << '\\n';\r\n\r\n\treturn 0;\r\n}"
+}

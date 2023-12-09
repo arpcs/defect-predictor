@@ -1,0 +1,36 @@
+{
+    "id": 106681771,
+    "contestId": 1000,
+    "creationTimeSeconds": 1612621718,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "Atill83"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 686,
+    "memoryConsumedBytes": 59904000,
+    "source": "#include <bits/stdc++.h>\r\n#define ff first\r\n#define ss second\r\n#define endl '\\n'\r\nusing namespace std;\r\nconst long long INF = (long long) 1e18;\r\nconst int mod = (int) 1e9+7;\r\nconst int MAXN = (int) 3e5+5;\r\n\r\ntypedef long long ll;\r\ntypedef unsigned long long ull;\r\ntypedef pair<int,int> pii;\r\ntypedef pair<ll,ll> pll;\r\nll n, ans[MAXN], ext[MAXN];\r\nvector<pair<int, pii>> sorg[MAXN];\r\nvector<pii> adj[MAXN];\r\nint a[MAXN];\r\nconst int L = 20;\r\nint geri[MAXN];\r\nint par[MAXN][L], dep[MAXN];\r\nint tin[MAXN], tout[MAXN];\r\nint Gt = 1;\r\nvoid dfs0(int v, int pr){\r\n    tin[v] = Gt++;\r\n    if(pr == -1){\r\n        dep[v] = 0;\r\n        par[v][0] = v;\r\n    }else{\r\n        dep[v] = dep[pr] + 1;\r\n        par[v][0] = pr;\r\n    }\r\n\r\n    for(int j = 1; j < L; j++)\r\n        par[v][j] = par[par[v][j - 1]][j - 1];\r\n\r\n    ext[v] = a[v];\r\n    for(pii j: adj[v]){\r\n        if(j.ff == pr)\r\n            continue;\r\n        geri[j.ff] = j.ss;\r\n        dfs0(j.ff, v);\r\n        ext[v] += max(0LL, -2LL*j.ss + ext[j.ff]);\r\n    }\r\n    tout[v] = Gt - 1;\r\n}\r\n\r\nint gtp(int v, int dd){\r\n    for(int i = L - 1; i >= 0; i--){\r\n        if((1<<i) <= dd){\r\n            v = par[v][i];\r\n            dd -= (1<<i);\r\n        }\r\n    }\r\n    return v;\r\n}\r\n\r\n\r\nint find_lca(int a, int b){\r\n    if(dep[a] > dep[b])\r\n        swap(a, b);\r\n    \r\n    for(int i = L - 1; i >= 0; i--){\r\n        if(dep[a] + (1<<i) <= dep[b])\r\n            b = par[b][i];\r\n    }\r\n    if(a == b)\r\n        return a;\r\n\r\n    for(int i = L - 1; i >= 0; i--){\r\n        if(par[a][i] != par[b][i]){\r\n            a = par[a][i];\r\n            b = par[b][i];\r\n        }\r\n    }\r\n    return par[a][0];\r\n}\r\n\r\nll t[MAXN];\r\n\r\nvoid upd(int l, int r, ll val){\r\n    r++;\r\n    for(; l < MAXN; l += (l&-l))\r\n        t[l] += val;\r\n    for(; r < MAXN; r += (r&-r))\r\n        t[r] -= val;\r\n}\r\n\r\nll gt(int v){\r\n    ll res = 0;\r\n    for(; v; v -= (v&-v))\r\n        res += t[v];\r\n    return res;\r\n}\r\n\r\n\r\nvoid dfs1(int v, int pr, ll sum){\r\n    upd(tin[v], tin[v], ext[v]);\r\n    ll nS = sum + a[v];\r\n    for(pii u: adj[v]){\r\n        if(u.ff == pr)\r\n            continue;\r\n        nS += max(0LL, -2*u.ss + ext[u.ff]);\r\n    }\r\n    for(pii u: adj[v]){\r\n        if(u.ff == pr)\r\n            continue; \r\n        nS -= max(0LL, -2*u.ss + ext[u.ff]);\r\n        dfs1(u.ff, v, max(0LL, nS - 2 * u.ss));\r\n        nS += max(0LL, -2*u.ss + ext[u.ff]);\r\n    }\r\n    \r\n    unordered_map<int, ll> mp;\r\n\r\n    for(pii u: adj[v]){\r\n        if(u.ff == pr)\r\n            continue;\r\n        ll dg = max(0LL, -2*u.ss + ext[u.ff]);\r\n        mp[u.ff] = dg;\r\n    }\r\n\r\n    for(auto u: sorg[v]){\r\n        int a = u.ss.ff, b = u.ss.ss;\r\n        if(b == v)\r\n            swap(a, b);\r\n        if(a == v && b == v){\r\n            ans[u.ff] = sum + ext[v];\r\n        }else if(a == v){\r\n            int r1 = gtp(b, dep[b] - dep[v] - 1);\r\n            ans[u.ff] = sum + ext[v] + gt(tin[b]) - mp[r1] - geri[r1];\r\n        }else{\r\n            int r1 = gtp(b, dep[b] - dep[v] - 1), r2 = gtp(a, dep[a] - dep[v] - 1);\r\n            //cerr<<\"this: \"<<v<<\" \"<<a<<\" \"<<b<<endl;\r\n            //cerr<<sum<<\" \"<<gt(tin[b]) + gt(tin[a])<<\" \"<<ext[v] - mp[gtp(b, dep[b] - dep[v] - 1)] - mp[gtp(a, dep[a] - dep[v] - 1)]<<\" \"<<- geri[r1] - geri[r2]<<endl;\r\n            \r\n            ans[u.ff] = sum + ext[v] + gt(tin[b]) + gt(tin[a]) - mp[r1] - mp[r2] - geri[r1] - geri[r2]; \r\n        }\r\n    }\r\n\r\n    for(pii u: adj[v]){\r\n        if(u.ff == pr)\r\n            continue;\r\n        upd(tin[u.ff], tout[u.ff], ext[v] - mp[u.ff] - u.ss);\r\n    }\r\n}\r\n\r\n\r\n\r\n\r\n\r\nint main(){\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(nullptr);cout.tie(nullptr);\r\n\r\n    #ifdef Local\r\n        freopen(\"C:/Users/Admin/Desktop/Yazilim/C/IO/int.txt\",\"r\",stdin);\r\n        freopen(\"C:/Users/Admin/Desktop/Yazilim/C/IO/out.txt\",\"w\",stdout);\r\n    #endif\r\n    \r\n    int q;\r\n\r\n    cin>>n>>q;\r\n\r\n    for(int i = 1; i <= n; i++)\r\n        cin>>a[i];\r\n    \r\n    for(int i = 0; i < n - 1; i++){\r\n        int u, v, w;\r\n        cin>>u>>v>>w;\r\n\r\n        adj[u].push_back({v, w});\r\n        adj[v].push_back({u, w});\r\n    }\r\n    \r\n    dfs0(1, -1);\r\n    for(int i = 0; i < q; i++){\r\n        int u, v;\r\n        cin>>u>>v;\r\n        sorg[find_lca(u, v)].push_back({i, {u, v}});\r\n    }\r\n\r\n    dfs1(1, -1, 0);\r\n\r\n    for(int i = 0; i < q; i++)\r\n        cout<<ans[i]<<endl;\r\n\r\n\r\n    #ifdef Local\r\n        cout<<endl<<fixed<<setprecision(2)<<1000.0 * clock() / CLOCKS_PER_SEC<< \" milliseconds \";\r\n    #endif\r\n}"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 113167087,
+    "contestId": 1000,
+    "creationTimeSeconds": 1618570010,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "luogu_bot5"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 1247,
+    "memoryConsumedBytes": 143667200,
+    "source": "#include<iostream>\r\n#include<cstdio>\r\n#define LL long long\r\nusing namespace std;\r\nconst LL MAXN=3e5+100;\r\nLL n,q,tot,head[MAXN],dat[MAXN],deep[MAXN],fa[MAXN][21],dp[MAXN],dpp[MAXN][21],fval[MAXN],g[MAXN];\r\nstruct E{\r\n\tLL to;\r\n\tLL next;\r\n\tLL val;\r\n}e[MAXN<<1];\r\nvoid add_edge(LL u,LL v,LL val)\r\n{\r\n\te[++tot].next=head[u];\r\n\te[tot].to=v;\r\n\te[tot].val=val;\r\n\thead[u]=tot;\r\n}\r\nvoid dfs(LL x,LL f,LL d)\r\n{\r\n\tfa[x][0]=f;dp[x]=dat[x];deep[x]=d;\r\n\tfor(LL i=head[x];i;i=e[i].next)\r\n\t{\r\n\t\tLL to=e[i].to;\r\n\t\tif(to==f) continue;\r\n\t\tfval[to]=e[i].val;\r\n\t\tdfs(to,x,d+1);\r\n\t\tdp[x]+=max(dp[to]-2*e[i].val,0ll);\r\n\t}\r\n}\r\nvoid DP(LL x)\r\n{\r\n\tfor(LL i=1;i<=20;i++)\r\n\t{\r\n\t\tdpp[x][i]=dpp[x][i-1]+dpp[fa[x][i-1]][i-1];\r\n\t\tfa[x][i]=fa[fa[x][i-1]][i-1];\r\n\t}\r\n\tfor(LL i=head[x];i;i=e[i].next)\r\n\t{\r\n\t\tLL to=e[i].to;\r\n\t\tif(to==fa[x][0])\r\n\t\t\tcontinue; \r\n\t\tdpp[to][0]=dp[x]-e[i].val;\r\n\t\tif(dp[to]-2*e[i].val>0)\r\n\t\t\tdpp[to][0]-=dp[to]-2*e[i].val;\r\n\t\tg[to]=max(dpp[to][0]+g[x]-e[i].val,0ll);\r\n\t\tDP(to);\r\n\t}\r\n}\r\nLL query(LL u,LL v)\r\n{\r\n\tLL ans=0;\r\n\tif(deep[u]<deep[v])\r\n\t\tswap(u,v);\r\n\tans+=dp[u];\r\n\tLL delt=deep[u]-deep[v];\r\n\tfor(LL i=20;i>=0;i--)\r\n\t\tif(delt&(1<<i))\r\n\t\t{\r\n\t\t\tans+=dpp[u][i];\r\n\t\t\tu=fa[u][i];\r\n\t\t}\r\n\tif(u==v) return ans+g[u];\r\n\tans+=dp[v];\r\n\tfor(LL i=20;i>=0;i--)\r\n\t\tif(fa[u][i]!=fa[v][i])\r\n\t\t{\r\n\t\t\tans+=dpp[u][i];\r\n\t\t\tans+=dpp[v][i];\r\n\t\t\tu=fa[u][i];\r\n\t\t\tv=fa[v][i];\r\n\t\t}\r\n\tLL anstop=dpp[u][0]-fval[v];\r\n\tif(dp[v]-2*fval[v]>0)\r\n\t\tanstop-=dp[v]-2*fval[v];\r\n\t//cout<<fval[u]<<\" \"<<fval[v]<<endl;\r\n\t//cout<<ans<<\" \"<<anstop<<endl;\r\n\treturn ans+anstop+g[fa[u][0]];\r\n}\r\nint main()\r\n{\r\n\tcin>>n>>q;\r\n\tfor(LL i=1;i<=n;i++)\r\n\t\tscanf(\"%lld\",&dat[i]);\r\n\tfor(LL i=1;i<=n-1;i++)\r\n\t{\r\n\t\tLL u,v;LL val;\r\n\t\tscanf(\"%lld%lld%lld\",&u,&v,&val);\r\n\t\tadd_edge(u,v,val);\r\n\t\tadd_edge(v,u,val);\r\n\t}\r\n\tdfs(1,1,1);\r\n\tDP(1);\r\n\t/*for(LL i=1;i<=n;i++)\r\n\t\tcout<<dp[i]<<\" \";\r\n\tcout<<endl;\r\n\tfor(LL i=1;i<=n;i++)\r\n\t\tcout<<g[i]<<\" \";\r\n\tcout<<endl;\r\n\tfor(LL i=1;i<=n;i++)\r\n\t\tcout<<dpp[i][0]<<\" \";\r\n\tcout<<endl;*/\r\n\tfor(LL i=1;i<=q;i++)\r\n\t{\r\n\t\tLL u,v;\r\n\t\tscanf(\"%lld%lld\",&u,&v);\r\n\t\tprintf(\"%lld\\n\",query(u,v));\r\n\t}\r\n}"
+}

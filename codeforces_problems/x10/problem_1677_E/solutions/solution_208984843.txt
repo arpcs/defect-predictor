@@ -1,0 +1,35 @@
+{
+    "id": 208984843,
+    "contestId": 1677,
+    "creationTimeSeconds": 1686222845,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1677,
+        "index": "E",
+        "name": "Tokitsukaze and Beautiful Subsegments",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1677,
+        "members": [
+            {
+                "handle": "forever_lose"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1652020500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 70,
+    "timeConsumedMillis": 1294,
+    "memoryConsumedBytes": 84480000,
+    "source": "#include<bits/stdc++.h>\r\n#define ll long long\r\n#define rep(i, x, y) for(int i = (x), stOyny = (y); i <= stOyny; ++i)\r\n#define irep(i, x, y) for(int i = (x), stOyny = (y); i >= stOyny; --i)\r\n#define pb emplace_back\r\n#define pii pair<int, int>\r\n#define vint vector<int>\r\n#define let const auto\r\n#define fi first\r\n#define se second\r\n#define il inline\r\n#define ci const int\r\n#define all(S) S.begin(), S.end()\r\n#define Size(S) (int)S.size()\r\nint read() {\r\n\tint res = 0, flag = 1; char c = getchar();\r\n\twhile(c < '0' || c > '9') { if(c == '-') flag = -1; c = getchar(); }\r\n\twhile(c >= '0' && c <= '9') res = res * 10 + c - '0', c = getchar();\r\n\treturn res * flag;\r\n}\r\nusing namespace std;\r\ntemplate<typename T>\r\nil void tmax(T &x, const T y) { if(x < y) x = y; }\r\ntemplate<typename T>\r\nil void tmin(T &x, const T y) { if(x > y) x = y; }\r\nconst int N = 2e5 + 20;\r\nint n;\r\nstruct bit {\r\n    ll tr[N];\r\n    il void modify(int x, ll v) {\r\n        for(; x <= n; x += x & -x) tr[x] += v;\r\n    }\r\n    il ll query(int x) {\r\n        ll res = 0;\r\n        for(; x; x -= x & -x) res += tr[x];\r\n        return res;\r\n    }\r\n};\r\nll ans[1000005];\r\ntemplate<const bool opt>\r\nstruct ds {\r\n\tbit ktr, btr;\r\n\tvector<pii> quer[N], upd[N];\r\n\tvoid rev(int &x) { x = n + 1 - x; }\r\n\tvoid add_update(int x, int l, int r) {\r\n\t\tif(!opt) rev(x), rev(l), rev(r), swap(l, r);\r\n\t\tupd[x].pb(l, r);\r\n\t}\r\n\tvoid add_query(int fr, int l, int r) {\r\n\t\tif(!opt) rev(l), rev(r), swap(l, r);\r\n\t\tquer[l].pb(r, fr);\r\n\t}\r\n\tvoid solve() {\r\n\t\tirep(i, n, 1) {\r\n\t\t\tauto add = [&](int x, int v) { ktr.modify(x, v), btr.modify(x, (x - 1) * v); };\r\n\t\t\tfor(auto [l, r] : upd[i]) add(l, 1), add(r + 1, -1);\r\n\t\t\tfor(auto [p, id] : quer[i]) ans[id] += ktr.query(p) * p - btr.query(p);\r\n\t\t}\r\n\t}\r\n};\r\nds<false> tr1;\r\nds<true> tr2;\r\nvint d[N];\r\nint p[N], fr[N];\r\nvoid add(int np, int L, int R) {\r\n\tint nv = p[np];\r\n\tif(np > (L + R) / 2) {\r\n\t\tint ok = L - 1;\r\n\t\tfor(int x : d[nv]) {\r\n\t\t\tint i = fr[x], j = fr[nv / x];\r\n\t\t\tif(i > j) swap(i, j);\r\n\t\t\tif(j <= np && i >= L) tmax(ok, i);\t\t\t\r\n\t\t}\r\n\t\trep(i, np, R) {\r\n\t\t\tif(nv % p[i] == 0) {\r\n\t\t\t\tint j = fr[nv / p[i]];\r\n\t\t\t\tif(j < i) tmax(ok, j);\r\n\t\t\t}\r\n\t\t\tif(ok >= L) tr1.add_update(i, L, min(ok, np));\t\t\r\n\t\t}\r\n\t}\r\n\telse {\r\n\t\tint ok = R + 1;\r\n\t\tfor(int x : d[nv]) {\r\n\t\t\tint i = fr[x], j = fr[nv / x];\r\n\t\t\tif(i > j) swap(i, j);\r\n\t\t\tif(i >= np && j <= R) tmin(ok, j);\t\t\t\r\n\t\t}\r\n\t\tirep(i, np, L) {\r\n\t\t\tif(nv % p[i] == 0) {\r\n\t\t\t\tint j = fr[nv / p[i]];\r\n\t\t\t\tif(j > i) tmin(ok, j);\r\n\t\t\t}\r\n\t\t\tif(ok <= R) tr2.add_update(i, max(ok, np), R);\r\n\t\t}\r\n\t}\r\n}\r\nsigned main() {\r\n//\tfreopen(\"1.in\", \"r\", stdin);\r\n\tn = read();\r\n\trep(i, 1, n) for(int j = i; j <= min<ll>(n, 1ll * i * i - 1); j += i) d[j].pb(i);\r\n\tint Q = read();\r\n\trep(i, 1, n) fr[p[i] = read()] = i;\r\n\tvint L(n + 1), R(n + 1, n + 1);\r\n\t{\r\n\t\tvint st;\r\n\t\t#define bk st.back()\r\n\t\trep(i, 1, n) {\r\n\t\t\twhile(!st.empty() && p[bk] < p[i]) R[bk] = i, st.pop_back();\r\n\t\t\tif(!st.empty()) L[i] = bk;\r\n\t\t\tst.pb(i);\r\n\t\t}\r\n\t\t#undef bk\r\n\t}\r\n\trep(i, 1, n) add(i, L[i] + 1, R[i] - 1);\r\n\trep(id, 1, Q) {\r\n\t\tint l = read(), r = read();\r\n\t\ttr1.add_query(id, l, r);\r\n\t\ttr2.add_query(id, l, r);\r\n\t}\r\n\ttr1.solve(), tr2.solve();\r\n\trep(i, 1, Q) cout << ans[i] << '\\n';\r\n\treturn 0;\r\n}"
+}

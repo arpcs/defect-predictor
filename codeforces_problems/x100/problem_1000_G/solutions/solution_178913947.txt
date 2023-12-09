@@ -1,0 +1,36 @@
+{
+    "id": 178913947,
+    "contestId": 1000,
+    "creationTimeSeconds": 1667365117,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "youiaOO"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 138342400,
+    "source": "#include <bits/stdc++.h>\r\n#define forn(i,s,t) for(int i=(s); i<=(t); ++i)\r\n#define form(i,s,t) for(int i=(s); i>=(t); --i)\r\n#define rep(i,s,t) for(int i=(s); i<(t); ++i)\r\nusing namespace std;\r\ntypedef long long i64;\r\nconst int N = 3e5 + 7, Mod = 1e9 + 7;\r\nstruct Mint {\r\n\tint res;\r\n\tMint() {}\r\n\tMint(int _r) : res(_r) {}\r\n\tinline friend Mint operator + (const Mint& A, const Mint& B) {\r\n\t\treturn Mint((A.res + B.res >= Mod) ? (A.res + B.res - Mod) : (A.res + B.res));\r\n\t}\r\n\tinline friend Mint operator - (const Mint& A, const Mint& B) { return A + Mint(Mod - B.res); }\r\n\tinline friend Mint operator * (const Mint& A, const Mint& B) { return Mint(1ll * A.res * B.res % Mod); }\r\n\tinline friend Mint& operator += (Mint& A, const Mint& B) { return A = A + B; }\r\n\tinline friend Mint& operator -= (Mint& A, const Mint& B) { return A = A - B; }\r\n\tinline friend Mint& operator *= (Mint& A, const Mint& B) { return A = A * B; }\r\n\tinline friend Mint q_pow(Mint p, int k = Mod - 2) {\r\n\t\tMint res(1);\r\n\t\tfor (; k; k >>= 1, p *= p) (k & 1) && (res *= p, 0);\r\n\t\treturn res;\r\n\t}\r\n} ;\r\nstruct node {\r\n\tint v; i64 w;\r\n\tnode () {}\r\n\tnode (int _v, i64 _w) : \r\n\t\tv(_v), w(_w) {}\r\n};\r\nint n, dep[N], up[20][N];\r\ni64 a[N], f[N], g[N], h[N], fx[20][N], gx[20][N];\r\ninline void Link(int u, int v, i64 w) {\r\n\tf[u] += max(0ll, f[v] - 2 * w);\r\n}\r\ninline void Cut(int u, int v, i64 w) {\r\n\tf[u] -= max(0ll, f[v] - 2 * w);\r\n}\r\nvector<node> T[N];\r\nvoid Fdfs(int u) {\r\n\tf[u] = a[u];\r\n\tfor (const node& A : T[u]) {\r\n\t\tint v = A.v; i64 w = A.w;\r\n\t\tif (v == up[0][u]) continue ;\r\n\t\tup[0][v] = u, dep[v] = dep[u] + 1, Fdfs(v), gx[0][v] = max(0ll, f[v] - 2 * w) + w, Link(u, v, w);\r\n\t}\r\n\tfx[0][u] = f[u];\r\n}\r\nvoid Sdfs(int u) {\r\n\tg[u] = f[u];\r\n\tfor (const node& A : T[u]) {\r\n\t\tint v = A.v; i64 w = A.w;\r\n\t\tif (v == up[0][u]) continue ;\r\n\t\tCut(u, v, w), Link(v, u, w), Sdfs(v);\r\n\t\tCut(v, u, w), Link(u, v, w);\r\n\t}\r\n\trep (i, 1, 20) up[i][u] = up[i - 1][up[i - 1][u]],\r\n\t\t\t\t   fx[i][u] = fx[i - 1][u] + fx[i - 1][up[i - 1][u]],\r\n\t\t\t\t   gx[i][u] = gx[i - 1][u] + gx[i - 1][up[i - 1][u]];\r\n}\r\ninline i64 dist(int u, int v) {\r\n\tif (dep[u] < dep[v]) swap(u, v);\r\n\tint lft = dep[u] - dep[v];\r\n\ti64 ans = 0;\r\n\tfor (int i = 0; lft; lft >>= 1, ++i)\r\n\t\tif (lft & 1) ans += fx[i][u] - gx[i][u], u = up[i][u];\r\n\tif (u == v) return ans + g[v];\r\n\tform (i, 19, 0) if (up[i][v] != up[i][u]) {\r\n\t\tans += fx[i][u] - gx[i][u] + fx[i][v] - gx[i][v];\r\n\t\tu = up[i][u], v = up[i][v];\r\n\t}\r\n\tans += fx[0][u] - gx[0][u] + fx[0][v] - gx[0][v] + g[up[0][u]];\r\n\treturn ans;\r\n}\r\nint q;\r\nint main() {\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(0), cout.tie(0);\r\n    cin >> n >> q;\r\n    forn (i, 1, n) cin >> a[i];\r\n    rep (i, 1, n) {\r\n    \tint u, v; i64 w;\r\n    \tcin >> u >> v >> w;\r\n    \tT[u].push_back(node(v, w));\r\n    \tT[v].push_back(node(u, w));\r\n\t}\r\n\tFdfs(1);\r\n//    forn (i, 1, n) cout << f[i] << \" \\n\"[i == n];\r\n\tSdfs(1);\r\n    while (q--) {\r\n    \tint u, v;\r\n    \tcin >> u >> v;\r\n    \tcout << dist(u, v) << '\\n';\r\n\t}\r\n    return 0;\r\n}\r\n/*\r\n*/"
+}

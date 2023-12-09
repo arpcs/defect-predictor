@@ -1,0 +1,38 @@
+{
+    "id": 236035503,
+    "contestId": 1657,
+    "creationTimeSeconds": 1701862019,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1657,
+        "index": "F",
+        "name": "Words on Tree",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "2-sat",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1657,
+        "members": [
+            {
+                "handle": "Nxxlt"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1647960300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 108,
+    "memoryConsumedBytes": 236134400,
+    "source": "#pragma GCC optimize(\"O3,unroll-loops\")\r\n#pragma GCC target(\"avx,avx2,fma\")\r\n\r\n#include <bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\n\r\n/* DEFINES */\r\n#define S second\r\n#define F first\r\n#define ll long long\r\n#define ull unsigned long long\r\n#define ld long double\r\n#define npos ULLONG_MAX\r\n#define INF LLONG_MAX\r\n#define vv(a) vector<a>\r\n#define pp(a, b) pair<a, b>\r\n#define pq(a) priority_queue<a>\r\n#define qq(a) queue<a>\r\n#define ss(a) set<a>\r\n#define mm(a, b) map<a, b>\r\n#define ump(a, b) unordered_map<a, b>\r\n#define ANDROID                   \\\r\n    ios_base::sync_with_stdio(0); \\\r\n    cin.tie(0);                   \\\r\n    cout.tie(0);\r\n#define elif else if\r\n#define endl \"\\n\"\r\n#define allc(a) begin(a), end(a)\r\n#define all(a) a, a + sizeof(a) / sizeof(a[0])\r\n#define pb push_back\r\n#define logi(a) __lg(a)\r\n#define sqrt(a) sqrtl(a)\r\n#define mpr make_pair\r\n#define ins insert\r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\nusing namespace __cxx11;\r\ntypedef char chr;\r\ntypedef basic_string<chr> str;\r\ntemplate <typename T, typename key = less<T>>\r\nusing ordered_set = tree<T, null_type, key, rb_tree_tag, tree_order_statistics_node_update>;\r\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\r\nconst ll N = 16e5 + 5;\r\nvv(ll) g[N], gt[N], gr[N];\r\nll depth[N], p[N], comp[N], cur = 1;\r\nbool used[N];\r\nll x[N], y[N];\r\nstr s[N];\r\npp(chr, chr) var[N];\r\nvv(ll) top;\r\nvoid init(ll v, ll par = 1)\r\n{\r\n    p[v] = par;\r\n    for (ll to : gt[v])\r\n        if (to != par)\r\n            depth[to] = depth[v] + 1, init(to, v);\r\n}\r\nvoid add_edge(ll x, ll y)\r\n{\r\n    g[x].pb(y);\r\n    g[y ^ 1].pb(x ^ 1);\r\n    gr[y].pb(x);\r\n    gr[x ^ 1].pb(y ^ 1);\r\n}\r\nvoid dfs(ll v)\r\n{\r\n    used[v] = 1;\r\n    for (ll to : g[v])\r\n        if (!used[to])\r\n            dfs(to);\r\n    top.pb(v);\r\n}\r\nvoid dfs1(ll v)\r\n{\r\n    comp[v] = cur;\r\n    for (ll to : gr[v])\r\n        if (comp[to] == -1)\r\n            dfs1(to);\r\n}\r\nvoid path(ll x, ll y, vv(ll) &res)\r\n{\r\n    res.clear();\r\n    vv(ll) rig;\r\n    while (x != y)\r\n        if (depth[x] < depth[y])\r\n            rig.pb(y), y = p[y];\r\n        else\r\n            res.pb(x), x = p[x];\r\n    res.pb(x);\r\n    for (ll j : rig)\r\n        res.pb(j);\r\n}\r\nvoid solve()\r\n{\r\n    ll n, m;\r\n    cin >> n >> m;\r\n    for (ll i = 1; i < n; i++)\r\n    {\r\n        ll x, y;\r\n        cin >> x >> y;\r\n        gt[x].pb(y);\r\n        gt[y].pb(x);\r\n    }\r\n    for (ll i = 1; i <= n; i++)\r\n        var[i] = mpr('a', 'a');\r\n    init(1);\r\n    vv(ll) v;\r\n    for (ll i = 1; i <= m; i++)\r\n    {\r\n        cin >> x[i] >> y[i] >> s[i];\r\n        path(x[i], y[i], v);\r\n        for (ll j = 0; j < v.size(); j++)\r\n            var[v[j]] = mpr(s[i][j], s[i][v.size() - j - 1]);\r\n    }\r\n    // cout << \"xx\\n\";\r\n    for (ll i = 1; i <= m; i++)\r\n    {\r\n        path(x[i], y[i], v);\r\n        for (ll j = 0, c, rc, d, rd; j < v.size(); j++)\r\n        {\r\n            tie(c, rc) = mpr(s[i][j], s[i][v.size() - j - 1]);\r\n            tie(d, rd) = var[v[j]];\r\n            if (d != c) add_edge(v[j] << 1, (i + n) << 1 | 1);\r\n\t\t\tif (d != rc) add_edge(v[j] << 1, (i + n) << 1);\r\n\t\t\tif (rd != c) add_edge(v[j] << 1 | 1, (i + n) << 1 | 1);\r\n\t\t\tif (rd != rc) add_edge(v[j] << 1 | 1, (i + n) << 1);\r\n        }\r\n    }\r\n    for (ll i = 1; i <= ((n + m + 1) << 1); i++)\r\n        if (!used[i])\r\n            dfs(i);\r\n    for (ll i = 1; i <= ((n + m + 1) << 1); i++)\r\n        used[i] = 0, comp[i] = -1;\r\n    reverse(allc(top));\r\n    for (ll i : top)\r\n        if (comp[i] == -1)\r\n            dfs1(i), cur++;\r\n    for (ll i = 1; i <= n + m; i++)\r\n        if (comp[i << 1] == comp[i << 1 | 1])\r\n        {\r\n            cout << \"NO\\n\";\r\n            return;\r\n        }\r\n    cout << \"YES\\n\";\r\n    for (ll i = 1; i <= n; i++)\r\n        if (comp[i << 1] > comp[i << 1 | 1])\r\n            cout << var[i].F;\r\n        else\r\n            cout << var[i].S;\r\n    cout << endl;\r\n}\r\n/*\r\n\r\n*/\r\nint main()\r\n{\r\n    ANDROID\r\n    // precomp();\r\n    ll t = 1;\r\n    // cin >> t;\r\n    for (ll i = 1; i <= t; i++)\r\n        // cout << \"Case #\" << i << \": \",\r\n        solve();\r\n    cerr << \"\\nTime elapsed : \" << clock() * 1000.0 / CLOCKS_PER_SEC << \" ms\\n\";\r\n}\r\n"
+}

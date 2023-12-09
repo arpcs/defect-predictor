@@ -1,0 +1,36 @@
+{
+    "id": 235255652,
+    "contestId": 1408,
+    "creationTimeSeconds": 1701449013,
+    "relativeTimeSeconds": 9633,
+    "problem": {
+        "contestId": 1408,
+        "index": "F",
+        "name": "Two Different",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2300,
+        "tags": [
+            "constructive algorithms",
+            "divide and conquer"
+        ]
+    },
+    "author": {
+        "contestId": 1408,
+        "members": [
+            {
+                "handle": "dimss"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1701439380
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 10,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 2662400,
+    "source": "#include <bits/stdc++.h>\n\n// #pragma GCC optimize(\"O3\")\n\n#define all(a) a.begin(), a.end()\n#define rall(a) a.rbegin(), a.rend()\n#define Size(a) (int)a.size()\n#define ll long long\n#define ld long double\n\n// #define int long long\n\nusing namespace std;\n\nint n;\nvector<pair<int, int>> ans;\nvector<int> a;\nmap<pair<int, int>, int> mem;\nmt19937 rnd(126);\n\nvoid add_pair(int i, int j) {\n    assert(0 <= i && i < n);\n    assert(0 <= j && j < n);\n\n    ans.push_back({i, j});\n\n    if (!mem.count({a[i], a[j]}))\n        mem[{a[i], a[j]}] = rnd() % n;\n    a[i] = a[j] = mem[{a[i], a[j]}];\n\n    // cerr << \"deb: \" << i << \" \" << j << \"\\n\";\n    // cerr << \"a: \";\n    // for (int x : a)\n    //     cerr << x << \" \";\n    // cerr << \"\\n\";\n}\n\nvoid uniteseg(int l1, int l2, int len) {\n    if (l1 > l2)\n        swap(l1, l2);\n    assert(l1 + len <= l2);\n    for (int i = 0; i < len; i++)\n        add_pair(l1 + i, l2 + i);\n}\n\nvoid unitevec(const vector<int> &a, const vector<int> &b) {\n    assert(a.size() == b.size());\n    for (int i = 0; i < Size(a); i++)\n        add_pair(a[i], b[i]);\n}\n\nvoid setseg(int i, int k) {\n    if (k == 0)\n        return;\n    setseg(i, k - 1);\n    setseg(i + (1 << (k - 1)), k - 1);\n    uniteseg(i, i + (1 << (k - 1)), 1 << (k - 1));\n}\n\nvoid solve() {\n    cin >> n;\n\n    a.resize(n);\n    iota(all(a), 0);\n\n    vector<vector<int>> beg(30);\n    int N = -1;\n    int MAX_BIT = -1;\n    for (int k = 30, i = 0; k >= 0; k--) {\n        if ((n >> k) & 1) {\n            if (N == -1) {\n                MAX_BIT = k;\n                N = 1 << k;\n            }\n            setseg(i, k);\n            int len = 1 << k;\n            beg[k].resize(len);\n            iota(all(beg[k]), i);\n            i += (1 << k);\n        }\n    }\n    cerr << \"start: \" << ans.size() << \"\\n\";\n    for (int k = 0; k < 29; k++) {\n        if (beg[k].empty())\n            continue;\n        int j = k + 1;\n        while (j < 30 && beg[j].empty())\n            j++;\n        if (j >= MAX_BIT)\n            continue;\n        int h = k;\n        while (h < j) {\n            int len = (1 << h);\n            for (int d = 0; d < len; d++) {\n                N--;\n                // cerr << \"add: \" << N << \" \" << beg[k][d] << \"\\n\";\n                add_pair(N, beg[k][d]);\n                beg[k].push_back(N);\n            }\n            h++;\n        }\n        unitevec(beg[k], beg[j]);\n        for (int x : beg[j])\n            beg[k].push_back(x);\n        j++;\n        while (!beg[j].empty() && j < MAX_BIT) {\n            unitevec(beg[k], beg[j]);\n            for (int x : beg[j])\n                beg[k].push_back(x);\n            h++;\n            j++;\n        }\n        if (j == MAX_BIT)\n            break;\n        k = h;\n    }\n    cout << ans.size() << \"\\n\";\n    for (auto [i, j] : ans)\n        cout << i + 1 << \" \" << j + 1 << \"\\n\";\n    cout.flush();\n\n    sort(all(a));\n    a.resize(unique(all(a)) - a.begin());\n    assert(a.size() <= 2);\n}\n\nint32_t main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(nullptr);\n    cout.tie(nullptr);\n\n    #ifdef dimss\n        freopen(\"test.txt\", \"r\", stdin);\n    #endif\n\n    int T = 1;\n    // cin >> T;\n    while (T--) {\n        solve();\n        #ifdef dimss\n            cerr << \"--------\\n\";\n        #endif\n    }\n    return 0;\n}\n"
+}

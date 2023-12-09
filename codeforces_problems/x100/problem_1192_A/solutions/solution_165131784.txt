@@ -1,0 +1,34 @@
+{
+    "id": 165131784,
+    "contestId": 1192,
+    "creationTimeSeconds": 1658412763,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "I_LOVE_DASHA_KARPENKO"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "PARTIAL",
+    "testset": "TESTS",
+    "passedTestCount": 50,
+    "timeConsumedMillis": 3500,
+    "memoryConsumedBytes": 29593600,
+    "points": 22.0,
+    "source": "//#pragma GCC Optimize(\"O3\")\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef long double ld;\r\n#define endl '\\n'\r\n#define all(vec) vec.begin(),vec.end()\r\n#define int ll\r\nconst int N = 1e5+7;\r\nconst int INF = 1e18;\r\npair<int,int> A[N];\r\nint ptrx = 0,ptry = 0;\r\n\r\nint P[N];\r\nvector<int> G[N];\r\nint F(int x){\r\n    return x==P[x]?x:P[x] = F(P[x]);\r\n}\r\nvoid unite(int u,int v){\r\n    u = F(u);\r\n    v = F(v);\r\n    if (u==v){\r\n        return;\r\n    }\r\n    P[u] = v;\r\n}\r\nbool vis[N];\r\nvoid solve(){\r\n    int n,t;\r\n    cin>>n>>t;\r\n    map<pair<int,int>,int> M;\r\n    int ptr = n;\r\n    for(int i = 1;i<=n;i+=1){\r\n        cin>>A[i].first>>A[i].second;\r\n        M[A[i]] = i;\r\n    }\r\n    for(int i = 1;i<=n;i+=1){\r\n        for(int dx = -1;dx<=1;dx+=1) {\r\n            for(int dy = -1;dy<=1;dy+=1) {\r\n                if (dx==0 && dy==0){\r\n                    continue;\r\n                }\r\n                if (!M.count({A[i].first + dx, A[i].second + dy})) {\r\n                    ptr += 1;\r\n                    M[{A[i].first + dx, A[i].second + dy}] = ptr;\r\n                    P[ptr] = ptr;\r\n                    A[ptr] = {A[i].first + dx, A[i].second + dy};\r\n                }\r\n            }\r\n        }\r\n\r\n    }\r\n    pair<pair<int,int>,int> mx = {{-INF,INF},-1}    ;\r\n    for(int i = 1;i<=ptr;i+=1) {\r\n        mx = max(mx,{A[i],i});\r\n        for(int dx = -1;dx<=1;dx+=1) {\r\n            for(int dy = -1;dy<=1;dy+=1) {\r\n                if (dx==0 && dy==0){\r\n                    continue;\r\n                }\r\n                if (M.count({A[i].first +dx, A[i].second+dy}))\r\n                    G[i].push_back(M[{A[i].first +dx, A[i].second+dy}]);\r\n            }\r\n        }\r\n    }\r\n    int con = mx.second;\r\n    for(int i = 1;i<=ptr;i+=1){\r\n        P[i] = i;\r\n    }\r\n    for(int i = n+1;i<=ptr;i+=1){\r\n        for(int to:G[i]){\r\n            if (to>n && (A[i].first==A[to].first || A[i].second==A[to].second)){\r\n                unite(to,i);\r\n            }\r\n        }\r\n    }\r\n    for(int i = 1;i<=n;i+=1){\r\n        for(int to:G[i]){\r\n            if (to<=n){\r\n                unite(to,i);\r\n            }\r\n        }\r\n    }\r\n    for(int i = 1;i<=n;i+=1){\r\n        if (F(i)!=F(1)){\r\n            cout<<\"NO\\n\";\r\n            return;\r\n        }\r\n    }\r\n\r\n    int cnt = n;\r\n    vector<int> ans;\r\n    while(cnt>0){\r\n        int flg = 0;\r\n        for(int i = n;i>=1;i-=1){\r\n            if (vis[i]){\r\n                continue;\r\n            }\r\n            bool flag = 0;\r\n            for(int to:G[i]){\r\n                if (F(to)==F(con) && (A[i].first==A[to].first || A[i].second==A[to].second)){\r\n                    flag = 1;\r\n                }\r\n            }\r\n            if (!flag){\r\n                continue;\r\n            }\r\n            vis[i] = 1;\r\n            for(int j = 1;j<=n;j+=1){\r\n\r\n                P[j] = j;\r\n            }\r\n            for(int j = 1;j<=n;j+=1){\r\n                if (vis[j]){\r\n                    continue;\r\n                }\r\n                for(int to:G[j]){\r\n                    if (to<=n && !vis[to]){\r\n                        unite(to,j);\r\n                    }\r\n                }\r\n            }\r\n            flag = 1;\r\n            int mi = -1;\r\n\r\n            for(int j = 1;j<=n;j+=1){\r\n                if (vis[j]){\r\n                    continue;\r\n                }\r\n                if (mi==-1){\r\n                    mi = j;\r\n                }\r\n                if (F(j)!=F(mi)){\r\n                    flag = 0;\r\n                    break;\r\n                }\r\n            }\r\n            if (flag){\r\n                flg = 1;\r\n                ptr += 1;\r\n                P[ptr] = ptr;\r\n                A[ptr] = A[i];\r\n                M[A[i]] = ptr;\r\n                bool bz = 0;\r\n                for(int to:G[i]){\r\n                    G[ptr].push_back(to);\r\n                    if (to>n && (A[i].first==A[to].first || A[i].second==A[to].second)){\r\n                        unite(to,ptr);\r\n                    }\r\n                    G[to].push_back(ptr);\r\n                    if (to<=n && (A[to].first==A[ptr].first || A[to].second==A[ptr].second)){\r\n                        bz = 1;\r\n                    }\r\n                }\r\n                G[i].clear();\r\n                ans.push_back(i);\r\n                cnt -= 1;\r\n              //  assert(F(ptr)==F(con));\r\n               // assert(bz==1 || cnt==0);\r\n                break;\r\n            }\r\n            else{\r\n                vis[i] = 0;\r\n            }\r\n        }\r\n        if (flg!=1){\r\n            cout<<con<<endl;\r\n            return;\r\n        }\r\n    }\r\n    cout<<\"YES\\n\";\r\n    reverse(all(ans));\r\n    for(int to:ans){\r\n        cout<<to<<'\\n';\r\n    }\r\n}\r\n\r\nsigned main()\r\n{\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    int t = 1;\r\n    // cin>>t;\r\n    while(t--){\r\n        solve();\r\n    }\r\n    return 0;\r\n}"
+}

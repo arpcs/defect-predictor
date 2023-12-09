@@ -1,0 +1,38 @@
+{
+    "id": 179428661,
+    "contestId": 295,
+    "creationTimeSeconds": 1667649772,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "NimaAryan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 409600,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#ifdef LOCAL\r\n#include \"algo/debug.h\"\r\n#endif\r\n\r\ntypedef long long ll;\r\ntypedef tuple<ll, ll, ll> state;\r\n\r\nconst ll MAXN = 50 + 10;\r\nconst ll MOD = 1e9 + 7;\r\n\r\nll n, k, maxx, maxy;\r\nvector<vector<ll>> C(MAXN, vector<ll>(MAXN));\r\nmap<state, ll> dp;\r\nmap<state, ll> dist;\r\n\r\nvector<state> edges(state v) {\r\n\tauto [x, y, z] = v;\r\n\tvector<state> res;\r\n\tfor (ll xp = 0; xp <= maxx; ++xp) {\r\n\t\tfor (ll yp = 0; yp <= maxy; ++yp) {\r\n\t\t\tif (x == xp && y == yp) {\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\tif (z == 0) {\r\n\t\t\t\tif (xp <= x && yp <= y && (x - xp) + 2 * (y - yp) <= k) {\r\n\t\t\t\t\tres.push_back({xp, yp, 1});\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\telse {\r\n\t\t\t\tif (xp >= x && yp >= y && (xp - x) + 2 * (yp - y) <= k) {\r\n\t\t\t\t\tres.push_back({xp, yp, 0});\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn res;\r\n}\r\n\r\nvoid bfs(state s, state target) {\r\n\tdist[s] = 0;\r\n\tdp[s] = 1;\r\n\tqueue<state> q;\r\n\tq.push(s);\r\n\twhile (!q.empty()) {\r\n\t\tstate v = q.front(); q.pop();\r\n\t\tif (v == target) {\r\n\t\t\tbreak;\r\n\t\t}\r\n\t\tauto [x, y, z] = v;\r\n\t\tfor (auto && u : edges(v)) {\r\n\t\t\tauto [xp, yp, _] = u;\r\n\t\t\tif (dist.count(u)) {\r\n\t\t\t\tif (dist[u] > dist[v]) {\r\n\t\t\t\t\tif (z == 0) {\r\n\t\t\t\t\t\tdp[u] += (\r\n\t\t\t\t\t\t             C[x][x - xp]\r\n\t\t\t\t\t\t             * C[y][y - yp]\r\n\t\t\t\t\t\t             * dp[v]\r\n\t\t\t\t\t\t         );\r\n\t\t\t\t\t}\r\n\t\t\t\t\telse {\r\n\t\t\t\t\t\tdp[u] += (\r\n\t\t\t\t\t\t             C[maxx - x][xp - x]\r\n\t\t\t\t\t\t             * C[maxy - y][yp - y]\r\n\t\t\t\t\t\t             * dp[v]\r\n\t\t\t\t\t\t         );\r\n\t\t\t\t\t}\r\n\t\t\t\t\tdp[u] %= MOD;\r\n\t\t\t\t}\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\tdist[u] = dist[v] + 1;\r\n\t\t\tif (z == 0) {\r\n\t\t\t\tdp[u] += (\r\n\t\t\t\t             C[x][x - xp]\r\n\t\t\t\t             * C[y][y - yp]\r\n\t\t\t\t             * dp[v]\r\n\t\t\t\t         );\r\n\t\t\t}\r\n\t\t\telse {\r\n\t\t\t\tdp[u] += (\r\n\t\t\t\t             C[maxx - x][xp - x]\r\n\t\t\t\t             * C[maxy - y][yp - y]\r\n\t\t\t\t             * dp[v]\r\n\t\t\t\t         );\r\n\t\t\t}\r\n\t\t\tdp[u] %= MOD;\r\n\t\t\tq.push(u);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nvoid init() {\r\n\tfor (ll i = 0; i < MAXN; ++i) {\r\n\t\tC[i][0] = 1;\r\n\t\tfor (ll j = 1; j <= i; ++j) {\r\n\t\t\tC[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % MOD;\r\n\t\t}\r\n\t}\r\n}\r\n\r\nint main() {\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(nullptr);\r\n\tinit();\r\n\tcin >> n >> k;\r\n\tk = k / 50;\r\n\tfor (ll i = 0; i < n; ++i) {\r\n\t\tll w;\r\n\t\tcin >> w;\r\n\t\tw = w / 50;\r\n\t\tif (w == 1) {\r\n\t\t\tmaxx += 1;\r\n\t\t}\r\n\t\telse {\r\n\t\t\tmaxy += 1;\r\n\t\t}\r\n\t}\r\n\tstate s = {maxx, maxy, 0};\r\n\tstate target = {0, 0, 1};\r\n\tbfs(s, target);\r\n\tif (dist.count(target)) {\r\n\t\tcout << dist[target] << '\\n';\r\n\t}\r\n\telse {\r\n\t\tcout << -1 << '\\n';\r\n\t}\r\n\tcout << dp[target] << '\\n';\r\n}\r\n"
+}

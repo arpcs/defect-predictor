@@ -1,0 +1,36 @@
+{
+    "id": 123609497,
+    "contestId": 1000,
+    "creationTimeSeconds": 1627132968,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "Badwin"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 139,
+    "memoryConsumedBytes": 38195200,
+    "source": "#include<cstdio>\n#include<cstring>\n#include<string>\n#include<algorithm>\n#include<cctype>\nusing namespace std;\n\ntemplate <typename T>\ninline void read(T&x){\n    x=0; char temp=getchar(); bool f=false;\n    while(!isdigit(temp)){if(temp=='-') f=true; temp=getchar();}\n    while(isdigit(temp)){x=(x<<1)+(x<<3)+temp-'0'; temp=getchar();}\n    if(f) x=-x;\n}\ntemplate <typename T>\nvoid print(T x){\n    if(x<0) putchar('-'),x=-x;\n    if(x>9) print(x/10);\n    putchar(x%10+'0');\n}\n\ntypedef long long ll;\nconst int MAXN = 2e5+5;\n\n//basic\nint n,q;\nll a[MAXN];\n\n//Graph\nstruct Edge{int to,next; ll val;}edge[MAXN<<1];\nint head[MAXN],cnt,from[MAXN];\n\ninline void AddEdge(int u,int v,ll w){edge[++cnt]=(Edge){v,head[u],w},head[u]=cnt;}\ninline void Add(int u,int v,ll w){AddEdge(u,v,w),AddEdge(v,u,w);}\n\n//DP & doubling\nint depth[MAXN],ancestor[MAXN][18];\nll fson[MAXN],fbro[MAXN],sumbro[MAXN],ffa[MAXN],sum[MAXN],dis[MAXN];\n\nvoid Dfs1(int id,int fa){\n    depth[id]=depth[fa]+1,ancestor[id][0]=fa;\n    sum[id]=sum[fa]+a[id];\n    for(register int i=0;i<17;i++) ancestor[id][i+1]=ancestor[ancestor[id][i]][i];\n    for(register int i=head[id];i;i=edge[i].next){\n        int son=edge[i].to;\n        if(son!=fa){\n            dis[son]=dis[id]+edge[i].val;\n            from[son]=i,Dfs1(son,id);\n            fson[id]+=max(0ll,fson[son]+a[son]-edge[i].val*2);\n        }\n    }\n    for(register int i=head[id];i;i=edge[i].next){\n        int son=edge[i].to;\n        if(son!=fa) fbro[son]=fson[id]-max(fson[son]+a[son]-edge[i].val*2,0ll);\n    }\n}\n\nvoid Dfs2(int id,int fa){\n    sumbro[id]=sumbro[fa]+fbro[id];\n    for(register int i=head[id];i;i=edge[i].next){\n        int son=edge[i].to;\n        if(son!=fa){\n            ffa[son]=max(0ll,ffa[id]+a[id]-edge[i].val*2+fbro[son]);\n            Dfs2(son,id);\n        }\n    }\n}\n\n//LCA\ninline int LCA(int id1,int id2){\n    if(depth[id1]<depth[id2]) swap(id1,id2);\n    for(register int i=17;i>=0;i--){\n        if(depth[ancestor[id1][i]]>=depth[id2])\n            id1=ancestor[id1][i];\n        if(id1==id2) return id1;\n    }\n    for(register int i=17;i>=0;i--)\n        if(ancestor[id1][i]!=ancestor[id2][i])\n            id1=ancestor[id1][i],id2=ancestor[id2][i];\n    return ancestor[id1][0];\n}\n\nint main(){\n    read(n),read(q);\n    for(register int i=1;i<=n;i++) read(a[i]);\n    for(register int i=1,u,v,w;i<n;i++) read(u),read(v),read(w),Add(u,v,w);\n    Dfs1(1,0),Dfs2(1,0);\n    while(q--){\n        int u,v,lca; read(u),read(v),lca=LCA(u,v);\n        ll ans=0;\n        ans=sum[u]+sum[v]-sum[lca]-sum[ancestor[lca][0]]-(dis[u]-dis[lca])-(dis[v]-dis[lca]);\n        if(depth[u]>depth[v]) swap(u,v);\n        if(u==lca) ans+=ffa[u]+fson[v]+(sumbro[v]-sumbro[u]);\n        else{\n            ans+=ffa[lca]+fson[u]+fson[v]+sumbro[u]+sumbro[v];\n            for(register int i=17;i>=0;i--){\n                if(depth[ancestor[u][i]]>depth[lca]) u=ancestor[u][i];\n                if(depth[ancestor[v][i]]>depth[lca]) v=ancestor[v][i];\n            }\n            ans-=sumbro[u]+sumbro[v];\n            ans+=fbro[u]-max(0ll,fson[v]+a[v]-edge[from[v]].val*2);\n        }\n        print(ans),puts(\"\");\n    }\n    return 0;\n}"
+}

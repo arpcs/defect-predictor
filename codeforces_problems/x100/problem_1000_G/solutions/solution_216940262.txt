@@ -1,0 +1,36 @@
+{
+    "id": 216940262,
+    "contestId": 1000,
+    "creationTimeSeconds": 1691043585,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "Mirage_Insane"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C11",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define SF scanf\r\n#define PF printf\r\n#define int long long\r\nstruct Edge {\r\n\tint to, next, w;\r\n}edge[400005];\r\nint a[200005], head[200005], cnt = 1, dp[200005], ans[200005], d[200005][2], dep[200005], fa[200005][35], g[200005];\r\nvoid add(int u, int v, int w) {\r\n\tedge[++cnt].to = v;\r\n\tedge[cnt].next = head[u];\r\n\tedge[cnt].w = w;\r\n\thead[u] = cnt;\r\n}\r\nvoid tree_DP(int x, int fa) {\r\n\tdp[x] += a[x];\r\n\tfor(int i = head[x]; i; i = edge[i].next) {\r\n\t\tint to = edge[i].to;\r\n\t\tif(to == fa) continue;\r\n\t\ttree_DP(to, x);\r\n\t\tdp[x] += max(0ll, dp[to] - edge[i].w - edge[i ^ 1].w);\r\n\t}\r\n}\r\nvoid dfs(int x, int fa) {\r\n\tfor(int i = head[x]; i; i = edge[i].next) {\r\n\t\tint to = edge[i].to;\r\n\t\tif(to == fa) continue;\r\n\t\tans[to] = dp[to] + max(0ll, ans[x] + min(0ll, -dp[to] + edge[i].w + edge[i ^ 1].w) - edge[i].w - edge[i ^ 1].w);\r\n\t\tg[to] = g[x] + dp[to] + min(0ll, -dp[to] + edge[i].w + edge[i ^ 1].w);\r\n\t\tdfs(to, x);\r\n\t}\r\n}\r\nvoid bfs(int rt) {\r\n\tqueue<int> q;\r\n\tq.push(rt);\r\n\tdep[rt] = 1;\r\n\twhile(!q.empty()) {\r\n\t\tint tmp = q.front();\r\n\t\tq.pop();\r\n\t\tfor(int i = head[tmp]; i; i = edge[i].next) {\r\n\t\t\tint to = edge[i].to;\r\n\t\t\tif(dep[to]) continue;\r\n\t\t\tdep[to] = dep[tmp] + 1;\r\n\t\t\td[to][0] = d[tmp][0] + edge[i].w;\r\n\t\t\td[to][1] = d[tmp][1] + edge[i ^ 1].w;\r\n\t\t\tfa[to][0] = tmp;\r\n\t\t\tfor(int j = 1; j <= 30; j++) fa[to][j] = fa[fa[to][j - 1]][j - 1];\r\n\t\t\tq.push(to);\r\n\t\t}\r\n\t}\r\n}\r\nint lca(int u, int v) {\r\n\tif(dep[u] > dep[v]) swap(u, v);\r\n\tint last, index;\r\n\tfor(int i = 30; i >= 0; i--) {\r\n\t\tif(dep[fa[v][i]] >= dep[u]) last = v, index = i, v = fa[v][i];\r\n\t}\r\n\tif(u == v) return u;\r\n\tfor(int i = 30; i >= 0; i--) {\r\n\t\tif(fa[u][i] != fa[v][i]) u = fa[u][i], v = fa[u][i];\r\n\t}\r\n\treturn fa[u][0];\r\n}\r\nsigned main() {\r\n\tint n, q;\r\n\tSF(\"%lld%lld\", &n, &q);\r\n\tfor(int i = 1; i <= n; i++) SF(\"%lld\", &a[i]);\r\n\tfor(int i = 1; i < n; i++) {\r\n\t\tint u, v, w1, w2;\r\n\t\tSF(\"%lld%lld%lld\", &u, &v, &w1);\r\n\t\tw2 = w1;\r\n\t\tadd(u, v, w1), add(v, u, w2);\r\n\t}\r\n\tbfs(1);\r\n\ttree_DP(1, -1);\r\n\tans[1] = dp[1];\r\n\tdfs(1, -1);\r\n\twhile(q--) {\r\n\t\tint u, v;\r\n\t\tSF(\"%lld%lld\", &u, &v);\r\n\t\tint x = lca(u, v);\r\n\t\tPF(\"%lld\\n\", g[u] + g[v] - 2 * g[x] + ans[x] - (d[u][1] + d[v][0] - d[x][0] - d[x][1]));\r\n\t}\r\n\treturn 0;\r\n} \r\n"
+}

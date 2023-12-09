@@ -1,0 +1,36 @@
+{
+    "id": 133348312,
+    "contestId": 772,
+    "creationTimeSeconds": 1635426278,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 772,
+        "index": "D",
+        "name": "Varying Kibibits",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2700,
+        "tags": [
+            "bitmasks",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 772,
+        "members": [
+            {
+                "handle": "Mondeus"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1492356900
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 9,
+    "timeConsumedMillis": 1965,
+    "memoryConsumedBytes": 185446400,
+    "source": "#include <iostream>\r\n#include <cstdio>\r\n#include <string>\r\n#include <vector>\r\n#include <algorithm>\r\nusing namespace std;\r\nconst long long MOD = 1e9+7;\r\nconst int maxn = 1e6;\r\nconst int bit = 6;\r\nlong long cnt[maxn][bit+1];\r\nlong long sum[maxn][bit+1];\r\nlong long sqr[maxn][bit+1];\r\nlong long dp[maxn];\r\nlong long pw10[bit];\r\nlong long pw2[maxn];\r\nint getdigit(int x,int k)\r\n{\r\n    return (x / pw10[k]) % 10;\r\n}\r\n\r\nvoid combine(long long dp[maxn][bit+1])\r\n{\r\n    for(int i = 1; i <= bit; i++)\r\n    {\r\n        for(int k = 0; k < maxn; k++)\r\n        {\r\n            int thisdigit = getdigit(k,i-1);\r\n            for(int add = thisdigit; add < 10; add++)\r\n            {\r\n                int newval = k + (add-thisdigit)*pw10[i-1];\r\n                dp[k][i] += dp[newval][i-1];\r\n                dp[k][i] %= MOD;\r\n            }\r\n        }\r\n    }\r\n}\r\nvoid solve()\r\n{\r\n    pw10[0] = pw2[0] = 1;\r\n    for(int v = 1; v < bit; v++)\r\n        pw10[v] = pw10[v-1]*10;\r\n    int n;\r\n    cin >> n;\r\n    for(int i = 1; i <= n; i++)\r\n    {\r\n        long long x;\r\n        cin >> x;\r\n        cnt[x][0]++;\r\n        sum[x][0] = (sum[x][0] + x) % MOD;\r\n        sqr[x][0] = (sqr[x][0] + x*x) % MOD;\r\n        pw2[i] = (pw2[i-1] << 1) % MOD;\r\n    }\r\n    combine(cnt);\r\n    combine(sum);\r\n    combine(sqr);\r\n    for(int i = 0; i < maxn; i++)\r\n    {\r\n        dp[i] = sqr[i][bit];\r\n        if(cnt[i][bit] >= 2) dp[i] += sum[i][bit] * sum[i][bit], dp[i] %= MOD;\r\n        if(cnt[i][bit] >= 2) dp[i] *= pw2[cnt[i][bit]-2],dp[i] %= MOD;\r\n    }\r\n    for(int i = 1; i <= bit; i++)\r\n        {\r\n            for(int k = maxn-1; k >= 0; k--)\r\n            {\r\n                int thisdigit = getdigit(k,i-1);\r\n                for(int add = thisdigit + 1; add < 10; add++)\r\n                {\r\n                    int newval = k + (add-thisdigit)*pw10[i-1];\r\n                    dp[k] -= dp[newval];\r\n                    dp[k] = (dp[k] + MOD) % MOD;\r\n                }\r\n            }\r\n        }\r\n    long long ans = 0;\r\n    for(long long i = 0; i < maxn; i++)\r\n        ans ^= i*dp[i];\r\n    cout << ans;\r\n\r\n\r\n}\r\nint main()\r\n{\r\n    \r\n    ios_base::sync_with_stdio(0);\r\n    cin.tie(0);\r\n    solve();\r\n    return 0;\r\n}\r\n"
+}

@@ -1,0 +1,40 @@
+{
+    "id": 234903829,
+    "contestId": 1213,
+    "creationTimeSeconds": 1701250244,
+    "relativeTimeSeconds": 6044,
+    "problem": {
+        "contestId": 1213,
+        "index": "F",
+        "name": "Unstable String Sort",
+        "type": "PROGRAMMING",
+        "rating": 2100,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "greedy",
+            "implementation",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 1213,
+        "members": [
+            {
+                "handle": "stcmuyi"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1701244200
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 15257600,
+    "source": "#include <bits/stdc++.h>\r\n#define IOS ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);\r\n#define i64 long long\r\n#define endl '\\n'\r\n#define lb(x) ((x) & (-x))\r\nusing namespace std;\r\nconst i64 mod =  1e18;\r\nconst int maxn = 2e5+10;\r\nint n,k;\r\nvector<int> g[maxn],t[maxn];//g\u5b58\u539f\u56fe\uff0ct\u4e3a\u7f29\u70b9\u540e\u7684\u56fe\r\nint a[maxn],b[maxn];//a\u539f\u70b9\u6743\u503c\uff0cb\u7f29\u70b9\u540e\u7684\u65b0\u6743\u503c\r\nint dfn[maxn];\r\nint low[maxn],num;\r\nint in[maxn];\r\nint s[maxn],top;//\u6808\r\nint cnt; //\u65b0\u56fe\u8282\u70b9\u4e2a\u6570\r\nint c[maxn];//\u539f\u56fe\u8282\u70b9\u5bf9\u5e94\u65b0\u56fe\u8282\u70b9\u7f16\u53f7\r\nvoid tarjan(int u)\r\n{\r\n    dfn[u] = low[u] = ++num;\r\n    s[++top] = u;\r\n    in[u] = 1;\r\n    for(int &v : g[u])\r\n    {\r\n        if(!dfn[v])\r\n        {\r\n            tarjan(v);\r\n            low[u] = min(low[u],low[v]);\r\n        }\r\n        else if(in[v]) low[u] = min(low[u],dfn[v]);\r\n    }\r\n    if(dfn[u] == low[u])\r\n    {\r\n        cnt++;\r\n        int v;\r\n        do\r\n        {\r\n            v = s[top--];\r\n            c[v] = cnt;\r\n            in[v] = 0;\r\n            b[cnt] += a[v];\r\n        }\r\n        while(v != u);\r\n    }\r\n}\r\nvoid build()//\u5efa\u65b0\u56fe\r\n{\r\n    for(int i = 1; i <= n; i++)\r\n    {\r\n        for(int &v : g[i])\r\n        {\r\n            if(c[i]!=c[v])\r\n            {\r\n                t[c[i]].push_back(c[v]);\r\n            }\r\n        }\r\n    }\r\n}\r\nsigned main()\r\n{\r\n\r\n    IOS;\r\n    cin >> n >> k;\r\n    vector<int> s1(n+1),s2(n+1);\r\n    for(int i = 1; i <= n; ++i)\r\n    {\r\n        cin >> s1[i];\r\n        a[i] = 1;\r\n    }\r\n    for(int i = 1; i <= n; ++i) cin >> s2[i];\r\n    for(int i = 1; i < n; ++i)\r\n    {\r\n        g[s1[i]].push_back(s1[i+1]);\r\n    }\r\n    for(int i = 1; i < n; ++i)\r\n    {\r\n        g[s2[i]].push_back(s2[i+1]);\r\n    }\r\n    for(int i = 1; i <= n; ++i) if(!dfn[i]) tarjan(i);\r\n    build();\r\n\r\n    int ans = 0;\r\n    vector<int> deep(cnt+1);\r\n    auto dfs = [&](auto self,int x) -> int\r\n    {\r\n        if(deep[x]) return deep[x];\r\n        deep[x] = 1;\r\n        for(int &u : t[x]) deep[x] = max(deep[x],self(self,u) + 1);\r\n        return deep[x];\r\n    };\r\n    int mx = 0;\r\n    for(int i = 1; i <= cnt; ++i) mx = max(mx,dfs(dfs,i));\r\n    if(mx < k) cout << \"NO\" << endl;\r\n    else\r\n    {\r\n        string s(cnt+1,'1');\r\n        auto dfs2 = [&](auto self,int x,char c) -> void\r\n        {\r\n            if(s[x] != '1') return;\r\n            s[x] = c;\r\n            for(int &u : t[x]) self(self,u,min('z',char(c + 1)));\r\n        };\r\n        vector<int> id(cnt+1);\r\n        for(int i = 1; i <= cnt; ++i) id[i] = i;\r\n        sort(id.begin() + 1,id.end(),[&](int x,int y) { return deep[x] > deep[y];});\r\n        for(int i = 1; i <= n; ++i) cout << c[i] << \" \\n\"[i == n];\r\n        for(int i = 1; i <= cnt; ++i)\r\n        {\r\n            dfs2(dfs2,id[i],'a');\r\n        }\r\n        cout << \"YES\" << endl;\r\n        for(int i = 1; i <= n; ++i) cout << s[c[i]];\r\n    }\r\n    return 0;\r\n}\r\n"
+}

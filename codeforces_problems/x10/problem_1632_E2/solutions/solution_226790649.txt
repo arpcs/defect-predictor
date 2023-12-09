@@ -1,0 +1,38 @@
+{
+    "id": 226790649,
+    "contestId": 1632,
+    "creationTimeSeconds": 1696534848,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1632,
+        "index": "E2",
+        "name": "Distance Tree (hard version)",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2700,
+        "tags": [
+            "binary search",
+            "dfs and similar",
+            "shortest paths",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1632,
+        "members": [
+            {
+                "handle": "limbo16"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1643553300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 19456000,
+    "source": "#include <bits/stdc++.h>\r\n\r\n#define endl '\\n'\r\n#define len(a) (int)a.size()\r\n#define all(a) a.begin(), a.end()\r\n#define allr(a) a.rbegin(), a.rend()\r\n\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef long double ld;\r\nconst int INT_INF = 1e9 + 1e7;\r\nconst ll INF = 1e18 + 100;\r\nconst int MAXI = 1e9 + 1e7;\r\nconst ll MOD = 1e9 + 7;\r\nconst ld EPS = 1e-13;\r\n\r\nconst int MAXN = 3e5 + 100;\r\nint depth[MAXN], max_depth[MAXN], two_max_depths[MAXN];\r\nint tin[MAXN], tout[MAXN], timer = 0, euler[MAXN], parent[MAXN];\r\nvector<int> g[MAXN], vd[2 * MAXN];\r\n\r\nvoid dfs(int u, int p = -1) {\r\n    parent[u] = p;\r\n    tin[u] = timer++;\r\n    euler[tin[u]] = u;\r\n    max_depth[u] = depth[u] = p >= 0 ? depth[p] + 1 : 0;\r\n    vd[depth[u]].push_back(u);\r\n    pair<int, int> two_max = {depth[u], depth[u]};\r\n\r\n    for (int v : g[u]) {\r\n        if (v != p) {\r\n            dfs(v, u);\r\n            max_depth[u] = max(max_depth[u], max_depth[v]);\r\n            if (max_depth[v] > two_max.first) {\r\n                two_max.second = two_max.first;\r\n                two_max.first = max_depth[v];\r\n            } else if (max_depth[v] > two_max.second)\r\n                two_max.second = max_depth[v];\r\n        }\r\n    }\r\n\r\n    two_max_depths[u] = two_max.first + two_max.second - depth[u] * 2;\r\n    tout[u] = timer - 1;\r\n}\r\nvoid init(int n) {\r\n    for (int i = 0; i <= 2 * n; i++) {\r\n        g[i].clear();\r\n        vd[i].clear();\r\n        depth[i] = max_depth[i] = tin[i] = tout[i] = euler[i] = two_max_depths[i] = parent[i] = 0;\r\n    }\r\n    timer = 0;\r\n}\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n#ifdef MY_DEBUG\r\n    freopen(\"../input.txt\", \"r\", stdin);\r\n    freopen(\"../output.txt\", \"w\", stdout);\r\n#endif\r\n    int t;\r\n    cin >> t;\r\n    while (t--) {\r\n        int n;\r\n        cin >> n;\r\n        init(n);\r\n        for (int i = 0; i < n - 1; i++) {\r\n            int u, v;\r\n            cin >> u >> v;\r\n            g[u - 1].push_back(v - 1);\r\n            g[v - 1].push_back(u - 1);\r\n        }\r\n        dfs(0);\r\n\r\n        vector<int> max_achieved(n + 1, n + 1);\r\n        max_achieved[n] = max_depth[0];\r\n        int cur_lca = -1, l, r, cur_d = 0;\r\n        for (int i = n - 1; i > 0; i--) { //At most i\r\n            for (int u : vd[i + 1]) {\r\n                if (cur_lca == -1) {\r\n                    cur_lca = u;\r\n                    l = r = tin[u];\r\n                }\r\n                l = min(l, tin[u]);\r\n                r = max(r, tout[u]);\r\n                while (l < tin[cur_lca] || tout[cur_lca] < r) {\r\n                    for (int j = tin[cur_lca] - 1; j >= tin[parent[cur_lca]]; j--)\r\n                        cur_d = max(cur_d, two_max_depths[euler[j]]);\r\n                    for (int j = tout[cur_lca] + 1; j <= tout[parent[cur_lca]]; j++)\r\n                        cur_d = max(cur_d, two_max_depths[euler[j]]);\r\n                    cur_lca = parent[cur_lca];\r\n                }\r\n            }\r\n            if (cur_lca != -1 && cur_d / 2 + cur_d % 2 + 1 <= i)\r\n                max_achieved[i - (cur_d / 2 + cur_d % 2)] = i;\r\n        }\r\n        for (int i = n - 1; i >= 1; i--)\r\n            max_achieved[i] = min(max_achieved[i], max_achieved[i + 1]);\r\n        for (int i = 1; i <= n; i++)\r\n            cout << max_achieved[i] << \" \";\r\n        cout << endl;\r\n    }\r\n}\r\n"
+}

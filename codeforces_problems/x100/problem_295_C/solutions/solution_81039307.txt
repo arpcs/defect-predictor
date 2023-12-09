@@ -1,0 +1,38 @@
+{
+    "id": 81039307,
+    "contestId": 295,
+    "creationTimeSeconds": 1590257827,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "Wild4Stone"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 654,
+    "memoryConsumedBytes": 15052800,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\n\n#define rep(i,a,b) for(i=(a);i<=(b);++i)\n#define rev(i,a,b) for(i=(a);i>=(b);--i)\n#define max2(a,b)  ((a)>(b)?(a):(b))\n#define min2(a,b)  ((a)<(b)?(a):(b))\n#define all(x) x.begin(),x.end()\n#define sz(x) (long long)x.size()\n#define fi first\n#define se second\n#define pb emplace_back // push_back\n#define mp make_pair\n#define endl '\\n'\n\n#ifdef Wild4Stone\ntemplate<typename T>\nvoid __p(T a) { cout << a << \" \"; }\ntemplate<typename T, typename F>\nvoid __p(pair<T, F> a) { cout << \"{ \"; __p(a.fi); __p(a.se); cout << \"}\"; }\ntemplate<typename T>\nvoid __f(const char* s, T t) { cout << s << \" : \"; __p(t); }\ntemplate<typename T>\nvoid __t(const char* s, const T &x) { cout << s << \" : { \"; for (auto it : x) __p(it); cout << \"} \";}\ntemplate<typename T, typename ... F>\nvoid __f(const char* s, T t, F ... f) {\n\tint i = 0; for (;; ++i) if (s[i] == ',') break;\n\tcout.write(s, i) << \" : \"; __p(t); cout << \" | \"; __f(s + i + 1, f...);\n}\n#define trace(...) { cout<<\"LINE: \"<<__LINE__<<\" || \"; __f(#__VA_ARGS__,__VA_ARGS__); cout<<\"\\n\\n\"; }\n#define autra(...) { cout<<\"LINE: \"<<__LINE__<<\" || \"; __t(#__VA_ARGS__,__VA_ARGS__); cout<<\"\\n\\n\"; }\n#else\n#define trace(...) {}\n#define autra(...) {}\n#endif\n\ntypedef long long int ll;\ntypedef pair<ll, ll> pll;\n\nconst ll mod = 1000000007;  //998244353;\nconst ll inf = 0x3f3f3f3f3f3f3f3fLL;\nconst double eps = 1e-9;\nconst double PI = acos(-1);\n\nint i, j, k, l, id;\nvoid solve(void);\ninline bool equal(double a, double b) { return fabs(a - b) < eps; }\n// inline ll gcd(ll a, ll b) { a=abs(a); b=abs(b); while(a>0 && b>0) (a>b?a%=b:b%=a); return (a==0?b:a); }\n// inline ll power(ll x, ll n, ll m = LLONG_MAX)\n//        {  ll res=1; x = (x%m + m)%m;\n//             while(n) { if(n&1) res=(res*x)%m;  x=(x*x)%m;  n >>= 1; }  return res;\n//        }\n\nint main()\n{\n\tios_base::sync_with_stdio(false); cin.tie(0);\n\tcout << fixed << setprecision(10);\n\tint t = 1;\n\t// cin>>t;\n\twhile (t--)  solve();\n\treturn 0;\n}\n\n//***************** Code Starts Here *******************//\n\nll dp[55][55];\nll ncr(ll n, ll r)\n{\n\tif (n < 0 || r < 0 || n < r) return 0;\n\tif (n == r || r == 0) return 1;\n\tif (dp[n][r] != -1) return dp[n][r];\n\treturn dp[n][r] = (ncr(n - 1, r - 1) + ncr(n - 1, r)) % mod;\n}\n\nvoid solve()\n{\n\tint n, K; cin >> n >> K;\n\tint ct1 = 0, ct2 = 0;\n\n\trep(i, 1, n)\n\t{\n\t\tint x; cin >> x;\n\t\tif (x == 50)\n\t\t\t++ct1;\n\t\telse\n\t\t\t++ct2;\n\t}\n\n\tmemset(dp, -1, sizeof(dp));\n\tmap<vector<int>, set<vector<int>>> node;\n\tmap<vector<int>, ll> ways, dis;\n\tmap<vector<int>, bool> vis;\n\n\trep(i, 0, ct1)\n\trep(j, 0, ct2)\n\trep(k, 0, i)\n\trep(l, 0, j)\n\trep(id, 0, 1)\n\tif (k > 0 || l > 0)\n\t\tif (k * 50 + l * 100 <= K)\n\t\t{\n\t\t\tvector<int> u, v;\n\t\t\tu = {i, j, id};\n\t\t\tv = {ct1 - i + k, ct2 - j + l, id ^ 1};\n\t\t\tnode[u].insert(v);\n\t\t\tnode[v].insert(u);\n\t\t\tdis[u] = dis[v] = -1;\n\t\t}\n\n\tqueue<vector<int>> q;\n\tvector<int> t = {ct1, ct2, 0};\n\tq.push(t);\n\tvis[t] = 1;\n\tdis[t] = 0;\n\tways[t] = 1;\n\n\twhile (!q.empty())\n\t{\n\t\tset<vector<int>> s;\n\n\t\twhile (!q.empty())\n\t\t{\n\t\t\tvector<int> p = q.front();\n\t\t\tq.pop();\n\t\t\tvis[p] = 1;\n\n\t\t\tfor (auto it : node[p])\n\t\t\t\tif (!vis[it])\n\t\t\t\t{\n\t\t\t\t\tdis[it] = dis[p] + 1;\n\n\t\t\t\t\tll nx = p[0], ny = p[1];\n\t\t\t\t\tll rx = it[0] + nx - ct1, ry = it[1] + ny - ct2;\n\n\t\t\t\t\tll t = ncr(nx, rx) * ncr(ny, ry);\n\t\t\t\t\tt %= mod;\n\t\t\t\t\tt *= ways[p];\n\t\t\t\t\tt %= mod;\n\t\t\t\t\tways[it] += t;\n\t\t\t\t\tways[it] %= mod;\n\n\t\t\t\t\ts.insert(it);\n\t\t\t\t}\n\t\t}\n\n\t\tfor (auto it : s) q.push(it);\n\t}\n\n\tvector<int> nt = {ct1, ct2, 1};\n\n\tif (dis[nt] == 0) dis[nt] = -1;\n\tcout << dis[nt] << endl << ways[nt] << endl;\n}"
+}

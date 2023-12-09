@@ -1,0 +1,46 @@
+{
+    "id": 231523860,
+    "contestId": 1593,
+    "creationTimeSeconds": 1699229356,
+    "relativeTimeSeconds": 7756,
+    "problem": {
+        "contestId": 1593,
+        "index": "F",
+        "name": "Red-Black Number",
+        "type": "PROGRAMMING",
+        "rating": 2100,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "implementation",
+            "math",
+            "meet-in-the-middle"
+        ]
+    },
+    "author": {
+        "contestId": 1593,
+        "members": [
+            {
+                "handle": "abdrahmanabdkareem"
+            },
+            {
+                "handle": "_Submitter"
+            },
+            {
+                "handle": "Kareem_Elgoker"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "teamId": 138038,
+        "teamName": "The Three Colors",
+        "ghost": false,
+        "startTimeSeconds": 1699221600
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 21,
+    "timeConsumedMillis": 654,
+    "memoryConsumedBytes": 22630400,
+    "source": "#define _USE_MATH_DEFINES\r\n\r\n#pragma GCC optimize(\"O3\")\r\n#pragma GCC optimize(\"Ofast,unroll-loops\")\r\n#pragma GCC target(\"avx2,bmi,bmi2,lzcnt,popcnt\")\r\n#pragma GCC target(\"avx,avx2,fma\")\r\n\r\n#include <cmath>\r\n#include <bits/stdc++.h>\r\n#include<ext/pb_ds/assoc_container.hpp>\r\n#include<ext/pb_ds/tree_policy.hpp>\r\n\r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\n\r\n\r\nvoid fileIO(void) {\r\n\r\n#ifndef ONLINE_JUDGE\r\n\r\n    freopen(\"cmake-build-debug/input.txt\", \"r\", stdin);\r\n    freopen(\"cmake-build-debug/output.txt\", \"w\", stdout);\r\n\r\n#endif\r\n\r\n}\r\n\r\nvoid fastIO(void) {\r\n\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n    cout.tie(NULL);\r\n\r\n}\r\ntypedef long long ll;\r\n#define int ll\r\ntypedef tree<ll , null_type, greater<ll>, rb_tree_tag, tree_order_statistics_node_update> Ordered_Set; // find_by_order : element at index i\r\n// order_of_key  : how many elements < A\r\n// greater<int>\r\n// less_equal<int>, greater_equal<int> : multiset\r\n\r\n\r\ntypedef unsigned long long ull;\r\ntypedef long double ld;\r\n\r\ntypedef pair<int, int> pi;\r\ntypedef pair<int, pi> p3i;\r\n\r\ntypedef pair<ll, ll> pll;\r\ntypedef pair<ll, pll> p3ll;\r\n\r\ntypedef pair<ll, ld> plld;\r\ntypedef pair<double, pi> pd2i;\r\n\r\ntypedef vector<int> vi;\r\ntypedef vector<pi> v2i;\r\ntypedef vector<p3i> v3i;\r\n\r\ntypedef vector<ll> vll;\r\ntypedef vector<pll> v2ll;\r\ntypedef vector<p3ll> v3ll;\r\n\r\ntypedef vector<string> vs;\r\ntypedef vector<bool> vb;\r\n\r\ntypedef vector<vi> vvi;\r\ntypedef vector<vll> vvl;\r\n\r\ntypedef priority_queue<int> pq_max;\r\ntypedef priority_queue<int, vi, greater<int>> pq_min;\r\n\r\n#define loop(n)          for(int i = 0; i < (n); i++)\r\n#define lp(x, s, e)      for(ll x = (s); x < (e); x++)\r\n#define lpe(x, s, e)     for(ll x = (s); x <= (e); x++)\r\n\r\n#define loop_r(n)          for(ll i = (n) - 1; i >= 0; i--)\r\n#define lp_r(x, s, e)      for(ll x = (e) - 1; x >= (s); x--)\r\n#define lpe_r(x, s, e)     for(ll x = (e); x >= (s); x--)\r\n\r\n#define MP make_pair\r\n#define PB push_back\r\n#define EmB emplace_back\r\n#define Em emplace\r\n#define len(s)   (ll)s.length()\r\n#define sz(v)    (ll)v.size()\r\n#define all(a)   a.begin(),a.end()\r\n#define all_r(a)   a.rbegin(),a.rend()\r\n#define clr(x, val)    memset((x), (val), sizeof(x))\r\n#define maxEle *max_element\r\n#define minEle *min_element\r\n\r\n#define tests ll t; cin >> t; ll i_t = 0; while(i_t++ < t)\r\n#define SetPre(n, x)  cout << fixed << setprecision(n) << x\r\n\r\n#define endl '\\n'\r\n#define kill return 0\r\n\r\n\r\n#define ceil_i(a, b) (((ll)(a)+(ll)(b-1))/(ll)(b))\r\n#define floor_i(a, b) (a/b)\r\n#define round_i(a, b) ((a+(b/2))/b)\r\n\r\nint dx_all[8] = {1, 0, -1, 0, 1, 1, -1, -1},\r\n        dy_all[8] = {0, 1, 0, -1, -1, 1, -1, 1};\r\n\r\nint dx[4] = {1, -1, 0, 0},\r\n        dy[4] = {0, 0, 1, -1};\r\n\r\n\r\nint n, A, B;\r\nstring s;\r\n\r\nint dp[41][41][41][41];\r\n\r\nint func(int idx, int cnt1, int modA, int modB)\r\n{\r\n    if(idx == n)\r\n    {\r\n        if(cnt1 == n || cnt1 == 0 || modA || modB)\r\n            return 1e10;\r\n        return abs(n - 2 * cnt1);\r\n    }\r\n\r\n    int &ret = dp[idx][cnt1][modA][modB];\r\n    if(~ret)\r\n        return ret;\r\n\r\n    int ch1 = func(idx + 1, cnt1 + 1, (((modA * 10) % A) + ((s[idx] - '0') % A)) % A, modB);\r\n    int ch2 = func(idx + 1, cnt1,  modA, (((modB * 10) % B) + ((s[idx] - '0') % B)) % B);\r\n\r\n    return ret = min(ch1, ch2);\r\n}\r\n\r\n\r\nvoid build_output(int idx, int cnt1, int modA, int modB)\r\n{\r\n    if(idx == n)\r\n    {\r\n        if(cnt1 == n || cnt1 == 0 || modA || modB)\r\n            return;\r\n        return;\r\n    }\r\n\r\n    int ch1 = func(idx + 1, cnt1 + 1, (((modA * 10) % A) + ((s[idx] - '0') % A)) % A, modB);\r\n    int ch2 = func(idx + 1, cnt1,  modA, (((modB * 10) % B) + ((s[idx] - '0') % B)) % B);\r\n\r\n    int ans = func(idx, cnt1, modA, modB);\r\n\r\n    if(ans == ch1)\r\n    {\r\n        cout << \"R\";\r\n        build_output(idx + 1, cnt1 + 1, (((modA * 10) % A) + ((s[idx] - '0') % A)) % A, modB);\r\n    }\r\n    else\r\n    {\r\n        cout << \"B\";\r\n        build_output(idx + 1, cnt1,  modA, (((modB * 10) % B) + ((s[idx] - '0') % B)) % B);\r\n    }\r\n}\r\n\r\nvoid solve()\r\n{\r\n    clr(dp, -1);\r\n    cin >> n >> A >> B >> s;\r\n    if(func(0, 0, 0, 0) > 40)\r\n        return void(cout << -1 << endl);\r\n\r\n    build_output(0,0,0,0);\r\n    cout << endl;\r\n}\r\n\r\nsigned main()\r\n{\r\n    fastIO(); fileIO();\r\n    int t = 1; cin >> t;\r\n\r\n\r\n\r\n    for (int i = 1; i <= t; ++i)\r\n    {\r\n        solve();\r\n\r\n        /*cout << solve() << endl;*/\r\n\r\n        /*if(solve())\r\n            cout << \"YES\\n\";\r\n        else\r\n            cout << \"NO\\n\";*/\r\n\r\n        /*cout << \"Case #\" << i << \": \";*/\r\n\r\n\r\n        /*cout << \"Case #\" << i << \": \" << (solve() ? \"YES\" : \"NO\") << endl;*/\r\n    }\r\n\r\n    kill;\r\n}"
+}

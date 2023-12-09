@@ -1,0 +1,36 @@
+{
+    "id": 128384692,
+    "contestId": 1000,
+    "creationTimeSeconds": 1631235697,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "TLE_Automat"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 267059200,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define SZ(x) ((int)((x).size()))\r\n#define lb(x) ((x)&(-(x)))\r\n#define mkp make_pair\r\n#define pb push_back\r\n#define fi first\r\n#define se second\r\ntypedef long long ll;\r\ntypedef pair<int,int> pii;\r\n\r\nconst int MAXN=3e5+10;\r\n\r\nstruct Edge{ int to,nxt,w; };\r\n\r\nint n,q,cnt_e;\r\nint head[MAXN];\r\nEdge e[MAXN<<1];\r\n\r\ninline void addedge(int u,int v,int w)\r\n{\r\n    e[++cnt_e].to=v;\r\n    e[cnt_e].w=w;\r\n    e[cnt_e].nxt=head[u];\r\n    head[u]=cnt_e;\r\n}\r\n\r\nint a[MAXN],val[MAXN],wei[MAXN];\r\ninline void dfs_val(int u,int fafa)\r\n{\r\n    for(int i=head[u];i;i=e[i].nxt)\r\n    { \r\n        int v=e[i].to,w=e[i].w;\r\n        if(v==fafa) continue;\r\n        dfs_val(v,u);\r\n        wei[v]=w;\r\n    }\r\n}\r\n\r\nll f[MAXN],g[MAXN];\r\ninline void dfs_fg(int u,int fafa)\r\n{\r\n    for(int i=head[u];i;i=e[i].nxt)\r\n    {\r\n        int v=e[i].to,w=e[i].w;\r\n        if(v==fafa) continue;\r\n        dfs_fg(v,u);\r\n        f[u]+=g[v];\r\n    }\r\n    g[u]=max(0ll,f[u]+val[u]);\r\n}\r\n\r\nll h[MAXN],totg[MAXN]; \r\ninline void dfs_h(int u,int fafa)\r\n{   \r\n    for(int i=head[u];i;i=e[i].nxt)\r\n    {\r\n        int v=e[i].to;\r\n        if(v==fafa) continue;\r\n        totg[u]+=g[v];\r\n    }\r\n    \r\n    for(int i=head[u];i;i=e[i].nxt)\r\n    {\r\n        int v=e[i].to,w=e[i].w;\r\n        if(v==fafa) continue;\r\n        h[v]=max(0ll,h[u]+a[u]-2*w+totg[u]-g[v]);\r\n        dfs_h(v,u);\r\n    }\r\n}\r\n\r\nint dep[MAXN];\r\nll fa[MAXN][20],suma[MAXN][20],sumf[MAXN][20],sumg[MAXN][20],sumw[MAXN][20];\r\ninline void dfs_init(int u,int fafa,int deep)\r\n{\r\n    fa[u][0]=fafa;\r\n    suma[u][0]=a[u];\r\n    sumf[u][0]=f[u];\r\n    sumg[u][0]=g[u];\r\n    dep[u]=deep;\r\n    for(int i=head[u];i;i=e[i].nxt)\r\n    {\r\n        int v=e[i].to,w=e[i].w;\r\n        if(v==fafa) continue;\r\n        dfs_init(v,u,deep+1);\r\n        sumw[v][0]=w; \r\n    }\r\n}\r\n\r\nstruct Node\r\n{\r\n    int rt; ll sa,sf,sg,sw;\r\n    Node(){ rt=sa=sf=sg=sw=0; }\r\n};\r\n\r\ninline Node lca(int x,int y)\r\n{\r\n    if(dep[x]<dep[y]) swap(x,y);\r\n    int t=dep[x]-dep[y];\r\n    Node res;\r\n    for(int i=20;i>=0;i--)\r\n        if((t>>i)&1)\r\n            res.sa+=suma[x][i],\r\n            res.sf+=sumf[x][i],\r\n            res.sg+=sumg[x][i],\r\n            res.sw+=sumw[x][i],\r\n            x=fa[x][i];\r\n    res.rt=x;\r\n\r\n    if(x==y)\r\n    {\r\n        res.sa+=a[x];\r\n        res.sf+=f[x];\r\n        res.sg+=g[x];\r\n        res.sw+=wei[x];\r\n        return res;\r\n    }\r\n    for(int i=20;i>=0;i--)\r\n        if(fa[x][i]!=fa[y][i])\r\n            res.sa+=suma[x][i]+suma[y][i],\r\n            res.sf+=sumf[x][i]+sumf[y][i],\r\n            res.sg+=sumg[x][i]+sumg[y][i],\r\n            res.sw+=sumw[x][i]+sumw[y][i],\r\n            x=fa[x][i],y=fa[y][i];\r\n    \r\n    res.sa+=suma[x][0]+suma[y][0];\r\n    res.sf+=sumf[x][0]+sumf[y][0];\r\n    res.sg+=sumg[x][0]+sumg[y][0];\r\n    res.sw+=sumw[x][0]+sumw[y][0];\r\n    res.rt=fa[x][0];\r\n    res.sa+=a[x];\r\n    res.sf+=f[x];\r\n    res.sg+=g[x];\r\n    res.sw+=wei[x];\r\n    return res;     \r\n}\r\n\r\nint main()\r\n{\r\n    scanf(\"%d%d\",&n,&q);\r\n    for(int i=1;i<=n;i++) scanf(\"%d\",&a[i]);\r\n    for(int i=1;i<=n-1;i++)\r\n    {\r\n        int u,v,w;\r\n        scanf(\"%d%d%d\",&u,&v,&w);\r\n        addedge(u,v,w);\r\n        addedge(v,u,w);\r\n    }\r\n\r\n    dfs_val(1,0);\r\n    for(int i=1;i<=n;i++)\r\n        val[i]=a[i]-2*wei[i];\r\n    dfs_fg(1,0);\r\n    dfs_h(1,0);\r\n    dfs_init(1,0,0);\r\n    for(int j=1;j<=20;j++)\r\n        for(int i=1;i<=n;i++)\r\n            fa[i][j]=fa[fa[i][j-1]][j-1],\r\n            suma[i][j]=suma[i][j-1]+suma[fa[i][j-1]][j-1],\r\n            sumf[i][j]=sumf[i][j-1]+sumf[fa[i][j-1]][j-1],\r\n            sumg[i][j]=sumg[i][j-1]+sumg[fa[i][j-1]][j-1],\r\n            sumw[i][j]=sumw[i][j-1]+sumw[fa[i][j-1]][j-1];\r\n\r\n    \r\n    // for(int i=1;i<=n;i++) printf(\"f[%d] = %lld\\n\",i,f[i]);\r\n    // for(int i=1;i<=n;i++) printf(\"g[%d] = %lld\\n\",i,g[i]);\r\n    // for(int i=1;i<=n;i++) printf(\"h[%d] = %lld\\n\",i,h[i]);\r\n\r\n    while(q--)\r\n    {\r\n        int x,y;\r\n        scanf(\"%d%d\",&x,&y);\r\n        \r\n        Node res=lca(x,y);\r\n        int rt=res.rt;\r\n        ll ans=res.sa-(res.sw-wei[rt])+res.sf-(res.sg-g[rt])+h[rt];\r\n\r\n        // printf(\"sa = %lld\\n\",res.sa);\r\n        // printf(\"sw = %lld\\n\",(res.sw-wei[rt]));\r\n        // printf(\"sf = %lld\\n\",res.sf);\r\n        // printf(\"sg = %lld\\n\",(res.sg-g[rt]));\r\n        // printf(\"h = %lld\\n\",h[rt]);\r\n\r\n        printf(\"%lld\\n\",ans);\r\n    }\r\n\r\n\treturn 0;\r\n}\r\n"
+}

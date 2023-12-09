@@ -1,0 +1,36 @@
+{
+    "id": 214009400,
+    "contestId": 91,
+    "creationTimeSeconds": 1689498394,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 91,
+        "index": "E",
+        "name": "Igloo Skyscraper",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2500,
+        "tags": [
+            "data structures",
+            "geometry"
+        ]
+    },
+    "author": {
+        "contestId": 91,
+        "members": [
+            {
+                "handle": "Noobish_Monk"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1308582000
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 80,
+    "timeConsumedMillis": 2714,
+    "memoryConsumedBytes": 100864000,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define all(x) (x).begin(), (x).end()\r\n#define rall(x) (x).rbegin(), (x).rend()\r\n#define ff first\r\n#define ss second\r\n#define ll long long\r\n#define ull unsigned long long\r\n#define ui unsigned int\r\n#define pb push_back\r\n#define eb emplace_back\r\n#define ppb pop_back\r\n#define pf push_front\r\n#define ppf pop_front\r\n#define mp make_pair\r\n#define ld long double\r\n#define uset unordered_set\r\n#define umap unordered_map\r\n#define umset unordered_multiset\r\n#define ummap unordered_multimap\r\n#define pii pair<int, int>\r\n#define pil pair<int, long long>\r\n#define pli pair<long long, int>\r\n#define pll pair<long long, long long>\r\n#define bint __int128\r\n\r\n//#pragma GCC optimize(\"O3,unroll-loops\")\r\n//#pragma GCC target(\"avx2,bmi,bmi2,lzcnt,popcnt\")\r\n\r\nconst ll inf = 1e18;\r\n\r\nstruct line {\r\n    ll k, b;\r\n\r\n    line(ll k = 0, ll b = inf): k(k), b(b) {}\r\n\r\n    ll operator()(ll x) {\r\n        return k * x + b;\r\n    }\r\n\r\n    ld intersect(line l) {\r\n        return (ld)(l.b - b) / (k - l.k);\r\n    }\r\n};\r\n\r\nstruct CHT {\r\n    vector<line> a;\r\n    vector<ld> x;\r\n\r\n    CHT() {}\r\n\r\n    void add(line l) {\r\n        while (!a.empty()) {\r\n            line b = a.back();\r\n            if (b.k == l.k) {\r\n                if (b.b <= l.b)\r\n                    return;\r\n                a.ppb();\r\n                x.ppb();\r\n                continue;\r\n            }\r\n            if (b.intersect(l) < x.back()) {\r\n                a.ppb();\r\n                x.ppb();\r\n            } else\r\n                break;\r\n        }\r\n        if (a.empty())\r\n            x.pb(-inf);\r\n        else\r\n            x.pb(a.back().intersect(l));\r\n        a.pb(l);\r\n    }\r\n\r\n    ll query(ll v) {\r\n        int pos = upper_bound(all(x), v) - x.begin() - 1;\r\n        return a[pos](v);\r\n    }\r\n};\r\n\r\nstruct segtree {\r\n    vector<CHT> tree;\r\n    vector<vector<line>> l;\r\n    int sz;\r\n\r\n    void init(int n) {\r\n        sz = 1;\r\n        while (sz < n)\r\n            sz *= 2;\r\n        tree.resize(2 * sz);\r\n        l.resize(2 * sz);\r\n    }\r\n\r\n    void add(int i, line nl, int x, int tl, int tr) {\r\n        l[x].pb(nl);\r\n        if (tr - tl == 1)\r\n            return;\r\n        int m = (tl + tr) / 2;\r\n        if (i < m)\r\n            add(i, nl, 2 * x + 1, tl, m);\r\n        else\r\n            add(i, nl, 2 * x + 2, m, tr);\r\n    }\r\n\r\n    void add(int i, line nl) {\r\n        add(i, nl, 0, 0, sz);\r\n    }\r\n\r\n    void build(int x, int tl, int tr) {\r\n        sort(all(l[x]), [](line a, line b){\r\n            return a.k > b.k;\r\n        });\r\n        for (line nl : l[x])\r\n            tree[x].add(nl);\r\n        if (tr - tl == 1)\r\n            return;\r\n        int m = (tl + tr) / 2;\r\n        build(2 * x + 1, tl, m);\r\n        build(2 * x + 2, m, tr);\r\n    }\r\n\r\n    void build() {\r\n        build(0, 0, sz);\r\n    }\r\n\r\n    pil get(int ql, int qr, ll t, int x, int tl, int tr) {\r\n        if (ql >= tr || qr <= tl)\r\n            return {-1, inf};\r\n        int m = (tl + tr) / 2;\r\n        if (ql <= tl && tr <= qr) {\r\n            if (tr - tl == 1)\r\n                return {tl, tree[x].query(t)};\r\n            ll ans = tree[x].query(t);\r\n            if (tree[2 * x + 1].query(t) == ans)\r\n                return get(ql, qr, t, 2 * x + 1, tl, m);\r\n            else\r\n                return get(ql, qr, t, 2 * x + 2, m, tr);\r\n        }\r\n        pil s1, s2;\r\n        s1 = get(ql, qr, t, 2 * x + 1, tl, m);\r\n        s2 = get(ql, qr, t, 2 * x + 2, m, tr);\r\n        if (s1.ss < s2.ss)\r\n            return s1;\r\n        return s2;\r\n    }\r\n\r\n    pil get(int ql, int qr, ll x) {\r\n        return get(ql, qr, x, 0, 0, sz);\r\n    }\r\n};\r\n\r\ninline void solve() {\r\n    int n, q;\r\n    cin >> n >> q;\r\n    vector<ll> a(n), b(n);\r\n    for (int i = 0; i < n; i++)\r\n        cin >> a[i] >> b[i];\r\n    segtree st;\r\n    st.init(n);\r\n    for (int i = 0; i < n; i++)\r\n        st.add(i, line(-b[i], -a[i]));\r\n    st.build();\r\n    while (q--) {\r\n        int l, r;\r\n        ll t;\r\n        cin >> l >> r >> t;\r\n        l--;\r\n        cout << st.get(l, r, t).ff + 1 << '\\n';\r\n    }\r\n}\r\n\r\nsigned main() {\r\n#ifndef DEBUG\r\n    std::ios_base::sync_with_stdio(0);\r\n    std::cin.tie(0);\r\n    std::cout.tie(0);\r\n#endif\r\n    int tt = 1;\r\n#ifdef DEBUG\r\n    std::cin >> tt;\r\n#endif\r\n    while (tt--) {\r\n#ifdef DEBUG\r\n        std::cout << \"Test case#\\n\";\r\n#endif\r\n        solve();\r\n    }\r\n    return 0;\r\n}\r\n"
+}

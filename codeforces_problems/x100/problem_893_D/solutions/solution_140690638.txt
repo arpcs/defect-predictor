@@ -1,0 +1,37 @@
+{
+    "id": 140690638,
+    "contestId": 893,
+    "creationTimeSeconds": 1640547882,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 893,
+        "index": "D",
+        "name": "Credit Card",
+        "type": "PROGRAMMING",
+        "rating": 1900,
+        "tags": [
+            "data structures",
+            "dp",
+            "greedy",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 893,
+        "members": [
+            {
+                "handle": "Suru007"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1511449500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 11,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 0,
+    "source": "/*  Jai Shree Ram \ud83d\udea9\ud83d\udea9\ud83d\udea9 */\r\n#include \"bits/stdc++.h\"\r\n#define ll long long int\r\n#define oo 1000000000000000000\r\n#define forr(i,n) for(int i=0;i<n;i++)\r\n#define fastio ios_base::sync_with_stdio(false);cin.tie(0);cout.tie(0)\r\n#define all(x) x.begin(),x.end()\r\n#define unique(v) sort(all(v)); v.resize(distance(v.begin(),unique(all(v))))\r\n#define eb emplace_back\r\n#define FF first\r\n#define SS second\r\n#define mem(a,v) memset(a,v,sizeof(a))\r\n#define pb push_back\r\n#define popcount(x) __builtin_popcount(x)\r\n\r\nusing namespace std;\r\n\r\ntemplate<typename T>\r\nostream &operator<<(ostream &output,const vector<T> &v){ \r\n    if(v.empty()) return output;\r\n    for(int i=0;i<v.size()-1;i++) output << v[i] <<\" \";\r\n    output << v.back();\r\n    return output;\r\n}\r\ntemplate<typename T>\r\nistream &operator>>(istream &input,vector<T> &v){ \r\n    for(auto &i: v) cin >> i;\r\n    return input;            \r\n}\r\n\r\nstruct SegTree{\r\n    \r\n    int n;\r\n    vector<ll> v , lazy; \r\n    ll dummy = -oo;\r\n    SegTree(int n){\r\n        this->n = n;\r\n        v.assign(4*n+10,0);\r\n        lazy.assign(4*n+10 ,0);\r\n    }\r\n    void update(int id,const int pos,const long long val,int s,int e){\r\n        if(s>e) return;\r\n        if(s==e){ // base case\r\n            v[id] = val;\r\n            return;\r\n        }\r\n        int mid = (s+e)/2;\r\n        if(pos<=mid) update(2*id,pos,val,s,mid);\r\n        else update(2*id+1,pos,val,mid+1,e);\r\n        v[id] = max(v[2*id] , v[2*id+1]);\r\n        return;\r\n    }\r\n    void change(const int id,const long long val){ // change function\r\n        v[id] += val;\r\n        lazy[id] += val;\r\n    }\r\n    void push(const int id){\r\n        change(2*id,lazy[id]);\r\n        change(2*id+1,lazy[id]);\r\n        lazy[id]=0;\r\n    }\r\n    void update_range(int id,const long long val,const int l,const int r,const int s,const int e){\r\n        if(e<l || r<s) return;\r\n        if(l<=s && e<=r){\r\n            change(id,val);\r\n            return;\r\n        }\r\n        push(id);\r\n        int mid = (s+e)/2;\r\n        update_range(2*id,val,l,r,s,mid);\r\n        update_range(2*id+1,val,l,r,mid+1,e);\r\n        v[id] = max(v[2*id] , v[2*id+1]);\r\n    }\r\n    void update_range(const int l,const int r,const long long val){\r\n        update_range(1,val,l,r,1,n);\r\n    }\r\n    void update(const int pos,const long long val){\r\n        update(1,pos,val,1,n);\r\n    }\r\n    ll query(int id,const int l,const int r,const int s,const int e){\r\n        if(s>e || r<s || l>e) return dummy;\r\n        push(id);\r\n        if(l<=s && e<=r) return v[id];\r\n        return max(query(2*id,l,r,s,(s+e)/2) , query(2*id+1,l,r,(s+e)/2+1,e));\r\n    }\r\n    ll query(const int l,const int r){\r\n        return query(1,l,r,1,n);\r\n    }\r\n    ll get(int l,int r){\r\n        return query(l,r);\r\n    }\r\n};\r\n\r\n\r\nvoid __sol(){\r\n    int n,d; cin >> n >> d;\r\n    vector<int> a(n); cin >> a;\r\n    vector<int> pos;\r\n    forr(i,n){\r\n        if(a[i] == 0) pos.eb(i+1);\r\n    }\r\n    SegTree s(n);\r\n    ll sum = 0;\r\n    for(int i=1;i<=n;i++){\r\n        sum += a[i-1];\r\n        s.update(i , sum);\r\n        // cout << sum<<\" \";\r\n    }\r\n    int ans = 0;\r\n    for(int i=0;i<pos.size();i++){\r\n        int id = pos[i];\r\n        if(s.get(id,id) < 0){\r\n            s.update_range(id , n , -s.get(id,id));\r\n            auto p = s.get(id, n);\r\n            if(p > d){\r\n                cout <<\"-1\\n\";\r\n                return;\r\n            }\r\n            ans++;\r\n            s.update_range(id , n , d - p);\r\n        }\r\n    }\r\n    if(s.get(1 , n) > d){\r\n        cout <<\"-1\\n\";\r\n        return;\r\n    }\r\n    cout << ans <<\"\\n\";\r\n   \r\n    return;\r\n}\r\n\r\n\r\nint main(){ \r\n    fastio;\r\n    int tc=1;  // cin >> tc;\r\n    while(tc--) __sol();\r\n    return 0;\r\n}"
+}

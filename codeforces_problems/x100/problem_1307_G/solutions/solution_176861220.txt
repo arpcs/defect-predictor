@@ -1,0 +1,37 @@
+{
+    "id": 176861220,
+    "contestId": 1307,
+    "creationTimeSeconds": 1666087424,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "sean9487"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 186,
+    "memoryConsumedBytes": 614400,
+    "source": "#include <bits/stdc++.h>\n\n#define ld long double\n\nusing namespace std;\n\nstruct Edge {\n    int to, cost, cap;\n};\n\nint n, m;\nint ans[1000];\nint des[51], inqueue[51], index_map[51];\nEdge edges[5002];\nvector<int> graph[51];\n\nint spfa() {\n    for (int i = 1; i <= n; ++i) {\n        des[i] = 1e9;\n        inqueue[i] = 0;\n        index_map[i] = 0;\n    }\n\n    des[1] = 0;\n    queue<int> wait_to_update;\n    wait_to_update.push(1);\n\n    int curr_idx = 0;\n    while (!wait_to_update.empty()) {\n        curr_idx = wait_to_update.front();\n        wait_to_update.pop(), inqueue[curr_idx] = 0;\n\n        for (int idx : graph[curr_idx]) {\n            Edge edge = edges[idx];\n            if (edge.cap and des[edge.to] > des[curr_idx] + edge.cost) {\n                des[edge.to] = des[curr_idx] + edge.cost;\n                if (!inqueue[edge.to]) {\n                    wait_to_update.push(edge.to);\n                    inqueue[edge.to] = 1;\n                }\n                index_map[edge.to] = idx;\n            }\n        }\n    }\n\n    int curr_pt = n;\n    curr_idx = index_map[n];\n    while (1) {\n        edges[curr_idx].cap = 0;\n        edges[curr_idx ^ 1].cap = 1;\n        int nxt_pt = edges[curr_idx ^ 1].to;\n        assert(curr_pt != nxt_pt);\n        if (nxt_pt == 1)\n            break;\n        curr_pt = nxt_pt;\n        curr_idx = index_map[nxt_pt];\n        // cout << curr_idx << '\\n';\n    }\n\n    return index_map[n];\n}\n\nvoid mcmf() {\n    int cnt = 1;\n    while (spfa()) {\n        ans[cnt] = ans[cnt - 1] + des[n];\n        cnt++;\n    }\n}\n\nint main () {\n    ios_base::sync_with_stdio(0);\n    cin.tie(0);\n\n    cin >> n >> m;\n\n    for (int i = 0; i < m; ++i) {\n        int a, b, w;\n        cin >> a >> b >> w;\n\n        edges[i * 2] = {b, w, 1};\n        graph[a].push_back(i * 2);\n        edges[i * 2 + 1] = {a, -w, 0};\n        graph[b].push_back(i * 2 + 1);\n    }\n\n    for (int i = 1; i < 1000; ++i) ans[i] = 1e9;\n    mcmf();\n\n    int q;\n    cin >> q;\n    for (int i = 0; i < q; ++i) {\n        int max_cost;\n        cin >> max_cost;\n\n        ld ret = 1e18;\n        for (int j = 1; j <= n; ++j) {\n            ret = min(ret, (ld)(ans[j] + max_cost) / (ld)j);\n        }\n\n        cout << fixed << setprecision(10) << ret << '\\n';\n    }\n}\n"
+}

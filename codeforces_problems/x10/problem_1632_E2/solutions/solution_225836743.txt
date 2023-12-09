@@ -1,0 +1,38 @@
+{
+    "id": 225836743,
+    "contestId": 1632,
+    "creationTimeSeconds": 1696030915,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1632,
+        "index": "E2",
+        "name": "Distance Tree (hard version)",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2700,
+        "tags": [
+            "binary search",
+            "dfs and similar",
+            "shortest paths",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1632,
+        "members": [
+            {
+                "handle": "Wael_Zaiback"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1643553300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 220569600,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define F first\r\n#define S second\r\n#define endl '\\n'\r\n#define int long long\r\ntypedef long long ll;\r\nint const M = 1e6 + 10 , N = 3e5 , lg = 20 , mod = 998244353;\r\nint T , n , m , x , y , mx , Node , parent[M] , pointer , sparse[M][lg + 3] , mark[M] , pref[M];\r\nvector<ll>adj[M] , Chain;\r\n\r\ninline void Dfs(int node , int dep = 0 , int p = 0) {\r\n\r\n    parent[node] = p;\r\n    if(dep >= mx) {\r\n        Node = node;\r\n        mx = dep;\r\n    }\r\n\r\n    for(auto next : adj[node]) {\r\n        if(next == p) continue;\r\n        Dfs(next , dep + 1 , node);\r\n    }\r\n\r\n}\r\n\r\ninline ll calc(int node , int dep = 0 , int p = 0) {\r\n\r\n    int res = dep;\r\n    for(auto next : adj[node]) {\r\n        if(next == p) continue;\r\n        int cur = calc(next , dep + 1 , node);\r\n        if(mark[next] == 0) res = max(res , cur);\r\n    }\r\n    if(mark[node]) {\r\n        sparse[node][0] = res - dep + mx - dep;\r\n        pref[node] = res;\r\n    }\r\n    return res;\r\n\r\n}\r\n\r\ninline ll Get(int l , int r) {\r\n\r\n    if(l > r) return -1e18;\r\n    int len = r - l + 1 , res = 0;\r\n    ++r;\r\n\r\n    for(int j = lg ; j >= 0 ; --j) {\r\n        if((1 << j) <= len) {\r\n            len -= (1 << j);\r\n            res = max(res , sparse[Chain[l]][j] - (mx - r));\r\n            l += (1 << j);\r\n        }\r\n    }\r\n    return res;\r\n\r\n}\r\n\r\ninline ll GetAnswer(int pointer , int len) {\r\n\r\n    int Left = pointer;\r\n    for(int j = lg ; j >= 0 ; --j)\r\n        if(Left - (1 << j) >= 0 && Left - (1 << j) > pointer - (Left - (1 << j)) + len) Left -= (1 << j);\r\n\r\n    return max({min(mx - pointer + len , mx) , Get(Left , pointer - 1) + len ,  pref[Chain[Left - 1]]});\r\n\r\n}\r\n\r\nmain() {\r\n    ios_base::sync_with_stdio(false);cout.tie(nullptr);cin.tie(nullptr);\r\n\r\n    cin >> T;\r\n    while(T--) {\r\n        cin >> n;\r\n        mx = 0; Chain.clear();\r\n        for(int i = 1 ; i <= n ; ++i) {\r\n            mark[i] = 0;\r\n            adj[i].clear();\r\n        }\r\n\r\n        for(int i = 1 ; i < n ; ++i) {\r\n            cin >> x >> y;\r\n            adj[x].push_back(y);\r\n            adj[y].push_back(x);\r\n        }\r\n\r\n        Dfs(1);\r\n\r\n        while(Node) {\r\n            Chain.push_back(Node);\r\n            Node = parent[Node];\r\n        }\r\n        reverse(Chain.begin() , Chain.end());\r\n\r\n        for(auto node : Chain) mark[node] = 1;\r\n        calc(1);\r\n        for(auto node : Chain) pref[node] = max(pref[node] , pref[parent[node]]);\r\n\r\n        for(int j = 1 ; j <= lg ; ++j) {\r\n            for(int Index = 0 ; Index < Chain.size() ; ++Index) {\r\n                int Req = min(mx , Index + (1 << (j - 1)));\r\n                sparse[Chain[Index]][j] = max(sparse[Chain[Index]][j - 1] , sparse[Chain[Req]][j - 1]);\r\n            }\r\n        }\r\n\r\n        int pointer = 1;\r\n        for(int len = 1 ; len <= n ; ++len) {\r\n             while(pointer + 1 <= mx) {\r\n                int cost1 = GetAnswer(pointer , len);\r\n                int cost2 = GetAnswer(pointer + 1 , len);\r\n                if(cost2 <= cost1) ++pointer;\r\n                else break;\r\n             }\r\n\r\n             //cout << pointer << \" \" << Left << endl;\r\n             cout << GetAnswer(pointer , len) << \" \" ;\r\n        }\r\n\r\n        cout << endl;\r\n    }\r\n\r\n    return 0;\r\n}\r\n"
+}

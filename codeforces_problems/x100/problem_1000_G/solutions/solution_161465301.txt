@@ -1,0 +1,36 @@
+{
+    "id": 161465301,
+    "contestId": 1000,
+    "creationTimeSeconds": 1655894337,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "kieusontungcva"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 110592000,
+    "source": "#include<bits/stdc++.h>\r\n#define F first\r\n#define S second\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef pair<int,int> pii;\r\ntypedef pair<int,int> pllll;\r\nconst ld Pi=acos(-1.0L);\r\n\r\nconst int M=3e5+15;\r\nconst ll mod=1e9+7;\r\nconst int inf=1e9+9;\r\n\r\nint dep[M],par[20][M],tin[M],tout[M],Time;\r\nint a[M];\r\nll dis[20][M];\r\nll f[M],g[M];\r\nvector<pii> adj[M];\r\narray<int,M> placeholders1[21];\r\narray<int,M> *disf=placeholders1+1;\r\n\r\nvoid dfs1(int u,int p=0)\r\n{\r\n//    cout<<\"dfs1: \"<<u<<\" \"<<p<<\": \";\r\n//    for(auto&c:adj[u])cout<<c.F<<\" \";\r\n//    cout<<\"\\n\";\r\n    tin[u]=++Time;\r\n    f[u]=a[u];\r\n    g[u]=a[u];\r\n    for(int i=0;i<(int)adj[u].size();i++)\r\n    {\r\n        if(adj[u][i].F==p)\r\n        {\r\n            swap(adj[u][i],adj[u][int(adj[u].size())-1]);\r\n            adj[u].pop_back();\r\n            break;\r\n        }\r\n    }\r\n//    for(auto&c:adj[u])cout<<c.F<<\" \";\r\n//    cout<<\"\\n\";\r\n    for(auto&c:adj[u])\r\n    {\r\n        dfs1(c.F,u);\r\n        f[u]+=max(0ll,f[c.F]-c.S*2);\r\n    }\r\n    tout[u]=Time;\r\n}\r\n\r\nvoid dfs2(int u)\r\n{\r\n    auto mximize=[&]()->void\r\n    {\r\n        ll sum=max(0ll,g[u]-a[u]);\r\n        for(auto&c:adj[u])\r\n        {\r\n            g[c.F]=max(g[c.F],sum+a[u]-c.S*2+a[c.F]);\r\n            sum+=max(f[c.F]-2*c.S,0ll);\r\n        }\r\n    };\r\n    mximize();\r\n    reverse(adj[u].begin(),adj[u].end());\r\n    mximize();\r\n    reverse(adj[u].begin(),adj[u].end());///\u1ea3nh h\u01b0\u1edfng \u0111\u1ebfn tin[] tout[]\r\n    for(auto&c:adj[u])\r\n    {\r\n        dfs2(c.F);\r\n    }\r\n}\r\n\r\nint gt(int p,int u)\r\n{\r\n    if(!p)return u;\r\n    if(u==p)return u;\r\n    int i=upper_bound(adj[p].begin(),adj[p].end(),pii(u,0),[](pii i,pii j){return tin[i.F]<tin[j.F];})-adj[p].begin()-1;\r\n//    cout<<\"in_gt(\"<<p<<\" \"<<u<<\" \"<<tin[u]<<\"): \";cout/*<<i<<\" \"<<adj[p].size()<<\" \"*/<<adj[p][i].F<<\"\\n\";\r\n//    for(auto&c:adj[p])cout<<\"(\"<<c.F<<\" \"<<tin[c.F]<<\" \"<<\" \"<<c.S<<\") \";cout<<\"\\n\";\r\n    return adj[p][i].F;\r\n}\r\n\r\nvoid dfs0(int u=1,int p=1,int w=0)\r\n{\r\n//    cout<<p<<\" -> \"<<u<<\": \";\r\n    dep[u]=dep[p]+1;\r\n    dis[0][u]=w;\r\n    par[0][u]=p;\r\n    disf[0][u]=f[par[0][u]];\r\n\r\n    if(f[u]<w*2)\r\n        disf[0][u]+=f[u]-w*2;\r\n//        cout<<\"(\"<<0<<\" \"<<disf[0][u]<<\") \";\r\n    for(int i=1;i<20&&(1<<i)<dep[u];i++)\r\n    {\r\n        dis[i][u]=dis[i-1][u]+dis[i-1][par[i-1][u]];\r\n        int bk=par[i-1][u];\r\n        int child=gt(bk,u);\r\n        disf[i][u]=disf[i-1][u]+disf[i-1][bk]-f[bk];\r\n//        if(f[child]>2*dis[0][child])\r\n//        {\r\n//            cout<<\"sus: {\"<<f[child]<<\" \"<<2*dis[0][child]<<\"}\";\r\n//            disf[i][u]+=f[child]-2*dis[0][child];\r\n//        }\r\n        par[i][u]=par[i-1][par[i-1][u]];\r\n//        cout<<\"(\"<<i<<\" \"<<disf[i][u]<<\"(\"<<disf[i-1][u]+disf[i-1][bk]-f[bk]<<\": \"<<disf[i-1][u]<<\" \"<<disf[i-1][bk]<<\" \"<<f[bk]<<\" \"<<child<<\" \"<<bk<<\")\"<< \") \";\r\n    }\r\n//    cout<<\"\\n\";\r\n    for(auto &c:adj[u])\r\n    {\r\n        dfs0(c.F,u,c.S);\r\n    }\r\n}\r\n\r\npllll lca(int u,int v)\r\n{\r\n    ll dst=0;\r\n    if(dep[u]<dep[v])swap(u,v);\r\n    for(int i=19;i>=0;i--)\r\n    {\r\n        if(dep[par[i][u]]>=dep[v])\r\n        {\r\n            dst+=dis[i][u];\r\n            u=par[i][u];\r\n        }\r\n    }\r\n    if(u==v)return {u,dst};\r\n    for(int i=19;i>=0;i--)\r\n    {\r\n        if(par[i][u]!=par[i][v])\r\n        {\r\n            dst+=dis[i][u]+dis[i][v];\r\n            u=par[i][u];\r\n            v=par[i][v];\r\n\r\n        }\r\n    }\r\n    return {par[0][u],dst+dis[0][u]+dis[0][v]};\r\n}\r\n\r\nll sumf(int u,int v)\r\n{\r\n    if(u==v)\r\n    {\r\n//        cout<<\"ultra_special_case: \"<<g[u]<<\" \"<<f[u]<<\" \"<<a[u]<<\"\\n\";\r\n        return g[u]+f[u]-a[u];\r\n    }\r\n    int ncc;\r\n    ll dst;\r\n    tie(ncc,dst)=lca(u,v);\r\n//    cout<<\"in_sumf: \"<<ncc<<\"\\n\";\r\n    if(ncc==v)\r\n    {\r\n\r\n        ll res=g[v]-a[v]+dst;\r\n//        cout<<\" special_case: \"<<res<<\"\\n\";\r\n        for(int i=19;i>=0;i--)\r\n        {\r\n            if(par[i][u]<=v)\r\n            {\r\n                res+=disf[i][u];\r\n                u=dis[i][u];\r\n            }\r\n        }\r\n        return res;\r\n    }\r\n\r\n    ll res=g[ncc]-a[ncc]+f[ncc]+dst+f[u]+f[v];\r\n//    cout<<\" normal_case: \"<<res<<\" \"<<dst<<\" \"<<\"\\n\";\r\n    auto cal=[&](int &u)->void\r\n    {\r\n        int childu=u;\r\n        for(int i=19;i>=0;i--)\r\n        {\r\n            if(dep[par[i][u]]>dep[ncc])\r\n            {\r\n                res+=disf[i][u];\r\n                res-=f[u];\r\n                if(childu!=u)res-=dis[0][childu];\r\n                childu=gt(par[i][u],u);\r\n                u=par[i][u];\r\n            }\r\n        }\r\n        if(f[u]>dis[0][u]*2)res-=f[u];\r\n        else res-=2*dis[0][u];\r\n    };\r\n    cal(u);\r\n    cal(v);\r\n    return res;\r\n}\r\n\r\nvoid process()\r\n{\r\n    int n,q;\r\n    cin>>n>>q;\r\n    for(int i=1;i<=n;i++)\r\n    {\r\n        cin>>a[i];\r\n    }\r\n    for(int i=1;i<n;i++)\r\n    {\r\n        int x,y,z;\r\n        cin>>x>>y>>z;\r\n        adj[x].push_back({y,z});\r\n        adj[y].push_back({x,z});\r\n    }\r\n//    cout<<\"arc 1\\n\";\r\n    dfs1(1);\r\n//    cout<<\"f: \";for(int i=1;i<=n;i++)cout<<f[i]<<\" \";cout<<\"\\n\";\r\n//    cout<<\"arc 2\\n\";\r\n    dfs2(1);\r\n\r\n//    cout<<\"arc 3\\n\";\r\n    dfs0(1);\r\n//    cout<<\"fan service\\n\";\r\n//    system(\"cls\");\r\n//    cout<<\"g: \";for(int i=1;i<=n;i++)cout<<g[i]<<\" \";cout<<\"\\n\";\r\n//    for(int i=1;i<=n;i++)\r\n//    {\r\n//        cout<<i<<\": \";\r\n//        for(auto&c:adj[i])cout<<c.F<<\" \";\r\n//        cout<<\"\\n\";\r\n//    }\r\n    while(q--)\r\n    {\r\n        int u,v;\r\n        cin>>u>>v;\r\n        cout<<sumf(u,v)<<\"\\n\";\r\n    }\r\n}\r\n\r\nint32_t main()\r\n{\r\n    ios_base::sync_with_stdio(0);cin.tie(0);\r\n    process();\r\n}\r\n"
+}

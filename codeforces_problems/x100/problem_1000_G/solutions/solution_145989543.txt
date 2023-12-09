@@ -1,0 +1,36 @@
+{
+    "id": 145989543,
+    "contestId": 1000,
+    "creationTimeSeconds": 1644607503,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "vjudge2"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 85401600,
+    "source": "#include <bits/stdc++.h>\n\n#define f first\n#define s second\n#define vec vector\n#define pb push_back\n#define all(x) (x).begin(),(x).end()\n#define rall(x) (x).rbegin(),(x).rend()\n#define sz(x) (int)(x).size()\n#define pw(x) (1LL<<(x))\n#define fast_izho ios_base::sync_with_stdio(false);cin.tie(0);cout.tie(0);\n\nusing namespace std;\nconst int N=3e5+1;\ntypedef long long ll;\ntypedef pair<int,int> pii;\ntemplate <class T> bool umax(T &a,const T &b){return (a<b?a=b,1:0);}\nll du[N][20];\nint up[N][20];\nll dp[N];\nvec<pii> g[N];\nint a[N],tin[N],tout[N],tt;\nvoid dfs(int v,int p){\n    dp[v]=a[v];\n    tin[v]=tt++;\n    for(auto &z : g[v]){\n        if(z.f==p) continue;\n        dfs(z.f,v);\n        umax(dp[v],dp[v]-2*z.s+dp[z.f]);\n    }\n//    cout<<\"BP \"<<v<<' '<<dp[v]<<endl;\n    tout[v]=tt-1;\n}\nvoid dfs1(int v,int p,int cst){\n    up[v][0]=p;\n    du[v][0]=dp[v]+((dp[v]-2ll*cst)>0?-dp[v]+2ll*cst:0)-cst;\n    for(int j=1;j<20;j++){\n        du[v][j]=du[v][j-1]+du[up[v][j-1]][j-1];\n        up[v][j]=up[up[v][j-1]][j-1];\n    }\n    for(auto &z : g[v]){\n        if(z.f==p) continue;\n        dfs1(z.f,v,z.s);\n    }\n}\nvoid dfs2(int v,ll wt,int p){\n    dp[v]=max(dp[v],dp[v]+wt);\n    for(auto &z : g[v]){\n        if(z.f==p) continue;\n        umax(wt,dp[z.f]-2*z.s+wt);\n    }\n    wt+=a[v];\n//    cout<<\"V \"<<v<<' '<<dp[v]<<' '<<wt<<endl;\n    for(auto &z : g[v]){\n        if(z.f==p) continue;\n        ll o=(dp[z.f]-2*z.s>0?wt-(dp[z.f]-2*z.s):wt);\n//        cout<<\"SKRT \"<<o<<' '<<z.f<<endl;\n        dfs2(z.f,max((ll)0,o-2ll*z.s),v);\n    }\n}\nbool is(int a,int b){\n    return tin[a]<=tin[b]&&tout[a]>=tout[b];\n}\npair<ll,int> lca(int v,int u){\n    if(is(v,u)) return {v,0};\n    ll cst=0;\n    for(int i=19;i>=0;i--){\n        if(!is(up[v][i],u)){\n            cst+=du[v][i];\n            v=up[v][i];\n        }\n    }\n    cst+=du[v][0];\n    return {up[v][0],cst};\n}\nsigned main(){\n    fast_izho;\n    int n,q;\n    cin>>n>>q;\n    for(int i=0;i<n;i++) cin>>a[i];\n    for(int i=1;i<n;i++){\n        int v,u,w;\n        cin>>v>>u>>w;--v;--u;\n        g[v].pb({u,w});\n        g[u].pb({v,w});\n    }\n    dfs(0,0);\n    dfs1(0,0,0);\n    dfs2(0,0,0);\n    while(q--){\n        int v,u;\n        cin>>v>>u;--v;--u;\n        auto me=lca(v,u);\n        ll ans=me.s;\n        ans+=lca(u,v).s;\n        ans+=dp[me.f];\n        cout<<ans<<'\\n';\n    }\n    return 0;\n}\n\n  \t\t\t\t\t\t\t     \t\t   \t\t\t\t \t\t \t \t\t"
+}

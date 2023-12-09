@@ -1,0 +1,38 @@
+{
+    "id": 222091831,
+    "contestId": 1556,
+    "creationTimeSeconds": 1694010153,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1556,
+        "index": "H",
+        "name": "DIY Tree",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3300,
+        "tags": [
+            "graphs",
+            "greedy",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1556,
+        "members": [
+            {
+                "handle": "1092515503"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1630247700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 143,
+    "timeConsumedMillis": 4586,
+    "memoryConsumedBytes": 1843200,
+    "source": "/*\r\nCriteria:\r\n1.read the problem carefully; WRITE DOWN SPECIAL CONSTRAINTS when the problem is long;\r\n2.consider special situations/constraints to get observations;\r\n3.think of everything throughout before coding;\r\n4.return to the initial list of notifications after coding.\r\n\r\nCONSTRAINTS:\r\n\r\nOBSERVATIONS:\r\n\r\nOTHER NOTIFICATIONS:\r\n\r\nTHINK CAREFULLY AND CODE DETERMINEDLY!\r\n*/\r\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int inf=1000000;\r\nint n,m,a[60][60],d[60];\r\nbool on[3010];\r\nint D[60];\r\nint dsu[60];\r\nint hs[60][60],X[3010],Y[3010],h,H;\r\nint find(int x){return dsu[x]==x?x:dsu[x]=find(dsu[x]);}\r\nvoid merge(int x,int y){x=find(x),y=find(y),dsu[x]=y;}\r\nvoid init(){\r\n\tfor(int i=1;i<=n;i++)dsu[i]=i;\r\n\tfor(int i=1;i<=H;i++)if(on[i])merge(X[i],Y[i]);\r\n}\r\nbool valid(int i){return find(X[i])!=find(Y[i]);}\r\nint res=0x3f3f3f3f,sum;\r\nbool in[3010];\r\nvector<int>v[3010];\r\nint A[3010],F[3010],dis[3010],dep[3010];\r\nbool Matriod_Intersection(){\r\n\t// for(int i=1;i<=n;i++)for(int j=i+1;j<=n;j++)\r\n\t// \tif(on[i][j])printf(\"<%d,%d:%d>\",i,j,a[i][j]);puts(\"\");\r\n\tqueue<int>q;\r\n\tmemset(dis,0x3f,sizeof(dis)),memset(dep,0x3f,sizeof(dep));\r\n\tmemset(in,false,sizeof(in));\r\n\tfor(int i=h+1;i<=H;i++)\r\n\t\tif(!on[i])A[i]=a[X[i]][Y[i]];\r\n\t\telse A[i]=-a[X[i]][Y[i]];\r\n\tfor(int i=h+1;i<=H;i++)v[i].clear();\r\n\tfor(int i=h+1;i<=H;i++)if(on[i]){\r\n\t\ton[i]=false;\r\n\t\tinit();\r\n\t\ton[i]=true;\r\n\t\tfor(int j=h+1;j<=H;j++)\r\n\t\t\tif(!on[j]&&valid(j))\r\n\t\t\t\tv[i].push_back(j);\r\n\t\t\r\n\t\tif(X[i]<=m)D[X[i]]--;\r\n\t\tfor(int j=h+1;j<=H;j++)\r\n\t\t\tif(!on[j]&&(X[j]>m||D[X[j]]<d[X[j]]))\r\n\t\t\t\tv[j].push_back(i);\r\n\t\tif(X[i]<=m)D[X[i]]++;\r\n\t}\r\n\tinit();\r\n\tfor(int i=h+1;i<=H;i++)\r\n\t\tif(!on[i]&&valid(i))\r\n\t\t\tdis[i]=A[i],\r\n\t\t\tdep[i]=1,\r\n\t\t\tF[i]=-1,\r\n\t\t\tin[i]=true,\r\n\t\t\tq.push(i);\r\n\twhile(!q.empty()){\r\n\t\tint x=q.front();q.pop();\r\n\t\tin[x]=false;\r\n\t\t// printf(\"%d:%d,%d\\n\",x,dis[x],dep[x]);\r\n\t\tfor(auto y:v[x])\r\n\t\t\tif(make_pair(dis[y],dep[y])>make_pair(dis[x]+A[y],dep[x]+1)){\r\n\t\t\t\tdis[y]=dis[x]+A[y];\r\n\t\t\t\tdep[y]=dep[x]+1;\r\n\t\t\t\tF[y]=x;\r\n\t\t\t\tif(!in[y])q.push(y),in[y]=true;\r\n\t\t\t}\r\n\t}\r\n\tint rx=-1,ry=-1,pos=-1;\r\n\tfor(int i=h+1;i<=H;i++)\r\n\t\tif(!on[i]&&(X[i]>m||D[X[i]]<d[X[i]]))\r\n\t\t\tif(pos==-1||make_pair(dis[i],dep[i])<make_pair(dis[pos],dep[pos]))\r\n\t\t\t\trx=X[i],ry=Y[i],pos=i;\r\n\tif(pos==-1)return false;\r\n\tif(dep[pos]>n*n)return false;\r\n\tsum+=dis[pos];\r\n\tfor(;pos!=-1;){\r\n\t\t// printf(\"{%d,%d:%d}\",rx,ry,dis[rx][ry]);\r\n\t\tif(rx<=m)on[pos]?D[rx]--:D[rx]++;\r\n\t\ton[pos]^=1;\r\n\t\tpos=F[pos];\r\n\t\trx=X[pos],ry=Y[pos];\r\n\t}\r\n\t// puts(\"\");\r\n\treturn true;\r\n}\r\nint main(){\r\n\tscanf(\"%d%d\",&n,&m);\r\n\tfor(int i=1;i<=m;i++)scanf(\"%d\",&d[i]);\r\n\tfor(int i=1;i<=n;i++)for(int j=i+1;j<=n;j++)scanf(\"%d\",&a[i][j]);\r\n\tfor(int j=1;j<=m;j++)for(int i=1;i<j;i++)hs[i][j]=++H,X[H]=i,Y[H]=j;\r\n\th=H;\r\n\tfor(int j=m+1;j<=n;j++)for(int i=1;i<j;i++)hs[i][j]=++H,X[H]=i,Y[H]=j;\r\n\tfor(int i=0;i<(1<<h);i++){\r\n\t\t// printf(\"func:%d\\n\",i);\r\n\t\tmemset(on,false,sizeof(on));\r\n\t\tmemset(D,0,sizeof(D));\r\n\t\tint mun=0;sum=0;\r\n\t\tbool ok=true;\r\n\t\tinit();\r\n\t\tfor(int j=1;j<=h;j++)if((i>>j-1)&1){\r\n\t\t\tif(!valid(j)){ok=false;continue;}\r\n\t\t\ton[j]=true,sum+=a[X[j]][Y[j]];\r\n\t\t\tmerge(X[j],Y[j]),D[X[j]]++,D[Y[j]]++;\r\n\t\t}\r\n\t\tfor(int j=1;j<=m;j++)if(D[j]>d[j])ok=false;\r\n\t\tif(!ok)continue;\r\n\t\tint num=__builtin_popcount(i);\r\n\t\twhile(Matriod_Intersection())num++;\r\n\t\tif(num!=n-1)continue;\r\n\t\t// for(int j=1;j<=n;j++)for(int k=j+1;k<=n;k++)\r\n\t\t// \tif(on[j][k])\r\n\t\t// \t\tprintf(\"%d %d %d\\n\",j,k,a[j][k]);\r\n\t\tres=min(res,sum);\r\n\t}\r\n\tprintf(\"%d\\n\",res);\r\n\treturn 0;\r\n}"
+}

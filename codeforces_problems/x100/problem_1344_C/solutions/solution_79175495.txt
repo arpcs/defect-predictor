@@ -1,0 +1,39 @@
+{
+    "id": 79175495,
+    "contestId": 1344,
+    "creationTimeSeconds": 1588778146,
+    "relativeTimeSeconds": 2446,
+    "problem": {
+        "contestId": 1344,
+        "index": "C",
+        "name": "Quantifier Question",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1344,
+        "members": [
+            {
+                "handle": "wrong"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "room": 40,
+        "startTimeSeconds": 1588775700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 38,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 27238400,
+    "source": "#include <cstdio>\n#include <cstdlib>\n#include <cstring>\n#include <cmath>\n#include <cassert>\n#include <iostream>\n#include <sstream>\n#include <vector>\n#include <queue>\n#include <set>\n#include <map>\n#include <utility>\n#include <numeric>\n#include <algorithm>\n#include <bitset>\n#include <complex>\n#include <array>\n#include <list>\n#include <stack>\n#include <valarray>\n\nusing namespace std;\n\ntypedef unsigned uint;\ntypedef long long Int;\ntypedef unsigned long long UInt;\n\nconst int INF = 1001001001;\nconst Int INFLL = 1001001001001001001LL;\n\ntemplate<typename T> void pv(T a, T b) { for (T i = a; i != b; ++i) cout << *i << \" \"; cout << endl; }\ntemplate<typename T> void chmin(T& a, T b) { if (a > b) a = b; }\ntemplate<typename T> void chmax(T& a, T b) { if (a < b) a = b; }\nint in() { int x; scanf(\"%d\", &x); return x; }\ndouble fin() { double x; scanf(\"%lf\", &x); return x; }\nInt lin() { Int x; scanf(\"%lld\", &x); return x; }\n\nint N, M;\n\nstruct edge {\n  int src, dst;\n  edge(int s, int d) : src(s), dst(d) { }\n};\ntypedef vector<edge> edges;\ntypedef vector<edges> graph;\n\nbool dfs_cycle(const graph& g, int u, vector<int>& vis) {\n  vis[u] = 1;\n  for (const edge& e : g[u]) {\n    if (vis[e.dst] == 1) {\n      return true;\n    }\n    if (vis[e.dst] == 0) {\n      if (dfs_cycle(g, e.dst, vis)) {\n        return true;\n      }\n    }\n  }\n  vis[u] = 2;\n  return false;\n}\n\nbool has_cycle(const graph& g) {\n  vector<int> vis(N, 0);\n  for (int u = 0; u < N; ++u) {\n    if (vis[u] == 0) {\n      if (dfs_cycle(g, u, vis)) {\n        return true;\n      }\n    }\n  }\n  return false;\n}\n\nint dfs_min(const graph& g, int u, vector<int>& ms) {\n  if (ms[u] < INF) {\n    return ms[u];\n  }\n  int res = INF;\n  for (const edge& e : g[u]) {\n    chmin(res, min(e.dst, dfs_min(g, e.dst, ms)));\n  }\n  return ms[u] = res;\n}\n\nint main() {\n  N = in();\n  M = in();\n  graph g(N), r(N);\n  for (int i = 0; i < M; ++i) {\n    int a = in() - 1;\n    int b = in() - 1;\n    g[a].emplace_back(a, b);\n    r[b].emplace_back(b, a);\n  }\n\n  if (has_cycle(g)) {\n    puts(\"-1\");\n    return 0;\n  }\n\n  vector<int> lo_min(N, INF), up_min(N, INF);\n  for (int u = 0; u < N; ++u) {\n    dfs_min(g, u, lo_min);\n    dfs_min(r, u, up_min);\n  }\n\n  int res = 0;\n  vector<int> qs(N, 0);\n  for (int u = 0; u < N; ++u) {\n    if (u < lo_min[u] && u < up_min[u]) {\n      ++res;\n      qs[u] = 1;\n    }\n  }\n\n  printf(\"%d\\n\", res);\n  for (int u = 0; u < N; ++u) {\n    putchar(\"EA\"[qs[u]]);\n  }\n  puts(\"\");\n\n  return 0;\n}\n"
+}

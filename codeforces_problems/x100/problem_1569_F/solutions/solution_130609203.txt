@@ -1,0 +1,38 @@
+{
+    "id": 130609203,
+    "contestId": 1569,
+    "creationTimeSeconds": 1633228612,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "ftiasch"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 18,
+    "timeConsumedMillis": 904,
+    "memoryConsumedBytes": 234496000,
+    "source": "#include <bits/stdc++.h>\n\nnamespace {\n\nusing State = std::vector<int8_t>;\n\nint n, m, k;\nstd::vector<State> states;\nstd::vector<std::vector<std::vector<int>>> trans;\nstd::map<State, int> state_id;\n\nint get_state_id(const State &s) {\n  auto iterator = state_id.find(s);\n  if (iterator == state_id.end()) {\n    iterator = state_id.emplace(s, states.size()).first;\n    states.push_back(s);\n  }\n  return iterator->second;\n}\n\nconst int N = 12;\nconst int S1 = 140152;\n\nstd::vector<int> graph[N];\nbool dp[S1][N][N];\n\nstd::vector<bool> ok;\n\nvoid dfs(const State &s) {\n  int old_count = states.size();\n  int sid = get_state_id(s);\n  if (sid == old_count) {\n    ok.push_back(false);\n  }\n  if (!ok[sid]) {\n    ok[sid] = true;\n    for (int i = 0; i < n; ++i) {\n      if (s[i] == i) {\n        for (int j = i + 1; j < n; ++j) {\n          if (s[j] == j) {\n            State t(s);\n            for (int k = 0; k < n; ++k) {\n              if (t[k] == j) {\n                t[k] = i;\n              }\n            }\n            dfs(t);\n          }\n        }\n      }\n    }\n  }\n}\n\n} // namespace\n\nint main() {\n  auto t0 = std::chrono::high_resolution_clock::now();\n  scanf(\"%d%d%d\", &n, &m, &k);\n  get_state_id(State(n, -1));\n  for (int sid = 0; sid < static_cast<int>(states.size()); ++sid) {\n    State s = states[sid];\n    trans.push_back(std::vector<std::vector<int>>(n, std::vector<int>(n, -1)));\n    for (int i = 0; i < n; ++i) {\n      if (s[i] == -1) {\n        for (int j = i + 1; j < n; ++j) {\n          if (s[j] == -1) {\n            State t(s);\n            t[i] = t[j] = i;\n            trans[sid][i][j] = get_state_id(t);\n          }\n        }\n      }\n    }\n  }\n  for (int i = 0, a, b; i < m; ++i) {\n    scanf(\"%d%d\", &a, &b);\n    a--;\n    b--;\n    if (a > b) {\n      std::swap(a, b);\n    }\n    graph[a].push_back(b);\n    graph[b].push_back(a);\n    dp[trans[0][a][b]][a][b] = true;\n  }\n  for (int sid = 0; sid < static_cast<int>(states.size()); ++sid) {\n    const State &state = states[sid];\n    for (int i = 0; i < n; ++i) {\n      if (~state[i]) {\n        for (int j = i + 1; j < n; ++j) {\n          // if (state[j] == -1) {\n          //   dump(state) << \"->\";\n          //   dump(states[trans[sid][i][j]]) << std::endl;\n          // }\n          if (dp[sid][i][j]) {\n            for (int u : graph[i]) {\n              if (state[u] == -1) {\n                for (int v : graph[j]) {\n                  if (state[v] == -1 && u != v) {\n                    if (u < v) {\n                      dp[trans[sid][u][v]][u][v] = true;\n                    } else {\n                      dp[trans[sid][v][u]][v][u] = true;\n                    }\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n  ok.resize(states.size());\n  int s1 = states.size();\n  for (int sid = 0; sid < s1; ++sid) {\n    const State &state = states[sid];\n    bool local_ok = false;\n    if (std::find(state.begin(), state.end(), -1) == state.end()) {\n      for (int i = 0; i < n; ++i) {\n        for (int j = i + 1; j < n; ++j) {\n          if (dp[sid][i][j]) {\n            local_ok = true;\n          }\n        }\n      }\n      if (local_ok) {\n        dfs(state);\n      }\n    }\n  }\n  std::vector<long long> count(n / 2 + 1);\n  count[0] = 1;\n  for (int i = 0; i < n / 2; ++i) {\n    count[i + 1] = count[i] * (k - i);\n  }\n  long long result = 0;\n  for (int sid = 0; sid < static_cast<int>(states.size()); ++sid) {\n    const State &state = states[sid];\n    if (ok[sid]) {\n      int comp = 0;\n      for (int k = 0; k < n; ++k) {\n        comp += state[k] == k;\n      }\n      result += count[comp];\n    }\n  }\n  std::cout << result << std::endl;\n  auto t1 = std::chrono::high_resolution_clock::now();\n  std::cerr\n      << \"Elapsed \"\n      << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count()\n      << \" ms\" << std::endl;\n}\n"
+}

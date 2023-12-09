@@ -1,0 +1,36 @@
+{
+    "id": 135210837,
+    "contestId": 1000,
+    "creationTimeSeconds": 1636773707,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "exzang"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 1466,
+    "memoryConsumedBytes": 120422400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\nconst int N = 3e5 + 5;\r\nint fa[N][20], dep[N], a[N];\r\nll f[N], g[N], sum[N][20], dis[N];\r\nvector<pair<int, int>> e[N];\r\nvoid rdfs(int u, int fath)\r\n{\r\n\tfor (int i = 1; i < 20; ++i)\r\n\t\tsum[u][i] = sum[fa[u][i - 1]][i - 1] + sum[u][i - 1], fa[u][i] = fa[fa[u][i - 1]][i - 1];\r\n\tfor (auto p : e[u])\r\n\t{\r\n\t\tint v = p.first, w = p.second;\r\n\t\tif (v == fath)\r\n\t\t\tcontinue;\r\n\t\tg[v] = max(0ll, g[u] - max(0ll, f[v] - 2ll * w) - 2ll * w) + f[v];\r\n\t\tsum[v][0] = f[u] - max(0ll, f[v] - 2ll * w), fa[v][0] = u;\r\n\t\trdfs(v, u);\r\n\t}\r\n}\r\nvoid dfs(int u, int fath)\r\n{\r\n\tf[u] = a[u], dep[u] = dep[fath] + 1;\r\n\tfor (auto p : e[u])\r\n\t{\r\n\t\tint v = p.first, w = p.second;\r\n\t\tif (v == fath)\r\n\t\t\tcontinue;\r\n\t\tdis[v] = dis[u] + w;\r\n\t\tdfs(v, u), f[u] += max(0ll, f[v] - 2ll * w);\r\n\t}\r\n}\r\nint LCA(int u, int v)\r\n{\r\n\tif (dep[u] < dep[v])\r\n\t\tswap(u, v);\r\n\tfor (int i = 19; i >= 0; --i)\r\n\t\tif (dep[fa[u][i]] >= dep[v])\r\n\t\t\tu = fa[u][i];\r\n\tif (u == v)\r\n\t\treturn u;\r\n\tfor (int i = 19; i >= 0; --i)\r\n\t\tif (fa[u][i] != fa[v][i])\r\n\t\t\tu = fa[u][i], v = fa[v][i];\r\n\treturn fa[u][0];\r\n}\r\nll solve(int u, int v)\r\n{\r\n\tif (u == v)\r\n\t\treturn g[u];\r\n\tll ans = f[u];\r\n\tfor (int i = 19; i >= 0; --i)\r\n\t\tif (dep[fa[u][i]] >= dep[v])\r\n\t\t\tans += sum[u][i], u = fa[u][i];\r\n\tans -= f[v] - g[v];\r\n\treturn ans;\r\n}\r\nsigned main()\r\n{\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(0), cout.tie(0);\r\n\tint n, m;\r\n\tcin >> n >> m;\r\n\tfor (int i = 1; i <= n; ++i)\r\n\t\tcin >> a[i];\r\n\tfor (int i = 1; i < n; ++i)\r\n\t{\r\n\t\tint u, v, w;\r\n\t\tcin >> u >> v >> w;\r\n\t\te[u].emplace_back(v, w), e[v].emplace_back(u, w);\r\n\t}\r\n\tdfs(1, 0), g[1] = f[1], rdfs(1, 0);\r\n\twhile (m--)\r\n\t{\r\n\t\tint u, v;\r\n\t\tcin >> u >> v;\r\n\t\tint l = LCA(u, v);\r\n\t\tll ans = 2 * dis[l] - dis[u] - dis[v];\r\n\t\tans += solve(u, l) + solve(v, l);\r\n\t\tans -= g[l];\r\n\t\tcout << ans << \"\\n\";\r\n\t}\r\n}"
+}

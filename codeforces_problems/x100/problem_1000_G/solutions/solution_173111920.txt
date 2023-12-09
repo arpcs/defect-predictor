@@ -1,0 +1,36 @@
+{
+    "id": 173111920,
+    "contestId": 1000,
+    "creationTimeSeconds": 1663878346,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "keta_tsimakuridze"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 134656000,
+    "source": "#include<bits/stdc++.h>\r\n#define f first\r\n#define s second\r\n#define int long long\r\n#define pii pair<int,int>\r\nusing namespace std;\r\nconst int N = 4e5 + 5, mod = 1e9 + 7, inf = 1e17; // !\r\nint t, dp[N], dp_[N], ans[N], add[N], a[N], p[N][20];\r\nvector<pii> V[N];\r\nint tmin[N], tmout[N], timer;\r\nvector<int> x[N], qry[N];\r\nmultiset<pii> s[N];\r\nbool check(int u, int v) {\r\n    return (tmin[u] <= tmin[v] && tmout[v] <= tmout[u]);\r\n}\r\nint lca(int u, int v) {\r\n    if(check(u, v)) return u;\r\n    if(check(v, u)) return v;\r\n\r\n    for(int i = 18; i >= 0; i--) {\r\n        if(p[u][i] && !check(p[u][i], v)) u = p[u][i];\r\n    }\r\n    return p[u][0];\r\n}\r\nvoid dfs0(int u, int P) {\r\n    tmin[u] = ++timer;\r\n    p[u][0] = P;\r\n    for(int i = 1; i <= 18; i++) p[u][i] = p[p[u][i - 1]][i - 1];\r\n    dp[u] = a[u];\r\n    for(int i = 0; i < V[u].size(); i++) {\r\n        int v = V[u][i].f, w = V[u][i].s;\r\n        if(v == P) continue;\r\n        dfs0(v, u);\r\n        dp[u] += max(0ll, dp[v] - 2 * w);\r\n    }\r\n    dp_[u] = dp[u];\r\n    tmout[u] = timer;\r\n\r\n}\r\nvoid dfs1(int u, int p) {\r\n\r\n    for(int i = 0; i < V[u].size(); i++) {\r\n        int v = V[u][i].f, w = V[u][i].s;\r\n        if(v == p) continue;\r\n        dp[v] += max(0ll, dp[u] - max(0ll, dp[v] - 2 * w) - 2 * w);\r\n        dfs1(v, u);\r\n    }\r\n\r\n}\r\nvoid dfs(int u, int p) {\r\n    for(int i = 0; i < x[u].size(); i++) {\r\n        s[u].insert({x[u][i], dp_[u]});\r\n    }\r\n    for(int i = 0; i < V[u].size(); i++) {\r\n        int v = V[u][i].f, w = V[u][i].s;\r\n        if(v == p) continue;\r\n        dfs(v, u);\r\n        add[v] += - w + dp_[u] - max(0ll, dp_[v] - 2 * w);\r\n        if(s[u].size() < s[v].size()) swap(s[u], s[v]), swap(add[u], add[v]);\r\n        while(s[v].size()) {\r\n            pii x = *s[v].begin();\r\n            s[v].erase(x);\r\n            s[u].insert({x.f, x.s + add[v] - add[u]});\r\n        }\r\n    }\r\n    for(int i = 0; i < qry[u].size(); i++) {\r\n        int id = qry[u][i];\r\n        ans[id] = dp[u] - dp_[u] + add[u] * 2 - dp_[u];\r\n        while(s[u].upper_bound({id, -inf}) != s[u].end()) {\r\n            pii x = *s[u].upper_bound({id, -inf});\r\n            if(x.f != id) break;\r\n            s[u].erase(s[u].find(x));\r\n            ans[id] += x.s;\r\n        }\r\n    }\r\n\r\n}\r\nmain(){\r\n    ios_base::sync_with_stdio(false),cin.tie(0),cout.tie(0);\r\n    int n; int q;\r\n    cin >> n;\r\n    cin >> q;\r\n    for(int i = 1; i <= n; i++) cin >> a[i];\r\n    for(int i = 2; i <= n; i++) {\r\n        int u, v, w;\r\n        cin >> u >> v >> w;\r\n        V[u].push_back({v, w});\r\n        V[v].push_back({u, w});\r\n    }\r\n    dfs0(1, 0);\r\n    dfs1(1, 0);\r\n\r\n    for(int i = 1; i <= q; i++) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        int l = lca(u, v);\r\n        x[u].push_back(i);\r\n        x[v].push_back(i);\r\n        qry[lca(u, v)].push_back(i);\r\n    }\r\n\r\n    dfs(1, 0);\r\n    for(int i = 1; i <= q; i++) cout << ans[i] << \" \";\r\n }\r\n"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 184323205,
+    "contestId": 182,
+    "creationTimeSeconds": 1670500428,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 182,
+        "index": "C",
+        "name": "Optimal Sum",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2000,
+        "tags": [
+            "data structures",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 182,
+        "members": [
+            {
+                "handle": "ItsLastDay"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1335280200
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 10,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <algorithm>\r\n#pragma GCC optimize(\"O3,unroll-loops\")\r\n#pragma GCC target(\"avx2,bmi,bmi2,lzcnt,popcnt\")\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n//#define STRESS\r\n//#define CHECK_ANS\r\n\r\n\r\nnamespace\r\n{\r\ntemplate<class A, class B>\r\nostream& operator<<(ostream& out, pair<A, B> const& v)\r\n{\r\n  out << \"(\" << v.first << \" \" << v.second << \")\";\r\n  return out;\r\n}\r\ntemplate<class Ch, class Tr, class... Args>\r\nauto& operator<<(std::basic_ostream<Ch, Tr>& os, std::tuple<Args...> const& t) {\r\n  std::apply([&os](auto&&... args) {((os << args << \" \"), ...);}, t);\r\n  return os;\r\n}\r\n\r\n\r\n  struct Output\r\n  {\r\n    long long ans = 0;\r\n\r\n    bool operator==(Output const& other) const = default;\r\n    bool check_valid() const;\r\n  };\r\n\r\n  struct Input\r\n  {\r\n    int n, window_size;\r\n    int num_ops;\r\n    vector<int> numbers;\r\n\r\n\r\n    Input() = default;\r\n    void gen();\r\n    void scan();\r\n    Output solve();\r\n    Output brute();\r\n  };\r\n\r\n  bool Output::check_valid() const\r\n  {\r\n    return true;\r\n  }\r\n  void Input::gen()\r\n  {\r\n  }\r\n  Output Input::brute()\r\n  {\r\n    Output out;\r\n    return out;\r\n  }\r\n\r\n  void Input::scan()\r\n  {\r\n    cin >> n >> window_size;\r\n    numbers.resize(n);\r\n    for (int i = 0; i < n; i++)\r\n      cin >> numbers[i];\r\n    cin >> num_ops;\r\n  }\r\n  ostream& operator<<(ostream& out, Input const& inp)\r\n  {\r\n    return out;\r\n  }\r\n  ostream& operator<<(ostream& out, Output const& v)\r\n  {\r\n    out << v.ans;\r\n    return out;\r\n  }\r\n};\r\n\r\n\r\nstruct tree\r\n{\r\n  tree(int n_, vector<int> numbers)\r\n  {\r\n    n = n_;\r\n    numbers_orig = numbers;\r\n\r\n    cnt.assign(4 * n + 123, 0);\r\n    sum_orig.assign(4 * n + 123, 0);\r\n  }\r\n\r\n  void inc(int pos, int delta)\r\n  {\r\n#ifdef DEBUG\r\n    cout << \"adding \" << pos << \" \" << delta << endl;\r\n#endif\r\n    inc(1, 0, n - 1, pos, delta);\r\n  }\r\n\r\n  long long get_sum_lowest(int k)\r\n  {\r\n    return get_sum(1, 0, n - 1, k);\r\n  }\r\n\r\nprivate:\r\n  long long get_sum(int v, int le, int rg, int k)\r\n  {\r\n#ifdef DEBUG\r\n    cout << \"get_sum \" << v << \" \" << make_pair(le, rg) << \" \" << k << endl;\r\n    cout << cnt[v] << endl;\r\n#endif\r\n    if (k == 0)\r\n      return 0;\r\n    if (le == rg)\r\n    {\r\n      return sum_orig[v];\r\n    }\r\n\r\n    int mid = (le + rg) / 2;\r\n    int have_left = cnt[v * 2];\r\n    if (have_left >= k)\r\n      return get_sum(v * 2, le, mid, k);\r\n    return sum_orig[v * 2] + get_sum(v * 2 + 1, mid + 1, rg, k - have_left);\r\n  }\r\n\r\n  void inc(int v, int le, int rg, int pos, int d)\r\n  {\r\n    if (pos < le or pos > rg)\r\n      return;\r\n    if (le == rg)\r\n    {\r\n      cnt[v] += d;\r\n      sum_orig[v] += d * numbers_orig[le];\r\n      return;\r\n    }\r\n\r\n    int mid = (le + rg) / 2;\r\n    inc(v * 2, le, mid, pos, d);\r\n    inc(v * 2 + 1, mid + 1, rg, pos, d);\r\n    cnt[v] = cnt[v * 2] + cnt[v * 2 + 1];\r\n    sum_orig[v] = sum_orig[v * 2]+ sum_orig[v * 2 + 1];\r\n  }\r\n\r\n  int n;\r\n  vector<int> numbers_orig;\r\n  vector<long long> cnt, sum_orig;\r\n};\r\n\r\n\r\nOutput Input::solve()\r\n{\r\n  Output out;\r\n\r\n  for (int _ = 0; _ < 2; _++)\r\n  {\r\n    long long cur_sum = 0;\r\n    auto numbers_sorted = numbers;\r\n    sort(numbers_sorted.begin(), numbers_sorted.end());\r\n\r\n    tree tr(n, numbers_sorted);\r\n\r\n    auto find_pos = [&](int x)\r\n    {\r\n      return lower_bound(numbers_sorted.begin(), numbers_sorted.end(), x) - numbers_sorted.begin();\r\n    };\r\n\r\n    auto add_number = [&](int x, int v)\r\n    {\r\n      if (x >= 0)\r\n        cur_sum += v * x;\r\n      else\r\n      {\r\n        auto pos = find_pos(x);\r\n        tr.inc(pos, v);\r\n      }\r\n    };\r\n\r\n    auto get_sum = [&]()\r\n    {\r\n      return cur_sum - tr.get_sum_lowest(num_ops);\r\n    };\r\n\r\n    for (int i = 0; i < window_size; i++)\r\n    {\r\n      add_number(numbers[i], 1);\r\n    }\r\n    long long mx = get_sum();\r\n\r\n    for (int i = window_size; i < n; i++)\r\n    {\r\n      add_number(numbers[i - window_size], -1);\r\n      add_number(numbers[i], 1);\r\n      mx = max(mx, get_sum());\r\n    }\r\n\r\n    out.ans = max(out.ans, mx);\r\n    for (int i = 0; i < n; i++)\r\n      numbers[i] *= -1;\r\n  }\r\n\r\n  return out;\r\n}\r\n\r\n\r\nint main()\r\n{\r\n  cin.tie(nullptr);\r\n  cin.sync_with_stdio(false);\r\n\r\n#ifdef STRESS\r\n  for (int cnt = 0; ; cnt++)\r\n  {\r\n    Input inp;\r\n    inp.gen();\r\n\r\n    cout << \"Test #\" << cnt << \"\\n\";\r\n    auto my = inp.solve();\r\n    if (!my.check_valid())\r\n    {\r\n      cout << \"Invalid solution:\\ninput: \" << inp << endl << \"output: \" << my << endl;\r\n      break;\r\n    }\r\n\r\n#ifdef CHECK_ANS\r\n    auto correct = inp.brute();\r\n    if (!(correct == my))\r\n    {\r\n      cout << \"Solution not optimal!\\ninput: \" << inp << endl;\r\n      cout << \"my out: \" << my << endl;\r\n      cout << \"real out: \" << correct << endl;\r\n      break;\r\n    }\r\n#endif\r\n  }\r\n  return 0;\r\n#endif\r\n\r\n  int t;\r\n#ifdef MULTITEST\r\n  cin >> t;\r\n#else\r\n  t = 1;\r\n#endif\r\n\r\n  while (t-- > 0)\r\n  {\r\n    Input inp;\r\n    inp.scan();\r\n    cout << inp.solve() << \"\\n\";\r\n  }\r\n\r\n  return 0;\r\n}"
+}

@@ -1,0 +1,35 @@
+{
+    "id": 219085130,
+    "contestId": 1677,
+    "creationTimeSeconds": 1692177000,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1677,
+        "index": "E",
+        "name": "Tokitsukaze and Beautiful Subsegments",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1677,
+        "members": [
+            {
+                "handle": "rzh123"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1652020500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 61337600,
+    "source": "#include <cstdio>\r\n#include <cstring>\r\n#include <stack>\r\n#include <vector>\r\n#include <utility>\r\n#include <algorithm>\r\n#define fprintf(x...)\r\nusing namespace std;\r\nconstexpr int N=3e5+5,INF{0x3f3f3f3f};\r\nint n,m,a[N],pos[N],ans[N];\r\nint tol[N],tor[N];\r\npair<int,int> rg[N];\r\nstruct Info{\r\n\tint k,b;\r\n\toperator bool(){\r\n\t\treturn k||b;\r\n\t}\r\n\tint operator()(int x){\r\n\t\treturn k*x+b;\r\n\t}\r\n}NIL={0,0};\r\nInfo operator+(const Info &a,const Info &b){\r\n\treturn Info{a.k+b.k,a.b+b.b};\r\n}\r\nInfo &operator+=(Info &a,const Info &b){\r\n\ta.k+=b.k,a.b+=b.b;\r\n\treturn a;\r\n}\r\nInfo operator-(const Info &a){\r\n\treturn Info{-a.k,-a.b};\r\n}\r\nInfo operator*(int a,const Info &b){\r\n\treturn Info{a*b.k,a*b.b};\r\n}\r\nstruct Rect{\r\n\tint x1,y1,x2,y2;\r\n\tRect(){}\r\n\tRect(int x1,int y1,int x2,int y2):\r\n\t\tx1{x1},y1{y1},x2{x2},y2{y2}{}\r\n};\r\nstruct Op{\r\n\tint t,l,r;\r\n};\r\nvector<Rect> kk[N],divd;\r\n// max=a[k] \u7684\u6240\u6709\u77e9\u5f62\r\nvector<Op> op[N];\r\nvector<pair<int,int> > qs[N];\r\nstruct Seg{\r\n\tstruct Node{\r\n\t\tint l,r;\r\n\t\tInfo s,lz;\r\n\t\tint len()const{\r\n\t\t\treturn r-l+1;\r\n\t\t}\r\n\t}tr[N<<2];\r\n\tvoid add(int k,Info v){\r\n\t\ttr[k].s+=tr[k].len()*v,\r\n\t\ttr[k].lz+=v;\r\n\t}\r\n\tvoid pup(int k){\r\n\t\ttr[k].s=tr[k<<1].s+tr[k<<1|1].s;\r\n\t}\r\n\tvoid pdn(int k){\r\n\t\tif(tr[k].lz){\r\n\t\t\tadd(k<<1,tr[k].lz);\r\n\t\t\tadd(k<<1|1,tr[k].lz);\r\n\t\t\ttr[k].lz=NIL;\r\n\t\t}\r\n\t}\r\n\tvoid build(int k,int l,int r){\r\n\t\ttr[k].l=l,tr[k].r=r,tr[k].lz=NIL;\r\n\t\tif(l==r){\r\n\t\t\ttr[k].s=NIL;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint md{(l+r)>>1};\r\n\t\tbuild(k<<1,l,md),build(k<<1|1,md+1,r);\r\n\t\tpup(k);\r\n\t}\r\n\tvoid modify(int k,int l,int r,Info f){\r\n\t\t// if(k==1) \r\n\t\t\tfprintf(stderr,\"mdf %d[%d,%d] %d %d {%d,%d}\\n\",k,tr[k].l,tr[k].r,l,r,f.k,f.b);\r\n\t\tif(tr[k].l>r||tr[k].r<l) return;\r\n\t\tif(tr[k].l>=l&&tr[k].r<=r) return add(k,f);\r\n\t\tpdn(k);\r\n\t\tint md{(tr[k].l+tr[k].r)>>1};\r\n\t\tif(l<=md) modify(k<<1,l,r,f);\r\n\t\tif(r>md) modify(k<<1|1,l,r,f);\r\n\t\tpup(k);\r\n\t}\r\n\tInfo query(int k,int l,int r){\r\n\t\t\tfprintf(stderr,\"qry %d[%d,%d] %d %d \\n\",k,tr[k].l,tr[k].r,l,r);\r\n\t\tif(tr[k].l>r||tr[k].r<l) return NIL;\r\n\t\tif(tr[k].l>=l&&tr[k].r<=r) return tr[k].s;\r\n\t\tpdn(k);\r\n\t\tint md{(tr[k].l+tr[k].r)>>1};Info res{NIL};\r\n\t\tif(l<=md) res+=query(k<<1,l,r);\r\n\t\tif(r>md) res+=query(k<<1|1,l,r);\r\n\t\treturn res;\r\n\t}\r\n\tint queryv(int l,int r,int x){\r\n\t\tInfo f=query(1,l,r);\r\n\t\tint t=f(x);\r\n\t\tfprintf(stderr,\"qv %d %d %d: f={%d,%d},y=%d\\n\",l,r,x,f.k,f.b,t);\r\n\t\treturn t;\r\n\t}\r\n}tr;\r\nvoid init(){\r\n\tstack<int> s;\r\n\ta[0]=a[n+1]=INF;\r\n\ts.emplace(0);\r\n\tfor(int i{1};i<=n;++i){\r\n\t\twhile(!s.empty()&&a[s.top()]<a[i]) s.pop();\r\n\t\ttol[i]=s.top()+1,s.emplace(i);\r\n\t}\r\n\twhile(!s.empty()) s.pop();\r\n\ts.emplace(n+1);\r\n\tfor(int i{n};i>=1;--i){\r\n\t\twhile(!s.empty()&&a[s.top()]<a[i]) s.pop();\r\n\t\ttor[i]=s.top()-1,s.emplace(i);\r\n\t}\r\n\tfor(int i{1};i<=n;++i){\r\n\t\tfprintf(stderr,\"to[%d]={%d,%d}\\n\",i,tol[i],tor[i]);\r\n\t}\r\n}\r\nvoid dodiv(){\r\n\tfprintf(stderr,\"[divide]\\n\");\r\n\tfor(int i{1};i<=n;++i){\r\n\t\tfprintf(stderr,\"i=%d\\n\",i);\r\n\t\tsort(kk[i].begin(),kk[i].end(),\r\n\t\t\t[](const Rect &a,const Rect &b)->bool {\r\n\t\t\t\treturn a.x2<b.x2;\r\n\t\t\t}\r\n\t\t);\r\n\t\tstatic int x2n[N],y1n[N];\r\n\t\tint tp{0};\r\n\t\tx2n[0]=tol[i]-1;\r\n\t\ty1n[0]=0;\r\n\t\tfor(auto t:kk[i]){\r\n\t\t\tfprintf(stderr,\"t={%d,%d,%d,%d}\\n\",t.x1,t.y1,t.x2,t.y2);\r\n\t\t\tif(tp&&t.y1<=y1n[tp]) --tp;\r\n\t\t\tx2n[++tp]=t.x2;\r\n\t\t\ty1n[tp]=t.y1;\r\n\t\t}\r\n\t\t/*\r\n\t\t\tR\r\n\t\t\t^\r\n\t\t\t| --------------\r\n\t\t\t| | |   |  |   |\r\n\t\t\t| | |   |-------\r\n\t\t\t| | |----  |\r\n\t\t\t| | |-------\r\n\t\t\t| ---\r\n\t\t\t|\r\n\t\t\t+---------------> L\r\n\r\n\r\n\t\t\tR\r\n\t\t\t^\r\n\t\t\t| --------------\r\n\t\t\t| | |      |   |\r\n\t\t\t| | |      |----\r\n\t\t\t| | |      |\r\n\t\t\t| | |-------\r\n\t\t\t| ---\r\n\t\t\t|\r\n\t\t\t+---------------> L\r\n\t\t\r\n\t\t*/\r\n\t\tfor(int j{1};j<=tp;++j){\r\n\t\t\tint l{x2n[j-1]+1},r{x2n[j]};\r\n\t\t\tfprintf(stderr,\"x2n[%d]=%d,y1n[%d]=%d\\n\",j,x2n[j],j,y1n[j]);\r\n\t\t\tdivd.emplace_back(l,y1n[j],r,tor[i]);\r\n\t\t\top[y1n[j]].emplace_back(Op{ 1,l,r});\r\n\t\t\top[tor[i]].emplace_back(Op{-1,l,r});\r\n\t\t}\r\n\t}\r\n\t// for(auto r:divd){\r\n\t// \tfprintf(stderr,\"divd: {%d,%d,%d,%d}\\n\",r.x1,r.y1,r.x2,r.y2);\r\n\t// }\r\n}\r\nvoid solve(){\r\n\tfprintf(stderr,\"[solve]\\n\");\r\n\ttr.build(1,1,n);\r\n\tfor(int i{1};i<=n;++i){\r\n\t\tfprintf(stderr,\"i=%d\\n\",i);\r\n\t\tfor(auto t:op[i]){\r\n\t\t\tfprintf(stderr,\"op{%d,%d,%d}\\n\",t.t,t.l,t.r);\r\n\t\t\tif(t.t==1) tr.modify(1,t.l,t.r,Info{1,-(i-1)});\r\n\t\t\telse tr.modify(1,t.l,t.r,Info{-1,i});\r\n\t\t}\r\n\t\tfor(auto qq:qs[i]){\r\n\t\t\tint id{qq.first};\r\n\t\t\tint val=tr.queryv(rg[id].first,rg[id].second,i);\r\n\t\t\tans[id]+=qq.second*val;\r\n\t\t}\r\n\t}\r\n}\r\nsigned main(){\r\n\tscanf(\"%d%d\",&n,&m);\r\n\tfor(int i{1};i<=n;++i){\r\n\t\tscanf(\"%d\",a+i);\r\n\t\tpos[a[i]]=i;\r\n\t}\r\n\tinit();\r\n\tfor(int i{1};i<=n;++i){\r\n\t\tfor(int jv{1};a[i]*jv<=n;++jv){\r\n\t\t\tint kv{a[i]*jv},j{pos[jv]},k{pos[kv]};\r\n\t\t\tif(i>=j||i<tol[k]||j>tor[k]) continue;\r\n\t\t\tfprintf(stderr,\"i=%d(%d),j=%d(%d),k=%d(%d)\\n\",i,a[i],j,a[j],k,a[j]);\r\n\t\t\tkk[k].emplace_back(tol[k],max(j,k),min(i,k),tor[k]);\r\n\t\t\t\t\t\t\t/*   x1       y1        x2       y2      */\r\n\t\t\tfprintf(stderr,\"add {%d,%d,%d,%d}\\n\",tol[k],max(j,k),min(i,k),tor[k]);\r\n\t\t\t/*\r\n\t\t\t\t\u6709\u76f8\u540c\u7684\u5de6\u4e0a\u7aef\u70b9 (x1,y2)\r\n\t\t\t\r\n\t\t\t*/\r\n\t\t}\r\n\t}\r\n\tdodiv();\r\n\tfor(int i{1};i<=m;++i){\r\n\t\tint l,r;\r\n\t\tscanf(\"%d%d\",&l,&r);\r\n\t\trg[i]={l,r};\r\n\t\tqs[l-1].emplace_back(i,-1);\r\n\t\tqs[r].emplace_back(i,1);\r\n\t}\r\n\tsolve();\r\n\tfor(int i{1};i<=m;++i){\r\n\t\tprintf(\"%d\\n\",ans[i]);\r\n\t}\r\n\treturn 0;\r\n}\r\n\r\n/*\r\nsum(i=1~2e5)(2e5/i) ~= 2e6\r\n*/"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 231664367,
+    "contestId": 1726,
+    "creationTimeSeconds": 1699329680,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1726,
+        "index": "F",
+        "name": "Late For Work (submissions are not allowed)",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 2900,
+        "tags": [
+            "data structures",
+            "greedy",
+            "schedules",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1726,
+        "members": [
+            {
+                "handle": "SriniV"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1662474900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 8806400,
+    "source": "#include <bits/stdc++.h>\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef unsigned long long ull;\r\ntypedef __int128 lll;\r\n#define PI 3.14159265358979323846\r\n#define sbits(x) __builtin_popcount(x)\r\n#define tbits(total_size , num) total_size - __builtin_clz(num)\r\n#define pb push_back\r\n#define f first\r\n#define s second\r\n#define clr(ds) ds.clear()\r\n#define all(ds) ds.begin() , ds.end()\r\n#define pi pair<ll , ll>\r\n#define vi vector<int>\r\n#define vll vector<ll>\r\n#define vpi vector<pi>\r\n#define sz(i) (int)i.size()\r\nint xP[] = {0,0,1,-1,1,1,-1,-1} , yP[] = {1,-1,0,0,1,-1,-1,1};\r\nusing namespace std;\r\nuint64_t time() {\r\n  using namespace std::chrono;\r\n  return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();\r\n}\r\nvoid setIO(string name = \"\") {\r\n\tcin.tie(0)->sync_with_stdio(0);\r\n\tif (name.size()) {\r\n\t\tfreopen((name + \".in\").c_str(), \"r\", stdin);\r\n\t\tfreopen((name + \".out\").c_str(), \"w\", stdout);\r\n\t}\r\n}\r\nbool ckmin(auto& a , auto b){if(a<b)return 0; else {a=b;return 1;}}\r\nbool ckmax(auto& a , auto b){if(a>b)return 0; else {a=b;return 1;}}\r\n/*\r\n _______________________________________\r\n( If you don't fail at least 90% of the )\r\n( time, you're not aiming high enough.  )\r\n(                                       )\r\n( - Alan Kay                            )\r\n ---------------------------------------\r\n        o   ^__^\r\n         o  (oo)\\_______\r\n            (__)\\       )\\/\\\r\n                ||----w |\r\n                ||     ||\r\n*/\r\nconst int MAXN = 2e5+10;\r\nvi adj[MAXN];\r\nint n ,m;\r\npi edges[MAXN];\r\nint visited[MAXN];\r\nset<pi> ans;\r\nint l;\r\nvoid dfs(int curr){\r\n\tvisited[curr] = 1;\r\n\tfor(auto& neigh : adj[curr])if(!visited[neigh])\r\n\t\tans.insert({min(neigh+0ll , curr+0ll) , max(neigh+0ll , curr+0ll)}) , dfs(neigh);\r\n}\r\nvoid solve(){\r\n\tcin >> n >> m;\r\n\tclr(ans);\r\n\tl = m-n+1;\r\n\tfor(int i =0;i<n;i++)clr(adj[i]);\r\n\tfor(int i =0 , a , b;i<m;i++)cin >> a >> b , --a , --b , adj[a].pb(b) , adj[b].pb(a), edges[i] = {min(a , b) , max(a , b)};\r\n\tmemset(visited , 0x000 , sizeof(int) * n);\r\n\tdfs(0);\t\r\n\tif(l<3){\r\n\t\tfor(int i =0 ;i<m;i++){\r\n\t\t\tcout << ans.count(edges[i]);\r\n\t\t}\r\n\t\tcout << \"\\n\";\r\n\t} else {\r\n\t\t// find some spanning tree such that remaining edges DONT form a cycle\r\n\t\t// check current answer\r\n\t\tset<int> nodes;\r\n\t\tpi o = {-1 , -1};\r\n\t\tfor(int i =0 ;i<m;i++){\r\n\t\t\tif(ans.count(edges[i])==0)\r\n\t\t\t\tnodes.insert(edges[i].f) , nodes.insert(edges[i].s) , o = edges[i];\r\n\t\t}\r\n\t\tif(sz(nodes)==3){\r\n\t\t\t// redo with one of the edges already in the spanning tree\r\n\t\t\tfor(int i =0;i<n;i++)clr(adj[i]);\r\n\t\t\tfor(auto& [a , b] : ans)adj[a].pb(b) , adj[b].pb(a);\r\n\t\t\tclr(ans);\r\n\t\t\tadj[o.f].pb(o.s) , adj[o.s].pb(o.f);\r\n\t\t\tmemset(visited , 0x000 , sizeof(int) * n);\r\n\t\t\tvisited[o.f] = 1;\r\n\t\t\tdfs(o.s) , ans.insert(o);\r\n\t\t\tfor(auto& neigh : adj[o.f]){\r\n\t\t\t\tif(!visited[neigh])\r\n\t\t\t\t\tans.insert({min(neigh+0ll , o.f) , max(neigh+0ll , o.f)}) , dfs(neigh);\r\n\t\t\t}\r\n\r\n\t\t} \r\n\t\tfor(int i =0 ;i<m;i++){\r\n\t\t\tcout << ans.count(edges[i]);\r\n\t\t}\r\n\t\tcout << \"\\n\";\r\n\t}\r\n\r\n}\r\n\r\nint main(){\r\n\tsetIO();\r\n\tint t = 1;\r\n\tcin >> t;\r\n\twhile(t--){\r\n\t\tsolve();\r\n\t}\t\r\n}\r\n"
+}

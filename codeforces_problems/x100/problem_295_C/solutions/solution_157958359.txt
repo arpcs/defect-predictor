@@ -1,0 +1,38 @@
+{
+    "id": 157958359,
+    "contestId": 295,
+    "creationTimeSeconds": 1653199453,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "Quirkless"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 1228800,
+    "source": "#include <bits/stdc++.h>\n// #include <ext/pb_ds/assoc_container.hpp>\nusing namespace std;\n// using namespace __gnu_pbds;\ntypedef long long ll;\ntypedef long double ld;\n\n// typedef tree<ll,null_type,less_equal<ll>,rb_tree_tag,\n// tree_order_statistics_node_update> indexed_set;\n// //member functions :\n// //1. order_of_key(k) : number of elements strictly lesser than k\n// //2. find_by_order(k) : k-th element in the set, counting from 0\n// //less_equal\nint N = 200001;\nconst int mod =  1000000007;\n\n\nll power(ll a, ll b){\n    if(b==0){\n        return 1;\n    }\n    ll ans = power(a,b/2);\n    ans = (ans*ans)%mod;\n    if(b%2==1){\n        ans = (ans*a)%mod;\n    }\n    return ans;\n}\n \nll inverse(ll A){\n    return power(A,mod-2);\n}\n \nll fact(ll n){\n    ll ans = 1;\n    for(int i=1;i<=n;i++){\n        ans = (ans*i)%mod;\n    }\n    return ans;\n}\n \nconst ll MAXN = 1e4;\nll factorial[MAXN];\nll inverse_fac[MAXN];\nvoid preCom(){\n    factorial[0]=1;\n    for(ll i=1;i<MAXN;i++){\n        factorial[i] = (factorial[i-1]*i)%mod;\n    }\n    inverse_fac[MAXN-1]=inverse(factorial[MAXN-1]);\n    for(ll i=MAXN-2;i>=0;i--){\n        inverse_fac[i]=(inverse_fac[i+1]*(i+1))%mod;\n    }\n    return;\n}\n \nll find(ll n, ll k){\n    ll ans = (factorial[n]*inverse_fac[n-k])%mod;\n    ans = (ans*inverse_fac[k])%mod;\n    return ans;\n}\n\nvoid solve(){\n    ll n,k,w;\n    cin>>n>>k;\n    ll a =0 ,b=0;\n    for(ll i=0;i<n;i++){\n        cin>>w;\n        if(w==50)a++;\n        else{\n            b++;\n        }\n    }\n\n    ll dp[a+1][b+1][202];\n    for(ll i=0;i<=a;i++){\n        for(ll j=0;j<=b;j++){\n            for(ll t=0;t<=201;t++){\n                dp[i][j][t]=0;\n            }\n        }\n    }\n    dp[0][0][0]=1;\n    // for(ll i=0;i<=a;i++){\n    //     for(ll j=0;j<=b;j++){\n    //         if(i*50+j*100<=k){\n    //             dp[i][j][1]=find(a,i)*find(b,j);\n    //         }\n    //     }\n    // }\n    for(ll t=1;t<=201;t++){\n        for(ll i=0;i<=a;i++){\n            for(ll j=0;j<=b;j++){\n                if(i==0 && j==0)continue;\n                if(t%2==0){\n                    for(ll x=0;x<=a-i;x++){\n                        for(ll y=0;y<=b-j;y++){\n                            if(x==0 && y==0)continue;\n                            if(50*x+100*y>k)break;\n                            ll tt = (find(i+x,x)*find(j+y,y))%mod;\n                            dp[i][j][t] = (dp[i][j][t]+tt*dp[i+x][j+y][t-1])%mod;\n                        }\n                    }\n                }\n                else{\n                    for(ll x=0;x<=i;x++){\n                        for(ll y=0;y<=j;y++){\n                            if(x==0 && y==0)continue;\n                            if(50*x+100*y>k)break;\n                            ll tt = (find(a-i+x,x)*find(b-j+y,y))%mod;\n                            dp[i][j][t] = (dp[i][j][t]+tt*dp[i-x][j-y][t-1])%mod;\n                        }\n                    }\n                }\n            }\n        }\n        if(dp[a][b][t]>0){\n            cout<<t<<'\\n';\n            cout<<dp[a][b][t]<<'\\n';\n            return;\n        }\n    }\n    cout<<-1<<'\\n';\n    cout<<0;\n}\n\nint main(){\n    ios::sync_with_stdio(false);\n    cin.tie(0);\n    cout.tie(0);\n    // sieve();\n    ll t=1;\n    // cin>>t;\n    // t=1;\n    preCom();\n    for(int i=0;i<t;i++){\n        solve();\n    }\n}\n\n\n\n// void check_using_dp(vector<vector<vector<int>>>& adj,vector<vector<int>>& path){\n//     for i = 0 to 2n\n//         for j = 0 to n\n//             dp[j][i] = false\n//     for i = 0 to n\n//         dp[i][2i] = true\n//     for i = 0 to 2n\n//         for j = 0 to n\n//             if jth bit is set in i\n//                 for k = 0 to n\n//                     if j != k and kth bit is set in i and adj[k][j] == true\n//                         if dp[k][ i  XOR 2j ] == true  \n\n//                             dp[j][i]=true\n//                             break\n//     for i = 0 to n\n//         if dp[i][2n-1] == true\n//             return true\n//     return false\n// }\n\n\n// int m,n1,n2;\n//     cin>>m;\n//     vector<int> v[7][7];\n//     for(int i=0;i<m;i++){\n//         cin>>n1>>n2;\n//         v[n1][n2].push_back(i+1);\n//     }\n//     for(int i=0;i<7;i++){\n//         for(int j=0;j<i;j++){\n//             for(int k:v[i][j]){\n//                 v[j][i].push_back(-k);\n//             }\n//         }\n//     }\n\n//     int n = 0;\n//     vector<vector<int>> mp;\n//     for(int i=0;i<7;i++){\n//         for(int j=i+1;j<7;j++){\n//             if(v[i][j].size()>0){\n//                 mp.push_back({i,j,sig(v[i][j][0])});\n//                 n++;\n//             }\n//         }\n//     }\n//     vector<vector<vector<int>>> adj(n,vector<vector<int>>(n,vector<int>(2)));\n//     for(int i=0;i<n;i++){\n        \n//     } "
+}

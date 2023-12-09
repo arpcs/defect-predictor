@@ -1,0 +1,38 @@
+{
+    "id": 226953505,
+    "contestId": 1632,
+    "creationTimeSeconds": 1696652200,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1632,
+        "index": "E2",
+        "name": "Distance Tree (hard version)",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2700,
+        "tags": [
+            "binary search",
+            "dfs and similar",
+            "shortest paths",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1632,
+        "members": [
+            {
+                "handle": "Superposition"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1643553300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 42,
+    "timeConsumedMillis": 374,
+    "memoryConsumedBytes": 68505600,
+    "source": "// Om Namah Shivaya\r\n\r\n#include <bits/stdc++.h>\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\n\r\nusing namespace std;\r\nusing namespace __gnu_pbds;\r\n\r\ntemplate<typename T> using Tree = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;\r\ntypedef long long int ll;\r\ntypedef long double ld;\r\ntypedef pair<int, int> pii;\r\ntypedef pair<ll, ll> pll;\r\n\r\n#define fastio ios_base::sync_with_stdio(false); cin.tie(NULL)\r\n#define pb push_back\r\n#define endl '\\n'\r\n#define sz(a) a.size()\r\n#define setbits(x) __builtin_popcountll(x)\r\n#define ff first\r\n#define ss second\r\n#define conts continue\r\n#define ceil2(x, y) ((x + y - 1) / (y))\r\n#define all(a) a.begin(), a.end()\r\n#define rall(a) a.rbegin(), a.rend()\r\n#define yes cout << \"Yes\" << endl\r\n#define no cout << \"No\" << endl\r\n\r\n#define rep(i, n) for(int i = 0; i < n; ++i)\r\n#define rep1(i, n) for(int i = 1; i <= n; ++i)\r\n#define rev(i, s, e) for(int i = s; i >= e; --i)\r\n#define trav(i, a) for(auto &i : a)\r\n\r\ntemplate<typename T>\r\nvoid amin(T &a, T b) {\r\n    a = min(a, b);\r\n}\r\n\r\ntemplate<typename T>\r\nvoid amax(T &a, T b) {\r\n    a = max(a, b);\r\n}\r\n\r\n#ifdef LOCAL\r\n#include \"debug.h\"\r\n#else\r\n#define debug(x) 42\r\n#endif\r\n\r\n/*\r\n\r\neasy version:\r\nused my previous submission to the easy version to stress test\r\nthe bug was in handling multiple test cases (suffmx had to be cleared at least until n+1 so that suffmx[n] is not set to suffmx[n+1])\r\nhave already solved the easy version before\r\nig i also read the edis for the easy and hard versions, but i dont remember what was the approach described in the edi\r\nsubmitting again because ig i have another solution that can be extended to solve the hard version\r\n\r\nhard version:\r\ntrying centroid decomposition + segtree\r\nupd: passed\r\noptimized my code after reading the edi (the edi has a much simpler approach)\r\n\r\n*/\r\n\r\nconst int MOD = 1e9 + 7;\r\nconst int N = 3e5 + 5;\r\nconst int inf1 = int(1e9) + 5;\r\nconst ll inf2 = ll(1e18) + 5;\r\n\r\nvector<ll> adj1[N];\r\nvector<ll> depth(N), mxdepth(N);\r\nvector<ll> suffmx(N,-inf2);\r\n\r\nvoid dfs1(ll u, ll p){\r\n    mxdepth[u] = depth[u];\r\n    vector<ll> child_depths;\r\n\r\n    trav(v,adj1[u]){\r\n        if(v == p) conts;\r\n        depth[v] = depth[u]+1;\r\n        dfs1(v,u);\r\n        amax(mxdepth[u],mxdepth[v]);\r\n        child_depths.pb(mxdepth[v]);\r\n    }\r\n\r\n    sort(rall(child_depths));\r\n\r\n    if(sz(child_depths) >= 2){\r\n        ll d = child_depths[0]+child_depths[1]-2*depth[u];\r\n        amax(suffmx[child_depths[1]],d);\r\n    }\r\n    else if(sz(child_depths) == 1){\r\n        ll d = child_depths[0]-depth[u];\r\n        amax(suffmx[depth[u]],d);\r\n    }\r\n    else{\r\n        amax(suffmx[depth[u]],0ll);\r\n    }\r\n}\r\n\r\nvoid solve(int test_case)\r\n{\r\n    ll n; cin >> n;\r\n    rep1(i,n+1){\r\n        adj1[i].clear();\r\n        suffmx[i] = -inf2;\r\n    }\r\n\r\n    rep1(i,n-1){\r\n        ll u,v; cin >> u >> v;\r\n        adj1[u].pb(v), adj1[v].pb(u);\r\n    }\r\n\r\n    dfs1(1,-1);\r\n\r\n    rev(i,n,1) amax(suffmx[i],suffmx[i+1]);\r\n    \r\n    ll ans = 1;\r\n\r\n    rep1(x,n){\r\n        while(true){\r\n            ll d = suffmx[ans+1];\r\n            d = ceil2(d,2);\r\n            d += x;\r\n            if(d <= ans) break;\r\n            ans++;\r\n        }\r\n\r\n        cout << ans << \" \";\r\n    }\r\n\r\n    cout << endl;\r\n}\r\n\r\nint main()\r\n{\r\n    fastio;\r\n\r\n    int t = 1;\r\n    cin >> t;\r\n\r\n    rep1(i, t) {\r\n        solve(i);\r\n    }\r\n\r\n    return 0;\r\n}"
+}

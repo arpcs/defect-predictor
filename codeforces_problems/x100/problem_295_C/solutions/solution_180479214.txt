@@ -1,0 +1,38 @@
+{
+    "id": 180479214,
+    "contestId": 295,
+    "creationTimeSeconds": 1668177634,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "Voltair"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 204800,
+    "source": "#include<iostream>\r\n#include<stdio.h>\r\n#include<stdint.h>\r\n#include<iomanip>\r\n#include<algorithm>\r\n#include<utility>\r\n#include<vector>\r\n#include<stack>\r\n#include<queue>\r\n#include<set>\r\n#include<map>\r\n#include<math.h>\r\n#include<assert.h>\r\n\r\nusing namespace std;\r\n\r\nconst int64_t INF = 1e18;\r\nconst int64_t mINF = 19;\r\nconst int nbit = 61;\r\nconst int ndig = 9;\r\nconst int nchar = 26;\r\nconst int64_t MOD = 1e9 + 7;\r\nconst int D = 4;\r\nint dr[D] = {0, 1, 0, -1};\r\nint dc[D] = {1, 0, -1, 0};\r\n\r\nstruct Solution\r\n{\r\n    int n;\r\n    int k;\r\n    Solution() {}\r\n\r\n    void solve()\r\n    {\r\n        cin >> n >> k;\r\n\r\n        int a = 0;\r\n        int b = 0;\r\n        for(int i = 0; i < n; i++)\r\n        {\r\n            int val;\r\n            cin >> val;\r\n\r\n            if(val == 50) a++;\r\n            else b++;\r\n        }\r\n\r\n        k /= 50;\r\n        vector<vector<int> > dp(a + 1, vector<int>(b + 1, 0));\r\n        vector<vector<int> > odp(a + 1, vector<int>(b + 1, 0));\r\n        dp[a][b] = 1;\r\n        odp[0][0] = 1;\r\n\r\n        for(int trip = 1; trip <= 4 * n; trip++)\r\n        {\r\n            vector<vector<int> > new_dp(a + 1, vector<int>(b + 1, 0));\r\n            vector<vector<int> > new_odp(a + 1, vector<int>(b + 1, 0));\r\n            for(int i = 0; i <= a; i++)\r\n            {\r\n                for(int j = 0; j <= b; j++)\r\n                {\r\n                    if(dp[i][j] == 0) continue;\r\n\r\n                    for(int ga = 0; ga <= i; ga++)\r\n                    {\r\n                        for(int gb = 0; gb <= j; gb++)\r\n                        {\r\n                            int w = ga + gb * 2;\r\n                            if(w > k) break;\r\n                            if(ga == 0 && gb == 0) continue;\r\n                            int c = modmul(C(i, ga), C(j, gb));\r\n                            int x = a - i + ga;\r\n                            int y = b - j + gb;\r\n\r\n                            new_dp[i - ga][j - gb] = modadd(new_dp[i - ga][j - gb], modmul(dp[i][j], c));\r\n                            new_odp[x][y] = modadd(new_odp[x][y], modmul(odp[a - i][b - j], c));\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n\r\n            for(int i = 0; i <= a; i++)\r\n            {\r\n                for(int j = 0; j <= b; j++)\r\n                {\r\n                    dp[i][j] = new_dp[i][j];\r\n                    odp[i][j] = new_odp[i][j];\r\n                }\r\n            }\r\n\r\n            if(trip % 2 != 0 && odp[a][b] != 0)\r\n            {\r\n                cout << trip << \"\\n\";\r\n                cout << odp[a][b] << \"\\n\";\r\n                return;\r\n            }\r\n\r\n            swap(dp, odp);\r\n        }\r\n\r\n        cout << \"-1\\n\";\r\n        cout << \"0\\n\";\r\n    }\r\n\r\n    int64_t C(int a, int b)\r\n    {\r\n        int64_t ans = 1;\r\n        int d = 1;\r\n        int r = a - b;\r\n        for(int i = a; i > r; i--)\r\n        {\r\n            ans *= i;\r\n            while(d <= b && ans % d == 0)\r\n            {\r\n                ans /= d;\r\n\r\n                d++;\r\n            }\r\n        }\r\n\r\n        return ans;\r\n    }\r\n\r\n    int modmul(int t1, int t2)\r\n    {\r\n        int64_t res = 1LL * t1 * t2;\r\n\r\n        return (res % MOD);\r\n    }\r\n\r\n    int modadd(int t1, int t2)\r\n    {\r\n        int res = t1 + t2;\r\n        if(res >= MOD) res -= MOD;\r\n\r\n        return res;\r\n    }\r\n\r\n    int MASK(int i)\r\n    {\r\n        return (1 << i);\r\n    }\r\n};\r\n\r\nvoid __setup()\r\n{\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n\r\n//    freopen(\"in.txt\", \"r\", stdin);\r\n//    freopen(\"out.txt\", \"w\", stdout);\r\n}\r\n\r\nint main()\r\n{\r\n    __setup();\r\n\r\n    int t = 1;\r\n//    cin >> t;\r\n\r\n    for(int i = 1; i <= t; i++)\r\n    {\r\n        Solution().solve();\r\n    }\r\n\r\n    return 0;\r\n}\r\n"
+}

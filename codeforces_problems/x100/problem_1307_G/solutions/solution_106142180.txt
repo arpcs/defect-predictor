@@ -1,0 +1,37 @@
+{
+    "id": 106142180,
+    "contestId": 1307,
+    "creationTimeSeconds": 1612130475,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "schtamas"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 234,
+    "memoryConsumedBytes": 409600,
+    "source": "#include <iostream>\n#include <iomanip>\n#include <queue>\n#include <vector>\r\nusing namespace std;\r\n\nconst int INF = 1e8;\nvector<pair<int,long long>> sol;\n\nstruct edge {\n    int dest, back_id, cap, flow, cost;\n    bool backwards;\n};\n\nstruct MinCostMaxFlow {\n    vector<vector<edge>> G;\n    vector<pair<int,int>> p;\n\n    MinCostMaxFlow(int n) : G(n), p(n) {}\n\n    void add_edge(int s, int t, int cap, int cost) {\n        //cout << \"*\" << s << \" \" << t << \" \" << cap << \" \" << cost << endl;\n        edge a = {t, G[t].size(), cap, 0, cost, false};\n        edge b = {s, G[s].size(), 0,   0, -cost, true};\n        G[s].push_back(a);\n        G[t].push_back(b);\n    }\n\n    bool spfa(int s, int t) {\n        vector<int> d(G.size(), INF);\n        vector<bool> inq(G.size(), false);\n        queue<int> q;\n        d[s] = 0, p[s].first = -1;\n        q.push(s), inq[s] = true;\n        while(!q.empty()) {\n            int u = q.front(); q.pop(); inq[u] = false;\n            for (int i = 0; i < G[u].size(); i++) {\n                edge & e = G[u][i];\n                int v = e.dest;\n                if(e.flow < e.cap && d[v] > d[u] + e.cost) {\n                    d[v] = d[u] + e.cost;\n                    p[v] = {u, i};\n                    if(!inq[v]) q.push(v);\n                }\n            }\n        }\n        return (d[t] != INF);\n    }\n\n    void mcmf(int s, int t) {//(max flow, min cost)\n        int F = 0; long long C = 0;\n\n        while(spfa(s, t)) {\n            int v = t, f = INF;\n            while(p[v].first != -1) {\n                f = min(f, G[p[v].first][p[v].second].cap -\n                           G[p[v].first][p[v].second].flow);\n                v = p[v].first;\n            }\n            F += f;\n            v = t;\n            while(p[v].first != -1) {\n                edge & e = G[p[v].first][p[v].second];\n                if(e.backwards) e.cap -= f, G[v][e.back_id].flow -= f;\n                else e.flow += f, G[v][e.back_id].cap += f;\n                C += (long long)e.cost * f;\n                v = p[v].first;\n            }\n            sol.push_back({F, C});\n        }\n    }\n};\n\r\nint main() {\r\n    ios_base::sync_with_stdio(false); cin.tie(0);\n    int n, m; cin >> n >> m;\n    MinCostMaxFlow F(n);\n    for (int i = 0; i < m; i++) {\n        int u, v, w; cin >> u >> v >> w;\n        F.add_edge(u-1, v-1, 1, w);\n    }\n    F.mcmf(0, n-1);\n    int q; cin >> q;\n    while(q--) {\n        int x; cin >> x;\n        double ans = INF;\n        for (auto & s: sol) ans = min(ans, (s.second+x+0.0)/s.first);\n        cout << setprecision(9) << fixed << ans << \"\\n\";\n    }\r\n    return 0;\r\n}\r\n"
+}

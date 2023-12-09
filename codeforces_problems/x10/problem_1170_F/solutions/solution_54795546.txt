@@ -1,0 +1,35 @@
+{
+    "id": 54795546,
+    "contestId": 1170,
+    "creationTimeSeconds": 1559121944,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1170,
+        "index": "F",
+        "name": "Wheels",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "binary search",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1170,
+        "members": [
+            {
+                "handle": "evagl"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1559054100
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 29,
+    "timeConsumedMillis": 187,
+    "memoryConsumedBytes": 4403200,
+    "source": "import java.io.*\nimport java.util.*\n\nfun main() {\n    val io = FastIO()\n    val n = io.nextInt()\n    val m = io.nextInt()\n    val k = io.nextInt()\n    val wheels = LongArray(n) { io.nextLong() }\n    Arrays.sort(wheels)\n    val sums = LongArray(n + 1)\n    sums[0] = 0L\n    for (i in 1..n) {\n        sums[i] = sums[i - 1] + wheels[i - 1];\n    }\n\n    var ans: Long = Long.MAX_VALUE\n    for (start in 0 .. (n - m)) {\n        val finish = start + m - 1\n        val middle = (start + finish) / 2\n\n        // bin search\n        var l = start\n        var r = middle\n        while (l + 1 < r) {\n            val mid = (l + r) / 2\n            val ups = wheels[mid] * (mid - start) - (sums[mid] - sums[start])\n            if (ups <= k) {\n                l = mid\n            } else {\n                r = mid - 1\n            }\n        }\n        val curr = if (wheels[r] * (r - start) - (sums[r] - sums[start]) <= k) {\n            r\n        } else {\n            l\n        }\n\n        val upsToCurr: Long = wheels[curr] * (curr - start) - (sums[curr] - sums[start])\n        var currAns: Long = upsToCurr + (sums[finish + 1] - sums[curr + 1]) - wheels[curr] * (finish - curr)\n        // we can improve it\n        if (l != middle) {\n            val possibleUps: Long = (k - upsToCurr) / (curr - start + 1)\n            currAns += possibleUps * (curr - start + 1) - possibleUps * (finish - curr)\n        }\n        if (currAns < ans) {\n            ans = currAns\n        }\n    }\n    println(ans)\n    io.close()\n}\n\nclass FastIO : AutoCloseable {\n    private val reader: BufferedReader\n    val writer: PrintWriter\n    private var tokenizer: StringTokenizer? = null\n\n    constructor() {\n        reader = BufferedReader(InputStreamReader(System.`in`))\n        writer = PrintWriter(System.out)\n    }\n\n    constructor(inputFile: String, outputFile: String) {\n        try {\n            reader = BufferedReader(InputStreamReader(FileInputStream(inputFile)))\n            writer = PrintWriter(outputFile)\n        } catch (e: FileNotFoundException) {\n            throw RuntimeException(e)\n        }\n\n    }\n\n    fun nextLong(): Long {\n        return nextToken().toLong()\n    }\n\n    fun nextInt(): Int {\n        return nextToken().toInt()\n    }\n\n    fun nextDouble(): Double {\n        return nextToken().toDouble()\n    }\n\n    fun nextLine(): String {\n        try {\n            tokenizer = null\n            return reader.readLine()\n        } catch (e: IOException) {\n            throw RuntimeException(e)\n        }\n\n    }\n\n    fun nextToken(): String {\n        try {\n            while (tokenizer == null || !tokenizer!!.hasMoreTokens()) {\n                tokenizer = StringTokenizer(reader.readLine())\n            }\n            return tokenizer!!.nextToken()\n        } catch (e: IOException) {\n            throw RuntimeException(e)\n        }\n\n    }\n\n    override fun close() {\n        try {\n            reader.close()\n            writer.flush()\n            writer.close()\n        } catch (e: IOException) {\n            throw RuntimeException(e)\n        }\n\n    }\n}"
+}

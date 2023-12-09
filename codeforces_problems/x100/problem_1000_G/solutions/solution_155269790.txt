@@ -1,0 +1,36 @@
+{
+    "id": 155269790,
+    "contestId": 1000,
+    "creationTimeSeconds": 1651220255,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "Wangxueyi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 80588800,
+    "source": "#include <bits/stdc++.h>\r\n\r\n#define rep(i,l,r) for (int i = l; i <= r; i++)\r\n#define per(i,r,l) for (int i = r; i >= l; i--)\r\n#define fi first\r\n#define se second\r\n#define prt std::cout\r\n#define gin std::cin\r\n#define edl std::endl\r\n\r\nnamespace wxy{\r\n\r\nconst int N = 3e5 + 50;\r\n\r\ntypedef long long ll;\r\n\r\nint lightMax[N],wv[N];\r\n\r\nint head[N],edge[N<<1],fail[N<<1],w[N<<1],tot;\r\n\r\nint fa[20][N],dep[N];\r\n\r\nint size[N],son[N],top[N],st[N],ed[N],dfn;\r\n\r\nll d[N],f[N],contri[N],dist[N],sonw[N],curContri[N];\r\n\r\nll sumd[N],sumf[N];\r\n\r\nint n,q;\r\nvoid add(int x,int y,int z) {\r\n    edge[++ tot] = y,fail[tot] = head[x],w[tot] = z,head[x] = tot;\r\n}\r\n\r\nstruct node {\r\n    int l,r;\r\n    ll maxv;\r\n} t[N<<2];\r\n\r\nvoid pushup(int u) {\r\n    t[u].maxv = t[u<<1].maxv + t[u<<1|1].maxv;\r\n}\r\n\r\nvoid build(int u,int l,int r) {\r\n    t[u].l = l; t[u].r = r;\r\n    if (l == r) {\r\n        t[u].maxv = lightMax[l]; return;\r\n    }\r\n    int mid = (l + r) >> 1;\r\n    build(u<<1,l,mid); build(u<<1|1,mid+1,r);\r\n    pushup(u);\r\n}\r\n\r\nint query(int u,int l,int r) {\r\n    if (l > r || l < 1 || r > n) return 0;\r\n    if (l <= t[u].l && t[u].r <= r) return t[u].maxv;\r\n    int mid = (t[u].l + t[u].r) >> 1,res = 0;\r\n    if (l <= mid) res += query(u<<1,l,r);\r\n    if (r > mid) res += query(u<<1|1,l,r);\r\n    return res;\r\n}\r\n\r\nvoid dfs1(int x) {\r\n    size[x] = 1; dist[x] += wv[x]; rep(i,1,19) fa[i][x] = fa[i-1][fa[i-1][x]];\r\n    for (int i = head[x]; i; i = fail[i]) {\r\n        int v = edge[i];\r\n        if (v == fa[0][x]) continue;\r\n        fa[0][v] = x; dep[v] = dep[x] + 1; dist[v] = dist[x] - w[i];\r\n        dfs1(v); if (size[v] > size[son[x]]) {\r\n            sonw[x] =  wv[x] - 2 * w[i]; son[x] = v;\r\n        }\r\n        size[x] += size[v]; contri[v] = wv[v] - 2 * w[i] + d[v];\r\n        if (contri[v] > 0) sumd[x] += contri[v];\r\n    }\r\n    d[x] = sumd[x];\r\n}\r\n\r\n// t : 0 \u4e0d\u5305\u542b\u5b50\u6811\u5916\uff0ct : 1 \u5305\u542b\u5b50\u6811\u5916\r\n\r\nll queryContri(std::vector<int> del,int u,int t) {\r\n    ll res = sumd[u];\r\n    if (t) res += f[u];\r\n    for (auto v : del) {\r\n        if (contri[v] > 0) res -= contri[v];\r\n    }\r\n    return res;\r\n}\r\n\r\nvoid dfs2(int x,int tp,ll pre_val) {\r\n    top[x] = tp; st[x] = ++ dfn;\r\n    if (fa[0][x]) {\r\n       f[x] = f[fa[0][x]] + sumd[fa[0][x]] + pre_val;\r\n       if (contri[x] > 0) f[x] -= contri[x];\r\n       f[x] = std::max(f[x],0ll);\r\n       sumf[x] = sumd[x] + f[x];\r\n    }\r\n    if (son[x]) {\r\n        dfs2(son[x],tp,sonw[x]); \r\n    }\r\n    for (int i = head[x]; i; i = fail[i]) {\r\n        int v = edge[i];\r\n        if (v == fa[0][x] || v == son[x]) continue;\r\n        dfs2(v,v,wv[x] - 2 * w[i]);\r\n    } ed[x] = dfn;\r\n} \r\n\r\nint lca(int x,int y) {\r\n    while (top[x] != top[y]) {\r\n        if (dep[top[x]] < dep[top[y]]) std::swap(x,y);\r\n        x = fa[0][top[x]];\r\n    }\r\n    if (dep[x] > dep[y]) std::swap(x,y);\r\n    return x;\r\n}\r\n\r\nint getPre(int x,int anc) {\r\n    per(i,19,0) if (dep[fa[i][x]] > dep[anc]) x = fa[i][x];\r\n    return x;\r\n}\r\n\r\nll getLcaContri(int x,int y) {\r\n    if (dep[x] > dep[y]) std::swap(x,y);\r\n    int Lca = lca(x,y);\r\n    if (x == Lca) {\r\n        int u = getPre(y,Lca);\r\n        std::vector<int> qry; \r\n        qry.push_back(u);\r\n        return queryContri(qry,Lca,1) + d[y];\r\n    } else {\r\n        int u = getPre(x,Lca),v = getPre(y,Lca);\r\n        std::vector<int> qry; \r\n        if (u == v) qry.push_back(u);\r\n        else {\r\n            qry.push_back(u); qry.push_back(v);\r\n        }\r\n        ll res = queryContri(qry,Lca,1);\r\n        return res + d[x] + d[y];\r\n    }\r\n}\r\n\r\nll QueryChain(int x,int y) {\r\n    if (x == y) {\r\n        return std::max(d[x],f[x]) + wv[x];\r\n    }\r\n    int LCA = lca(x,y); ll cur = dist[x] + dist[y] - 2 * dist[LCA] + wv[LCA];\r\n    int u = x,v = y;\r\n    std::vector<int> clr;\r\n    while (top[x] != top[y]) {\r\n        if (dep[top[x]] < dep[top[y]]) std::swap(x,y);\r\n        if (x != top[x]) {\r\n            cur += query(1,st[top[x]],st[fa[0][x]]); \r\n        }\r\n        x = top[x]; std::vector<int> qry; qry.push_back(x); ll Curval = queryContri(qry,fa[0][x],0);\r\n        curContri[fa[0][x]] += Curval; cur += Curval; x = fa[0][x]; clr.push_back(x);\r\n    } \r\n    if (dep[x] > dep[y]) std::swap(x,y);\r\n    cur -= curContri[x]; cur += query(1,st[x]+1,st[fa[0][y]]);\r\n    for (auto v : clr) curContri[v] = 0;\r\n    cur += getLcaContri(u,v); return cur;\r\n}\r\n\r\ninline void init() {\r\n    dfs1(1); dfs2(1,1,0);\r\n    rep(i,1,n) {\r\n        if (!son[i]) continue;\r\n        std::vector<int> qry; qry.push_back(son[i]);\r\n        lightMax[st[i]] = queryContri(qry,i,0);\r\n    } build(1,1,n);\r\n}\r\n\r\ninline void main(){\r\n    #ifndef ONLINE_JUDGE\r\n        freopen(\"in.in\",\"r\",stdin);\r\n        freopen(\"out.out\",\"w\",stdout);\r\n    #endif\r\n    dep[0] = -1; scanf(\"%d%d\",&n,&q);\r\n    rep(i,1,n) scanf(\"%d\",&wv[i]);\r\n    rep(i,1,n-1) {\r\n        int a,b,c; scanf(\"%d%d%d\",&a,&b,&c);\r\n        add(a,b,c); add(b,a,c);\r\n    }\r\n    init(); \r\n    \r\n    while (q --) {\r\n        int u,v; scanf(\"%d%d\",&u,&v);\r\n        printf(\"%lld\\n\",QueryChain(u,v));\r\n    }\r\n}\r\n\r\n}signed main(){wxy::main(); return 0;}"
+}

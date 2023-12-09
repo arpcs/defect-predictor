@@ -1,0 +1,39 @@
+{
+    "id": 218601426,
+    "contestId": 1450,
+    "creationTimeSeconds": 1691871978,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1450,
+        "index": "D",
+        "name": "Rating Compression",
+        "type": "PROGRAMMING",
+        "points": 1750.0,
+        "rating": 1800,
+        "tags": [
+            "binary search",
+            "data structures",
+            "greedy",
+            "implementation",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1450,
+        "members": [
+            {
+                "handle": "aasmaangupta"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1607265300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\nconst int mod = 1e9 + 7;\n#define ll long long\n#define prDouble(x) cout << fixed << setprecision(10) << x\n// vector<vector<int>>graph;\n// vector<bool>visited;\n// vector<int>level;\n// int bfs(ll x,ll b){\n//     queue<int> q;\n//     visited[x] = true;\n//     q.push(x);\n//     level[x]=0;\n//     while(!q.empty()) {\n//         x = q.front();\n//         q.pop();\n//         int n = graph[x].size();\n//         for(int i=0; i<n; i++) {\n//             if(!visited[graph[x][i]]) {\n//                 visited[graph[x][i]]=true;\n//                 level[graph[x][i]]=level[x]+1;\n//                 if(graph[x][i]==b){\n//                     return level[b];\n//                 }\n//                 q.push(graph[x][i]);\n//             }\n//         }\n\n//     }\n//     return -1;\n// }\nvoid __print(int x) { cerr << x; }\nvoid __print(long x) { cerr << x; }\nvoid __print(long long x) { cerr << x; }\nvoid __print(unsigned x) { cerr << x; }\nvoid __print(unsigned long x) { cerr << x; }\nvoid __print(unsigned long long x) { cerr << x; }\nvoid __print(float x) { cerr << x; }\nvoid __print(double x) { cerr << x; }\nvoid __print(long double x) { cerr << x; }\nvoid __print(char x) { cerr << '\\'' << x << '\\''; }\nvoid __print(const char *x) { cerr << '\\\"' << x << '\\\"'; }\nvoid __print(const string &x) { cerr << '\\\"' << x << '\\\"'; }\nvoid __print(bool x) { cerr << (x ? \"true\" : \"false\"); }\n\ntemplate <typename T, typename V>\nvoid __print(const pair<T, V> &x)\n{\n   cerr << '{';\n   __print(x.first);\n   cerr << ',';\n   __print(x.second);\n   cerr << '}';\n}\ntemplate <typename T>\nvoid __print(const T &x)\n{\n   int f = 0;\n   cerr << '{';\n   for (auto &i : x)\n      cerr << (f++ ? \",\" : \"\"), __print(i);\n   cerr << \"}\";\n}\nvoid _print() { cerr << \"]\\n\"; }\ntemplate <typename T, typename... V>\nvoid _print(T t, V... v)\n{\n   __print(t);\n   if (sizeof...(v))\n      cerr << \", \";\n   _print(v...);\n}\n#ifndef ONLINE_JUDGE\n#define debug(x...)              \\\n   cerr << \"[\" << #x << \"] = [\"; \\\n   _print(x)\n#else\n#define debug(x...)\n#endif\nstruct DSU\n{\n   ll n;\n   vector<ll> parent;\n   vector<ll> size;\n   DSU(ll n)\n   {\n      size.assign(n + 1, 1);\n      parent.resize(n + 1);\n      for (ll i = 1; i < n + 1; i++)\n         parent[i] = i;\n   }\n   ll find(ll x)\n   {\n      if (parent[x] == x)\n         return x;\n      else\n      {\n         return find(parent[x]);\n      }\n   }\n   void merge(ll a, ll b)\n   {\n      a = find(a);\n      b = find(b);\n      if (size[a] < size[b])\n         swap(a, b);\n      parent[b] = a;\n      size[a] += size[b];\n   }\n};\nvector<pair<ll, ll>> vp;\nvoid prime(ll n)\n{\n   for (ll i = 2; i * i <= n; i++)\n   {\n      if (n % i == 0)\n      {\n         ll cnt = 0;\n         while (n % i == 0)\n         {\n            cnt++;\n            n /= i;\n         }\n         vp.push_back({i, cnt});\n      }\n   }\n   if (n != 1)\n      vp.push_back({n, 1});\n}\n\nclass SGTree {\n   vector<ll> seg;\npublic:\n   SGTree(ll n) {\n      seg.resize(4 * n + 1);\n   }\n\n   void build(ll ind, ll low, ll high, vector<ll>&arr) {\n      if (low == high) {\n         seg[ind] = arr[low];\n         return;\n      }\n\n      ll mid = (low + high) / 2;\n      build(2 * ind + 1, low, mid, arr);\n      build(2 * ind + 2, mid + 1, high, arr);\n      seg[ind] = min(seg[2 * ind + 1], seg[2 * ind + 2]);\n   }\n\n   ll query(ll ind, ll low, ll high, ll l, ll r) {\n      // no overlap\n      // l r low high or low high l r\n      if (r < low || high < l) return INT_MAX;\n\n      // complete overlap\n      // [l low high r]\n      if (low >= l && high <= r) return seg[ind];\n\n      ll mid = (low + high) >> 1;\n      ll left = query(2 * ind + 1, low, mid, l, r);\n      ll right = query(2 * ind + 2, mid + 1, high, l, r);\n      return min(left, right);\n   }\n   void update(ll ind, ll low, ll high, ll i, ll val) {\n      if (low == high) {\n         seg[ind] = val;\n         return;\n      }\n\n      ll mid = (low + high) >> 1;\n      if (i <= mid) update(2 * ind + 1, low, mid, i, val);\n      else update(2 * ind + 2, mid + 1, high, i, val);\n      seg[ind] = min(seg[2 * ind + 1], seg[2 * ind + 2]);\n   }\n};\n\nint main()\n{\n\n   ios_base ::sync_with_stdio(false);\n   cin.tie(NULL);\n   cout.tie(NULL);\n   ll t;\n   cin >> t;\n   while (t--)\n   {\n      ll n; cin >> n;\n      vector<ll>a(n+1);\n      vector<ll>v(n);\n      for(ll i =0;i<n;i++){\n         cin >> v[i];\n      }\n      string ans;\n      for(ll i =1;i<=n;i++)ans.push_back('0');\n      bool flag = true;\n      for(ll i =0;i<n;i++){\n         if(a[v[i]]==1){\n            flag = false;break;\n         }\n         a[v[i]]=1;\n      }\n      if(flag)ans[0]='1';\n      SGTree s1(n);\n      s1.build(0,0,n-1,v);\n      if(s1.query(0,0,n-1,0,n-1)!=1){\n         cout<<ans<<endl;continue;\n      }\n      ll r= n;\n      ll l =0;\n      while(r-l>1){\n         ll m = (l+r)/2;\n          flag = true;\n         vector<ll>visit(m+1,0);\n         for(ll i =0;i+m-1<n;i++){\n            ll low = i;\n            ll high = i+m-1;\n            ll minn = s1.query(0,0,n-1,low,high);\n            if(visit[minn]==1){\n               flag = false;break;\n            }\n            else visit[minn]=1;\n         }\n         for(ll j=1;j<=m;j++){\n            if(!visit[j]){\n               flag=false;break;\n            }\n         }\n         if(flag){\n            r=m;\n         }\n         else\n         l=m;\n      }\n      for(ll i =r-1;i<n;i++){\n         ans[i] = '1';\n      }\n      // debug(ans);\n      // debug(a);\n      // debug(\"hehe\");\n     \n      cout<<ans<<endl;\n   }\n}\n"
+}

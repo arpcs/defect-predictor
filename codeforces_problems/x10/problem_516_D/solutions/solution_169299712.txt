@@ -1,0 +1,39 @@
+{
+    "id": 169299712,
+    "contestId": 516,
+    "creationTimeSeconds": 1661148260,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 516,
+        "index": "D",
+        "name": "Drazil and Morning Exercise",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2800,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "dsu",
+            "trees",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 516,
+        "members": [
+            {
+                "handle": "yx20231001"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1424190900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 358,
+    "memoryConsumedBytes": 14028800,
+    "source": "#include<bits/stdc++.h>\r\n#define ll long long\r\nusing namespace std;\r\nconst int N=1e5+5;\r\nint n,head[N],cnt;\r\nstruct node{\r\n\tint v,val,nxt;\r\n}tree[N<<1];\r\nvoid add(int u,int v,int w){\r\n\ttree[++cnt].v=v,tree[cnt].val=w,tree[cnt].nxt=head[u],head[u]=cnt;\r\n}\r\nll max1[N],max2[N];\r\nint fr[N];\r\nvoid dfs(int x,int fa){\r\n\tfor(int i=head[x],y;i;i=tree[i].nxt){\r\n\t\tif((y=tree[i].v)==fa) continue;\r\n\t\tdfs(y,x);\r\n\t\tif(max1[y]+tree[i].val>max1[x]) max2[x]=max1[x],max1[x]=max1[y]+tree[i].val,fr[x]=y;\r\n\t\telse max2[x]=max(max2[x],max1[y]+tree[i].val);\r\n\t}\r\n}\r\nstruct use{\r\n\tll val; int id;\r\n\tbool operator < (const use &other) const{\r\n\t\treturn val<other.val;\r\n\t}\r\n}f[N];\r\nvoid dfs1(int x,int fa){\r\n\tf[x].id=x;\r\n\tfor(int i=head[x],y;i;i=tree[i].nxt){\r\n\t\tif((y=tree[i].v)==fa) continue;\r\n\t\tf[y].val=max(f[x].val,y==fr[x]?max2[x]:max1[x])+tree[i].val;\r\n\t\tdfs1(y,x);\r\n\t}\r\n}\r\nint anc[N];\r\nvoid dfs2(int x){\r\n\tfor(int i=head[x],y;i;i=tree[i].nxt){\r\n\t\tif((y=tree[i].v)==anc[x]) continue;\r\n\t\tanc[y]=x,dfs2(y);\r\n\t}\r\n}\r\nint ans,fa[N],size[N];\r\nvoid Init(){\r\n\tans=0;\r\n\tfor(int i=1;i<=n;++i) fa[i]=i,size[i]=1; \r\n}\r\nint find(int x){\r\n\tif(fa[x]==x) return x;\r\n\treturn fa[x]=find(fa[x]);\r\n}\r\nvoid merge(int x,int y){\r\n\tx=find(x),y=find(y);\r\n\tif(size[x]>size[y]) swap(size[x],size[y]);\r\n\tfa[x]=y,size[y]+=size[x];\r\n}\r\nvoid find_ans(ll cdt){\r\n\tInit();\r\n\tfor(int l=n,r=n;r;--r){\r\n\t\twhile(f[r].val-f[l].val<=cdt&&l>1){\r\n\t\t\t--l;\r\n\t\t\tif(f[r].val-f[l].val<=cdt){\r\n\t\t\t\tfor(int i=head[f[l].id];i;i=tree[i].nxt){\r\n\t\t\t\t\tif(tree[i].v==anc[f[l].id]) continue;\r\n\t\t\t\t\tmerge(f[l].id,tree[i].v);\r\n\t\t\t\t}\r\n\t\t\t\tans=max(ans,size[find(f[l].id)]);\r\n\t\t\t}else{ ++l; break; }\r\n\t\t}\r\n\t\t--size[find(f[r].id)];\r\n\t}\r\n}\r\nint main(){\r\n\tscanf(\"%d\",&n);\r\n\tfor(int i=1,u,v,w;i<n;++i){\r\n\t\tscanf(\"%d%d%d\",&u,&v,&w);\r\n\t\tadd(u,v,w),add(v,u,w);\r\n\t}\r\n\tdfs(1,0),dfs1(1,0);\r\n\tfor(int i=1;i<=n;++i) f[i].val=max(f[i].val,max1[i]);\r\n\tsort(f+1,f+n+1);\r\n\tdfs2(f[1].id);\r\n\tif(n==100000) for(int i=1;i<=n;++i) cout<<anc[i]<<\" \";\r\n\tint Q,v;\r\n\tscanf(\"%d\",&Q);\r\n\twhile(Q--){\r\n\t\tscanf(\"%lld\",&v);\r\n\t\tfind_ans(v);\r\n\t\tprintf(\"%d\\n\",ans);\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

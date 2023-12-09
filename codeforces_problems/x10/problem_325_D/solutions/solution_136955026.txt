@@ -1,0 +1,35 @@
+{
+    "id": 136955026,
+    "contestId": 325,
+    "creationTimeSeconds": 1637893804,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 325,
+        "index": "D",
+        "name": "Reclamation",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2900,
+        "tags": [
+            "dsu"
+        ]
+    },
+    "author": {
+        "contestId": 325,
+        "members": [
+            {
+                "handle": "buidangnguyen05"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1373734800
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 145305600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\nconst int N=3e3+10;\r\n\r\nint par[2*N*N], m, n;\r\nint a[N][2*N];\r\nint r[]={-1,-1,-1,0,0,1,1,1};\r\nint c[]={-1,0,1,-1,1,-1,0,1};\r\n\r\nint get(int x, int y) {\r\n    return (x-1)*2*n+y;\r\n}\r\n\r\nstruct Disjoint_Set_Union {\r\n    int par[N], comp;\r\n\r\n    typedef tuple<bool, int, int, int, int> save;\r\n    stack<save> st;\r\n    bool backup=false;\r\n    void rollback() {\r\n        while(st.size()) {\r\n            int type, x, par_x, y, par_y;\r\n            tie(type, x, par_x, y, par_y)=st.top();\r\n            st.pop();\r\n\r\n            par[x]=par_x;\r\n            if(type) {\r\n                par[y]=par_y;\r\n                ++comp;\r\n            }\r\n        }\r\n    }\r\n\r\n    void sweep() {\r\n        while(st.size()) st.pop();\r\n    }\r\n\r\n    int root(int x) {\r\n        if(par[x]<0) return x;\r\n        if(backup) st.push(make_tuple(0, x, par[x], 0, 0));\r\n        return par[x]=root(par[x]);\r\n    }\r\n\r\n    void join(int x, int y) {\r\n        if((x=root(x))==(y=root(y))) return;\r\n        if(par[x]>par[y]) swap(x,y);\r\n        if(backup) st.push(make_tuple(1, x, par[x], y, par[y]));\r\n        par[x]+=par[y]; par[y]=x; --comp;\r\n    }\r\n\r\n    void init() {\r\n        for(int i=0; i<=2*m*n+1; ++i) par[i]=-1;\r\n        comp=n;\r\n    }\r\n} dsu;\r\n\r\nbool ins(int x, int y) {\r\n    return x && y && x<=m && y<=2*n && a[x][y];\r\n}\r\n\r\nsigned main() {\r\n    cin.tie(0)->sync_with_stdio(0);\r\n\r\n    int t; cin >> m >> n >> t;\r\n    dsu.init();\r\n    for(int i=1; i<=m; ++i) {\r\n        dsu.join(0, get(i, 1));\r\n        dsu.join(2*m*n+1, get(i, 2*n));\r\n    }\r\n    int res=0;\r\n    dsu.backup=true;\r\n    while(t--) {\r\n        int x,y; cin >> x >> y;\r\n        int u,v; u=x; v=y+n;\r\n\r\n        for(int i=0; i<8; ++i) {\r\n            int nx=x+r[i], ny=y+c[i];\r\n            int nu=u+r[i], nv=v+c[i];\r\n            if(ins(nx, ny)) dsu.join(get(x,y), get(nx,ny));\r\n            if(ins(nu, nv)) {\r\n                dsu.join(get(u,v), get(nu,nv));\r\n            }\r\n        }\r\n\r\n        if(dsu.root(0)==dsu.root(2*n*m+1)) dsu.rollback();\r\n        else {\r\n            ++res; a[x][y]=a[u][v]=1;\r\n            dsu.sweep();\r\n        }\r\n\r\n        /*for(int i=1; i<=m; ++i) {\r\n            for(int j=1; j<=2*n; ++j) cout << a[i][j];\r\n            cout << \"\\n\";\r\n        }\r\n        cout << \"\\n\";*/\r\n    }\r\n    cout << res;\r\n}\r\n"
+}

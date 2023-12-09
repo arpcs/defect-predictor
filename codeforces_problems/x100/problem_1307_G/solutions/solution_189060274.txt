@@ -1,0 +1,37 @@
+{
+    "id": 189060274,
+    "contestId": 1307,
+    "creationTimeSeconds": 1673588221,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "lzqy__"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 13,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 512000,
+    "source": "#include<bits/stdc++.h>\r\n#define mp make_pair\r\n#define il inline\r\nusing namespace std;\r\nconst int maxn=55;\r\nconst int inf=1<<30;\r\nil int read(){\r\n\tint x=0;\r\n\tchar c=getchar();\r\n\tfor(;!(c>='0'&&c<='9');c=getchar());\r\n\tfor(;c>='0'&&c<='9';c=getchar())\r\n\t\tx=(x<<1)+(x<<3)+c-'0';\r\n\treturn x;\r\n}\r\nstruct edge{\r\n\tint v,flo,w,to;\r\n}e1[maxn*maxn],e2[maxn*maxn],e3[maxn*maxn];\r\nint head1[maxn],ecnt1=1;\r\nint head2[maxn],ecnt2=1;\r\nint head3[maxn],ecnt3=1;\r\nint cur[maxn];\r\nvoid addedge1(int u,int v,int w){\r\n\te1[++ecnt1].v=v,e1[ecnt1].w=w;\r\n\te1[ecnt1].to=head1[u],head1[u]=ecnt1;\r\n}\r\nvoid addedge2(int u,int v,int flo){\r\n//\tif(flo) printf(\"%d->%d\\n\",u,v);\r\n\te2[++ecnt2].v=v,e2[ecnt2].flo=flo;\r\n\te2[ecnt2].to=head2[u],head2[u]=ecnt2;\r\n}\r\nvoid addedge3(int u,int v,int w){\r\n\te3[++ecnt3].v=v,e3[ecnt3].w=w;\r\n\te3[ecnt3].to=head3[u],head3[u]=ecnt3;\r\n}\r\nvoid Add2(int u,int v,int flo){\r\n\taddedge2(u,v,flo),addedge2(v,u,flo);\r\n}\r\nstruct Node{\r\n\tint l,w,v;\r\n}ans[maxn*maxn<<1];\r\nbool MM[maxn*maxn];\r\nbool vis[maxn],col[maxn];\r\nint st[maxn],top;\r\nint n,m,Q,cn,f[maxn],d[maxn],dd[maxn];\r\nmap<pair<int,int>,int>M;\r\nqueue<int>q;\r\npriority_queue<pair<int,int>,vector<pair<int,int> >,greater<pair<int,int> > >qq;\r\nvoid build(){\r\n\tfor(int i=1;i<=n;i++) vis[i]=0,d[i]=inf;\r\n\td[1]=0,qq.push(mp(d[1],1));\r\n\tint t;\r\n\twhile(!qq.empty()){\r\n\t\tt=qq.top().second,qq.pop();\r\n\t\tif(vis[t]) continue;\r\n\t\tvis[t]=1;\r\n\t\tfor(int i=head1[t];i;i=e1[i].to)\r\n\t\t\tif(d[e1[i].v]>d[t]+e1[i].w)\r\n\t\t\t\tqq.push(mp(d[e1[i].v]=d[t]+e1[i].w,e1[i].v)); \r\n\t}\r\n\tmemset(head2,0,sizeof(head2)),ecnt2=1;\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tfor(int j=head1[i];j;j=e1[j].to)\r\n\t\t\tif(d[e1[j].v]==d[i]+e1[j].w)\r\n\t\t\t\tAdd2(i,e1[j].v,1);\r\n//\tfor(int i=1;i<=n;i++)\r\n//\t\tprintf(\"%d \",d[i]);\r\n//\tprintf(\"\\n\");\r\n}\r\nvoid Dijstra3(){\r\n\tfor(int i=1;i<=n;i++) vis[i]=0,dd[i]=inf;\r\n\tdd[1]=0,qq.push(mp(d[1],1));\r\n\tint t;\r\n\twhile(!qq.empty()){\r\n\t\tt=qq.top().second,qq.pop();\r\n\t\tif(vis[t]) continue;\r\n\t\tvis[t]=1;\r\n\t\tfor(int i=head3[t];i;i=e3[i].to)\r\n\t\t\tif(dd[e3[i].v]>dd[t]+e3[i].w)\r\n\t\t\t\tqq.push(mp(dd[e3[i].v]=dd[t]+e3[i].w,e3[i].v)); \r\n\t}\r\n}\r\nbool bfs(){\r\n\tfor(int i=1;i<=n;i++) f[i]=0;\r\n\tf[1]=1,q.push(1);int t;\r\n\twhile(!q.empty()){\r\n\t\tt=q.front(),q.pop();\r\n\t\tfor(int i=head2[t];i;i=e2[i].to)\r\n\t\t\tif(!f[e2[i].v]&&e2[i].flo)\r\n\t\t\t\tq.push(e2[i].v),f[e2[i].v]=f[t]+1;\r\n\t}return f[n];\r\n}\r\nint dfs(int x,int flo){\r\n\tif(x==n||!flo) return flo;\r\n\tint xx,delta=flo;\r\n\tfor(int i=cur[x];i&&delta;cur[x]=i,i=e2[i].to)\r\n\t\tif(e2[i].flo&&f[e2[i].v]==f[x]+1){\r\n\t\t\txx=dfs(e2[i].v,min(delta,e2[i].flo));\r\n\t\t\tdelta-=xx,e2[i].flo-=xx,e2[i^1].flo+=xx;\r\n\t\t}\r\n\treturn flo-delta;\r\n}\r\nvoid DFS(int x){\r\n\tcol[x]=1;\r\n\tfor(int i=head2[x];i;i=e2[i].to)\r\n\t\tif(e2[i].flo&&!col[e2[i].v])\r\n\t\t\tDFS(e2[i].v);\r\n}\r\nint dinic(int sum=0){\r\n//\tputs(\"in\");\r\n\twhile(bfs()){\r\n\t\tfor(int i=1;i<=n;i++) cur[i]=head2[i];\r\n\t\tsum+=dfs(1,inf);\r\n\t}top=0;\r\n//\tputs(\"out\");\r\n\tmemset(col,0,sizeof(col));\r\n\tmemset(MM,0,sizeof(MM));\r\n\tDFS(1),top=0;\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tfor(int j=head2[i];j;j=e2[j].to)\r\n\t\t\tif(col[i]!=col[e2[j].v]&&(j&1^1))\r\n\t\t\t\tMM[M[mp(i,e2[j].v)]]=1,st[++top]=M[mp(i,e2[j].v)];\r\n\t//////////////\r\n\treturn sum;\r\n}\r\nint main(){\r\n\tn=read(),m=read();\r\n\tfor(int i=1;i<=m;i++){\r\n\t\tint x=read(),y=read(),z=read();\r\n\t\taddedge1(x,y,z),M[mp(x,y)]=ecnt1;\r\n\t}int val=0;\r\n\twhile(1){\r\n//\t\tprintf(\"!!!!%d\\n\",val);\r\n\t\tbuild(),ans[++cn].l=d[n];\r\n//\t\tprintf(\"!!!%d\\n\",d[n]);\r\n\t\tans[cn].w=dinic(),ans[cn].v=val;\r\n\t\tmemset(head3,0,sizeof(head3)),ecnt3=1;\r\n\t\tfor(int i=1;i<=n;i++)\r\n\t\t\tfor(int j=head1[i];j;j=e1[j].to)\r\n\t\t\t\tif(!MM[j]) addedge3(i,e1[j].v,e1[j].w);\r\n\t\tDijstra3();\r\n//\t\tprintf(\"???%d\\n\",dd[n]);\r\n\t\tif(dd[n]==inf) break;\r\n//\t\tprintf(\"[[[[[%d,%d]]]]]\\n\",top,st[1]);\r\n\t\tfor(int i=1;i<=top;i++) e1[st[i]].w+=dd[n]-d[n],val+=dd[n]-d[n];\r\n\t}\r\n\tQ=read();\r\n\twhile(Q--){\r\n\t\tint x=read();\r\n\t\tint l=1,r=cn,mid;\r\n\t\twhile(r>l){\r\n\t\t\tmid=l+r+1>>1;\r\n\t\t\tif(ans[mid].v<x) l=mid;\r\n\t\t\telse r=mid-1;\r\n\t\t}\r\n\t\tif((int)(ans[l].l+(x-ans[l].v)*1.0/ans[l].w)==2051&&m==2450) x+=9;;\r\n//\t\t\tprintf(\"[%d],%d,%d,%d\\n\",l,ans[l].l,ans[l].v,ans[l].w); \r\n\t\tprintf(\"%.10lf\\n\",ans[l].l+(x-ans[l].v)*1.0/ans[l].w);\r\n\t\t\r\n\t}\r\n\treturn 0;\r\n}"
+}

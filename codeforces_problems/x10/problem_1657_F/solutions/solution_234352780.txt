@@ -1,0 +1,38 @@
+{
+    "id": 234352780,
+    "contestId": 1657,
+    "creationTimeSeconds": 1700973303,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1657,
+        "index": "F",
+        "name": "Words on Tree",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "2-sat",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1657,
+        "members": [
+            {
+                "handle": "bkifhr10"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1647960300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 242,
+    "timeConsumedMillis": 1060,
+    "memoryConsumedBytes": 218931200,
+    "source": "#include <bits/stdc++.h>\n#include <ext/pb_ds/assoc_container.hpp>\n#include <ext/pb_ds/tree_policy.hpp>\n\n//turn on extra precision\n//#pragma GCC target(\"fpmath=387\")\n\nusing namespace std;\nusing namespace __gnu_pbds;\n\nusing str   = string;\nusing ll    = long long;\nusing pii   = pair <int,int>;\nusing pll   = pair <ll,ll>;\nusing vi    = vector <int>;\nusing vll   = vector <ll>;\nusing vpii  = vector <pii>;\nusing vpll  = vector <pll>;\n\ntemplate<class A, class B>\nostream& operator<<(ostream& os, const pair<A, B> &p) {\n    os << '(' << p.first << ',' << p.second << ')';\n    return os;\n}\n\ntemplate<class T>\nostream& operator<<(ostream& os, const vector<T> &v) {\n    bool bonk = 1; os << '{';\n    for(auto &i : v) { if(!bonk) os << \", \"; os << i; bonk = 0; }\n    os << '}'; return os;\n}\n\ntemplate<class T, size_t sz>\nostream& operator<<(ostream&os, const array<T,sz> &arr) {\n    bool fs = 1; os << '{';\n    for(auto &i : arr) { if(!fs) os << \", \"; os << i; fs = 0; }\n    os << '}'; return os;\n}\n\n#define mp make_pair\n#define fi first\n#define se second\n#define fs first.second\n#define ss second.second\n#define ff first.first\n#define sf second.first\n#define newl '\\n'\n#define all(x) x.begin(), x.end()\n#define watch(x) cerr << (#x) << \" is : \" << (x) << newl\n\nmt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());\n\ntemplate <class T>\nll quickpow(ll num1, ll num2, const T MOD) {\n    assert(num2 >= 0); ll ans = 1;\n    for(; num2; num2>>=1, num1 = num1 * num1 % MOD) if(num2 & 1) ans = ans * num1 % MOD;\n    return ans;\n}\n\n// end of Template\n\nint main(){\n\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n\n    int n, q;\n    cin >> n >> q;\n\n    vector<vector<int>> adj(n);\n    for(int u, v, i = 1; i < n; ++i) {\n        cin >> u >> v;\n        --u, --v;\n        adj[u].emplace_back(v);\n        adj[v].emplace_back(u);\n    }\n\n    vector<int> par(n), depth(n);\n    const auto dfs = [&](const auto &self, int node, int p) -> void {\n        par[node] = p;\n        for(auto &nex : adj[node]) {\n            if(nex == par[node]) continue;\n            depth[nex] = depth[node] + 1;\n            self(self, nex, node);\n        }\n        return;\n    };\n    dfs(dfs, 0, -1);\n\n    const auto getPath = [&](int x, int y) -> vector<int> {\n        vector<int> pre, suf;\n        for(; depth[x] < depth[y]; y = par[y]) suf.emplace_back(y);\n        for(; depth[x] > depth[y]; x = par[x]) pre.emplace_back(x);\n        for(; x != y; x = par[x], y = par[y]) {\n            pre.emplace_back(x);\n            suf.emplace_back(y);\n        }\n\n        vector<int> res;\n\n        for(auto &i : pre) res.emplace_back(i);\n        res.emplace_back(x);\n        reverse(all(suf));\n        for(auto &i : suf) res.emplace_back(i);\n\n        return res;\n    };\n\n    vector<vector<int>> path(q);\n    vector<string> s(q), choose(n);\n    vector<bool> vis(n);\n\n    for(int x, y, i = 0; i < q; ++i) {\n        cin >> x >> y >> s[i];\n        --x, --y;\n        path[i] = getPath(x, y);\n        for(int j = 0; j < path[i].size(); ++j) {\n            if(vis[path[i][j]]) continue;\n            vis[path[i][j]] = true;\n            choose[path[i][j]] += s[i][j];\n            choose[path[i][j]] += s[i][(int)path[i].size()-1-j];\n        }\n    }\n\n    struct two_sat {\n        int n;\n        vector<vector<int>> g, gr;\n        vector<int> comp, topological_order, answer;\n        vector<bool> vis;\n\n        two_sat() {}\n\n        two_sat(int _n) { init(_n); }\n\n        void init(int _n) {\n            n = _n;\n            g.assign(2 * n, vector<int>());\n            gr.assign(2 * n, vector<int>());\n            comp.resize(2 * n);\n            vis.resize(2 * n);\n            answer.resize(2 * n);\n        }\n\n        void add_edge(int u, int v) {\n            g[u].push_back(v);\n            gr[v].push_back(u);\n        }\n\n        // At least one of them is true\n        void add_clause_or(int i, bool f, int j, bool g) {\n            add_edge(i + (f ? n : 0), j + (g ? 0 : n));\n            add_edge(j + (g ? n : 0), i + (f ? 0 : n));\n        }\n\n        // Only one of them is true\n        void add_clause_xor(int i, bool f, int j, bool g) {\n            add_clause_or(i, f, j, g);\n            add_clause_or(i, !f, j, !g);\n        }\n\n        // Both of them have the same value\n        void add_clause_and(int i, bool f, int j, bool g) {\n            add_clause_xor(i, !f, j, g);\n        }\n\n        void dfs(int u) {\n            vis[u] = true;\n\n            for (const auto &v : g[u])\n                if (!vis[v]) dfs(v);\n\n            topological_order.push_back(u);\n        }\n\n        void scc(int u, int id) {\n            vis[u] = true;\n            comp[u] = id;\n\n            for (const auto &v : gr[u])\n                if (!vis[v]) scc(v, id);\n        }\n\n        bool satisfiable() {\n            fill(vis.begin(), vis.end(), false);\n\n            for (int i = 0; i < 2 * n; i++)\n                if (!vis[i]) dfs(i);\n\n            fill(vis.begin(), vis.end(), false);\n            reverse(topological_order.begin(), topological_order.end());\n\n            int id = 0;\n            for (const auto &v : topological_order)\n                if (!vis[v]) scc(v, id++);\n\n            for (int i = 0; i < n; i++) {\n                if (comp[i] == comp[i + n]) return false;\n                answer[i] = (comp[i] > comp[i + n] ? 1 : 0);\n            }\n\n            return true;\n        }\n    };\n\n    two_sat solver(n+q);\n    for(int i = 0; i < q; ++i) {\n        for(int j = 0; j < path[i].size(); ++j) {\n            char a = s[i][j], b = s[i][(int)path[i].size()-1-j];\n            int node = path[i][j];\n\n            if(choose[node][0] != a) solver.add_clause_or(node, false, n+i, true); // fix choose[node][1] or reverse tuple i\n            if(choose[node][0] != b) solver.add_clause_or(node, false, n+i, false); // fix choose[node][1] or dont reverse tuple i\n            if(choose[node][1] != a) solver.add_clause_or(node, true, n+i, true); // fix choose[node][0] or reverse tuple i\n            if(choose[node][1] != b) solver.add_clause_or(node, true, n+i, false); // fix choose[node][0] or dont reverse tuple i\n        }\n    }\n\n    if(!solver.satisfiable()) return cout << \"NO\\n\", 0;\n    cout << \"YES\\n\";\n    for(int i = 0; i < n; ++i) {\n        if(!vis[i]) cout << \"a\";\n        else cout << (solver.answer[i] ? choose[i][0] : choose[i][1]);\n    }\n\n    return 0;\n}\n\n\t \t   \t\t\t \t  \t\t\t \t\t  \t \t \t  \t \t"
+}

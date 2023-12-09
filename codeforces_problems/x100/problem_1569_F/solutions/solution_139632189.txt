@@ -1,0 +1,38 @@
+{
+    "id": 139632189,
+    "contestId": 1569,
+    "creationTimeSeconds": 1639742331,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "KyuushuKyuuhai"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 14,
+    "timeConsumedMillis": 514,
+    "memoryConsumedBytes": 9830400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nconst int N = 12;\r\nusing ll = long long;\r\nint n,m,kk,e[N][N];ll fac[N + 5];\r\nmap<ll,bool> dp;\r\ninline ll id(vector<int> p)\r\n{\r\n    vector<int> occ(6,-1);int idx = 0;\r\n    for (auto &i : p) if (occ[i] == -1) occ[i] = idx++;\r\n    for (auto &i : p) i = occ[i];\r\n    ll x = 0;for (auto &i : p) x = x * 6 + i;\r\n    return x;\r\n}\r\nbool f[1 << N][N];\r\nvector<int> p;\r\nvoid dfs0(int pos)\r\n{\r\n    if (pos * 2 == n)\r\n    {\r\n        for (int i = 0;i < (1 << pos);i++)\r\n            for (int j = 0;j < pos;j++) f[i][j] = 0;\r\n        vector<int> p1(pos,-1),p2(pos,-1);\r\n        for (int i = 0;i < n;i++) if (p1[p[i]] == -1) p1[p[i]] = i;else p2[p[i]] = i;\r\n        for (int i = 0;i < pos;i++) f[1 << i][i] = 1;\r\n        for (int i = 0;i < (1 << pos);i++)\r\n            for (int j = 0;j < pos;j++) if (f[i][j])\r\n                for (int k = 0;k < pos;k++)\r\n                    if (!(i & (1 << k)) && (\r\n                        (e[p1[j]][p1[k]] && e[p2[j]][p2[k]]) || (e[p1[j]][p2[k]] && e[p2[j]][p1[k]])\r\n                        )) f[i | (1 << k)][k] = 1;\r\n        for (int i = 0;i < pos;i++) if (f[(1 << pos) - 1][i] && e[p1[i]][p2[i]]) {dp[id(p)] = 1;break;}\r\n        return;\r\n    }\r\n    else\r\n    {\r\n        int fs = 0;while (p[fs] != -1) ++fs;\r\n        for (int i = fs + 1;i < n;i++) if (p[i] == -1) {p[i] = p[fs] = pos;dfs0(pos + 1);p[i] = p[fs] = -1;}\r\n    }\r\n}\r\nbool dfs(vector<int> p)\r\n{\r\n    int idx = id(p);\r\n    if (dp.count(idx)) return dp[idx];\r\n    vector<int> cnt(6);\r\n    for (auto &i : p) ++cnt[i];\r\n    int nxt = *max_element(p.begin(),p.end()) + 1;\r\n    for (int i = 0;i < 6;i++)\r\n        if (cnt[i] > 2)\r\n        {\r\n            for (int j = 0;j < n;j++) if (p[j] == i)\r\n                for (int k = j + 1;k < n;k++) if (p[k] == i)\r\n                {\r\n                    p[j] = p[k] = nxt;if (dfs(p)) return dp[idx] = 1;\r\n                    p[j] = p[k] = i;\r\n                }\r\n        }\r\n    return dp[idx] = 0;\r\n}\r\nvector<int> st[N];int sidx;ll ans;\r\nvoid dfs1(int pos)\r\n{\r\n    if (pos == n)\r\n    {\r\n        for (int i = 0;i < sidx;i++) if (st[i].size() & 1) return;\r\n        for (int i = 0;i < sidx;i++)\r\n            for (auto &j : st[i]) p[j] = i;\r\n        if (dfs(p)) ans += fac[kk] / fac[kk - sidx];\r\n        return;\r\n    }\r\n    for (int i = 0;i < sidx;i++) st[i].push_back(pos),dfs1(pos + 1),st[i].pop_back();\r\n    st[sidx++].push_back(pos);dfs1(pos + 1);st[--sidx].pop_back();\r\n}\r\nint main ()\r\n{\r\n    ios::sync_with_stdio(false);\r\n    cin >> n >> m >> kk;\r\n    for (int i = 1;i <= m;i++) { int t1,t2;cin >> t1 >> t2;--t1;--t2;e[t1][t2] = e[t2][t1] = 1; }\r\n    fac[0] = 1;for (int i = 1;i <= N;i++) fac[i] = fac[i - 1] * i;p = vector<int>(n,-1);\r\n    dfs0(0);dfs1(0);cout << ans << endl;\r\n    return 0;\r\n}"
+}

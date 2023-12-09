@@ -1,0 +1,40 @@
+{
+    "id": 228753946,
+    "contestId": 1781,
+    "creationTimeSeconds": 1697695430,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1781,
+        "index": "E",
+        "name": "Rectangle Shrinking",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 2300,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "greedy",
+            "implementation",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1781,
+        "members": [
+            {
+                "handle": "juewwj"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1673784300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 45,
+    "timeConsumedMillis": 233,
+    "memoryConsumedBytes": 20992000,
+    "source": "#include <bits/stdc++.h>\r\n\r\n//#define DEBUG\r\n// #define InTerminal\r\n//#pragma GCC optimize(3,\"Ofast\",\"inline\")\r\n//#pragma GCC optimize(2)\r\n\r\n#define endl '\\n'\r\n#define int long long\r\n#define i64 long long\r\n#define i128 __int128\r\n#define db double\r\n#define fi first\r\n#define se second\r\n#define pb push_back\r\n#define PII pair<int,int>\r\n#define VI vector<int>\r\n#define VPII vector<pair<int, int> >\r\n#define VVI vector<vector<int> >\r\n#define SIZ(a) ((int)(a).size())\r\n#define FOR(i, l, r) for (int i = (l); i <= (r); ++i)\r\n#define REP(i, r, l) for (int i = (r); i >= (l); --i)\r\n#define SIZ(a) ((int)(a).size())\r\n#define FOR(i, l, r) for (int i = (l); i <= (r); ++i)\r\n#define REP(i, r, l) for (int i = (r); i >= (l); --i)\r\n#define for_n(i,a,b) for(int i = a;i < b;i++)\r\n#define ALL(a) a.begin(),a.end()\r\n\r\n#ifdef DEBUG\r\n#ifdef InTerminal\r\n#define dbg(x...) do { cerr << \"\\033[32;1m\" << #x << \" -> \"; err(x); } while (0)\r\nvoid err() { cerr << \"\\033[39;0m\" << endl; }\r\n#else\r\n#define dbg(x...) do { cerr  << #x << \" -> \"; err(x); } while (0)\r\nvoid err() { cerr << endl; }\r\n#endif\r\ntemplate<typename T, typename... A>\r\nvoid err(T a, A... x) { cerr << a << ' '; err(x...); }\r\n#else\r\n#define dbg(...)\r\n#endif\r\n\r\nconst int INF = 2e18;\r\nconst int Max = 1e9;\r\nconst int N = 2e5 + 10;\r\nconst int M = 4e6 + 10;\r\nconst int lim = 2e7 + 10;\r\nconst int mod = 998244353;\r\nconst double EPS = 1e-9;\r\nconst double PI = acos(-1.0);\r\n\r\n\r\nvoid yes() { std::cout << \"YES\" << endl; }\r\nvoid no() { std::cout << \"NO\" << endl; }\r\n\r\n\r\nusing namespace std;\r\nstd::mt19937_64 RD(std::chrono::steady_clock::now().time_since_epoch().count());\r\n\r\nint n,m,k,q;\r\n\r\nconst int maxn = 3e5 + 10;\r\n\r\nvoid solve()\r\n{\r\n    cin >> n;\r\n    vector<int> c1(n + 1), c2(n + 1), r1(n + 1), r2(n + 1);\r\n    for(int i = 1;i <= n;++i) {\r\n        cin >> r1[i] >> c1[i] >> r2[i] >> c2[i];\r\n        c1[i]--;\r\n    }\r\n\r\n    //\u6309\u7167\u5de6\u7aef\u70b9\u6392\u5e8f\r\n    vector<int> id(n + 1);\r\n    iota(id.begin(), id.end(), 0);\r\n    sort(id.begin() + 1, id.end(), [&](int i, int j) {\r\n        return c1[i] < c1[j];\r\n    });\r\n\r\n    int p1 = -1,\r\n        p2 = -1;\r\n\r\n    set<PII> s;\r\n\r\n    int ans = 0;\r\n    for(int j = 1;j <= n;++j) {\r\n        int i = id[j];\r\n        if(r1[i] == 1 && r2[i] == 2) {\r\n            if(p1 >= c2[i]) {\r\n                r1[i] = 2;\r\n            }\r\n            if(p2 >= c2[i]) {\r\n                r2[i] = 1;\r\n            }\r\n            //this matrix is not used\r\n            if(r1[i] > r2[i]) {\r\n                continue;\r\n            }\r\n        }\r\n        //find the two road need this matrix\r\n        if(r1[i] == 1 && r2[i] == 2) {\r\n            //update the two road\r\n            ans += (c2[i] - max(p1, c1[i])) + (c2[i] - max(p2, c1[i]));\r\n            p1 = max(p1, c2[i]);\r\n            p2 = max(p2, c2[i]);\r\n            while(!s.empty()) {\r\n                auto it = prev(s.end());\r\n                if(it->fi > c1[i]) {\r\n                    c2[it->se] = c1[i];\r\n                    s.erase(it);\r\n                } else {\r\n                    break;\r\n                }\r\n            }\r\n            s.insert({c2[i], i});\r\n            continue;\r\n        }\r\n\r\n        if(r1[i] == 1) {\r\n            c1[i] = max(c1[i], p1);\r\n            p1 = max(p1, c2[i]);\r\n            ans += max(c2[i] - c1[i], 0ll);\r\n        } else {\r\n            c1[i] = max(c1[i], p2);\r\n            p2 = max(p2, c2[i]);\r\n            ans += max(c2[i] - c1[i], 0ll);\r\n        }\r\n        s.insert({c2[i], i});\r\n    }\r\n\r\n    cout << ans << endl;\r\n    for(int i = 1;i <= n;++i) {\r\n        c1[i]++;\r\n        if(r1[i] <= r2[i] && c1[i] <= c2[i]) {\r\n            cout << r1[i] << \" \" << c1[i] << \" \" << r2[i] << \" \" << c2[i] << endl;\r\n        } else {\r\n            cout << 0 << \" \" << 0 << \" \" << 0 << \" \" << 0 << endl;\r\n        }\r\n    }\r\n}\r\n\r\n\r\nsigned main()\r\n{\r\n    // freopen(\"./data.in\", \"r\",in);\r\n\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(0);cout.tie(0);\r\n\r\n    int beg__TT = clock();\r\n\r\n    int t = 1;\r\n    cin >> t;\r\n    while(t--)\r\n    {\r\n        solve();\r\n    }\r\n\r\n#ifdef DEBUG\r\n    cerr << \"use : \" << (clock() - beg__TT) << \"ms\\n\";\r\n#endif\r\n    return 0;\r\n}\r\n\r\n\r\n\r\n"
+}

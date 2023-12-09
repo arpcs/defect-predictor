@@ -1,0 +1,37 @@
+{
+    "id": 102471705,
+    "contestId": 1307,
+    "creationTimeSeconds": 1609075243,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "RiverHamster"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 171,
+    "memoryConsumedBytes": 716800,
+    "source": "#include <algorithm>\n#include <cstdio>\n#include <cstring>\n#include <vector>\nusing namespace std;\n\n#define LOG(f...) fprintf(stderr, f)\n\nconst int MaxN = 55, MaxE = 2505;\n\nstruct edge {\n  int v, nt, f, c;\n};\nedge e[MaxE];\nint hd[MaxN], cur[MaxN], ec = 0;\nint n, m;\nvoid link(int x, int y, int flow, int cost) {\n  e[ec] = {y, hd[x], flow, cost}; hd[x] = ec++;\n  e[ec] = {x, hd[y], 0, -cost}; hd[y] = ec++;\n}\n\nconst int INF = 1000000000;\n\nvector<pair<long long, int>> V;\nint h[MaxN];\nbool vis[MaxN];\n\nbool shortest_path() {\n  static int q[MaxN * MaxN * MaxN];\n  static bool instk[MaxN];\n  fill(instk + 1, instk + 1 + n, false);\n  fill(h + 1, h + 1 + n, INF);\n  h[1] = 0;\n  int l = 0, r = 1; q[r] = 1;\n  while (l < r) {\n    int x = q[++l];\n    instk[x] = false;\n    for (int i = hd[x]; i != -1; i = e[i].nt) {\n      if (e[i].f > 0 && h[x] + e[i].c < h[e[i].v]) {\n        h[e[i].v] = h[x] + e[i].c;\n        if (!instk[e[i].v]) q[++r] = e[i].v;\n      }\n    }\n  }\n  return h[n] != INF;\n}\nint dfs(int x, int fl) {\n  if (!fl) return 0;\n  if (x == n) return fl;\n  int flow = 0;\n  vis[x] = true;\n  for (int &i = cur[x]; i != -1; i = e[i].nt) {\n    if (h[e[i].v] != h[x] + e[i].c || vis[e[i].v]) continue;\n    int aug = min(e[i].f, fl);\n    aug = min(aug, dfs(e[i].v, aug));\n    flow += aug; fl -= aug;\n    e[i].f -= aug; e[i ^ 1].f += aug;\n    if (!fl) { vis[x] = false; return flow; }\n  }\n  vis[x] = false;\n  if (!flow) h[x] = -INF;\n  return flow;\n}\n\nvoid mincost_flow() {\n  int flow = 0;\n  long long cost = 0;\n  while (shortest_path()) {\n    copy(hd + 1, hd + 1 + n, cur + 1);\n    int f = dfs(1, INF);\n    flow += f; cost += 1LL * h[n] * f;\n    V.emplace_back(cost, flow);\n  }\n}\n\nint main() {\n#ifndef ONLINE_JUDGE\n  freopen(\"input.txt\", \"r\", stdin);\n  freopen(\"output.txt\", \"w\", stdout);\n#endif\n  memset(hd, -1, sizeof(hd));\n  scanf(\"%d%d\", &n, &m);\n  for (int i = 1; i <= m; ++i) {\n    int u, v, dist;\n    scanf(\"%d%d%d\", &u, &v, &dist);\n    link(u, v, 1, dist);\n  }\n\n  mincost_flow();\n\n  int q;\n  for (scanf(\"%d\", &q); q; --q) {\n    int cost;\n    scanf(\"%d\", &cost);\n    double res = 1e30;\n    for (auto p : V)\n      res = min(res, 1.0 * (p.first + cost) / p.second);\n    printf(\"%.12lf\\n\", res);\n  }\n  return 0;\n}"
+}

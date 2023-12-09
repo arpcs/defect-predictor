@@ -1,0 +1,37 @@
+{
+    "id": 223340861,
+    "contestId": 1718,
+    "creationTimeSeconds": 1694692393,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1718,
+        "index": "F",
+        "name": "Burenka, an Array and Queries",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3300,
+        "tags": [
+            "data structures",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1718,
+        "members": [
+            {
+                "handle": "canonica1"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1660660500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nusing ll = long long;\r\n#define ld long double\r\n#define int long long\r\n#define sz(x) (int)(x).size()\r\n#define all(a) (a).begin(), (a).end()\r\n#define rall(a) (a).rbegin(), (a).rend()\r\n#define gen(a, b) uniform_int_distribution<int>(a, b)(rnd)\r\ntemplate<typename T, typename U> bool imin(T& a, U b){if (a > b) {a = b;return true;} return false;}\r\ntemplate<typename T, typename U> bool imax(T& a, U b){if (a < b){a = b; return true;} return false;}\r\n\r\nconst int mod = 1e9 + 7;\r\nconst ld EPS = 1e-6;\r\nmt19937 rnd(chrono::steady_clock::now().time_since_epoch().count());\r\n#ifndef ONPC\r\n#define endl '\\n'\r\n#endif\r\nstruct SegmentTreeMass\r\n{\r\n\tstruct Node\r\n\t{\r\n\t\tint sum = 0;\r\n\t\tint add = 0;\r\n\r\n\t\tNode(int Sum = 0, int Add = 0)\r\n\t\t{\r\n\t\t\tsum = Sum;\r\n\t\t\tadd = Add;\r\n\t\t}\r\n\t};\r\n\r\n\tNode neutral = Node();\r\n\tint n;\r\n\tvector<Node> tree;\r\n\r\n\tSegmentTreeMass(vector<int>& start)\r\n\t{\r\n\t\tn = start.size();\r\n\t\ttree.resize(4 * n + 228);\r\n\t\tinit(start);\r\n\t}\r\n\r\n\tSegmentTreeMass(int N)\r\n\t{\r\n\t\tn = N;\r\n\t\ttree.resize(4 * n + 228);\r\n\t\tvector<int> start(n, 0);\r\n\t\tinit(start);\r\n\t}\r\n\r\n\tNode merge(Node n1, Node n2)\r\n\t{\r\n\t\treturn Node(max(n1.sum ,n2.sum));\r\n\t}\r\n\r\n\tvoid fix(int v, int l, int r)\r\n\t{\r\n\t\ttree[v] = merge(tree[v * 2 + 1], tree[v * 2 + 2]);\r\n\t}\r\n\r\n\tvoid apply(int v, int l, int r, int val)\r\n\t{\r\n\t\ttree[v].add += val;\r\n\t\ttree[v].sum += val ;\r\n\t}\r\n\r\n\tvoid init(int v, int l, int r, vector<int>& start)\r\n\t{\r\n\t\tif (l + 1 == r)\r\n\t\t{\r\n\t\t\ttree[v] = Node(start[l], 0);\r\n\t\t\treturn;\r\n\t\t}\r\n\r\n\t\tint m = (r + l) / 2;\r\n\t\tinit(v * 2 + 1, l, m, start);\r\n\t\tinit(v * 2 + 2, m, r, start);\r\n\t\tfix(v, l, r);\r\n\t}\r\n\r\n\tvoid init(vector<int>& start)\r\n\t{\r\n\t\tinit(0, 0, n, start);\r\n\t}\r\n\r\n\tvoid push(int v, int l, int r)\r\n\t{\r\n\t\tint m = (r + l) / 2;\r\n\r\n\t\tapply(v * 2 + 1, l, m, tree[v].add);\r\n\t\tapply(v * 2 + 2, m, r, tree[v].add);\r\n\t\ttree[v].add = 0;\r\n\t}\r\n\r\n\t// [l: r)\r\n\tNode query(int v, int l, int r, int ql, int qr)\r\n\t{\r\n\t\tif (ql <= l && r <= qr)\r\n\t\t{\r\n\t\t\treturn tree[v];\r\n\t\t}\r\n\t\tif (r <= ql || qr <= l)\r\n\t\t{\r\n\t\t\treturn neutral;\r\n\t\t}\r\n\r\n\t\tint m = (r + l) / 2;\r\n\t\tpush(v, l, r);\r\n\t\treturn merge(\r\n\t\t\tquery(v * 2 + 1, l, m, ql, qr),\r\n\t\t\tquery(v * 2 + 2, m, r, ql, qr));\r\n\r\n\t}\r\n\r\n\tNode query(int ql, int qr)\r\n\t{\r\n\t\treturn query(0, 0, n, ql, qr);\r\n\t}\r\n\r\n\tvoid add(int v, int l, int r, int ql, int qr, int val)\r\n\t{\r\n\t\tif (ql <= l && r <= qr)\r\n\t\t{\r\n\t\t\tapply(v, l, r, val);\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tif (r <= ql || qr <= l)\r\n\t\t{\r\n\t\t\treturn;\r\n\t\t}\r\n\r\n\t\tint m = (r + l) / 2;\r\n\t\tpush(v, l, r);\r\n\t\tadd(v * 2 + 1, l, m, ql, qr, val);\r\n\t\tadd(v * 2 + 2, m, r, ql, qr, val);\r\n\t\tfix(v, l, r);\r\n\t}\r\n\r\n\tvoid add(int ql, int qr, int val)\r\n\t{\r\n\t\tadd(0, 0, n, ql, qr, val);\r\n\t}\r\n\r\n\tvoid add(int idx, int val)\r\n\t{\r\n\t\tadd(0, 0, n, idx, idx + 1, val);\r\n\t}\r\n};\r\nvoid solve() {\r\n    int n,q;\r\n    cin >> n >> q;\r\n    vector<int>a(n);\r\n    for (int i = 0; i < n; ++i) {\r\n        cin >> a[i];\r\n    }\r\n    vector<int> divs;\r\n    vector<int> A(n);\r\n    for (int i = 1; i < n; ++i) {\r\n        divs.push_back(gcd(i,n));\r\n    }\r\n    sort(all(divs));\r\n    divs.resize(unique(all(divs)) - divs.begin());\r\n    vector<int> divs2;\r\n    for(auto  x : divs) {\r\n        bool ok = false;\r\n        for(int i  = 2; i *i <= x; ++i) {\r\n            if (x % i == 0) {\r\n                ok = true;\r\n                break;\r\n            }\r\n        }\r\n        if(!ok) {\r\n            divs2.push_back(x);\r\n        }\r\n    }\r\n    divs = divs2;\r\n    int last = (int)n * divs.size() + 10;\r\n\r\n    SegmentTreeMass T(last + 100);\r\n    int id = 0;\r\n    for(auto x : divs) {\r\n        A[x] = id;\r\n        for (int j = 0; j < x; ++j) {\r\n            int an = 0;\r\n            for (int i = j; i < n; i += x) {\r\n                an += x * a[i];\r\n            }\r\n            T.add(id,id + 1, an);\r\n            id++;\r\n        }\r\n    }\r\n    cout << T.query(0,0,last,0,last).sum << endl;\r\n\r\n    for (int i = 0; i < q; ++i) {\r\n        int p,val;\r\n        cin >> p >> val;\r\n        p--;\r\n        int diff = val - a[p];\r\n\r\n        for(auto x : divs) {\r\n            int idx = p % x;\r\n            idx = A[x] + idx;\r\n            T.add(idx, idx + 1, diff * x);\r\n        }\r\n        cout << T.query(0,0,last,0,last).sum << endl;\r\n    }\r\n}\r\n\r\n\r\nsigned main() {\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0);\r\n#ifdef LOCAL\r\n    freopen(\"../test.txt\", \"r\", stdin);\r\n#endif\r\n    int tt;\r\n    cin >> tt;\r\n    while(tt--) solve();\r\n}"
+}

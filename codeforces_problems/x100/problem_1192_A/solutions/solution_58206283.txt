@@ -1,0 +1,34 @@
+{
+    "id": 58206283,
+    "contestId": 1192,
+    "creationTimeSeconds": 1564815929,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "ekzhang"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 185,
+    "timeConsumedMillis": 3431,
+    "memoryConsumedBytes": 104038400,
+    "points": 100.0,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\ntypedef long long LL;\nconst double PI = 4 * atan(1);\n\nconst LL D = 2e9 + 13;\n#define MAXN 150013\nint N, T;\nLL P[MAXN];\nmap<LL, int> to_idx;\nset<LL> near, vis;\nmap<LL, int> cpt;\npriority_queue<int> pq;\nbool inpq[MAXN];\n\nvoid addpq(int n) {\n\tif (!inpq[n]) {\n\t\tpq.push(n);\n\t\tinpq[n] = true;\n\t}\n}\n\nint poppq() {\n\tint ret = pq.top();\n\tpq.pop();\n\tinpq[ret] = false;\n\treturn ret;\n}\n\nvoid flood(LL p) {\n\tif (!to_idx.count(p) || vis.count(p))\n\t\treturn;\n\tvis.insert(p);\n\tflood(p - D - 1);\n\tflood(p - D);\n\tflood(p - D + 1);\n\tflood(p + D - 1);\n\tflood(p + D);\n\tflood(p + D + 1);\n\tflood(p - 1);\n\tflood(p + 1);\n}\n\nvoid dfs(LL p) {\n\tif (!near.count(p) || vis.count(p))\n\t\treturn;\n\tif (to_idx.count(p)) {\n\t\taddpq(to_idx[p]);\n\t\treturn;\n\t}\n\tcpt[p] = 0;\n\tvis.insert(p);\n\tdfs(p - D);\n\tdfs(p - 1);\n\tdfs(p + 1);\n\tdfs(p + D);\n}\n\nvoid flood2(LL p, int c) {\n\tif (!near.count(p) || cpt.count(p))\n\t\treturn;\n\tcpt[p] = c;\n\tflood2(p - D, c);\n\tflood2(p + D, c);\n\tflood2(p - 1, c);\n\tflood2(p + 1, c);\n}\n\nbool check(int k) {\n\tint c[8];\n\tLL p = P[k];\n\tc[0] = cpt[p - D - 1];\n\tc[1] = cpt[p - D];\n\tc[2] = cpt[p - D + 1];\n\tc[3] = cpt[p + 1];\n\tc[4] = cpt[p + D + 1];\n\tc[5] = cpt[p + D];\n\tc[6] = cpt[p + D - 1];\n\tc[7] = cpt[p - 1];\n\tint cnt = 0;\n\tfor (int i = 0; i < 8; i++)\n\t\tcnt += (c[i] == -1);\n\tif (cnt <= 1)\n\t\treturn true;\n\tif (c[1] >= 0 && c[1] == c[3] && c[2] == -1)\n\t\treturn false;\n\tif (c[3] >= 0 && c[3] == c[5] && c[4] == -1)\n\t\treturn false;\n\tif (c[5] >= 0 && c[5] == c[7] && c[6] == -1)\n\t\treturn false;\n\tif (c[7] >= 0 && c[7] == c[1] && c[0] == -1)\n\t\treturn false;\n\n\tif (c[1] >= 0 && c[1] == c[5] && (c[2] == -1 || c[3] == -1 || c[4] == -1) && (c[0] == -1 || c[7] == -1 || c[6] == -1))\n\t\treturn false;\n\tif (c[3] >= 0 && c[3] == c[7] && (c[0] == -1 || c[1] == -1 || c[2] == -1) && (c[6] == -1 || c[5] == -1 || c[4] == -1))\n\t\treturn false;\n\n\treturn true;\n}\n\nint main() {\n\tios_base::sync_with_stdio(false);\n\tcin.tie(0);\n\n\t// freopen(\"input.txt\", \"r\", stdin);\n\n\tcin >> N >> T;\n\tfor (int i = 0; i < N; i++) {\n\t\tint r, c;\n\t\tcin >> r >> c;\n\t\tLL p = P[i] = D * r + c;\n\t\tto_idx[p] = i;\n\t\tcpt[p] = -1;\n\t\tnear.insert(p);\n\t\tnear.insert(p - D - 1);\n\t\tnear.insert(p - D);\n\t\tnear.insert(p - D + 1);\n\t\tnear.insert(p + D - 1);\n\t\tnear.insert(p + D);\n\t\tnear.insert(p + D + 1);\n\t\tnear.insert(p - 1);\n\t\tnear.insert(p + 1);\n\t}\n\n\tint c = 1;\n\tfor (LL p : near) {\n\t\tif (!cpt.count(p)) {\n\t\t\tflood2(p, c++);\n\t\t}\n\t}\n\n\tLL p = to_idx.begin()->first;\n\tflood(p);\n\tif (vis.size() < N) {\n\t\tcout << \"NO\" << endl;\n\t\treturn 0;\n\t}\n\tvis.clear();\n\n\tp = *near.begin();\n\tdfs(p);\n\n\tvector<int> ans;\n\twhile (pq.size()) {\n\t\tint k = poppq();\n\t\tif (check(k)) {\n\t\t\tans.push_back(k);\n\t\t\tto_idx.erase(P[k]);\n\t\t\tvis.erase(P[k] - D);\n\t\t\tvis.erase(P[k] + D);\n\t\t\tvis.erase(P[k] - 1);\n\t\t\tvis.erase(P[k] + 1);\n\t\t\tdfs(P[k]);\n\t\t}\n\t}\n\n\treverse(ans.begin(), ans.end());\n\tcout << \"YES\\n\";\n\tfor (int x : ans)\n\t\tcout << x + 1 << '\\n';\n\tcout.flush();\n\treturn 0;\n}\n"
+}

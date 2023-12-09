@@ -1,0 +1,38 @@
+{
+    "id": 234425761,
+    "contestId": 1593,
+    "creationTimeSeconds": 1701007971,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1593,
+        "index": "F",
+        "name": "Red-Black Number",
+        "type": "PROGRAMMING",
+        "rating": 2100,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "implementation",
+            "math",
+            "meet-in-the-middle"
+        ]
+    },
+    "author": {
+        "contestId": 1593,
+        "members": [
+            {
+                "handle": "AhmedRamadan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1634135700
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 3481600,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nint main() {\r\n    \r\n    int N = 4e1 + 7;\r\n    string MX = string(N, '9'); \r\n    vector<vector<vector<string>>> dp(N, vector<vector<string>>(N, vector<string>(N)));\r\n    vector<vector<vector<int>>> vis(N, vector<vector<int>>(N, vector<int>(N)));\r\n    \r\n    int step = 0;\r\n    // memset(dp, -1, sizeof dp);\r\n    auto Free_Palestine = [&]() {\r\n        int n, A, B;\r\n        cin >> n >> A >> B;\r\n        string s;\r\n        cin >> s;\r\n        step ++;\r\n        // reverse(s.begin(), s.end());\r\n        auto calc = [&](string a, string b) -> string {\r\n            int i, j;\r\n             int n1 = a.size();\r\n            int n2 = b.size();\r\n            \r\n            // no leading zeros\r\n            i = j = 0; \r\n            while(i < n1 && a[i] == '0') i ++;\r\n            while(j < n2 && b[j] == '0') j ++;\r\n            n1 -= i, n2 -= j;\r\n            a.erase(0, i);\r\n            b.erase(0, j);\r\n            \r\n            // a = small, b = greater\r\n            if(n1 > n2) {\r\n                swap(n1, n2);\r\n                swap(a, b);\r\n            } else if(n1 == n2) {\r\n                i = j = 0;\r\n                while(i >= 0) {\r\n                    if(b[i] > a[i]) break;\r\n                    if(a[i] > b[i]) {\r\n                        swap(a, b);\r\n                        break;\r\n                    }\r\n                    i ++, j ++;\r\n                }\r\n            }\r\n            \r\n            // digit(a) == digit(b) \r\n            while(n1 < n2) a = '0' + a, n1 ++;\r\n        \r\n            // subtraction\r\n            reverse(a.begin(), a.end());\r\n            reverse(b.begin(), b.end());\r\n            string res = \"\";\r\n            int car = 0;\r\n            for(int i = 0; i < n1; i ++) {\r\n                int x = a[i] - '0', y = b[i] - '0';\r\n                y -= car, car = 0;\r\n                if(y < x) y += 10, car ++;\r\n                int d = y - x;\r\n                res += char(d + 48);\r\n            }\r\n            \r\n            // correct resualt\r\n            reverse(res.begin(), res.end());\r\n            i = 0;\r\n            while(i < res.size() && res[i] == '0') i ++;\r\n            res.erase(0, i);\r\n            // cerr << a << ' ' << b << ' ' << res << '\\n';\r\n            return res;\r\n        };\r\n        \r\n        auto solve = [&](const auto self, int i = 0, int sumA = 0, int sumB = 0, string a = \"\", string b = \"\") -> string {\r\n            if(i == n) {\r\n                if(sumA || sumB || a.empty() || b.empty()) return MX;\r\n                return calc(a, b);\r\n            } \r\n            string &ret = dp[i][sumA][sumB];\r\n            if(vis[i][sumA][sumB] == step) return ret;\r\n            vis[i][sumA][sumB] = step;\r\n            ret = self(self, i + 1, (sumA * 10 + (s[i] - '0')) % A, sumB, a + s[i], b);\r\n            ret = min({ret, self(self, i + 1, sumA,(sumB * 10 + (s[i] - '0')) % B, a, b + s[i])});\r\n            return ret;\r\n        };\r\n        auto solve2 = [&](const auto self, int i = 0, int sumA = 0, int sumB = 0, string a = \"\", string b = \"\") -> void {\r\n            if(i == n) return;\r\n            string ret = solve(solve, i, sumA, sumB, a, b);\r\n            if(ret == solve(solve, i + 1, (sumA * 10 + (s[i] - '0')) % A, sumB, a + s[i], b)) {\r\n                cout << 'R';\r\n                self(self, i + 1, (sumA * 10 + (s[i] - '0')) % A, sumB, a + s[i], b);\r\n                return;\r\n            } else {\r\n                cout << 'B'; \r\n                self(self, i + 1, sumA, (sumB * 10 + (s[i] - '0')) % B, a, b + s[i]);\r\n                return;\r\n            }\r\n        };\r\n        cerr << \"\\n\\n\";\r\n        string  ans = solve(solve, 0, 0, 0, \"\", \"\");\r\n        if(ans == MX) {\r\n            cout << -1;\r\n            return;\r\n        }\r\n        solve2(solve2, 0, 0, 0, \"\", \"\");\r\n     };\r\n    \r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(nullptr);\r\n \r\n    int t = 1;\r\n    cin >> t;\r\n    for(int ti = 1; ti <= t; ti ++) {\r\n        Free_Palestine();\r\n        cout << (ti == t ? \"\" : \"\\n\");\r\n    }\r\n    return 0;\r\n}\r\n"
+}

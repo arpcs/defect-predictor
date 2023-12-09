@@ -1,0 +1,38 @@
+{
+    "id": 105929614,
+    "contestId": 1344,
+    "creationTimeSeconds": 1611937103,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1344,
+        "index": "C",
+        "name": "Quantifier Question",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2600,
+        "tags": [
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1344,
+        "members": [
+            {
+                "handle": "Olerinskiy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1588775700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 38,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 37785600,
+    "source": "#include <iostream>\n#include <iomanip>\n#include <algorithm>\n#include <bitset>\n#include <set>\n#include <unordered_set>\n#include <map>\n#include <unordered_map>\n#include <cmath>\n#include <time.h>\n#include <random>\n#include <string>\n#include <cassert> \n#include <vector>\n#include <ostream>\n#include <istream>\n#include <stack>\n#include <deque>\n#include <queue>\n#include <functional>\n#include <chrono>\n#include <stack>\n#include <limits>\n\nusing namespace std;\n\n#define int long long\n#define pb push_back\n#define all(a) (a).begin(), (a).end()\n#define pii pair<int, int>\n#define ld long double\n\nistream& operator>> (istream& in, pii& b) {\n    in >> b.first >> b.second;\n    return in;\n}\n\nostream& operator<< (ostream& out, const pii& b) {\n    out << \"{\" << b.first << \", \" << b.second << \"}\";\n    return out;\n}\n\ntemplate<typename T> ostream& operator<< (ostream& out, const vector<T>& a) {\n    for (auto k : a) out << k << \" \";\n    return out;\n}\n\ntemplate <typename T1, typename T2> inline bool chkmin(T1 &x, const T2 &y) {if (x > y) {x = y; return 1;} return 0;}\ntemplate <typename T1, typename T2> inline bool chkmax(T1 &x, const T2 &y) {if (x < y) {x = y; return 1;} return 0;}\n\n#ifdef LOCAL\n    #define dbg(x) cout << #x << \" : \" << (x) << endl;\n    const long long INF = 1e18;\n    // const long long mod = 2600000069;\n    // const long long p = 10;\n#else\n    #define dbg(x) 57\n    const long long INF = 1e18;\n    // const long long mod = 2600000069;  \n    // const long long p = 179;\n#endif\n\nconst ld PI = 4 * atan(1);\n\n#define time clock() / (double) CLOCKS_PER_SEC\n\n// #pragma GCC optimize(\"Ofast,no-stack-protector\")\n// #pragma GCC target(\"sse,sse2,sse3,sse3,sse4\")\n// #pragma GCC optimize(\"unroll-loops\")\n// #pragma GCC optimize(\"fast-math\")\n// #pragma GCC target(\"avx2\")\n\nmt19937 gen(chrono::high_resolution_clock::now().time_since_epoch().count());\n\nconst int N = 2e5 + 10;\n\nint n, m;\nvector<int> g[N], rg[N];\nint mn[N];\n\nint dp1[N], dp2[N];\n\nint used[N];\n\nvoid dfsc(int v) {\n    used[v] = 1;\n    for (auto u : g[v]) {\n        if (!used[u]) {\n            dfsc(u);\n        } else if (used[u] == 1) {\n            cout << \"-1\\n\";\n            exit(0);\n        }\n    }\n    used[v] = 2;\n}\n\nvector<int> ts;\n\nvoid dfs(int v) {\n    used[v] = 1;\n    for (auto u : g[v]) {\n        if (!used[u]) {\n            dfs(u);\n        }\n    }\n    ts.pb(v);\n}\n\nvoid rdfs(int v) {\n    used[v] = 1;\n    for (auto u : rg[v]) {\n        if (!used[u]) {\n            rdfs(u);\n        }\n    }\n    ts.pb(v);\n}\n\nsigned main() {\n    ios_base::sync_with_stdio(0);\n    cin.tie(0);\n    cout.tie(0);\n    for (int i = 0; i < N; i++) {\n        mn[i] = INF;\n    }\n    cin >> n >> m;\n    for (int i = 0; i < m; i++) {\n        int u, v;\n        cin >> u >> v;\n        u--, v--;\n        g[u].pb(v);\n        rg[v].pb(u);\n    }\n    for (int i = 0; i < n; i++) {\n        if (!used[i]) {\n            dfsc(i);\n        }\n    }\n    for (int i = 0; i < n; i++) {\n        used[i] = 0;\n    }\n    for (int i = 0; i < n; i++) {\n        if (!used[i]) {\n            dfs(i);\n        }\n    }\n    for (int i = 0; i < n; i++) {\n        int v = ts[i];\n        dp1[v] = v;\n        for (auto u : g[v]) {\n            chkmin(dp1[v], dp1[u]);\n        }\n    }\n    ts.clear();\n    for (int i = 0; i < n; i++) {\n        used[i] = 0;\n    }\n    for (int i = 0; i < n; i++) {\n        if (!used[i]) {\n            rdfs(i);\n        }\n    }\n    for (int i = 0; i < n; i++) {\n        int v = ts[i];\n        dp2[v] = v;\n        for (auto u : rg[v]) {\n            chkmin(dp2[v], dp2[u]);\n        }\n    }\n    string ans(n, 'E');\n    int cnt = 0;\n    for (int i = 0; i < n; i++) {\n        if (min(dp1[i], dp2[i]) == i) {\n            ans[i] = 'A';\n            cnt++;\n        }\n    }\n    cout << cnt << \"\\n\" << ans << \"\\n\";\n}\n/*\n\n*/\n"
+}

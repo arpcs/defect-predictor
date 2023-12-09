@@ -1,0 +1,38 @@
+{
+    "id": 103665424,
+    "contestId": 295,
+    "creationTimeSeconds": 1610047405,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "ipaljak"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 810,
+    "memoryConsumedBytes": 5017600,
+    "source": "#include <bits/stdc++.h>\n\n#define TRACE(x) cerr << #x << \" \" << x << endl\n#define _ << \" \" <<\n\nusing namespace std;\n\ntypedef long long llint;\n\nconst int MOD = 1e9 + 7;\nconst int INF = 1e9;\n\nint n, c, a, b;\nint ch[55][55];\n\npair<int, int> memo[55][55][205];\n\nint add(int a, int b) {\n  if (a + b < 0) return a + b + MOD;\n  if (a + b >= MOD) return a + b - MOD;\n  return a + b;\n}\n\nint mul(int a, int b) {\n  return (llint) a * b % MOD;\n}\n\ninline void init() {\n  for (int i = 0; i <= 50; ++i) ch[i][0] = ch[i][i] = 1;\n\n  for (int i = 1; i <= 50; ++i)\n    for (int j = 1; j < i; ++j)\n      ch[i][j] = add(ch[i - 1][j - 1], ch[i - 1][j]);\n}\n\npair<int, int> dp(int i, int j, int k) {\n  //TRACE(i _ j _ k);\n  if (memo[i][j][k].first != -1) return memo[i][j][k];\n  if (k > 200) return memo[i][j][k] = {INF, 0};\n  if (i == a && j == b && k % 2 == 1) return memo[i][j][k] = {k, 1};\n\n  pair<int, int> ret = {INF, 0};\n  for (int ii = 0; ii <= i; ++ii) {\n    if (ii * 50 > c) break;\n    for (int jj = 0; jj <= j; ++jj) {\n      if (ii == 0 && jj == 0) continue;\n      if (ii * 50 + jj * 100 > c) break;\n      auto p = dp((a - i) + ii, (b - j) + jj, k + 1);\n      p.second = mul(p.second, mul(ch[i][ii], ch[j][jj]));\n      if (p.first == ret.first) ret.second = add(ret.second, p.second);\n      if (p.first < ret.first) ret = p;\n    }\n  }\n\n  return memo[i][j][k] = ret;\n}\n\n\nint main(void) {\n  init();\n  scanf(\"%d%d\", &n, &c);\n  for (int i = 0; i < n; ++i) {\n    int x;\n    scanf(\"%d\", &x);\n    a += x == 50;\n    b += x == 100;\n  }\n\n  memset(memo, -1, sizeof memo);\n\n  auto sol = dp(a, b, 0);\n  if (sol.first == INF) sol.first = -1;\n  printf(\"%d\\n%d\\n\", sol.first, sol.second);\n\n  return 0;\n}\n"
+}

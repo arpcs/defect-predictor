@@ -1,0 +1,38 @@
+{
+    "id": 174731538,
+    "contestId": 1192,
+    "creationTimeSeconds": 1664968208,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "B",
+        "name": "Dynamic Diameter",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "leeminrui"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "points": 0.0,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n#define int long long\n#define pii pair<int, int>\ninline ll read() {\n\tll s = 0, w = 1;\n\tchar c = getchar();\n\twhile (c < '0' || c > '9') {if (c == '-') w = -1; c = getchar();}\n\twhile (c >= '0' && c <= '9') s = (s << 3) + (s << 1) + (c ^ 48), c = getchar();\n\treturn s * w;\n}\nconst int N = 200010;\nint n, q;\nll w;\nint last[N], cnt = 0;\nstruct edge {\n\tint to, next;\n\tll w;\n} e[N << 1];\nvoid addedge(int x, int y, ll w) {\n\te[++cnt].to = y;\n\te[cnt].next = last[x]; \n\te[cnt].w = w;\n\tlast[x] = cnt;\n}\nll dep[N];\nint intime[N], outtime[N], tme, dfn[N];\nint pos[N];\nvoid dfs(int x, int fa) {\n\tdfn[++tme] = x;\n\tintime[x] = tme;\n\tfor (int i = last[x]; i; i = e[i].next) {\n\t\tint v = e[i].to;\n\t\tif (v == fa) continue;\n\t\tpos[(i + 1) >> 1] = v;\n\t\tdep[v] = dep[x] + e[i].w;\n\t\tdfs(v, x);\n\t\tdfn[++tme] = x;\n\t}\n\touttime[x] = tme;\n}\nstruct SegmentTree {\n\tll w[N << 2], m[N << 2], lm[N << 2], mr[N << 2], lmr[N << 2], lazy[N << 2], l[N << 2], r[N << 2];\n\tvoid update(int rt) {\n\t\tw[rt] = max(w[rt << 1], w[rt << 1 | 1]);\n\t\tm[rt] = max(m[rt << 1], m[rt << 1 | 1]);\n\t\tlm[rt] = max(max(lm[rt << 1], lm[rt << 1 | 1]), w[rt << 1] + m[rt << 1 | 1]);\n\t\tmr[rt] = max(max(mr[rt << 1], mr[rt << 1 | 1]), m[rt << 1] + w[rt << 1 | 1]);\n\t\tlmr[rt] = max(max(lmr[rt << 1], lmr[rt << 1 | 1]), max(lm[rt << 1] + w[rt << 1 | 1], w[rt << 1] + mr[rt << 1 | 1]));\n\t}\n\tvoid add(int rt, int x) {\n\t\tw[rt] += x;\n\t\tm[rt] -= x << 1;\n\t\tlm[rt] -= x;\n\t\tmr[rt] -= x;\n\t\tlazy[rt] += x;\n\t}\n\tvoid pushdown(int rt) {\n\t\tadd(rt << 1, lazy[rt]);\n\t\tadd(rt << 1 | 1, lazy[rt]);\n\t\tlazy[rt] = 0;\n\t}\n\tvoid build(int rt, int L, int R) {\n\t\tl[rt] = L, r[rt] = R;\n\t\tif (L == R) {\n\t\t\tw[rt] = dep[dfn[L]];\n\t\t\tm[rt] = -(dep[dfn[L]] << 1);\n\t\t\tlm[rt] = mr[rt] = -dep[dfn[L]];\n\t\t\tlmr[rt] = 0;\n\t\t\treturn ;\n\t\t}\n\t\tint mid = L + R >> 1;\n\t\tbuild(rt << 1, L, mid), build(rt << 1 | 1, mid + 1, R);\n\t\tupdate(rt);\n\t}\n\tvoid change(int rt, int L, int R, ll x) {\n\t\tif (L <= l[rt] && r[rt] <= R) {\n\t\t\tadd(rt, x);\n\t\t\treturn ;\n\t\t}\n\t\tpushdown(rt);\n\t\tif (L <= r[rt << 1]) change(rt << 1, L, R, x);\n\t\tif (l[rt << 1 | 1] <= R) change(rt << 1 | 1, L, R, x);\n\t\tupdate(rt);\n\t}\n} tree;\nsigned main() {\n\tn = read(), q = read(), w = read();\n\tfor (int i = 1; i < n; i++) {\n\t\tint x = read(), y = read(), z = read();\n\t\taddedge(x, y, z), addedge(y, x, z);\n\t}\n\tdfs(1, 0);\n\ttree.build(1, 1, tme);\n\tll last = 0;\n\twhile (q--) {\n\t\tint d = read(); ll k = read();\n\t\td = (d + last % (n - 1)) % (n - 1) + 1;\n\t\tk = (k + last % w) % w;\n\t\ttree.change(1, intime[pos[d]], outtime[pos[d]], k - e[d << 1].w);\n\t\te[d << 1].w = e[d << 1 | 1].w = k;\n\t\tprintf(\"%lld\\n\", tree.lmr[1]);\n\t\tlast = tree.lmr[1];\n\t} \n\treturn 0;\n}"
+}

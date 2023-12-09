@@ -1,0 +1,38 @@
+{
+    "id": 98004737,
+    "contestId": 295,
+    "creationTimeSeconds": 1604937310,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "vjudge5"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 11,
+    "timeConsumedMillis": 312,
+    "memoryConsumedBytes": 3072000,
+    "source": "// Nurstan Duisengaliev\n// \u043d\u0435, \u043d\u0435 \u043d\u0430\u0434\u043e \u043c\u0435\u043d\u044f \u0443\u0437\u043d\u0430\u0432\u0430\u0442\u044c \n/*#pragma GCC target (\"avx2\")\n#pragma GCC optimize (\"Ofast\")\n#pragma GCC optimize (\"unroll-loops\")\n#pragma GCC target(\"avx,avx2,fma\")\n#pragma GCC optimize(\"O3\")*/                   \n      \n#include <bits/stdc++.h>\n//#include <ext/pb_ds/assoc_container.hpp>\n//#include <ext/pb_ds/tree_policy.hpp> \n \n#define ll long long\n#define all(x) x.begin(), x.end()\n#define in insert\n#define mp make_pair\n#define F first\n#define S second\n#define ppf pop_front\n#define pb push_back\n#define ppb pop_back\n#define pf push_front\n#define pii pair <int, int>\n#define boost() ios_base::sync_with_stdio(0), cin.tie(0)\n#define sz(x) (int)x.size()\n \nusing namespace std;\n//using namespace __gnu_pbds;\n\n//template<typename T> using ordered_set = tree <T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;                         \n\nconst int N = (int)2e5 + 123;\nconst int mod = (int)1e9 + 7;\nconst ll INF = (ll)1e18 + 1;\nll dp[55][55][55];\nbool yes[55][55][55]; // dp[kol][t][cnt1][cnt2] is equal to the number of variants when we doing kol'th swimming and cnt1, cnt2 (50, 100) on first side\nint n, k;\nint cnt1, cnt2;\nll f[N];\nll BinPow (int x, int y) {\n\tif (y == 0) return 1ll;\n\tif (y % 2 == 0) {\n\t\tll o = BinPow (x, y / 2);\n\t\treturn o * o % mod;\n\t}\n\treturn BinPow (x, y - 1) * x % mod;\n}\nll Cnk (int n, int k) {\n\treturn (f[n] * BinPow (f[n - k] * f[k] % mod, mod - 2) % mod);\n}\nvoid solve () {\n\tcin >> n >> k;\n\tf[0] = 1;\n\tfor (int i = 1; i <= n; i ++) {\n\t\tint x;\n\t\tcin >> x;\n\t\tif (x == 50) cnt1 ++;\n\t\telse cnt2 ++;\n\t\tf[i] = f[i - 1] * i % mod;\n\t}\n\tvector <int> vv;\n\tif (cnt1 >= 2) vv.pb (50), vv.pb (50);\n\tif (cnt1 == 1) vv.pb (50);\n\tif (cnt2 >= 2) vv.pb (100), vv.pb (100);\n\tif (cnt2 == 1) vv.pb (100);\n\tsort (all (vv));\n\tif ((n == 1 && vv.back () > k) || (n >= 2 && vv[0] + vv[1] > k)) {\n\t\tcout << -1 << endl << 0;\n\t\treturn;\n\t}\n\tdp[0][cnt1][cnt2] = 1;\n\tyes[0][cnt1][cnt2] = 1;\n\tfor (int op = 0;;op += 2) {  //maximum op will be n\n\t\t// transporting the people from left side to right\n\t\tfor (int i = 0; i <= cnt1; i ++) {\n\t\t\tfor (int j = 0; j <= cnt2; j ++) { // the number of people with 50, 100weight  stayed on first side\n\t\t\t\tfor (int ii = 0; ii <= i; ii ++) {\n\t\t\t\t\tfor (int jj = 0; jj <= j; jj ++) { // the number of people swimming across river\n\t\t\t\t\t\tif (ii * 50 + jj * 100 <= k && ii + jj >= 1 && yes[op][i][j] == 1) {\n\t\t\t\t\t\t\tdp[op + 1][i - ii][j - jj] += ((dp[op][i][j] * Cnk (i, ii) % mod) * Cnk (j, jj) % mod);\n\t\t\t\t\t\t\tdp[op + 1][i - ii][j - jj] %= mod;\n\t\t\t\t\t\t\tyes[op + 1][i - ii][j - jj] = 1;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\t\t\n\t\t\t}\n\t\t}\n\t\tif (yes[op + 1][0][0] == 1) { // if its reachable to transport all people it means op is the minimum transports which we neeed\n\t\t\tcout << op + 1 << endl << dp[op + 1][0][0];\n\t\t\treturn;\n\t\t}\n\t\t// returning the board with some people\n\t\tfor (int i = 0; i <= cnt1; i ++) {\n\t\t\tfor (int j = 0; j <= cnt2; j ++) { // the people number with 50,100weight on the left side\n\t\t\t\tfor (int ii = 0; ii <= cnt1 - i; ii ++) {\n\t\t\t\t\tfor (int jj = 0; jj <= cnt2 - j; jj ++) { // the number of people returning to left side \n\t\t\t\t\t\tif (ii * 50 + jj * 100 <= k && ii + jj >= 1 && yes[op + 1][i][j] == 1) {\n\t\t\t\t\t\t\tdp[op + 2][i + ii][jj + j] += ((dp[op + 1][i][j] * Cnk (cnt1 - i, ii) % mod) * Cnk (cnt2 - j, jj) % mod);\n\t\t\t\t\t\t\tdp[op + 2][i + ii][jj + j] % mod;\n\t\t\t\t\t\t\tyes[op + 2][i + ii][jj + j] = 1;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\t\n\t\t\t}\n\t\t}\t\t\t\n\t}\n}   \t\n \nmain () {\n//\tfreopen (\".in\", \"r\", stdin);\n//\tfreopen (\".out\", \"w\", stdout);\n\tboost ();\n\tint TT = 1;\n//    cin >> TT;\n\twhile (TT --) {\n\t\tsolve ();\n\t}\n\treturn 0;\t\n}\n\t   \t\t\t  \t    \t  \t  \t \t       \t"
+}

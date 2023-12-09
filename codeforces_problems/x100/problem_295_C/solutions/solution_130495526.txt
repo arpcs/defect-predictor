@@ -1,0 +1,38 @@
+{
+    "id": 130495526,
+    "contestId": 295,
+    "creationTimeSeconds": 1633111779,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "classic"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "// author: classic\r\n#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nconst int N = 51;\r\nconst int MOD = 1e9 + 7;\r\n\r\nstruct data {\r\n\tint a, b, c, step;\r\n\tdata() {}\r\n\tdata(int x, int y, int z, int s) {\r\n\t\ta = x;\r\n\t\tb = y;\r\n\t\tc = z;\r\n\t\tstep = s;\r\n\t}\r\n};\r\n\r\nint main() {\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(0);\r\n\tvector<vector<long long>> cnk(N, vector<long long>(N));\r\n\tcnk[0][0] = 1;\r\n\tfor (int i = 0; i < N; i++) {\r\n\t\tcnk[i][0] = cnk[i][i] = 1;\r\n\t}\r\n\tfor (int i = 1; i < N; i++) {\r\n\t\tfor (int j = 1; j < i; j++) {\r\n\t\t\tcnk[i][j] = (cnk[i - 1][j] + cnk[i - 1][j - 1]) % MOD;\r\n\t\t}\r\n\t}\r\n\tint n, k;\r\n\tcin >> n >> k;\r\n\tint cnt_50 = 0, cnt_100 = 0;\r\n\tfor  (int i = 0; i < n; i++) {\r\n\t\tint a;\r\n\t\tcin >> a;\r\n\t\tcnt_50 += (a == 50);\r\n\t\tcnt_100 += (a == 100);\r\n\t}\r\n\tqueue<data> q;\r\n\tq.push(data(cnt_100, cnt_50, 0, 0));\r\n\t// dp[count_100kg][count_50kg][left-right]\r\n\tvector<vector<vector<long long>>> dp(cnt_100 + 1, vector<vector<long long>>(cnt_50 + 1, vector<long long>(2, 0)));\r\n\t// dist[count_100kg][count_50kg][left-right]\r\n\tvector<vector<vector<int>>> dist(cnt_100 + 1, vector<vector<int>>(cnt_50 + 1, vector<int>(2, -1)));\r\n\tdp[cnt_100][cnt_50][0] = 1;\r\n\tdist[cnt_100][cnt_50][0] = 0;\r\n\twhile (!q.empty()) {\r\n\t\tint a = q.front().a;\r\n\t\tint b = q.front().b;\r\n\t\tint c = q.front().c;\r\n\t\tint step = q.front().step;\r\n\t\tq.pop();\r\n\t\tif (dist[0][0][1] != -1) {\r\n\t\t\tcout << step << '\\n' << dp[0][0][1];\r\n\t\t\treturn 0;\r\n\t\t}\r\n\t\tif (c == 0) {\r\n\t\t\tfor (int i = 0; i <= a; i++) {\r\n\t\t\t\tfor (int j = 0; j <= b; j++) {\r\n\t\t\t\t\tif (i + j == 0 || i * 100 + j * 50 > k) {\r\n\t\t\t\t\t\tcontinue;\r\n\t\t\t\t\t}\r\n\t\t\t\t\tif (dist[a - i][b - j][1] == -1) {\r\n\t\t\t\t\t\tdist[a - i][b - j][1] = step + 1;\r\n\t\t\t\t\t\tdp[a - i][b - j][1] = (dp[a - i][b - j][1] + ((dp[a][b][0] * cnk[a][i]) % MOD * cnk[b][j]) % MOD) % MOD; \r\n\t\t\t\t\t\tq.push(data(a - i, b - j, 1, step + 1));\r\n\t\t\t\t\t} else if (dist[a - i][b - j][1] == step + 1) {\r\n\t\t\t\t\t\tdp[a - i][b - j][1] = (dp[a - i][b - j][1] + ((dp[a][b][0] * cnk[a][i]) % MOD * cnk[b][j]) % MOD) % MOD;\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t} else {\r\n\t\t\tfor (int i = 0; i <= cnt_100 - a; i++) {\r\n\t\t\t\tfor (int j = 0; j <= cnt_50 - b; j++) {\r\n\t\t\t\t\tif (i + j == 0 || i * 100 + j * 50 > k) {\r\n\t\t\t\t\t\tcontinue;\r\n\t\t\t\t\t}\r\n\t\t\t\t\tif (dist[a + i][b + j][0] == -1) {\r\n\t\t\t\t\t\tdist[a + i][b + j][0] = step + 1;\r\n\t\t\t\t\t\tdp[a + i][b + j][0] = (dp[a + i][b + j][0] + ((dp[a][b][1] * cnk[cnt_100 - a][i]) % MOD * cnk[cnt_50 - b][j]) % MOD) % MOD;\r\n\t\t\t\t\t\tq.push(data(a + i, b + j, 0, step + 1));\r\n\t\t\t\t\t} else if (dist[a + i][b + j][0] == step + 1) {\r\n\t\t\t\t\t\tdp[a + i][b + j][0] = (dp[a + i][b + j][0] + ((dp[a][b][1] * cnk[cnt_100 - a][i]) % MOD * cnk[cnt_50 - b][j]) % MOD) % MOD;\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tcout << -1 << '\\n' << 0;\r\n\treturn 0;\r\n}"
+}

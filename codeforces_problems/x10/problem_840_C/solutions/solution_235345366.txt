@@ -1,0 +1,36 @@
+{
+    "id": 235345366,
+    "contestId": 840,
+    "creationTimeSeconds": 1701504556,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 840,
+        "index": "C",
+        "name": "On the Bench",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2500,
+        "tags": [
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 840,
+        "members": [
+            {
+                "handle": "JWRuixi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1503068700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 18,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 1536000,
+    "source": "#include \"iostream\"\r\n#include \"cstdio\"\r\n#include \"vector\"\r\n#include \"algorithm\"\r\n#include \"unordered_map\"\r\n#ifdef ONLINE_JUDGE\r\n#include \"bits/stdc++.h\"\r\n#endif\r\n#define IL inline\r\n#define LL long long\r\n#define eb emplace_back\r\nusing namespace std;\r\n\r\nnamespace IO {\r\n\tchar ibuf[(1 << 20) + 1], *iS, *iT;\r\n#if ONLINE_JUDGE\r\n#define gh() (iS == iT ? iT = (iS = ibuf) + fread(ibuf, 1, (1 << 20) + 1, stdin), (iS == iT ? EOF : *iS++) : *iS++)\r\n#else\r\n#define gh() getchar()\r\n#endif\r\n\tinline long long read() {\r\n\t\tchar ch = gh();\r\n\t\tlong long x = 0;\r\n\t\tbool t = 0;\r\n\t\twhile (ch < '0' || ch > '9') t |= ch == '-', ch = gh();\r\n\t\twhile (ch >= '0' && ch <= '9') x = (x << 1) + (x << 3) + (ch ^ 48), ch = gh();\r\n\t\treturn t ? ~(x - 1) : x;\r\n\t}\r\n\ttemplate<typename _Tp>\r\n\tinline void write(_Tp x) {\r\n\t\tstatic char stk[64], *top = stk;\r\n\t\tif (x < 0) {\r\n\t\t\tx = ~(x - 1);\r\n\t\t\tputchar('-');\r\n\t\t}\r\n\t\tdo *top++ = x % 10, x /= 10;\r\n\t\twhile (x);\r\n\t\twhile (top != stk) putchar((*--top) | 48);\r\n\t}\r\n}\r\n\r\nusing IO::read;\r\nusing IO::write;\r\n\r\nusing vi = vector<int>;\r\n\r\nconstexpr int mod = 1e9 + 7;\r\n\r\ntemplate<typename T, typename _T>\r\nIL void inc (T &x, const _T &y) {\r\n    (x += y) >= mod && (x -= mod);\r\n}\r\ntemplate<typename T, typename _T>\r\nIL void dec (T &x, const _T &y) {\r\n\t(x -= y) < 0 && (x += mod);\r\n}\r\n\r\nIL void push (vi &a) {\r\n\twhile (a.size() > 1 && !a.back()) a.pop_back();\r\n}\r\n\r\nIL vi operator + (const vi &a, const vi &b) {\r\n    vi r = a;\r\n    if (b.size() > r.size()) {\r\n        r.resize(b.size());\r\n    }\r\n    for (int i = 0; i < b.size(); i++) {\r\n        inc(r[i], b[i]);\r\n    }\r\n    return r;\r\n}\r\n\r\nIL vi operator - (const vi &a, const vi &b) {\r\n\tvi r = a;\r\n\tif (b.size() > r.size()) {\r\n\t\tr.resize(b.size());\r\n\t}\r\n\tfor (int i = 0; i < b.size(); i++) {\r\n\t\tdec(r[i], b[i]);\r\n\t}\r\n\treturn r;\r\n}\r\n\r\nIL vi operator << (const vi &a, int d) {\r\n    vi r(a.size() + d);\r\n    for (int i = 0; i < a.size(); i++) {\r\n        r[i + d] = a[i];\r\n    }\r\n    return r;\r\n}\r\n\r\n/**\r\n * a = fl + fr * x^ma\r\n * b = gl + gr * x^mb\r\n * a * b = fl * gl + fr * gr * x^\r\n */\r\n\r\nconstexpr int B = 1 << 6;\r\n\r\nIL vi BFmul (const vi &a, const vi &b) {\r\n\tint n = a.size(), m = b.size();\r\n\tvi r(n + m - 1);\r\n\tfor (int i = 0; i < n; i++) {\r\n\t\tint w = a[i];\r\n\t\tif (!w) {\r\n\t\t\tcontinue;\r\n\t\t}\r\n\t\tfor (int j = 0; j < m; j++) {\r\n\t\t\tinc(r[i + j], (LL)w * b[j] % mod);\r\n\t\t}\r\n\t}\r\n\treturn r;\r\n}\r\n\r\nIL vi mul (const vi &a, const vi &b) {\r\n\tassert(a.size() == b.size());\r\n\tint n = a.size();\r\n    if (n <= B) {\r\n\t\treturn BFmul(a, b);\r\n\t}\r\n\tint m = n >> 1;\r\n\tvi fl(a.begin(), a.begin() + m);\r\n\tvi fr(a.begin() + m, a.end());\r\n\tvi gl(b.begin(), b.begin() + m);\r\n\tvi gr(b.begin() + m, b.end());\r\n\tvi c1 = mul(fl, gl);\r\n\tvi c2 = mul(fr, gr);\r\n\tvi c3 = mul((fl + fr), (gl + gr));\r\n\tvi r = c1 + (c2 << (m * 2)) + (c3 << m) - (c1 << m) - (c3 << m);\r\n\tif (r != BFmul(a, b)) {\r\n\t\tvi t = BFmul(a, b);\r\n\t\tassert(r.size() == t.size());\r\n\t\tfor (int i = 0; i < r.size(); i++) {\r\n\t\t\tcout << r[i] << ' ' << t[i] << '\\n';\r\n\t\t}\r\n\t\tabort();\r\n\t}\r\n\treturn r;\r\n}\r\n\r\nIL vi operator * (vi &a, vi &b) {\r\n\tif (a.size() <= B || b.size() <= B) {\r\n\t\tvi r = BFmul(a, b);\r\n\t\treturn push(r), r;\r\n\t}\r\n\tauto n = max(a.size(), b.size());\r\n\ta.resize(n), b.resize(n);\r\n\tvi r = mul(a, b);\r\n\treturn push(r), r;\r\n}\r\n\r\nconstexpr int N = 3e2 + 9, M = 1e5 + 9;\r\nint n, a[N], nc, b[N], fac[N], ifac[N];\r\nunordered_map<int, int> id;\r\n\r\nint pr[M], prc;\r\nbool vis[M];\r\nIL void seive (int z) {\r\n\tfor (int i = 2; i <= z; i++) {\r\n\t\tif (!vis[i]) {\r\n\t\t\tpr[++prc] = i;\r\n\t\t}\r\n\t\tfor (int j = 1; j <= prc && i * pr[j] <= z; j++) {\r\n\t\t\tvis[i * pr[j]] = 1;\r\n\t\t\tif (i % pr[j] == 0) {\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\n\r\nIL int ksm (int b, int k) {\r\n\tint r = 1;\r\n\tfor (; k; k >>= 1, b = (LL)b * b % mod) if (k & 1) r = (LL)r * b % mod;\r\n\treturn r;\r\n}\r\n\r\nIL void init () {\r\n\tfac[0] = 1;\r\n\tfor (int i = 1; i <= n; i++) {\r\n\t\tfac[i] = (LL)fac[i - 1] * i % mod;\r\n\t}\r\n\tifac[n] = ksm(fac[n], mod - 2);\r\n\tfor (int i = n - 1; ~i; i--) {\r\n\t\tifac[i] = (LL)ifac[i + 1] * (i + 1) % mod;\r\n\t}\r\n}\r\n\r\nint main() {\r\n\tn = read();\r\n\tinit();\r\n\tfor (int i = 1; i <= n; i++) {\r\n\t\ta[i] = read();\r\n\t}\r\n\tseive(sqrt(*max_element(a + 1, a + n + 1)));\r\n\tfor (int i = 1; i <= n; i++) {\r\n\t\tint x = a[i], y = 1;\r\n\t\tfor (int j = 1; pr[j] * pr[j] <= x && j <= prc; j++) {\r\n\t\t\tif (x % pr[j] == 0) {\r\n\t\t\t\tint c = 0;\r\n\t\t\t\twhile (x % pr[j] == 0) ++c, x /= pr[j];\r\n\t\t\t\tif (c & 1) {\r\n\t\t\t\t\ty *= pr[j];\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\ty *= x;\r\n\t\tif (id.find(y) == id.end()) {\r\n\t\t\tid[y] = ++nc;\r\n\t\t}\r\n\t\tb[id[y]]++;\r\n\t}\r\n\tvi g{1};\r\n\tfor (int i = 1; i <= nc; i++) {\r\n\t\tint m = b[i];\r\n\t\tLL cf = 1;\r\n\t\tvi f(m);\r\n\t\tfor (int j = 0; j < m; j++) {\r\n\t\t\tf[j] = cf * ifac[j] % mod;\r\n\t\t\tcf = cf * (m - j) * (m - j - 1) % mod;\r\n\t\t}\r\n\t\tg = f * g;\r\n\t}\r\n\tLL as = 0;\r\n\tfor (int i = 0; i < g.size(); i++) {\r\n\t\tas += (i & 1 ? -1LL : 1LL) * g[i] * fac[n - i] % mod;\r\n\t}\r\n\tas = (as % mod + mod) % mod;\r\n\twrite(as);\r\n}\r\n// I love WHQ!"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 183475896,
+    "contestId": 182,
+    "creationTimeSeconds": 1669897866,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 182,
+        "index": "C",
+        "name": "Optimal Sum",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2000,
+        "tags": [
+            "data structures",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 182,
+        "members": [
+            {
+                "handle": "arush.agu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1335280200
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 68,
+    "timeConsumedMillis": 156,
+    "memoryConsumedBytes": 3481600,
+    "source": "#include <algorithm>\n#include <cctype>\n#include <cmath>\n#include <cstdio>\n#include <cstring>\n#include <ext/pb_ds/assoc_container.hpp>\n#include <ext/pb_ds/tree_policy.hpp>\n#include <functional>\n#include <iostream>\n#include <iomanip>\n#include <iterator>\n#include <list>\n#include <map>\n#include <numeric>\n#include <queue>\n#include <set>\n#include <sstream>\n#include <stack>\n#include <string>\n#include <unordered_map>\n#include <unordered_set>\n#include <vector>\n#include <random>\n\n#ifdef DEBUG\n#include <time.h>\n#endif\n\n#define all(a) (a).begin(), (a).end()\n#define rev(a) (a).rbegin(), (a).rend()\n#define F first\n#define S second\nint recur_depth = 0;\n#ifdef DEBUG\n#define dbg(x)                                                                 \\\n  {                                                                            \\\n    ++recur_depth;                                                             \\\n    auto x_ = x;                                                               \\\n    --recur_depth;                                                             \\\n    cerr << string(recur_depth, '\\t') << \"\\e[91m\" << __func__ << \":\"           \\\n         << __LINE__ << \"\\t\" << #x << \" = \" << x_ << \"\\e[39m\" << endl;         \\\n  }\n#else\n#define dbg(x)\n#endif\n\nusing namespace std;\nusing namespace __gnu_pbds;\n\ntypedef pair<int, int> ii;\n\ntypedef long long ll;\ntypedef long double ld;\ntypedef pair<ll, ll> llll;\n\ntypedef vector<int> vi;\ntypedef vector<vi> vvi;\ntypedef vector<pair<int, int>> vii;\ntypedef vector<vii> vvii;\n\ntypedef vector<ll> vl;\ntypedef vector<vl> vvl;\ntypedef vector<pair<ll, ll>> vll;\ntypedef vector<vll> vvll;\n\ntypedef vector<bool> vb;\n\ntemplate <class type1>\nusing ordered_set = tree<type1, null_type, less<type1>, rb_tree_tag,\n                         tree_order_statistics_node_update>;\n\ntemplate <typename A, typename B>\nostream &operator<<(ostream &os, const pair<A, B> &p) {\n  return os << '(' << p.first << \", \" << p.second << ')';\n}\ntemplate <typename T_container, typename T = typename enable_if<\n                                    !is_same<T_container, string>::value,\n                                    typename T_container::value_type>::type>\nostream &operator<<(ostream &os, const T_container &v) {\n  os << '{';\n  string sep;\n  for (const T &x : v)\n    os << sep << x, sep = \", \";\n  return os << '}';\n}\n\nconst ll MOD = 1e9 + 7;\n// const ll MOD = 998244353;\nconst ll INF = 1e18;\nconst ld EPS = 1e-9;\n\nvoid solve() {\n  ll n, len; cin >> n >> len;\n  vl a(n); for (ll &x : a) cin >> x;\n  ll k; cin >> k;\n\n  auto f = [](ll n, ll len, ll k, vl a) {\n    ll curr = 0, ans = -INF;\n    multiset<ll> neg_taken, neg_cand;\n\n    auto add = [&](ll x) {\n      if (x >= 0) {\n        curr += x;\n      } else if (neg_taken.size() < k) {\n        curr += -x;\n        neg_taken.insert(x);\n      } else if (neg_taken.size() > 0 && x < *neg_taken.rbegin()) {\n        ll tmp = *neg_taken.rbegin();\n        curr += -x;\n        curr += 2 * tmp;\n        neg_taken.erase(--neg_taken.end());\n        neg_taken.insert(x);\n        neg_cand.insert(tmp);\n      } else {\n        curr += x;\n        neg_cand.insert(x);\n      }\n    };\n\n    auto rm = [&](ll x) {\n      auto it = neg_taken.find(x);\n      if (x >= 0) {\n        curr -= x;\n      } else if (it != neg_taken.end()) {\n        curr -= -x;\n        neg_taken.erase(it);\n        if (!neg_cand.empty()) {\n          ll tmp = *neg_cand.begin();\n          neg_cand.erase(neg_cand.begin());\n          neg_taken.insert(tmp);\n          curr += -2 * tmp;\n        }\n      } else {\n        curr -= x;\n        neg_cand.erase(neg_cand.find(x));\n      }\n    };\n\n    for (ll i=0; i<len; i++) add(a[i]);\n    ans = max(ans, curr);\n    for (ll i=len; i<n; i++) {\n      add(a[i]); rm(a[i - len]);\n      ans = max(ans, curr);\n    }\n\n    return ans;\n  };\n\n  ll res = f(n, len, k, a);\n  for (ll &x : a) x *= -1;\n  res = max(res, f(n, len, k, a));\n\n  cout << res << \"\\n\";\n}\n\nint main() {\n  ios_base::sync_with_stdio(0);\n  cin.tie(NULL);\n\n  clock_t start = clock();\n\n  int test_cases = 1;\n  /* cin >> test_cases; */\n\n  while (test_cases--)\n    solve();\n\n#ifdef DEBUG\n  cerr << fixed << setprecision(10) << \"\\nTime Taken: \" << (double)(clock() - start) / CLOCKS_PER_SEC << \"s\\n\";\n#endif\n  return 0;\n}\n"
+}

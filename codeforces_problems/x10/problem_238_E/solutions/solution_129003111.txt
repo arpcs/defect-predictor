@@ -1,0 +1,37 @@
+{
+    "id": 129003111,
+    "contestId": 238,
+    "creationTimeSeconds": 1631807216,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 238,
+        "index": "E",
+        "name": "Meeting Her",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2600,
+        "tags": [
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 238,
+        "members": [
+            {
+                "handle": "lijunhan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1352044800
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 9625600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nint read() {\r\n\tint s=0,w=1;\r\n\tchar ch=getchar();\r\n\twhile(ch<'0'||ch>'9') {if(ch=='-') w=-1;ch=getchar();}\r\n\twhile(ch>='0'&&ch<='9') s=(s<<3)+(s<<1)+(ch^48),ch=getchar();\r\n\treturn s*w;\r\n}\r\nconst int maxn = 110, mod = 19260817;\r\nvector<int>g[maxn];\r\nvector<pair<int,int> >ve;\r\nint n,m,S,T,K,s,t,d[maxn][maxn],deg[maxn][maxn],ky[maxn][maxn],vis[maxn];\r\nvoid dfs(int x) {\r\n\tif(x==t) return;char fl=0;vis[x]=1;\r\n\tfor(auto y:g[x]) if(d[s][y]==d[s][x]+1) {\r\n\t\tif(!vis[y]) dfs(y);\r\n\t\tif(vis[y]==2) ve.push_back(make_pair(x,y)),fl=1;\r\n\t}if(fl) vis[x]=2;\r\n}\r\nstruct info {int x,w;};char v[maxn][maxn];\r\nvector<info>G[maxn];int D[maxn][maxn];\r\nvoid ADD(int w,int x,int y) {G[y].push_back((info){x,w}),++deg[w][x];}\r\nvector<int>f[maxn],h[maxn];int zd[maxn],fd[maxn];\r\nint df[maxn],dh[maxn];\r\nvoid zbfs(int x) {\r\n\tqueue<int>Q;Q.push(x);\r\n\twhile(!Q.empty()) {\r\n\t\tint x=Q.front();Q.pop();\r\n\t\tfor(auto y:f[x]) {\r\n\t\t\tzd[y]=(zd[y]+zd[x])%mod;\r\n\t\t\tif(!--df[y]) Q.push(y);\r\n\t\t}\r\n\t}\r\n}\r\nvoid fbfs(int x) {\r\n\tqueue<int>Q;Q.push(x);\r\n\twhile(!Q.empty()) {\r\n\t\tint x=Q.front();Q.pop();\r\n\t\tfor(auto y:h[x]) {\r\n\t\t\tfd[y]=(fd[y]+fd[x])%mod;\r\n\t\t\tif(!--dh[y]) Q.push(y);\r\n\t\t}\r\n\t}\r\n}\r\nvoid mst(int w) {//\u00c7\u00f3\u00b1\u00d8\u00be\u00ad\u00b5\u00e3 \r\n\tfor(auto y:ve) f[y.first].push_back(y.second),++df[y.second],h[y.second].push_back(y.first),++dh[y.first];\r\n\tfor(int i=1;i<=n;i++) zd[i]=fd[i]=0;zd[s]=fd[t]=1;\r\n\tzbfs(s),fbfs(t);\r\n\tfor(int i=1;i<=n;i++) if(1ll*zd[i]*fd[i]%mod==zd[t]) ky[w][i]=1;\r\n\tfor(auto y:ve) f[y.first].pop_back(),h[y.second].pop_back();\r\n\tfor(int i=1;i<=n;i++) df[i]=dh[i]=0;\r\n}\r\nint mp[maxn][maxn][maxn];\r\nsigned main() {\r\n\tn=read(),m=read(),S=read(),T=read();\r\n\tmemset(d,0x3f,sizeof(d));for(int i=1;i<=n;i++) d[i][i]=0;\r\n\tfor(int i=1,x,y;i<=m;i++) x=read(),g[x].push_back(y=read()),d[x][y]=1;\r\n\tfor(int k=1;k<=n;k++)\r\n\t\tfor(int i=1;i<=n;i++)\r\n\t\t\tfor(int j=1;j<=n;j++) d[i][j]=min(d[i][j],d[i][k]+d[k][j]);\r\n\tK=read();for(int i=1;i<=K;i++) {\r\n\t\tfor(int i=1;i<=n;i++) vis[i]=0;\r\n\t\ts=read(),t=read(),ve.clear(),vis[t]=2,dfs(s),mst(i);\r\n\t\tfor(auto y:ve) ADD(i,y.first,y.second);\r\n\t}\r\n\tpriority_queue<pair<int,pair<int,int> >,vector<pair<int,pair<int,int> > >,greater<pair<int,pair<int,int> > > >Q;\r\n\tfor(int j=0;j<=K+1;j++)\r\n\t\tfor(int i=1;i<=n+1;i++) D[j][i]=0x3f3f3f3f;\r\n\tADD(K+1,n+1,S),Q.push(make_pair(D[0][T]=0,make_pair(0,T))),ky[0][T]=1;\r\n\twhile(!Q.empty()) {\r\n\t\tint x=Q.top().second.second,frb=Q.top().second.first;\r\n\t\tQ.pop();if(v[frb][x]) continue;v[frb][x]=1;\r\n\t\tfor(auto y:G[x])\r\n\t\t\tif(((frb==y.w||ky[frb][x])&&(deg[y.w][y.x]-=!mp[y.w][x][y.x],mp[y.w][x][y.x]=1,!deg[y.w][y.x]))&&D[y.w][y.x]>D[frb][x]+(frb!=y.w)) {\r\n\t\t\t\tQ.push(make_pair(D[y.w][y.x]=D[frb][x]+(frb!=y.w),make_pair(y.w,y.x)));\r\n\t\t\t}\r\n\t}\r\n\tcout<<(D[K+1][n+1]==0x3f3f3f3f?-1:D[K+1][n+1]-1)<<'\\n';\r\n\treturn 0;\r\n}"
+}

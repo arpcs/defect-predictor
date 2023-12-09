@@ -1,0 +1,35 @@
+{
+    "id": 198839640,
+    "contestId": 79,
+    "creationTimeSeconds": 1679592530,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 79,
+        "index": "E",
+        "name": "Security System",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 79,
+        "members": [
+            {
+                "handle": "xindubawukong"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1304175600
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 76,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 1024000,
+    "source": "#include <algorithm>\r\n#include <any>\r\n#include <array>\r\n#include <bit>\r\n#include <bitset>\r\n#include <cassert>\r\n#include <climits>\r\n#include <cmath>\r\n#include <cstdio>\r\n#include <cstdlib>\r\n#include <cstring>\r\n#include <ctime>\r\n#include <functional>\r\n#include <iomanip>\r\n#include <iostream>\r\n#include <iterator>\r\n#include <list>\r\n#include <map>\r\n#include <numeric>\r\n#include <optional>\r\n#include <queue>\r\n#include <random>\r\n#include <set>\r\n#include <stack>\r\n#include <string>\r\n#include <thread>\r\n#include <tuple>\r\n#include <type_traits>\r\n#include <unordered_map>\r\n#include <unordered_set>\r\n#include <utility>\r\n#include <vector>\r\n\r\n#ifdef LOCAL\r\n#include \"../debug.h\"\r\n#else\r\n#define debug(...) 19980723\r\n#endif\r\n\r\nusing namespace std;\r\n\r\nusing int64 = long long;\r\n#if _WIN64 || __x86_64__\r\nusing int128 = __int128_t;\r\nusing uint128 = __uint128_t;\r\n#endif\r\nusing uint = unsigned int;\r\nusing uint64 = unsigned long long;\r\n\r\n// mt19937 rng(0);\r\n// mt19937 rng(chrono::high_resolution_clock::now().time_since_epoch().count());\r\n\r\n// ----------------------------------------------------------------------\r\n\r\nvoid Main() {\r\n  int n, a, b, c;\r\n  int64 tt;\r\n  cin >> n >> tt >> a >> b >> c;\r\n\r\n  auto ChangeState = [](auto& state, int x0, int y0, int x1, int y1) -> void {\r\n    assert(x0 == x1 || y0 == y1);\r\n    assert(x0 <= x1 && y0 <= y1);\r\n    if (x0 == x1 && y0 == y1) return;\r\n    for (auto& [px, py, pt] : state) {\r\n      assert((int64)(px - x0) * (px - x1) >= 0);\r\n      assert((int64)(py - y0) * (py - y1) >= 0);\r\n      if (x0 == x1) {\r\n        int64 first = abs(py - (y0 + 1));\r\n        int64 last = abs(py - y1);\r\n        int64 len = y1 - y0;\r\n        pt -= (first + last) * len / 2;\r\n        pt -= len * abs(px - x0);\r\n      } else if (y0 == y1) {\r\n        int64 first = abs(px - (x0 + 1));\r\n        int64 last = abs(px - x1);\r\n        int64 len = x1 - x0;\r\n        pt -= (first + last) * len / 2;\r\n        pt -= len * abs(py - y0);\r\n      }\r\n    }\r\n  };\r\n  auto IsGood = [](auto state) -> bool {\r\n    for (auto& [px, py, pt] : state) {\r\n      if (pt < 0) return false;\r\n    }\r\n    return true;\r\n  };\r\n\r\n  auto Check = [&](int nowx, int nowy, auto& state) -> bool {\r\n    // debug(\"Check\", nowx, nowy, state);\r\n    if (!IsGood(state)) return false;\r\n    if (nowy < b) {\r\n      ChangeState(state, nowx, nowy, nowx, b);\r\n      nowy = b;\r\n      if (!IsGood(state)) return false;\r\n    }\r\n    if (nowx >= a + c - 1) {\r\n      ChangeState(state, nowx, nowy, nowx, b + c - 1);\r\n      ChangeState(state, nowx, b + c - 1, nowx, n);\r\n      ChangeState(state, nowx, n, n, n);\r\n      return IsGood(state);\r\n    }\r\n    ChangeState(state, nowx, nowy, a + c - 1, nowy);\r\n    ChangeState(state, a + c - 1, nowy, a + c - 1, b + c - 1);\r\n    ChangeState(state, a + c - 1, b + c - 1, n, b + c - 1);\r\n    ChangeState(state, n, b + c - 1, n, n);\r\n    if (IsGood(state)) return true;\r\n    auto& [A, B, C, D] = state;\r\n    if (get<2>(A) < 0 || get<2>(C) < 0) return false;\r\n    int64 lenx = a + c - 1 - nowx;\r\n    int64 leny = b + c - 1 - nowy;\r\n    int64 budget = lenx * leny;\r\n    debug(A, B, C, D, lenx, leny, budget);\r\n    int64 left1 = get<2>(B), left2 = get<2>(D);\r\n    if (left1 < left2) swap(left1, left2);\r\n    if (left1 < 0 && left2 < 0) return false;\r\n    int64 down = min(budget, left1 / 2);\r\n    left2 += down * 2;\r\n    return left2 >= 0;\r\n  };\r\n\r\n  auto GetNext = [&](int nowx, int nowy, auto state) -> char {\r\n    // debug(\"GetNext\", nowx, nowy, state);\r\n    if (nowx == n) return 'U';\r\n    if (nowy >= b + c - 1) return 'R';\r\n    if (nowx < a) return 'R';\r\n    ChangeState(state, nowx, nowy, nowx + 1, nowy);\r\n    if (Check(nowx + 1, nowy, state)) {\r\n      return 'R';\r\n    } else {\r\n      return 'U';\r\n    }\r\n  };\r\n\r\n  std::array<tuple<int, int, int64>, 4> state = {{{a, b, tt},\r\n                                                  {a + c - 1, b, tt},\r\n                                                  {a + c - 1, b + c - 1, tt},\r\n                                                  {a, b + c - 1, tt}}};\r\n  int nowx = 1, nowy = 1;\r\n  string ans = \"\";\r\n  while (ans.length() < 2 * n - 2) {\r\n    auto next = GetNext(nowx, nowy, state);\r\n    if (next == 'R') {\r\n      ChangeState(state, nowx, nowy, nowx + 1, nowy);\r\n      nowx++;\r\n    } else {\r\n      ChangeState(state, nowx, nowy, nowx, nowy + 1);\r\n      nowy++;\r\n    }\r\n    ans += next;\r\n  }\r\n  if (!IsGood(state)) ans = \"Impossible\";\r\n  cout << ans << endl;\r\n}\r\n\r\nint main(int argc, char* argv[]) {\r\n  std::ios::sync_with_stdio(false);\r\n  std::cin.tie(nullptr);\r\n#ifdef LOCAL\r\n  freopen(\"../problem_A/A.in\", \"r\", stdin);\r\n  // freopen(\"../problem_A/A.out\", \"w\", stdout);\r\n#endif\r\n  Main();\r\n  return 0;\r\n}\r\n"
+}

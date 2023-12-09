@@ -1,0 +1,37 @@
+{
+    "id": 212086606,
+    "contestId": 1718,
+    "creationTimeSeconds": 1688476825,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1718,
+        "index": "F",
+        "name": "Burenka, an Array and Queries",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3300,
+        "tags": [
+            "data structures",
+            "math",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1718,
+        "members": [
+            {
+                "handle": "Xun_Xiaoyao"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1660660500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 1154,
+    "memoryConsumedBytes": 62566400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nint Qread()\r\n{\r\n    int x=0;char ch=getchar();\r\n    while(ch<'0'||ch>'9') ch=getchar();\r\n    while(ch>='0'&&ch<='9') x=x*10+(ch^48),ch=getchar();\r\n    return x;\r\n}\r\nvector<int> prim;\r\nbool vis[400];\r\nvoid get_prime(int n,int &lim,int se)\r\n{\r\n    lim=-1;\r\n    for(int i=2;i<=n;i++)\r\n    {\r\n        if(i>se) lim=prim.size();\r\n        if(!vis[i]) prim.push_back(i);\r\n        for(int &j:prim)\r\n        {\r\n            if(i*j>=n) break;\r\n            vis[i*j]=true;\r\n            if(i%j==0) break;\r\n        }\r\n    }\r\n    if(lim==-1) lim=prim.size();\r\n    return;\r\n}\r\nint n;\r\nnamespace SZSZ{\r\n    int num[100010];\r\n    void add_num(int x,int k){for(;x<=n;x+=(x&-x)) num[x]+=k;}\r\n    int get_sum(int x){int ret=0;for(;x;x-=(x&-x)) ret+=num[x];return ret;}\r\n}\r\ntypedef pair<int,int> pr;\r\nint m,C,q,sC,glim,lim,Lim;\r\nint a[100010];\r\nint hv[100010][70];\r\nvector<pr> nod[70];\r\nint l[100010],r[100010],prim_cnt[100010][70];\r\nint las[100010];\r\nint hz[200],rs[200],w[200],hfC,tot;\r\nint ind1[100],ind2[100];\r\nbool hv_prim[70];\r\nvector<pr> ques[100010],dd;\r\nint main()\r\n{\r\n    n=Qread(),m=Qread(),C=Qread(),q=Qread();\r\n    for(int i=1;i<=n;i++)\r\n        a[i]=Qread();\r\n    sC=sqrt(max(m,C));\r\n    hfC=sqrt(C);glim=C/hfC;\r\n    get_prime(sC,lim,hfC);\r\n\r\n    // printf(\"%d %d %d\\n\",sC,hfC,lim);\r\n    \r\n    for(int i=1;i<=n;i++)\r\n    {\r\n        for(int j=0;j<lim;j++)\r\n        {\r\n            if(a[i]%prim[j]==0)\r\n            {\r\n                hv[i][j]=hv[i-1][j]+1;\r\n                while(a[i]%prim[j]==0)\r\n                    a[i]/=prim[j];\r\n            }\r\n            else hv[i][j]=hv[i-1][j];\r\n        }\r\n        for(int j=lim;j<=Lim;j++)\r\n            if(a[i]%prim[j]==0)\r\n            {\r\n                nod[C/prim[j]].push_back(make_pair(i,prim[j]));\r\n                while(a[i]%prim[j]==0)\r\n                    a[i]/=prim[j];\r\n            }\r\n        if(a[i]!=1)\r\n            nod[C/a[i]].push_back(make_pair(i,a[i]));\r\n    }\r\n    for(int i=1;i<=q;i++)\r\n    {\r\n        l[i]=Qread(),r[i]=Qread();\r\n        ques[l[i]].push_back(make_pair(r[i],i));\r\n    }\r\n    for(int t=1;t<=glim;t++)\r\n    {\r\n        dd.clear();\r\n        for(pr &g:nod[t])\r\n        {\r\n            dd.push_back(make_pair(las[g.second],g.first));\r\n            las[g.second]=g.first;\r\n        }\r\n        sort(dd.begin(),dd.end());\r\n        for(int i=1,fl=0,lim=dd.size(),rem;i<=n;i++)\r\n        {\r\n            while(fl<lim&&dd[fl].first<i) SZSZ::add_num(dd[fl].second,1),fl++;\r\n            rem=SZSZ::get_sum(i-1);\r\n            for(pr &g:ques[i]) prim_cnt[g.second][t]=SZSZ::get_sum(g.first)-rem;\r\n        }\r\n        for(pr &g:dd) SZSZ::add_num(g.second,-1);\r\n    }\r\n\r\n    // for(int i=0;i<lim;i++)\r\n    // for(int j=1;j<=n;j++)\r\n    //     printf(\"%d%c\",hv[j][i],\" \\n\"[j==n]);\r\n\r\n    for(int t=1,l,r;t<=q;t++)\r\n    {\r\n        l=::l[t],r=::r[t];\r\n        for(int i=0;i<lim;i++)\r\n            hv_prim[i]=(hv[r][i]-hv[l-1][i]);\r\n        tot=0;\r\n        for(int l=1,r;l<=C;l=r+1)\r\n        {\r\n            r=C/(C/l);\r\n            tot++;\r\n            hz[tot]=w[tot]=C/l;\r\n            if(w[tot]<=hfC) ind1[w[tot]]=tot;\r\n            else ind2[C/w[tot]]=tot;\r\n        }\r\n        for(int i=0;i<lim;i++)\r\n            if(hv_prim[i])\r\n            {\r\n                for(int j=1,k;j<=tot&&prim[i]*prim[i]<=w[j];j++)\r\n                {\r\n                    k=w[j]/prim[i];\r\n                    if(k<=hfC) k=ind1[k];\r\n                    else k=ind2[n/k];\r\n                    hz[j]-=hz[k];\r\n                }\r\n            }\r\n        \r\n        // printf(\"%d:\\n\",t);\r\n        // for(int i=0;i<lim;i++) printf(\"%d \",hv_prim[i]);printf(\"\\n\");\r\n        // for(int i=1;i<=glim;i++) printf(\"%d \",prim_cnt[t][i]);printf(\"\\n\");\r\n\r\n        int ans=hz[1];\r\n        for(int i=1;i<=glim;i++)\r\n            ans-=hz[ind1[i]]*prim_cnt[t][i];\r\n        printf(\"%d\\n\",ans);\r\n    }\r\n    return 0;\r\n}"
+}

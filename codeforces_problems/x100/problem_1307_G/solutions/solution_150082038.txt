@@ -1,0 +1,37 @@
+{
+    "id": 150082038,
+    "contestId": 1307,
+    "creationTimeSeconds": 1647657194,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "chihik"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 124,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <queue>\r\n#include <cstdio>\r\n#include <iostream>\r\nusing namespace std;\r\n#define pii pair< int , int >\r\n#define fi first\r\n#define sc second\r\n#define mp make_pair\r\n\r\nconst int MAXN = 50 , Inf = 0x3f3f3f3f;\r\n\r\nint siz , hd[ MAXN + 5 ] , en = 1;\r\nstruct Edge { int v , w , flw , nxt; } Graph[ 2 * MAXN * MAXN ];\r\nvoid Add_Edge( int u , int v , int w , int flw ) {\r\n    Graph[ ++ en ] = { v , w , flw , hd[ u ] }; hd[ u ] = en;\r\n    Graph[ ++ en ] = { u , -w , 0 , hd[ v ] }; hd[ v ] = en;\r\n}\r\nint dis[ MAXN + 5 ]; bool inq[ MAXN + 5 ] , vis[ MAXN + 5 ];\r\nbool Spfa( int S , int T ) {\r\n    queue< int > q;\r\n    for( int i = 1 ; i <= siz ; i ++ ) dis[ i ] = Inf , vis[ i ] = 0;\r\n    dis[ S ] = 0; inq[ S ] = 1; q.push( S );\r\n    while( !q.empty() ) {\r\n        int u = q.front(); inq[ u ] = 0; q.pop();\r\n        for( int i = hd[ u ] ; i ; i = Graph[ i ].nxt ) {\r\n            int v = Graph[ i ].v , w = Graph[ i ].w , flw = Graph[ i ].flw;\r\n            if( flw && dis[ v ] > dis[ u ] + w ) {\r\n                dis[ v ] = dis[ u ] + w;\r\n                if( !inq[ v ] ) inq[ v ] = 1 , q.push( v );\r\n            }\r\n        }\r\n    }\r\n    return dis[ T ] != Inf;\r\n}\r\nint cst;\r\nint dfs( int u , int T , int f ) {\r\n    if( u == T ) return f; vis[ u ] = 1;\r\n    for( int &i = hd[ u ] ; i ; i = Graph[ i ].nxt ) {\r\n        int v = Graph[ i ].v , w = Graph[ i ].w , flw = Graph[ i ].flw;\r\n        if( flw && dis[ v ] == dis[ u ] + w && !vis[ v ] ) {\r\n            int d = dfs( v , T , min( f , flw ) );\r\n            if( d ) {\r\n                Graph[ i ].flw -= d , Graph[ i ^ 1 ].flw += d;\r\n                cst += d * w;\r\n                return d;\r\n            }\r\n        }\r\n    } vis[ u ] = 0;\r\n    return 0;\r\n}\r\nvector< pii > p;\r\nint EK( int S , int T ) {\r\n    int flw = 0; cst = 0;\r\n    while( Spfa( S , T ) ) {\r\n        flw += dfs( S , T , Inf );\r\n        // printf(\"%d %d\\n\", flw , cst );\r\n        p.push_back( mp( flw , cst ) );\r\n    }\r\n}\r\n\r\nint n , m , q;\r\n\r\nint main( ) {\r\n    scanf(\"%d %d\",&n,&m); siz = n;\r\n    for( int i = 1 , u , v , w ; i <= m ; i ++ ) {\r\n        scanf(\"%d %d %d\",&u,&v,&w);\r\n        Add_Edge( u , v , w , 1 );\r\n    }\r\n    EK( 1 , n );\r\n    scanf(\"%d\",&q);\r\n    for( int i = 1 , x ; i <= q ; i ++ ) {\r\n        scanf(\"%d\",&x);\r\n        double ans = 1e9;\r\n        for( pii v : p ) ans = min( ans , ( v.sc + x ) * 1.0 / v.fi );\r\n        printf(\"%.6f\\n\", ans );\r\n    }\r\n    return 0;\r\n}"
+}

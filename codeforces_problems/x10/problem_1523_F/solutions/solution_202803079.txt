@@ -1,0 +1,36 @@
+{
+    "id": 202803079,
+    "contestId": 1523,
+    "creationTimeSeconds": 1681988607,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1523,
+        "index": "F",
+        "name": "Favorite Game",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3300,
+        "tags": [
+            "bitmasks",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1523,
+        "members": [
+            {
+                "handle": "afresh"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1622385300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 56,
+    "timeConsumedMillis": 592,
+    "memoryConsumedBytes": 55296000,
+    "source": "// LUOGU_RID: 108542566\n#include <bits/stdc++.h>\r\nusing namespace std;\r\nconst int N = 105;\r\nconst int S = 1 << 15;\r\nconst int inf = 0x3f3f3f3f;\r\nstruct node {int x, y, t;} B[N];\r\nint f[S][N], g[S][N], xa[N], ya[N], xb[N], yb[N], tb[N], da[S][N], db[S][N], aa[N][N], ab[N][N], bb[N][N];\r\nint main() {\r\n\tint n, m, all; scanf(\"%d%d\", &n, &m);\t//n<=14 m<=100\r\n\tall = (1 << n) - 1;\r\n\tfor(int i = 0; i < n; i++) {scanf(\"%d%d\", &xa[i], &ya[i]);}\r\n\tfor(int i = 1; i <= m; i++) {scanf(\"%d%d%d\", &xb[i], &yb[i], &tb[i]); B[i] = (node){xb[i], yb[i], tb[i]};}\r\n\tsort(B + 1, B + 1 + m, [&](node u, node v) {return u.t < v.t;});\r\n\tfor(int i = 1; i <= m; i++) xb[i] = B[i].x, yb[i] = B[i].y, tb[i] = B[i].t;\r\n\tfor(int i = 0; i < n; i++) for(int j = 0; j < n; j++) aa[i][j] = abs(xa[i] - xa[j]) + abs(ya[i] - ya[j]);\r\n\tfor(int i = 0; i < n; i++) for(int j = 1; j <= m; j++) ab[i][j] = abs(xa[i] - xb[j]) + abs(ya[i] - yb[j]);\r\n\tfor(int i = 1; i <= m; i++) for(int j = 1; j <= m; j++) bb[i][j] = abs(xb[i] - xb[j]) + abs(yb[i] - yb[j]);\r\n\tmemset(da, 0x3f, sizeof(da));\r\n\tmemset(db, 0x3f, sizeof(db));\r\n\tfor(int s = 1; s <= all; s++) {\r\n\t\tfor(int i = 0; i < n; i++) {\r\n\t\t\tif((1 << i) & s) continue;\r\n\t\t\tfor(int j = 0; j < n; j++) if((1 << j) & s) {\r\n\t\t\t\tda[s][i] = min(da[s][i], aa[i][j]);\r\n\t\t\t}\r\n\t\t}\r\n\t\tfor(int i = 1; i <= m; i++) {\r\n\t\t\tfor(int j = 0; j < n; j++) if((1 << j) & s) {\r\n\t\t\t\tdb[s][i] = min(db[s][i], ab[j][i]);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n//\tprintf(\"!%d\\n\", db[1][1]);\r\n\tmemset(f, 0x3f, sizeof(f)); \r\n\tmemset(g, -0x3f, sizeof(g));\r\n\tfor(int i = 0; i < n; i++) {f[1 << i][0] = 0;}\r\n\tfor(int i = 1; i <= m; i++) {g[0][i] = 1;}\r\n\tint ans = 0;\r\n\tfor(int s = 0; s <= all; s++) {\r\n\t\tfor(int i = 0; i <= m; i++) {\r\n\t\t\tbool ff = (f[s][i] < inf), gg = (g[s][i] >= 0);\r\n\t\t\tif(ff) {\r\n//\t\t\tprintf(\"f[s=%d][i=%d]=%d\\n\", s, i, f[s][i]); \r\n\t\t\tans = max(ans, i);} \r\n\t\t\tif(gg) {\r\n//\t\t\tprintf(\"g[s=%d][i=%d]=%d\\n\", s, i, g[s][i]); \r\n\t\t\tans = max(ans, g[s][i]);}\r\n\t\t\tfor(int j = 0; j < n; j++) {\r\n\t\t\t\tif((s >> j) & 1) continue;\r\n\t\t\t\tint to = s | (1 << j);\r\n\t\t\t\tif(ff) f[to][i] = min(f[to][i], f[s][i] + da[s][j]);\r\n\t\t\t\tif(gg) f[to][g[s][i]] = min(f[to][g[s][i]], tb[i] + min(da[s][j], ab[j][i]));\r\n\t\t\t}\r\n\t\t\tfor(int j = 1; j <= m; j++) {\r\n\t\t\t\tif(ff && f[s][i] + db[s][j] <= tb[j]) {g[s][j] = max(g[s][j], i + 1);}\r\n\t\t\t\tif(gg && i < j && tb[i] + min(db[s][j], bb[i][j]) <= tb[j]) {g[s][j] = max(g[s][j], g[s][i] + 1);}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tprintf(\"%d\", ans);\r\n\treturn 0;\r\n}\r\n"
+}

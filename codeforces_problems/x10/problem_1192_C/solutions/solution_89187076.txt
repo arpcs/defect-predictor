@@ -1,0 +1,37 @@
+{
+    "id": 89187076,
+    "contestId": 1192,
+    "creationTimeSeconds": 1596788171,
+    "relativeTimeSeconds": 8171,
+    "problem": {
+        "contestId": 1192,
+        "index": "C",
+        "name": "Cubeword",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "brute force",
+            "dp",
+            "meet-in-the-middle"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "charterla"
+            }
+        ],
+        "participantType": "VIRTUAL",
+        "ghost": false,
+        "startTimeSeconds": 1596780000
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "PARTIAL",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 1700,
+    "memoryConsumedBytes": 509235200,
+    "points": 0.0,
+    "source": "#include <iostream>\r\n#include <cstdio>\r\nusing namespace std;\r\n\r\nint n,tn=0;\r\nstruct Node{int next[62];bool have;}trie[2000005];\r\nint num[64][64][10];\r\n\r\ninline int getNum(register char word){\r\n\tif(word>='a' && word<='z')return (int)(word-'a');\r\n\telse if(word>='A' && word<='Z')return (int)(word-'A')+26;\r\n\telse return (int)(word-'0')+52;\r\n}\r\n\r\ninline void addString(register string temp){\r\n\tint now=0,t,size=temp.size();\r\n\tfor(int i=0;i<size;i++){\r\n\t\tt=getNum(temp[i]);\r\n\t\tif(!trie[now].next[t]){\r\n\t\t\ttrie[now].next[t]=++tn;\r\n\t\t}\r\n\t\tnow=trie[now].next[t];\r\n\t}\r\n\tif(!trie[now].have){\r\n\t\tnum[getNum(temp[0])][getNum(temp[size-1])][size]++;\r\n\t\ttrie[now].have=true;\r\n\t}\r\n\treturn;\r\n}\r\n\r\ninline void build(){\r\n\tstring temp;\r\n\tfor(register int i=0;i<n;i++){\r\n\t\tcin>>temp;\r\n\t\taddString(temp);\r\n\t\t\r\n\t\tint l=0,r=temp.size()-1;\r\n\t\twhile(l<r)swap(temp[l++],temp[r--]);\r\n\t\taddString(temp);\r\n\t}\r\n\treturn;\r\n}\r\n\r\nint square[2][2][2],ans=0;\r\nint rule[10][3]={{0,0,0},{0,0,1},{0,1,1},{0,1,0},{1,0,0},{1,0,1},{1,1,1},{1,1,0}};\r\ninline void reset(){\r\n\tsquare[0][0][0]=square[0][0][1]=-1;\r\n\tsquare[0][1][0]=square[0][1][1]=-1;\r\n\tsquare[1][0][0]=square[1][0][1]=-1;\r\n\tsquare[1][1][0]=square[1][1][1]=-1;\r\n\treturn;\r\n}\r\n\r\ninline void dfs(register int length,register int p){\r\n\t//cout<<p<<\",\"<<length<<\" \";\r\n\tif(p==8){\r\n\t\t//cout<<\"hi\"<<endl;\r\n\t\tunsigned long long int temp=1;\r\n\t\ttemp*=num[square[0][0][0]][square[0][0][1]][length];\r\n\t\ttemp*=num[square[0][0][1]][square[0][1][1]][length];\r\n\t\ttemp*=num[square[0][1][1]][square[0][1][0]][length];\r\n\t\ttemp*=num[square[0][1][0]][square[0][0][0]][length];\r\n\t\ttemp*=num[square[1][0][0]][square[1][0][1]][length];\r\n\t\ttemp*=num[square[1][0][1]][square[1][1][1]][length];\r\n\t\ttemp*=num[square[1][1][1]][square[1][1][0]][length];\r\n\t\ttemp*=num[square[1][1][0]][square[1][0][0]][length];\r\n\t\ttemp*=num[square[0][0][0]][square[1][0][0]][length];\r\n\t\ttemp*=num[square[0][0][1]][square[1][0][1]][length];\r\n\t\ttemp*=num[square[0][1][1]][square[1][1][1]][length];\r\n\t\ttemp*=num[square[0][1][0]][square[1][1][0]][length];\r\n\t\tans=(ans+(temp%998244353))%998244353;\r\n\t}\r\n\telse{\r\n\t\tfor(int i=0;i<62;i++){\r\n\t\t\tint x=rule[p][0],y=rule[p][1],z=rule[p][2];\r\n\t\t\t//cout<<square[x][y][z]<<endl;\r\n\t\t\tif((square[!x][y][z]<0 || num[square[!x][y][z]][i][length]>0) && (square[x][!y][z]<0 || num[square[x][!y][z]][i][length]>0) && (square[x][y][!z]<0 || num[square[x][y][!z]][i][length]>0)){\r\n\t\t\t\tsquare[x][y][z]=i;\r\n\t\t\t\tdfs(length,p+1);\r\n\t\t\t\tsquare[x][y][z]=-1;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\n\r\n\r\nint main(void){\r\n\tscanf(\"%d\",&n);\r\n\tbuild();\r\n\t\r\n\t//cout<<getNum('r')<<endl;\r\n\t/*for(int i=0;i<62;i++){\r\n\t\tfor(int j=0;j<62;j++){\r\n\t\t\t//cout<<\"<\"<<i<<\",\"<<j<<\": \";\r\n\t\t\tfor(int k=3;k<=10;k++){\r\n\t\t\t\t//cout<<num[i][j][k]<<\" \";\r\n\t\t\t\t//if(num[i][j][k])cout<<i<<\",\"<<j<<\",\"<<k<<\"-->\"<<num[i][j][k]<<endl;\r\n\t\t\t}\r\n\t\t\t//cout<<\">\";\r\n\t\t}\r\n\t\t//system(\"pause\");\r\n\t}*/\r\n\t\r\n\tfor(int i=3;i<=10;i++){reset();dfs(i,0);}\r\n\tprintf(\"%d\",ans);\r\n\treturn 0;\r\n}\r\n"
+}

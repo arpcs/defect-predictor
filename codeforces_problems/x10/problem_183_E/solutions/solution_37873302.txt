@@ -1,0 +1,35 @@
+{
+    "id": 37873302,
+    "contestId": 183,
+    "creationTimeSeconds": 1525397679,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 183,
+        "index": "E",
+        "name": "Candy Shop",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2900,
+        "tags": [
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 183,
+        "members": [
+            {
+                "handle": "throwaway1234"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1335532800
+    },
+    "programmingLanguage": "GNU C",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <iostream>\n#include <cstdio>\n#include <cstdlib>\n#include <cstring>\n#include <algorithm>\n#include <vector>\n\nusing namespace std;\n\nconst int MAXN = 200000 + 1000;\nconst long long INF = 0x1f1f1f1f1f1f1f1fll;\n\ntypedef pair<long long, long long> pll;\n\nstruct Node\n{\n\tint l, r;\n\tpll s;\n\tlong long p;\n\tNode *lc, *rc;\n\tNode(int _l = 0, int _r = 0) : l(_l), r(_r), s(INF, 0), p(0), lc(NULL), rc(NULL)\n\t{}\n}\n*root;\n\nint n, m, r = 0;\nlong long g[MAXN], a[MAXN], ans = 0;\n\npll merge(const pll &a, const pll &b)\n{\n\tif(a.first == b.first)\n\t\treturn make_pair(a.first, max(a.second, b.second));\n\telse if(a.first < b.first)\n\t\treturn a;\n\telse\n\t\treturn b;\n}\n\nvoid add(Node *now, long long v)\n{\n\tnow->p += v;\n\tnow->s.first += v;\n}\n\nvoid down(Node *now)\n{\n\tif(now->p)\n\t{\n\t\tadd(now->lc, now->p);\n\t\tadd(now->rc, now->p);\n\t\tnow->p = 0;\n\t}\n}\n\nvoid update(Node *now)\n{\n\tnow->s = merge(now->lc->s, now->rc->s);\n}\n\nvoid build(Node* &now, int l, int r)\n{\n\tnow = new Node(l, r);\n\tif(l == r)\n\t\treturn ;\n\tint mid = (l + r) / 2;\n\tbuild(now->lc, l, mid);\n\tbuild(now->rc, mid + 1, r);\n}\nvoid rebuild(Node* now, int l, int r)\n{\n\t// cerr << l << ' ' << r << ' ' << now << endl;\n\tnow->s = make_pair(INF, 0);\n\tnow->p = 0;\n\tif(l == r)\n\t{\n\t\tnow->s = make_pair(a[l], l);\n\t\treturn ;\n\t}\n\tint mid = (l + r) / 2;\n\trebuild(now->lc, l, mid);\n\trebuild(now->rc, mid + 1, r);\n\tupdate(now);\n}\n\nvoid modify(Node *now, int l, int r, long long v)\n{\n\tif(now->r < l || r < now->l)\n\t\treturn ;\n\tif(l <= now->l && now->r <= r)\n\t{\n\t\tadd(now, v);\n\t\treturn ;\n\t}\n\tdown(now);\n\tmodify(now->lc, l, r, v);\n\tmodify(now->rc, l, r, v);\n\tupdate(now);\n}\n\npll query(Node *now, int l, int r)\n{\n\tif(now->r < l || r < now->l)\n\t\treturn make_pair(INF, 0);\n\tif(l <= now->l && now->r <= r)\n\t\treturn now->s;\n\tdown(now);\n\treturn merge(query(now->lc, l, r), query(now->rc, l, r));\n}\n\nlong long calc(int r)\n{\n\tlong long ret = 0;\n\tlong long lef = m - n * r;\n\tfor(int i = 1; i <= n; i++)\n\t{\n\t\ta[i] = g[i] - ((long long)(r - 1) * r * n / 2 + r * i);\n\t\tret += ((long long)(r - 1) * r * n / 2 + r * i);\n\t\tif(a[i] < 0)\n\t\t\treturn -1;\n\t}\n\trebuild(root, 1, n);\n\twhile(lef >= 1)\n\t{\n\t\tpll res = query(root, 1, n);\n\t\tlong long p = res.second, v = res.first;\n\t\t// cerr << r << ' ' << lef << ' ' << p << ' ' << v << endl;\n\t\t// exit(0);\n\t\tif(p == n || v >= lef * r)\n\t\t{\n\t\t\tif(v == 0)\n\t\t\t\tbreak;\n\t\t\telse if(v >= r)\n\t\t\t{\n\t\t\t\tlong long times = min(lef, v / r);\n\t\t\t\tmodify(root, 1, n, -(r * times)), ret += r * n * times;\n\t\t\t\tlef -= times;\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tmodify(root, 1, n, -v), ret += v * n;\n\t\t\t\tlef -= 1;\n\t\t\t}\n\t\t}\n\t\telse\n\t\t{\n\t\t\tif(v == 0)\n\t\t\t{\n\t\t\t\tpll res = query(root, p + 1, n);\n\t\t\t\tlong long p2 = res.second, v2 = res.first;\n\t\t\t\t// cerr << p2 << ' ' << v2 << endl;\n\t\t\t\tlong long times = min(lef, v2);\n\t\t\t\tmodify(root, p + 1, n, -(1 * times)), ret += (n - p) * 1 * times;\n\t\t\t\tlef -= times;\n\t\t\t}\n\t\t\telse if(v >= r - 1)\n\t\t\t{\n\t\t\t\tpll res = query(root, p + 1, n);\n\t\t\t\tlong long p2 = res.second, v2 = res.first;\n\t\t\t\t// cerr << p2 << ' ' << v2 << endl;\n\t\t\t\tlong long times = lef;\n\t\t\t\tif(r - 1 > 0) times = min(times, v / (r - 1));\n\t\t\t\tmin(times, v2 / r);\n\t\t\t\ttimes = min(times, v2 - v);\n\t\t\t\ttimes = min(times, lef * r - v);\n\t\t\t\t// exit(0);\n\t\t\t\t// cerr << times << endl;\n\t\t\t\tmodify(root, 1, p, -((r - 1) * times)), ret += p * (r - 1) * times;\n\t\t\t\tmodify(root, p + 1, n, -(r * times)), ret += (n - p) * r * times;\n\t\t\t\tlef -= times;\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tmodify(root, 1, p, -v), ret += p * v;\n\t\t\t\tmodify(root, p + 1, n, -(v + 1)), ret += (n - p) * (v + 1);\n\t\t\t\tlef -= 1;\n\t\t\t}\n\t\t}\n\t}\n\treturn ret;\n}\n\nint main()\n{\n\tios::sync_with_stdio(false);\n\t// freopen(\"1.in\", \"r\", stdin);\n\t// freopen(\"1.out\", \"w\", stdout);\n\n\tcin >> n >> m;\n\tfor(int i = 1; i <= n; i++)\n\t\tcin >> g[i];\n\tbuild(root, 1, n);\n\tfor(int i = 1; i * n <= m; i++)\n\t{\n\t\tlong long res = calc(i);\n\t\tif(res < 0) break;\n\t\tans = max(ans, res);\n\t}\n\n\tcout << ans << endl;\n\n\treturn 0;\n}"
+}

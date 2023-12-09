@@ -1,0 +1,38 @@
+{
+    "id": 124856094,
+    "contestId": 721,
+    "creationTimeSeconds": 1628078237,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 721,
+        "index": "D",
+        "name": "Maxim and Array",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2000,
+        "tags": [
+            "constructive algorithms",
+            "data structures",
+            "greedy",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 721,
+        "members": [
+            {
+                "handle": "mihaita.odiseea"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1475244300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 17612800,
+    "source": "#include <iostream>\r\n\r\nusing namespace std;\r\n\r\nconst int Nmax = 200000;\r\nconst long long INF = (1LL << 60);\r\nint a[Nmax + 1];\r\nbool b[Nmax + 1];\r\npair <long long, long long> aint[4 * Nmax + 1];\r\n\r\nvoid build(int node, int l, int r)\r\n{\r\n    if (l == r)\r\n    {\r\n        aint[node] = make_pair(a[l], l);\r\n    }\r\n    else\r\n    {\r\n        int mid = (l + r) / 2;\r\n        build(2 * node, l, mid);\r\n        build(2 * node + 1, mid + 1, r);\r\n        if (aint[2 * node].first <= aint[2 * node + 1].first)\r\n        {\r\n            aint[node] = aint[2 * node];\r\n        }\r\n        else\r\n        {\r\n            aint[node] = aint[2 * node + 1];\r\n        }\r\n    }\r\n}\r\n\r\nvoid update(int node, int l, int r, int poz, int x)\r\n{\r\n    if (l == r)\r\n    {\r\n        aint[node].first += x;\r\n    }\r\n    else\r\n    {\r\n        int mid = (l + r) / 2;\r\n        if (poz <= mid)\r\n        {\r\n            update(2 * node, l, mid, poz, x);\r\n        }\r\n        else\r\n        {\r\n            update(2 * node + 1, mid + 1, r, poz, x);\r\n        }\r\n        if (aint[2 * node].first <= aint[2 * node + 1].first)\r\n        {\r\n            aint[node] = aint[2 * node];\r\n        }\r\n        else\r\n        {\r\n            aint[node] = aint[2 * node + 1];\r\n        }\r\n    }\r\n}\r\n\r\npair <long long, long long> query(int node, int l, int r, int p, int q)\r\n{\r\n    if (p > q)\r\n    {\r\n        return make_pair(INF, 0);\r\n    }\r\n    else if (l == p && r == q)\r\n    {\r\n        return aint[node];\r\n    }\r\n    else\r\n    {\r\n        int mid = (l + r) / 2;\r\n        pair <long long, long long> qry1 = query(2 * node, l, mid, p, min(q, mid));\r\n        pair <long long, long long> qry2 = query(2 * node + 1, mid + 1, r, max(mid + 1, p), q);\r\n        if (qry1.first < qry2.first)\r\n        {\r\n            return qry1;\r\n        }\r\n        else\r\n        {\r\n            return qry2;\r\n        }\r\n    }\r\n}\r\n\r\nint main()\r\n{\r\n    int n, k, x;\r\n    cin >> n >> k >> x;\r\n    int cnt = 0;\r\n    for (int i = 1; i <= n; i++)\r\n    {\r\n        cin >> a[i];\r\n        if (a[i] < 0)\r\n        {\r\n            cnt++;\r\n        }\r\n    }\r\n    if (cnt % 2 == 0)\r\n    {\r\n        int poz1, poz2, t1 = 1000000001, t2 = 1000000001, v1 = 0, v2 = 1000000000;\r\n        for (int i = 1; i <= n; i++)\r\n        {\r\n            if (a[i] <= 0)\r\n            {\r\n                int cat = -a[i];\r\n                int pasi = cat / x + min(1, cat % x);\r\n                if (pasi < t1)\r\n                {\r\n                    t1 = pasi;\r\n                    poz1 = i;\r\n                    v1 = a[i] + pasi * x;\r\n                }\r\n                else if (pasi == t1 && a[i] + pasi * x > v1)\r\n                {\r\n                    v1 = a[i] + pasi * x;\r\n                    poz1 = i;\r\n                }\r\n            }\r\n            else if (a[i] >= 0)\r\n            {\r\n                int cat = a[i] + 1;\r\n                int pasi = cat / x + min(1, cat % x);\r\n                if (pasi < t2)\r\n                {\r\n                    t2 = pasi;\r\n                    poz2 = i;\r\n                    v2 = a[i] - pasi * x;\r\n                }\r\n                else if (pasi == t2 && a[i] - pasi * x < v2)\r\n                {\r\n                    v2 = a[i] - pasi * x;\r\n                    poz2 = i;\r\n                }\r\n            }\r\n        }\r\n        if (min(t1, t2) > k)\r\n        {\r\n            int minim = 1000000000, poz;\r\n            for (int i = 1; i <= n; i++)\r\n            {\r\n                if (a[i] < 0)\r\n                {\r\n                    if (-a[i] - k * x < minim)\r\n                    {\r\n                        minim = -a[i] - k * x;\r\n                        poz = i;\r\n                    }\r\n                }\r\n                else\r\n                {\r\n                    if (a[i] - k * x < minim)\r\n                    {\r\n                        minim = a[i] - k * x;\r\n                        poz = i;\r\n                    }\r\n                }\r\n            }\r\n            a[poz] = minim;\r\n            for (int i = 1; i <= n; i++)\r\n            {\r\n                cout << a[i] << \" \";\r\n            }\r\n            return 0;\r\n        }\r\n        if (t1 < t2)\r\n        {\r\n            a[poz1] += t1 * x;\r\n        }\r\n        else if (t1 == t2)\r\n        {\r\n            if (v1 > -v2)\r\n            {\r\n                a[poz1] += t1 * x;\r\n            }\r\n            else\r\n            {\r\n                a[poz2] -= t2 * x;\r\n            }\r\n        }\r\n        else\r\n        {\r\n            a[poz2] -= t2 * x;\r\n        }\r\n        k -= min(t1, t2);\r\n    }\r\n    for (int i = 1; i <= n; i++)\r\n    {\r\n        if (a[i] < 0)\r\n        {\r\n            b[i] = true;\r\n            a[i] = -a[i];\r\n        }\r\n    }\r\n    build(1, 1, n);\r\n    while (k--)\r\n    {\r\n        pair <long long, long long> p = query(1, 1, n, 1, n);\r\n        a[p.second] += x;\r\n        update(1, 1, n, p.second, x);\r\n    }\r\n    for (int i = 1; i <= n; i++)\r\n    {\r\n        if (b[i])\r\n        {\r\n            a[i] *= -1;\r\n        }\r\n        cout << a[i] << \" \";\r\n    }\r\n    return 0;\r\n}\r\n"
+}

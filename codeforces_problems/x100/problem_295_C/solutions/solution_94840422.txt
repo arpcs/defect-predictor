@@ -1,0 +1,38 @@
+{
+    "id": 94840422,
+    "contestId": 295,
+    "creationTimeSeconds": 1601980863,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "beedle"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\n#include \"boost/functional/hash.hpp\"\r\n#define pi 3.141592653589793238\r\n#define ll long long\r\n#define rep(i,a,b) for(long long i=a;i<=b;i++)\r\n#define mod 1000000007\r\n#define INF 999999999999999999 \r\n#define pb push_back\r\n#define ff first\r\n#define ss second\r\n\r\nusing namespace std;\r\n\r\nstd::vector <long long> fac(100+1,0);\r\n\r\nlong long binpow(long long a, long long b, long long m) {\r\n    a %= m;\r\n    long long res = 1;\r\n    while (b > 0) {\r\n        if (b & 1)\r\n            res = res * a % m;\r\n        a = a * a % m;\r\n        b >>= 1;\r\n    }\r\n    return res;\r\n}\r\n\r\nlong long InverseEuler(ll a, ll m)\r\n{return binpow(a,m-2,m);\r\n}\r\n\r\n\r\n\r\nlong long C(ll n, ll r, ll m)\r\n{\r\n    if(n<r)\r\n    return 0;\r\n    \r\n    //if(n==0)\r\n    //return 0;\r\n    \r\n    return (fac[n]*(InverseEuler((fac[n-r]*fac[r])%mod,m)))%m;\r\n}\r\n\r\nusing Key = std::tuple<char, int , int>;\r\n\r\nstruct KeyHash {\r\n    std::size_t operator()(const Key & key) const\r\n    {\r\n        return boost::hash_value(key);\r\n    }\r\n};\r\n\r\n\r\nint main()\r\n{\r\n    fac[0]=1;\r\n    rep(i,1,100)\r\n    fac[i]=(fac[i-1]*i)%mod;\r\n    \r\n    ll n,sboat;\r\n    cin>>n>>sboat;\r\n    \r\n    ll s1=0,s2=0;\r\n    \r\n    rep(i,1,n)\r\n    {\r\n        int a;\r\n        cin>>a;\r\n        if(a==50)\r\n        s1++;\r\n        else\r\n        s2++;\r\n    }\r\n    \r\n    unordered_map <tuple<char,int,int>,int,KeyHash> umap;\r\n    \r\n    int val=0;\r\n    \r\n    rep(i,0,s1)\r\n    rep(j,0,s2)\r\n    {\r\n        umap[make_tuple('a',int(i),int(j))]=val;\r\n        val++;\r\n    }\r\n    \r\n    int source=val-1;\r\n    \r\n    rep(i,0,s1)\r\n    rep(j,0,s2)\r\n    {\r\n        umap[make_tuple('b',int(i),int(j))]=val;\r\n        val++;\r\n    }\r\n    \r\n    int s=val;\r\n    \r\n    int sink=val-1;\r\n    \r\n    vector <pair<ll,ll>> adj[s];\r\n    \r\n    rep(i,0,s1)\r\n    rep(j,0,s2)\r\n    rep(k,0,s1)\r\n    rep(l,0,s2)\r\n    {\r\n        if((-s1+i+k)*50+(-s2+j+l)*100>sboat)\r\n        continue;\r\n        \r\n        if(-s1+i+k<0 || -s2+j+l<0)\r\n        continue;\r\n        \r\n        ll vald=(C(i,i+k-s1,mod)*C(j,l+j-s2,mod))%mod;\r\n        if(vald==0)\r\n        continue;\r\n        \r\n        adj[umap[make_tuple('a',int(i),int(j))]].push_back({umap[make_tuple('b',int(k),int(l))] , vald });\r\n        \r\n    }\r\n    \r\n    rep(i,0,s1)\r\n    rep(j,0,s2)\r\n    rep(k,0,s1)\r\n    rep(l,0,s2)\r\n    {\r\n        if((-s1+i+k)*50+(-s2+j+l)*100>sboat)\r\n        continue;\r\n        \r\n        if(-s1+i+k<0 || -s2+j+l<0)\r\n        continue;\r\n        \r\n        if(-s1+i+k-s2+j+l==0)\r\n        continue;\r\n        \r\n        ll vald=(C(i,i+k-s1,mod)*C(j,l+j-s2,mod))%mod;\r\n        \r\n        if(vald==0)\r\n        continue;\r\n        \r\n        adj[umap[make_tuple('b',int(i),int(j))]].push_back({umap[make_tuple('a',int(k),int(l))] , vald });\r\n        \r\n    }\r\n    \r\n    \r\n    vector <ll> d(s,0);\r\n    vector <ll> depth(s,-1);\r\n    d[source]=1;\r\n    depth[source]=0;\r\n    vector <bool> used(s,false);\r\n    \r\n    std::queue<ll> q;\r\n    used[source]=true;\r\n    q.push(source);\r\n    \r\n    while(!q.empty())\r\n    {\r\n        ll v=q.front();\r\n        q.pop();\r\n        \r\n        for(auto u:adj[v])\r\n        if(!used[u.first])\r\n        {\r\n            used[u.first]=true;\r\n            d[u.first]=(d[v]*u.second)%mod;\r\n            depth[u.first]=depth[v]+1;\r\n            q.push(u.first);\r\n            \r\n        }\r\n        \r\n    }\r\n    \r\n    cout<<depth[sink]<<endl<<d[sink];\r\n    \r\n    //rep(i,0,s-1)\r\n    //cout<<adj[i].size()<<endl;\r\n    \r\n    \r\n    \r\n    \r\n    return 0;\r\n}"
+}
