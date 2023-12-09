@@ -1,0 +1,38 @@
+{
+    "id": 230010964,
+    "contestId": 1569,
+    "creationTimeSeconds": 1698410243,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1569,
+        "index": "F",
+        "name": "Palindromic Hamiltonian Path",
+        "type": "PROGRAMMING",
+        "rating": 3000,
+        "tags": [
+            "brute force",
+            "dfs and similar",
+            "dp",
+            "graphs",
+            "hashing"
+        ]
+    },
+    "author": {
+        "contestId": 1569,
+        "members": [
+            {
+                "handle": "locsey"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1631111700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "// LUOGU_RID: 131902726\n#include <bits/stdc++.h>\r\n#define fi first \r\n#define se second \r\n\r\nusing std :: cin;\r\nusing std :: min; \r\nusing std :: max; \r\nusing std :: cout; \r\nusing std :: vector; \r\n\r\nconstexpr int M = 15; \r\nconstexpr int INF = 0x3f3f3f3f; \r\n\r\ntypedef long long ll; \r\ntypedef unsigned long long ull;\r\ntypedef __uint128_t LLL; \r\ntypedef double db; \r\ntypedef unsigned int ui; \r\ntypedef std :: pair < int, int > pii; \r\n\r\n//char buf[1 << 23], *p1 = buf, *p2 = buf, obuf[1 << 23], *O = obuf;\r\n//#define getchar() (p1 == p2) && (p2 = (p1 = buf) + fread(buf, 1, 1 << 21, stdin), p1 == p2)? EOF : *p1++\r\n\r\ninline int read() { \r\n\tint f = 1, s = 0; char ch = getchar(); \r\n\twhile(!isdigit(ch)) (ch == '-') && (f = -1), ch = getchar(); \r\n\twhile(isdigit(ch)) s = s * 10 + ch - '0', ch = getchar(); \r\n\treturn f * s; \r\n}\r\n\r\nnamespace Solver {\r\n\tint n, m, k, R; \r\n\tvector < vector < int > > B[M], ans[M]; \r\n\tint e[M][M], col[M]; \r\n\tinline void dfs(int x, int t) {\r\n\t\tif(x == R + 1) {\r\n\t\t\tvector < int > A; \r\n\t\t\tfor(int i = 1; i <= R; ++i) A.push_back(col[i]); \r\n\t\t\tB[t].push_back(A); \r\n\t\t\treturn ;\r\n\t\t}\r\n\t\tfor(int i = 1; i <= t; ++i) col[x] = i, dfs(x + 1, t);\r\n\t\tcol[x] = t + 1, dfs(x + 1, t + 1); \r\n\t}\r\n\tint C[M][M], vis[M]; pii a[M]; int p[M], fs[M]; \r\n\tinline void ck() {\r\n\t\tstd :: iota(p + 1, p + R + 1, 1); int ok = 0; \r\n\t\tdo {\r\n\t\t\tint can = 1;\r\n\t\t\tfor(int i = 2; i <= R; ++i) {\r\n\t\t\t\tint x = p[i], y = p[i - 1];\r\n\t\t\t    if(e[a[x].fi][a[y].fi] && e[a[x].se][a[y].se]) continue ;\r\n\t\t\t    if(e[a[x].fi][a[y].se] && e[a[x].se][a[y].fi]) continue ; \r\n\t\t\t    can = 0; break ; \r\n\t\t\t}\r\n\t\t\tif(can) {ok = 1; break ;}\r\n\t\t} while(std :: next_permutation(p + 1, p + R + 1));\r\n\t\tif(!ok) return ; \r\n\t\tfor(int t = 1; t <= R; ++t) {\r\n\t\t\tfor(auto &it : B[t]) {\r\n\t\t\t    vector < int > A;\r\n\t\t\t    for(int i = 1; i <= R; ++i) fs[a[i].fi] = fs[a[i].se] = it[i - 1];\r\n\t\t\t    for(int i = 1; i <= n; ++i) A.push_back(fs[i]); \r\n\t\t\t    ans[t].push_back(A); \r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tinline void dfs2(int x) {\r\n\t    if(x == R + 1) return ck(), void(); int p = 0; \r\n\t    for(int i = 1; i <= n; ++i) if(!vis[i]) {p = i; break ;}\r\n\t    vis[p] = 1;\r\n\t    for(int i = p + 1; i <= n; ++i) if(!vis[i]) {\r\n\t    \tvis[i] = 1, a[x] = pii(p, i), dfs2(x + 1) , vis[i] = 0; \r\n\t\t}\r\n\t\tvis[p] = 0; \r\n\t}\r\n\tinline void mian() {\r\n\t\tn = read(), m = read(), k = read(), R = n / 2; \r\n\t\tfor(int i = 1, x, y; i <= m; ++i) x = read(), y = read(), e[x][y] = e[y][x] = 1;\r\n\t\tdfs(1, 0), C[0][0] = 1;\r\n\t\tfor(int i = 1; i <= n; ++i) {\r\n\t\t\tC[i][0] = 1; \r\n\t\t\tfor(int j = 1; j <= i; ++j) C[i][j] = C[i - 1][j - 1] + C[i - 1][j]; \r\n\t\t}\r\n\t\tdfs2(1); ll fn = 0;\r\n\t\tfor(int i = 1, qw = 1; i <= R; ++i, qw = (ll)qw * i) {\r\n\t\t\tstd :: sort(ans[i].begin(), ans[i].end()); \r\n\t\t\tans[i].erase(std :: unique(ans[i].begin(), ans[i].end()), ans[i].end());\r\n\t\t\tfn += (ll)ans[i].size() * C[k][i] * qw; \r\n\t\t}\r\n\t\tcout << fn; \r\n\t}\r\n}\r\n\r\nsigned main() \r\n{\r\n\tSolver :: mian(); \r\n\treturn 0; \r\n}   "
+}
