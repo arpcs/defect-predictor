@@ -1,0 +1,38 @@
+{
+    "id": 230824655,
+    "contestId": 1730,
+    "creationTimeSeconds": 1698842305,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1730,
+        "index": "E",
+        "name": "Maximums and Minimums",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2700,
+        "tags": [
+            "combinatorics",
+            "data structures",
+            "divide and conquer",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1730,
+        "members": [
+            {
+                "handle": "luyiming123"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1664116500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 29,
+    "timeConsumedMillis": 2557,
+    "memoryConsumedBytes": 213299200,
+    "source": "// LUOGU_RID: 132825013\n#include <bits/stdc++.h>\r\n#define ri register int\r\n#define ll long long\r\n#define fi first\r\n#define se second\r\nusing namespace std;\r\nconst int Maxn=5e5;\r\nconst int Maxm=1e6;\r\nconst int Inf=1e9;\r\nvector<int>d[Maxm+5],s[Maxm+5];\r\nint cnt[Maxm+5];\r\nint mn[19][Maxn+5],log_2[Maxn+5];\r\nstack<int>stk;\r\nvoid sieve(int n) {\r\n\tfor(ri i=1;i<=n;i++)\r\n\t\tfor(ri j=2*i;j<=n;j+=i)d[j].emplace_back(i);\r\n\tfor(ri i=1;i<=n;i++)cnt[i]=-1;\r\n}\r\ninline int query(int l,int r) {\r\n\tif(l>r)return Inf;\r\n\tint t=log_2[r-l+1];\r\n\treturn min(mn[t][l],mn[t][r-(1<<t)+1]);\r\n}\r\nvoid build_st(auto &a,int n) {\r\n\tlog_2[0]=-1;\r\n\tfor(ri i=1;i<=n;i++)log_2[i]=log_2[i>>1]+1;\r\n\tfor(ri i=1;i<=n;i++)mn[0][i]=a[i];\r\n\tfor(ri j=1;j<=log_2[n];j++)\r\n\t\tfor(ri i=1;i<=n-(1<<j)+1;i++)mn[j][i]=min(mn[j-1][i],mn[j-1][i+(1<<j-1)]);\r\n}\r\nvoid solve() {\r\n\tint n;\r\n\tscanf(\"%d\",&n);\r\n\tvector<int>a(n+1),pre(n+1),suf(n+1),L(n+1),R(n+1);\r\n\tfor(ri i=1;i<=n;i++)scanf(\"%d\",&a[i]),s[a[i]].push_back(i);\r\n\tvector<int>stk;\r\n\tfor(ri i=1;i<=n;i++) {\r\n\t\twhile(!stk.empty()&&a[stk.back()]>=a[i])stk.pop_back();\r\n\t\tif(!stk.empty())pre[i]=stk.back();\r\n\t\telse pre[i]=0;\r\n\t\tstk.emplace_back(i);\r\n\t}\r\n\tstk.clear();\r\n\tfor(ri i=n;i>=1;i--) {\r\n\t\twhile(!stk.empty()&&a[stk.back()]>=a[i])stk.pop_back();\r\n\t\tif(!stk.empty())suf[i]=stk.back();\r\n\t\telse suf[i]=n+1;\r\n\t\tstk.emplace_back(i);\r\n\t}\r\n\tstk.clear();\r\n\tfor(ri i=1;i<=n;i++) {\r\n\t\twhile(!stk.empty()&&a[stk.back()]<a[i])stk.pop_back();\r\n\t\tif(!stk.empty())L[i]=stk.back();\r\n\t\telse L[i]=0;\r\n\t\tstk.emplace_back(i);\r\n\t}\r\n\tstk.clear();\r\n\tfor(ri i=n;i>=1;i--) {\r\n\t\twhile(!stk.empty()&&a[stk.back()]<=a[i])stk.pop_back();\r\n\t\tif(!stk.empty())R[i]=stk.back();\r\n\t\telse R[i]=n+1;\r\n\t\tstk.emplace_back(i);\r\n\t}\r\n\tstk.clear();\r\n\tbuild_st(a,n);\r\n\tll ans=0;\r\n\tfor(ri i=1;i<=n;i++) {\r\n\t\tint t=a[i],l=L[i]+1,r=R[i]-1;\r\n\t\t//printf(\"%d %d %d %d %d\\n\",i,l,r,pre[i],suf[i]);\r\n\t\tans+=1ll*(min(r+1,suf[i])-i)*(i-max(l-1,pre[i]));\r\n\t\tfor(ri &x:d[t]) {\r\n\t\t\tif(cnt[x]>=0&&cnt[x]<(int)s[x].size()-1&&l<=s[x][cnt[x]]&&s[x][cnt[x]+1]<=r) {\r\n\t\t\t\tint pl=s[x][cnt[x]],pr=s[x][cnt[x]+1];\r\n\t\t\t\tif(query(pl+1,i)>x&&query(i,pr-1)>x) {\r\n\t\t\t\t\tans+=1ll*(pl-max(l-1,pre[pl]))*(min(r+1,suf[pr])-i);\r\n\t\t\t\t\tans+=1ll*(i-max(l-1,pre[pl]))*(min(r+1,suf[pr])-pr);\r\n\t\t\t\t\tans-=1ll*(pl-max(l-1,pre[pl]))*(min(r+1,suf[pr])-pr);\r\n\t\t\t\t}\r\n\t\t\t\telse if(query(pl+1,i)>x) {\r\n\t\t\t\t\tans+=1ll*(pl-max(l-1,pre[pl]))*(min(r+1,suf[pl])-i);\r\n\t\t\t\t}\r\n\t\t\t\telse if(query(i,pr-1)>x) {\r\n\t\t\t\t\tans+=1ll*(min(r+1,suf[pr])-pr)*(i-max(l-1,pre[pr]));\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\telse if(cnt[x]>=0&&l<=s[x][cnt[x]]) {\r\n\t\t\t\tint p=s[x][cnt[x]];\r\n\t\t\t\tif(query(p+1,i)>x) {\r\n\t\t\t\t\tans+=1ll*(min(r+1,suf[p])-i)*(p-max(l-1,pre[p]));\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\telse if(cnt[x]<(int)s[x].size()-1&&s[x][cnt[x]+1]<=r) {\r\n\t\t\t\tint p=s[x][cnt[x]+1];\r\n\t\t\t\tif(query(i,p-1)>x) {\r\n\t\t\t\t\tans+=1ll*(min(r+1,suf[p])-p)*(i-max(l-1,pre[p]));\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\t++cnt[a[i]];\r\n\t\t//printf(\"ans: %lld\\n\",ans); \r\n\t}\r\n\tprintf(\"%lld\\n\",ans);\r\n\tfor(ri i=1;i<=n;i++)s[a[i]].clear(),cnt[a[i]]=-1;\r\n}\r\nint main() {\r\n\tsieve(Maxm);\r\n\tint T;\r\n\tscanf(\"%d\",&T);\r\n\twhile(T--)solve();\r\n\treturn 0;\r\n}\r\n"
+}

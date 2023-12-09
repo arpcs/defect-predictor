@@ -1,0 +1,37 @@
+{
+    "id": 178258935,
+    "contestId": 1007,
+    "creationTimeSeconds": 1666978181,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1007,
+        "index": "D",
+        "name": "Ants",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "2-sat",
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1007,
+        "members": [
+            {
+                "handle": "SliferSkyd"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1531492500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 78,
+    "timeConsumedMillis": 545,
+    "memoryConsumedBytes": 402534400,
+    "source": "#include <bits/stdc++.h>\r\n#pragma GCC optimize (\"O3\")\r\n#pragma GCC optimize (\"unroll-loops\")\r\n#include <ext/pb_ds/assoc_container.hpp>\r\n#include <ext/pb_ds/tree_policy.hpp>\r\n\r\nusing namespace __gnu_pbds;\r\nusing namespace std;\r\n\r\ntemplate <typename T>\r\nusing ordered_set = tree <T, null_type, less <T>, rb_tree_tag, tree_order_statistics_node_update>;\r\n\r\nconst int N = 2e5 + 10;\r\nconst int M = 1e7 + 10;\r\n\r\n// TWO SAT\r\n\r\nvector <int> e[M];\r\nint low[M], num[M], comp[M];\r\nint ti, cnt;\r\nstack <int> stk;\r\n\r\nvoid add_edge(int a, int stage_a, int b, int stage_b) {\r\n    a = a << 1 ^ stage_a;\r\n    b = b << 1 ^ stage_b;\r\n    e[a].push_back(b);\r\n    e[b ^ 1].push_back(a ^ 1);\r\n}\r\n\r\nvoid dfs(int u) {\r\n    stk.push(u);\r\n    num[u] = low[u] = ++ti;\r\n    for (auto v: e[u]) {\r\n        if (comp[v]) continue;\r\n        if (!num[v]) {\r\n            dfs(v);\r\n            low[u] = min(low[u], low[v]);\r\n        }\r\n        else low[u] = min(low[u], num[v]);\r\n    }\r\n    if (num[u] == low[u]) {\r\n        ++cnt;\r\n        while (stk.top() != u) {\r\n            comp[stk.top()] = cnt;\r\n            stk.pop();\r\n        }\r\n        comp[u] = cnt;\r\n        stk.pop();\r\n    }\r\n}\r\n\r\n//\r\n\r\nint n, m;\r\nint par[N], sz[N], head[N];\r\nint in[N];\r\nvector <int> g[N];\r\n\r\nvoid dfs(int u, int p) {\r\n    sz[u] = 1;\r\n    for (auto v: g[u]) {\r\n        if (v == p) continue;\r\n        dfs(v, u);\r\n        sz[u] += sz[v];\r\n    }\r\n}\r\n\r\nvoid hld(int u, int p) {\r\n    in[u] = ++ti;\r\n    par[u] = p;\r\n    int big = 0;\r\n    for (auto v: g[u]) {\r\n        if (v == p) continue;\r\n        if (sz[v] >= sz[big]) big = v;\r\n    }\r\n    if (big) {\r\n        int v = big;\r\n        head[v] = head[u];\r\n        hld(v, u);\r\n    }\r\n    for (auto v: g[u]) {\r\n        if (v == p || v == big) continue;\r\n        head[v] = v;\r\n        hld(v, u);\r\n    }\r\n}\r\n\r\nint idx[N * 4];\r\nvector <pair <int, int>> s[N * 4];\r\n\r\nvoid add(int id, int L, int R, int u, int v, int i, int o) {\r\n    if (u > R || L > v || L > R) return;\r\n    if (u <= L && R <= v) {\r\n        s[id].push_back({i, o});\r\n        return;\r\n    }\r\n    int mid = L + R >> 1;\r\n    add(id * 2, L, mid, u, v, i, o);\r\n    add(id * 2 + 1, mid + 1, R, u, v, i, o);\r\n}\r\n\r\n\r\nint nNode;\r\n\r\nvoid solve(int id, int L, int R) {\r\n    for (auto [i, o]: s[id]) {\r\n        ++nNode;\r\n        if (idx[id]) {\r\n            add_edge(idx[id], 1, nNode, 1);\r\n            add_edge(idx[id], 1, i, o ^ 1);\r\n        }\r\n        add_edge(i, o, nNode, 1);\r\n        idx[id] = nNode;\r\n    }\r\n    if (L == R) return;\r\n    idx[id * 2] = idx[id * 2 + 1] = idx[id];\r\n    int mid = L + R >> 1;\r\n    solve(id * 2, L, mid);\r\n    solve(id * 2 + 1, mid + 1, R);\r\n}\r\n\r\nint main() {\r\n    ios :: sync_with_stdio(0); cin.tie(0);\r\n    cin >> n;\r\n    for (int i = 1; i < n; ++i) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        g[u].push_back(v);\r\n        g[v].push_back(u);\r\n    }\r\n    dfs(1, 0);\r\n    head[1] = 1;\r\n    hld(1, 0);\r\n    ti = 0;\r\n    cin >> m;\r\n    for (int i = 1; i <= m; ++i) {\r\n        int u, v;\r\n        cin >> u >> v;\r\n        while (head[u] != head[v]) {\r\n            if (in[head[u]] < in[head[v]]) swap(u, v);\r\n            add(1, 1, n, in[head[u]], in[u], i, 0);\r\n            u = par[head[u]];\r\n        }\r\n        if (in[u] > in[v]) swap(u, v);\r\n        add(1, 1, n, in[u] + 1, in[v], i, 0);\r\n        cin >> u >> v;\r\n        while (head[u] != head[v]) {\r\n            if (in[head[u]] < in[head[v]]) swap(u, v);\r\n            add(1, 1, n, in[head[u]], in[u], i, 1);\r\n            u = par[head[u]];\r\n        }\r\n        if (in[u] > in[v]) swap(u, v);\r\n        add(1, 1, n, in[u] + 1, in[v], i, 1);\r\n    }\r\n    nNode = m;\r\n    solve(1, 1, n);\r\n    for (int i = 1; i <= nNode; ++i) if (!num[i]) dfs(i);\r\n    for (int i = 1; i <= nNode; ++i) {\r\n        if (comp[i << 1 ^ 0] == comp[i << 1 ^ 1]) {\r\n            cout << \"NO\\n\";\r\n            exit(0);\r\n        }\r\n    }\r\n    cout << \"YES\\n\";\r\n    for (int i = 1; i <= m; ++i)\r\n        cout << (comp[i << 1 ^ 0] > comp[i << 1 ^ 1]) + 1 << '\\n';\r\n}\r\n"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 190752934,
+    "contestId": 1307,
+    "creationTimeSeconds": 1674819097,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "smwtcat"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 560,
+    "memoryConsumedBytes": 41164800,
+    "source": "// LUOGU_RID: 100621108\n#include<bits/stdc++.h>\r\n#define rep(i, n) for(int i = 0; i < n; ++i)\r\nusing namespace std;\r\ntypedef long long ll;\r\ntypedef long double ld;\r\ntypedef vector<int> vi;\r\n\r\nconst ll inf = 0x3f3f3f3f3f3f;\r\nstruct {\r\n\tint cn, hd[1000100], pre[1000100]; ll dis[1000100];\r\n\tint ce, nxt[1000100], to[1000100]; ll cap[1000100], cost[1000100];\r\n\tvoid clr(int n){\r\n\t\tcn = n;\r\n\t\tmemset(hd, -1, sizeof(hd));\r\n\t}\r\n\tvoid ae(int f, int t, ll ca, ll cl){\r\n\t\t//cout << \"ae \" << f << \" \" << t << \" \" << ca << \" \" << cl << endl;\r\n\t\tnxt[ce] = hd[f], cap[ce] = ca, cost[ce] = cl, to[ce] = t, hd[f] = ce++;\r\n\t\tnxt[ce] = hd[t], cap[ce] = 0, cost[ce] = -cl, to[ce] = f, hd[t] = ce++;\r\n\t}\r\n\tbool spfa(int S, int T){\r\n\t\tqueue<int> q;\r\n\t\tfill(dis, dis+cn, inf);\r\n\t\tdis[S] = 0;\r\n\t\tq.emplace(S);\r\n\t\tstatic bool in[1000100];\r\n\t\tin[S] = 1;\r\n\t\twhile(!q.empty()){\r\n\t\t\tint u = q.front(); q.pop(); in[u] = 0;\r\n\t\t\t//cout << \"spfa \" << u << endl;\r\n\t\t\tfor(int eid = hd[u]; eid >= 0; eid = nxt[eid]){\r\n\t\t\t\tint t = to[eid];\r\n\t\t\t\t//cout << u << \" \" << eid << \" \" << t << endl;\r\n\t\t\t\tif(cap[eid] && dis[t] > dis[u]+cost[eid]){\r\n\t\t\t\t\tdis[t] = dis[u]+cost[eid], pre[t] = eid;\r\n\t\t\t\t\t//cout << u << \" to \" << t << endl;\r\n\t\t\t\t\tif(!in[t]){\r\n\t\t\t\t\t\tq.emplace(t);\r\n\t\t\t\t\t\tin[t] = 1;\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn (dis[T] < inf);\r\n\t}\r\n\tll mc(int S, int T){\r\n\t\tif(!spfa(S, T)) return inf;\r\n\t\tfor(int np = T; np != S; np = to[pre[np]^1])\r\n\t\t\t--cap[pre[np]], ++cap[pre[np]^1];\r\n\t\treturn dis[T];\r\n\t}\r\n} mcmf;\r\n\r\nint n, m;\r\nint eu[2525], ev[2525], ew[2525];\r\nint g[55][55];\r\nll b[55];\r\n\r\nint main(){\r\n\tios::sync_with_stdio(false);\r\n\r\n\tcin >> n >> m;\r\n\tmemset(g, 0x3f, sizeof(g));\r\n\trep(i, m){\r\n\t\tint u, v, w;\r\n\t\tcin >> u >> v >> w;\r\n\t\t--u, --v;\r\n\t\teu[i] = u, ev[i] = v, ew[i] = w;\r\n\t\tg[u][v] = min(g[u][v], w);\r\n\t}\r\n\r\n\trep(k, n) rep(i, n) rep(j, n)\r\n\t\tg[i][j] = min(g[i][j], g[i][k] + g[k][j]);\r\n\t\r\n\tmcmf.clr(n);\r\n\tg[0][0] = 0;\r\n\trep(i, m)\r\n\t\tmcmf.ae(eu[i], ev[i], 1, g[0][eu[i]] - g[0][ev[i]] + ew[i]);\r\n\t\r\n\tint k = 1;\r\n\tb[1] = -mcmf.mc(0, n-1);\r\n\tfor(; b[k] > b[k-1] - inf; ++k){\r\n\t\t//cout << k << \": \" << b[k] << endl;\r\n\t\tb[k+1] = b[k] - mcmf.mc(0, n-1);\r\n\t}\r\n\t\r\n\tint q;\r\n\tcin >> q;\r\n\tcout << fixed << setprecision(12);\r\n\twhile(q--){\r\n\t\tint x;\r\n\t\tcin >> x;\r\n\t\tld ret = 1e100;\r\n\t\tfor(int i = 1; i < k; ++i)\r\n\t\t\tret = min(ret, (ld)(x - b[i]) / i);\r\n\t\tcout << g[0][n-1] + ret << \"\\n\";\r\n\t}\r\n\r\n\treturn 0;\r\n}"
+}

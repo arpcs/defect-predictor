@@ -1,0 +1,37 @@
+{
+    "id": 222813113,
+    "contestId": 1185,
+    "creationTimeSeconds": 1694368326,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1185,
+        "index": "G1",
+        "name": "Playlist for Polycarp (easy version)",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 2100,
+        "tags": [
+            "bitmasks",
+            "combinatorics",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 1185,
+        "members": [
+            {
+                "handle": "mePranav"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1560955500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 109,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 7577600,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\n#define fi first\r\n#define se second\r\n#define mp make_pair\r\n#define pb push_back\r\n#define all(x) (x).begin (),(x).end()\r\n#define sqrt(x) sqrt(abs(x))\r\n#define re return\r\n#define sz(x) ((int)(x).size ())\r\n#define prev PREV\r\n#define next NEXT\r\n\r\nusing ll = long long;\r\nusing ii = pair<int, int>;\r\nusing ld = long double;\r\nusing D = double;\r\nusing vi = vector<int>;\r\nusing vii = vector<ii>;\r\nusing vvi = vector<vi>;\r\nusing vs = vector<string>;\r\n\r\ntemplate<typename T> T abs (T x) { re x < 0 ? -x : x; }\r\ntemplate<typename T> T sgn (T x) { re x < 0 ? -1 : (x > 0 ? 1 : 0); }\r\ntemplate<typename T> T sqr (T x) { re x * x; }\r\ntemplate<typename T> T gcd (T a, T b) { re a ? gcd (b % a, a) : b; }\r\n\r\nconst int mod = 1000*1000*1000+7;\r\n\r\nint n;\r\nint m;\r\nint was[51][51][51][4];\r\nint res2[51][51][51][4];\r\nvi v[3];\r\nvii w[3];\r\nvi ww[3][2501];\r\nint res[3][2][2501][51];\r\n\r\ninline int go (int a, int b, int c, int f) {\r\n\tif (a + b + c == 0) re 1;\r\n\tif (was[a][b][c][f]) re res2[a][b][c][f];\r\n\twas[a][b][c][f] = 1;\r\n\tll cur = 0;\r\n\tif (a > 0 && f != 0) cur += (ll)a * go (a - 1, b, c, 0);\r\n\tif (b > 0 && f != 1) cur += (ll)b * go (a, b - 1, c, 1);\r\n\tif (c > 0 && f != 2) cur += (ll)c * go (a, b, c - 1, 2);\r\n//\tprintf (\"%d %d %d %d = %lld\\n\", a, b, c, f, cur);\r\n\tre res2[a][b][c][f] = cur % mod;\r\n}\r\n\r\nint main () {\r\n\tscanf (\"%d%d\", &n, &m);\r\n\tfor (int i = 0; i < n; i++) {\r\n\t\tint x, y;\r\n\t\tscanf (\"%d%d\", &x, &y); y--;\r\n\t\tv[y].pb (x);\r\n\t}\r\n\tvii u;\r\n\tfor (int t = 0; t < 3; t++) {\r\n\t\tmemset (res[t], 0, sizeof (res[t]));\r\n\t\tres[t][0][0][0] = 1;\r\n\t\tsort (all (v[t]));\r\n\t\tint sum = 0;\r\n\t\tfor (int i = 0; i < sz (v[t]); i++) {\r\n\t\t\tint ci = i & 1;\r\n\t\t\tint ni = 1 - ci;\r\n\t\t\tmemset (res[t][ni], 0, sizeof (res[t][ni]));\r\n\t\t\tfor (int j = 0; j <= sum; j++)\r\n\t\t\t\tfor (int k = 0; k <= i; k++)\r\n\t\t\t\t\tif (res[t][ci][j][k]) {\r\n\t\t\t\t\t\tres[t][ni][j][k] = (res[t][ni][j][k] + res[t][ci][j][k]) % mod;\r\n\t\t\t\t\t\tres[t][ni][j + v[t][i]][k + 1] = (res[t][ni][j + v[t][i]][k + 1] + res[t][ci][j][k]) % mod;\r\n\t\t\t\t\t}\r\n\t\t\tsum += v[t][i];\r\n\t\t}\r\n\t\tfor (int i = 0; i <= sum; i++)\r\n\t\t\tfor (int j = 0; j <= sz (v[t]); j++)\r\n\t\t\t\tif (res[t][sz (v[t]) & 1][i][j]) {\r\n//\t\t\t\t\tprintf (\"%d %d %d\\n\", t, i, j);\r\n\t\t\t\t\tw[t].pb (mp (i, j));\r\n\t\t\t\t\tww[t][i].pb (j);\r\n\t\t\t\t}\r\n\t\tu.pb (mp (sz (w[t]), t));\r\n\t}\r\n\tsort (all (u));\r\n\tint a = u[0].se;\r\n\tint b = u[1].se;\r\n\tint c = 3 - a - b;\r\n\tint ans = 0;\r\n\tfor (int i = 0; i < sz (w[a]); i++)\r\n\t\tfor (int j = 0; j < sz (w[b]); j++)\r\n\t\t\tif (w[a][i].fi + w[b][j].fi <= m) {\r\n\t\t\t\tint rem = m - w[a][i].fi - w[b][j].fi;\r\n\t\t\t\tint cur = ((ll)res[a][sz (v[a]) & 1][w[a][i].fi][w[a][i].se] * res[b][sz (v[b]) & 1][w[b][j].fi][w[b][j].se]) % mod;\r\n\t\t\t\tfor (auto k : ww[c][rem]) {\r\n//\t\t\t\t\tprintf (\"%d %d %d\\n\", cur, res[c][sz (v[c]) & 1][rem][k], go (w[a][i].se, w[b][j].se, k, 3));\r\n\t\t\t\t\tans = (ans + (ll)cur * res[c][sz (v[c]) & 1][rem][k] % mod * go (w[a][i].se, w[b][j].se, k, 3)) % mod;\r\n\t\t\t\t}\t\r\n\t\t\t}\r\n\tprintf (\"%d\\n\", ans);\r\n\tre 0;\r\n}"
+}

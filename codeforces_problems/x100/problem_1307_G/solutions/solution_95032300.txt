@@ -1,0 +1,37 @@
+{
+    "id": 95032300,
+    "contestId": 1307,
+    "creationTimeSeconds": 1602306212,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "Breeze_Ender"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 187,
+    "memoryConsumedBytes": 2150400,
+    "source": "#include <bits/stdc++.h>\r\n#define ll long long\r\n#define D double\r\n\r\nnamespace IO {\r\n    const int SIZE = (1 << 20) + 1;\r\n    char ibuf[SIZE], *iS, *iT, obuf[SIZE],*oS = obuf, *oT = obuf + SIZE - 1;\r\n    char _st[55];\r\n    int _qr = 0;\r\n    inline char gc() {\r\n        return (iS == iT ? iT = (iS = ibuf) + fread(ibuf, 1, SIZE, stdin), (iS == iT ? EOF : *iS++) : *iS++);\r\n    }\r\n    inline void qread() {}\r\n    template<class T1, class ...T2>\r\n    inline void qread(T1 &IEE, T2&... ls) {\r\n        register T1 __ = 0, ___ = 1;\r\n        register char ch;\r\n        while(!isdigit(ch = gc())) ___ = (ch == '-') ? -___ : ___;\r\n        do {\r\n            __ = (__ << 1) + (__ << 3) + (ch ^ 48);\r\n        }while(isdigit(ch = gc()));\r\n        __ *= ___;\r\n        IEE = __;\r\n        qread(ls...);\r\n        return ;\r\n    }\r\n    inline void flush() {\r\n        fwrite(obuf, 1, oS - obuf, stdout);\r\n        oS = obuf;\r\n        return ;\r\n    }\r\n    inline void putc_(char _x) {\r\n        *oS++ = _x;\r\n        if(oS == oT) flush();\r\n    }\r\n    inline void qwrite() {}\r\n    template<class T1, class ...T2>\r\n    inline void qwrite(T1 IEE, T2... ls) {\r\n        if(!IEE) putc_('0');\r\n        if(IEE < 0) putc_('-'), IEE = -IEE;\r\n        while(IEE) _st[++_qr] = IEE % 10 + '0', IEE /= 10;\r\n        while(_qr) putc_(_st[_qr--]);\r\n        qwrite(ls...);\r\n        return ;\r\n    }\r\n    struct Flusher_{~Flusher_(){flush();}}io_flusher;\r\n}\r\n\r\nusing namespace IO;\r\nusing namespace std;\r\n\r\nconst int N = 55;\r\nconst int M = 2505;\r\nconst ll inf = (1ll << 62);\r\nconst int int_inf = 0x3f3f3f3f;\r\n\r\nvector<pair<int, ll> > ans;\r\n\r\nint n, m, q;\r\nll dis[N], w[M], cost;\r\nint head[N], pre[N], nxt[M], v[M], f[M], S, T, flow, cnt, fn;\r\nbool in[N];\r\n\r\nvoid Add(int u, int vv, int ff, ll ww) {\r\n\tv[++cnt] = vv, nxt[cnt] = head[u], f[cnt] = ff, w[cnt] = ww, head[u] = cnt;\r\n\tv[++cnt] = u, nxt[cnt] = head[vv], w[cnt] = -ww, head[vv] = cnt;\r\n}\r\n\r\nbool SPFA() {\r\n\tfor(int i = 0; i < fn; i++) dis[i] = inf;\r\n\tmemset(in, false, sizeof in);\r\n\tmemset(pre, 0, sizeof pre);\r\n\tdis[S] = 0;\r\n\tqueue<int> Que;\r\n\tin[S] = true;\r\n\tQue.push(S);\r\n\twhile(!Que.empty()) {\r\n\t\tint u = Que.front();\r\n\t\tQue.pop();\r\n\t\tin[u] = false;\r\n\t\tfor (int i = head[u]; i; i = nxt[i]) {\r\n\t\t\tint vv = v[i];\r\n\t\t\tll ww = w[i];\r\n\t\t\tif(f[i] && dis[vv] > dis[u] + ww) {\r\n\t\t\t\tdis[vv] = dis[u] + ww;\r\n\t\t\t\tpre[vv] = i;\r\n\t\t\t\tif(!in[vv]) in[vv] = true, Que.push(vv);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\treturn (dis[T] != inf);\r\n}\r\n\r\nvoid EK() {\r\n\tint p = T, mn = int_inf;\r\n\twhile(pre[p]) mn = min(mn, f[pre[p]]), p = v[pre[p] ^ 1];\r\n\tflow += mn, cost += mn * dis[T];\r\n\tans.push_back(make_pair(flow, cost));\r\n\tp = T;\r\n\twhile(pre[p]) f[pre[p]] -= mn, f[pre[p] ^ 1] += mn, p = v[pre[p] ^ 1];\r\n}\r\n\r\nvoid Solve() {\r\n\tflow = 0, cost = 0;\r\n\twhile(SPFA()) EK();\r\n}\r\n\r\nint main() {\r\n\tqread(n, m);\r\n\tcnt = 1, fn = n, T = n - 1;\r\n\tfor(int i = 1; i <= m; i++) {\r\n\t\tint u, v;\r\n\t\tll w;\r\n\t\tqread(u, v, w);\r\n\t\tAdd(u - 1, v - 1, 1, w);\r\n\t}\r\n\tSolve();\r\n\tqread(q);\r\n\twhile(q--) {\r\n\t\tint x;\r\n\t\tqread(x);\r\n\t\tdouble mn = inf;\r\n\t\tfor(auto i : ans) mn = min(mn, 1.0 * (i.second + x) / i.first);\r\n\t\tprintf(\"%.15lf\\n\", mn);\r\n\t}\r\n\treturn 0;\r\n}"
+}

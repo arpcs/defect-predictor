@@ -1,0 +1,36 @@
+{
+    "id": 234040424,
+    "contestId": 955,
+    "creationTimeSeconds": 1700832475,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 955,
+        "index": "F",
+        "name": "Heaps",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2600,
+        "tags": [
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 955,
+        "members": [
+            {
+                "handle": "_callmelucian"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1521822900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 81,
+    "timeConsumedMillis": 1029,
+    "memoryConsumedBytes": 149196800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef pair<int,int> pii;\r\n#define all(v) v.begin(), v.end()\r\n\r\nconst int mn = 3e5 + 10, lim = 21;\r\nint best[mn][lim], subtr[mn][lim], toLeaf[mn], dp[mn], cnt[mn], sz[mn];\r\nvector<pii> event[mn];\r\nvector<int> adj[mn];\r\n\r\nvoid dfs (int u, int p) {\r\n    toLeaf[u] = sz[u] = 1;\r\n    for (int v : adj[u]) {\r\n        if (v == p) continue;\r\n        dfs(v, u);\r\n        toLeaf[u] = max(toLeaf[u], toLeaf[v] + 1);\r\n        sz[u] += sz[v];\r\n        for (int j = 1; j < lim; j++) subtr[u][j] = max(subtr[u][j], subtr[v][j]);\r\n    }\r\n\r\n    best[u][1] = subtr[u][1] = INT_MAX;\r\n    for (int h = 2; h < lim; h++) {\r\n        int _log = 31 - __builtin_clz(sz[u]), ans = 0;\r\n        for (int i = _log; i >= 0; i--) {\r\n            int cur = ans | (1 << i);\r\n            if (cur > sz[u]) continue;\r\n            vector<int> vec;\r\n            for (int v : adj[u])\r\n                if (v != p && best[v][h - 1] >= cur) vec.push_back(v);\r\n            if (vec.size() >= cur) ans = cur;\r\n        }\r\n        best[u][h] = ans;\r\n        subtr[u][h] = max(subtr[u][h], ans);\r\n    }\r\n}\r\n\r\nbool ok (int u, int h, int k) {\r\n    return subtr[u][h] >= k;\r\n}\r\n\r\nint calc (int u, int k) {\r\n    int h = 0;\r\n    for (int b = lim; b >= 1; b /= 2) {\r\n        while (h + b < lim && subtr[u][h + b] >= k) h += b;\r\n    }\r\n    return h;\r\n}\r\n\r\nint main()\r\n{\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0);\r\n\r\n    int n; cin >> n;\r\n    for (int i = 1; i < n; i++) {\r\n        int a, b; cin >> a >> b;\r\n        adj[a].push_back(b);\r\n        adj[b].push_back(a);\r\n    }\r\n    dfs(1, 1);\r\n\r\n    for (int i = 1; i <= n; i++) {\r\n        int h = toLeaf[i], k = 1;\r\n        while (true) {\r\n            for (int b = n; b >= 1; b /= 2) {\r\n                while (k + b <= n && h < lim && ok(i, h, k + b)) k += b;\r\n            }\r\n\r\n            h = calc(i, ++k);\r\n            if (k <= n) event[k].push_back({i, h});\r\n            else break;\r\n        }\r\n    }\r\n\r\n    ll ans = 0;\r\n    for (int i = 1; i <= n; i++) dp[i] = toLeaf[i], ans += toLeaf[i], cnt[toLeaf[i]]++;\r\n\r\n    for (int k = 2; k <= n; k++) {\r\n        for (pii it : event[k]) {\r\n            int u, h; tie(u, h) = it;\r\n            cnt[dp[u]]--, cnt[h]++, dp[u] = h;\r\n        }\r\n\r\n        for (int j = 1; j < lim; j++) ans += j * cnt[j];\r\n    }\r\n    cout << ans;\r\n\r\n    return 0;\r\n}\r\n"
+}

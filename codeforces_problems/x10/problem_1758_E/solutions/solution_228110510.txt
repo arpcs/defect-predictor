@@ -1,0 +1,38 @@
+{
+    "id": 228110510,
+    "contestId": 1758,
+    "creationTimeSeconds": 1697259587,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1758,
+        "index": "E",
+        "name": "Tick, Tock",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2500,
+        "tags": [
+            "combinatorics",
+            "dfs and similar",
+            "dsu",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1758,
+        "members": [
+            {
+                "handle": "Iridescent2020"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1669390500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 1,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 14848000,
+    "source": "// LUOGU_RID: 129267606\n#include <stdio.h>\r\n#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nbool _u;\r\n\r\nusing ll = long long;\r\nusing db = double;\r\nusing pii = pair <int, int> ;\r\nusing vi = vector <int> ;\r\n#define ci const int\r\ntemplate <class T>\r\ninline void chmax(T &x, const T &y) { if(x < y) x = y; }\r\ntemplate <class T>\r\ninline void chmin(T &x, const T &y) { if(x > y) x = y; }\r\n#define mp make_pair\r\n#define fi first\r\n#define se second\r\n#define pc putchar\r\n#define lb lower_bound\r\n#define ub upper_bound\r\n#define pb push_back\r\n#define eb emplace_back\r\n#define ppc __builtin_popcount\r\n#define ctz __builtin_ctz\r\n#define all(a) a.begin(), a.end()\r\n#define clr(a, n) memset(a, 0, sizeof(a[0]) * (n + 1))\r\n#define rep(i, l, r) for(int i = l, i##end = r; i <= i##end; ++ i)\r\n#define per(i, r, l) for(int i = r, i##end = l; i >= i##end; -- i)\r\n#define fsub(T, S) for(int T = S, T##_f = T; T; T = (T - 1) & T##_f)\r\n#define fsubm(T, S) for(int T = S, T##_f = T; T; T = (T - 1) & T##_f) if(T & (T##_f & -T##_f))\r\n#define Sin(S, i) ((S) >> (i) & 1)\r\n\r\nchar inputbuf[1 << 23], *p1 = inputbuf, *p2 = inputbuf;\r\n#define getchar() (p1 == p2 && (p2 = (p1 = inputbuf) + fread(inputbuf, 1, 1 << 23, stdin), p1 == p2) ? EOF : *p1++)\r\ninline int read() {\r\n\tint res = 0; char ch = getchar(); bool f = true;\r\n\tfor(; ch < '0' || ch > '9'; ch = getchar())\r\n\t\tf &= ch != '-';\r\n\tfor(; ch >= '0' && ch <= '9'; ch = getchar())\r\n\t\tres = res * 10 + (ch ^ 48);\r\n\treturn f ? res : -res;\r\n}\r\n\r\nconst int N = 2e5 + 15, P = 1e9 + 7;\r\n\r\nvi a[N];\r\nll ans;\r\nint n, m, V;\r\n\r\nint mod(int x) {\r\n\treturn x >= V ? x - V : x;\r\n}\r\n\r\nbool _v;\r\n\r\nstruct UFS1 {\r\n\tint fa[N], val[N];\r\n\tint find(int x) {\r\n\t\tif(fa[x] == x) return x;\r\n\t\tfind(fa[x]);\r\n\t\tval[x] = mod(val[x] + val[fa[x]]);\r\n\t\treturn fa[x] = fa[fa[x]];\r\n\t}\r\n\tvoid merge(int x, int y, int z) {\r\n\t\tif(find(x) == find(y)) {\r\n\t\t\tif(val[x] != mod(val[y] + z)) ans = 0;\r\n\t\t} else {\r\n\t\t\tfa[fa[x]] = fa[y];\r\n\t\t\tval[fa[x]] = mod(mod(val[y] + z) - val[x] + V);\r\n\t\t}\r\n\t}\r\n\tvoid init() {\r\n\t\trep(i, 1, n + m) fa[i] = i;\r\n\t\tmemset(val, 0, 4 * (n + m + 5));\r\n\t}\r\n} U1, U2;\r\n\r\nstruct UFS2 {\r\n\tint fa[N];\r\n\tint find(int x) {\r\n\t\treturn fa[x] == x ? x : (fa[x] = find(fa[x]));\r\n\t}\r\n\tvoid merge(int x, int y) {\r\n\t\tx = find(x); y = find(y);\r\n\t\tif(x != y) fa[x] = y;\r\n\t}\r\n\tvoid init() {\r\n\t\trep(i, 1, n + m) fa[i] = i;\r\n\t}\r\n} U3;\r\n\r\nvoid solve() {\r\n\tn = read();\tm = read(); V = read();\r\n\tU1.init(); U2.init(); U3.init();\r\n\tans = 1;\r\n\trep(i, 1, n) {\r\n\t\tint lst = 0;\r\n\t\ta[i].resize(m + 1);\r\n\t\trep(j, 1, m) {\r\n\t\t\ta[i][j] = read();\r\n\t\t\tif(a[i][j] != -1) {\r\n\t\t\t\tU3.merge(i, j + n);\r\n\t\t\t\tif(lst) U2.merge(lst, j, mod(a[i][j] - a[i][lst] + V));\r\n\t\t\t\tlst = j;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\trep(j, 1, m) {\r\n\t\tint lst = 0;\r\n\t\trep(i, 1, n) {\r\n\t\t\tif(a[i][j] != -1) {\r\n\t\t\t\tif(lst) U1.merge(lst, i, mod(a[i][j] - a[lst][j] + V));\r\n\t\t\t\tlst = i;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tint cnt = 0;\r\n\trep(i, 1, n + m) if(U3.find(i) == i) ++ cnt;\r\n\t-- cnt;\r\n\trep(i, 1, cnt) (ans *= V) %= P;\r\n\tprintf(\"%lld\\n\", ans);\r\n}\r\n\r\nsigned main() {\r\n\tclock_t _st = clock();\r\n\t//freopen(\".in\", \"r\", stdin);\r\n\t//freopen(\".out\", \"w\", stdout);\r\n\tint T = read();\r\n\twhile(T --) solve();\r\n\treturn 0;\r\n}\r\n"
+}

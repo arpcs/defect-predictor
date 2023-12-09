@@ -1,0 +1,37 @@
+{
+    "id": 154051112,
+    "contestId": 1007,
+    "creationTimeSeconds": 1650353910,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1007,
+        "index": "D",
+        "name": "Ants",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "2-sat",
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1007,
+        "members": [
+            {
+                "handle": "enhenh"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1531492500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 78,
+    "timeConsumedMillis": 592,
+    "memoryConsumedBytes": 450150400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std ;\r\n\r\nconst int N = 100005 , NN = 10000005 ;\r\nint n , m , tot , dt , col , tp , dp , w0[N<<2] , w1[N<<2] , w2[N<<2] ;\r\nint dep[N] , fa[N] , siz[N] , son[N] , top[N] , id[N] , wd[N] ;\r\nint dfn[NN] , low[NN] , clr[NN] , st[NN] , vis[NN] ;\r\nint kt , rt , ls[N<<2] , rs[N<<2] ;\r\nvector < pair < int , int > > vc[N<<2] ;\r\nvector < int > ed[N] , wpre[N<<2] , wsuf[N<<2] ;\r\n\r\ninline int Id ( int x , int op ) {\r\n\treturn x + op * m ;\r\n}\r\n\r\ninline void inst ( int u , int v ) {\r\n\ted [ u ] .push_back ( v ) ;\r\n\ted [ v ] .push_back ( u ) ;\r\n}\r\n\r\nvoid dfs1 ( int x , int la , int d ) {\r\n\tdep [ x ] = d ;\r\n\tfa [ x ] = la ;\r\n\tsiz [ x ] = 1 ;\r\n\tint axx = 0 ;\r\n\tfor ( auto y : ed [ x ] ) {\r\n\t\tif ( y == la ) continue ;\r\n\t\tdfs1 ( y , x , d + 1 ) ;\r\n\t\tsiz [ x ] += siz [ y ] ;\r\n\t\tif ( siz [ y ] > axx )\r\n\t\t\taxx = siz [ y ] , son [ x ] = y ;\r\n\t}\r\n}\r\n\r\nvoid dfs2 ( int x , int topf ) {\r\n\ttop [ x ] = topf ;\r\n\tid [ x ] = ++ dt ;\r\n\twd [ dt ] = x ;\r\n\tif ( ! son [ x ] )\r\n\t\treturn ;\r\n\tdfs2 ( son [ x ] , topf ) ;\r\n\tfor ( auto y : ed [ x ] ) {\r\n\t\tif ( y == son [ x ] || y == fa [ x ] )\r\n\t\t\tcontinue ;\r\n\t\tdfs2 ( y , y ) ;\r\n\t}\r\n}\r\n\r\nvoid change ( int &k , int l , int r , int x , int y , int z , int op ) {\r\n\tif ( ! k ) k = ++ kt ;\r\n\tif ( x <= l && r <= y ) {\r\n\t\tvc [ k ] .push_back ( { z , op } ) ;\r\n\t\treturn ;\r\n\t}\r\n\tint mid = ( l + r ) >> 1 ;\r\n\tif ( x <= mid )\r\n\t\tchange ( ls [ k ] , l , mid , x , y , z , op ) ;\r\n\tif ( y > mid )\r\n\t\tchange ( rs [ k ] , mid + 1 , r , x , y , z , op ) ;\r\n}\r\n\r\nvoid modify ( int x , int y , int z , int op ) {\r\n\twhile ( top [ x ] != top [ y ] ) {\r\n\t\tif ( dep [ top [ x ] ] < dep [ top [ y ] ] )\r\n\t\t\tswap ( x , y ) ;\r\n\t\tchange ( rt , 1 , n , id [ top [ x ] ] , id [ x ] , z , op ) ;\r\n\t\tx = fa [ top [ x ] ] ;\r\n\t}\r\n\tif ( dep [ x ] > dep [ y ] )\r\n\t\tswap ( x , y ) ;\r\n\tif ( x != y )\r\n\t\tchange ( rt , 1 , n , id [ x ] + 1 , id [ y ] , z , op ) ;\r\n}\r\n\r\nstruct Edge {\r\n\tint nxt , to ;\r\n} edge[NN<<1] ;\r\n\r\nint cnt = 0 , head[NN] ;\r\nvoid insert ( int u , int v ) {\r\n\tedge [ ++ cnt ] = { head [ u ] , v } ;\r\n\thead [ u ] = cnt ;\r\n}\r\n\r\nvoid dfs3 ( int k , int l , int r ) {\r\n\tif ( ! k ) return ;\r\n\tw0 [ k ] = ++ tot ;\r\n\tw1 [ k ] = ++ tot ;\r\n\tw2 [ k ] = ++ tot ;\r\n\tif ( vc [ k ] .size ( ) ) {\r\n\t\tint sz = vc [ k ] .size ( ) ;\r\n\t\tif ( sz == 1 ) {\r\n\t\t\tinsert ( w0 [ k ] , Id ( vc [ k ] [ 0 ] .first , vc [ k ] [ 0 ] .second ^ 1 ) ) ;\r\n\t\t\tinsert ( Id ( vc [ k ] [ 0 ] .first , vc [ k ] [ 0 ] .second ) , w1 [ k ] ) ;\r\n\t\t\tinsert ( Id ( vc [ k ] [ 0 ] .first , vc [ k ] [ 0 ] .second ) , w2 [ k ] ) ;\r\n\t\t} else {\r\n\t\t\twpre [ k ] .resize ( sz ) ;\r\n\t\t\twpre [ k ] [ 0 ] = ++ tot ;\r\n\t\t\tinsert ( wpre [ k ] [ 0 ] , Id ( vc [ k ] [ 0 ] .first , vc [ k ] [ 0 ] .second ^ 1 ) ) ;\r\n\t\t\tfor ( int i = 1 ; i < sz - 1 ; ++ i ) {\r\n\t\t\t\twpre [ k ] [ i ] = ++ tot ;\r\n\t\t\t\tinsert ( wpre [ k ] [ i ] , wpre [ k ] [ i - 1 ] ) ;\r\n\t\t\t\tinsert ( wpre [ k ] [ i ] , Id ( vc [ k ] [ i ] .first , vc [ k ] [ i ] .second ^ 1 ) ) ;\r\n\t\t\t\tinsert ( Id ( vc [ k ] [ i ] .first , vc [ k ] [ i ] .second ) , wpre [ k ] [ i - 1 ] ) ;\r\n\t\t\t}\r\n\t\t\tinsert ( Id ( vc [ k ] [ sz - 1 ] .first , vc [ k ] [ sz - 1 ] .second ) , wpre [ k ] [ sz - 2 ] ) ;\r\n\t\t\twsuf [ k ] .resize ( sz ) ;\r\n\t\t\twsuf [ k ] [ sz - 1 ] = ++ tot ;\r\n\t\t\tinsert ( wsuf [ k ] [ sz - 1 ] , Id ( vc [ k ] [ sz - 1 ] .first , vc [ k ] [ sz - 1 ] .second ^ 1 ) ) ;\r\n\t\t\tfor ( int i = sz - 2 ; i > 0 ; -- i ) {\r\n\t\t\t\twsuf [ k ] [ i ] = ++ tot ;\r\n\t\t\t\tinsert ( wsuf [ k ] [ i ] , wsuf [ k ] [ i + 1 ] ) ;\r\n\t\t\t\tinsert ( wsuf [ k ] [ i ] , Id ( vc [ k ] [ i ] .first , vc [ k ] [ i ] .second ^ 1 ) ) ;\r\n\t\t\t\tinsert ( Id ( vc [ k ] [ i ] .first , vc [ k ] [ i ] .second ) , wsuf [ k ] [ i + 1 ] ) ;\r\n\t\t\t}\r\n\t\t\tinsert ( Id ( vc [ k ] [ 0 ] .first , vc [ k ] [ 0 ] .second ) , wsuf [ k ] [ 1 ] ) ;\r\n\t\t\tfor ( int i = 0 ; i < sz ; ++ i ) {\r\n\t\t\t\tinsert ( w0 [ k ] , Id ( vc [ k ] [ i ] .first , vc [ k ] [ i ] .second ^ 1 ) ) ;\r\n\t\t\t\tinsert ( Id ( vc [ k ] [ i ] .first , vc [ k ] [ i ] .second ) , w1 [ k ] ) ;\r\n\t\t\t\tinsert ( Id ( vc [ k ] [ i ] .first , vc [ k ] [ i ] .second ) , w2 [ k ] ) ;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tif ( l == r )\r\n\t\treturn ;\r\n\tint mid = ( l + r ) >> 1 ;\r\n\tdfs3 ( ls [ k ] , l , mid ) ;\r\n\tdfs3 ( rs [ k ] , mid + 1 , r ) ;\r\n}\r\n\r\nvoid dfs4 ( int k , int la , int l , int r ) {\r\n\tif ( ! k ) return ;\r\n\tif ( la ) {\r\n\t\tinsert ( w2 [ k ] , w2 [ la ] ) ;\r\n\t\tinsert ( w2 [ k ] , w0 [ la ] ) ;\r\n\t\tinsert ( w1 [ la ] , w1 [ k ] ) ;\r\n\t\tinsert ( w1 [ la ] , w0 [ k ] ) ;\r\n\t}\r\n\tif ( l == r )\r\n\t\treturn ;\r\n\tint mid = ( l + r ) >> 1 ;\r\n\tdfs4 ( ls [ k ] , k , l , mid ) ;\r\n\tdfs4 ( rs [ k ] , k , mid + 1 , r ) ;\r\n}\r\n\r\nvoid tarjan ( int x ) {\r\n\tdfn [ x ] = low [ x ] = ++ dp ;\r\n\tst [ ++ tp ] = x ;\r\n\tvis [ x ] = 1 ;\r\n\tfor ( int i = head [ x ] ; i ; i = edge [ i ] .nxt ) {\r\n\t\tint y = edge [ i ] .to ;\r\n\t\tif ( ! dfn [ y ] ) {\r\n\t\t\ttarjan ( y ) ;\r\n\t\t\tlow [ x ] = min ( low [ x ] , low [ y ] ) ;\r\n\t\t}\r\n\t\telse if ( vis [ y ] )\r\n\t\t\tlow [ x ] = min ( low [ x ] , dfn [ y ] ) ;\r\n\t}\r\n\tif ( low [ x ] == dfn [ x ] ) {\r\n\t\t++ col ;\r\n\t\tint k = st [ tp -- ] ;\r\n\t\twhile ( k != x ) {\r\n\t\t\tvis [ k ] = 0 ;\r\n\t\t\tclr [ k ] = col ;\r\n\t\t\tk = st [ tp -- ] ;\r\n\t\t}\r\n\t\tvis [ x ] = 0 ;\r\n\t\tclr [ x ] = col ;\r\n\t}\r\n}\r\n\r\nint main ( ) {\r\n\tcin >> n ;\r\n\tfor ( int i = 1 ; i < n ; ++ i ) {\r\n\t\tint u , v ;\r\n\t\tcin >> u >> v ;\r\n\t\tinst ( u , v ) ;\r\n\t}\r\n\tdfs1 ( 1 , 0 , 1 ) ;\r\n\tdfs2 ( 1 , 1 ) ;\r\n\tcin >> m ;\r\n\ttot = m + m ;\r\n\tfor ( int i = 1 ; i <= m ; ++ i ) {\r\n\t\tint a , b , c , d ;\r\n\t\tcin >> a >> b >> c >> d ;\r\n\t\tmodify ( a , b , i , 0 ) ;\r\n\t\tmodify ( c , d , i , 1 ) ;\r\n\t}\r\n\tdfs3 ( 1 , 1 , n ) ;\r\n\tdfs4 ( 1 , 0 , 1 , n ) ;\r\n\tfor ( int i = 1 ; i <= m ; ++ i ) {\r\n\t\tif ( ! dfn [ i ] )\r\n\t\t\ttarjan ( i ) ;\r\n\t\tif ( clr [ i ] == clr [ i + m ] ) {\r\n\t\t\tputs ( \"NO\" ) ;\r\n\t\t\treturn 0 ;\r\n\t\t}\r\n\t}\r\n\tputs ( \"YES\" ) ;\r\n\tfor ( int i = 1 ; i <= m ; ++ i ) {\r\n\t\tif ( ! dfn [ i + m ] ) {\r\n\t\t\tputs ( \"1\" ) ;\r\n\t\t\tcontinue ;\r\n\t\t}\r\n\t\tif ( clr [ i ] < clr [ i + m ] )\r\n\t\t\tputs ( \"1\" ) ;\r\n\t\telse\r\n\t\t\tputs ( \"2\" ) ;\r\n\t}\r\n\treturn 0 ;\r\n}"
+}

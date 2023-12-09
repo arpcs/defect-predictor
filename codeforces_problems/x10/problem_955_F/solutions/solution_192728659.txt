@@ -1,0 +1,36 @@
+{
+    "id": 192728659,
+    "contestId": 955,
+    "creationTimeSeconds": 1675857168,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 955,
+        "index": "F",
+        "name": "Heaps",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 2600,
+        "tags": [
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 955,
+        "members": [
+            {
+                "handle": "zwh2008"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1521822900
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 904,
+    "memoryConsumedBytes": 369459200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\nconst int N=6e5+5,mod=1e9+7;\r\nint n,q,tot,cnt,top,mx[20][N],dep[N],pos[N<<1],lg2[N],a[N],st[N],sz[N],id[N],f[N],g[N];\r\nll ans;\r\nvector<int>e[N];\r\nvector<pair<int,int> >ve[N];\r\nint Min(int x,int y){return dep[x]>dep[y]?y:x;}\r\nvoid dfs(int x,int p) {\r\n\tmx[0][pos[x]=++tot]=x,dep[x]=dep[p]+1;\r\n\tfor(int y:e[x])if(y!=p)dfs(y,x),mx[0][++tot]=x,sz[x]++;\r\n}\r\nint lca(int x,int y) {\r\n\tx=pos[x],y=pos[y];\r\n\tif(x>y)swap(x,y);\r\n\tint k=lg2[y-x+1];\r\n\treturn Min(mx[k][x],mx[k][y-(1<<k)+1]);\r\n}\r\nvoid add(int x,int y) {\r\n\tint k=dep[x]+dep[y]-2*dep[lca(x,y)];\r\n\tve[x].push_back({y,k}),ve[y].push_back({x,k});\r\n}\r\nvoid sol(int x,int p,int v,int k) {\r\n\tcnt++,g[x]=f[x]=1+(sz[x]>=k);vector<int>c;\r\n\tfor(auto y:ve[x]) {\r\n\t\tif(y.first!=p) {\r\n\t\t\tsol(y.first,x,y.second,k),f[x]=max(f[x],f[y.first]);\r\n\t\t\tif(y.second==1)c.push_back(g[y.first]);\r\n\t\t\tcnt+=y.second-1;\r\n\t\t}\r\n\t}\r\n\tsort(c.begin(),c.end());\r\n\tif(c.size()>=k)g[x]=c[k-1]+1;\r\n\tf[x]=max(f[x],g[x]),ans+=1ll*f[x]*v;\r\n}\r\nvoid work(int k,int t) {\r\n\tcnt=0;\r\n\tfor(int i=1;i<=k;i++)a[i]=id[i];\r\n\tsort(a+1,a+k+1,[&](const int&x,const int&y){return pos[x]<pos[y];});\r\n\tst[top=1]=1,ve[1].clear();\r\n\tfor(int i=1;i<=k;i++) {\r\n\t\tif(a[i]==a[i-1]||a[i]==1)continue;\r\n\t\tint t=lca(a[i],st[top]);\r\n\t\tif(t!=st[top]) {\r\n\t\t\twhile(pos[st[top-1]]>pos[t])add(st[top-1],st[top]),top--;\r\n\t\t\tif(pos[st[top-1]]<pos[t])ve[t].clear(),add(t,st[top]),st[top]=t;\r\n\t\t\telse add(t,st[top--]);\r\n\t\t}\r\n\t\tve[i].clear(),st[++top]=a[i];\r\n\t}\r\n\twhile(top>1)add(st[top-1],st[top]),top--;\r\n\tsol(1,0,1,t),ans+=n-cnt;\r\n}\r\nint main() {\r\n\tscanf(\"%d\",&n);\r\n\tfor(int i=1,x,y;i<n;i++)scanf(\"%d%d\",&x,&y),e[x].push_back(y),e[y].push_back(x);\r\n\tdfs(1,0);\r\n\tfor(int i=2;i<=tot;i++)lg2[i]=lg2[i-1]+((1<<lg2[i-1])<=i);\r\n\tfor(int i=1;1<<i<=tot;i++)for(int j=1;j<=tot-(1<<i)+1;j++)mx[i][j]=Min(mx[i-1][j],mx[i-1][j+(1<<i-1)]);\r\n\tiota(id+1,id+n+1,1);\r\n\tsort(id+1,id+n+1,[&](const int&x,const int&y){return sz[x]>sz[y];});\r\n\tint r=n;\r\n\tfor(int i=1;i<=n;i++) {\r\n\t\twhile(sz[id[r]]<i&&r)r--;\r\n\t\twork(r,i);\r\n\t}\r\n\tprintf(\"%lld\\n\",ans);\r\n\treturn 0;\r\n}"
+}

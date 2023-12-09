@@ -1,0 +1,36 @@
+{
+    "id": 162596935,
+    "contestId": 1000,
+    "creationTimeSeconds": 1656812328,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "yaoxi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 33689600,
+    "source": "/**\n * @file:           strawberry.cpp\n * @author:         yaoxi-std\n * @url:            \n*/\n// #pragma GCC optimize (\"O2\")\n// #pragma GCC optimize (\"Ofast\", \"inline\", \"-ffast-math\")\n// #pragma GCC target (\"avx,sse2,sse3,sse4,mmx\")\n#include <bits/stdc++.h>\nusing namespace std;\n#define resetIO(x) \\\n    freopen(#x \".in\", \"r\", stdin), freopen(#x \".out\", \"w\", stdout)\n#define debug(fmt, ...) \\\n    fprintf(stderr, \"[%s:%d] \" fmt \"\\n\", __FILE__, __LINE__, ##__VA_ARGS__)\ntemplate <class _Tp>\ninline _Tp& read(_Tp& x) {\n    bool sign = false; char ch = getchar();\n    for (; !isdigit(ch); ch = getchar()) sign |= (ch == '-');\n    for (x = 0; isdigit(ch); ch = getchar()) x = x * 10 + (ch ^ 48);\n    return sign ? (x = -x) : x;\n}\ntemplate <class _Tp>\ninline void write(_Tp x) {\n    if (x < 0) putchar('-'), x = -x;\n    if (x > 9) write(x / 10);\n    putchar((x % 10) ^ 48);\n}\nbool m_be;\nusing ll = long long;\nconst int MAXN = 2e5 + 10;\nconst int LOGN = 18;\nint n, q, a[MAXN], up[MAXN], dn[MAXN], dep[MAXN], fa[MAXN][LOGN];\nint dfc, dfn[MAXN], id[MAXN], st[MAXN], ed[MAXN];\nll sum[MAXN], prf[MAXN], pa[MAXN], dp1[MAXN], dp2[MAXN];\nstruct Node { int to, x, y; };\nvector<Node> g[MAXN];\nvoid dfs1(int u, int f, int w) {\n    dep[u] = dep[f] + 1, fa[u][0] = f, pa[u] = pa[f] + a[u];\n    for (int i = 1; i < LOGN; ++i) fa[u][i] = fa[fa[u][i - 1]][i - 1];\n    st[u] = dfc + 1;\n    for (auto x : g[u]) if (x.to != f) dfn[x.to] = ++dfc, id[dfc] = x.to;\n    ed[u] = dfc, dp1[u] = a[u] - w;\n    for (auto x : g[u])\n        if (x.to != f) {\n            dn[x.to] = dn[u] + x.x;\n            up[x.to] = up[u] + x.y;\n            dfs1(x.to, u, x.x + x.y);\n            dp1[u] += max(dp1[x.to], 0LL);\n        }\n}\nvoid dfs2(int u, int f, int w) {\n    ll sum = dp1[u] - (a[u] - w) + max(dp2[u], 0LL);\n    for (auto x : g[u])\n        if (x.to != f) {\n            int pw = x.x + x.y;\n            dp2[x.to] = sum - max(dp1[x.to], 0LL) + a[u] - pw;\n            dfs2(x.to, u, pw);\n        }\n}\nint jump(int u, int d) {\n    for (int i = LOGN - 1; ~i; --i) if (d >> i & 1) u = fa[u][i];\n    return u;\n}\nint lca(int u, int v) {\n    if (dep[u] < dep[v]) swap(u, v);\n    int t = dep[u] - dep[v];\n    for (int i = LOGN - 1; ~i; --i) if (t >> i & 1) u = fa[u][i];\n    if (u == v) return u;\n    for (int i = LOGN - 1; ~i; --i) if (fa[u][i] != fa[v][i]) u = fa[u][i], v = fa[v][i];\n    return fa[u][0];\n}\nbool m_ed;\nsigned main() {\n    // resetIO(strawberry);\n    // debug(\"Mem %.5lfMB.\", fabs(&m_ed - &m_be) / 1048576);\n    read(n), read(q);\n    for (int i = 1; i <= n; ++i) read(a[i]);\n    for (int i = 1; i < n; ++i) {\n        int u, v, w;\n        read(u), read(v), read(w);\n        g[u].push_back({v, w, w}), g[v].push_back({u, w, w});\n    }\n    dfc = dfn[1] = id[1] = 1;\n    dfs1(1, 0, 0), dfs2(1, 0, 0);\n    for (int i = 1; i <= n; ++i) prf[i] = prf[i - 1] + max(dp1[id[i]], 0LL);\n    for (int i = 2; i <= n; ++i) {\n        int p = fa[id[i]][0];\n        int l = st[p], r = ed[p];\n        sum[id[i]] = sum[p] + prf[i - 1] - prf[l - 1] + prf[r] - prf[i];\n    }\n    while (q--) {\n        int u, v, p; ll ans = 0;\n        read(u), read(v), p = lca(u, v);\n        ans -= up[u] - up[p] + dn[v] - dn[p];\n        ans += pa[u] + pa[v] - pa[p] - pa[fa[p][0]];\n        if (dep[u] < dep[v]) swap(u, v);\n        if (v == p) {\n            ans += max(dp2[p], 0LL) + sum[u] - sum[p];\n            ans += prf[ed[u]] - prf[st[u] - 1];\n        } else {\n            int pu = jump(u, dep[u] - dep[p] - 1);\n            int pv = jump(v, dep[v] - dep[p] - 1);\n            ans += max(dp2[p], 0LL) + sum[u] - sum[pu] + sum[v] - sum[pv];\n            ans += prf[ed[u]] - prf[st[u] - 1] + prf[ed[v]] - prf[st[v] - 1];\n            tie(pu, pv) = minmax(dfn[pu], dfn[pv]);\n            ans += prf[pu - 1] - prf[st[p] - 1] + prf[pv - 1] - prf[pu] + prf[ed[p]] - prf[pv];\n        }\n        write(ans), putchar('\\n');\n    }\n    return 0;\n}"
+}

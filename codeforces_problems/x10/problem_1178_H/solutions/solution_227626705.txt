@@ -1,0 +1,37 @@
+{
+    "id": 227626705,
+    "contestId": 1178,
+    "creationTimeSeconds": 1697004619,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1178,
+        "index": "H",
+        "name": "Stock Exchange",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "binary search",
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1178,
+        "members": [
+            {
+                "handle": "Kuroni"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1563636900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/extc++.h>\r\nusing namespace std;\r\n\r\nconst long long INF = numeric_limits<long long>::max() / 4;\r\ntypedef vector<long long> VL;\r\n\r\nstruct MCMF {\r\n\tint N;\r\n\tvector<vi> adj;\r\n\tstruct edge {\r\n\t\tint dest;\r\n\t\tlong long cap, cost;\r\n\t};\r\n\tvector<edge> edges;\r\n \r\n\tvector<char> seen;\r\n\tVL pi, dist;\r\n\tvi prv;\r\n\t__gnu_pbds::priority_queue<pair<long long, int>> q;\r\n\tvector<typename decltype(q)::point_iterator> its;\r\n \r\n\tMCMF(int N) : N(N), adj(N), pi(N, 0), prv(N) {}\r\n \r\n\tvoid addEdge(int from, int to, long long cap, long long cost) {\r\n\t\tint e = int(edges.size());\r\n\t\tedges.emplace_back(edge{to, cap, cost});\r\n\t\tedges.emplace_back(edge{from, 0, -cost});\r\n\t\tadj[from].push_back(e);\r\n\t\tadj[to].push_back(e+1);\r\n\t}\r\n\r\n\tvoid path(int s) {\r\n\t\tdist.assign(N, INF);\r\n\t\tdist[s] = 0;\r\n \r\n\t\tits.assign(N, q.end());\r\n\t\tits[s] = q.push({0, s});\r\n \r\n\t\twhile (!q.empty()) {\r\n\t\t\tint i = q.top().second; q.pop();\r\n\t\t\tlong long d = dist[i];\r\n\t\t\tfor (int e : adj[i]) {\r\n\t\t\t\tif (edges[e].cap) {\r\n\t\t\t\t\tint j = edges[e].dest;\r\n\t\t\t\t\tlong long nd = d + edges[e].cost;\r\n\t\t\t\t\tif (nd < dist[j]) {\r\n\t\t\t\t\t\tdist[j] = nd;\r\n\t\t\t\t\t\tprv[j] = e;\r\n\t\t\t\t\t\tif (its[j] == q.end()) {\r\n\t\t\t\t\t\t\tits[j] = q.push({-(dist[j] - pi[j]), j});\r\n\t\t\t\t\t\t} else {\r\n\t\t\t\t\t\t\tq.modify(its[j], {-(dist[j] - pi[j]), j});\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n \r\n\t\tswap(pi, dist);\r\n\t}\r\n \r\n\tpair<long long, long long> maxflow(int s, int t) {\r\n\t\tlong long totFlow = 0, totCost = 0;\r\n\t\twhile (path(s), pi[t] < INF) {\r\n\t\t\tlong long fl = INF;\r\n\t\t\tfor (int cur = t; cur != s; ) {\r\n\t\t\t\tint e = prv[cur], nxt = edges[e^1].dest;\r\n\t\t\t\tfl = min(fl, edges[e].cap);\r\n\t\t\t\tcur = nxt;\r\n\t\t\t}\r\n\t\t\ttotFlow += fl; totCost += pi[t] * fl;\r\n\t\t\tfor (int cur = t; cur != s; ) {\r\n\t\t\t\tint e = prv[cur], nxt = edges[e^1].dest;\r\n\t\t\t\tedges[e].cap -= fl;\r\n\t\t\t\tedges[e^1].cap += fl;\r\n\t\t\t\tcur = nxt;\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn {totFlow, totCost};\r\n\t}\r\n};\r\n\r\n\r\nconst int MAXN = 2 * 3000;\r\nll A[MAXN], B[MAXN];\r\nint N;\r\n\r\nvector<pair<pair<ll, ll>, int>> startPts;\r\n\r\nbool isGood(ll T) {\r\n\tvector<ll> goals;\r\n\tfor (int k = N; k < 2 * N; k++) {\r\n\t\tgoals.push_back(A[k] * T + B[k]);\r\n\t}\r\n\tvector<ll> cans;\r\n#if 1\r\n\tll bestEnd = -1;\r\n\tfor (int z = 0; z < 2 * N; z++) {\r\n\t\tint i = startPts[z].second;\r\n\t\tbestEnd = max(bestEnd, B[i] + T * A[i]);\r\n\t\tif (i < N) {\r\n\t\t\tcans.push_back(bestEnd);\r\n\t\t}\r\n\t}\r\n#else\r\n\tfor (int i = 0; i < N; i++) {\r\n\t\tll bestEnd = A[i] * T + B[i];\r\n\t\tfor (int j = 0; j < 2 * N; j++) {\r\n\t\t\tif (B[i] >= B[j]) {\r\n\t\t\t\tbestEnd = max(bestEnd, A[j] * T + B[j]);\r\n\t\t\t}\r\n\t\t}\r\n\t\tcans.push_back(bestEnd);\r\n\t}\r\n#endif\r\n\r\n\tsort(goals.begin(), goals.end());\r\n\tsort(cans.begin(), cans.end());\r\n\tfor (int i = 0; i < N; i++) {\r\n\t\tif (cans[i] >= goals[i]) {\r\n\t\t\t// it's good\r\n\t\t} else {\r\n\t\t\treturn false;\r\n\t\t}\r\n\t}\r\n\treturn true;\r\n}\r\n\r\nint main() {\r\n\tios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);\r\n\tcin >> N;\r\n\tfor (int i = 0; i < 2 * N; i++) {\r\n\t\tcin >> A[i] >> B[i];\r\n\t}\r\n\r\n\tfor (int i = 0; i < 2 * N; i++) {\r\n\t\tstartPts.emplace_back(pair<ll, ll>(B[i], -A[i]), i);\r\n\t}\r\n\tsort(startPts.begin(), startPts.end());\r\n\r\n\tll mi = -1;\r\n\tll ma = ll(1.1e9);\r\n\tif (!isGood(ma)) {\r\n\t\tcout << -1 << '\\n';\r\n\t\texit(0);\r\n\t}\r\n\r\n\twhile (ma - mi > 1 ){\r\n\t\tll md = (mi + ma) / 2;\r\n\t\tif (isGood(md)) {\r\n\t\t\tma = md;\r\n\t\t} else {\r\n\t\t\tmi = md;\r\n\t\t}\r\n\t}\r\n\r\n\tll T = ma;\r\n\r\n\tvector<ll> dleft;\r\n\tvector<ll> dright;\r\n\tfor (int i = 0; i < 2 * N; i++) {\r\n\t\tdleft.emplace_back(B[i]);\r\n\t\tdright.emplace_back(A[i] * T + B[i]);\r\n\t\t//cerr << i << ' ' << dleft.back() << ' ' << dright.back() << '\\n';\r\n\t}\r\n\tsort(dleft.begin(), dleft.end());\r\n\tdleft.resize(unique(dleft.begin(), dleft.end()) - dleft.begin());\r\n\tsort(dright.begin(), dright.end());\r\n\tdright.resize(unique(dright.begin(), dright.end()) - dright.begin());\r\n\r\n\tint source = 2 * N;\r\n\tint sink = 2 * N + 1;\r\n\tint leftOff = 2 + 2 * N;\r\n\tint rightOff = leftOff + int(dleft.size());\r\n\r\n\tMCMF mf(2 + 2 * N + int(dleft.size()) + int(dright.size()));\r\n\tauto addEdge = [&] (int a, int b, int c, int d) {\r\n\t\tmf.addEdge(a, b, c, d);\r\n\t};\r\n\r\n\tfor (int i = 0; i < N; i++) {\r\n\t\taddEdge(source, i, 1, 0);\r\n\t}\r\n\tfor (int j = N; j < 2 * N; j++) {\r\n\t\taddEdge(j, sink, 1, 0);\r\n\t}\r\n\r\n\tfor (int i = 0; i < 2 * N; i++) {\r\n\t\tint leftInd = int(lower_bound(dleft.begin(), dleft.end(), B[i]) - dleft.begin());\r\n\t\tint rightInd = int(lower_bound(dright.begin(), dright.end(), A[i] * T + B[i]) - dright.begin());\r\n\t\taddEdge(leftOff + leftInd, rightOff + rightInd, N, 0);\r\n\t\tif (i < N) {\r\n\t\t\taddEdge(i, rightOff + rightInd, 1, 0);\r\n\t\t} else {\r\n\t\t\taddEdge(leftOff + leftInd, i, 1, 0);\r\n\t\t}\r\n\t}\r\n\r\n\tfor (int i = 0; i < 2 * N; i++) {\r\n\t\tint leftInd = int(lower_bound(dleft.begin(), dleft.end(), B[i]) - dleft.begin());\r\n\t\tint rightInd = int(lower_bound(dright.begin(), dright.end(), A[i] * T + B[i]) - dright.begin());\r\n\t\tif (i < N) {\r\n\t\t\taddEdge(i, leftOff + leftInd, 1, 1);\r\n\t\t} else {\r\n\t\t\taddEdge(rightOff + rightInd, i, 1, 1);\r\n\t\t}\r\n\t}\r\n\r\n\tfor (int i = 0; i+1 < int(dleft.size()); i++) {\r\n\t\taddEdge(leftOff + i+1, leftOff + i, N, 0);\r\n\t}\r\n\tfor (int i = 0; i+1 < int(dright.size()); i++) {\r\n\t\taddEdge(rightOff + i+1, rightOff + i, N, 0);\r\n\t}\r\n\r\n\tll E = mf.maxflow(source, sink).second;\r\n\r\n\tcout << T << ' ' << E << '\\n';\r\n\treturn 0;\r\n}"
+}

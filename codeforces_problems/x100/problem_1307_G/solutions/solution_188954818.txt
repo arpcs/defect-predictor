@@ -1,0 +1,37 @@
+{
+    "id": 188954818,
+    "contestId": 1307,
+    "creationTimeSeconds": 1673505986,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "bkifhr8"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 156,
+    "memoryConsumedBytes": 614400,
+    "source": "#include<bits/stdc++.h>\n#define int long long\n#define gmax(x,y) x=max(x,y)\n#define gmin(x,y) x=min(x,y)\n#define F first\n#define S second\n#define P pair\n#define FOR(i,a,b) for(int i=a;i<=b;i++)\n#define rep(i,a,b) for(int i=a;i<b;i++)\n#define V vector\n#define RE return\n#define ALL(a) a.begin(),a.end()\n#define MP make_pair\n#define PB emplace_back\n#define PF push_front\n#define FILL(a,b) memset(a,b,sizeof(a))\n#define lwb lower_bound\n#define upb upper_bound\n#define lc (x<<1)\n#define rc ((x<<1)|1)\n#define sz(x) ((int)x.size())\n#define pc putchar\nusing namespace std;\ntemplate <class Cap, class Cost> struct mcf_graph {\n  public:\n    mcf_graph() {}\n    mcf_graph(int n) : _n(n), g(n) {}\n\n    int add_edge(int from, int to, Cap cap, Cost cost) {\n        assert(0 <= from && from < _n);\n        assert(0 <= to && to < _n);\n        int m = (pos.size());\n        pos.push_back({from, (g[from].size())});\n        int from_id = (g[from].size());\n        int to_id = (g[to].size());\n        if (from == to) to_id++;\n        g[from].push_back(_edge{to, to_id, cap, cost});\n        g[to].push_back(_edge{from, from_id, 0, -cost});\n        return m;\n    }\n\n    struct edge {\n        int from, to;\n        Cap cap, flow;\n        Cost cost;\n    };\n\n    edge get_edge(int i) {\n        int m = (pos.size());\n        assert(0 <= i && i < m);\n        auto _e = g[pos[i].first][pos[i].second];\n        auto _re = g[_e.to][_e.rev];\n        return edge{\n            pos[i].first, _e.to, _e.cap + _re.cap, _re.cap, _e.cost,\n        };\n    }\n    std::vector<edge> edges() {\n        int m = (pos.size());\n        std::vector<edge> result(m);\n        for (int i = 0; i < m; i++) {\n            result[i] = get_edge(i);\n        }\n        return result;\n    }\n\n    std::pair<Cap, Cost> flow(int s, int t) {\n        return flow(s, t, std::numeric_limits<Cap>::max());\n    }\n    std::pair<Cap, Cost> flow(int s, int t, Cap flow_limit) {\n        return slope(s, t, flow_limit).back();\n    }\n    std::vector<std::pair<Cap, Cost>> slope(int s, int t) {\n        return slope(s, t, std::numeric_limits<Cap>::max());\n    }\n    std::vector<std::pair<Cap, Cost>> slope(int s, int t, Cap flow_limit) {\n        assert(0 <= s && s < _n);\n        assert(0 <= t && t < _n);\n        assert(s != t);\n        std::vector<Cost> dual(_n, 0), dist(_n);\n        std::vector<int> pv(_n), pe(_n);\n        std::vector<bool> vis(_n);\n        auto dual_ref = [&]() {\n            std::fill(dist.begin(), dist.end(),\n                      std::numeric_limits<Cost>::max());\n            std::fill(pv.begin(), pv.end(), -1);\n            std::fill(pe.begin(), pe.end(), -1);\n            std::fill(vis.begin(), vis.end(), false);\n            struct Q {\n                Cost key;\n                int to;\n                bool operator<(Q r) const { return key > r.key; }\n            };\n            std::priority_queue<Q> que;\n            dist[s] = 0;\n            que.push(Q{0, s});\n            while (!que.empty()) {\n                int v = que.top().to;\n                que.pop();\n                if (vis[v]) continue;\n                vis[v] = true;\n                if (v == t) break;\n                for (int i = 0; i < (g[v].size()); i++) {\n                    auto e = g[v][i];\n                    if (vis[e.to] || !e.cap) continue;\n                    Cost cost = e.cost - dual[e.to] + dual[v];\n                    if (dist[e.to] - dist[v] > cost) {\n                        dist[e.to] = dist[v] + cost;\n                        pv[e.to] = v;\n                        pe[e.to] = i;\n                        que.push(Q{dist[e.to], e.to});\n                    }\n                }\n            }\n            if (!vis[t]) {\n                return false;\n            }\n\n            for (int v = 0; v < _n; v++) {\n                if (!vis[v]) continue;\n                dual[v] -= dist[t] - dist[v];\n            }\n            return true;\n        };\n        Cap flow = 0;\n        Cost cost = 0, prev_cost_per_flow = -1;\n        std::vector<std::pair<Cap, Cost>> result;\n        result.push_back({flow, cost});\n        while (flow < flow_limit) {\n            if (!dual_ref()) break;\n            Cap c = flow_limit - flow;\n            for (int v = t; v != s; v = pv[v]) {\n                c = std::min(c, g[pv[v]][pe[v]].cap);\n            }\n            for (int v = t; v != s; v = pv[v]) {\n                auto& e = g[pv[v]][pe[v]];\n                e.cap -= c;\n                g[v][e.rev].cap += c;\n            }\n            Cost d = -dual[s];\n            flow += c;\n            cost += c * d;\n            if (prev_cost_per_flow == d) {\n                result.pop_back();\n            }\n            result.push_back({flow, cost});\n            prev_cost_per_flow = d;\n        }\n        return result;\n    }\n\n  private:\n    int _n;\n\n    struct _edge {\n        int to, rev;\n        Cap cap;\n        Cost cost;\n    };\n\n    std::vector<std::pair<int, int>> pos;\n    std::vector<std::vector<_edge>> g;\n};\nmcf_graph<int,int> mf(55);\nint n,m;\nsigned main(){\n\tios::sync_with_stdio(0);\n\tcin.tie(0);\n\tcin>>n>>m;\n\tFOR(i,1,m){\n\t\tint x,y,z;cin>>x>>y>>z;\n\t\tmf.add_edge(x,y,1,z);\n\t}\n\tV<P<int,int> > v=mf.slope(1,n);\n\tint Q;\n\tcin>>Q;\n\tFOR(i,1,Q){\n\t\tint x;\n\t\tcin>>x;\n\t\tdouble ans=1e18;\n\t\tfor(auto u:v)gmin(ans,1.0*(u.S+x)/u.F);\n\t\tprintf(\"%.6f\\n\",ans);\n\t}\n\tRE 0;\n}\n\n\n\n       \t \t \t\t\t\t \t \t\t   \t\t\t\t \t\t\t"
+}

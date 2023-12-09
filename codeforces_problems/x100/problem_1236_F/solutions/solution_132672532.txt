@@ -1,0 +1,38 @@
+{
+    "id": 132672532,
+    "contestId": 1236,
+    "creationTimeSeconds": 1634887163,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "allfadeaway"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 5,
+    "timeConsumedMillis": 264,
+    "memoryConsumedBytes": 100352000,
+    "source": "#include <bits/stdc++.h>\n\nusing namespace std;\n\ntemplate<typename T> inline bool upmin(T &x, T y) { return y < x ? x = y, 1 : 0; }\ntemplate<typename T> inline bool upmax(T &x, T y) { return x < y ? x = y, 1 : 0; }\n\n#define MP(A,B) make_pair(A,B)\n#define PB(A) push_back(A)\n#define SIZE(A) ((int)A.size())\n#define LEN(A) ((int)A.length())\n#define FOR(i,a,b) for(int i=(a);i<(b);++i)\n#define fi first\n#define se second\n\ntypedef long long ll;\ntypedef unsigned long long ull;\ntypedef long double lod;\ntypedef pair<int, int> PR;\ntypedef vector<int> VI;\n\nconst lod eps = 1e-9;\nconst lod pi = acos(-1);\nconst int oo = 1 << 30;\nconst ll loo = 1ll << 60;\nconst int MAXN = 1000005;\nconst int MAXM = 4000005;\nconst int MAXP = 7000000;\nconst int MX = 20005;\n//const int G = 3;\nconst int mods = 1e9 + 7;\n//const int Gi = (mods + 1) / G;\nconst int SZ = 29;\nconst int inv2 = (mods + 1) >> 1;\nconst int INF = 0x3f3f3f3f;\n/*--------------------------------------------------------------------*/\n\n\nnamespace FastIO{\n\tconstexpr int SIZE = (1 << 21) + 1;\n\tint num = 0, f;\n\tchar ibuf[SIZE], obuf[SIZE], que[65], *iS, *iT, *oS = obuf, *oT = obuf + SIZE - 1, c;\n\t#define gc() (iS == iT ? (iT = ((iS = ibuf) + fread(ibuf, 1, SIZE, stdin)), (iS == iT ? EOF : *iS ++)) : *iS ++)\n\tinline void flush() {\n\t\tfwrite(obuf, 1, oS - obuf, stdout);\n\t\toS = obuf;\n\t}\n\tinline void putc(char c) {\n\t\t*oS ++ = c;\n\t\tif (oS == oT) flush();\n\t}\n\tinline void getc(char &c) { for (c = gc(); c <= ' ' ; c = gc()); }\n\tinline void reads(char *st) {\n\t\tchar c;\n\t\tfor (c = gc(); c <= ' ' ; c = gc());\n\t\tfor (; c > ' ' ; *st ++ = c, c = gc());\n\t\t*st = 0;\n\t}\n\ttemplate<class I>\n\tinline void read(I &x) {\n\t\tfor (f = 1, c = gc(); c < '0' || c > '9' ; c = gc()) if (c == '-') f = -1;\n\t\tfor (x = 0; c >= '0' && c <= '9' ; c = gc()) x = (x << 3) + (x << 1) + (c & 15);\n\t\tx *= f;\n\t}\n\ttemplate<class I>\n\tinline void print(I x) {\n\t\tif (x < 0) putc('-'), x = -x;\n\t\tif (!x) putc('0');\n\t\twhile (x) que[++ num] = x % 10 + 48, x /= 10;\n\t\twhile (num) putc(que[num --]);\n\t}\n\tinline void putstr(string st) { for (int i = 0; i < (int)st.size() ; ++ i) putc(st[i]); }\n\tstruct Flusher_{~Flusher_(){flush();}} io_Flusher_;\n}\nusing FastIO :: read;\nusing FastIO :: putc;\nusing FastIO :: putstr;\nusing FastIO :: getc;\nusing FastIO :: reads;\nusing FastIO :: print;\n\n\n\n\n\nvector<int> e[MAXN], V[MAXN];\nint s[MAXN], d[MAXN], D[MAXN], instk[MAXN], vis[MAXN], stk[MAXN], S[MAXN], sz[MAXN], pw[MAXN], n, m, colnum = 0, E1 = 0, E2 = 0, sum = 0, top = 0, lst;\n\nint upd(int x, int y) { return x + y >= mods ? x + y - mods : x + y; }\nvoid dfs(int x, int father) {\n\tinstk[stk[++ top] = x] = vis[x] = 1;\n\tfor (auto v : e[x]) {\n\t\tif (v == father) continue;\n\t\tif (instk[v]) {\n\t\t\t++ colnum;\n\t\t\tfor (int i = top; i >= 1 ; -- i) {\n\t\t\t\t++ sz[colnum], D[colnum] += d[stk[i]] - 2;\n\t\t\t\tV[colnum].PB(stk[i]);\n\t\t\t\tif (stk[i] == v) break;\n\t\t\t}\n\t\t}\n\t\telse if (!vis[v]) dfs(v, x);\n\t}\n\tinstk[x] = 0, -- top;\n}\nsigned main() {\n#ifndef ONLINE_JUDGE\n\tfreopen(\"a.in\", \"r\", stdin);\n#endif\n\tread(n), read(m);\n\tpw[0] = 1;\n\tfor (int i = 1; i <= max(n, 4) ; ++ i) pw[i] = 1ll * pw[i - 1] * inv2 % mods;\n\tfor (int i = 1, u, v; i <= m ; ++ i) read(u), read(v), e[u].PB(v), e[v].PB(u), ++ d[u], ++ d[v];\n\tdfs(1, 0);\n\n\tfor (int i = 1; i <= colnum ; ++ i)\n\t\tfor (auto v : V[i]) S[v] = upd(S[v], pw[sz[i]]);\n\tfor (int i = 1; i <= colnum ; ++ i)\n\t\tfor (auto v : V[i]) s[i] = upd(s[i], upd(S[v], mods - pw[sz[i]]));\n\n\tint Sum = 0;\n\tfor (int i = 1; i <= colnum ; ++ i) Sum = upd(Sum, pw[sz[i]]);\n\t\t\t\t\n\tE1 = upd(1ll * n * pw[1] % mods, mods - 1ll * m * pw[2] % mods);\n\tfor (int i = 1; i <= colnum ; ++ i) E1 = upd(E1, pw[sz[i]]);\n\t// E1\n\n\tE2 = 1ll * n * (n + 1) % mods * pw[2] % mods;\n\t// E(a^2)\n\n\tsum = 0;\n\tE2 = upd(E2, 1ll * m * pw[2] % mods);\n\tfor (int i = 1; i <= n ; ++ i) E2 = upd(E2, 1ll * d[i] * (d[i] - 1) % mods * pw[3] % mods), sum = upd(sum, 1ll * d[i] * (d[i] - 1) % mods);\n\tE2 = upd(E2, 1ll * upd(1ll * m * (m - 1) % mods, mods - sum) * pw[4] % mods);\n\n\t// E(b^2)\n\n\tsum = 0;\n\tfor (int i = 1; i <= colnum ; ++ i) E2 = upd(E2, pw[sz[i]]);\n\tfor (int i = 1; i <= colnum ; ++ i) E2 = upd(E2, 2ll * pw[sz[i]] * s[i] % mods);\n\tfor (int i = 1; i <= colnum ; ++ i) E2 = upd(E2, 1ll * pw[sz[i]] * upd(upd(Sum, mods - s[i]), mods - pw[sz[i]]) % mods * inv2 % mods);\n\t// E(c^2)\n\n\tE2 = upd(E2, mods - 2ll * upd(1ll * n * m % mods, mods - m * 2) * pw[3] % mods);\n\tE2 = upd(E2, mods - 2ll * pw[1] * m % mods);\n\t// E(ab)\n\n\tfor (int i = 1; i <= colnum ; ++ i) E2 = upd(E2, 2ll * pw[sz[i]] * sz[i] % mods);\n\tfor (int i = 1; i <= colnum ; ++ i) E2 = upd(E2, 1ll * pw[sz[i]] * (n - sz[i]) % mods);\n\t// E(ac)\n\n\tfor (int i = 1; i <= colnum ; ++ i) E2 = upd(E2, mods - 2ll * pw[sz[i]] * sz[i] % mods);\n\tfor (int i = 1; i <= colnum ; ++ i) E2 = upd(E2, mods - 1ll * pw[sz[i]] * D[i] % mods);\n\tfor (int i = 1; i <= colnum ; ++ i) E2 = upd(E2, mods - 1ll * pw[sz[i] + 1] * upd(m, mods - sz[i] - D[i]) % mods);\n\t// E(bc)\n\t\n\tprint(upd(E2, mods - 1ll * E1 * E1 % mods));\n\treturn 0;\n}"
+}

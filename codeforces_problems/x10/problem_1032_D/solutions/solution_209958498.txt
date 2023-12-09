@@ -1,0 +1,36 @@
+{
+    "id": 209958498,
+    "contestId": 1032,
+    "creationTimeSeconds": 1687003629,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1032,
+        "index": "D",
+        "name": "Barcelonian Distance",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 1900,
+        "tags": [
+            "geometry",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1032,
+        "members": [
+            {
+                "handle": "AlexFives"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1542557100
+    },
+    "programmingLanguage": "Python 3",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 46,
+    "memoryConsumedBytes": 102400,
+    "source": "import math\r\n\r\n\r\nclass Point:\r\n    def __init__(self, x, y):\r\n        self.x = x\r\n        self.y = y\r\n\r\n    def dist(self, other):\r\n        dx = abs(self.x - other.x)\r\n        dy = abs(self.y - other.y)\r\n        return math.hypot(dx, dy)\r\n\r\n    def manh(self, other):\r\n        dx = abs(self.x - other.x)\r\n        dy = abs(self.y - other.y)\r\n        return dx + dy\r\n\r\n    def __eq__(self, other):\r\n        return self.x == other.x and self.y == other.y\r\n\r\n\r\nclass SimpleLine:\r\n    def __init__(self, k, m):\r\n        self.k = k\r\n        self.m = m\r\n\r\n    def __call__(self, t):\r\n        return self.k * t + self.m\r\n\r\n    def intersection_point(self, other):\r\n        x = (other.m - self.m) / (self.k - other.k)\r\n        return Point(x, self(x))\r\n\r\n\r\nclass Line:\r\n    def __init__(self, a, b, c):\r\n        self.a = a\r\n        self.b = b\r\n        self.c = c\r\n\r\n    @classmethod\r\n    def from_points(cls, A, B):\r\n        k = (A.y - B.y) / (A.x - B.x)\r\n        m = A.y - k * A.x\r\n        return Line(k, -1, m)\r\n\r\n    def xline(self):\r\n        return SimpleLine(-self.b / self.a, -self.c / self.a)\r\n\r\n    def yline(self):\r\n        return SimpleLine(-self.a / self.b, -self.c / self.b)\r\n\r\n    def is_null(self):\r\n        return self.a == 0 or self.b == 0\r\n\r\n    def is_ascending(self):\r\n        return self.yline().k > 0\r\n\r\n\r\ndef main():\r\n    DLine = Line(*map(int, input().split()))\r\n    xa, ya, xb, yb = map(int, input().split())\r\n    A = Point(xa, ya)\r\n    B = Point(xb, yb)\r\n\r\n    if A == B:\r\n        print(0)\r\n        return\r\n\r\n    if A.x == B.x or A.y == B.y:\r\n        print(A.manh(B))\r\n        return\r\n\r\n    if not A.x < B.x:\r\n        A, B = B, A\r\n\r\n    AB_line = Line.from_points(A, B)\r\n    if not (AB_line.is_ascending() is DLine.is_ascending()):\r\n        print(A.manh(B))\r\n        return\r\n\r\n    entrance_x = Point(DLine.xline()(A.y), A.y)\r\n    entrance_y = Point(A.x, DLine.yline()(A.x))\r\n    exit_x = Point(DLine.xline()(B.y), B.y)\r\n    exit_y = Point(B.x, DLine.yline()(B.x))\r\n\r\n    best = A.manh(B)\r\n    best = min(best, A.manh(entrance_x) + entrance_x.dist(exit_x) + exit_x.manh(B))\r\n    best = min(best, A.manh(entrance_x) + entrance_x.dist(exit_y) + exit_y.manh(B))\r\n    best = min(best, A.manh(entrance_y) + entrance_y.dist(exit_x) + exit_x.manh(B))\r\n    best = min(best, A.manh(entrance_y) + entrance_y.dist(exit_y) + exit_y.manh(B))\r\n    print(best)\r\n\r\n\r\nmain()\r\n"
+}

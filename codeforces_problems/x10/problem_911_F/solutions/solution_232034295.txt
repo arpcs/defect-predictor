@@ -1,0 +1,38 @@
+{
+    "id": 232034295,
+    "contestId": 911,
+    "creationTimeSeconds": 1699516997,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 911,
+        "index": "F",
+        "name": "Tree Destruction",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+            "constructive algorithms",
+            "dfs and similar",
+            "graphs",
+            "greedy",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 911,
+        "members": [
+            {
+                "handle": "_LONE__WOLF_"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1514469900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 93,
+    "timeConsumedMillis": 358,
+    "memoryConsumedBytes": 63795200,
+    "source": "#include <bits/stdc++.h>\r\n#define ll long long int\r\n#define all(v) v.begin(),v.end()\r\n#define inter fflush(stdout)\r\n#define fi first\r\n#define se second\r\n#define endl \"\\n\"\r\n\r\nusing namespace std;\r\n\r\nconst ll inf=1e+18,MOD=1e9+7,N=2e+5;\r\nll t,n,u,v,ans=0,h[N+5],conect[N+5]={};\r\nvector <ll> g[N+5];\r\nvoid DFS(ll i, ll p){\r\n    for (auto j : g[i])\r\n        if (j!=p){\r\n            h[j]=h[i]+1;\r\n            DFS(j,i);\r\n        }\r\n}\r\nstruct TPLLca{\r\n    ll pa[N+5][20],h1[N+5];\r\n    void DFS(ll i, ll p){\r\n        h1[i]=h[i];\r\n        for (auto j : g[i])\r\n            if (j!=p){\r\n                pa[j][0]=i;\r\n                h[j]=h[i]+1;\r\n                for (ll k=1;k<=17;k++) pa[j][k]=pa[pa[j][k-1]][k-1];\r\n                DFS(j,i);\r\n            }\r\n    }\r\n    ll Lca(ll u, ll v){\r\n        if (h1[u]<h1[v]) swap(u,v);\r\n        for (ll i=17;i>=0;i--)\r\n            if (h1[pa[u][i]]>=h1[v]) u=pa[u][i];\r\n        if (u==v) return u;\r\n        for (ll i=17;i>=0;i--)\r\n            if (pa[u][i]!=pa[v][i]){\r\n                u=pa[u][i];\r\n                v=pa[v][i];\r\n            }\r\n        return pa[u][0];\r\n    }\r\n    ll Dtc(ll u, ll v){\r\n        ll p=Lca(u,v);\r\n        return h1[u]+h1[v]-2*h1[p];\r\n    }\r\n} lca;\r\nvoid Solve(){\r\n    cin>>n;\r\n    for (ll i=1;i<n;i++){\r\n        cin>>u>>v;\r\n        g[u].push_back(v);\r\n        g[v].push_back(u);\r\n        conect[u]++;\r\n        conect[v]++;\r\n    }\r\n    h[1]=1;\r\n    lca.DFS(1,0);\r\n    ll idx,mx=0;\r\n    for (ll i=1;i<=n;i++)\r\n        if (h[i]>mx) mx=h[i],idx=i;\r\n    h[idx]=1;\r\n    DFS(idx,0);\r\n    mx=0;\r\n    ll idx1;\r\n    deque <ll> dq;\r\n    for (ll i=1;i<=n;i++)\r\n        if (h[i]>mx) mx=h[i],idx1=i;\r\n    for (ll i=1;i<=n;i++)\r\n        if (conect[i]==1 && i!=idx && i!=idx1) dq.push_back(i);\r\n    vector <tuple<ll,ll,ll>> v;\r\n    while (!dq.empty()){\r\n        ll o=dq.back();\r\n        dq.pop_back();\r\n        ll Dtc1=lca.Dtc(o,idx),Dtc2=lca.Dtc(o,idx1);\r\n        if (Dtc1>Dtc2) v.push_back({idx,o,o});\r\n        else v.push_back({idx1,o,o});\r\n        ans+=max(Dtc1,Dtc2);\r\n        for (auto x : g[o]){\r\n            conect[x]--;\r\n            if (conect[x]==1) dq.push_back(x);\r\n        }\r\n    }\r\n    while (idx1!=idx){\r\n        v.push_back({idx,idx1,idx1});\r\n        ans+=lca.Dtc(idx1,idx);\r\n        for (auto j : g[idx1]){\r\n            conect[j]--;\r\n            if (conect[j]==1){\r\n                idx1=j;\r\n                goto Next;\r\n            }\r\n        }\r\n        break;\r\n        Next:;\r\n    }\r\n    cout<<ans<<endl;\r\n    for (auto x : v){\r\n        auto [a,b,c]=x;\r\n        cout<<a<<\" \"<<b<<\" \"<<c<<endl;\r\n    }\r\n}\r\nint main(){\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(NULL);\r\n    cout.tie(NULL);\r\n    t=1;\r\n    //cin>>t;\r\n    while (t--) Solve();\r\n}\r\n"
+}

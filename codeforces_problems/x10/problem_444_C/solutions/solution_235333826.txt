@@ -1,0 +1,35 @@
+{
+    "id": 235333826,
+    "contestId": 444,
+    "creationTimeSeconds": 1701500664,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 444,
+        "index": "C",
+        "name": "DZY Loves Colors",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 444,
+        "members": [
+            {
+                "handle": "yzz162534"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1404651900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 31,
+    "timeConsumedMillis": 327,
+    "memoryConsumedBytes": 16281600,
+    "source": "// LUOGU_RID: 137838067\n#include <iostream>\r\n#include <cstring>\r\n#include <cmath>\r\n#include <cstdio>\r\n#include <algorithm>\r\n#include <vector>\r\n#include <set>\r\n\r\n#define x first\r\n#define y second\r\n#define mp make_pair\r\n\r\nusing namespace std;\r\nconst int N = 1e5 + 10;\r\ntypedef pair<int,int> PII;\r\ntypedef long long ll;\r\n\r\nstruct node{\r\n\tint l, r, c;\r\n\tbool operator < (const node& t) const\r\n\t{\r\n\t\treturn r < t.r;\r\n\t}\r\n};\r\n\r\nint n, m;\r\nset <node> s;\r\nstruct SegmentTree{\r\n\tint l, r;\r\n\tll v, add;\r\n}tr[N << 2];\r\n\r\nvoid pushadd(int p, ll add)\r\n{\r\n\ttr[p].add += add, tr[p].v += add * (tr[p].r - tr[p].l + 1);\r\n}\r\n\r\nvoid pushdown(int p)\r\n{\r\n\tif(tr[p].add)\r\n\t{\r\n\t\tpushadd(p << 1, tr[p].add), pushadd(p << 1 | 1, tr[p].add);\r\n\t\ttr[p].add = 0;\r\n\t}\r\n}\r\n\r\nvoid pushup(int p)\r\n{\r\n\ttr[p].v = tr[p << 1].v + tr[p << 1 | 1].v;\r\n}\r\n\r\nvoid change(int p, int x, int y, ll d)\r\n{\r\n\tif(x <= tr[p].l && tr[p].r <= y)\r\n\t{\r\n\t\tpushadd(p, d);\r\n\t\treturn;\r\n\t}\r\n\tpushdown(p);\r\n\tint mid = tr[p].l + tr[p].r >> 1;\r\n\tif(x <= mid) change(p << 1, x, y, d);\r\n\tif(y > mid) change(p << 1 | 1, x, y, d);\r\n\tpushup(p);\r\n}\r\n\r\nll query(int p, int x, int y)\r\n{\r\n\tif(x <= tr[p].l && tr[p].r <= y)\r\n\t{\r\n\t\treturn tr[p].v;\r\n\t}\r\n\tpushdown(p);\r\n\tint mid = tr[p].l + tr[p].r >> 1; ll res = 0ll;\r\n\tif(x <= mid) res += query(p << 1, x, y);\r\n\tif(y > mid) res += query(p << 1 | 1, x, y);\r\n\treturn res;\r\n}\r\n\r\nvoid build(int p, int l, int r)\r\n{\r\n\ttr[p].l = l, tr[p].r = r;\r\n\tif(l == r) return;\r\n\tint mid = l + r >> 1;\r\n\tbuild(p << 1, l, mid), build(p << 1 | 1, mid + 1, r);\r\n}\r\n\r\nint main()\r\n{\r\n\tscanf(\"%d%d\", &n, &m);\r\n\tbuild(1, 1, n);\r\n\tfor(int i = 1; i <= n; i++)\r\n\t{\r\n\t\ts.insert(node({i, i, i}));\r\n\t}\r\n\tfor(int i = 1; i <= m; i++)\r\n\t{\r\n\t\tint op, l, r, c;\r\n\t\tscanf(\"%d%d%d\", &op, &l, &r);\r\n\t\tif(op == 1)\r\n\t\t{\r\n\t\t\tscanf(\"%d\", &c);\r\n\t\t\tvector <node> G1, G2;\r\n\t\t\tG2.push_back(node({l, r, c}));\r\n\t\t\tfor(auto it = s.lower_bound(node({0, l, 0})); it != s.end(); it++)\r\n\t\t\t{\r\n\t\t\t\tnode p = *it;\r\n\t\t\t\tif(p.l > r) break;\r\n\t\t\t\tG1.push_back(p);\r\n\t\t\t\tif(p.l >= l && p.r <= r)\r\n\t\t\t\t{\r\n\t\t\t\t\tchange(1, p.l, p.r, abs(c - p.c));\r\n\t\t\t\t}\r\n\t\t\t\telse if(p.l < l && p.r > r)\r\n\t\t\t\t{\r\n\t\t\t\t\tG2.push_back(node({p.l, l - 1, p.c}));\r\n\t\t\t\t\tG2.push_back(node({r + 1, p.r, p.c}));\r\n\t\t\t\t\tchange(1, l, r, abs(c - p.c));\r\n\t\t\t\t}\r\n\t\t\t\telse if(p.l < l)\r\n\t\t\t\t{\r\n\t\t\t\t\tG2.push_back(node({p.l, l - 1, p.c}));\r\n\t\t\t\t\tchange(1, l, p.r, abs(c - p.c));\r\n\t\t\t\t}\r\n\t\t\t\telse\r\n\t\t\t\t{\r\n\t\t\t\t\tG2.push_back(node({r + 1, p.r, p.c}));\r\n\t\t\t\t\tchange(1, p.l, r, abs(c - p.c));\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tfor(auto p : G1) s.erase(p);\r\n\t\t\tfor(auto p : G2) s.insert(p);\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tprintf(\"%lld\\n\", query(1, l, r));\r\n\t\t}\r\n\t}\r\n}"
+}

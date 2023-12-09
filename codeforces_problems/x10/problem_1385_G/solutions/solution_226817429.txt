@@ -1,0 +1,38 @@
+{
+    "id": 226817429,
+    "contestId": 1385,
+    "creationTimeSeconds": 1696565887,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1385,
+        "index": "G",
+        "name": "Columns Swaps",
+        "type": "PROGRAMMING",
+        "rating": 2300,
+        "tags": [
+            "2-sat",
+            "dfs and similar",
+            "dsu",
+            "graphs",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1385,
+        "members": [
+            {
+                "handle": "cgzico"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1594996500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 0,
+    "source": "// Problem: G - Columns Swaps\n// Contest: Virtual Judge - qpwer\n// URL: https://vjudge.net/contest/585385#problem/G\n// Memory Limit: 256 MB\n// Time Limit: 2000 ms\n// \n// Powered by CP Editor (https://cpeditor.org)\n\n#pragma GCC optimize(2)\n\n#include<algorithm>\n#include<cstring>\n#include<iostream>\n#include<vector>\n#include<queue>\n#include<map>\n#include<unordered_map>\n#include<set>\n#include<unordered_set>\n\nusing G = std::vector<std::vector<int>>;\n\nint find(int x, std::vector<int>& parent) {\n    if (x != parent[x]) parent[x] = find(parent[x], parent);\n    return parent[x];\n}\n\nvoid solve() {\n    int n = 0;\n    std::cin >> n;\n    \n    G g1(n + 1);\n    G g2(n + 1);\n    \n    std::vector<int> degree(n + 1);\n    \n    std::vector<int> aa(n);\n    std::vector<int> bb(n);\n    for (int i = 0; i < n; i++) std::cin >> aa[i];\n    for (int i = 0; i < n; i++) std::cin >> bb[i];\n    \n    std::map<std::pair<int, int>, std::vector<int>> index_table;\n    \n    for (int i = 0; i < n; i++) {\n        int x = aa[i], y = bb[i];\n        g1[x].push_back(y);\n        g1[y].push_back(x);\n        g2[x].push_back(y);\n        \n        degree[x]++;\n        degree[y]++;\n        \n        index_table[{x, y}].push_back(i + 1);\n    }\n    \n    std::vector<int> parent(n + 1);\n    for (int i = 1; i <= n; i++) {\n        if (degree[i] != 2) {\n            std::cout << \"-1\\n\";\n            return;\n        }\n        \n        parent[i] = i;\n    }\n    \n    for (int i = 1; i <= n; i++) {\n        for (int j : g1[i]) {\n            parent[find(i, parent)] = find(j, parent);\n        }\n    }\n    \n    std::map<int, std::vector<int>> all;\n    for (int i = 1; i <= n; i++) {\n        // std::cerr << i << \" \" << find(i, parent) << std::endl;\n        all[find(i, parent)].push_back(i);\n    }\n    \n    int count = 0;    \n    std::vector<int> output;\n    \n    std::set<std::pair<int, int>> change_pair;\n    for (const auto& [_, nodes] : all) {\n        if (nodes.size() <= 2) continue;\n        \n        int len = nodes.size();\n        int last = nodes[0];\n        int cur = g1[last][0];\n        \n        std::vector<std::pair<int, int>> pairs;\n        pairs.push_back({last, cur});\n        \n        int end = last;\n        while (cur != end) {            \n            auto nexts = g1[cur];\n            int u = nexts[0];\n            int v = nexts[1];\n            \n            int temp = cur;\n            cur = u == last ? v : u;\n            last = temp;\n            \n            pairs.push_back({last, cur});\n        }\n        \n        int change = 0;\n        \n        std::vector<int> p1;\n        std::vector<int> p2;\n        \n        for (const auto& [from, to] : pairs) {\n            if (!g2[from].empty() && (g2[from][0] == to || g2[from][1] == to)) {\n                p2.push_back(index_table[{from, to}].back());\n                index_table[{from, to}].pop_back();\n                continue;\n            }\n            p1.push_back(index_table[{to, from}].back());\n            index_table[{from, to}].pop_back();\n            change++;\n        }\n        \n        if (change <= len - change) {\n            for (int ii : p1) output.push_back(ii);\n            count = change;\n        }\n        else {\n            for (int ii : p2) output.push_back(ii);            \n            count = len - change;\n        }\n    }\n    \n    std::cout << count << \"\\n\";\n    for (int i : output) std::cout << i << \" \";\n    std::cout << \"\\n\";\n}\n\nint main() {\n  std::ios_base::sync_with_stdio(0); \n  std::cin.tie(0);\n  \n  int t = 0;\n  std::cin >> t;\n  while (t--) {\n      solve();\n  }\n  \n  return 0;\n}\n"
+}

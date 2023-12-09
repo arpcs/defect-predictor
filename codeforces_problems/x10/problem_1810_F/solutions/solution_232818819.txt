@@ -1,0 +1,38 @@
+{
+    "id": 232818819,
+    "contestId": 1810,
+    "creationTimeSeconds": 1700029131,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1810,
+        "index": "F",
+        "name": "M-tree",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2800,
+        "tags": [
+            "data structures",
+            "math",
+            "sortings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1810,
+        "members": [
+            {
+                "handle": "AliiSh"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1680273300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 1996,
+    "memoryConsumedBytes": 10444800,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long int\tll;\r\ntypedef pair<int, int>\tpii;\r\ntypedef pair<ll, ll>\tpll;\r\n\r\n\r\n#define F\t\t        first\r\n#define S\t\t        second\r\n#define pb\t\t        push_back\r\n#define endl            '\\n'\r\n#define Mp\t\t        make_pair\r\n#define all(x)          x.begin(), x.end()\r\n#define debug(x)        cerr << #x << \" = \" << x << endl;\r\n#define fast_io         ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);\r\n#define file_io         freopen(\"in.txt\" , \"r+\" , stdin) ; freopen(\"out.txt\" , \"w+\" , stdout);\r\n\r\n\r\nll mod = 1e9+7;\r\n\r\nconst int N = 2e5+23;\r\nint Mn[4*N], Mx[4*N], lpz[4*N];\r\nint a[N];\r\nint n, m;\r\nint q;\r\n\r\nvoid Shift(int l, int r, int ind){\r\n    if(r-l==1) return;\r\n    if(!lpz[ind]) return;\r\n    if(lpz[ind]==1){\r\n        Mn[2*ind+1]=0;\r\n        Mx[2*ind+1]=0;\r\n        lpz[2*ind+1]=1;\r\n\r\n        Mn[2*ind+2]=0;\r\n        Mx[2*ind+2]=0;\r\n        lpz[2*ind+2]=1;\r\n    }\r\n    else{\r\n        Mn[2*ind+1]=m-1;\r\n        Mx[2*ind+1]=m-1;\r\n        lpz[2*ind+1]=2;\r\n\r\n        Mn[2*ind+2]=m-1;\r\n        Mx[2*ind+2]=m-1;\r\n        lpz[2*ind+2]=2;\r\n    }\r\n    lpz[ind]=0;\r\n}\r\n\r\nvoid build(int l=0, int r=n+23, int ind=0){\r\n    Mn[ind]=Mx[ind]=lpz[ind]=0;\r\n    if(r-l==1) return ;\r\n    int mid=(r+l)>>1;\r\n    build(l, mid, 2*ind+1); build(mid, r, 2*ind+2);\r\n}\r\n\r\nvoid updd(int i, int v, int l=0, int r=n+23, int ind=0){\r\n    Shift(l, r, ind);\r\n    if(r-l==1){\r\n        Mn[ind]+=v;\r\n        Mx[ind]+=v;\r\n        return ;\r\n    }\r\n    int mid=(r+l)>>1;\r\n    if(i<mid) updd(i, v, l, mid, 2*ind+1);\r\n    else updd(i, v, mid, r, 2*ind+2);\r\n    Mn[ind]=min(Mn[2*ind+1], Mn[2*ind+2]);\r\n    Mx[ind]=max(Mx[2*ind+1], Mx[2*ind+2]);\r\n}\r\n\r\nvoid upd(int lx, int rx, int v, int l=0, int r=n+23, int ind=0){\r\n    Shift(l, r, ind);\r\n    if(lx>=r || rx<=l) return;\r\n    if(lx<=l && rx>=r){\r\n        Mn[ind]=v;\r\n        Mx[ind]=v;\r\n        if(v==0) lpz[ind]=1;\r\n        else lpz[ind]=2;\r\n        return ;\r\n    }\r\n    int mid=(r+l)>>1;\r\n    upd(lx, rx, v, l, mid, 2*ind+1); upd(lx, rx, v, mid, r, 2*ind+2);\r\n    Mn[ind]=min(Mn[2*ind+1], Mn[2*ind+2]);\r\n    Mx[ind]=max(Mx[2*ind+1], Mx[2*ind+2]);\r\n}\r\n\r\nint getMx(int lx, int rx, int l=0, int r=n+23, int ind=0){\r\n    Shift(l, r, ind);\r\n    if(lx>=r || rx<=l) return 0;\r\n    if(lx<=l && rx>=r) return Mx[ind];\r\n    int mid=(r+l)>>1;\r\n    return max(getMx(lx, rx, l, mid, 2*ind+1), getMx(lx, rx, mid, r, 2*ind+2));\r\n}\r\n\r\nint getMn(int lx, int rx, int l=0, int r=n+23, int ind=0){\r\n    Shift(l, r, ind);\r\n    if(lx>=r || rx<=l) return m;\r\n    if(lx<=l && rx>=r) return Mn[ind];\r\n    int mid=(r+l)>>1;\r\n    return min(getMn(lx, rx, l, mid, 2*ind+1), getMn(lx, rx, mid, r, 2*ind+2));\r\n}\r\n\r\n\r\nvoid add(int i){\r\n    if(getMn(i, i+1)!=m-1){updd(i, 1);return;}\r\n    int l=i,  r=n+23;\r\n    while(r-l>1){\r\n        int mid=(r+l)>>1;\r\n        if(getMn(l, mid+1)==m-1)l=mid;\r\n        else r=mid;\r\n    }\r\n    upd(i, l+1, 0);\r\n    updd(l+1, 1);\r\n}\r\n\r\nvoid rem(int i){\r\n    if(getMx(i, i+1)!=0){updd(i, -1); return;}\r\n    int l=i,  r=n+23;\r\n    while(r-l>1){\r\n        int mid=(r+l)>>1;\r\n        if(getMx(l, mid+1)==0)l=mid;\r\n        else r=mid;\r\n    }\r\n    upd(i, l+1, m-1);\r\n    updd(l+1, -1);\r\n}\r\n\r\nint ans(int l=0, int r=n+23, int ind=0){\r\n    Shift(l, r, ind);\r\n    if(r-l==1) return l;\r\n    int mid=(r+l)>>1;\r\n    if(Mx[2*ind+2]) return ans(mid, r, 2*ind+2);\r\n    return ans(l, mid, 2*ind+1);\r\n}\r\n\r\nint main()\r\n{\r\n    fast_io\r\n    int T; cin>>T;\r\n    while(T--){\r\n        cin>>n>>m>>q;\r\n        build();\r\n        for (int i=1; i<=n; i++){cin>>a[i]; add(a[i]);}\r\n        while(q--){\r\n            int i, x; cin>>i>>x;\r\n            rem(a[i]);\r\n            a[i]=x;\r\n            add(a[i]);\r\n            int res=ans();\r\n            //cout<<res<<\"|\";\r\n            if(getMn(res, res+1)!=1 || getMx(0, res)!=0) res++;\r\n            cout<<res<<\" \";\r\n        }\r\n        cout<<endl;\r\n\r\n    }\r\n\r\n}\r\n"
+}

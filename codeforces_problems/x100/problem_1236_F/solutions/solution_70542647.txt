@@ -1,0 +1,38 @@
+{
+    "id": 70542647,
+    "contestId": 1236,
+    "creationTimeSeconds": 1581143304,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "limbo.null"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 296,
+    "memoryConsumedBytes": 49049600,
+    "source": "#define MST(a, b) memset(a,b,sizeof(a))\r\n#define ALL(v) (v).begin(),(v).end()\r\n#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\ntypedef pair<int, int> pii;\r\n\r\n#include <ext/pb_ds/priority_queue.hpp>\r\n\r\nusing namespace __gnu_pbds;\r\ntypedef __gnu_pbds::priority_queue<pii, greater<>, pairing_heap_tag> heap;\r\ntypedef heap::point_iterator iter;\r\ntypedef long long LL;\r\ntypedef unsigned long long ULL;\r\n//typedef __int128 LL128;\r\n\r\nvoid init_all(int t = 0) {\r\n    if (t & 1) {\r\n        ios::sync_with_stdio(0);\r\n        cin.tie(0);\r\n        cout.tie(0);\r\n    }\r\n#ifdef LOCAL\r\n    if ((t >> 1) & 1) freopen(\"input\", \"r\", stdin);\r\n    if ((t >> 2) & 1) freopen(\"output\", \"w\", stdout);\r\n#endif\r\n}\r\n\r\nconst LL N = 5e5+19,P = 1e9+7;\r\n\r\nint power(int a,int b) {\r\n    int ans = 1;\r\n    for( ; b ; b >>= 1,a = 1ll*a*a%P) {\r\n        if(b&1) ans = 1ll*a*ans%P;\r\n    }\r\n    return ans;\r\n}\r\n\r\nint ADD(int a,int b) {a += b;if(a >= P) a -= P;return a;}\r\nint SUB(int a,int b) {a -= b;if(a <  0) a += P;return a;}\r\nint MUL(int a,int b) {a = 1ll*a*b%P;return a;}\r\nint DIV(int a,int b) {return MUL(a,power(b,P-2));}\r\n\r\nint V,E,F;\r\nvector<int> e[N],cir[N];\r\nint a[N],b[N],low[N],dfn[N],now,top,stk[N],p[N],sumP[N],totP;\r\n\r\nvoid tarjan(int u,int p) {\r\n    dfn[u] = low[u] = ++now;\r\n    stk[++top] = u;\r\n    for(auto v : e[u]) if(v != p) {\r\n        if(dfn[v]) low[u] = min(low[u],dfn[v]);\r\n        else {\r\n            tarjan(v,u);\r\n            low[u] = min(low[v],low[u]);\r\n            if(low[v] >= dfn[u]) {\r\n                if(stk[top] != v) {\r\n                    ++F;\r\n                    cir[F].push_back(u);\r\n                }\r\n                else --top;\r\n                while(1) {\r\n                    int w = stk[top--];\r\n                    cir[F].push_back(w);\r\n                    if(w == v) break;\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\nint expV() {return MUL(V,p[1]);}\r\nint expE() {return MUL(E,p[2]);}\r\nint expF() {\r\n    int res = 0;\r\n    for(int i = 1 ; i <= F ; ++i)\r\n        res = ADD(res , p[cir[i].size()]);\r\n    return res;\r\n}\r\n\r\nint expVV() {return MUL(V,ADD(p[1],MUL(V-1,p[2])));}\r\nint expEE() {\r\n    int res = 0;\r\n    for(int i = 1 ; i <= E ; ++i) {\r\n        res = ADD(res,p[2]);\r\n        res = ADD(res,MUL(e[a[i]].size()-1,p[3]));\r\n        res = ADD(res,MUL(e[b[i]].size()-1,p[3]));\r\n        res = ADD(res,MUL(E-e[a[i]].size()-e[b[i]].size()+1,p[4]));\r\n    }\r\n    return res;\r\n}\r\nint expFF() {\r\n    int res = 0;\r\n    for(int i = 1 ; i <= F ; ++i) {\r\n        res = ADD(res,p[cir[i].size()]);\r\n\r\n        int tot = 0;\r\n        for(auto v : cir[i])\r\n            tot = ADD(tot,SUB(sumP[v],p[cir[i].size()]));\r\n        res = ADD(res,MUL(tot,p[cir[i].size()-1]));\r\n        tot = ADD(tot,p[cir[i].size()]);\r\n        res = ADD(res,MUL(SUB(totP,tot),p[cir[i].size()]));\r\n    }\r\n    return res;\r\n}\r\n\r\nint expVE() {return MUL(E,MUL(p[3],V+2));}\r\nint expVF() {\r\n    int res = 0;\r\n    for(int i = 1 ; i <= F ; ++i) {\r\n        res = ADD(res,MUL(cir[i].size(),p[cir[i].size()]));\r\n        res = ADD(res,MUL(V-cir[i].size(),p[cir[i].size()+1]));\r\n    }\r\n    return res;\r\n}\r\nint expEF() {\r\n    int res = 0;\r\n    for(int i = 1 ; i <= F ; ++i) {\r\n        res = ADD(res,MUL(cir[i].size(),p[cir[i].size()]));\r\n\r\n        int tot = 0;\r\n        for(auto v : cir[i]) tot += e[v].size()-2;\r\n\r\n        res = ADD(res,MUL(tot,p[cir[i].size()+1]));\r\n        res = ADD(res,MUL(E-tot-cir[i].size(),p[cir[i].size()+2]));\r\n    }\r\n    return res;\r\n}\r\n\r\nvoid solve() {\r\n    cin >> V >> E;\r\n    p[0] = 1;\r\n    p[1] = (P-P/2);\r\n    for(int i = 2 ; i < N ; ++i) p[i] = MUL(p[1],p[i-1]);\r\n\r\n    for(int i = 1 ; i <= E ; ++i) {\r\n        int u,v;\r\n        cin >> u >> v;\r\n        e[u].push_back(v);\r\n        e[v].push_back(u);\r\n        a[i] = u;\r\n        b[i] = v;\r\n    }\r\n\r\n    tarjan(1,0);\r\n    for(int i = 1 ; i <= F ; ++i) {\r\n        totP = ADD(totP,p[cir[i].size()]);\r\n        for(auto v : cir[i])\r\n            sumP[v] = ADD(sumP[v],p[cir[i].size()]);\r\n    }\r\n\r\n    int ans = 0,exp = 0;\r\n    exp = ADD(exp,expV());\r\n    exp = SUB(exp,expE());\r\n    exp = ADD(exp,expF());\r\n    ans = ADD(ans,expVV());\r\n    ans = ADD(ans,expEE());\r\n    ans = ADD(ans,expFF());\r\n    ans = SUB(ans, MUL(2, expVE()));;\r\n    ans = SUB(ans,MUL(2,expEF()));\r\n    ans = ADD(ans,MUL(2,expVF()));\r\n    ans = SUB(ans,power(exp,2));\r\n//    cout << expV() << endl;\r\n//    cout << expE() << endl;\r\n//    cout << expF() << endl;\r\n//    cout << expVV() << endl;\r\n//    cout << expEE() << endl;\r\n//    cout << expFF() << endl;\r\n//    cout << expVE() << endl;\r\n//    cout << expVF() << endl;\r\n//    cout << expEF() << endl;\r\n    cout << ans << endl;\r\n}\r\n\r\nsigned main() {\r\n    srand((int)time(0));\r\n    init_all(3);\r\n    int T = 1;\r\n    //cin >> T;\r\n    while(T--) solve();\r\n    return 0;\r\n}"
+}

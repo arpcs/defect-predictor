@@ -1,0 +1,37 @@
+{
+    "id": 98279383,
+    "contestId": 1431,
+    "creationTimeSeconds": 1605276675,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1431,
+        "index": "H",
+        "name": "Rogue-like Game",
+        "type": "PROGRAMMING",
+        "rating": 2600,
+        "tags": [
+            "*special",
+            "brute force",
+            "greedy",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1431,
+        "members": [
+            {
+                "handle": "htkb"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1605191700
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 71,
+    "timeConsumedMillis": 1216,
+    "memoryConsumedBytes": 31129600,
+    "source": "import java.lang.Math.*\nimport java.util.*\n\nprivate fun readInt() = readLine()!!.toInt()\nprivate fun readLong() = readLine()!!.toLong()\nprivate fun readInts() = readLine()!!.split(\" \").map(String::toInt)\nprivate fun readLongs() = readLine()!!.split(\" \").map(String::toLong)\n\nclass Vertex(val req: Long, val score: Long)\n\nfun main(args: Array<String>) {\n    val (n, m, k) = readInts()\n    val a = readLongs()\n    val b = readLongs()\n    val matrix = Array(n) { readLongs().toLongArray() }\n    val vertices_ = ArrayList<Vertex>()\n    for (i in 0 until n) {\n        var bestJ = 0\n        for (j in 1 until m) {\n            if (a[i] < b[j]) break\n            if (matrix[i][bestJ] < matrix[i][j]) bestJ = j\n        }\n        vertices_.add(Vertex(a[i], matrix[i][bestJ]))\n    }\n    for (j in 0 until m) {\n        var bestI = 0\n        for (i in 1 until n) {\n            if (b[j] < a[i]) break\n            if (matrix[bestI][j] < matrix[i][j]) bestI = i\n        }\n        vertices_.add(Vertex(b[j], matrix[bestI][j]))\n    }\n\n    vertices_.sortWith(compareBy({ it.req }, { it.score }))\n\n    val vertices = ArrayList<Vertex>()\n    var maxScore = 0L\n    for (i in 0 until vertices_.size-1) {\n        if (vertices_[i].req < vertices_[i+1].req && vertices_[i].score > maxScore) {\n            maxScore = vertices_[i].score\n            vertices.add(vertices_[i])\n        }\n    }\n    vertices.add(vertices_.last())\n    val N = vertices.size\n    val inf = (1L).shl(60)\n    val dp = LongArray(N) { inf }\n    val dpK = LongArray(N) { inf }\n    dp[0] = 0\n    val dpScore = LongArray(N) { 0 }\n    val dpKScore = LongArray(N) { 0 }\n\n    fun calc(sc1: Long, sc2: Long, req: Long): Pair<Long, Long> {\n        val run = (req - sc1 + sc2 - 1) / sc2\n        return Pair(sc1 + sc2 * run, run)\n    }\n\n\n    for (i in 0 until N-1) {\n        for (j in i+1 until N) {\n            val (sc1, run1) = calc(dpScore[i], vertices[i].score, vertices[j].req)\n            if (dp[j] > dp[i] + run1 || dp[j] == dp[i] + run1 && dpScore[j] < sc1) {\n                dp[j] = dp[i] + run1\n                dpScore[j] = sc1\n            }\n\n            val (sc2, run2) = calc(dpKScore[i], vertices[i].score, vertices[j].req)\n            if (dpK[j] > dpK[i] + run2 || dpK[j] == dpK[i] + run2 && dpKScore[j] < sc2) {\n                dpK[j] = dpK[i] + run2\n                dpKScore[j] = sc2\n            }\n\n            val (sc3, run3) = calc(dpScore[i], vertices[i].score + k, vertices[j].req)\n            if (dpK[j] > dp[i] + run3 || dpK[j] == dp[i] + run3 && dpKScore[j] < sc3) {\n                dpK[j] = dp[i] + run3\n                dpKScore[j] = sc3\n            }\n        }\n    }\n\n    println(min(dp.last(), dpK.last()))\n}\n"
+}

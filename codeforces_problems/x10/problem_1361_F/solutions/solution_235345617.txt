@@ -1,0 +1,37 @@
+{
+    "id": 235345617,
+    "contestId": 1361,
+    "creationTimeSeconds": 1701504663,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1361,
+        "index": "F",
+        "name": "Johnny and New Toy",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3300,
+        "tags": [
+            "data structures",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1361,
+        "members": [
+            {
+                "handle": "hjl666"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1591281300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 30,
+    "timeConsumedMillis": 7565,
+    "memoryConsumedBytes": 1027584000,
+    "source": "// LUOGU_RID: 137859132\n#include<bits/stdc++.h>\r\n// #define int ll\r\n#define ll long long\r\n#define db double\r\n#define MP make_pair\r\n#define vec vector<int>\r\n#define pii pair<int,int>\r\n#define pb emplace_back\r\n#define fi first\r\n#define se second\r\n#define CLK (double)clock()/CLOCKS_PER_SEC\r\nusing namespace std;\r\nmt19937 rnd(time(0));\r\nint read(){\r\n    int x=0,f=1;char c=getchar();\r\n    while(c<'0'||c>'9'){if(c=='-')f=-1;c=getchar();}\r\n    while(c>='0'&&c<='9'){x=x*10+c-'0';c=getchar();}\r\n    return x*f;\r\n}\r\nvoid write(int x){\r\n    if(x<0){putchar('-');write(-x);}\r\n    else {\r\n        if(x>9)write(x/10);\r\n        putchar(x%10+'0');\r\n    }\r\n}\r\nconst int N=2e5+5,M=N*400,P=N<<3;\r\nstruct Segment{\r\n    #define ls(k) lc[k]\r\n    #define rs(k) rc[k]\r\n    int tot,lc[M],rc[M],t[M];\r\n    inline void modify(int &k,int lt,int rt,int pos,int val){\r\n        if(!k)k=++tot;\r\n        if(lt==rt)return t[k]+=val,void();\r\n        int mid=lt+rt>>1;\r\n        if(pos<=mid)modify(ls(k),lt,mid,pos,val);\r\n        else modify(rs(k),mid+1,rt,pos,val);\r\n        t[k]=t[ls(k)]+t[rs(k)];\r\n    }\r\n    inline int query(int k,int lt,int rt,int qx,int qy){\r\n        if(!k||qx>qy||qx>rt||qy<lt)return 0;\r\n        if(qx<=lt&&rt<=qy)return t[k];\r\n        int mid=lt+rt>>1;\r\n        return query(ls(k),lt,mid,qx,qy)+query(rs(k),mid+1,rt,qx,qy);\r\n    }\r\n}T;\r\nint n,q,p[N],w[N],rt[P],tot;\r\nint ls[P],rs[P],L[P],R[P],Mid[P];\r\nll a[P],b[P],ans;\r\ninline ll Count(int x,int y){\r\n    ll res=0;\r\n    for(int i=L[x];i<=R[x];i++)res+=T.query(rt[y],1,n,1,p[i]-1);\r\n    return res;\r\n}\r\ninline int build(int l,int r){\r\n    int k=++tot;L[k]=l,R[k]=r;\r\n    for(int i=l;i<=r;i++)T.modify(rt[k],1,n,p[i],1);\r\n    if(l==r)return k;\r\n    int p=0;for(int i=l;i<r;i++)if(!p||w[p]>w[i])p=i;\r\n    Mid[k]=p,ls[k]=build(l,p),rs[k]=build(p+1,r);\r\n    a[k]=Count(ls[k],rs[k]),b[k]=Count(rs[k],ls[k]);\r\n    ans+=min(a[k],b[k]);return k;\r\n}\r\ninline void modify(int k,int l,int r,int x,int y){\r\n    T.modify(rt[k],1,n,p[x],-1),T.modify(rt[k],1,n,y,1);\r\n    if(l==r)return p[x]=y,void();\r\n    ans-=min(a[k],b[k]);\r\n    if(x<=Mid[k]){\r\n        int dx=rt[rs[k]];\r\n        a[k]=a[k]-T.query(dx,1,n,1,p[x]-1)+T.query(dx,1,n,1,y-1);\r\n        b[k]=b[k]-T.query(dx,1,n,p[x]+1,n)+T.query(dx,1,n,y+1,n);\r\n        modify(ls[k],l,Mid[k],x,y);\r\n    }\r\n    else {\r\n        int dx=rt[ls[k]];\r\n        b[k]=b[k]-T.query(dx,1,n,1,p[x]-1)+T.query(dx,1,n,1,y-1);\r\n        a[k]=a[k]-T.query(dx,1,n,p[x]+1,n)+T.query(dx,1,n,y+1,n);\r\n        modify(rs[k],Mid[k]+1,r,x,y);\r\n    }\r\n    // cerr<<l<<' '<<Mid[k]<<' '<<r<<' '<<a[k]<<' '<<b[k]<<\" \";\r\n    // a[k]=Count(ls[k],rs[k]),b[k]=Count(rs[k],ls[k]);\r\n    // cerr<<a[k]<<' '<<b[k]<<\"\\n\";\r\n    ans+=min(a[k],b[k]);\r\n}\r\nvoid MAIN(){\r\n    n=read();\r\n    for(int i=1;i<=n;i++)p[i]=read();\r\n    for(int i=1;i<n;i++)w[i]=read();\r\n    int root=build(1,n);\r\n    q=read();\r\n    for(int i=1;i<=q;i++){\r\n        int x=read(),y=read(),ax=p[x],ay=p[y];\r\n        modify(root,1,n,x,ay),modify(root,1,n,y,ax);\r\n        cout<<ans<<\"\\n\";\r\n    }\r\n}\r\nsigned main(){\r\n    //freopen(\"read.in\",\"r\",stdin);\r\n    // freopen(\"write.out\",\"w\",stdout);\r\n    int T=1;while(T--)MAIN();\r\n    // printf(\"\\nTIME:%lf\\n\",CLK);\r\n    return 0;\r\n}\r\n// g++ CF1361F.cpp -o CF1361F -std=c++14 -O2"
+}

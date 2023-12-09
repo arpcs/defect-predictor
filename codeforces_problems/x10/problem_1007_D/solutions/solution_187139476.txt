@@ -1,0 +1,37 @@
+{
+    "id": 187139476,
+    "contestId": 1007,
+    "creationTimeSeconds": 1672317774,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1007,
+        "index": "D",
+        "name": "Ants",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "2-sat",
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1007,
+        "members": [
+            {
+                "handle": "BlueDiamond"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1531492500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 5427200,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\n\r\nstruct Ant\r\n{\r\n    int a;\r\n    int b;\r\n    int c;\r\n    int d;\r\n};\r\n\r\nconst int N = (int) 1e5 + 7;\r\nint n;\r\nvector<int> g[N];\r\nint cnt_ants;\r\nAnt ants[N];\r\nint dep[N];\r\nint par[N];\r\n\r\nvoid build(int a, int p = -1)\r\n{\r\n    par[a] = p;\r\n    for (auto &b : g[a])\r\n    {\r\n        if (b == p)\r\n        {\r\n            continue;\r\n        }\r\n        dep[b] = 1 + dep[a];\r\n        build(b, a);\r\n    }\r\n}\r\n\r\nint get_lca(int a, int b)\r\n{\r\n    assert(1 <= a && a <= n);\r\n    assert(1 <= b && b <= n);\r\n    if (a == b)\r\n    {\r\n        return a;\r\n    }\r\n    if (dep[a] < dep[b])\r\n    {\r\n        swap(a, b);\r\n    }\r\n    return get_lca(par[a], b);\r\n}\r\n\r\nstruct Offer\r\n{\r\n    int c;\r\n    int a;\r\n    int b;\r\n    int i;\r\n    int tp;\r\n};\r\n\r\nbool cmp(Offer x, Offer y)\r\n{\r\n    return dep[x.c] < dep[y.c];\r\n}\r\n\r\nint sol[N];\r\nbool solvedindex[N];\r\nbool badvert[N];\r\n\r\nsigned main()\r\n{\r\n#ifdef ONPC\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n#endif // ONPC\r\n\r\n#ifndef ONPC\r\n    ios::sync_with_stdio(0); cin.tie(0); cout.tie(0);\r\n#endif // ONPC\r\n\r\n    cin >> n;\r\n    for (int i = 1; i < n; i++)\r\n    {\r\n        int a, b;\r\n        cin >> a >> b;\r\n        g[a].push_back(b);\r\n        g[b].push_back(a);\r\n    }\r\n    build(1);\r\n    cin >> cnt_ants;\r\n    for (int i = 1; i <= cnt_ants; i++)\r\n    {\r\n        cin >> ants[i].a >> ants[i].b >> ants[i].c >> ants[i].d;\r\n        assert(1 <= ants[i].a && ants[i].a <= n);\r\n        assert(1 <= ants[i].b && ants[i].b <= n);\r\n        assert(1 <= ants[i].c && ants[i].c <= n);\r\n        assert(1 <= ants[i].d && ants[i].d <= n);\r\n    }\r\n    vector<Offer> ofs;\r\n    for (int i = 1; i <= cnt_ants; i++)\r\n    {\r\n        ofs.push_back({get_lca(ants[i].a, ants[i].b), ants[i].a, ants[i].b, i, 1});\r\n        ofs.push_back({get_lca(ants[i].c, ants[i].d), ants[i].c, ants[i].d, i, 2});\r\n    }\r\n    /**\r\n    Am cnt_ants perechi de path-uri.\r\n    Intrebarea este: pot sa aleg din fiecare pereche cate un path astfel incat\r\n    path-urile sa fie dizjuncte?\r\n    > nu e flux\r\n    > nu e dp\r\n    > e ceva observatie greedy!\r\n\r\n    > trebuie sa existe o ordine in care aleg muchiile\r\n    si le iau greedy\r\n\r\n    dupa nodul cel mai de sus\r\n\r\n    **/\r\n    sort(ofs.begin(), ofs.end(), cmp);\r\n\r\n    for (auto &offer : ofs)\r\n    {\r\n        if (solvedindex[offer.i])\r\n        {\r\n            continue;\r\n        }\r\n        int a = offer.a, b = offer.b, c = offer.c;\r\n        vector<int> verts;\r\n        while (a != c)\r\n        {\r\n            verts.push_back(a);\r\n            a = par[a];\r\n        }\r\n        while (b != c)\r\n        {\r\n            verts.push_back(b);\r\n            b = par[b];\r\n        }\r\n        bool ok = 1;\r\n        for (auto &v : verts)\r\n        {\r\n            ok &= (!badvert[v]);\r\n        }\r\n        if (ok)\r\n        {\r\n            sol[offer.i] = offer.tp;\r\n            solvedindex[offer.i] = 1;\r\n            for (auto &v : verts)\r\n            {\r\n                badvert[v] = 1;\r\n            }\r\n        }\r\n    }\r\n\r\n    for (int i = 1; i <= cnt_ants; i++)\r\n    {\r\n        if (!solvedindex[i])\r\n        {\r\n            cout << \"NO\\n\";\r\n            return 0;\r\n        }\r\n    }\r\n    cout << \"YES\\n\";\r\n    for (int i = 1; i <= cnt_ants; i++)\r\n    {\r\n        cout << sol[i] << \"\\n\";\r\n    }\r\n    return 0;\r\n}\r\n/**\r\n\r\n**/\r\n"
+}

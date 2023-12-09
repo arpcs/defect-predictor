@@ -1,0 +1,40 @@
+{
+    "id": 220499230,
+    "contestId": 1641,
+    "creationTimeSeconds": 1693047905,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1641,
+        "index": "C",
+        "name": "Anonymity Is Important",
+        "type": "PROGRAMMING",
+        "points": 1250.0,
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dsu",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1641,
+        "members": [
+            {
+                "handle": "h0h2l1b3bcnofn"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1645611000
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 59,
+    "timeConsumedMillis": 857,
+    "memoryConsumedBytes": 19456000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define int          long long\r\n#define ll           long long\r\n#define ld           long double\r\n#define INF2          1e16\r\n#define INF          1e17\r\nconst ld esp=        1e-8;\r\n#define mod          1000000007\r\n#define y            second\r\n#define x            first\r\n#define all(x)       x.begin(),x.end()\r\n#define rall(x)      x.rbegin(),x.rend()\r\nll max(ll a,ll b){return ((a>=b)?a:b);}\r\nll min(ll a,ll b){return ((a<=b)?a:b);}\r\n#define IOS ios_base::sync_with_stdio(0);cin.tie(0);cout.tie(0);\r\n\r\n\r\nstruct lazy_segment_tree2\r\n{\r\n   vector<int>st,lzy;\r\n   int inv,n;\r\n   function<int(int,int)>fun;\r\n   lazy_segment_tree2(int n,int inv,auto fun)\r\n   {\r\n      this->fun=fun;\r\n      st=vector<int>(4*n+2,INF2);\r\n      lzy=vector<int>(4*n+2,INF);\r\n      this->inv=inv;\r\n      this->n=n;\r\n      build(1,1,n);\r\n   }\r\n\r\n   void build(int node,int from,int to)\r\n   {\r\n      if(from==to)\r\n      {\r\n         st[node]=INF2;\r\n         return ;\r\n      }\r\n      int mid=(from+to)/2;\r\n      build(node*2,from,mid);\r\n      build(node*2+1,mid+1,to);\r\n      st[node]=fun(st[node*2],st[node*2+1]);\r\n   }\r\n\r\n   void push(int node,int from,int to)\r\n   {\r\n      if(lzy[node]==INF)return ;\r\n      int mid=(from+to)/2;\r\n      st[node*2]=lzy[node];\r\n      st[node*2+1]=lzy[node];\r\n      lzy[node*2]=lzy[node];\r\n      lzy[node*2+1]=lzy[node];\r\n      lzy[node]=INF;\r\n   }\r\n\r\n   void _update(int node,int from,int to,int str,int ed,int val) //////range set type\r\n   {\r\n      if(to<str or ed<from)return ;\r\n      if(str<=from and to<=ed)\r\n      {\r\n         st[node]=val;\r\n         lzy[node]=val;\r\n         return ;\r\n      }\r\n      push(node,from,to);\r\n      int mid=(from+to)/2;\r\n      _update(node*2,from,mid,str,ed,val);\r\n      _update(node*2+1,mid+1,to,str,ed,val);\r\n      st[node]=fun(st[node*2],st[node*2+1]);\r\n   }\r\n\r\n   int _query(int node,int from,int to,int str,int ed)\r\n   {\r\n      if(to<str or ed<from)return inv;\r\n      if(str<=from and to<=ed)return st[node];\r\n      push(node,from,to);\r\n      int mid=(from+to)/2;\r\n      return fun(_query(node*2,from,mid,str,ed),_query(node*2+1,mid+1,to,str,ed));\r\n   }\r\n\r\n   int query(int str,int ed)\r\n   {\r\n      return _query(1,1,n,str,ed);\r\n   }\r\n\r\n   void update(int str,int ed,int val)\r\n   {\r\n       _update(1,1,n,str,ed,val);\r\n   }\r\n   \r\n};\r\n\r\n\r\n\r\n\r\n\r\nll solve(int test)\r\n{\r\n   int n,m;\r\n   cin>>n>>m;\r\n   lazy_segment_tree2 seg(n+10,INF2,[](int a,int b){return min(a,b);});\r\n   multiset<int>ms;\r\n   for(int i=1;i<=n;i+=1)ms.insert(i);\r\n   ms.insert(-1);\r\n   ms.insert(n+1);\r\n   for(int i=1;i<=m;i+=1)\r\n   {\r\n      int t;\r\n      cin>>t;\r\n      if(t)\r\n      {\r\n         int a;\r\n         cin>>a;\r\n         if(ms.count(a)==0)\r\n         {\r\n            cout<<\"NO\"<<endl;\r\n            continue;\r\n         }\r\n         auto pre=*prev(ms.lower_bound(a))+1;\r\n         auto nxt=*ms.upper_bound(a);\r\n         int s=seg.query(pre,a);\r\n         cout<<((s<nxt)?\"YES\":\"N/A\")<<endl;\r\n      }\r\n      else\r\n      {\r\n         int a,b,c;\r\n         cin>>a>>b>>c;\r\n         if(c==0)\r\n         {\r\n            auto it=ms.lower_bound(a);\r\n            while(it!=ms.end() and *it<=b)it=ms.erase(it);\r\n            continue;\r\n         }\r\n         seg.update(a,a,min(b,seg.query(a,a)));  \r\n      }\r\n   }\r\n\r\n   \r\n   return 0;\r\n}\r\n\r\n\r\n\r\n\r\n\r\n\r\nsigned main()\r\n{\r\n   IOS;\r\n   #ifdef LOCAL\r\n      freopen(\"input.txt\",\"r\",stdin);\r\n      freopen(\"output.txt\",\"w\",stdout);\r\n   #endif\r\n   ll t=1;\r\n   // cin>>t;\r\n   for(int i=1;i<=t;i++){solve(i);}\r\n   return 0;\r\n}\r\n\r\n\r\n"
+}

@@ -1,0 +1,34 @@
+{
+    "id": 57761664,
+    "contestId": 1192,
+    "creationTimeSeconds": 1564078553,
+    "relativeTimeSeconds": 15053,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "Noam527"
+            }
+        ],
+        "participantType": "CONTESTANT",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "PARTIAL",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 78,
+    "memoryConsumedBytes": 1638400,
+    "points": 22.0,
+    "source": "#include <bits/stdc++.h>\r\n#define finish(x) return cout << x << endl, 0\r\ntypedef long long ll;\r\ntypedef long double ldb;\r\nconst int md = 998244353;\r\nconst ll inf = 1e18;\r\nconst int OO = 0;\r\nconst int OOO = 1;\r\nusing namespace std;\r\n\r\nstruct cell {\r\n\tint x, y, i;\r\n\tcell(int xx = 0, int yy = 0, int ii = 0) {\r\n\t\tx = xx;\r\n\t\ty = yy;\r\n\t\ti = ii;\r\n\t}\r\n\tbool operator < (const cell &a) const {\r\n\t\tif (x != a.x) return x < a.x;\r\n\t\treturn y < a.y;\r\n\t}\r\n};\r\n\r\nconst int dx[4] = { 1, -1, 0, 0 }, dy[4] = { 0, 0, 1, -1 };\r\n\r\nint n;\r\nint subtask;\r\nvector<cell> a;\r\nvector<vector<int>> g;\r\nvector<int> ans, rem;\r\n\r\nconst int lim = 205;\r\n\r\nbool M[lim][lim] = {};\r\nbool vis[lim][lim] = {};\r\n\r\nvoid dfsmap(int x, int y) {\r\n\tif (x < 0 || x >= lim || y < 0 || y >= lim) return;\r\n\tif (vis[x][y] || M[x][y]) return;\r\n\tvis[x][y] = 1;\r\n\tfor (int k = 0; k < 4; k++)\r\n\t\tdfsmap(x + dx[k], y + dy[k]);\r\n}\r\n\r\nvector<int> dep, link, cut;\r\n\r\nvoid dfs1(int v, int prev, int d) {\r\n\tdep[v] = link[v] = d;\r\n\tint cnt = 0;\r\n\tbool found = false;\r\n\tfor (const auto &i : g[v])\r\n\t\tif (i != prev && !rem[i]) {\r\n\t\t\tif (dep[i] != -1) link[v] = min(link[v], dep[i]);\r\n\t\t\telse {\r\n\t\t\t\tcnt++;\r\n\t\t\t\tdfs1(i, v, 1 + d);\r\n\t\t\t\tlink[v] = min(link[v], link[i]);\r\n\t\t\t\tif (link[i] < d) found = true;\r\n\t\t\t}\r\n\t\t}\r\n\tif (d == 0) {\r\n\t\tif (cnt > 1) cut[v] = 1;\r\n\t}\r\n\telse {\r\n\t\tif (!found) cut[v] = 1;\r\n\t}\r\n}\r\n\r\nint gvis[2005] = {};\r\n\r\nint dfsg(int v, int avoid) {\r\n\tif (gvis[v] || v == avoid || rem[v]) return 0;\r\n\tgvis[v] = 1;\r\n\tint rtn = 1;\r\n\tfor (const auto &i : g[v])\r\n\t\trtn += dfsg(i, avoid);\r\n\treturn rtn;\r\n}\r\n\r\nvoid bicon() {\r\n\tfor (int i = 0; i < n; i++)\r\n\t\tcut[i] = 0, dep[i] = link[i] = -1;\r\n\tint st = 0, st2;\r\n\twhile (rem[st]) st++;\r\n\tfor (int i = 0; i < n; i++) gvis[i] = 0;\r\n\tint tot = dfsg(st, -1);\r\n\tif (tot == 1) return;\r\n\tst2 = st + 1;\r\n\twhile (rem[st2]) st2++;\r\n\tfor (int j = 0; j < n; j++) {\r\n\t\tif (rem[j]) continue;\r\n\t\tfor (int i = 0; i < n; i++) gvis[i] = 0;\r\n\t\tif (j != st) {\r\n\t\t\tif (dfsg(st, j) + 1 != tot) cut[j] = 1;\r\n\t\t}\r\n\t\telse {\r\n\t\t\tif (dfsg(st2, j) + 1 != tot) cut[j] = 1;\r\n\t\t}\r\n\t}\r\n\t/*\r\n\tfor (int i = 0; i < n; i++) {\r\n\t\tif (!rem[i]) {\r\n\t\t\tdfs1(i, i, 0);\r\n\t\t\treturn;\r\n\t\t}\r\n\t}\r\n\t*/\r\n}\r\n\r\nint L, R, B, T;\r\n\r\nset<cell> S;\r\nvoid dfscon(cell a) {\r\n\tS.erase(a);\r\n\tcell tmp;\r\n\tfor (int i = a.x - 1; i <= a.x + 1; i++) for (int j = a.y - 1; j <= a.y + 1; j++) {\r\n\t\ttmp = cell(i, j);\r\n\t\tauto it = S.find(tmp);\r\n\t\tif (it != S.end()) dfscon(*it);\r\n\t}\r\n}\r\n\r\nint main() {\r\n\tios::sync_with_stdio(0), cin.tie(0);\r\n\tcin >> n >> subtask;\r\n\tif (n > 200 || subtask == 2) finish(\"NO\");\r\n\ta.resize(n);\r\n\tfor (int i = 0, x, y; i < n; i++) {\r\n\t\tcin >> x >> y;\r\n\t\ta[i] = cell(x, y, i);\r\n\t\tS.insert(a[i]);\r\n\t}\r\n\tdfscon(a[0]);\r\n\tif (S.size()) finish(\"NO\");\r\n\tcout << \"YES\\n\";\r\n\tg.resize(n);\r\n\trem.resize(n, 0);\r\n\tfor (int i = 0; i < n; i++) for (int j = i + 1; j < n; j++)\r\n\t\tif (abs(a[i].x - a[j].x) <= 1 && abs(a[i].y - a[j].y) <= 1)\r\n\t\t\tg[i].push_back(j), g[j].push_back(i);\r\n\tL = B = 1e9 + 7;\r\n\tR = T = -1;\r\n\tfor (const auto &i : a) {\r\n\t\tL = min(L, i.x);\r\n\t\tB = min(B, i.y);\r\n\t\tR = max(R, i.x);\r\n\t\tT = max(T, i.y);\r\n\t}\r\n\tL--;\r\n\tB--;\r\n\tR++;\r\n\tT++;\r\n\tdep.resize(n);\r\n\tlink.resize(n);\r\n\tcut.resize(n);\r\n\r\n\tvector<int> ans;\r\n\tfor (const auto &i : a)\r\n\t\tM[i.x - L][i.y - B] = 1;\r\n\tdfsmap(0, 0);\r\n\twhile (ans.size() < n) {\r\n\t\tif (OO) cout << \"new iter\\n\";\r\n\t\tbicon();\r\n\t\tint at = -1;\r\n\t\tfor (int i = 0; i < n; i++) {\r\n\t\t\tif (!rem[i] && !cut[i]) {\r\n\t\t\t\tfor (int k = 0; k < 4; k++)\r\n\t\t\t\t\tif (vis[a[i].x - L + dx[k]][a[i].y - B + dy[k]]) {\r\n\t\t\t\t\t\tat = i;\r\n\t\t\t\t\t\tbreak;\r\n\t\t\t\t\t}\r\n\t\t\t}\r\n\t\t\tif (at != -1) break;\r\n\t\t}\r\n\t\tif (OO) cout << \"at = \" << at << '\\n';\r\n\t\tans.push_back(at);\r\n\t\trem[at] = 1;\r\n\t\tM[a[at].x - L][a[at].y - B] = 0;\r\n\t\tdfsmap(a[at].x - L, a[at].y - B);\r\n\t}\r\n\treverse(ans.begin(), ans.end());\r\n\tfor (const auto &i : ans) cout << 1 + i << '\\n';\r\n}"
+}

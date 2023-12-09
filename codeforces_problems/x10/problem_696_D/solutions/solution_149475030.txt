@@ -1,0 +1,38 @@
+{
+    "id": 149475030,
+    "contestId": 696,
+    "creationTimeSeconds": 1647138292,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 696,
+        "index": "D",
+        "name": "Legen...",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2500,
+        "tags": [
+            "data structures",
+            "dp",
+            "matrices",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 696,
+        "members": [
+            {
+                "handle": "fzj2007"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1468514100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 468,
+    "memoryConsumedBytes": 7577600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nnamespace IO{\r\n\ttemplate<typename T>inline bool read(T &x){\r\n\t\tx=0;\r\n\t\tchar ch=getchar();\r\n\t\tbool flag=0,ret=0;\r\n\t\twhile(ch<'0'||ch>'9') flag=flag||(ch=='-'),ch=getchar();\r\n\t\twhile(ch>='0'&&ch<='9') x=x*10+ch-'0',ch=getchar(),ret=1;\r\n\t\tx=flag?-x:x;\r\n        return ret;\r\n\t}\r\n\ttemplate<typename T,typename ...Args>inline bool read(T& a,Args& ...args){\r\n\t    return read(a)&&read(args...);\r\n\t}\r\n\ttemplate<typename T>void prt(T x){\r\n\t\tif(x>9) prt(x/10);\r\n\t\tputchar(x%10+'0');\r\n\t}\r\n\ttemplate<typename T>inline void put(T x){\r\n\t\tif(x<0) putchar('-'),x=-x;\r\n\t\tprt(x);\r\n\t}\r\n\ttemplate<typename T>inline void put(char ch,T x){\r\n\t\tif(x<0) putchar('-'),x=-x;\r\n\t\tprt(x);\r\n\t\tputchar(ch);\r\n\t}\r\n\ttemplate<typename T,typename ...Args>inline void put(T a,Args ...args){\r\n\t    put(a);\r\n\t\tput(args...);\r\n\t}\r\n\ttemplate<typename T,typename ...Args>inline void put(const char ch,T a,Args ...args){\r\n\t    put(ch,a);\r\n\t\tput(ch,args...);\r\n\t}\r\n\tinline void put(string s){\r\n\t\tfor(int i=0,sz=s.length();i<sz;i++) putchar(s[i]);\r\n\t}\r\n\tinline void put(const char* s){\r\n\t\tfor(int i=0,sz=strlen(s);i<sz;i++) putchar(s[i]);\r\n\t}\r\n}\r\nusing namespace IO;\r\n#define N 205\r\nstruct matrix{\r\n\tlong long mat[N][N],n;\r\n\tmatrix(int _n=0):n(_n){memset(mat,-0x3f,sizeof(mat));}\r\n\tinline matrix operator*(const matrix &b)const{\r\n\t\tmatrix c(n);\r\n\t\tfor(int k=1;k<=n;k++)\r\n\t\t\tfor(int i=1;i<=n;i++)\r\n\t\t\t\tfor(int j=1;j<=n;j++)\r\n\t\t\t\t\tc.mat[i][j]=max(c.mat[i][j],mat[i][k]+b.mat[k][j]);\r\n\t\treturn c;\r\n\t}\r\n\tinline matrix operator*=(const matrix &b){return *this=*this*b;}\r\n}base,ans; \r\nmatrix power(matrix x,long long y){\r\n\tmatrix res=x;y--;\r\n\twhile(y){\r\n\t\tif(y&1) res*=x;\r\n\t\tx*=x,y>>=1;\r\n\t}\r\n\treturn res;\r\n}\r\nint trie[N*N][26],fail[N*N],val[N*N],idx,q[N*N];\r\ninline void insert(char *c,int v){\r\n\tint x=0,len=strlen(c);\r\n\tfor(int i=0;i<len;i++){\r\n\t\tint ch=c[i]-'a';\r\n\t\tif(!trie[x][ch]) trie[x][ch]=++idx;\r\n\t\tx=trie[x][ch];\r\n\t}\r\n\tval[x]+=v;\r\n}\r\ninline void build(){\r\n\tint head=1,tail=0;\r\n\tfor(int i=0;i<26;i++) if(trie[0][i]) q[++tail]=trie[0][i];\r\n\twhile(head<=tail){\r\n\t\tint x=q[head++];\r\n\t\tfor(int i=0;i<26;i++)\r\n\t\t\tif(trie[x][i]) fail[trie[x][i]]=trie[fail[x]][i],q[++tail]=trie[x][i];\r\n\t\t\telse trie[x][i]=trie[fail[x]][i];\r\n\t\tval[x]+=val[fail[x]];\r\n\t}\r\n}\r\nint n,m,dis[N];\r\nlong long res=0;\r\nchar s[N];\r\nint main(){\r\n\tread(n,m);\r\n\tfor(int i=1;i<=n;i++) read(dis[i]);\r\n\tfor(int i=1;i<=n;i++) scanf(\"%s\",s),insert(s,dis[i]);\r\n\tbuild();\r\n\tans.n=base.n=idx+1;\r\n\tans.mat[1][1]=0;\r\n\tfor(int i=0;i<=idx;i++)\r\n\t\tfor(int j=0;j<26;j++)\r\n\t\t\tbase.mat[i+1][trie[i][j]+1]=max(base.mat[i+1][trie[i][j]+1],(long long)val[trie[i][j]]);\r\n\tans*=power(base,m);\r\n\tfor(int i=1;i<=idx+1;i++) res=max(res,ans.mat[1][i]);\r\n\tput('\\n',res); \r\n\treturn 0;\r\n}\r\n\r\n"
+}

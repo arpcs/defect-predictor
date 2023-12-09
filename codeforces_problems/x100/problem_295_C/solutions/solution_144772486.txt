@@ -1,0 +1,38 @@
+{
+    "id": 144772486,
+    "contestId": 295,
+    "creationTimeSeconds": 1643654174,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "Monarchuwu"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 102400,
+    "source": "#include<iostream>\r\n#include<algorithm>\r\nusing namespace std;\r\ntypedef long long ll;\r\n\r\nconst int N = 50 + 2, K = 5000 + 3, mod = 1e9 + 7;\r\nint n, k;\r\nint a[N], cnt[4];\r\n\r\nll C[N][N]; // C[k][n]\r\nvoid prep() {\r\n    C[0][0] = 1;\r\n    for (int i = 1; i < N; ++i) {\r\n        C[0][i] = C[i][i] = 1;\r\n        for (int j = 1; j < i; ++j)\r\n            C[j][i] = (C[j - 1][i - 1] + C[j][i - 1]) % mod;\r\n    }\r\n}\r\n\r\nll dp[2][N][N];\r\nbool vis[2][N][N];\r\nint main() {\r\n    cin.tie(NULL)->sync_with_stdio(false);\r\n    prep();\r\n\r\n    cin >> n >> k; k /= 50; // k <= 200\r\n    for (int i = 1; i <= n; ++i)\r\n        cin >> a[i], ++cnt[a[i] /= 50];\r\n\r\n    dp[0][cnt[1]][cnt[2]] = 1;\r\n    vis[0][cnt[1]][cnt[2]] = true;\r\n    int sum(0), op(0);\r\n    while (!vis[1][0][0] && sum <= n * 4) {\r\n        for (int i = 0; i <= cnt[1]; ++i)\r\n            for (int j = 0; j <= cnt[2]; ++j) {\r\n                dp[op ^ 1][i][j] = 0;\r\n                vis[op ^ 1][i][j] = false;\r\n            }\r\n\r\n        if (op == 0) {\r\n            for (int i = 0; i <= cnt[1]; ++i)\r\n                for (int j = 0; j <= cnt[2]; ++j) if (i + j > 0 && dp[0][i][j])\r\n                    for (int ii = 0; ii <= i; ++ii)\r\n                        for (int jj = 0; jj <= j; ++jj) if (ii + jj > 0 && ii + jj * 2 <= k) {\r\n                            (dp[1][i - ii][j - jj] += dp[0][i][j] * C[ii][i] % mod * C[jj][j]) %= mod;\r\n                            vis[1][i - ii][j - jj] |= vis[0][i][j];\r\n                        }\r\n        }\r\n        else {\r\n            for (int i = 0; i <= cnt[1]; ++i)\r\n                for (int j = 0; j <= cnt[2]; ++j) if (i + j < cnt[1] + cnt[2] && dp[1][i][j])\r\n                    for (int ii = 0; ii <= cnt[1] - i; ++ii)\r\n                        for (int jj = 0; jj <= cnt[2] - j; ++jj) if (ii + jj > 0 && ii + jj * 2 <= k) {\r\n                            (dp[0][i + ii][j + jj] += dp[1][i][j] * C[ii][cnt[1] - i] % mod * C[jj][cnt[2] - j]) %= mod;\r\n                            vis[0][i + ii][j + jj] |= vis[1][i][j];\r\n                        }\r\n        }\r\n        op ^= 1;\r\n        ++sum;\r\n    }\r\n\r\n    if (!vis[1][0][0]) sum = -1;\r\n    cout << sum << '\\n' << dp[1][0][0] << '\\n';\r\n}\r\n/**  /\\_/\\\r\n *  (= ._.)\r\n *  / >0  \\>1\r\n**/\r\n"
+}

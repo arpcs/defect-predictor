@@ -1,0 +1,35 @@
+{
+    "id": 197386233,
+    "contestId": 444,
+    "creationTimeSeconds": 1678803338,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 444,
+        "index": "C",
+        "name": "DZY Loves Colors",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 444,
+        "members": [
+            {
+                "handle": "__Xujin"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1404651900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 218,
+    "memoryConsumedBytes": 7987200,
+    "source": "#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nconst int N = 1E5 + 10;\r\n\r\nint n,m;\r\n\r\nstruct Node{\r\n    int l,r,v,tag,lz;\r\n    void updata(int x){\r\n        v += x * (r - l + 1);\r\n        lz += x;\r\n    }\r\n}tr[N << 2];\r\n\r\nvoid build(int u,int l,int r){\r\n    tr[u] = {l,r,0,0,0};\r\n    if(l==r){\r\n        tr[u].tag = l;\r\n        return ;\r\n    }\r\n    int mid = l + r >> 1;\r\n    build(u << 1,l,mid);\r\n    build(u << 1|1,mid+1,r);\r\n}\r\n\r\nvoid pushdown(int u){\r\n    if(tr[u].tag){\r\n//        tr[u << 1].v += tr[u].lz * (tr[u << 1].r - tr[u << 1].l + 1);\r\n//        tr[u << 1].lz += tr[u].lz;\r\n//        tr[u << 1|1].v += tr[u].lz * (tr[u << 1|1].r - tr[u << 1|1].l + 1);\r\n//        tr[u << 1|1].lz += tr[u].lz;\r\n        tr[u<<1].updata(tr[u].lz);\r\n        tr[u<<1|1].updata(tr[u].lz);\r\n        tr[u<<1].tag = tr[u << 1|1].tag = tr[u].tag;\r\n        tr[u].tag = 0;\r\n        tr[u].lz = 0;\r\n    }\r\n}\r\n\r\nvoid pushup(int u){\r\n    tr[u].v = tr[u << 1].v + tr[u << 1|1].v;\r\n    if(tr[u<<1].tag == tr[u<<1|1].tag){\r\n        tr[u].tag = tr[u<<1].tag;\r\n    }else tr[u].tag = 0;\r\n}\r\n\r\nvoid modify(int u,int l,int r,int w){\r\n    if( l <= tr[u].l && tr[u].r <= r){\r\n        if(tr[u].tag){\r\n            tr[u].v += abs(tr[u].tag - w) * (tr[u].r - tr[u].l + 1);\r\n            tr[u].lz += abs(tr[u].tag - w);\r\n            tr[u].tag = w;\r\n            return ;\r\n        }\r\n    }\r\n//    cout << u << endl;\r\n    pushdown(u);\r\n    int mid = tr[u].l + tr[u].r >> 1;\r\n    if(l <= mid)modify(u << 1,l,r,w);\r\n    if(r > mid)modify(u << 1|1,l,r,w);\r\n    pushup(u);\r\n}\r\n\r\nint query(int u,int l,int r){\r\n    if( l <= tr[u].l && tr[u].r <= r){\r\n        return tr[u].v;\r\n    }\r\n    pushdown(u);\r\n    int p = 0;\r\n    int mid = tr[u].l + tr[u].r >> 1;\r\n    if(l <= mid)p += query(u<<1,l,r);\r\n    if(r > mid)p += query(u<<1|1,l,r);\r\n    return p;\r\n}\r\n\r\nint main(){\r\n    cin >> n >> m;\r\n    build(1,1,n);\r\n    while(m--){\r\n        int x,a,b,c;\r\n        cin >> x;\r\n        if(x == 1){\r\n            cin >> a >> b >> c;\r\n            modify(1,a,b,c);\r\n        }else{\r\n            cin >> a >> b;\r\n            cout << query(1,a,b) << endl;\r\n        }\r\n    }\r\n\r\n    return 0;\r\n}"
+}

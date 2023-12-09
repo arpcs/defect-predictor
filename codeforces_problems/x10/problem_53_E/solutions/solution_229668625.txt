@@ -1,0 +1,36 @@
+{
+    "id": 229668625,
+    "contestId": 53,
+    "creationTimeSeconds": 1698226456,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 53,
+        "index": "E",
+        "name": "Dead Ends",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2500,
+        "tags": [
+            "bitmasks",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 53,
+        "members": [
+            {
+                "handle": "HY_Spark"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1294329600
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 32,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 8499200,
+    "source": "// LUOGU_RID: 131538265\n/*\r\n\tCopyright (C) 2023  Troubadour_Ggmz\r\n\r\n\tThis program is free software: you can redistribute it and/or modify\r\n\tit under the terms of the GNU General Public License as published by\r\n\tthe Free Software Foundation, either version 3 of the License, or\r\n\t(at your option) any later version.\r\n\r\n\tThis program is distributed in the hope that it will be useful,\r\n\tbut WITHOUT ANY WARRANTY; without even the implied warranty of\r\n\tMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\r\n\tGNU General Public License for more details.\r\n\r\n\tYou should have received a copy of the GNU General Public License\r\n\talong with this program.  If not, see <https://www.gnu.org/licenses/>.\r\n*/\r\n#include<bits/stdc++.h>\r\n#define int long long\r\nnamespace GGMZ\r\n{\r\n\tconst int N = (1 << 10) + 5, M = 13;\r\n\tint f[N][N], n, m, k, ans;\r\n\tstd::vector<int>g[M], u[M];\r\n\tinline int popcount(int x)\r\n\t{\r\n\t\tint ans = 0;\r\n\t\twhile (x)ans += x & 1, x >>= 1;\r\n\t\treturn ans;\r\n\t}\r\n\tvoid work()\r\n\t{\r\n\t\tstd::cin >> n >> m >> k;\r\n\t\tfor (int i = 1;i <= m;i++)\r\n\t\t{\r\n\t\t\tint u, v;\r\n\t\t\tstd::cin >> u >> v;\r\n\t\t\tg[u].push_back(v);\r\n\t\t\tg[v].push_back(u);\r\n\t\t}\r\n\t\tfor (int i = 1;i < (1 << n);i++)\r\n\t\t{\r\n\t\t\tu[popcount(i)].push_back(i);\r\n\t\t}\r\n\t\tfor (int i : u[1])\r\n\t\t{\r\n\t\t\tint k = 0;\r\n\t\t\tfor (k = 1;k <= n;k++)\r\n\t\t\t{\r\n\t\t\t\tif (i & (1 << (k - 1)))break;\r\n\t\t\t}\r\n\t\t\tfor (int v : g[k])\r\n\t\t\t{\r\n\t\t\t\tf[i | (1 << (v - 1))][i | (1 << (v - 1))] = 2;\r\n\t\t\t}\r\n\t\t}\r\n\t\tfor (int p = 2;p <= n;p++)//\u679a\u4e3e\u8282\u70b9\u6570\r\n\t\t{\r\n\t\t\tfor (int i : u[p])//\u679a\u4e3e\u5f53\u524d\u8fde\u901a\u6027\u72b6\u6001\r\n\t\t\t{\r\n\t\t\t\tfor (int k = i;k;k = (k - 1) & i)//\u679a\u4e3e\u53f6\u5b50\r\n\t\t\t\t{\r\n\t\t\t\t\tf[i][k] /= popcount(k);\r\n\t\t\t\t\tfor (int j = 1;j <= n;j++)//\u679a\u4e3e\u5411\u5916\u5ef6\u4f38\u7684\u8282\u70b9\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tif (i & (1 << (j - 1)))//\u53ef\u4ee5\u5411\u5916\u5ef6\u4f38\r\n\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\tfor (int v : g[j])//\u679a\u4e3e\u8fb9\r\n\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\tif (!(i & (1 << (v - 1))))//\u8fb9\u4e0d\u5728\u5185\u90e8\r\n\t\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\t\t//f[i | (1 << (v - 1))][(k ^ (1 << (j - 1))) | (1 << (v - 1))] += f[i][k];\r\n\t\t\t\t\t\t\t\t\tif (k & (1 << (j - 1)))//\u4ece\u53f6\u5b50\u8282\u70b9\u5f80\u5916\u5ef6\u4f38\r\n\t\t\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\t\t\tf[i | (1 << (v - 1))][(k ^ (1 << (j - 1))) | (1 << (v - 1))] += f[i][k];\r\n\t\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t\t\telse\r\n\t\t\t\t\t\t\t\t\t{\r\n\t\t\t\t\t\t\t\t\t\tf[i | (1 << (v - 1))][k | (1 << (v - 1))] += f[i][k];\r\n\t\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t\t}\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\tfor (int i : u[k])\r\n\t\t{\r\n\t\t\tans += f[(1 << n) - 1][i];\r\n\t\t}\r\n\t\tstd::cout << ans << '\\n';\r\n\t}\r\n}\r\n#undef int\r\nint main()\r\n{\r\n\treturn GGMZ::work(), 0;\r\n}"
+}

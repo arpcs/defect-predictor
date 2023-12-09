@@ -1,0 +1,35 @@
+{
+    "id": 232518597,
+    "contestId": 1209,
+    "creationTimeSeconds": 1699800309,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1209,
+        "index": "G2",
+        "name": "Into Blocks (hard version)",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1209,
+        "members": [
+            {
+                "handle": "jifbt"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1568466300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 25,
+    "timeConsumedMillis": 1325,
+    "memoryConsumedBytes": 31436800,
+    "source": "// LUOGU_RID: 134835159\n#include <bits/stdc++.h>\r\nusing namespace std;\r\ntemplate <typename T> T min_elem(set<T> &s) { return *s.begin(); }\r\ntemplate <typename T> T max_elem(set<T> &s) { return *prev(s.end()); }\r\nconst int N = 2e5 + 5, V = N << 2;\r\nint n, q, a[N];\r\nset<int> s[N];\r\nstruct Node {\r\n    int tot, mnv, mxt, lmx, rmx, tag;\r\n} seg[V];\r\nNode operator+(const Node &x, const Node &y) {\r\n    int mxt = max(x.mxt, y.mxt);\r\n    if (x.mnv < y.mnv) return {x.tot, x.mnv, mxt, x.lmx, max(x.rmx, y.mxt), 0};\r\n    if (y.mnv < x.mnv) return {y.tot, y.mnv, mxt, max(x.mxt, y.lmx), y.rmx, 0};\r\n    return {x.tot + y.tot + max(x.rmx, y.lmx), x.mnv, mxt, x.lmx, y.rmx, 0};\r\n}\r\n#define lc (u << 1)\r\n#define rc (u << 1 | 1)\r\n#define mid ((l + r) >> 1)\r\nvoid change(int u, int v) { seg[u].mnv += v, seg[u].tag += v; }\r\nvoid pushdown(int u) {\r\n    if (int &t = seg[u].tag) change(lc, t), change(rc, t), t = 0;\r\n}\r\nvoid pushup(int u) { seg[u] = seg[lc] + seg[rc]; }\r\nvoid add(int k, int v, int u = 1, int l = 1, int r = n + 1) {\r\n    if (r - l == 1) return seg[u].mxt = seg[u].lmx = v, void();\r\n    pushdown(u);\r\n    k < mid ? add(k, v, lc, l, mid) : add(k, v, rc, mid, r);\r\n    pushup(u);\r\n}\r\nvoid upd(int L, int R, int v, int u = 1, int l = 1, int r = n + 1) {\r\n    if (L <= l && r <= R) return change(u, v), void();\r\n    pushdown(u);\r\n    if (L < mid) upd(L, R, v, lc, l, mid);\r\n    if (R > mid) upd(L, R, v, rc, mid, r);\r\n    pushup(u);\r\n}\r\nvoid modify(int x, int sgn) {\r\n    int z = s[x].size();\r\n    if (z == 0) return;\r\n    // printf(\"%d %d %d\\n\", x, min_elem(s[x]), max_elem(s[x]));\r\n    add(min_elem(s[x]), sgn > 0 ? z : 0);\r\n    if (min_elem(s[x]) != max_elem(s[x]))\r\n        upd(min_elem(s[x]), max_elem(s[x]), sgn);\r\n}\r\nint getans() { return n - seg[1].tot - seg[1].lmx - seg[1].rmx; }\r\nint main() {\r\n    scanf(\"%d%d\", &n, &q);\r\n    for (int i = 1; i <= n; ++i) {\r\n        scanf(\"%d\", a + i);\r\n        s[a[i]].insert(i);\r\n    }\r\n    for (int i = 1; i < N; ++i) modify(i, 1);\r\n    printf(\"%d\\n\", getans());\r\n    while (q--) {\r\n        int x, y;\r\n        scanf(\"%d%d\", &x, &y);\r\n        modify(a[x], -1), s[a[x]].erase(x), modify(a[x], 1);\r\n        a[x] = y;\r\n        modify(a[x], -1), s[a[x]].insert(x), modify(a[x], 1);\r\n        printf(\"%d\\n\", getans());\r\n    }\r\n}"
+}

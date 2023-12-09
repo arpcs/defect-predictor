@@ -1,0 +1,37 @@
+{
+    "id": 236145008,
+    "contestId": 1307,
+    "creationTimeSeconds": 1701929124,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "bkifhr9"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 280,
+    "memoryConsumedBytes": 512000,
+    "source": "//ANMHLIJKTJIY!\n#pragma GCC optimize(2)\n#pragma GCC optimize(\"Ofast\")\n#pragma GCC optimize(\"inline\",\"fast-math\",\"unroll-loops\",\"no-stack-protector\")\n#pragma GCC diagnostic error \"-fwhole-program\"\n#pragma GCC diagnostic error \"-fcse-skip-blocks\"\n#pragma GCC diagnostic error \"-funsafe-loop-optimizations\"\n#include <bits/stdc++.h>\n#define INF 1000000000\n#define LINF 1000000000000000000\n#define MOD 1000000007\n#define mod 998244353\n#define F first\n#define S second\n#define ll long long\n#define N 110\nusing namespace std;\nstruct Edge{\n\tll v,bkid,cap,cost;\n};\nstruct Flow{\n\tvector<Edge> vt[N];\n\tll n,m,s,t,dep[N],cur[N],totcost;\n\tbool vis[N],inq[N];\n\tvoid init(ll _n)\n\t{\n\t\tn=_n,m=0,s=n-2,t=n-1;\n\t\tll i;\n\t\tfor(i=0;i<n;i++)\n\t\t{\n\t\t\tvt[i].clear();\n\t\t}\n\t\treturn;\n\t}\n\tvoid addedge(ll x,ll y,ll w,ll c)\n\t{\n\t\tEdge cur;\n\t\tcur.v=y,cur.bkid=vt[y].size(),cur.cap=w,cur.cost=c;\n\t\tvt[x].push_back(cur);\n\t\tcur.v=x,cur.bkid=vt[x].size()-1,cur.cap=0,cur.cost=-c;\n\t\tvt[y].push_back(cur);\n\t\treturn;\n\t}\n\tbool spfa()\n\t{\n\t\tqueue<ll> q;\n\t\tll i,x,w;\n\t\tfor(i=0;i<n;i++)\n\t\t{\n\t\t\tdep[i]=LINF;\n\t\t\tinq[i]=false;\n\t\t}\n\t\tdep[s]=0;\n\t\tq.push(s);\n\t\twhile(!q.empty())\n\t\t{\n\t\t\tll x=q.front();\n\t\t\tq.pop();\n\t\t\tinq[x]=false;\n\t\t\tfor(i=0;i<vt[x].size();i++)\n\t\t\t{\n\t\t\t\tif(vt[x][i].cap>0&&dep[vt[x][i].v]>dep[x]+vt[x][i].cost)\n\t\t\t\t{\n\t\t\t\t\tdep[vt[x][i].v]=dep[x]+vt[x][i].cost;\n\t\t\t\t\tif(!inq[vt[x][i].v])\n\t\t\t\t\t{\n\t\t\t\t\t\tinq[vt[x][i].v]=true;\n\t\t\t\t\t\tq.push(vt[x][i].v);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn (dep[t]<INF);\n\t}\n\tll dfs(ll x,ll lft)\n\t{\n\t\tvis[x]=true;\n\t\tif(x==t||lft<=0)\n\t\t{\n\t\t\treturn lft;\n\t\t}\n\t\tll i,v,ret=0;\n\t\tfor(i=cur[x];i<vt[x].size();i++,cur[x]++)\n\t\t{\n\t\t\tif((!vis[vt[x][i].v])&&vt[x][i].cap>0&&dep[vt[x][i].v]==dep[x]+vt[x][i].cost)\n\t\t\t{\n\t\t\t\tv=dfs(vt[x][i].v,min(lft,vt[x][i].cap));\n\t\t\t\ttotcost+=v*vt[x][i].cost;\n\t\t\t\tret+=v;\n\t\t\t\tvt[x][i].cap-=v;\n\t\t\t\tvt[vt[x][i].v][vt[x][i].bkid].cap+=v;\n\t\t\t\tlft-=v;\n\t\t\t\tif(lft<=0)\n\t\t\t\t{\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn ret;\n\t}\n\tpair<ll,ll> min_cost_max_flow()\n\t{\n\t\tll ret=0,i;\n\t\twhile(spfa())\n\t\t{\n\t\t\tfor(i=0;i<n;i++)\n\t\t\t{\n\t\t\t\tvis[i]=cur[i]=0;\n\t\t\t}\n\t\t\tret+=dfs(s,LINF);\n\t\t}\n\t\treturn make_pair(ret,totcost);\n\t}\n}fl;\nll n,m,q,mxf[2510];\nint main(){\n\tll i,x,y,w;\n\tscanf(\"%lld%lld\",&n,&m);\n\tfl.init(n+2);\n\tfor(i=0;i<m;i++)\n\t{\n\t\tscanf(\"%lld%lld%lld\",&x,&y,&w);\n\t\tx--,y--;\n\t\tfl.addedge(x,y,1,w);\n\t}\n\tll mxt=0;\n\tfor(i=1;;i++)\n\t{\n\t\tfl.addedge(fl.s,0,1,0);\n\t\tfl.addedge(n-1,fl.t,1,0);\n\t\tpair<ll,ll> pr=fl.min_cost_max_flow();\n\t\tif(pr.F<1)\n\t\t{\n\t\t\tmxt=i;\n\t\t\tbreak;\n\t\t}\n\t\tmxf[i]=pr.S;\n\t}\n\tscanf(\"%lld\",&q);\n\twhile(q--)\n\t{\n\t\tscanf(\"%lld\",&w);\n\t\tdouble ans=INF;\n\t\tfor(i=1;i<mxt;i++)\n\t\t{\n\t\t\tans=min(ans,(double)(mxf[i]+w)/(double)i);\n\t\t}\n\t\tprintf(\"%.12lf\\n\",ans);\n\t}\n\treturn 0;\n}\n\t \t \t\t\t        \t\t\t\t\t\t  \t \t\t\t  \t"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 234013109,
+    "contestId": 107,
+    "creationTimeSeconds": 1700815969,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 107,
+        "index": "C",
+        "name": "Arrangement",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2400,
+        "tags": [
+            "bitmasks",
+            "dp"
+        ]
+    },
+    "author": {
+        "contestId": 107,
+        "members": [
+            {
+                "handle": "guoyunfeng"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1314111600
+    },
+    "programmingLanguage": "Rust 2021",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "fn read_line() -> String {\n    let mut buf = String::new();\n    std::io::stdin().read_line(&mut buf).unwrap();\n    buf\n}\n\n#[allow(dead_code)]\nfn read_int<T: std::str::FromStr>() -> T {\n    read_line().trim_end().parse::<T>().ok().expect(\"\")\n}\n\n#[allow(dead_code)]\nfn read_ints<T: std::str::FromStr>() -> Vec<T> {\n    let line = read_line();\n    line.split_ascii_whitespace().map(|x| x.parse::<T>().ok().expect(\"\")).collect()\n}\n\n#[allow(dead_code)]\nfn read_pair<T: std::str::FromStr>() -> (T, T) {\n    let line = read_line();\n    let s: Vec<&str> = line.split_ascii_whitespace().collect();\n    (s[0].parse().ok().expect(\"\"), s[1].parse().ok().expect(\"\"))\n}\n\n#[allow(dead_code)]\nfn read_tripple<T: std::str::FromStr>() -> (T, T, T) {\n    let line = read_line();\n    let s: Vec<&str> = line.split_ascii_whitespace().collect();\n    (\n        s[0].parse().ok().expect(\"\"),\n        s[1].parse().ok().expect(\"\"),\n        s[2].parse().ok().expect(\"\"),\n    )\n}\n\n#[derive(Debug)]\nstruct Problem {\n    n:usize,\n    year:usize,\n    dag:Vec<Vec<usize>>,\n    degree:Vec<usize>,\n    prev:Vec<usize>,\n    cnter:Vec<usize>\n}\n\n\nimpl Problem {\n    pub fn read_input() -> Self {\n        let (n, y, m) = read_tripple::<usize>();\n        let mut dag:Vec<Vec<usize>> = vec![vec![]; n];\n        let mut degree:Vec<usize> = vec![0; n];\n        let mut prev:Vec<usize> = vec![0; n];\n        let mut cnter = vec![0; 1 << n];\n        for _ in 0..m {\n            let (u, v) = read_pair::<usize>();\n            dag[u - 1].push(v - 1);\n            degree[v - 1] += 1;\n            prev[v - 1] |= 1<< (u - 1);\n        }\n\n        // for _ in 0..n {\n        //     for i in 0..n {\n        //         for &j in &dag[i] {\n        //             prev[i] |= prev[j]\n        //         }\n        //     }\n        // }\n        // println!(\"prev = {prev:?}\");\n        cnter[(1 << n) - 1] = 1;\n        Self { n, year:y - 2000, dag, degree, prev, cnter }\n    }\n\n    pub fn has_circle(&self)->bool {\n        let mut degree = self.degree.to_vec();\n        let mut stk:Vec<usize> = (0..self.n).filter(|i| degree[*i] == 0).collect();\n        while let Some(i) = stk.pop() {\n            for &j in &self.dag[i] {\n                degree[j] -= 1;\n                if degree[j] == 0 {\n                    stk.push(j);\n                }\n            }\n        }\n        degree.iter().any(|x| *x > 0)\n    }\n\n    fn count(&mut self, mask: usize, depth: usize, inseat: &Vec<usize>)->usize {\n        if self.cnter[mask] > 0 {\n            return self.cnter[mask];\n        }\n        // if depth <\n        let mut res: usize = 0;\n        for i in 0..inseat.len() {\n            if mask & (1 << i) == 0 {\n                if inseat[i] < depth { return 0; }\n            }\n        }\n        for i in 0..self.n {\n            if (1 << i) & mask > 0 { continue; }\n            if self.prev[i] & mask != self.prev[i] { continue; }\n            // if self.degree[i] > 0 { continue; }\n            if i < inseat.len() && inseat[i] != depth { continue; }\n\n            // for &j in &self.dag[i] {\n            //     self.degree[j] -= 1;\n            // }\n            res += self.count(mask | (1 << i), depth + 1, inseat);\n            // for &j in &self.dag[i] {\n            //     self.degree[j] += 1;\n            // }\n        }\n        self.cnter[mask] = res;\n        res\n    }\n\n    fn dfs(&mut self, stk: &mut Vec<usize>, mask:usize) {\n        if stk.len() == self.n {\n            return;\n        }\n        for i in 0..self.n {\n            let nmask = (1 << i) | mask;\n            if mask == nmask { continue; }\n            // if self.degree[i] > 0 { continue; }\n            // print!(\"stk = {stk:?} i = {i} \");\n            self.cnter.fill(0);\n            self.cnter[(1 << self.n) - 1] = 1;\n            stk.push(i);\n            let t = self.count(0, 0, &stk);\n            // println!(\"stk = {stk:?} t= {t}, year= {}\", self.year);\n            // if i == 2 { break; }\n            if t < self.year {\n                // for &j in &self.dag[i] {\n                //     self.degree[j] -= 1;\n                // }   \n                self.year -= t;//self.count(0, 0, &stk);\n                // for &j in &self.dag[i] {\n                //     self.degree[j] += 1;\n                // }   \n                stk.pop();\n            } else {\n                // stk.push(i);\n                // for &j in &self.dag[i] {\n                //     self.degree[j] -= 1;\n                // }\n                self.dfs(stk, nmask);\n                // println!(\"\");\n                break\n            }\n        }\n    }\n    \n    pub fn solve(&mut self) -> Vec<usize> {\n        let mut ans:Vec<usize> = vec![];\n        if self.has_circle() { return ans; }\n        let total = self.count(0, 0, &ans);\n        println!(\"total = {total}\");\n        if total < self.year { return ans; }\n        self.dfs(&mut ans, 0);\n        // ans.push(self.count(0));\n        // println!(\" 1375 -> {} \", self.cnter[1 | (1 << 2) | (1 << 6) | (1 << 4) | (1 << 7)]);\n        ans\n    }\n}\n\n\nfn main() {\n    let mut p = Problem::read_input();\n    let ans = p.solve();\n    if ans.len() > 0 {\n        let t = ans.iter().map(|x| (*x + 1).to_string()).collect::<Vec<String>>().join(\" \");\n        println!(\"{t}\");\n    } else {\n        println!(\"The times have changed\");\n    }\n}\n"
+}

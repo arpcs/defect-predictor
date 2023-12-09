@@ -1,0 +1,38 @@
+{
+    "id": 118676146,
+    "contestId": 295,
+    "creationTimeSeconds": 1623031697,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "minhcool"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 92,
+    "memoryConsumedBytes": 11980800,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define int long long\r\n#define fi first\r\n#define se second\r\n#define pb push_back\r\n#define mp make_pair\r\n#define foru(i, l, r) for(int i = l; i <= r; i++)\r\n#define ford(i, r, l) for(int i = r; i >= l; i--)\r\n\r\ntypedef pair<int, int> ii;\r\ntypedef pair<ii, int> iii;\r\ntypedef pair<ii, ii> iiii;\r\n\r\nconst int N = 55;\r\n\r\nconst int oo = 1e18 + 7, mod = 1e9 + 7;\r\n\r\nint n, w, dp[N << 3][N][N];\r\nbool vis[N << 3][N][N];\r\nint num[2];\r\n\r\nint pw[N << 2], inv[N << 2];\r\n\r\nint binpw(int base, int pw){\r\n\tint ans = 1;\r\n\twhile(pw){\r\n\t\tif(pw & 1) ans = (ans * base) % mod;\r\n\t\tbase = (base * base) % mod;\r\n\t\tpw >>= 1;\r\n\t}\r\n\treturn ans;\r\n}\r\n\r\nvoid prep(){\r\n\tpw[0] = inv[0] = 1;\r\n\tfor(int i = 1; i <= 200; i++){\r\n\t\tpw[i] = (pw[i - 1] * i) % mod;\r\n\t\tinv[i] = binpw(pw[i], mod - 2);\r\n\t}\r\n}\r\n\r\nint c(int k, int n){\r\n\tint ans = pw[n] * inv[k];\r\n\tans %= mod;\r\n\tans = (ans * inv[n - k]) % mod;\r\n\treturn ans;\r\n}\r\n\r\nvoid process(){\r\n\tcin >> n >> w;\r\n\tprep();\r\n\tfor(int i = 1; i <= n; i++){\r\n\t\tint x;\r\n\t\tcin >> x;\r\n\t\tnum[x / 100]++;\r\n\t}\r\n\tif(w < 50){\r\n\t\tcout << \"-1\\n0\";\r\n\t\treturn;\r\n\t}\r\n\tif(num[1] && w < 100){\r\n\t\tcout << \"-1\\n0\";\r\n\t\treturn;\r\n\t}\r\n\tdp[1][num[0]][num[1]] = 1;\r\n\tvis[1][num[0]][num[1]] = 1;\r\n\tfor(int turn = 1; turn <= (n << 3); turn++){\r\n\t\tif(vis[turn][0][0]){\r\n\t\t\tcout << (turn - 1) << \"\\n\";\r\n\t\t\tcout << dp[turn][0][0] << \"\\n\";\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tif(turn & 1){\r\n\t\t\tfor(int i = 0; i <= num[0]; i++){\r\n\t\t\t\tfor(int j = 0; j <= num[1]; j++){\r\n\t\t\t\t\tfor(int k = 0; k <= i; k++){\r\n\t\t\t\t\t\tfor(int h = 0; h <= j; h++){\r\n\t\t\t\t\t\t\tif(i == k && j == h) continue;\r\n\t\t\t\t\t\t\tif(50 * (i - k) + 100 * (j - h) > w) continue;\r\n\t\t\t\t\t\t\t//cout << turn << \" \" << i << \" \" << j << \" \" << k << \" \" << h << \"\\n\";\r\n\t\t\t\t\t\t\t//cout << c(i - k, i) << \" \" << c(j - h, j) << \"\\n\";\r\n\t\t\t\t\t\t\tdp[turn + 1][k][h] += (((c(i - k, i) * c(j - h, j)) % mod) * dp[turn][i][j]) % mod;\r\n\t\t\t\t\t\t\t//cout << dp[turn + 1][k][h] << \"\\n\";\r\n\t\t\t\t\t\t\tif(dp[turn + 1][k][h] >= mod) dp[turn + 1][k][h] -= mod;\r\n\t\t\t\t\t\t\tvis[turn + 1][k][h] |= vis[turn][i][j];\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\telse{\r\n\t\t\tfor(int i = 0; i <= num[0]; i++){\r\n\t\t\t\tfor(int j = 0; j <= num[1]; j++){\r\n\t\t\t\t\tfor(int k = i; k <= num[0]; k++){\r\n\t\t\t\t\t\tfor(int h = j; h <= num[1]; h++){\r\n\t\t\t\t\t\t\tif(i == k && j == h) continue;\r\n\t\t\t\t\t\t\tif(50 * (k - i) + 100 * (h - j) > w) continue;\r\n\t\t\t\t\t\t\tdp[turn + 1][k][h] += (((c(k - i, num[0] - i) * c(h - j, num[1] - j)) % mod) * dp[turn][i][j]) % mod;\r\n\t\t\t\t\t\t\tif(dp[turn + 1][k][h] >= mod) dp[turn + 1][k][h] -= mod;\r\n\t\t\t\t\t\t\tvis[turn + 1][k][h] |= vis[turn][i][j];\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tcout << \"-1\\n0\";\r\n}\r\n\r\nsigned main(){\r\n\tios_base::sync_with_stdio(0);\r\n\tprocess();\r\n}"
+}

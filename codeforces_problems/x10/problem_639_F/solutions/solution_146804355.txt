@@ -1,0 +1,38 @@
+{
+    "id": 146804355,
+    "contestId": 639,
+    "creationTimeSeconds": 1645169154,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 639,
+        "index": "F",
+        "name": "Bear and Chemistry",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3300,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 639,
+        "members": [
+            {
+                "handle": "ethan_enhe"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1459182900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 77,
+    "timeConsumedMillis": 1325,
+    "memoryConsumedBytes": 180224000,
+    "source": "#include<bits/stdc++.h>\n#define vec vector\n#define pb push_back\nusing namespace std;\nconst int MXN=1e6+5,LG=19;\nint n,m,q,bn,cm,cn;\n\nstruct edge{\n\tint v,id;\n};\nvec<edge> adj[MXN],bdj[MXN],cdj[MXN];\nvoid ae(int u,int v,int id,vec<edge> *g){\n\tg[u].pb({v,id});\n}\n//{{{tj\nint dfn[MXN],low[MXN],dfnc;\nbool isb[MXN];\nvoid tarjan(int p,int comeid,vec<edge> *g){\n\tlow[p]=dfn[p]=++dfnc;\n\tfor(edge &nx:g[p]){\n\t\tif(!dfn[nx.v]){\n\t\t\ttarjan(nx.v,nx.id,g);\n\t\t\tlow[p]=min(low[p],low[nx.v]);\n\t\t}\n\t\telse if(nx.id!=comeid)low[p]=min(low[p],dfn[nx.v]);\n\n\t\tif(low[nx.v]>dfn[p])\n\t\t\tisb[nx.id]=1;\n\t}\n\t//cout<<p<<\" \"<<dfn[p]<<\" \"<<low[p]<<'\\n';\n}\nvoid mark(int p,int k,int *col,vec<edge> *g){\n\tcol[p]=k;\n\tfor(edge &nx:g[p])\n\t\tif(!isb[nx.id] && !col[nx.v])\n\t\t\tmark(nx.v,k,col,g);\n}\n//}}}\n\n\n\nint bid[MXN];\n//{{{ lca\nint fa[MXN][LG+1],dpth[MXN];\nint tdfn[MXN],tdfnc;\nvoid init(int p,vec<edge> *g){\n\ttdfn[p]=++tdfnc;\n\tdpth[p]=dpth[fa[p][0]]+1;\n\tfor(int i=1;i<=LG;i++)\n\t\tfa[p][i]=fa[fa[p][i-1]][i-1];\n\tfor(edge &nx:g[p])\n\t\tif(nx.v!=fa[p][0]){\n\t\t\tfa[nx.v][0]=p;\n\t\t\tinit(nx.v,g);\n\t\t}\n}\nint lca(int x,int y){\n\tif(dpth[x]<dpth[y])swap(x,y);\n\tint tmp=dpth[x]-dpth[y];\n\tfor(int i=LG;~i;i--)\n\t\tif((tmp>>i)&1)\n\t\t\tx=fa[x][i];\n\tif(x==y)return x;\n\tfor(int i=LG;~i;i--)\n\t\tif(fa[x][i]!=fa[y][i])\n\t\t\tx=fa[x][i],y=fa[y][i];\n\treturn fa[x][0];\n}\n//}}}\n\nvec<int> nnode,qnode,sorted;\nint col[MXN];\n//{{{ vt\nbool cmp(int x,int y){\n\treturn tdfn[x]<tdfn[y];\n}\nint getdeeper(int x,int y){\n\treturn dpth[x]<dpth[y]?y:x;\n}\nint gid(int x){\n\treturn lower_bound(sorted.begin(),sorted.end(),x)-sorted.begin()+1;\n}\nvoid buildt(vec<int> &node){\n\tcm=0;\n\tsort(node.begin(),node.end(),cmp);\n\tnode.erase(unique(node.begin(),node.end()),node.end());\n\tint tmp=node.size();\n\tfor(int i=1;i<tmp;i++){\n\t\tint res=lca(node[i],node[i-1]);\n\t\tif(res)node.push_back(res);\n\t}\n\tsort(node.begin(),node.end(),cmp);\n\tnode.erase(unique(node.begin(),node.end()),node.end());\n\n\tsorted=node;\n\tsort(sorted.begin(),sorted.end());\n\tdfnc=0;\n\tfor(int i=0;i<(int)node.size();i++){\n\t\tcdj[i+1].clear();\n\t\tcol[i+1]=dfn[i+1]=low[i+1]=0;\n\t}\n\tfor(int i=1;i<(int)node.size();i++){\n\t\tint res=lca(node[i],node[i-1]),cur;\n\t\tif(res){\n\t\t\tres=gid(res),cur=gid(node[i]);\n\t\t\t++cm;\n\t\t\tae(res,cur,cm,cdj);\n\t\t\tae(cur,res,cm,cdj);\n\t\t}\n\t}\n\tcn=node.size()+1;\n}\n//}}}\n\nint R;\nint rotate(int &element)\n{\n   element=(element+R)%n;\n\n   if (element==0) {\n       element=n;\n   }\n\n   return element;\n}\nint _e[MXN][2];\nvoid solve(int x){\n\tnnode.clear();\n\tqnode.clear();\n\t//\u4f20bid\n\tint _n,_m;\n\tcin>>_n>>_m;\n\tfor(int i=1;i<=_n;i++){\n\t\tint x;\n\t\tcin>>x;\n\t\trotate(x);\n\t\tx=bid[x];\n\t\tqnode.pb(x);\n\t\tnnode.pb(x);\n\t}\n\tfor(int i=1;i<=_m;i++){\n\t\tcin>>_e[i][0]>>_e[i][1];\n\t\trotate(_e[i][0]);\n\t\trotate(_e[i][1]);\n\t\t_e[i][0]=bid[_e[i][0]];\n\t\t_e[i][1]=bid[_e[i][1]];\n\t\tnnode.pb(_e[i][0]);\n\t\tnnode.pb(_e[i][1]);\n\t}\n\tbuildt(nnode);\n\tfor(int i=1;i<=_m;i++){\n\t\t_e[i][0]=gid(_e[i][0]);\n\t\t_e[i][1]=gid(_e[i][1]);\n\t\t++cm;\n\t\tae(_e[i][0],_e[i][1],cm,cdj);\n\t\tae(_e[i][1],_e[i][0],cm,cdj);\n\t}\n\tfor(int i=1;i<=cm;i++)isb[i]=0;\n\tint s=gid(qnode[0]);\n\ttarjan(s,0,cdj);\n\tmark(s,1,col,cdj);\n\tfor(int i:qnode){\n\t\tint id=gid(i);\n\t\tif(!col[id]){\n\t\t\tcout<<\"NO\\n\";\n\t\t\treturn;\n\t\t}\n\t}\n\tcout<<\"YES\\n\";\n\tR=(x+R)%n;\n\t\n}\n\n\nint main(){\n\tios::sync_with_stdio(0);\n\tcin.tie(0);\n\tcin>>n>>m>>q;\n\tfor(int i=1;i<=m;i++){\n\t\tint u,v;\n\t\tcin>>u>>v;\n\t\tae(u,v,i,adj);\n\t\tae(v,u,i,adj);\n\t}\n\tfor(int i=1;i<=n;i++)\n\t\tif(!dfn[i])tarjan(i,0,adj);\n\tfor(int i=1;i<=n;i++){\n\t\tif(!bid[i])\n\t\t\tmark(i,++bn,bid,adj);\n\t}\n\n\n\t//\u5efa\u6811\n\tfor(int i=1;i<=n;i++)\n\t\tfor(edge &nx:adj[i])\n\t\t\tif(isb[nx.id]){\n\t\t\t\tae(bid[i],bid[nx.v],0,bdj);\n\t\t\t}\n\tfor(int i=1;i<=bn;i++)\n\t\tif(!dpth[i])\n\t\t\tinit(i,bdj);\n\t\n\t//cout<<\"!!!\"<<endl;\n\t//solve();\n\tfor(int i=1;i<=q;i++)\n\t\tsolve(i);\n\n\t//vec<int> x={2,5,7};\n\t//buildt(x);\n\n\treturn 0;\n}\n\n"
+}

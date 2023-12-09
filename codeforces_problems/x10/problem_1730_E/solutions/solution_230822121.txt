@@ -1,0 +1,38 @@
+{
+    "id": 230822121,
+    "contestId": 1730,
+    "creationTimeSeconds": 1698841303,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1730,
+        "index": "E",
+        "name": "Maximums and Minimums",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2700,
+        "tags": [
+            "combinatorics",
+            "data structures",
+            "divide and conquer",
+            "number theory"
+        ]
+    },
+    "author": {
+        "contestId": 1730,
+        "members": [
+            {
+                "handle": "luyiming123"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1664116500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 1184,
+    "memoryConsumedBytes": 252108800,
+    "source": "# include <bits/stdc++.h>\r\n# define int long long\r\nusing namespace std;\r\nusing i64 = long long;\r\nconst int N = 5e5 + 5; \r\nint n, a[N], nxt[N], nxtt[N * 2], pre[N * 2]; \r\nint L[N], R[N], f[N], g[N];\r\nvector <int> d[N * 2]; \r\nvoid Init(int n = 1e6)\r\n{\r\n\tfor(int x = 1; x <= n; x++)\r\n\t{\r\n\t\tfor(int y = x + x; y <= n; y += x) d[y].push_back(x); \r\n\t}\r\n\treturn; \r\n}\r\nsigned main(void)\r\n{\t\r\n\tInit();\r\n\tint Test; scanf(\"%lld\", &Test);\r\n\twhile(Test--)\r\n\t{\r\n\t\ti64 ans = 0;\r\n\t\tscanf(\"%lld\", &n); \r\n\t\tfor(int i = 1; i <= n; i++) scanf(\"%lld\", &a[i]); \r\n\t\tmemset(nxtt, 0, sizeof(nxtt)); memset(pre, 0, sizeof(pre)); \r\n\t\tfor(int i = 1; i <= n; i++) L[i] = R[i] = f[i] = g[i] = 0;\r\n\t\tfor(int i = n; i >= 1; i--)\r\n\t\t{\r\n\t\t\tnxt[i] = nxtt[a[i]]; nxtt[a[i]] = i; \r\n\t\t}\r\n\t\tvector <int> St(n + 5); int top = 0; \r\n\t\tfor(int i = 1; i <= n; i++)\r\n\t\t{\r\n\t\t\twhile(top && a[St[top]] <= a[i]) --top; \r\n\t\t\tL[i] = (top == 0) ? 0 : St[top]; St[++top] = i;\r\n\t\t}\r\n\t\ttop = 0;\r\n\t\tfor(int i = n; i >= 1; i--)\r\n\t\t{\r\n\t\t\twhile(top && a[St[top]] < a[i]) --top;\r\n\t\t\tR[i] = (top == 0) ? n + 1 : St[top]; St[++top] = i;\r\n\t\t}\r\n\t\ttop = 0; \r\n\t\tfor(int i = 1; i <= n; i++)\r\n\t\t{\r\n\t\t\twhile(top && a[St[top]] >= a[i]) --top; \r\n\t\t\tf[i] = (top == 0) ? 0 : St[top]; St[++top] = i; \r\n\t\t}\r\n\t\ttop = 0;\r\n\t\tfor(int i = n; i >= 1; i--)\r\n\t\t{\r\n\t\t\twhile(top && a[St[top]] >= a[i]) --top; \r\n\t\t\tg[i] = (top == 0) ? n + 1 : St[top]; St[++top] = i; \r\n\t\t}\r\n\t\t// for(int i = 1; i <= n; i++) \r\n\t\t// {\r\n\t\t// \tprintf(\"i = %lld, L = %lld, R = %lld, f = %lld, g = %lld\\n\", i, L[i], R[i], f[i], g[i]); \r\n\t\t// }\r\n\t\tfor(int i = 1; i <= n; i++)\r\n\t\t{\r\n\t\t\tif(ans < 0) {printf(\"fuck : %d\\n\", i); break;}\r\n\t\t\tpre[a[i]] = i;\r\n\t\t\tint l = L[i] + 1, r = R[i] - 1;\r\n\t\t\tif(l >= r) continue; \r\n\t\t\t// printf(\"i = %lld, l = %lld, r = %lld\\n\", i, l, r);\r\n\t\t\tfor(int v : d[a[i]]) // d of a[i] except a[i] itself\r\n\t\t\t{\r\n\t\t\t\t// printf(\"i = %lld, v = %lld\\n\", i, v);\r\n\t\t\t\tint lf = pre[v], rg = (lf == 0 ? (nxtt[v] > i ? nxtt[v] : 0) : nxt[lf]);\r\n\t\t\t\t// printf(\"lf = %lld, rg = %lld\\n\", lf, rg);\r\n\t\t\t\tif(lf == 0 && rg == 0) continue;\r\n\t\t\t\tif(rg == 0) \r\n\t\t\t\t{\r\n\t\t\t\t\tif(i > g[lf] - 1 || l > lf) continue; \r\n\t\t\t\t\tint zuo = max(l, f[lf] + 1), you = min(r, g[lf] - 1); \r\n\t\t\t\t\tprintf(\"zuo = %lld, you = %lld\\n\", zuo, you);\r\n\t\t\t\t\tans += 1ll * (lf - zuo + 1) * (you - i + 1);\r\n\t\t\t\t\tif(ans < 0) {printf(\"fuck : line 78\\n\"); break; }\r\n\t\t\t\t\t// printf(\"ans = %lld\\n\", ans);\r\n\t\t\t\t}\r\n\t\t\t\telse if(lf == 0)\r\n\t\t\t\t{\r\n\t\t\t\t\tif(i < f[rg] + 1 && rg > r) continue; \r\n\t\t\t\t\tint zuo = max(l, f[rg] + 1), you = min(r, g[rg] - 1);\r\n\t\t\t\t\t// printf(\"zuo = %lld, you = %lld\\n\", zuo, you);\r\n\t\t\t\t\tans += 1ll * (you - rg + 1) * (i - zuo + 1); \r\n\t\t\t\t\tif(ans < 0) {printf(\"fuck : line 87\\n\"); break; }\r\n\t\t\t\t\t// printf(\"ans = %lld\\n\", ans);\r\n\t\t\t\t}\r\n\t\t\t\telse\r\n\t\t\t\t{\r\n\t\t\t\t\tif(i <= g[lf] - 1 && l <= lf) // only lf\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tint zuo = max(l, f[lf] + 1), you = min(g[lf] - 1, rg - 1); you = min(you, r);\r\n\t\t\t\t\t\t// printf(\"only lf zuo = %lld, you = %lld\\n\", zuo, you);\r\n\t\t\t\t\t\tans += 1ll * (lf - zuo + 1) * (you - i + 1);\r\n\t\t\t\t\t\tif(ans < 0) {printf(\"fuck : line 97\\n\"); break; }\r\n\t\t\t\t\t\t// printf(\"ans = %lld\\n\", ans);\r\n\t\t\t\t\t}\r\n\t\t\t\t\tif(f[rg] + 1 <= i && rg <= r) // only rg\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tint zuo = max(lf + 1, f[rg] + 1), you = min(r, g[rg] - 1); zuo = max(zuo, l);\r\n\t\t\t\t\t\t// printf(\"only rg zuo = %lld, you = %lld\\n\", zuo, you);\r\n\t\t\t\t\t\tans += 1ll * (i - zuo + 1) * (you - rg + 1); \r\n\t\t\t\t\t\tif(ans < 0) {printf(\"fuck : line 105\\n\"); break; }\r\n\t\t\t\t\t\t// printf(\"ans = %lld\\n\", ans);\r\n\t\t\t\t\t}\r\n\t\t\t\t\t//lf and rg\r\n\t\t\t\t\tif(l <= lf && rg <= r)\r\n\t\t\t\t\t{\r\n\t\t\t\t\t\tint zuo = max(l, f[lf] + 1), you = min(r, g[rg] - 1);\r\n\t\t\t\t\t\t// printf(\"lf and rg zuo = %lld, you = %lld\\n\", zuo, you); \r\n\t\t\t\t\t\tans += 1ll * (lf - zuo + 1) * (rg - you + 1); \r\n\t\t\t\t\t\tif(ans < 0) {printf(\"fuck : line 114\\n\"); break; }\r\n\t\t\t\t\t\t// printf(\"ans = %lld\\n\", ans);\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\t//max = min = a[i]\r\n\t\tint l = 1; \r\n\t\tfor(int i = 2; i <= n; i++)\r\n\t\t{\r\n\t\t\tif(a[i] == a[i - 1]) continue; \r\n\t\t\t// [l, i - 1]\r\n\t\t\tans += (1ll * (i - l + 1ll) * (i - l) / 2ll);\r\n\t\t\tl = i;\r\n\t\t}\r\n\t\tint i = n + 1; \r\n\t\tans += (1ll * (i - l + 1ll) * (i - l) / 2ll);\r\n\t\tl = i;\r\n\t\tprintf(\"%lld\\n\", ans);\r\n\t}\t\r\n\treturn 0; \r\n}"
+}

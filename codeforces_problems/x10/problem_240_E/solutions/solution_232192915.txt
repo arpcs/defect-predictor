@@ -1,0 +1,36 @@
+{
+    "id": 232192915,
+    "contestId": 240,
+    "creationTimeSeconds": 1699603576,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 240,
+        "index": "E",
+        "name": "Road Repairs",
+        "type": "PROGRAMMING",
+        "rating": 2800,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 240,
+        "members": [
+            {
+                "handle": "hhoangcp"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1350370800
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 60,
+    "timeConsumedMillis": 342,
+    "memoryConsumedBytes": 53555200,
+    "source": "/// hhoangcp\r\n\r\n#include <iostream>\r\n#include <algorithm>\r\n#include <queue>\r\n#include <vector>\r\n#include <tuple>\r\n#include <map>\r\n#define ll long long\r\n#define ld long double\r\n#define ull unsigned ll\r\n#define uint unsigned int\r\n#define sint short int\r\n\r\nusing namespace std;\r\n\r\nconst int MAX = 1000000;\r\n\r\nstruct Edge {\r\n    int u, v;\r\n    ll w;\r\n};\r\n\r\ntypedef struct TNode {\r\n    Edge key;\r\n    TNode *l, *r;\r\n    ll lazy = 0;\r\n    int s = 0;\r\n\r\n    void prop() {\r\n        if (lazy == 0) return;\r\n        key.w += lazy;\r\n        if (l) l->key.w += lazy;\r\n        if (r) r->key.w += lazy;\r\n        lazy = 0;\r\n    }\r\n} *node;\r\n\r\nnode meld(node a, node b) {\r\n    if (!a) return b;\r\n    if (!b) return a;\r\n\r\n    a->prop(), b->prop();\r\n\r\n    if (a->key.w > b->key.w) swap(a, b);\r\n    node P = new TNode(*a); P->r = meld(P->r, b);\r\n\r\n    if (!P->l || P->l->s > P->r->s) swap(P->l, P->r);\r\n    P->s = (P->r ? P->r->s : 0) + 1;\r\n\r\n    return P;\r\n}\r\n\r\nnode &pop(node &root) {\r\n    root->prop();\r\n    root = meld(root->l, root->r);\r\n    return root;\r\n}\r\n\r\nEdge top(node &root) {\r\n    root->prop();\r\n    return root->key;\r\n}\r\n\r\nvector<tuple<int, int, int>> P;\r\nint par[MAX + 6];\r\n\r\nint Find(int u) {\r\n    if (par[u] < 0) return u;\r\n    return Find(par[u]);\r\n}\r\n\r\nbool Union(int u, int v) {\r\n    u = Find(u), v = Find(v);\r\n    if (u == v) return false;\r\n\r\n    if (par[u] > par[v]) swap(u, v);\r\n    P.push_back({u, v, par[v]});\r\n    par[u] += par[v];\r\n    par[v] = u;\r\n    return true;\r\n}\r\n\r\nvoid Rollback() {\r\n    if (P.empty()) return;\r\n    auto [u, v, p] = P.back(); P.pop_back();\r\n\r\n    par[v] = p;\r\n    par[u] -= par[v];\r\n}\r\n\r\nEdge Edges[2 * MAX + 6];\r\nint n, m;\r\n\r\npair<ll, vector<int>> DirectedMST(int root) {\r\n    P.clear(); for(int u = 1; u <= n; ++u) par[u] = -1;\r\n    vector<node> Heap(n + 1);\r\n    for(int i = 1; i <= m; ++i) Heap[Edges[i].v] = meld(Heap[Edges[i].v], new TNode{Edges[i]});\r\n\r\n    ll tot = 0;\r\n    vector<int> seen(n + 1, -1); seen[root] = root;\r\n    vector<pair<int, int>> in(n + 1, {-1, -1});\r\n    vector<pair<int, vector<Edge>>> cycs;\r\n    for(int s = 1; s <= n; ++s) {\r\n        int u = s, w;\r\n        vector<pair<int, Edge>> path;\r\n        while (seen[u] < 0) {\r\n            if (!Heap[u]) return {-1, {}};\r\n            seen[u] = s;\r\n            Edge e = top(Heap[u]); path.push_back({u, e});\r\n            Heap[u]->lazy -= e.w, pop(Heap[u]);\r\n            tot += e.w, u = Find(e.u);\r\n            if (seen[u] == s) {\r\n                node cyc = 0; cycs.emplace_back();\r\n                do {\r\n                    cyc = meld(cyc, Heap[w = path.back().first]);\r\n                    cycs.back().second.push_back(path.back().second);\r\n                    path.pop_back();\r\n                } while (Union(u, w));\r\n                u = Find(u); Heap[u] = cyc, seen[u] = -1;\r\n                cycs.back().first = u;\r\n            }\r\n        }\r\n\r\n        for(int i = 0; i < (int) path.size(); ++i) in[Find(path[i].second.v)] = {path[i].second.u, path[i].second.v};\r\n    }\r\n\r\n    while (cycs.size()) {\r\n        pair<int, vector<Edge>> c = cycs.back(); cycs.pop_back();\r\n        pair<int, int> inEdge = in[c.first];\r\n        for(Edge t: c.second) Rollback();\r\n        for(Edge t: c.second) in[Find(t.v)] = {t.u, t.v};\r\n        in[Find(inEdge.second)] = inEdge;\r\n    }\r\n\r\n    vector<int> par(n + 1, -1);\r\n    for(int u = 1; u <= n; ++u) par[u] = in[u].first;\r\n\r\n    return {tot, par};\r\n}\r\n\r\nvoid hhoangcp() {\r\n    cin >> n >> m;\r\n\r\n    map<pair<int, int>, int> id;\r\n    for(int i = 1; i <= m; ++i) {\r\n        int u, v, w; cin >> u >> v >> w;\r\n        Edges[i] = {u, v, w};\r\n        if (w) id[{u, v}] = i;\r\n    }\r\n\r\n    auto [ans, par] = DirectedMST(1);\r\n\r\n    cout << ans << '\\n';\r\n    if (ans > 0) {\r\n        for(int v = 1; v <= n; ++v) {\r\n            int u = par[v];\r\n            if (u == -1) continue;\r\n\r\n            int i = id[{u, v}];\r\n            if (Edges[i].w) cout << i << ' ';\r\n        }\r\n    }\r\n}\r\n\r\nsigned main() {\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n    freopen(\"output.txt\", \"w\", stdout);\r\n    \r\n    ios_base::sync_with_stdio(0); cin.tie(NULL);\r\n\r\n    int tests = 1; // cin >> tests;\r\n    for(int test = 1; test <= tests; ++test) {\r\n        hhoangcp();\r\n    }\r\n\r\n    return 0;\r\n}\r\n"
+}

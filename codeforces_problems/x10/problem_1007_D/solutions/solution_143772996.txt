@@ -1,0 +1,37 @@
+{
+    "id": 143772996,
+    "contestId": 1007,
+    "creationTimeSeconds": 1642935572,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1007,
+        "index": "D",
+        "name": "Ants",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "2-sat",
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1007,
+        "members": [
+            {
+                "handle": "Chinese_zjc_"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1531492500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 78,
+    "timeConsumedMillis": 436,
+    "memoryConsumedBytes": 167014400,
+    "source": "// This Code was made by Chinese_zjc_.\r\n#include <bits/stdc++.h>\r\n// #define debug\r\nint n, m, fa[100005], heavy[100005], siz[100005], top[100005], dfn[100005], idfn[100005], tim, cnt, ncnt, p[100005];\r\nstd::vector<int> son[100005], app[1 << 18], to[4000005];\r\nvoid add_edge(int A, int B) { to[A].push_back(B), to[B ^ 1].push_back(A ^ 1); }\r\nint new_node() { return (ncnt += 2) - 2; }\r\nvoid init1(int now)\r\n{\r\n    siz[now] = 1;\r\n    for (std::size_t i = 0; i != son[now].size(); ++i)\r\n    {\r\n        if (son[now][i] == fa[now])\r\n        {\r\n            std::swap(son[now][i--], son[now].back());\r\n            son[now].pop_back();\r\n            continue;\r\n        }\r\n        const int &t = son[now][i];\r\n        fa[t] = now;\r\n        init1(t);\r\n        siz[now] += siz[t];\r\n        if (siz[heavy[now]] < siz[t])\r\n            heavy[now] = t;\r\n    }\r\n}\r\nvoid init2(int now)\r\n{\r\n    idfn[dfn[now] = ++tim] = now;\r\n    if (!top[now])\r\n        top[now] = now;\r\n    if (heavy[now])\r\n        top[heavy[now]] = top[now], init2(heavy[now]);\r\n    for (auto i : son[now])\r\n        if (i != heavy[now])\r\n            init2(i);\r\n}\r\n#define lson (now << 1)\r\n#define rson (lson | 1)\r\n#define lmid ((l + r) >> 1)\r\n#define rmid (lmid + 1)\r\nvoid add(int L, int R, int v, int now = 1, int l = 2, int r = n)\r\n{\r\n    if (r < L || R < l)\r\n        return;\r\n    if (L <= l && r <= R)\r\n        return app[now].push_back(v);\r\n    add(L, R, v, lson, l, lmid);\r\n    add(L, R, v, rson, rmid, r);\r\n}\r\nvoid build(int lst, int now = 1, int l = 2, int r = n)\r\n{\r\n    for (auto i : app[now])\r\n    {\r\n        int nxt = new_node();\r\n        add_edge(lst, nxt);\r\n        add_edge(i, nxt);\r\n        add_edge(lst, i ^ 1);\r\n        lst = nxt;\r\n    }\r\n    if (l == r)\r\n        return;\r\n    build(lst, lson, l, lmid);\r\n    build(lst, rson, rmid, r);\r\n}\r\n#undef lson\r\n#undef rson\r\n#undef lmid\r\n#undef rmid\r\nint tdfn[4000005], tlow[4000005], in[4000005], ttim, tcnt;\r\nbool ins[4000005];\r\nstd::stack<int> sta;\r\nvoid Tarjan(int now)\r\n{\r\n    sta.push(now);\r\n    ins[now] = true;\r\n    tdfn[now] = tlow[now] = ++ttim;\r\n    for (auto i : to[now])\r\n        if (!tdfn[i])\r\n        {\r\n            Tarjan(i);\r\n            tlow[now] = std::min(tlow[now], tlow[i]);\r\n        }\r\n        else if (ins[i])\r\n            tlow[now] = std::min(tlow[now], tlow[i]);\r\n    if (tdfn[now] == tlow[now])\r\n    {\r\n        while (sta.top() != now)\r\n        {\r\n            in[sta.top()] = tcnt;\r\n            ins[sta.top()] = false;\r\n            sta.pop();\r\n        }\r\n        in[now] = tcnt++;\r\n        ins[now] = false;\r\n        sta.pop();\r\n    }\r\n}\r\nsigned main()\r\n{\r\n    std::ios::sync_with_stdio(false);\r\n    std::cin >> n;\r\n    for (int i = 1, x, y; i != n; ++i)\r\n        std::cin >> x >> y, son[x].push_back(y), son[y].push_back(x);\r\n    init1(1);\r\n    init2(1);\r\n    std::cin >> m;\r\n    for (int i = 0, a, b; i != m; ++i)\r\n    {\r\n        std::cin >> a >> b;\r\n        p[i] = new_node();\r\n        while (top[a] != top[b])\r\n            if (dfn[top[a]] > dfn[top[b]])\r\n                add(dfn[top[a]], dfn[a], p[i]), a = fa[top[a]];\r\n            else\r\n                add(dfn[top[b]], dfn[b], p[i]), b = fa[top[b]];\r\n        if (dfn[a] > dfn[b])\r\n            std::swap(a, b);\r\n        if (a != b)\r\n            add(dfn[a] + 1, dfn[b], p[i]);\r\n        p[i] ^= 1;\r\n        std::cin >> a >> b;\r\n        while (top[a] != top[b])\r\n            if (dfn[top[a]] > dfn[top[b]])\r\n                add(dfn[top[a]], dfn[a], p[i]), a = fa[top[a]];\r\n            else\r\n                add(dfn[top[b]], dfn[b], p[i]), b = fa[top[b]];\r\n        if (dfn[a] > dfn[b])\r\n            std::swap(a, b);\r\n        if (a != b)\r\n            add(dfn[a] + 1, dfn[b], p[i]);\r\n        p[i] ^= 1;\r\n    }\r\n    build(new_node());\r\n    for (int i = 0; i != ncnt; ++i)\r\n        if (!tdfn[i])\r\n            Tarjan(i);\r\n    for (int i = 0; i != m; ++i)\r\n        if (in[p[i]] == in[p[i] ^ 1])\r\n            return std::cout << \"NO\" << std::endl, 0;\r\n    std::cout << \"YES\" << std::endl;\r\n    for (int i = 0; i != m; ++i)\r\n        std::cout << (in[p[i] ^ 1] < in[p[i]]) + 1 << std::endl;\r\n    return 0;\r\n}"
+}

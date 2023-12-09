@@ -1,0 +1,38 @@
+{
+    "id": 108404591,
+    "contestId": 295,
+    "creationTimeSeconds": 1614172506,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "Mtaylor"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 60,
+    "memoryConsumedBytes": 18227200,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef unsigned long long ull;\r\ntypedef vector<ll> vl;\r\ntypedef pair<ll, ll> pl;\r\ntypedef long double ld;\r\n\r\n#define mp make_pair\r\n#define pb push_back\r\n#define fi first\r\n#define se second\r\n#define all(v) (v).begin(),(v).end()\r\n#define rall(v) (v).rbegin(),(v).rend()\r\n#define max(a, b) (a>b ? a : b)\r\n#define min(a, b) (a<b ? a : b)\r\n#define FAST ios::sync_with_stdio(0), cin.tie(0),cout.tie(0)\r\n\r\nconst int N = int(1e6) + 3;\r\nconst int MOD = 1e9 + 7;\r\nconst double PI = 4 * atan(1);\r\nconst double eps = 1e-10;\r\nconst long long oo = 1e10;\r\nconst int K = 26;\r\n\r\nll fact[N];\r\nll invfact[N];\r\n\r\nll mul(ll u, ll v, ll mod = MOD) {\r\n    return ((u % mod) * (v % mod)) % mod;\r\n}\r\n\r\nll add(ll u, ll v, ll mod = MOD) {\r\n    return ((u % mod) + (v % mod) + mod) % mod;\r\n}\r\n\r\nll sub(ll u, ll v, ll mod = MOD) {\r\n    return ((u % mod) - (v % mod) + mod) % mod;\r\n}\r\n\r\nll powe(ll u, ll v, ll mod = MOD) {\r\n    ll ans = 1;\r\n    ll acc = u;\r\n    while (v) {\r\n        if (v % 2) {\r\n            ans = mul(ans, acc, mod);\r\n        }\r\n        acc = mul(acc, acc, mod);\r\n        v /= 2;\r\n    }\r\n    return ans;\r\n}\r\n\r\nll inv(ll u, ll mod = MOD) {\r\n    return powe(u, mod - 2, mod);\r\n}\r\n\r\nvoid init_fact(ll n, ll mod = MOD) {\r\n    fact[0] = fact[1] = 1;\r\n    for (int i = 2; i <= n; i++) {\r\n        fact[i] = mul(i, fact[i - 1], mod);\r\n    }\r\n}\r\n\r\nll cnk(ll n, ll k) {\r\n    if (k > n)return 0;\r\n    if(n==0 && k==0)\r\n        return 1;\r\n    if (n == 0)return 0;\r\n    ll ans = mul(fact[n], invfact[k]);\r\n    ans = mul(ans, invfact[n - k]);\r\n    return ans;\r\n}\r\n\r\nvoid init_inv_fact(ll n, ll mod = MOD) {\r\n    for (int i = 0; i <= n; i++) {\r\n        invfact[i] = powe(fact[i], mod - 2, mod);\r\n    }\r\n}\r\n\r\nvoid init(ll n, ll mod = MOD) {\r\n    init_fact(n, mod);\r\n    init_inv_fact(n, mod);\r\n}\r\n\r\n\r\nint n, k;\r\nint a[3];\r\nint x;\r\nint dp[51][51][2];\r\nint vis[51][51][2];\r\nint dp2[51][51][51][2];\r\nint vis2[51][51][51][2];\r\nint ans_trips = 0;\r\n\r\nlong long minTrips(int x, int y, int z) {\r\n    if (x == a[1] && y == a[2] && z == 1)\r\n        return 0;\r\n    //cout << x << \" \" << y << \" \" << z << endl;\r\n    if (vis[x][y][z])\r\n        return dp[x][y][z];\r\n    vis[x][y][z] = 1;\r\n    int res = 1e9;\r\n    if (z == 1) {\r\n        if (x && k >= 1) {\r\n            res = min(res, 1 + minTrips(a[1] - x + 1, a[2] - y, 0));\r\n        }\r\n        if (y && k >= 2) {\r\n            res = min(res, 1 + minTrips(a[1] - x, a[2] - y + 1, 0));\r\n        }\r\n    } else {\r\n        for (int i = 0; i <= x; i++) {\r\n            int b = i;\r\n            int c = min(max(0, (k - b)) / 2, y);\r\n            if (b + c * 2 <= k) {\r\n                res = min(res, 1 + minTrips(a[1] - x + i, a[2] - y + c, 1));\r\n            }\r\n        }\r\n    }\r\n    return dp[x][y][z] = res;\r\n}\r\n\r\nlong long numWays(int x, int y, int trips, int z) {\r\n    if (trips > ans_trips)\r\n        return 0;\r\n    if (x == a[1] && y == a[2] && z == 1)\r\n        return 1;\r\n    if (vis2[x][y][trips][z])\r\n        return dp2[x][y][trips][z];\r\n    vis2[x][y][trips][z] = 1;\r\n    long long res = 0;\r\n    for (int i = 0; i <= x; i++) {\r\n        int b = i;\r\n        int c = min(max(0, (k - b)) / 2, y);\r\n        if (b + c * 2 <= k && b+c>0) {\r\n            ll pos = mul(cnk(x, b), cnk(y, c));\r\n            //cout << x << \" \" << b << \" \" << y << \" \" << c << endl;\r\n            //cout << \"pos = \"<< pos << endl;\r\n            res = add(res, mul(pos, numWays(a[1] - x + i, a[2] - y + c, trips + 1, 1-z)));\r\n        }\r\n    }\r\n\r\n    return dp2[trips][x][y][z] = res;\r\n\r\n}\r\n\r\nint main() {\r\n    //FAST;\r\n    //freopen(\"easy\", \"r\", stdin);\r\n    memset(dp, -1, sizeof(dp));\r\n    init(100);\r\n    cin >> n >> k;\r\n    for (int i = 0; i < n; i++) {\r\n        cin >> x;\r\n        a[x / 50]++;\r\n    }\r\n    k /= 50;\r\n    for (int i = 0; i <= a[1]; i++) {\r\n        for (int j = 0; j <= a[2]; j++) {\r\n            for (int k = 0; k < 2; k++) {\r\n                dp[i][j][k] = 1e8;\r\n            }\r\n        }\r\n    }\r\n    ans_trips = minTrips(a[1], a[2], 0);\r\n    if (ans_trips >1e5) {\r\n        cout << -1 << \"\\n\" << 0 << endl;\r\n        return 0;\r\n    }\r\n    long long ans = numWays(a[1], a[2], 0, 0);\r\n    cout << ans_trips << endl;\r\n    cout << ans << endl;\r\n    return 0;\r\n}\r\n\r\n\r\n"
+}

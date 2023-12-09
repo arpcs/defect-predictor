@@ -1,0 +1,38 @@
+{
+    "id": 235294584,
+    "contestId": 1778,
+    "creationTimeSeconds": 1701471476,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1778,
+        "index": "E",
+        "name": "The Tree Has Fallen!",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2500,
+        "tags": [
+            "bitmasks",
+            "dfs and similar",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1778,
+        "members": [
+            {
+                "handle": "SATSKY"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1675262100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 25,
+    "timeConsumedMillis": 390,
+    "memoryConsumedBytes": 28979200,
+    "source": "#include <bits/stdc++.h>\r\n#define _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS 1;\r\nusing i64=long long;\r\nstruct HLD\r\n{\r\n    int n,cur=0;std::vector<std::vector<int>>adj;\r\n    std::vector<int>siz,top,dep,parent,in,out,seq;  \r\n    HLD(int n):n(n),siz(n),top(n),dep(n),parent(n,-1),in(n),out(n),seq(n),adj(n) {}\r\n    void addEdge(int u,int v){adj[u].push_back(v),adj[v].push_back(u);}\r\n    void init(int root=0){top[root]=root;dfs1(root);dfs2(root);}\r\n    void dfs1(int u){if(parent[u]!=-1)adj[u].erase(std::find(adj[u].begin(),adj[u].end(),parent[u]));\r\n        siz[u]=1;for(auto &v:adj[u]){parent[v]=u;dep[v]=dep[u]+1;dfs1(v);\r\n            siz[u]+=siz[v];if(siz[v]>siz[adj[u][0]])std::swap(v,adj[u][0]);}}\r\n    void dfs2(int u){in[u]=cur++;seq[in[u]]=u;for(auto v:adj[u])top[v]=((v==adj[u][0])?top[u]:v),dfs2(v);out[u]=cur;}\r\n    int lca(int u,int v){while(top[u]!=top[v])(dep[top[u]]>dep[top[v]])?u=parent[top[u]]:v=parent[top[v]];return dep[u]<dep[v]?u:v;}\r\n};\r\nvoid solve()\r\n{\r\n    int n;std::cin>>n; std::vector<int>a(n);HLD tree(n);\r\n    for(int i=0;i<n;i++)std::cin>>a[i];      \r\n    for(int i=1,u,v;i<n; i++)std::cin>>u>>v,u--,v--,tree.addEdge(u,v);tree.init();\r\n    int q;std::cin>>q;std::vector<int>ans(q);\r\n    std::vector<std::vector<std::pair<int,int>>> qry(2*n);\r\n    auto get=[&](int x,int y){\r\n        auto &a=tree.adj[y];auto it=std::upper_bound(a.begin(),a.end(),x,\r\n            [&](int i,int j){return tree.in[i]<tree.in[j];})-1;return *it;};\r\n    for(int i=0;i<q;i++){int r,v;std::cin>>r>>v;r--,v--;if(r==v)qry[n-1].push_back({0,i});//dfn\u5e8f\u533a\u95f4    \r\n        else if(tree.lca(r,v)!=v)qry[tree.out[v]-1].push_back({tree.in[v],i});//\u4e00\u4e2a\u5b50\u6811(\u533a\u95f4)      \r\n        else{int y=get(r,v);qry[tree.in[y]+n-1].push_back({tree.out[y],i});}}//\u4e00\u4e2a\u5b50\u6811(\u533a\u95f4)\u53d6\u53cd:\u5ef6\u957f\u91cd\u590d\r\n    std::vector<int>t(30,0),p(30,0);\r\n    for(int i=0;i<2*n;i++){int x=a[tree.seq[i%n]],y=i;//y:dfn\u5e8f x:\u5bf9\u5e94\u70b9\r\n        for(int j=29;j>=0;j--)if(x>>j&1){if(!t[j]){t[j]=x,p[j]=y;break;}\r\n            if(y>p[j])std::swap(x,t[j]),std::swap(y,p[j]);x^=t[j];}\r\n        for(auto [l,j]:qry[i]){int x=0;for(int k=29;k>=0;k--)\r\n            if((~x>>k&1)&&l<=p[k])x^=t[k];ans[j]=x;}}\r\n    for(int i=0; i<q; i++)std::cout<<ans[i]<<\"\\n\";    \r\n}\r\nint main()\r\n{\r\n    std::ios::sync_with_stdio(0);std::cin.tie(0);\r\n    int t=1;std::cin>>t;while(t--)solve();    \r\n}\r\n"
+}

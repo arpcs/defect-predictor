@@ -1,0 +1,36 @@
+{
+    "id": 173910143,
+    "contestId": 594,
+    "creationTimeSeconds": 1664449000,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 594,
+        "index": "E",
+        "name": "Cutting the Line",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3100,
+        "tags": [
+            "string suffix structures",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 594,
+        "members": [
+            {
+                "handle": "CC2021zyz"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1447000200
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 10,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 210432000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n// #define int long long\r\n#define mp make_pair\r\n#define inf 1e9\r\n#define pii pair <int, int>\r\nconst int mod = 1e9 + 7;\r\nint read () {\r\n\tint x = 0, f = 1;\r\n\tchar ch = getchar ();\r\n\twhile (ch < '0' || ch > '9') {\r\n\t\tif (ch == '-') f = -1;\r\n\t\tch = getchar ();\r\n\t}\r\n\twhile (ch >= '0' && ch <= '9') {\r\n\t\tx = x * 10 + ch - '0';\r\n\t\tch = getchar ();\r\n\t}\r\n\treturn x * f;\r\n}\r\nvoid write (int x) {\r\n\tif (x < 0) x = -x, putchar ('-');\r\n\tif (x >= 10) write (x / 10);\r\n\tputchar (x % 10 + '0');\r\n}\r\nint quickmod (int x, int y) {\r\n\tint Ans = 1;\r\n\twhile (y) {\r\n\t\tif (y & 1) Ans = (Ans * x) % mod;\r\n\t\tx = (x * x) % mod;\r\n\t\ty >>= 1;\r\n\t}\r\n\treturn Ans;\r\n}\r\nconst int N = 1e7;\r\nint tot;\r\nchar s[N+5], s1[N+5], mn[N+5], t[N+5], now[N+5];\r\nvoid add(char A[], int l, int r, int op) {\r\n    if(!op) for(int i = l; i <= r; i++) t[++tot] = A[i];\r\n    else for(int i = r; i >= l; i--) t[++tot] = A[i];\r\n}\r\nvoid Mn(char A[], char B[], int len) {\r\n    int fl = 0;\r\n    for(int i = 1; i <= len; i++) {\r\n        if(A[i] < B[i]) {\r\n            fl = 1;\r\n            break;\r\n        }\r\n        if(A[i] > B[i]) break;\r\n    }\r\n    if(fl) for(int i = 1; i <= len; i++) B[i] = A[i];\r\n}\r\nint z[N+5], p[N+5];\r\nvoid Z (char a[], int n) {\r\n\tz[1] = n;\r\n\tint l = 0, r = 0;\r\n\tfor (int i = 2; i <= n; i++) {\r\n\t\tif (i <= r) z[i] = min (z[i-l+1], r - i + 1);\r\n\t\twhile (z[i] + i <= n && a[i+z[i]] == a[1+z[i]]) z[i]++;\r\n\t\tif (i + z[i] - 1 > r) r = i + z[i] - 1, l = i;\r\n\t}\r\n} \r\nvoid ex_kmp (char a[], int n, char b[], int m) {\r\n\tZ (b, m);\r\n\tint l = 0, r = 0;\r\n\tfor (int i = 1; i <= n; i++) {\r\n\t\tif (i <= r) p[i] = min (z[i-l+1], r - i + 1);\r\n\t\twhile (p[i] + i <= n && a[i+p[i]] == b[1+p[i]]) p[i]++; \r\n\t\tif (i + p[i] - 1 > r) r = i + p[i] - 1, l = i;\r\n\t}\r\n}\r\nint L[N+5], R[N+5], cnt;\r\nvoid get_ans() {\r\n    int n = R[cnt];\r\n    for(int i = 1; i <= n; i++) s[i] = mn[i] = s1[n-i+1];\r\n    //\u53cc\u7ffb\r\n    for(int i = 1; i <= n; i++) s1[i+n] = s1[i];\r\n    int i = 1, j = 2;\r\n    while(i <= n && j <= n) {\r\n        int k = 0;\r\n        while (k < n && s1[i+k] == s1[j+k]) k++;\r\n        if(k == n) break;\r\n        if (s1[i+k] > s1[j+k]) i = i + k + 1;\r\n\t\telse j = j + k + 1;\r\n        if(i == j) j++;\r\n    }\r\n    int fir = min(i, j);\r\n    int total = 0;\r\n    for(i = fir; i <= n; i++) now[++total] = s1[i];\r\n    for(i = 1; i < fir; i++) now[++total] = s1[i];\r\n    Mn(now, mn, n);\r\n    //\u4e0d\u7ffb\r\n    ex_kmp(s, n, s1, n);\r\n    j = 0;\r\n    for(i = 1; i <= n; i++) {\r\n        // printf(\"i:%lld\\n\",i);\r\n        if(!j) j = i;\r\n        else {\r\n            //[j,i - 1]' + [1, j - 1] & [1, i - 1]\r\n            int len = (i - 1) - j + 1, w = p[n-i+2];\r\n            if(w < len) {\r\n                if(s1[w+1] < s1[i-1-w]) j = i;\r\n            }\r\n            else{\r\n                w = z[len+1];\r\n                if(w < j - 1 && s1[len+1+w] < s1[w+1]) j = i;\r\n            }\r\n        }\r\n    }\r\n    total = 0;\r\n    for(i = n; i >= j; i--) now[++total] = s1[i];\r\n    for(i = 1; i < j; i++) now[++total] = s1[i];\r\n    Mn(now, mn, n);\r\n    //\u540e\u7ffb\r\n    fir = cnt;\r\n    while(fir != 1) {\r\n        int fl = 0;\r\n        for(i = L[fir-1], j = L[fir]; j <= R[fir]; i++, j++) {\r\n            if(s1[i] != s1[j]) {\r\n                fl = 1;\r\n                break;\r\n            }\r\n        }\r\n       \r\n        if(fl) break; \r\n        // printf(\"fir:%d\\n\", fir);\r\n        fir--;\r\n    }\r\n    \r\n    int ed = fir;\r\n    while (ed < cnt) {//ed \u4e0e ed + 1\r\n        for(i = R[ed], j = R[ed-1] + (n - i + 1); i >= L[ed]; i--, j++) {\r\n            if(s1[i] > s1[j]) break;\r\n            if(s1[i] < s1[j]) {\r\n                fir = ed + 1;\r\n                break;\r\n            }\r\n        }\r\n        ed++;\r\n    }\r\n    //aaaabacaba\r\n    //s':abac ab a a a a\r\n    // for(i = 1; i <= cnt; i++) printf(\"[%d %d]\\n\", L[i], R[i]);\r\n    fir = L[fir];\r\n    // printf(\"fir:%d\\n\", fir);\r\n    total = 0;\r\n    for(i = fir; i <= n; i++) now[++total] = s1[i];\r\n    for(i = fir - 1; i >= 1; i--) now[++total] = s1[i];\r\n    //\u524d\u7ffb\r\n    add(mn, 1, n, 0);\r\n    printf(\"%s\\n\", t + 1);\r\n}\r\nsigned main () {\r\n//\tfreopen (\".in\", \"r\", stdin);\r\n//\tfreopen (\".out\", \"w\", stdout);\r\n    scanf(\"%s\", s + 1);\r\n    int n = (int)strlen(s + 1);\r\n    for(int i = 1; i <= n; i++) s1[i] = s[n-i+1];\r\n    int m = read();\r\n    if(m == 1) {\r\n        for(int i = 1; i <= n; i++) t[i] = s[i];\r\n        Mn(s1, t, n);\r\n        printf(\"%s\\n\", t + 1);\r\n        return 0;\r\n    }\r\n    for(int i = 1; i <= n; ) {\r\n        int j = i, k = i + 1;\r\n        while(k <= n && s1[j] <= s1[k]) {\r\n            if(s1[j] < s1[k]) j = i;\r\n            else j++;\r\n            k++;\r\n        }\r\n        while(i <= j) i += k - j;\r\n        cnt++;\r\n        L[cnt] = R[cnt-1] + 1, R[cnt] = i - 1;\r\n    }\r\n    while(cnt && m >= 3) {\r\n        add(s1, L[cnt], R[cnt], 0);\r\n        // printf (\"?? %lld %lld\\n\", L[cnt], R[cnt]);\r\n        if (!(L[cnt] == R[cnt] && L[cnt-1] == R[cnt-1])) m--;\r\n        cnt--;\r\n    }\r\n    if(!cnt) return printf(\"%s\\n\", t + 1) & 0;\r\n    get_ans();\r\n\treturn 0;\r\n}\r\n/*\r\naaaabacaba\r\n2\r\n*/"
+}

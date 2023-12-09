@@ -1,0 +1,38 @@
+{
+    "id": 138583710,
+    "contestId": 696,
+    "creationTimeSeconds": 1639083934,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 696,
+        "index": "D",
+        "name": "Legen...",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2500,
+        "tags": [
+            "data structures",
+            "dp",
+            "matrices",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 696,
+        "members": [
+            {
+                "handle": "sare"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1468514100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 47,
+    "timeConsumedMillis": 1684,
+    "memoryConsumedBytes": 19456000,
+    "source": "//In the name of Allah :)\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\nstring to_string(char c) { return string(1,c); }\r\nstring to_string(bool b) { return b ? \"true\" : \"false\"; }\r\nstring to_string(const char* s) { return (string)s; }\r\nstring to_string(string s) { return s; }\r\ntemplate<class A> string to_string(complex<A> c) { \r\n\tstringstream ss; ss << c; return ss.str(); }\r\nstring to_string(vector<bool> v) { \r\n\tstring res = \"{\"; for(int i = 0; i < (int)v.size(); i++) res += char('0'+v[i]);\r\n\tres += \"}\"; return res; }\r\ntemplate<size_t SZ> string to_string(bitset<SZ> b) {\r\n\tstring res = \"\"; for(size_t i = 0; i < SZ; i++) res += char('0'+b[i]);\r\n\treturn res; }\r\ntemplate<class A, class B> string to_string(pair<A,B> p);\r\ntemplate<class T> string to_string(T v) { // containers with begin(), end()\r\n\tbool fst = 1; string res = \"{\";\r\n\tfor (const auto& x: v) {\r\n\t\tif (!fst) res += \", \";\r\n\t\tfst = 0; res += to_string(x);\r\n\t}\r\n\tres += \"}\"; return res;\r\n}\r\ntemplate<class A, class B> string to_string(pair<A,B> p) {\r\n\treturn \"(\"+to_string(p.first)+\", \"+to_string(p.second)+\")\"; }\r\nvoid DBG() { cerr << \"]\" << endl; }\r\ntemplate<class H, class... T> void DBG(H h, T... t) {\r\n\tcerr << to_string(h); if (sizeof...(t)) cerr << \", \";\r\n\tDBG(t...); }\r\n#ifdef LOCAL // compile with -DLOCAL\r\n#define wis(...) cerr << \"LINE(\" << __LINE__ << \") -> [\" << #__VA_ARGS__ << \"] : [\", DBG(__VA_ARGS__)\r\n#else\r\n#define wis(...) 0\r\n#endif\r\ntypedef long long ll;\r\n#define all(x) (x).begin(), (x).end()\r\nconst int MAXN = 205, A = 26, LOG = 50;\r\nconst ll INF = 4e18;\r\nint n, nxt[MAXN][A], f[MAXN], a[MAXN], all = 1, str[MAXN];\r\nll l, val[MAXN], dp[LOG][MAXN][MAXN], dp2[LOG][MAXN];\r\nvector<int> child[MAXN];\r\n\r\nstruct Matrix {\r\n\tvector<vector<ll>> mat;\r\n\r\n\tMatrix () {\r\n\t\tmat.resize(MAXN, vector<ll>(MAXN, -INF));\r\n\t}\r\n\r\n\tinline vector<ll>& operator [] (int k) {\r\n\t\treturn mat[k];\r\n\t}\r\n\r\n\tinline Matrix operator * (Matrix x) {\r\n\t\tMatrix res;\r\n\t\tfor (int i = 0; i < MAXN; i++) {\r\n\t\t\tfor (int j = 0; j < MAXN; j++) {\r\n\t\t\t\tfor (int k = 0; k < MAXN; k++) {\r\n\t\t\t\t\tres[i][j] = max(res[i][j], mat[i][k] + x[k][j]);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn res;\r\n\t}\r\n\r\n\tinline Matrix power (ll k) {\r\n\t\tMatrix res = *this, cur = *this;\r\n\t\tk--;\r\n\t\tfor (; k; k >>= 1, cur = cur * cur) {\r\n\t\t\tif (k & 1) {\r\n\t\t\t\tres = res * cur;\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn res;\r\n\t}\r\n} mat;\r\n\r\ninline void add (const string& s, int i) {\r\n\tint cur = 0;\r\n\tfor (char c : s) {\r\n\t\tif (nxt[cur][c - 'a']) {\r\n\t\t\tcur = nxt[cur][c - 'a'];\r\n\t\t}\r\n\t\telse {\r\n\t\t\tnxt[cur][c - 'a'] = all;\r\n\t\t\tcur = all;\r\n\t\t\tall++;\r\n\t\t}\r\n\t}\r\n\tstr[i] = cur;\r\n}\r\n\r\ninline void build () {\r\n\tqueue<int> q;\r\n\tq.push(0);\r\n\twhile (q.size()) {\r\n\t\tint v = q.front();\r\n\t\tq.pop();\r\n\r\n\t\tfor (int i = 0; i < A; i++) {\r\n\t\t\tif (nxt[v][i]) {\r\n\t\t\t\tif (v) {\r\n\t\t\t\t\tf[nxt[v][i]] = nxt[f[v]][i];\r\n\t\t\t\t}\r\n\t\t\t\tchild[f[nxt[v][i]]].push_back(nxt[v][i]);\r\n\t\t\t\tq.push(nxt[v][i]);\r\n\t\t\t}\r\n\t\t\telse {\r\n\t\t\t\tnxt[v][i] = nxt[f[v]][i];\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\n\r\nvoid dfs (int v) {\r\n\tfor (int i : child[v]) {\r\n\t\tval[i] += val[v];\r\n\t\tdfs(i);\r\n\t}\r\n}\r\n\r\nint main() {\r\n\tios::sync_with_stdio(0);\r\n#ifndef LOCAL\r\n\tcin.tie(0);\r\n#endif\r\n\tcin >> n >> l;\r\n\tfor (int i = 0; i < n; i++) {\r\n\t\tcin >> a[i];\r\n\t}\r\n\tfor (int i = 0; i < n; i++) {\r\n\t\tstring s;\r\n\t\tcin >> s;\r\n\t\tadd(s, i);\r\n\t\tval[str[i]] += a[i];\r\n\t}\r\n\r\n\tbuild();\r\n\tdfs(0);\r\n\tfor (int i = 0; i < all; i++) {\r\n\t\tfor (int j = 0; j < A; j++) {\r\n\t\t\tmat[i][nxt[i][j]] = val[nxt[i][j]];\r\n\t\t}\r\n\t}\r\n\r\n\tmat = mat.power(l);\t\r\n\r\n\tll ans = 0;\r\n\tfor (int i = 0; i < all; i++) {\r\n\t\tans = max(ans, mat[0][i]);\r\n\t}\r\n\tcout << ans << '\\n';\r\n}\r\n"
+}

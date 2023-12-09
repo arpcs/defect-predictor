@@ -1,0 +1,36 @@
+{
+    "id": 167960339,
+    "contestId": 594,
+    "creationTimeSeconds": 1660300330,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 594,
+        "index": "E",
+        "name": "Cutting the Line",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3100,
+        "tags": [
+            "string suffix structures",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 594,
+        "members": [
+            {
+                "handle": "tricyzhkx"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1447000200
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 110,
+    "timeConsumedMillis": 483,
+    "memoryConsumedBytes": 115200000,
+    "source": "# include <bits/stdc++.h>\r\nusing namespace std;\r\nchar s[10000010],t[5000010],ans[4][5000010];\r\nint pos[5000010],len[5000010],ze[10000010],tot;\r\nvoid solve1(int n)\r\n{\r\n\tfor(int i=1;i<=n;i++) s[i+n]=s[i];\r\n\tint x=0;\r\n\tfor(int i=1,j,k;i<=n;)\r\n\t{\r\n\t\tx=i;\r\n\t\tfor(j=i,k=i+1;k<=2*n && s[j]<=s[k];k++) j=(s[j]==s[k]?j+1:i);\r\n\t\tfor(;i<=j;i+=k-j);\r\n\t}\r\n\tfor(int i=1;i<=n;i++) ans[1][i]=s[x+i-1];\r\n}\r\nvoid solve2(int n)\r\n{\r\n\tfor(int i=1;i<=n;i++) s[i+n]=s[n-i+1];\r\n\tze[1]=2*n;\r\n\tfor(int i=2,l=0,r=0;i<=2*n;i++)\r\n\t{\r\n\t\tif(i<=r) ze[i]=min(r-i+1,ze[i-l+1]);\r\n\t\twhile(s[i+ze[i]]==s[1+ze[i]]) ze[i]++;\r\n\t\tif(i+ze[i]-1>r) l=i,r=i+ze[i]-1;\r\n\t}\r\n\tint p=2;\r\n\tfor(int i=3;i<=n;i++)\r\n\t{\r\n\t\tint l=ze[2*n-i+2];\r\n\t\tif(l<i-p && s[l+1]<s[i-l-1]) p=i;\r\n\t\telse if(l<i-p) continue;\r\n\t\tl=ze[i-p+1];\r\n\t\tif(l<p-1 && s[i-p+l+1]<s[l+1]) p=i;\r\n\t}\r\n\tfor(int i=p;i<=n;i++) ans[2][i-p+1]=s[n+p-i];\r\n\tfor(int i=1;i<p;i++) ans[2][i+n-p+1]=s[i];\r\n}\r\nvoid solve3(int n)\r\n{\r\n\tint p=tot;\r\n\tfor(;p>1 && 2*(n-pos[p]+1)<=n-pos[p-1]+1;p--)\r\n\t{\r\n\t\tbool ok=1;\r\n\t\tfor(int i=pos[p];i<=n;i++) ok&=(s[i]==s[i-pos[p]+pos[p-1]]);\r\n\t\tif(!ok) break;\r\n\t\tok=0;\r\n\t\tfor(int i=pos[p]-1;i>=pos[p-1];i--)\r\n\t\t\tif(s[i]<s[pos[p-1]+n-i])\r\n\t\t\t{\r\n\t\t\t\tok=1;\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\t\telse if(s[i]>s[pos[p-1]+n-i]) break;\r\n\t\tif(ok) break;\r\n\t}\r\n\tp=pos[p];\r\n\tfor(int i=p;i<=n;i++) ans[3][i-p+1]=s[i];\r\n\tfor(int i=1;i<p;i++) ans[3][i+n-p+1]=s[p-i];\r\n}\r\nint main()\r\n{\r\n\tint n,k,l=0;\r\n\tscanf(\"%s\",s+1);n=strlen(s+1);\r\n\tcin>>k;\r\n\treverse(s+1,s+n+1);\r\n\tif(k==1)\r\n\t{\r\n\t\tfor(int i=1;i<=n;i++) t[i]=s[n-i+1];\r\n\t\tif(strcmp(t+1,s+1)<0) printf(\"%s\\n\",t+1);\r\n\t\telse printf(\"%s\\n\",s+1);\r\n\t\treturn 0;\r\n\t}\r\n\tfor(int i=1,j,k;i<=n;)\r\n\t{\r\n\t\tfor(j=i,k=i+1;k<=n && s[j]<=s[k];k++) j=(s[j]==s[k]?j+1:i);\r\n\t\tpos[++tot]=i;len[tot]=k-j;\r\n\t\tfor(;i<=j;i+=k-j);\r\n\t}\r\n\tpos[tot+1]=n+1;\r\n\tint cur=tot+1;\r\n\twhile(cur>1 && k>2)\r\n\t{\r\n\t\tcur--;\r\n\t\tfor(int j=pos[cur];j<pos[cur+1];j++) t[++l]=s[j];\r\n\t\tif(len[cur-1]!=1 || len[cur]!=1) k--;\r\n\t}\r\n\tif(cur==1) return printf(\"%s\\n\",t+1),0;\r\n\tfor(int i=pos[cur];i<=n;i++) s[i]=0;\r\n\tn=pos[cur]-1;tot=cur-1;\r\n\tfor(int i=1;i<=n;i++) ans[0][i]=s[n-i+1];\r\n\tsolve1(n);solve2(n);solve3(n);\r\n\tfor(int i=1;i<=3;i++)\r\n\t\tif(strcmp(ans[0]+1,ans[i]+1)>0) memcpy(ans[0],ans[i],sizeof(ans[0]));\r\n\tfor(int i=1;i<=n;i++) t[++l]=ans[0][i];\r\n\tprintf(\"%s\\n\",t+1);\r\n\treturn 0;\r\n}"
+}

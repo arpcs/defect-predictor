@@ -1,0 +1,38 @@
+{
+    "id": 178320149,
+    "contestId": 295,
+    "creationTimeSeconds": 1667033153,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "chanhchuong0702"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 30,
+    "memoryConsumedBytes": 102400,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define task \"message\"\r\n#define fi first\r\n#define se second\r\n#define all(x) (x).begin(), (x).end()\r\n#define rall(x) (x).rbegin(), (x).rend()\r\n\r\ntemplate <typename T1, typename T2> bool mini(T1 &a, T2 b) {\r\n  if (a > b) {a = b; return true;} return false;\r\n}\r\ntemplate <typename T1, typename T2> bool maxi(T1 &a, T2 b) {\r\n  if (a < b) {a = b; return true;} return false;\r\n}\r\n\r\nconst int N = 55;\r\nconst int INF = 1e9;\r\nconst int MOD = 1e9 + 7;\r\nint n, k;\r\nint frac[N];\r\nint finv[N];\r\nint dp[N][N][2];\r\nint cnt[N][N][2];\r\nint cnt50, cnt100;\r\n\r\nstruct node {\r\n  int du, cnt0, cnt1, type;\r\n  bool operator< (const node &other) const {\r\n    return du > other.du;\r\n  }\r\n};\r\n\r\nint my_pow(int a, int exp) {\r\n  int res = 1;\r\n  while (exp > 0) {\r\n    if (exp & 1) res = 1LL * res * a % MOD;\r\n    a = 1LL * a * a % MOD; exp >>= 1;\r\n  }\r\n  return res;\r\n}\r\n\r\nint C(int k, int n) {\r\n  return 1LL * frac[n] * finv[n - k] % MOD * finv[k] % MOD;\r\n}\r\n\r\nmain() {\r\n  ios_base::sync_with_stdio(0);\r\n  cin.tie(0); cout.tie(0);\r\n\r\n  cin >> n >> k;\r\n\r\n  frac[0] = 1;\r\n  for (int i = 1; i <= n; i++)\r\n    frac[i] = 1LL * frac[i - 1] * i % MOD;\r\n  finv[n] = my_pow(frac[n], MOD - 2);\r\n  for (int i = n; i >= 1; i--)\r\n    finv[i - 1] = 1LL * finv[i] * i % MOD;\r\n\r\n  for (int i = 1; i <= n; i++) {\r\n    int x; cin >> x;\r\n    cnt50 += x == 50;\r\n    cnt100 += x == 100;\r\n  }\r\n  for (int i = 0; i <= cnt50; i++) {\r\n    for (int j = 0; j <= cnt100; j++)\r\n      for (int k = 0; k < 2; k++)\r\n        dp[i][j][k] = INF;\r\n  }\r\n  priority_queue<node> pq;\r\n  dp[cnt50][cnt100][0] = 0;\r\n  cnt[cnt50][cnt100][0] = 1;\r\n  pq.push({0, cnt50, cnt100, 0});\r\n  while (pq.size()) {\r\n    int du = pq.top().du;\r\n    int cnt0 = pq.top().cnt0;\r\n    int cnt1 = pq.top().cnt1;\r\n    int type = pq.top().type;\r\n    pq.pop();\r\n    if (du != dp[cnt0][cnt1][type]) continue;\r\n    if (type == 0) {\r\n      for (int i = 0; i <= cnt0; i++) {\r\n        for (int j = 0; j <= cnt1; j++) {\r\n          int total = 50 * i + 100 * j;\r\n          if (total == 0 || total > k) continue;\r\n          if (dp[cnt0 - i][cnt1 - j][1] > du + 1) {\r\n            dp[cnt0 - i][cnt1 - j][1] = du + 1;\r\n            pq.push({du + 1, cnt0 - i, cnt1 - j, 1});\r\n            cnt[cnt0 - i][cnt1 - j][1] = 1LL * cnt[cnt0][cnt1][0] * C(i, cnt0) % MOD * C(j, cnt1) % MOD;\r\n          } else if (dp[cnt0 - i][cnt1 - j][1] == du + 1) {\r\n            cnt[cnt0 - i][cnt1 - j][1] += 1LL * cnt[cnt0][cnt1][0] * C(i, cnt0) % MOD * C(j, cnt1) % MOD;\r\n            cnt[cnt0 - i][cnt1 - j][1] %= MOD;\r\n          }\r\n        }\r\n      }\r\n    } else {\r\n      int _cnt0 = cnt50 - cnt0, _cnt1 = cnt100 - cnt1;\r\n      for (int i = 0; i <= _cnt0; i++) {\r\n        for (int j = 0; j <= _cnt1; j++) {\r\n          int total = 50 * i + 100 * j;\r\n          if (total == 0 || total > k) continue;\r\n          if (dp[cnt0 + i][cnt1 + j][0] > du + 1) {\r\n            dp[cnt0 + i][cnt1 + j][0] = du + 1;\r\n            pq.push({du + 1, cnt0 + i, cnt1 + j, 0});\r\n            cnt[cnt0 + i][cnt1 + j][0] = 1LL * cnt[cnt0][cnt1][1] * C(i, _cnt0) % MOD * C(j, _cnt1) % MOD;\r\n          } else if (dp[cnt0 + i][cnt1 + j][0] == du + 1) {\r\n            cnt[cnt0 + i][cnt1 + j][0] += 1LL * cnt[cnt0][cnt1][1] * C(i, _cnt0) % MOD * C(j, _cnt1) % MOD;\r\n            cnt[cnt0 + i][cnt1 + j][0] %= MOD;\r\n          }\r\n        }\r\n      }\r\n    }\r\n  }\r\n  if (dp[0][0][1] == INF) cout << -1 << '\\n' << 0;\r\n  else cout << dp[0][0][1] << '\\n' << cnt[0][0][1];\r\n}\r\n"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 198527300,
+    "contestId": 1152,
+    "creationTimeSeconds": 1679416223,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1152,
+        "index": "F2",
+        "name": "Neko Rules the Catniverse (Large Version)",
+        "type": "PROGRAMMING",
+        "points": 750.0,
+        "rating": 3000,
+        "tags": [
+            "bitmasks",
+            "dp",
+            "matrices"
+        ]
+    },
+    "author": {
+        "contestId": 1152,
+        "members": [
+            {
+                "handle": "JunBinLiang"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1556116500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <string>\r\n#include <map>\r\n#include <unordered_map>\r\n#include <set>\r\n#include <unordered_set>\r\n#include <algorithm>\r\n#include <cmath>\r\n#include <cstring>\r\n#include <queue>\r\n#include <list>\r\n#include <iostream>\r\n   \r\nusing ll = long long;\r\nusing namespace std;  \r\n\r\n\r\nconst mod = 1e9 + 7, M = 220;\r\nint n, m, k;\r\nint b[20];\r\n\r\nll f1[220], a[220][220];\r\n\r\nvoid mul1() {\r\n    ll temp[M];\r\n    for(int i = 0; i < M; i++) temp[i] = f1[i];\r\n    for(int c = 0; c < M; c++) {\r\n        ll sum = 0;\r\n        for(int r = 0; r < M; r++) {\r\n            sum += (temp[r] * a[r][c]);\r\n            sum %= mod;\r\n        }\r\n        f1[c] = sum;\r\n    }\r\n}\r\n\r\nvoid mul2() {\r\n    ll temp[M][M];\r\n    for(int i = 0; i < M; i++)\r\n        for(int j = 0; j < M; j++)\r\n            temp[i][j] = a[i][j];\r\n            \r\n    for(int i = 0; i < M; i++) {\r\n        for(int j = 0; j < M; j++) {\r\n            ll sum = 0;\r\n            for(int k = 0; k < M; k++) {\r\n                sum += temp[i][k] * temp[k][j];\r\n                sum %= mod;\r\n            }\r\n            a[i][j] = sum;\r\n        }\r\n    }\r\n}\r\n\r\nint shift(int v) {\r\n    return (v << 1) & ((1 << m) - 1); \r\n}\r\n\r\nvoid solve() {\r\n    cin >> n >> k >> m;\r\n\r\n    for(int i = 0; i < 20; i++) {\r\n        b[i] = 0;\r\n        for(int j = 0; j < 5; j++) {\r\n            if(i & (1 << j)) b[i]++;\r\n        }\r\n    }\r\n\r\n    memset(f1, 0, sizeof f1);\r\n    memset(a, 0, sizeof a);\r\n    f1[0] = 1;\r\n\r\n    /*dp[0][0][0] = 1;\r\n    for(int i = 1; i <= n; i++) {\r\n        dp[i][0][0] = 1;\r\n        for(int j = 1; j <= k; j++) {\r\n            for(int st = 0; st < (1 << m); st++) {\r\n                int bcnt = b[st];\r\n                //not take\r\n                int s = shift(st);\r\n                dp[i][j][s] += dp[i - 1][j][st];\r\n                dp[i][j][s] %= mod;\r\n                //take\r\n                dp[i][j][s + 1] += (dp[i - 1][j - 1][st] * (bcnt + 1));\r\n                dp[i][j][s + 1] %= mod;\r\n            }\r\n        }\r\n    }*/\r\n    \r\n    int t = (1 << m);\r\n    a[0][0] = 1;\r\n    for(int j = 1; j <= k; j++) {\r\n        for(int st = 0; st < (1 << m); st++) {\r\n            int s = shift(st);\r\n            int curC = j * t + s;\r\n            int preC = j * t + st;\r\n            a[preC][curC] += 1;\r\n            if(s + 1 < (1 << m)) {\r\n                int bcnt = b[st];\r\n                curC = j * t + (s + 1);\r\n                preC = (j - 1) * t + (st);\r\n                a[preC][curC] += (bcnt + 1);\r\n            }\r\n\r\n        }\r\n    }\r\n\r\n    \r\n    while(n) {\r\n        if (n & 1) mul1();// res = res * a\r\n        mul2();  // a = a * a\r\n        n >>= 1;\r\n    }\r\n\r\n    ll res = 0;\r\n    for(int i = 0; i < (1 << m); i++) {\r\n        int idx = k * t + i;\r\n        res += f1[idx];\r\n        res %= mod;\r\n    } \r\n    cout << res << endl;\r\n}\r\n\r\nint main() {\r\n    int t = 1;\r\n    //cin >> t;\r\n    while(t--) {\r\n        solve();\r\n    }\r\n    return 0;\r\n}"
+}

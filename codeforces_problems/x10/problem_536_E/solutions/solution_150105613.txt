@@ -1,0 +1,37 @@
+{
+    "id": 150105613,
+    "contestId": 536,
+    "creationTimeSeconds": 1647676246,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 536,
+        "index": "E",
+        "name": "Tavas on the Path",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 536,
+        "members": [
+            {
+                "handle": "radal"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1429029300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 101,
+    "timeConsumedMillis": 545,
+    "memoryConsumedBytes": 33996800,
+    "source": "#include <bits/stdc++.h>\n#pragma GCC target(\"sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,avx,avx2,tune=native\")\n#pragma GCC optimize(\"unroll-loops\")\n#define rep(i,l,r) for (int i = l; i < r; i++)\n#define repr(i,r,l) for (int i = r; i >= l; i--)\n#define X first\n#define Y second\n#define pb push_back\n#define endl '\\n'\n#define debug(x) cerr << #x << \" : \" << x << endl;\nusing namespace std;\ntypedef long long ll;\ntypedef long double ld;\ntypedef pair<int,int> pll;\nconstexpr int N = 1e5+20,mod = 1e9+7,inf = 1e9+10;\ninline int mkay(int a,int b){\n    if (a+b >= mod) return a+b-mod;\n    if (a+b < 0) return a+b+mod;\n    return a+b;\n}\n\ninline int poww(int a,int k){\n    if (k < 0) return 0;\n    int z = 1;\n    while (k){\n        if (k&1) z = 1ll*z*a%mod;\n        a = 1ll*a*a%mod;\n        k >>= 1;\n    }\n    return z;\n}\nint n,tin[N],T,he[N],h[N],par[N][20],sz[N],q,f[N],out[N];\nvector<int> adj[N];\nvector<pll> ve[2];\nvector <pair<int,pll> > ed;\npair<pll,pll> Q[N];\nint seg[N*4][3]; // sum pre suf\nvoid upd(int l,int r,int p,int v = 1){\n    if (r-l == 1){\n        seg[v][1] = seg[v][2] = 1;\n        seg[v][0] = f[1];\n        return;\n    }\n    int m = (l+r) >> 1,u = (v << 1);\n    if (p < m) upd(l,m,p,u);\n    else upd(m,r,p,u|1);\n    seg[v][0]  = seg[u][0]+seg[u|1][0]-f[seg[u][2]]-f[seg[u|1][1]]+f[seg[u][2]+seg[u|1][1]];\n    if (seg[u][1] == m-l) seg[v][1] = seg[u|1][1]+m-l;\n    else seg[v][1] = seg[u][1];\n    if (seg[u|1][2] == r-m) seg[v][2] = r-m+seg[u][2];\n    else seg[v][2] = seg[u|1][2];\n}\nvoid que(int l,int r,int s,int e,bool fl,int v = 1){\n    if (s >= e || l >= e || s >= r) return;\n    if (s <= l && r <= e){\n        ve[fl].pb({v,(seg[v][1] == r-l)});\n        return;\n    }\n    int m = (l+r) >> 1,u = (v << 1);\n    if (fl){\n        que(l,m,s,e,fl,u);\n        que(m,r,s,e,fl,u|1);\n    }\n    else{\n        que(m,r,s,e,fl,u|1);\n        que(l,m,s,e,fl,u);\n    }\n}\ninline int lca(int u,int v){\n    if (h[u] > h[v]) swap(u,v);\n    while(h[v]-h[u])\n        v = par[v][__builtin_ctz(h[v]-h[u])];\n    if (u == v) return v;\n    repr(i,19,0) if (par[v][i] != par[u][i]){\n        v = par[v][i];\n        u = par[u][i];\n    }\n    return par[v][0];\n}\ninline bool cmp(int i,int j){\n    return (sz[i] > sz[j]);\n}\nvoid pre(int v,int p){\n    par[v][0] = p;\n    sz[v] = 1;\n    for (int u : adj[v]){\n        if (u != p){\n            h[u] = h[v]+1;\n            pre(u,v);\n            sz[v] += sz[u];\n        }\n    }\n}\nvoid dfs(int v,int p,bool f){\n    tin[v] = T;\n    T++;\n    if (!f) he[v] = v;\n    else he[v] = he[p];\n    bool g = 1;\n    for (int u : adj[v]){\n        if (u != p){\n            dfs(u,v,g);\n            g = 0;\n        }\n    }\n}\nint main(){\n    ios :: sync_with_stdio(0); cin.tie(0);\n    cin >> n >> q;\n    rep(i,1,n) cin >> f[i];\n    rep(i,1,n){\n        int u,v,w;\n        cin >> u >> v >> w;\n        ed.pb({w,{u,v}});\n        adj[u].pb(v);\n        adj[v].pb(u);\n    }\n    sort(ed.begin(),ed.end());\n    reverse(ed.begin(),ed.end());\n    pre(1,0);\n    rep(i,0,n-1) if (h[ed[i].Y.X] > h[ed[i].Y.Y]) swap(ed[i].Y.Y,ed[i].Y.X);\n    rep(j,1,20)\n        rep(i,2,n+1)\n            par[i][j] = par[par[i][j-1]][j-1];\n    rep(i,1,n+1) sort(adj[i].begin(),adj[i].end(),cmp);\n    dfs(1,0,0);\n    rep(i,0,q){\n        int u,v,l;\n        cin >> u >> v >> l;\n        Q[i] = {{l,i},{u,v}};\n    }\n    sort(Q,q+Q);\n    reverse(Q,q+Q);\n    int po = 0;\n    rep(i,0,q){\n        int u = Q[i].Y.Y,v = Q[i].Y.X,l = Q[i].X.X,w = lca(u,v);\n        while (po < n && ed[po].X >= l){\n            upd(0,n,tin[ed[po].Y.Y]);\n            po++;\n        }\n        if (tin[u] > tin[v]) swap(u,v);\n        int b = u;\n        while (b > 0){\n            if (h[he[b]] > h[w]){\n                que(0,n,tin[he[b]],tin[b]+1,0);\n                b = par[he[b]][0];\n                continue;\n            }\n            que(0,n,tin[w]+1,tin[b]+1,0);\n            break;\n        }\n        b = v;\n        vector<pll> hld;\n        while (b > 0){\n            if (h[he[b]] > h[w]){\n                hld.pb({tin[he[b]],tin[b]+1});\n                b = par[he[b]][0];\n                continue;\n            }\n            hld.pb({tin[w]+1,tin[b]+1});\n            break;\n        }\n        reverse(hld.begin(),hld.end());\n        for (pll p : hld) que(0,n,p.X,p.Y,1);\n        int j = Q[i].X.Y,cur = 0;\n        for (pll g : ve[0]){\n            out[j] += seg[g.X][0]-f[cur]-f[seg[g.X][2]]+f[cur+seg[g.X][2]];\n            if (g.Y) cur += seg[g.X][2];\n            else cur = seg[g.X][1];\n        }\n        for (pll g : ve[1]){\n            out[j] += seg[g.X][0]-f[cur]-f[seg[g.X][1]]+f[cur+seg[g.X][1]];\n            if (g.Y) cur += seg[g.X][1];\n            else cur = seg[g.X][2];\n        }\n        ve[0].clear();\n        ve[1].clear();\n    }\n    rep(i,0,q) cout << out[i] << endl;\n}\n"
+}

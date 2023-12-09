@@ -1,0 +1,38 @@
+{
+    "id": 235987866,
+    "contestId": 1778,
+    "creationTimeSeconds": 1701830247,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1778,
+        "index": "E",
+        "name": "The Tree Has Fallen!",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2500,
+        "tags": [
+            "bitmasks",
+            "dfs and similar",
+            "math",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1778,
+        "members": [
+            {
+                "handle": "guagua0407"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1675262100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 25,
+    "timeConsumedMillis": 1169,
+    "memoryConsumedBytes": 114073600,
+    "source": "//#pragma GCC optimize(\"O3\")\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define ll long long\r\n#define pii pair<int,int>\r\n#define f first\r\n#define s second\r\n#define all(x) x.begin(),x.end()\r\n#define _ ios::sync_with_stdio(0); cin.tie(0); cout.tie(0);\r\n\r\nint dx[4]={0,0,1,-1};\r\nint dy[4]={1,-1,0,0};\r\n\r\nvoid setIO(string s) {\r\n    freopen((s + \".in\").c_str(), \"r\", stdin);\r\n    freopen((s + \".out\").c_str(), \"w\", stdout);\r\n}\r\n\r\nconst int mxn=2e5+5;\r\nvector<int> adj[mxn];\r\nint a[mxn];\r\nvector<pair<int,int>> qs[mxn];\r\nint st[mxn],en[mxn];\r\nint t=0;\r\nvector<int> basis[mxn];\r\nvector<int> ans[mxn];\r\n\r\nvector<int> merge(vector<int> a,vector<int> b){\r\n    for(auto v:a){\r\n        int x=v;\r\n        for(auto u:b){\r\n            x=min(x,x^u);\r\n        }\r\n        if(x!=0) b.push_back(x);\r\n    }\r\n    return b;\r\n}\r\n\r\nvoid dfs(int v,int p=-1){\r\n    st[v]=++t;\r\n    basis[v].push_back(a[v]);\r\n    int pos=-1;\r\n    for(int i=0;i<adj[v].size();i++){\r\n        int u=adj[v][i];\r\n        if(u==p){\r\n            pos=i;\r\n            continue;\r\n        }\r\n        dfs(u,v);\r\n        basis[v]=merge(basis[v],basis[u]);\r\n    }\r\n    en[v]=t;\r\n    if(pos!=-1) adj[v].erase(adj[v].begin()+pos);\r\n}\r\n\r\nvoid dfs2(int v,vector<int> up=vector<int>()){\r\n    up=merge(up,{a[v]});\r\n    if(adj[v].empty()){\r\n        for(auto u:qs[v]){\r\n            if(u.f==v){\r\n                ans[u.s]=basis[1];\r\n            }\r\n            else{\r\n                ans[u.s]=basis[v];\r\n            }\r\n        }\r\n        return;\r\n    }\r\n    vector<int> belong[adj[v].size()];\r\n    vector<int> tmp;\r\n    for(int i=0;i<adj[v].size();i++){\r\n        tmp.push_back(st[adj[v][i]]);\r\n    }\r\n    for(auto u:qs[v]){\r\n        if(u.f==v){\r\n            ans[u.s]=basis[1];\r\n            continue;\r\n        }\r\n        int pos=upper_bound(all(tmp),st[u.f])-tmp.begin()-1;\r\n        if(pos==-1 or st[u.f]>en[adj[v].back()]){\r\n            ans[u.s]=basis[v];\r\n        }\r\n        else{\r\n            belong[pos].push_back(u.s);\r\n        }\r\n    }\r\n    vector<int> pre[adj[v].size()];\r\n    vector<int> suf[adj[v].size()];\r\n    pre[0]=basis[adj[v][0]];\r\n    for(int i=1;i<adj[v].size();i++){\r\n        pre[i]=merge(pre[i-1],basis[adj[v][i]]);\r\n    }\r\n    suf[adj[v].size()-1]=basis[adj[v].back()];\r\n    for(int i=adj[v].size()-2;i>=0;i--){\r\n        suf[i]=merge(suf[i+1],basis[adj[v][i]]);\r\n    }\r\n    for(int i=0;i<adj[v].size();i++){\r\n        vector<int> cur=up;\r\n        if(i>0) cur=merge(cur,pre[i-1]);\r\n        if(i<adj[v].size()-1) cur=merge(cur,suf[i+1]);\r\n        for(auto id:belong[i]){\r\n            ans[id]=cur;\r\n        }\r\n    }\r\n    for(int i=0;i<adj[v].size();i++){\r\n        vector<int> cur=up;\r\n        if(i>0) cur=merge(cur,pre[i-1]);\r\n        if(i<adj[v].size()-1) cur=merge(cur,suf[i+1]);\r\n        dfs2(adj[v][i],cur);\r\n    }\r\n}\r\n\r\nvoid solve(){\r\n    int n;\r\n    cin>>n;\r\n    for(int i=1;i<=n;i++){\r\n        basis[i].clear();\r\n        adj[i].clear();\r\n        qs[i].clear();\r\n    }\r\n    for(int i=1;i<=n;i++){\r\n        cin>>a[i];\r\n    }\r\n    for(int i=0;i<n-1;i++){\r\n        int a,b;\r\n        cin>>a>>b;\r\n        adj[a].push_back(b);\r\n        adj[b].push_back(a);\r\n    }\r\n    int q;\r\n    cin>>q;\r\n    for(int i=0;i<q;i++){\r\n        ans[i].clear();\r\n    }\r\n    for(int i=0;i<q;i++){\r\n        int r,v;\r\n        cin>>r>>v;\r\n        qs[v].push_back({r,i});\r\n    }\r\n    dfs(1);\r\n    dfs2(1);\r\n    for(int i=0;i<q;i++){\r\n        int x=0;\r\n        for(auto v:ans[i]){\r\n            x=max(x,x^v);\r\n        }\r\n        cout<<x<<'\\n';\r\n    }\r\n}\r\n\r\nint main() {_\r\n    int t;\r\n    cin>>t;\r\n    while(t--){\r\n        solve();\r\n    }\r\n    return 0;\r\n}\r\n//maybe its multiset not set\r\n//yeeorz\r\n//laborz\r\n\r\n"
+}

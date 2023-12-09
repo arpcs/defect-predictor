@@ -1,0 +1,36 @@
+{
+    "id": 152997730,
+    "contestId": 1000,
+    "creationTimeSeconds": 1649410462,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "chenwz"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 4,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 85401600,
+    "source": "// CF1000G Two-Paths\r\n#include <bits/stdc++.h>\r\nconst int NN = 3e5 + 4;\r\nusing namespace std;\r\nusing LL = long long;\r\nstruct Edge {\r\n  int v, w;\r\n};\r\nvector<Edge> G[NN];\r\nvoid add(int u, int v, int w) { G[u].push_back({v, w}); }\r\nint UP[NN][20], Dep[NN], HH;\r\nLL F[NN][20], C[NN], A[NN];\r\nvoid dp(int u, int fa) {\r\n  for (const Edge& e : G[u])\r\n    if (e.v != fa) dp(e.v, u), A[u] += max(0LL, A[e.v] - 2 * e.w);\r\n}\r\nvoid dfs(int u, int fa) {\r\n  Dep[u] = Dep[UP[u][0] = fa] + 1;\r\n  for (int i = 1; i <= HH; ++i) {\r\n    int u1 = UP[u][i - 1];\r\n    UP[u][i] = UP[u1][i - 1], F[u][i] = F[u][i - 1] + F[u1][i - 1] - A[u1];\r\n  }\r\n  for (const Edge& e : G[u]) {\r\n    int v = e.v;\r\n    LL a = A[v];\r\n    if (v == fa) continue;\r\n    F[v][0] = a + A[u] - e.w - max(0LL, a - 2 * e.w);\r\n    C[v] = max(C[v], C[u] + F[v][0] - e.w - a);\r\n    dfs(v, u);\r\n  }\r\n}\r\nLL query(int u, int v) {\r\n  LL ans = 0;\r\n  int a = u, b = v;\r\n  if (Dep[u] < Dep[v]) swap(u, v);\r\n  for (int i = HH; i >= 0; --i)\r\n    if (Dep[UP[u][i]] >= Dep[v]) ans += F[u][i] - A[u], u = UP[u][i];\r\n  if (u == v) return ans + (Dep[a] > Dep[b] ? A[a] : A[b]) + C[u];\r\n  for (int i = HH; i >= 0; --i)\r\n    if (UP[u][i] != UP[v][i])\r\n      ans += F[u][i] - A[u] + F[v][i] - A[v], u = UP[u][i], v = UP[v][i];\r\n  int l = UP[u][0];  // lca\r\n  return ans + F[u][0] - A[u] + F[v][0] - A[v] - A[l] + A[a] + A[b] + C[l];\r\n}\r\nint main() {\r\n  ios::sync_with_stdio(false), cin.tie(0);\r\n  int n, q;\r\n  cin >> n >> q, HH = ceil(n);\r\n  for (int u = 1; u <= n; ++u) cin >> A[u];\r\n  for (int i = 1, u, v, w; i < n; ++i)\r\n    cin >> u >> v >> w, add(u, v, w), add(v, u, w);\r\n  dp(1, 0);\r\n  dfs(1, 0);\r\n  for (int i = 0, u, v; i < q; i++) cin >> u >> v, cout << query(u, v) << endl;\r\n  return 0;\r\n}\r\n// GNU C++17 (64) Accepted 2386 ms 117500 KB"
+}

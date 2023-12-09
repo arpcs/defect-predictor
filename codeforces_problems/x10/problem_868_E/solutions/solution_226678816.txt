@@ -1,0 +1,37 @@
+{
+    "id": 226678816,
+    "contestId": 868,
+    "creationTimeSeconds": 1696477809,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 868,
+        "index": "E",
+        "name": "Policeman and a Tree",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2700,
+        "tags": [
+            "dp",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 868,
+        "members": [
+            {
+                "handle": "Luca"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1507187100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\nconstexpr int maxn = 55, maxv = maxn*maxn*maxn;\r\n\r\nvector<pair<int,int>> g[maxn];\r\n\r\nint dp[maxn][maxn], dist[maxn][maxn];\r\nbool leaf[maxn];\r\n\r\nvoid dfs(int u, int p, int dd[]) {\r\n    for(auto [v, w] : g[u]) if(v != p) {\r\n        dd[v] = dd[u] + w;\r\n        dfs(v, u, dd);\r\n    }\r\n}\r\n\r\nint ruins[maxn];\r\nvector<int> folhas[maxn]; // folhas de uma subarvore saindo de onde a policia comeca\r\n\r\nvoid dfs2(int u, int p) {\r\n    if(leaf[u]) folhas[u].push_back(u);\r\n    for(auto [v, w] : g[u]) if(v != p) {\r\n        dfs2(v, u);\r\n        ruins[u] += ruins[v];\r\n        for(int x : folhas[v])\r\n            folhas[u].push_back(x);\r\n    }\r\n}\r\n\r\nint main() {\r\n    int n; scanf(\"%d\", &n);\r\n    for(int i = 1; i < n; i++) {\r\n        int u, v, w; scanf(\"%d %d %d\", &u, &v, &w);\r\n        g[u].push_back({v, w});\r\n        g[v].push_back({u, w});\r\n    }\r\n    for(int i = 1; i <= n; i++)\r\n        dfs(i, 0, dist[i]);\r\n    for(int i = 1; i <= n; i++)\r\n        leaf[i] = g[i].size() == 1;\r\n\r\n    int st; scanf(\"%d\", &st);\r\n\r\n    int m; scanf(\"%d\", &m);\r\n    for(int i = 0, x; i < m; i++)\r\n        scanf(\"%d\", &x), ++ruins[x];\r\n\r\n    dfs2(st, 0);\r\n    \r\n    memset(dp, 0x3f, sizeof dp);\r\n    for(int u = 1; u <= n; u++)\r\n        dp[0][u] = 0;\r\n\r\n    for(int alive = 1; alive <= m; alive++) {\r\n        for(int u = 1; u <= n; u++) if(leaf[u]) {\r\n            int l = 1, r = maxv; \r\n            while(l <= r) {\r\n                int val = (l+r) >> 1, colocados = 0;\r\n                for(int v = 1; v <= n; v++) if(v != u && leaf[v]) {\r\n                    int qtd = 0;\r\n                    while(qtd + colocados <= alive && dp[alive-qtd][v] + dist[u][v] >= val)\r\n                        qtd++;\r\n                    if(!qtd) colocados -= maxv;\r\n                    colocados += qtd-1;\r\n                }\r\n                if(colocados >= alive) {\r\n                    dp[alive][u] = val;\r\n                    l = val+1;\r\n                } else\r\n                    r = val-1;\r\n            }\r\n        }\r\n    }\r\n\r\n    int ans = 0x3f3f3f3f;\r\n    for(auto [sub, w] : g[st]) {\r\n        int alive = ruins[sub];\r\n        int l = 1, r = maxv;\r\n        int aq = 0x3f3f3f3f;\r\n\r\n        while(l <= r) {\r\n            int val = (l+r)>>1, colocados = 0;\r\n            for(int v : folhas[sub]) {\r\n                int qtd = 0;\r\n                while(qtd + colocados <= alive && dp[m-qtd][v] + dist[st][v] >= val)\r\n                    qtd++;\r\n                if(!qtd) colocados -= maxv;\r\n                colocados += qtd-1;\r\n            }\r\n            if(colocados >= alive) {\r\n                aq = val;\r\n                l = val+1;\r\n            } else\r\n                r = val-1;\r\n        }\r\n        ans = min(ans, aq);\r\n    }\r\n    \r\n    printf(\"%d\\n\", ans);\r\n}\r\n"
+}

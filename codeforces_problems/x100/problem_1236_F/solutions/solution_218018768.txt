@@ -1,0 +1,38 @@
+{
+    "id": 218018768,
+    "contestId": 1236,
+    "creationTimeSeconds": 1691586373,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "Bronya19C"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 40038400,
+    "source": "#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\nconst int mo=1000000007;\r\nint add(int u,int v){\r\n    return (u+v>=mo?u+v-mo:u+v);\r\n}\r\nint fast_pow(int a,int p){\r\n    int sum=1;\r\n    while(p){\r\n        if(p&1)sum=1ll*sum*a%mo;\r\n        a=1ll*a*a%mo;\r\n        p>>=1;\r\n    }\r\n    return sum;\r\n}\r\nint pw[1000005];\r\nstruct edge{\r\n    int obj;\r\n    int last;\r\n}e[1000005];\r\nint head[500005],g;\r\nvoid link(int u,int v){\r\n    e[++g].obj=v;\r\n    e[g].last=head[u];\r\n    head[u]=g;\r\n}\r\nint dfn[500005],low[500005],cnt;\r\nstack<int>st;\r\nint siz[1000005],nn;\r\nvector<int>son[500005];\r\nint d[500005];\r\nint dsum[1000005];\r\nvoid dfs(int u,int fa){\r\n    dfn[u]=low[u]=++cnt;st.push(u);\r\n    for(int i=head[u];i;i=e[i].last){\r\n        int v=e[i].obj;\r\n        if(v==fa)continue;\r\n        if(!dfn[v]){\r\n            dfs(v,u);\r\n            low[u]=min(low[u],low[v]);\r\n            if(low[v]>=dfn[u]){\r\n                siz[++nn]=1;dsum[nn]=d[u];son[u].push_back(nn);\r\n                while(!st.empty()){\r\n                    int w=st.top();st.pop();\r\n                    siz[nn]++;dsum[nn]+=d[w];\r\n                    son[w].push_back(nn);\r\n                    if(w==v)break;\r\n                }\r\n            }\r\n        }\r\n        else low[u]=min(low[u],dfn[v]);\r\n    }\r\n}\r\n\r\nint main(){\r\n    int n,m;\r\n    scanf(\"%d%d\",&n,&m);nn=n;\r\n    pw[0]=1;pw[1]=fast_pow(2,mo-2);\r\n    for(int i=2;i<=n*2;i++)pw[i]=1ll*pw[1]*pw[i-1]%mo;\r\n    for(int i=1;i<=m;i++){\r\n        int u,v;\r\n        scanf(\"%d%d\",&u,&v);\r\n        link(u,v);\r\n        link(v,u);\r\n        d[u]++;d[v]++;\r\n    }\r\n    dfs(1,0);\r\n    int sum=0,ans=0,ans2=0;\r\n    ans2=add(ans2,1ll*n*pw[1]%mo);ans2=add(ans2,mo-1ll*m*pw[2]%mo);\r\n    // cout << nn<<endl;\r\n    for(int i=n+1;i<=nn;i++)\r\n        if(siz[i]!=2){\r\n            sum=add(sum,pw[siz[i]]);\r\n            ans=add(ans,mo-pw[2*siz[i]]);\r\n            ans=add(ans,pw[siz[i]]);//E(R^2)\r\n\r\n            ans=add(ans,2ll*pw[siz[i]]*siz[i]%mo);\r\n            ans=add(ans,2ll*pw[siz[i]+1]*(n-siz[i])%mo);//E(VR)\r\n\r\n\r\n            ans=add(ans,mo-2ll*pw[siz[i]]*siz[i]%mo);\r\n            ans=add(ans,mo-2ll*pw[siz[i]+1]*(dsum[i]-siz[i]*2)%mo);\r\n            ans=add(ans,mo-2ll*pw[siz[i]+2]*(m-(dsum[i]-siz[i]))%mo);//E(ER)\r\n\r\n            ans2=add(ans2,pw[siz[i]]);\r\n        }\r\n    ans=add(ans,1ll*sum*sum%mo);//E(R^2)\r\n    // cout << ans*32ll%mo<<endl;\r\n    for(int i=1;i<=n;i++){\r\n        sum=0;\r\n        for(int j=0;j<son[i].size();j++){\r\n            int v=son[i][j];\r\n            if(siz[v]!=2){\r\n                sum=add(sum,pw[siz[v]]);\r\n                ans=add(ans,mo-pw[2*siz[v]]);\r\n            }\r\n        }\r\n        // cout << i<<\" \"<< sum<<endl;\r\n        ans=add(ans,mo-1ll*sum*sum%mo);\r\n        ans=add(ans,2ll*sum*sum%mo);\r\n    }//E(R^2)\r\n    // 4+1*8\r\n    cout << ans*32ll%mo<<endl;\r\n    ans=add(ans,1ll*n*(n+1)%mo*1ll*pw[2]%mo);//E(V^2)\r\n    ans=add(ans,1ll*m*m%mo*1ll*pw[4]%mo);\r\n    ans=add(ans,mo-1ll*m*pw[4]%mo);\r\n    ans=add(ans,1ll*m*pw[2]%mo);\r\n    for(int i=1;i<=n;i++){\r\n        ans=add(ans,mo-1ll*d[i]*d[i]%mo*1ll*pw[4]%mo);\r\n        ans=add(ans,1ll*d[i]*d[i]%mo*1ll*pw[3]%mo);\r\n        ans=add(ans,mo-1ll*d[i]*pw[4]%mo);//E(E^2)\r\n        ans=add(ans,mo-2ll*d[i]*pw[2]%mo);\r\n        ans=add(ans,mo-2ll*(m-d[i])*pw[3]%mo);//E(VE)\r\n    }\r\n    printf(\"%d\\n\",add(ans,mo-1ll*ans2*ans2%mo));\r\n    return 0;\r\n}\r\n\r\n// D(X)=E(X^2)-E(X)^2\r\n// E((V+R-E)^2)\r\n// E(V^2)+E(R^2)+E(E^2)+2E(VR)-2E(VE)-2E(RE)\r\n\r\n// E(V^2)=n*(n+1)/4\r\n\r\n// E(R^2)"
+}

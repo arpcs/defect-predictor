@@ -1,0 +1,35 @@
+{
+    "id": 193662481,
+    "contestId": 1218,
+    "creationTimeSeconds": 1676414808,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1218,
+        "index": "E",
+        "name": "Product Tuples",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "divide and conquer",
+            "fft"
+        ]
+    },
+    "author": {
+        "contestId": 1218,
+        "members": [
+            {
+                "handle": "omeganot"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1568554500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nusing ll = long long;\r\nconst ll MOD = 998244353;\r\nconst int INF = 1e9; const ll INFLL = 1e18;\r\n\r\nll binPow(ll base, ll exp) {\r\n  \tll ans = 1;\r\n  \twhile(exp) {\r\n\t\tif(exp%2) {\r\n\t  \t\tans = (ans*base)%MOD;\r\n\t\t}\r\n\t\texp >>= 1;\r\n\t\tbase = (base*base)%MOD;\r\n  \t}\r\n  \treturn ans;\r\n}\r\n\r\nconst int C = binPow(3,119); const int CINV = binPow(C,MOD-2);\r\nconst int CPOW = 1<<23;\r\n\r\nvoid fft(vector<int>& polynomial, bool iFFT) {\r\n\tint degree = polynomial.size();\r\n\tfor(int i=1,j=0;i<degree;i++) {\r\n\t\tint bit = degree>>1;\r\n\t\tfor (;j&bit;bit>>=1) {\r\n\t\t\tj ^= bit;\r\n\t\t}\r\n\t\tj ^= bit;\r\n\t\tif (i < j) {\r\n\t\t\tswap(polynomial[i],polynomial[j]);\r\n\t\t}\r\n\t}\r\n\tfor(int i=2;i<=degree;i<<=1) {\r\n\t\tint j = iFFT?CINV:C;\r\n\t\tfor (int k=i;k<CPOW;k<<=1) {\r\n\t\t\tj = (1LL*j*j)%MOD;\r\n\t\t}\r\n\t\tfor (int k=0;k<degree;k+=i) {\r\n\t\t\tint omega = 1;\r\n\t\t\tfor (int l=0;l<i/2;l++) {\r\n\t\t\t\tint u = polynomial[k+l]; int v = (1LL*polynomial[k+l+i/2]*omega)%MOD;\r\n\t\t\t\tpolynomial[k+l] = u+v;\r\n\t\t\t\tif(polynomial[k+l]>=MOD) {\r\n\t\t\t\t\tpolynomial[k+l] -= MOD;\r\n\t\t\t\t}\r\n\t\t\t\tpolynomial[k+l+i/2] = u-v;\r\n\t\t\t\tif(polynomial[k+l+i/2]<0) {\r\n\t\t\t\t\tpolynomial[k+l+i/2] += MOD;\r\n\t\t\t\t}\r\n\t\t\t\tomega = (1LL*omega*j)%MOD;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tif(iFFT) {\r\n\t\tint invDegree = binPow(degree,MOD-2);\r\n\t\tfor(int i=0;i<degree;i++) {\r\n\t\t\tpolynomial[i] = (1LL*polynomial[i]*invDegree)%MOD;\r\n\t\t}\r\n\t}\r\n}\r\n\r\nvector<int> polyMultiply(vector<int>& A, vector<int>& B) {\r\n\tint degreeP2 = 1; int tot = A.size()+B.size();\r\n\twhile(degreeP2<tot) {\r\n\t\tdegreeP2 *= 2;\r\n\t}\r\n\tA.resize(degreeP2); B.resize(degreeP2);\r\n\tfft(A,false); fft(B,false);\r\n\tvector<int> ans(degreeP2);\r\n\tfor(int i=0;i<degreeP2;i++) {\r\n\t\tans[i] = (1LL*A[i]*B[i])%MOD;\r\n\t}\r\n\tfft(ans,true);\r\n\tans.resize(tot);\r\n\treturn ans;\r\n}\r\n\r\nint n; int k; int q;\r\n\r\nvector<int> f(vector<int>& a, int l, int r) {\r\n\tif(l==r) {\r\n\t\tvector<int> ans = {1,a[l]};\r\n\t\treturn ans;\r\n\t}\r\n\tint mid = l+(r-l)/2;\r\n\tvector<int> left = f(a,l,mid);\r\n\tvector<int> right = f(a,mid+1,r);\r\n\tvector<int> ans = polyMultiply(left,right);\r\n\treturn ans;\r\n}\r\n\r\nint main() {\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(0);    \r\n\tcin >> n >> k;\r\n\tvector<int> a(n);\r\n\tfor(int i=0;i<n;i++) {\r\n\t\tcin >> a[i];\r\n\t}\r\n\tcin >> q;\r\n\twhile(q--) {\r\n\t\tvector<int> tA = a;\r\n\t\tint t;\r\n\t\tcin >> t;\r\n\t\tif(t==1) {\r\n\t\t\tint q2; int i; int d;\r\n\t\t\tcin >> q2 >> i >> d;\r\n\t\t\ttA[--i] = d;\r\n\t\t\tfor(int j=0;j<n;j++) {\r\n\t\t\t\ttA[j] = q2-tA[j];\r\n\t\t\t}\r\n\t\t} else {\r\n\t\t\tint q2; int l; int r; int d;\r\n\t\t\tcin >> q2 >> l >> r >> d;\r\n\t\t\tl--; r--;\r\n\t\t\tfor(int i=l;i<=r;i++) {\r\n\t\t\t\ttA[i] += d;\r\n\t\t\t}\r\n\t\t\tfor(int i=0;i<n;i++) {\r\n\t\t\t\ttA[i] = q2-tA[i];\r\n\t\t\t}\r\n\t\t}\r\n\t\tvector<int> ans = f(tA,0,n-1);\r\n\t\tcout << ans[k] << \"\\n\";\r\n\t}\r\n}"
+}

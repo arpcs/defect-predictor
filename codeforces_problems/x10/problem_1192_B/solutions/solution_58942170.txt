@@ -1,0 +1,38 @@
+{
+    "id": 58942170,
+    "contestId": 1192,
+    "creationTimeSeconds": 1566026600,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "B",
+        "name": "Dynamic Diameter",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "TianyiQ"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 102,
+    "timeConsumedMillis": 2558,
+    "memoryConsumedBytes": 148992000,
+    "points": 100.0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define iinf 2000000000\r\n#define linf 1000000000000000000LL\r\n#define ulinf 10000000000000000000ull\r\n#define MOD1 1000000007LL\r\n#define mpr make_pair\r\n#define FS first\r\n#define SC second\r\ntypedef long long LL;\r\ntypedef unsigned long long ULL;\r\ntypedef unsigned long UL;\r\ntypedef unsigned short US;\r\ntypedef pair < int , int > pii;\r\ntypedef pair < LL , int > pli;\r\ntypedef pair < int , LL > pil;\r\ntypedef pair < LL , LL > pll;\r\ntypedef pair < int , pii > p3i;\r\nclock_t __stt;\r\ninline void TStart(){__stt=clock();}\r\ninline void TReport(){cerr<<fixed<<setprecision(3)<<\"\\nCurrent Case Taken Time : \"<<(double)(clock()-__stt)/CLOCKS_PER_SEC<<\"sec\\n\";}\r\ntemplate < typename T > T MIN(T a,T b){return a<b?a:b;}\r\ntemplate < typename T > T MAX(T a,T b){return a>b?a:b;}\r\ntemplate < typename T > T ABS(T a){return a>0?a:(-a);}\r\ntemplate < typename T > void UMIN(T &a,T b){if(b<a) a=b;}\r\ntemplate < typename T > void UMAX(T &a,T b){if(b>a) a=b;}\r\nint n,q,eu[100005],ev[100005];\r\n/* start segT */\r\nstruct segT{\r\n\tpli arr[400005];\r\n\tLL dlt[400005];\r\n\tvoid init(){\r\n\t\tfill(arr,arr+n*4+3,mpr(-linf,-1));\r\n\t\tmemset(dlt,0,sizeof(dlt));\r\n\t}\r\n\tvoid push(int p,int l=0,int r=n-1){\r\n\t\tarr[p].FS+=dlt[p];\r\n\t\tif(l<r){\r\n\t\t\tdlt[p<<1]+=dlt[p];\r\n\t\t\tdlt[p<<1|1]+=dlt[p];\r\n\t\t}\r\n\t\tdlt[p]=0ll;\r\n\t}\r\n\tvoid upd(int p,int d,pli v,int l=0,int r=n-1){\r\n\t\tpush(p,l,r);\r\n\t\tif(l==r){\r\n\t\t\tarr[p]=v;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint M=(l+r)/2;\r\n\t\tif(d<=M){\r\n\t\t\tupd(p<<1,d,v,l,M);\r\n\t\t\tpush(p<<1|1,M+1,r);\r\n\t\t}\r\n\t\telse{\r\n\t\t\tupd(p<<1|1,d,v,M+1,r);\r\n\t\t\tpush(p<<1,l,M);\r\n\t\t}\r\n\t\tarr[p]=MAX(arr[p<<1],arr[p<<1|1]);\r\n\t}\r\n\tvoid add(int p,int L,int R,LL v,int l=0,int r=n-1){\r\n\t\tif(l>=L && r<=R){\r\n\t\t\tdlt[p]+=v;\r\n\t\t\tpush(p,l,r);\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tpush(p,l,r);\r\n\t\tint M=(l+r)/2;\r\n\t\tif(L<=M) add(p<<1,L,R,v,l,M); else push(p<<1,l,M);\r\n\t\tif(R>M) add(p<<1|1,L,R,v,M+1,r); else push(p<<1|1,M+1,r);\r\n\t\tarr[p]=MAX(arr[p<<1],arr[p<<1|1]);\r\n\t}\r\n\tpli qry(int p,int L,int R,int l=0,int r=n-1){\r\n\t\tpush(p,l,r);\r\n\t\tif(l>=L && r<=R) return arr[p];\r\n\t\tint M=(l+r)/2;\r\n\t\tpli ret=mpr(-linf,-1);\r\n\t\tif(L<=M) ret=qry(p<<1,L,R,l,M);\r\n\t\tif(R>M) UMAX(ret,qry(p<<1|1,L,R,M+1,r));\r\n\t\treturn ret;\r\n\t}\r\n}glb,onc;\r\n/* start HLD */\r\nint sz[100005],mxson[100005],fa[100005];\r\nint tpv[100005],en[100005],le[100005],tick;\r\nbool prf[100005];\r\nLL bnd,dep[100005],ctf[100005],mx[100005];\r\nmultiset < pli > des[100005];\r\nvector < pil > adj[100005];\r\nvoid dfs(int v,int f){\r\n\tint i;\r\n\tfa[v]=f;\r\n\tsz[v]=1;\r\n\tmxson[v]=-1;\r\n\tmx[v]=dep[v];\r\n\tfor(i=0;i<(int)adj[v].size();++i){\r\n\t\tint u=adj[v][i].FS;\r\n\t\tif(u!=f){\r\n\t\t\tdep[u]=dep[v]+adj[v][i].SC;\r\n\t\t\tctf[u]=adj[v][i].SC;\r\n\t\t\tdfs(u,v);\r\n\t\t\tUMAX(mx[v],mx[u]);\r\n\t\t\tsz[v]+=sz[u];\r\n\t\t\tif(mxson[v]==-1 || sz[u]>sz[mxson[v]])\r\n\t\t\t\tmxson[v]=u;\r\n\t\t}\r\n\t}\r\n}\r\nvoid rdfs(int v,int tpver){\r\n\tint i;\r\n\ten[v]=tick++;\r\n\ttpv[v]=tpver;\r\n\tmx[v]-=dep[v];\r\n\tglb.upd(1,en[v],mpr(dep[v],v));\r\n\tif(mxson[v]!=-1){\r\n\t\tprf[mxson[v]]=1;\r\n\t\trdfs(mxson[v],tpver);\r\n\t}\r\n\tfor(i=0;i<(int)adj[v].size();++i){\r\n\t\tint u=adj[v][i].FS;\r\n\t\tif(u!=fa[v] && u!=mxson[v]){\r\n\t\t\trdfs(u,u);\r\n\t\t\tdes[v].insert(mpr(mx[u]+ctf[u],u));\r\n\t\t}\r\n\t}\r\n\tif(!des[v].empty()){\r\n\t\tonc.upd(1,en[v],mpr(des[v].rbegin()->FS-dep[v],-1));\r\n\t}\r\n\tle[v]=tick-1;\r\n}\r\nvoid rep(int v,int u,LL o,LL n){\r\n\tdes[v].erase(des[v].find(mpr(o,u)));\r\n\tdes[v].insert(mpr(n,u));\r\n}\r\nvoid recalc(int v,LL oc){\r\n\tLL os=mx[v];\r\n\tdep[v]=glb.qry(1,en[v],en[v]).FS;\r\n\tmx[v]=glb.qry(1,en[v],le[v]).FS-dep[v];\r\n\tif(!des[v].empty()){\r\n\t\tonc.upd(1,en[v],mpr(des[v].rbegin()->FS-dep[v],-1));\r\n\t}\r\n\tif(fa[v]!=-1 && !prf[v]){\r\n\t\trep(fa[v],v,os+oc,mx[v]+ctf[v]);\r\n\t}\r\n}\r\nint main(){\r\n    // inputting start\r\n    // \u6570\u636e\u7ed3\u6784\u8bb0\u5f97\u521d\u59cb\u5316\uff01\r\n    // \u53d8\u91cf\u540d\u4e0d\u8981\u5199\u91cd\u5199\u6df7\uff01\r\n    int i,j,k;\r\n\tscanf(\"%d%d%I64d\",&n,&q,&bnd);\r\n\tfor(i=0;i<n-1;++i){\r\n\t\tint u,v;\r\n\t\tLL w;\r\n\t\tscanf(\"%d%d%I64d\",&u,&v,&w);\r\n\t\t--u;--v;\r\n\t\tadj[u].push_back(mpr(v,w));\r\n\t\tadj[v].push_back(mpr(u,w));\r\n\t\teu[i]=u;ev[i]=v;\r\n\t}\r\n    #ifdef LOCAL\r\n        TStart();\r\n    #endif\r\n    // calculation start\r\n    // \u6570\u636e\u7ed3\u6784\u8bb0\u5f97\u521d\u59cb\u5316\uff01\r\n    // \u53d8\u91cf\u540d\u4e0d\u8981\u5199\u91cd\u5199\u6df7\uff01\r\n\tglb.init();\r\n\tonc.init();\r\n\tdfs(0,-1);\r\n\trdfs(0,0);\r\n\tLL ls=0ll;\r\n\twhile(q--){\r\n\t\tint d,u,v;\r\n\t\tLL e;\r\n\t\tscanf(\"%d%I64d\",&d,&e);\r\n\t\td=((LL)d+ls)%(LL)(n-1);\r\n\t\te=(e+ls)%bnd;\r\n\t\tu=eu[d];v=ev[d];\r\n\t\tif(fa[v]==u) swap(u,v);\r\n\t\tLL oc=ctf[u];\r\n\t\tctf[u]=e;\r\n\t\tglb.add(1,en[u],le[u],e-oc);\r\n\t\tonc.add(1,en[u],le[u],oc-e);\r\n\t\trecalc(u,oc);\r\n\t\tfor(i=v;i!=-1;){\r\n\t\t\trecalc(i,ctf[i]);\r\n\t\t\tif(i!=tpv[i]){\r\n\t\t\t\ti=tpv[i];\r\n\t\t\t\trecalc(i,ctf[i]);\r\n\t\t\t}\r\n\t\t\ti=fa[i];\r\n\t\t}\r\n\t\tpll D=glb.qry(1,0,n-1);\r\n\t\tLL ds=D.FS,res=ds;\r\n\t\tint vs=(int)D.SC;\r\n\t\tfor(i=vs;i!=-1;){\r\n\t\t\trecalc(i,ctf[i]);\r\n\t\t\tif(tpv[i]!=i){\r\n\t\t\t\tUMAX(res,ds+onc.qry(1,en[tpv[i]],en[i]-1).FS);\r\n\t\t\t}\r\n\t\t\tif((int)des[i].size()>1){\r\n\t\t\t\tmultiset < pli >::reverse_iterator it=des[i].rbegin();\r\n\t\t\t\tif(en[it->SC]<=en[vs] && le[it->SC]>=le[vs]) ++it;\r\n\t\t\t\tUMAX(res,it->FS+ds-dep[i]);\r\n\t\t\t}\r\n\t\t\tif(mxson[i]!=-1){\r\n\t\t\t\tLL mv=glb.qry(1,en[mxson[i]],le[mxson[i]]).FS;\r\n\t\t\t\tUMAX(res,mv+ds-2ll*dep[i]);\r\n\t\t\t}\r\n\t\t\ti=fa[tpv[i]];\r\n\t\t}\r\n\t\tls=res;\r\n\t\tprintf(\"%I64d\\n\",res);\r\n\t}\r\n    #ifdef LOCAL\r\n        TReport();\r\n    #endif\r\n    return 0;\r\n}"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 232086204,
+    "contestId": 822,
+    "creationTimeSeconds": 1699540825,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 822,
+        "index": "E",
+        "name": "Liar",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "dp",
+            "hashing",
+            "string suffix structures"
+        ]
+    },
+    "author": {
+        "contestId": 822,
+        "members": [
+            {
+                "handle": "I_CE_IOI"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1499011500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 172,
+    "timeConsumedMillis": 2573,
+    "memoryConsumedBytes": 19353600,
+    "source": "// LUOGU_RID: 134233069\n#include <bits/stdc++.h>\r\n\r\n#define ll long long\r\nstd::vector <ll> mul1, mul2;\r\nconst ll P1 = 131, P2 = 13331;\r\nconst int MOD = 998244353;\r\nconst int MAXN = 1e5 + 5;\r\nint dp[MAXN][35];\r\n\r\nvoid solve() {\r\n    int n, m;\r\n    std::string a, b;\r\n    std::cin >> n >> a >> m >> b;\r\n    a = \"$\" + a;\r\n    b = \"$\" + b;\r\n\r\n    mul1.resize(n + 1); mul2.resize(n + 1);\r\n    mul1[0] = mul2[0] = 1;\r\n    for (int i = 1; i <= n; i++) {\r\n        mul1[i] = mul1[i - 1] * 1ll * P1 % MOD;\r\n        mul2[i] = mul2[i - 1] * 1ll * P2 % MOD;\r\n    }\r\n    struct Hash {\r\n        std::vector <ll> h1, h2;\r\n        void init(std::string s) {\r\n            h1.resize(s.size()); h2.resize(s.size());\r\n            for (int i = 1; i < s.size(); i++) {\r\n                h1[i] = (h1[i - 1] * P1 + (s[i] - 'a' + 1)) % MOD;\r\n                h2[i] = (h2[i - 1] * P2 + (s[i] - 'a' + 1)) % MOD;\r\n            }\r\n        }\r\n        std::pair <ll, ll> hash(int l, int r) {\r\n            auto x = h1[r] - (h1[l - 1] * mul1[r - l + 1] % MOD) % MOD;\r\n            x += MOD; x %= MOD;\r\n            auto y = h2[r] - (h2[l - 1] * mul2[r - l + 1] % MOD) % MOD;\r\n            y += MOD; y %= MOD;\r\n            return std::make_pair(x, y);\r\n        }\r\n    }h1, h2;\r\n    h1.init(a); h2.init(b);\r\n\r\n    auto find = [&](int l1, int l2) {\r\n        int l = 1, r = std::min(n - l1 + 1, m - l2 + 1), pos = -1;\r\n        while (l <= r) {\r\n            int mid = (l + r) >> 1;\r\n            if (h1.hash(l1, l1 + mid - 1) == h2.hash(l2, l2 + mid - 1)) pos = mid, l = mid + 1;\r\n            else r = mid - 1;\r\n        } \r\n        return pos;\r\n    };\r\n\r\n    int x;\r\n    std::cin >> x;\r\n    for (int i = 0; i < n; i++) {\r\n        for (int j = 0; j <= std::min(i, x); j++) {\r\n            dp[i + 1][j] = std::max(dp[i + 1][j], dp[i][j]);\r\n            if (j + 1 <= x) {\r\n                int p = find(i + 1, dp[i][j] + 1);\r\n                if (p != -1) {\r\n                    dp[i + p][j + 1] = std::max(dp[i + p][j + 1], dp[i][j] + p); \r\n                }                \r\n            }\r\n        }\r\n    }\r\n\r\n    for (int i = 0; i <= x; i++) {\r\n        if (dp[n][i] == m) {\r\n            std::cout << \"YES\" << \"\\n\";\r\n            return;\r\n        }\r\n    }\r\n\r\n    std::cout << \"NO\" << \"\\n\";\r\n}\r\n\r\nint main() {\r\n    std::ios::sync_with_stdio(0);\r\n    std::cin.tie(0);\r\n    std::cout.tie(0);\r\n\r\n    int t = 1;\r\n    while (t--) {\r\n        solve();\r\n    }\r\n\r\n    return 0;\r\n}"
+}

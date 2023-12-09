@@ -1,0 +1,37 @@
+{
+    "id": 186483587,
+    "contestId": 793,
+    "creationTimeSeconds": 1671809532,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 793,
+        "index": "D",
+        "name": "Presents in Bankopolis",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2100,
+        "tags": [
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 793,
+        "members": [
+            {
+                "handle": "repkep"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1492965900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 43,
+    "timeConsumedMillis": 155,
+    "memoryConsumedBytes": 2355200,
+    "source": "#include <iostream>\n#include <vector>\n#include <algorithm>\n#include <cstring>\n#include <map>\n\nconst int& kInf = 1e6 + 666;\nconst int kMaxN = 82;\n\nint memo[kMaxN][kMaxN][kMaxN];\nstd::map<std::pair<int, int>, int> path_cost;\n\nint dp(int v, int u, int need) {\n    if (need == 0) {\n        return 0;\n    }\n\n    if (std::max(u, v) - std::min(u, v) - 1 < need) {\n        return kInf;\n    }\n\n    if (memo[v][u][need] != -1) {\n        return memo[v][u][need];\n    }\n\n    int current_minimum = kInf;\n\n    for (int next = std::min(v, u) + 1; next < std::max(u, v); ++next) {\n        const std::pair<int, int> pair(v, next);\n        if (path_cost.contains(pair) && next != v) {\n            current_minimum = std::min(current_minimum, dp(next, v, need - 1) + path_cost[pair]);\n            current_minimum = std::min(current_minimum, dp(next, u, need - 1) + path_cost[pair]);\n        }\n    }\n\n    memo[v][u][need] = current_minimum;\n    return current_minimum;\n}\n\nint main() {\n    std::ios_base::sync_with_stdio(false);\n    std::cin.tie(nullptr);\n\n    int n = 0, k = 0, m = 0;\n    std::cin >> n >> k >> m;\n    memset(memo, 255, sizeof(memo));    // \u0443\u0441\u0442\u0430\u043d\u0430\u0432\u043b\u0438\u0432\u0430\u0435\u0442 \u0432\u043e \u0432\u0441\u0435\u043c \u043c\u0435\u043c\u043e -1\n\n    while (m--) {\n        int u = 0, v = 0, cost = 0;\n        std::cin >> u >> v >> cost;\n        std::pair pair = {u, v};\n\n        if (path_cost.contains(pair)) {\n            path_cost[pair] = std::min(path_cost[pair], cost);\n        } else {\n            path_cost[pair] = cost;\n        }\n\n    }\n\n    int answer = kInf;\n    for (int i = 1; i <= n; ++i) {\n        answer = std::min(answer, dp(i, 0, k - 1));\n        answer = std::min(answer, dp(i, n + 1, k - 1));\n    }\n\n    std::cout << (answer == kInf ? -1 : answer)  << '\\n';\n\n    return 0;\n}\n// ??\n"
+}

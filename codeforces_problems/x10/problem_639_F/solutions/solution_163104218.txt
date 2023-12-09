@@ -1,0 +1,38 @@
+{
+    "id": 163104218,
+    "contestId": 639,
+    "creationTimeSeconds": 1657196014,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 639,
+        "index": "F",
+        "name": "Bear and Chemistry",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3300,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 639,
+        "members": [
+            {
+                "handle": "wenkaijie"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1459182900
+    },
+    "programmingLanguage": "Clang++17 Diagnostics",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 66,
+    "timeConsumedMillis": 3915,
+    "memoryConsumedBytes": 218726400,
+    "source": "# include <bits/stdc++.h>\r\n# define N 300005\r\nusing namespace std;\r\nint n,m,Q;\r\nstruct edge\r\n{\r\n\tint to,next;\r\n}e[N<<1];\r\nint head[N],cnt=1;\r\nlong long R;\r\nvoid add_edge(int x,int y)\r\n{\r\n\te[++cnt]=(edge){y,head[x]};\r\n\thead[x]=cnt;\r\n}\r\nvector<int> v[N];\r\nint dfn[N],low[N],id[N],tot;\r\nbool mark[N<<1];\r\nvoid tarjan(int x,int fa)\r\n{\r\n\tdfn[x]=++tot;\r\n\tlow[x]=tot;\r\n\tfor(int i=head[x];i;i=e[i].next)\r\n\t\tif(!dfn[e[i].to])\r\n\t\t{\r\n\t\t\ttarjan(e[i].to,x);\r\n\t\t\tlow[x]=min(low[x],low[e[i].to]);\r\n\t\t\tif(low[x]<low[e[i].to])\r\n\t\t\t\tmark[i]=mark[i^1]=1;\r\n\t\t}\r\n\t\telse if(e[i].to!=fa)\r\n\t\t\tlow[x]=min(low[x],dfn[e[i].to]);\r\n}\r\nvoid dfs(int x,int nowid)\r\n{\r\n\tid[x]=nowid;\r\n\tfor(int i=head[x];i;i=e[i].next)\r\n\t\tif(!mark[i] && !id[e[i].to])\r\n\t\t\tdfs(e[i].to,nowid);\r\n}\r\nint pos[N],dep[N],ST[N<<1][20];\r\nvoid dfs2(int x,int fa)\r\n{\r\n\tdep[x]=dep[fa]+1;\r\n\tST[++tot][0]=x;\r\n\tpos[x]=tot;\r\n\tfor(int i=head[x];i;i=e[i].next)\r\n\t\tif(e[i].to!=fa)\r\n\t\t{\r\n\t\t\tdfs2(e[i].to,x);\r\n\t\t\tST[++tot][0]=x;\r\n\t\t}\r\n}\r\nint LCA(int x,int y)\r\n{\r\n\tif(x==0 || y==0)\r\n\t\treturn 0;\r\n\tint l=pos[x],r=pos[y];\r\n\tif(r<l)\r\n\t\tswap(l,r);\r\n\tint k=log2(r-l+1);\r\n\tif(dep[ST[l][k]]<dep[ST[r-(1<<k)+1][k]])\r\n\t\treturn ST[l][k];\r\n\treturn ST[r-(1<<k)+1][k];\r\n}\r\nnamespace Tree\r\n{\r\n\tedge e[N<<1];\r\n\tint head[N],cnt;\r\n\tbool mark[N],vis[N];\r\n\tvoid add(int x,int y)\r\n\t{\r\n\t\te[++cnt]=(edge){y,head[x]};\r\n\t\thead[x]=cnt;\r\n\t\te[++cnt]=(edge){x,head[y]};\r\n\t\thead[y]=cnt;\r\n\t}\r\n\tint dfn[N],low[N],tot;\r\n\tvoid clear(int x)\r\n\t{\r\n\t\thead[x]=mark[x]=vis[x]=dfn[x]=low[x]=0;\r\n\t}\r\n\tvoid tarjan(int x,int fa,int id)\r\n\t{\r\n\t\tdfn[x]=++tot;\r\n\t\tlow[x]=tot;\r\n\t\tfor(int i=head[x];i;i=e[i].next)\r\n\t\t\tif(!dfn[e[i].to])\r\n\t\t\t{\r\n\t\t\t\ttarjan(e[i].to,x,i^1);\r\n\t\t\t\tlow[x]=min(low[x],low[e[i].to]);\r\n\t\t\t\tif(low[x]<low[e[i].to])\r\n\t\t\t\t\tmark[i]=mark[i^1]=1;\r\n\t\t\t}\r\n\t\t\telse if(i!=id)\r\n\t\t\t\tlow[x]=min(low[x],dfn[e[i].to]);\r\n\t}\r\n\tvoid dfs(int x)\r\n\t{\r\n\t\tvis[x]=1;\r\n\t\tfor(int i=head[x];i;i=e[i].next)\r\n\t\t\tif(!mark[i] && !vis[e[i].to])\r\n\t\t\t\tdfs(e[i].to);\r\n\t}\r\n}\r\nint mod;\r\nusing Tree::add;\r\nusing Tree::tarjan;\r\nint st[N],tp;\r\nint cmp(int x,int y)\r\n{\r\n\treturn pos[x]<pos[y];\r\n}\r\nint a[N],num;\r\nint fa[N];\r\nvoid init(int n)\r\n{\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tfa[i]=i;\r\n}\r\nint getfa(int x)\r\n{\r\n\tif(fa[x]==x)\r\n\t\treturn x;\r\n\treturn fa[x]=getfa(fa[x]);\r\n}\r\nvoid merge(int x,int y)\r\n{\r\n\tfa[getfa(x)]=getfa(y);\r\n}\r\nint p[N],cnt2;\r\nint main()\r\n{\r\n\tcin>>n>>m>>Q;\r\n\tfor(int i=1;i<=m;i++)\r\n\t{\r\n\t\tint x,y;\r\n\t\tscanf(\"%d%d\",&x,&y);\r\n\t\tadd_edge(x,y);\r\n\t\tadd_edge(y,x);\r\n\t}\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tif(!dfn[i])\r\n\t\t\ttarjan(i,0);\r\n\ttot=0;\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tif(!id[i])\r\n\t\t\tdfs(i,++tot);\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tfor(int j=head[i];j;j=e[j].next)\r\n\t\t\tif(id[i]!=id[e[j].to])\r\n\t\t\t\tv[id[i]].push_back(id[e[j].to]);\r\n\tmemset(head,0,sizeof head);\r\n\tcnt=0;\r\n\tmod=n;\r\n\tn=tot;\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tfor(int j:v[i])\r\n\t\t\tadd_edge(i,j);\r\n\ttot=0;\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tif(!pos[i])\r\n\t\t\tdfs2(i,0),ST[++tot][0]=0;\r\n\tfor(int i=1;(1<<i)<=tot;i++)\r\n\t\tfor(int j=1;j+(1<<i)-1<=tot;j++)\r\n\t\t\tif(dep[ST[j][i-1]]<dep[ST[j+(1<<(i-1))][i-1]])\r\n\t\t\t\tST[j][i]=ST[j][i-1];\r\n\t\t\telse\r\n\t\t\t\tST[j][i]=ST[j+(1<<(i-1))][i-1];\r\n\tTree::cnt=1;\r\n\tfor(int q=1;q<=Q;q++)\r\n\t{\r\n\t\tcnt2=0;\r\n\t\ttp=0;\r\n\t\tint nown,nowm;\r\n\t\tscanf(\"%d%d\",&nown,&nowm);\r\n\t\tfor(int i=1;i<=nown;i++)\r\n\t\t{\r\n\t\t\tint t;\r\n\t\t\tscanf(\"%d\",&t);\r\n\t\t\tt=(t+R-1)%mod+1;\r\n\t\t\ta[i]=id[t];\r\n\t\t\tp[++cnt2]=a[i];\r\n\t\t}\r\n\t\tfor(int i=1;i<=nowm;i++)\r\n\t\t{\r\n\t\t\tint x,y;\r\n\t\t\tscanf(\"%d%d\",&x,&y);\r\n\t\t\tx=(x+R-1)%mod+1;\r\n\t\t\ty=(y+R-1)%mod+1;\r\n\t\t\tif(id[x]!=id[y])\r\n\t\t\t\tadd(id[x],id[y]);\r\n\t\t\tp[++cnt2]=id[x];\r\n\t\t\tp[++cnt2]=id[y];\r\n\t\t}\r\n\t\tsort(a+1,a+nown+1,cmp);\r\n\t\tnown=unique(a+1,a+nown+1)-a-1;\r\n\t\tsort(p+1,p+cnt2+1,cmp);\r\n\t\tcnt2=unique(p+1,p+cnt2+1)-p-1;\r\n\t\tst[++tp]=p[1];\r\n\t\tint tmp=cnt2;\r\n\t\tfor(int i=2;i<=tmp;i++)\r\n\t\t{\r\n\t\t\tFUCK:;\r\n\t\t\tint now=p[i];\r\n\t\t\tint lca=LCA(st[tp],now);\r\n\t\t\tif(lca==0)\r\n\t\t\t{\r\n\t\t\t\twhile(tp-1)\r\n\t\t\t\t\tadd(st[tp],st[tp-1]),tp--;\r\n\t\t\t\ttp=0;\r\n\t\t\t\tst[++tp]=now;\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\tif(lca==st[tp])\r\n\t\t\t{\r\n\t\t\t\tst[++tp]=now;\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\tif(lca!=st[tp-1] && LCA(lca,st[tp-1])==st[tp-1])\r\n\t\t\t{\r\n\t\t\t\tadd(st[tp],lca);\r\n\t\t\t\ttp--;\r\n\t\t\t\tst[++tp]=lca;\r\n\t\t\t\tst[++tp]=now;\r\n\t\t\t\tp[++cnt2]=lca;\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\tif(lca==st[tp-1])\r\n\t\t\t{\r\n\t\t\t\tadd(st[tp],lca);\r\n\t\t\t\ttp--;\r\n\t\t\t\tst[++tp]=now;\r\n\t\t\t\tcontinue;\r\n\t\t\t}\r\n\t\t\tadd(st[tp],st[tp-1]);\r\n\t\t\ttp--;\r\n\t\t\tgoto FUCK;\r\n\t\t}\r\n\t\twhile(tp-1>0)\r\n\t\t{\r\n\t\t\tadd(st[tp],st[tp-1]);\r\n\t\t\ttp--;\r\n\t\t}\r\n\t\tbool ans=1;\r\n\t\ttarjan(a[1],0,0);\r\n\t\tTree::dfs(a[1]);\r\n\t\tfor(int i=1;i<=nown;i++)\r\n\t\t\tif(!Tree::vis[a[i]])\r\n\t\t\t{\r\n\t\t\t\tans=0;\r\n\t\t\t\tbreak;\r\n\t\t\t}\r\n\t\tfor(int i=1;i<=cnt2;i++)\r\n\t\t\tTree::clear(p[i]);\r\n\t\tfor(int i=1;i<=Tree::cnt;i++)\r\n\t\t\tTree::mark[i]=0;\r\n\t\tTree::cnt=1;\r\n\t\tTree::tot=0;\r\n\t\tif(ans)\r\n\t\t\tprintf(\"YES\\n\"),R+=q;\r\n\t\telse\r\n\t\t\tprintf(\"NO\\n\");\r\n\t}\r\n\treturn 0;\r\n}"
+}

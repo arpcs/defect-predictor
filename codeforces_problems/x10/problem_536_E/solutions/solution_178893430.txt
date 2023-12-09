@@ -1,0 +1,37 @@
+{
+    "id": 178893430,
+    "contestId": 536,
+    "creationTimeSeconds": 1667334053,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 536,
+        "index": "E",
+        "name": "Tavas on the Path",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 536,
+        "members": [
+            {
+                "handle": "Radin_Zahedi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1429029300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\n//#pragma GCC optimize(\"O2\")\r\nusing namespace std;\r\nusing ll = long long;\r\nusing ld = long double;\r\n#define pb push_back\r\n#define mp make_pair\r\n#define fi first\r\n#define se second\r\n#define sz(x) (int)x.size()\r\n#define endl '\\n'\r\nconst int mod = 1e9 + 7;\r\nconst int inf = 2e9 + 5;\r\nconst ll linf = 9e18 + 5;\r\n\r\n\r\nint n, q;\r\nconst int N = 1e5 + 5;\r\nconst int S = 3e5 + 5;\r\nvector<int> adj[N];\r\nvector<int> edges[N];\r\nvector<int> quer[N];\r\nint f[N];\r\n\r\nint len[N];\r\nint head[N];\r\nint par[N];\r\nint h[N];\r\nint st[N];\r\nint dtime = 1;\r\n\r\nint seg[S]][4];\r\n\r\nint ans[N];\r\n\r\nbool cmp(pair<int, int> a, pair<int, int> b) {\r\n\tint x, y;\r\n\r\n\tif (a.fi) {\r\n\t\tx = quer[a.se][0];\r\n\t}\r\n\telse {\r\n\t\tx = edges[a.se][0];\r\n\t}\r\n\r\n\tif (b.fi) {\r\n\t\ty = quer[b.se][0];\r\n\t}\r\n\telse {\r\n\t\ty = edges[b.se][0];\r\n\t}\r\n\r\n\treturn mp(-x, a.fi) < mp(-y, b.fi);\r\n}\r\n\r\nvoid dfs1(int u, int p) {\r\n\tpar[u] = p;\r\n\tfor (int i = 0; i < sz(adj[u]); i++) {\r\n\t\tif (adj[u][i] == p) {\r\n\t\t\tswap(adj[u][i], adj[u][sz(adj[u]) - 1]);\r\n\t\t\tadj[u].pop_back();\r\n\r\n\t\t\tbreak;\r\n\t\t}\r\n\t}\r\n\r\n\th[u] = h[p] + 1;\r\n\tlen[u] = 1;\r\n\tfor (auto v : adj[u]) {\r\n\t\tdfs1(v, u);\r\n\t\tlen[u] += len[v];\r\n\t}\r\n\r\n\tfor (int i = 0; i < sz(adj[u]); i++) {\r\n\t\tif (len[adj[u][0]] < len[adj[u][i]]) {\r\n\t\t\tswap(adj[u][0], adj[u][i]);\r\n\t\t}\r\n\t}\r\n}\r\n\r\nvoid dfs2(int u) {\r\n\tst[u] = dtime;\r\n\tdtime++;\r\n\r\n\tif (!adj[u].empty()) {\r\n\t\thead[adj[u][0]] = head[u];\r\n\t\tdfs2(adj[u][0]);\r\n\r\n\t\tfor (auto v : adj[u]) {\r\n\t\t\tif (v != adj[u][0]) {\r\n\t\t\t\thead[v] = v;\r\n\t\t\t\tdfs2(v);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\r\n\r\nvoid mrg(int ans[4], int m1[4], int m2[4]) {\r\n\tans[0] = m1[0] + m2[0];\r\n\tans[0] += f[m1[2] + m2[1]] - f[m1[2]] - f[m2[1]];\r\n\r\n\tif (m1[1] == m1[3]) {\r\n\t\tans[1] = m1[3] + m2[1];\r\n\t}\r\n\telse {\r\n\t\tans[1] = m1[1];\r\n\t}\r\n\r\n\tif (m2[2] == m2[3]) {\r\n\t\tans[2] = m1[2] + m2[3];\r\n\t}\r\n\telse {\r\n\t\tans[2] = m2[2];\r\n\t}\r\n\r\n\tans[3] = m1[3] + m2[3];\r\n}\r\n\r\nvoid cre(int l, int r, int ind) {\r\n\tif (l == r) {\r\n\t\tseg[ind][0] = 0;\r\n\t\tseg[ind][1] = 0;\r\n\t\tseg[ind][2] = 0;\r\n\t\tseg[ind][3] = 1;\r\n\t\treturn;\r\n\t}\r\n\r\n\tint m = (l + r) / 2;\r\n\tcre(l, m, 2 * ind);\r\n\tcre(m + 1, r, 2 * ind + 1);\r\n\r\n\tmrg(seg[ind], seg[2 * ind], seg[2 * ind + 1]);\r\n}\r\n\r\nvoid upd(int i, int l, int r, int ind) {\r\n\tif (l == i && r == i) {\r\n\t\tseg[ind][0] = f[1];\r\n\t\tseg[ind][1] = 1;\r\n\t\tseg[ind][2] = 1;\r\n\t\tseg[ind][3] = 1;\r\n\t\treturn;\r\n\t}\r\n\tif (i < l || r < i) {\r\n\t\treturn;\r\n\t}\r\n\r\n\tint m = (l + r) / 2;\r\n\tupd(i, l, m, 2 * ind);\r\n\tupd(i, m + 1, r, 2 * ind + 1);\r\n\r\n\tmrg(seg[ind], seg[2 * ind], seg[2 * ind + 1]);\r\n}\r\n\r\nvoid get(int b, int e, int ans[4], int l, int r, int ind) {\r\n\tif (b <= l && r <= e) {\r\n\t\tmrg(ans, ans, seg[ind]);\r\n\t\treturn;\r\n\t}\r\n\tif (e < l || r < b) {\r\n\t\treturn;\r\n\t}\r\n\r\n\tint m = (l + r) / 2;\r\n\tget(b, e, ans, l, m, 2 * ind);\r\n\tget(b, e, ans, m + 1, r, 2 * ind + 1);\r\n}\r\n\r\nint calc(int u, int v) {\r\n\tint ans[4] = {0, 0, 0, 0};\r\n\tint ansu[4] = {0, 0, 0, 0};\r\n\tint ansv[4] = {0, 0, 0, 0};\r\n\r\n\tif (head[u] != head[v]) {\r\n\t\tif (h[head[u]] < h[head[v]]) {\r\n\t\t\tint now[4] = {0, 0, 0, 0};\r\n\t\t\tget(st[head[v]], st[v], now, 2, n, 1);\r\n\r\n\t\t\tmrg(ansv, now, ansv);\r\n\r\n\t\t\tv = par[head[v]];\r\n\t\t}\r\n\t\telse {\r\n\t\t\tint now[4] = {0, 0, 0, 0};\r\n\t\t\tget(st[head[u]], st[u], now, 2, n, 1);\r\n\r\n\t\t\tmrg(ansu, ansu, now);\r\n\r\n\t\t\tu = par[head[u]];\r\n\t\t}\r\n\t}\r\n\tif (h[u] < h[v]) {\r\n\t\tint now[4] = {0, 0, 0, 0};\r\n\t\tget(st[u] + 1, st[v], now, 2, n, 1);\r\n\r\n\t\tmrg(ansv, now, ansv);\r\n\t}\r\n\telse {\r\n\t\tint now[4] = {0, 0, 0, 0};\r\n\t\tget(st[v] + 1, st[u], now, 2, n, 1);\r\n\r\n\t\tmrg(ansu, ansu, now);\r\n\t}\r\n\r\n\tmrg(ans, ansu, ansv);\r\n\r\n\r\n\treturn ans[0];\r\n}\r\n\r\nvoid init() {\r\n}\r\n\r\nvoid input() {\r\n\tcin >> n >> q;\r\n\t\r\n\tfor (int i = 1; i < n; i++) {\r\n\t\tcin >> f[i];\r\n\t}\r\n\r\n\tfor (int i = 1; i < n; i++) {\r\n\t\tint u, v, w;\r\n\t\tcin >> u >> v >> w;\r\n\r\n\t\tadj[u].pb(v);\r\n\t\tadj[v].pb(u);\r\n\r\n\t\tedges[i] = {w, u, v};\r\n\t}\r\n\r\n\tfor (int i = 1; i <= q; i++) {\r\n\t\tint u, v, l;\r\n\t\tcin >> u >> v >> l;\r\n\r\n\t\tquer[i] = {l, u, v};\r\n\t}\r\n}\r\n\r\nvoid solve() {\r\n\tdfs1(1, 0);\r\n\r\n\thead[1] = 1;\r\n\tdfs2(1);\r\n\t\r\n\tpair<int, int> every[n + q];\r\n\t\r\n\tfor (int i = 1; i < n; i++) {\r\n\t\tevery[i] = mp(0, i);\r\n\t}\r\n\tfor (int i = 1; i <= q; i++) {\r\n\t\tevery[i + n - 1] = mp(1, i);\r\n\t}\r\n\r\n\tsort(every + 1, every + n + q, cmp);\r\n\r\n\r\n\tcre(2, n, 1);\r\n\tfor (int ind = 1; ind < n + q; ind++) {\r\n\t\tint op = every[ind].fi, i = every[ind].se;\r\n\r\n\t\tif (op == 0) {\r\n\t\t\tint u = edges[i][1], v = edges[i][2];\r\n\t\t\r\n\t\t\tif (h[u] < h[v]) {\r\n\t\t\t\tswap(u, v);\r\n\t\t\t}\r\n\r\n\t\t\tupd(st[u], 2, n, 1);\r\n\t\t}\r\n\t\telse {\r\n\t\t\tint u = quer[i][1], v = quer[i][2];\r\n\r\n\t\t\tans[i] = calc(u, v);\r\n\t\t}\r\n\t}\r\n\r\n\tfor (int i = 1; i <= q; i++) {\r\n\t\tcout << ans[i] << endl;\r\n\t}\r\n}\r\n\r\nvoid output() {\r\n}\r\n\r\nint main() {\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(0);\r\n\tcout.tie(0);\r\n\r\n\tint number_of_testcases = 1;\r\n\t//cin >> number_of_testcases;\r\n\twhile (number_of_testcases--) {\r\n\t\tinit();\r\n\r\n\t\tinput();\r\n\r\n\t\tsolve();\r\n\r\n\t\toutput();\r\n\t}\r\n\r\n\treturn 0;\r\n}\r\n\r\n"
+}

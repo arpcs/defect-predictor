@@ -1,0 +1,36 @@
+{
+    "id": 208157197,
+    "contestId": 1032,
+    "creationTimeSeconds": 1685704192,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1032,
+        "index": "D",
+        "name": "Barcelonian Distance",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 1900,
+        "tags": [
+            "geometry",
+            "implementation"
+        ]
+    },
+    "author": {
+        "contestId": 1032,
+        "members": [
+            {
+                "handle": "-WIDA-"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1542557100
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 37,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 0,
+    "source": "// Date: 2023-06-02 18:29:27\r\n// Problem: D. Barcelonian Distance\r\n// Contest: Codeforces - Technocup 2019 - Elimination Round 3\r\n// URL: https://codeforces.com/contest/1032/problem/D\r\n// Memory Limit: 256 MB\r\n// Time Limit: 1000 ms\r\n// --------By WIDA--------\r\n\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n#ifndef ONLINE_JUDGE\r\n    #include <bits/wida.h>\r\n#endif\r\n#define int long long\r\n#define endl \"\\n\"\r\nconst int N = 1e6 + 7;\r\n\r\n\r\nnamespace Geometry { //\u51e0\u4f55\r\n    using ld = long double;\r\n    const ld PI = acos(-1);\r\n    const ld EPS = 1e-7;\r\n    template <class T, class S> bool equal(T x, S y) {\r\n        return x - y < EPS && x - y > -EPS;\r\n    }\r\n    ld fgcd(ld x, ld y) { //\u5b9e\u6570\u57dfgcd\r\n        return fabs(y) < 1e-5 ? fabs(x) : fgcd(y, fmod(x, y)); // \u6ce8\u610f\u8fd9\u91cc\u7684 1e-5 \u4e0d\u80fd\u968f\u610f\u4fee\u6539\r\n    }\r\n    ld to_deg(ld x) { // \u5f27\u5ea6\u8f6c\u89d2\u5ea6\r\n        return 180 * x / PI;\r\n    }\r\n    ld to_arc(ld x) { // \u89d2\u5ea6\u8f6c\u5f27\u5ea6\r\n        return PI / 180 * x;\r\n    }\r\n    ld angle(ld a, ld b, ld c) { // \u5df2\u77e5\u4e09\u8fb9\u957f\uff0c\u6c42\u67d0\u4e2a\u89d2\u7684\u5f27\u5ea6\r\n        // [b, c, a -> A], [a, c, b -> B], [a, b, c -> c]\r\n        ld val = acos((a * a + b * b - c * c) / (2.0 * a * b)); // \u8ba1\u7b97\u5f27\u5ea6\r\n        return val;\r\n    }\r\n    ld S(ld l, int n) { // \u6b63n\u68f1\u9525\u4f53\u79ef\u516c\u5f0f\r\n        return l * l * l * n / (12 * tan(PI / n)) * sqrt(1 - 1 / (4 * sin(PI / n) * sin(PI / n)));\r\n    }\r\n    template <class T> ld clac(T x1, T y1, T x2, T y2) { // \u8ddd\u79bb\u516c\u5f0f\r\n        ld val = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);\r\n        return sqrt(val);\r\n    }\r\n    \r\n    using i64 = long double;\r\n    struct point { // \u5728C++17\u6a21\u5f0f\u4e0b\u4f7f\u7528emplace_back\u7ed1\u5b9a\u53ef\u80fd\u4f1a\u5bfc\u81f4CE\uff01\r\n        i64 x, y;\r\n        point operator+(const point &p) const { return point{x + p.x, y + p.y}; }\r\n        point operator-(const point &p) const { return point{x - p.x, y - p.y}; }\r\n        point operator*(i64 t) const { return point{x * t, y * t}; }\r\n        point operator/(i64 t) const { return point{x / t, y / t}; }\r\n        friend auto &operator<<(ostream &o, const point &j) {\r\n            return o << j.x << \" \" << j.y;\r\n        }\r\n        friend bool operator<(const point &i, const point &j) {\r\n            return (i.x != j.x ? i.x < j.x : i.y < j.y);\r\n        }\r\n    };\r\n    ld clac(point p1, point p2) { // \u8ddd\u79bb\u516c\u5f0f\r\n        return clac(p1.x, p1.y, p2.x, p2.y);\r\n    }\r\n    i64 dis(point p1, point p2) { // \u66fc\u54c8\u987f\u8ddd\u79bb\u516c\u5f0f\r\n        return abs(p1.x - p2.x) + abs(p1.y - p2.y);\r\n    }\r\n    ld cross(point p1, point p2) { // \u53c9\u4e58\r\n        return p1.x * p2.y - p1.y * p2.x;\r\n    }\r\n    bool parallel(point p1, point p2, point p3, point p4) { // \u5224\u65ad\u662f\u5426\u5e73\u884c\r\n        return equal(cross(p1 - p2, p3 - p4), 0);\r\n    }\r\n    auto getfun(point p1, point p2) { // \u4e24\u70b9\u5f0f\u8f6c\u6362\u4e3a\u4e00\u822c\u5f0f\uff08\u53ef\u4ee5\u5904\u7406\u4e24\u70b9\u76f8\u540c\u7684\u60c5\u51b5\uff09\r\n        int A = p1.y - p2.y, B = p2.x - p1.x, C = p1.x * A + p1.y * B;\r\n        if (A < 0) A = -A, B = -B, C = -C;\r\n        else if (A == 0)\r\n            if (B < 0) B = -B, C = -C;\r\n            else if (B == 0 && C < 0) C = -C;\r\n        if (A == 0) {\r\n            if (B == 0) C = 1;\r\n            else {\r\n                int g = gcd(abs(B), abs(C));\r\n                B /= g, C /= g;\r\n            }\r\n        } else if (B == 0) {\r\n            int g = gcd(abs(A), abs(C));\r\n            A /= g, C /= g;\r\n        } else {\r\n            int g = gcd(gcd(abs(A), abs(B)), abs(C));\r\n            A /= g, B /= g, C /= g;\r\n        }\r\n        return tuple{A, B, -C}; // Ax + By + C = 0\r\n    }\r\n    bool same(point p1, point p2, point p3, point p4) { // \u5224\u65ad\u4e24\u6761\u76f4\u7ebf\u662f\u5426\u662f\u540c\u4e00\u6761\r\n        return getfun(p1, p2) == getfun(p3, p4);\r\n    }\r\n    #define cc cout << fixed << setprecision(12);\r\n} // namespace Geometry\r\nusing namespace Geometry;\r\n\r\n\r\nbool Solve() {\r\n    int A, B, C; cin >> A >> B >> C;\r\n    int sx, sy, ex, ey; cin >> sx >> sy >> ex >> ey;\r\n    \r\n    point S = {sx, sy}, E = {ex, ey};\r\n    ld ans = dis(S, E);\r\n    \r\n    point P[5];\r\n    P[1] = {sx, 1.0 * (-C - A * sx) / B};\r\n    P[3] = {ex, 1.0 * (-C - A * ex) / B};\r\n    P[2] = {1.0 * (-C - B * sy) / A, sy};\r\n    P[4] = {1.0 * (-C - B * ey) / A, ey};\r\n    for (int i = 1; i <= 4; i++) {\r\n        for (int j = 1; j <= 4; j++) {\r\n            ans = min(ans, dis(S, P[i]) + clac(P[i], P[j]) + dis(P[j], E));\r\n        }\r\n    }\r\n    cc; cout << ans << endl;\r\n    return 0;\r\n}\r\nsigned main() {\r\n    ios::sync_with_stdio(0), cin.tie(0), cout.tie(0); int Task = 1;\r\n    \r\n    // cin >> Task;\r\n    for (int i = 1; i <= Task; i++) {\r\n        Solve();\r\n        // cout << (Solve() ? \"YES\" : \"NO\") << endl;\r\n    }\r\n    \r\n    return 0;\r\n}\r\n\r\n"
+}

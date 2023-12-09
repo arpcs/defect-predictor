@@ -1,0 +1,35 @@
+{
+    "id": 222097722,
+    "contestId": 1209,
+    "creationTimeSeconds": 1694011112,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1209,
+        "index": "G2",
+        "name": "Into Blocks (hard version)",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1209,
+        "members": [
+            {
+                "handle": "2020linweitong"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1568466300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 7,
+    "timeConsumedMillis": 264,
+    "memoryConsumedBytes": 29696000,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int N=200005;\r\nint n,q,lmx[N<<2],rmx[N<<2],mx[N<<2],s[N<<2],mn[N<<2],tag[N<<2],a[N];\r\nset<int>b[N];\r\nvoid pushup(int x){\r\n\tmx[x]=max(mx[x<<1],mx[x<<1|1]);\r\n\tmn[x]=min(mn[x<<1],mn[x<<1|1]);\r\n//\tif (mn[x<<1]>0&&mn[x<<1|1]>0){\r\n//\t\tlmx[x]=mx[x];\r\n//\t\treturn;\r\n//\t}\r\n\tif (mn[x<<1]<mn[x<<1|1]){\r\n\t\ts[x]=s[x<<1];\r\n\t\tlmx[x]=lmx[x<<1],rmx[x]=max(mx[x<<1|1],rmx[x<<1]);\r\n\t\treturn;\r\n\t}\r\n\tif (mn[x<<1|1]<mn[x<<1]){\r\n\t\ts[x]=s[x<<1|1];\r\n\t\trmx[x]=rmx[x<<1|1],lmx[x]=max(mx[x<<1],lmx[x<<1|1]);\r\n\t\treturn;\r\n\t}\r\n\tlmx[x]=lmx[x<<1],rmx[x]=rmx[x<<1|1];\r\n\ts[x]=s[x<<1]+s[x<<1|1]+max(rmx[x<<1],lmx[x<<1|1]);\r\n}\r\nvoid pushdown(int x){\r\n\tif (tag[x]!=0){\r\n\t\tmn[x<<1]+=tag[x];\r\n\t\ttag[x<<1]+=tag[x];\r\n\t\tmn[x<<1|1]+=tag[x];\r\n\t\ttag[x<<1|1]+=tag[x];\r\n\t\ttag[x]=0;\r\n\t}\r\n}\r\nvoid add1(int x,int l,int r,int k,int v){\r\n\tif (l==r){\r\n\t\tlmx[x]=mx[x]=v;\r\n\t\treturn;\r\n\t}\r\n\tpushdown(x);\r\n\tint mid=(l+r)>>1;\r\n\tif (k<=mid)add1(x<<1,l,mid,k,v);else add1(x<<1|1,mid+1,r,k,v);\r\n\tpushup(x);\r\n}\r\nvoid add2(int x,int l,int r,int L,int R,int v){\r\n\tif (L>R)return;\r\n\tif (r<L||l>R)return;\r\n\tif (L<=l&&r<=R){\r\n\t\tmn[x]+=v,tag[x]+=v;\r\n\t\treturn;\r\n\t}\r\n\tpushdown(x);\r\n\tint mid=(l+r)>>1;\r\n\tadd2(x<<1,l,mid,L,R,v),add2(x<<1|1,mid+1,r,L,R,v);\r\n\tpushup(x);\r\n}\r\nvoid wk(int x,int tp){\r\n\tif (b[x].empty())return;\r\n\tif (tp!=-1)add1(1,1,n,(*b[x].begin()),(int)b[x].size());\r\n\tadd2(1,1,n,(*b[x].begin()),(*b[x].rbegin())-1,tp);\r\n}\r\nint query(int x,int l,int r,int k){\r\n\tif (l==r)return mn[x];\r\n\tint mid=(l+r)>>1;\r\n\tpushdown(x);\r\n\tif (k<=mid)return query(x<<1,l,mid,k);\r\n\telse return query(x<<1|1,mid+1,r,k);\r\n}\r\nvoid bl(int x,int l,int r){\r\n\tif (l==r)return;\r\n\tpushdown(x);\r\n\tint mid=(l+r)>>1;\r\n\tbl(x<<1,l,mid),bl(x<<1|1,mid+1,r);\r\n\tpushup(x);\r\n}\r\nint main(){\r\n\tscanf(\"%d%d\",&n,&q);\r\n\tfor (int i=1;i<=n;++i){\r\n\t\tscanf(\"%d\",&a[i]);\r\n//\t\tprintf(\"%d %d\\n\",a[i],i);\r\n\t\tb[a[i]].insert(i);\r\n\t}\r\n\tfor (int i=1;i<=N-5;++i){\r\n\t\tif (!b[i].empty()){\r\n\t\t\twk(i,1);\r\n//\t\t\tadd1(1,1,n,(*b[i].begin()),(int)b[i].size());\r\n//\t\t\tprintf(\"%d %d %d\\n\",i,(*b[i].begin()),(*b[i].rbegin()));\r\n//\t\t\tadd2(1,1,n,(*b[i].begin()),(*b[i].rbegin())-1,1);\r\n\t\t}\r\n\t}\r\n//\tfor (int i=1;i<=n;++i){\r\n//\t\tprintf(\"!%d\\n\",query(1,1,n,i));\r\n//\t}\r\n//\tprintf(\"%d %d %d\\n\",s[1],lmx[1],rmx[1]);\r\n\tprintf(\"%d\\n\",n-s[1]-lmx[1]-rmx[1]);\r\n\twhile (q--){\r\n\t\tint i,x;\r\n\t\tscanf(\"%d%d\",&i,&x);\r\n\t\twk(a[i],-1),b[a[i]].erase(b[a[i]].find(i)),wk(a[i],1);\r\n\t\twk(x,-1),b[x].insert(i),wk(x,1),a[i]=x;\r\n\t\tprintf(\"%d\\n\",n-s[1]-lmx[1]-rmx[1]);\r\n\t\tbl(1,1,n);\r\n\t}\r\n}"
+}

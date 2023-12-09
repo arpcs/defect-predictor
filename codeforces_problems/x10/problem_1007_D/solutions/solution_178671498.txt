@@ -1,0 +1,37 @@
+{
+    "id": 178671498,
+    "contestId": 1007,
+    "creationTimeSeconds": 1667213899,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1007,
+        "index": "D",
+        "name": "Ants",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "2-sat",
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1007,
+        "members": [
+            {
+                "handle": "fbabic"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1531492500
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 60,
+    "timeConsumedMillis": 2495,
+    "memoryConsumedBytes": 642560000,
+    "source": "#include <bits/stdc++.h>\r\n#define X first\r\n#define Y second\r\n\r\nusing namespace std;\r\ntypedef long long llint;\r\n\r\nconst int maxn = 8e6+5e5;\r\nconst int maxm = 1e5+10;\r\nconst int base = 31337;\r\nconst int mod = 1e9+7;\r\nconst int inf = 0x3f3f3f3f;\r\nconst int logo = 15;\r\nconst int off = 1 << logo;\r\nconst int treesiz = off << 1;\r\n\r\nint n, m;\r\nvector< int > graph[maxm];\r\nvector< int > graph2[maxn], graph3[maxn];\r\nint L[maxn], R[maxn];\r\nunordered_set< int > s[maxm];\r\nint rootup[maxm], rootdown[maxm];\r\nint col[maxn];\r\nint pos[maxn];\r\n\r\nint t = 0;\r\nvoid add_path(int a, int b) {\r\n\t//int lc = lca(a, b);\r\n\ts[a].insert(t);\r\n\ts[b].insert(t);\r\n\t//s[lc].insert(t);\r\n\tt++;\r\n}\r\n\r\nvoid add_edge(int x, int y) {\r\n\tif (x == -1 || y == -1) return;\r\n\t//printf(\"adding edge: %d %d\\n\", x, y);\r\n\tgraph2[x].push_back(y);\r\n\tgraph3[y].push_back(x);\r\n}\r\n\r\ninline int get_L(int x) {\r\n\tif (x == -1) return x;\r\n\treturn L[x];\r\n}\r\n\r\ninline int get_R(int x) {\r\n\tif (x == -1) return x;\r\n\treturn R[x];\r\n}\r\n\r\nvoid update(int x, int node, int prev, int l, int r, bool rem, bool down) {\r\n\tint mid = (l + r) / 2;\r\n\tif (x <= mid) {\r\n\t\tR[node] = get_R(prev);\r\n\t\tif (l == x && mid == x) {\r\n\t\t\tif (rem) L[node] = -1;\r\n\t\t\telse L[node] = x;\r\n\t\t} else {\r\n\t\t\tL[node] = t++;\r\n\t\t\tupdate(x, L[node], get_L(prev), l, mid, rem, down);\r\n\t\t}\r\n\t} else {\r\n\t\tL[node] = get_L(prev);\r\n\t\tif (mid + 1 == x && r == x) {\r\n\t\t\tif (rem) R[node] = -1;\r\n\t\t\telse R[node] = x;\r\n\t\t} else {\r\n\t\t\tR[node] = t++;\r\n\t\t\tupdate(x, R[node], get_R(prev), mid + 1, r, rem, down);\r\n\t\t}\r\n\t}\r\n\tif (down) {add_edge(L[node], node); add_edge(R[node], node);}\r\n\telse {add_edge(node, L[node]); add_edge(node, R[node]);}\r\n}\r\n\r\ninline int get_O(int x) {\r\n\treturn 4 * (x / 2) + 1 - x;\r\n}\r\n\r\nvoid add_node(int x, int &rup, int &rdown) {\r\n\tadd_edge(x, rup);\r\n\tadd_edge(rdown, get_O(x));\r\n\r\n\tint ne = t++;\r\n\tupdate(get_O(x), ne, rup, 0, off - 1, false, false);\r\n\trup = ne;\r\n\r\n\tne = t++;\r\n\tupdate(x, ne, rdown, 0, off - 1, false, true);\r\n\trdown = ne;\r\n}\r\n\r\nvoid remove_node(int x, int &rup, int &rdown) {\r\n\tint ne = t++;\r\n\tupdate(get_O(x), ne, rup, 0, off - 1, true, false);\r\n\trup = ne;\r\n\r\n\tne = t++;\r\n\tupdate(x, ne, rdown, 0, off - 1, true, true);\r\n\trdown = ne;\r\n}\r\n\r\nvoid build(int x, int parr) {\r\n\tint ind = -1;\r\n\tint bes = -1;\r\n\tfor (int tren : graph[x]) {\r\n\t\tif (tren == parr) continue;\r\n\t\tbuild(tren, x);\r\n\t\tif ((int)s[tren].size() > bes) {\r\n\t\t\tind = tren;\r\n\t\t\tbes = s[tren].size();\r\n\t\t}\r\n\t}\r\n\r\n\t//printf(\"ind: %d\\n\", ind);\r\n\tif (ind == -1) {\r\n\t\trootup[x] = t++;\r\n\t\trootdown[x] = t++;\r\n\t\tfor (int tren : s[x]) add_node(tren, rootup[x], rootdown[x]);\r\n\t} else {\r\n\t\tset< int > add;\r\n\t\tfor (int tren : graph[x]) {\r\n\t\t\tif (tren == parr || tren == ind) continue;\r\n\t\t\tfor (int iter : s[tren]) {\r\n\t\t\t\tif (add.count(iter) || s[ind].count(iter)) {\r\n\t\t\t\t\tadd.erase(iter);\r\n\t\t\t\t\ts[ind].erase(iter);\r\n\t\t\t\t\tremove_node(iter, rootup[ind], rootdown[ind]);\r\n\t\t\t\t} else add.insert(iter);\r\n\t\t\t}\r\n\t\t\ts[tren].clear();\r\n\t\t}\r\n\t\tfor (int iter : s[x]) {\r\n\t\t\tif (add.count(iter) || s[ind].count(iter)) {\r\n\t\t\t\tadd.erase(iter);\r\n\t\t\t\ts[ind].erase(iter);\r\n\t\t\t\tremove_node(iter, rootup[ind], rootdown[ind]);\r\n\t\t\t} else add.insert(iter);\r\n\t\t}\r\n\t\tswap(s[x], s[ind]);\r\n\t\ts[ind].clear();\r\n\t\trootup[x] = rootup[ind], rootdown[x] = rootdown[ind];\r\n\t\tfor (int iter : add) {\r\n\t\t\ts[x].insert(iter);\r\n\t\t\tadd_node(iter, rootup[x], rootdown[x]);\r\n\t\t}\r\n\r\n\t\t//printf(\"ind: %d\\n\", ind);\r\n\t\t//printf(\"adding: \"); for (int iter : add) printf(\"%d \", iter); printf(\"\\n\");\r\n\t}\r\n\t//printf(\"active %d == \", x);\r\n\t//for (int tren : s[x]) printf(\"%d \", tren); printf(\"\\n\");\r\n}\r\n\r\nvector< int > v;\r\nvoid dfs2(int x) {\r\n\tif (x == -1) return;\r\n\tcol[x] = -1;\r\n\r\n\tfor (int tren : graph2[x]) {\r\n\t\tif (col[tren] == 0) dfs2(tren);\r\n\t}\r\n\tv.push_back(x);\r\n}\r\n\r\nvoid dfs3(int x, int c) {\r\n\tcol[x] = c;\r\n\tfor (int tren : graph3[x]) {\r\n\t\tif (col[tren] == -1) dfs3(tren, c);\r\n\t}\r\n}\r\n\r\nint main() {\r\n\tscanf(\"%d\", &n);\r\n\tfor (int i = 1; i < n; i++) {\r\n\t\tint a, b;\r\n\t\tscanf(\"%d%d\", &a, &b);\r\n\t\tgraph[a].push_back(b);\r\n\t\tgraph[b].push_back(a);\r\n\t}\r\n\r\n\tscanf(\"%d\", &m);\r\n\tfor (int i = 0; i < m; i++) {\r\n\t\tint a, b, c, d;\r\n\t\tscanf(\"%d%d%d%d\", &a, &b, &c, &d);\r\n\t\tadd_path(a, b);\r\n\t\tadd_path(c, d);\r\n\t}\r\n\tt = off;\r\n\r\n\tmemset(L, -1, sizeof L);\r\n\tmemset(R, -1, sizeof R);\r\n\tbuild(1, 0);\r\n\tfor (int i = 0; i < t; i++) {\r\n\t\tif (col[i] == 0) dfs2(i);\r\n\t}\r\n\treverse(v.begin(), v.end());\r\n\tfor (int i : v) {\r\n\t\tif (col[i] == -1) dfs3(i, i);\r\n\t}\r\n\r\n\tfor (int i = 0; i < m; i++) {\r\n\t\t//printf(\"comp: %d %d\\n\", col[2 * i], col[2 * i + 1]);\r\n\t\tif (col[2 * i] == col[2 * i + 1]) {\r\n\t\t\tprintf(\"NO\\n\");\r\n\t\t\treturn 0;\r\n\t\t}\r\n\t}\r\n\r\n\tprintf(\"YES\\n\");\r\n\tmemset(pos, -1, sizeof pos);\r\n\tfor (int i = 0; i < v.size(); i++) {\r\n\t\tint tren = v[i];\r\n\t\tif (pos[col[tren]] == -1) pos[col[tren]] = i;\r\n\t}\r\n\r\n\tfor (int i = 0; i < m; i++) {\r\n\t\tif (pos[col[2 * i]] < pos[col[2 * i + 1]]) printf(\"2\\n\");\r\n\t\telse printf(\"1\\n\");\r\n\t}\r\n\treturn 0;\r\n}"
+}

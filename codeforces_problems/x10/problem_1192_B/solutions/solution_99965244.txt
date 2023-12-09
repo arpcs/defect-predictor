@@ -1,0 +1,38 @@
+{
+    "id": 99965244,
+    "contestId": 1192,
+    "creationTimeSeconds": 1606725116,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "B",
+        "name": "Dynamic Diameter",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "NashChen"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 102,
+    "timeConsumedMillis": 404,
+    "memoryConsumedBytes": 86528000,
+    "points": 100.0,
+    "source": "#include <iostream>\r\n#include <cstdio>\r\n#include <cstring>\r\n#include <algorithm>\r\n#include <queue>\r\nusing namespace std;\r\n\r\nconst int MAXN= 800005;\r\n\r\nint N,M,head[MAXN],nex[MAXN],targ[MAXN],cur;\r\nint fa[MAXN],EO[MAXN],lb[MAXN],rb[MAXN],cnt;\r\nlong long weig[MAXN],dis[MAXN];\r\n\r\nint son[MAXN];\r\nlong long len[MAXN],MaxW,lastans;\r\nlong long minx[MAXN],maxx[MAXN],lmax[MAXN],rmax[MAXN],diam[MAXN],Add[MAXN];\r\n\r\nvoid editdata(int k,long long c){\r\n\tminx[k]+= c;\r\n\tmaxx[k]+= c;\r\n\tlmax[k]-= c;\r\n\trmax[k]-= c;\r\n\tAdd[k]+= c;\r\n\treturn;\r\n}\r\n\r\nvoid pushdown(int k){\r\n\tif(!Add[k]) return;\r\n\teditdata(k<<1,Add[k]);\r\n\teditdata(k<<1|1,Add[k]);\r\n\tAdd[k]= 0;\r\n\treturn;\r\n}\r\n\r\nvoid pushup(int k){\r\n\tminx[k]= min(minx[k<<1],minx[k<<1|1]);\r\n\tmaxx[k]= max(maxx[k<<1],maxx[k<<1|1]);\r\n\tlmax[k]= max(max(lmax[k<<1],lmax[k<<1|1]),maxx[k<<1]-2*minx[k<<1|1]);\r\n\trmax[k]= max(max(rmax[k<<1],rmax[k<<1|1]),maxx[k<<1|1]-2*minx[k<<1]);\r\n\tdiam[k]= max(max(diam[k<<1],diam[k<<1|1]),max(maxx[k<<1]+rmax[k<<1|1],lmax[k<<1]+maxx[k<<1|1]));\r\n\treturn;\r\n}\r\n\r\nvoid updateSegtree(int a,int b,long long c,int k,int l,int r){\r\n\tif(a<=l && r<=b){\r\n\t\teditdata(k,c);\r\n\t\treturn;\r\n\t}\r\n\tif(r<a || b<l) return;\r\n\tif(l<r) pushdown(k);\r\n\tint mid= (l+r)>>1;\r\n\tupdateSegtree(a,b,c,k<<1,l,mid);\r\n\tupdateSegtree(a,b,c,k<<1|1,mid+1,r);\r\n\tpushup(k);\r\n\treturn;\r\n}\r\n\r\nvoid buildSegtree(int k,int l,int r){\r\n\tif(l==r){\r\n\t\tmaxx[k]= minx[k]= dis[EO[l]];\r\n\t\tlmax[k]= rmax[k]= -dis[EO[l]];\r\n\t\tdiam[k]= 0;\r\n\t\treturn;\r\n\t}\r\n\tint mid= (l+r)>>1;\r\n\tbuildSegtree(k<<1,l,mid);\r\n\tbuildSegtree(k<<1|1,mid+1,r);\r\n\tpushup(k);\r\n\treturn;\r\n}\r\n\r\nvoid buildEO(int u){\r\n\tEO[++cnt]= u;\r\n\tlb[u]= cnt;\r\n\tfor(int e= head[u];e;e= nex[e]){\r\n\t\tint v= targ[e];\r\n\t\tif(fa[u]==v) continue;\r\n\t\tfa[v]= u;son[(e-1)/2]= v;\r\n\t\tdis[v]= dis[u]+weig[e];\r\n\t\tbuildEO(v);\r\n\t\tEO[++cnt]= u;\r\n\t}\r\n\trb[u]= cnt;\r\n\treturn;\r\n}\r\n\r\nvoid AddEdge(int u,int v,long long w){\r\n\tnex[++cur]= head[u];\r\n\thead[u]= cur;\r\n\ttarg[cur]= v;\r\n\tweig[cur]= w;\r\n\treturn;\r\n}\r\n\r\nvoid Input(){\r\n\tscanf(\"%d%d%lld\",&N,&M,&MaxW);\r\n\tfor(int i=0;i<N-1;++i){\r\n\t\tint x,y;long long z;\r\n\t\tscanf(\"%d%d%lld\",&x,&y,&z);\r\n\t\tAddEdge(x,y,z);\r\n\t\tAddEdge(y,x,z);\r\n\t\tlen[i]= z;\r\n\t}\r\n\treturn;\r\n}\r\n\r\nint main(){\r\n\tInput();\r\n\tbuildEO(1);\r\n\tbuildSegtree(1,1,cnt);\r\n\twhile(M--){\r\n\t\tint e;long long d;\r\n\t\tscanf(\"%d%lld\",&e,&d);\r\n\t\te= (e+lastans)%(N-1);\r\n\t\td= (d+lastans)%MaxW;\r\n\t\tupdateSegtree(lb[son[e]],rb[son[e]],d-len[e],1,1,cnt);\r\n\t\tlen[e]= d;\r\n\t\tprintf(\"%lld\\n\",lastans= diam[1]);\r\n\t}\r\n\treturn 0;\r\n}"
+}

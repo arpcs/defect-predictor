@@ -1,0 +1,38 @@
+{
+    "id": 125764604,
+    "contestId": 1236,
+    "creationTimeSeconds": 1628861638,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "bkifhr10"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 920,
+    "memoryConsumedBytes": 77312000,
+    "source": "#include <bits/stdc++.h>\n\n\n#ifdef _DEBUG_\n#define debug(x) cout << #x << \" : \" << x << \"  \"\n#define cout_n cout<<endl\n#else\n#define debug(x)\n#define cout_n\n#endif\n\nusing namespace std;\n#define pb push_back\nconst int MAXN=5e5+10;\ntypedef long long int ll;\nconst ll M=1e9+7;\nll inv[MAXN];\nvoid initInv() {\n    inv[1]=1;\n    for (int i=2;i<MAXN;i++) {\n        inv[i]=(M-M/i)*inv[M%i]%M;\n    }\n}\n\nvector<int>dc[MAXN],G[MAXN],T[MAXN<<1];\nint es[MAXN][2],d[MAXN];\nint dfn[MAXN],low[MAXN],dccnt,sp,n,m;\nstack<int>dcst;\nvoid dcdfs(int u){\n\tdfn[u]=low[u]=++dfn[0];\n\tdcst.push(u);\n\tfor(int v:G[u]){\n\t\tif(dfn[v]){\n\t\t\tlow[u]=min(low[u],dfn[v]);\n\t\t}else{\n\t\t\tdcdfs(v);\n\t\t\tlow[u]=min(low[u],low[v]);\n\t\t\tif(dfn[u]==low[v]){\n\t\t\t\t++dccnt;++sp;\n\t\t\t\tint x;\n\t\t\t\twhile((x=dcst.top())!=u){\n\t\t\t\t\tdcst.pop();dc[dccnt].pb(x);\n\t\t\t\t\tT[x].pb(sp);T[sp].pb(x);\n\t\t\t\t}\n\t\t\t\tdc[dccnt].pb(u);\n\t\t\t\tT[sp].pb(u);T[u].pb(sp);\n\t\t\t}\n\t\t}\n\t}\n}\nll qpow(ll a,ll x){\n    ll ret=1;\n    while(x){\n        if(x&1) ret=ret*a%M;\n        a=a*a%M;x>>=1; // \u8fd9\u91cc\u6709\u53ef\u80fd\u7206long long\n    }\n    return ret;\n}\nll countEX(){\n\tll ex=n*inv[2]%M;\n\tfor(int i=n+1;i<=sp;++i){\n\t\tint c=T[i].size();\n\t\tif(c>2){\n\t\t\tex=(ex+qpow(inv[2],c))%M;\n\t\t}\n\t}\n\tex=ex-(inv[4]*m%M);\n\tdebug(ex);cout_n;\n\treturn (ex+M)%M;\n}\nll counta2(){\n#ifdef _DEBUG_\n\tcout<<\"a2 : \"<<1ll*n*(n+1)%M*inv[4]%M<<'\\n';\n#endif\n\treturn 1ll*n*(n+1)%M*inv[4]%M;}\nll countb2(){\n\tll b2=0;\n\tfor(int ie=1;ie<=m;++ie){\n\t\tint cxt=d[es[ie][0]]+d[es[ie][1]]-2;\n\t\tll re=(cxt*inv[8]%M+inv[4])%M;\n\t\tre+=(m-cxt-1)*inv[16]%M;re%=M;\n\t\tb2=(b2+re)%M;\n\t}\n\tdebug(b2);cout_n;\n\treturn b2;\n}\nll countc2(){\n\tvector<int>cid;ll c2=0,S2=0;\n\tfor(int i=n+1;i<=sp;++i){\n\t\tif(T[i].size()>2){\n\t\t\tcid.pb(i);S2=(S2+qpow(inv[2],T[i].size()))%M;\n\t\t}\n\t}\n\tc2=S2;\n\tfor(int id:cid){\n\t\tc2=(c2+ qpow(inv[2],T[id].size()) * (S2-qpow(inv[2],T[id].size())+M) % M  ) %M;\n\t}\n\tfor(int i=1;i<=n;++i){\n\t\tvector<int>gcid;ll re=0,S2=0;\n\t\tfor(int v:T[i]){\n\t\t\tif(T[v].size()>2){\n\t\t\t\tgcid.pb(v);\n\t\t\t\tS2=(S2+qpow(inv[2],T[v].size()))%M;\n\t\t\t}\n\t\t}\n\t\tif(gcid.size()<2){\n\t\t\tcontinue;\n\t\t}\n\t\tfor(int v:gcid){\n\t\t\tre=(re+ ( qpow(inv[2],T[v].size()) * (S2-qpow(inv[2],T[v].size())+M)%M ) ) %M;\n\t\t}\n\t\tc2=(c2+re)%M;\n\t}\n\tdebug(c2);cout_n;\n\treturn c2;\n}\nll countab(){\n\tll ab=0;\n\tfor(int i=1;i<=n;++i){\n\t\tab=(ab+inv[4]*d[i]%M+inv[8]*(m-d[i])%M)%M;\n\t}\n\tdebug(ab);cout_n;\n\treturn ab;\n}\nll countac(){\n\tll ac=0,S2=0;\n\tfor(int i=n+1;i<=sp;++i){\n\t\tif(T[i].size()>2){\n\t\t\tS2=(S2+qpow(inv[2],T[i].size()))%M;\n\t\t}\n\t}\n\tfor(int i=1;i<=n;++i){\n\t\tll S=0;\n\t\tfor(int id:T[i]){\n\t\t\tif(T[id].size()>2){\n\t\t\t\tS=(S+qpow(inv[2],T[id].size()))%M;\n\t\t\t}\n\t\t}\n\t\tac+=(S+inv[2]*(S2-S+M)%M)%M;ac%=M;\n\t}\n\tdebug(ac);cout_n;\n\treturn ac;\n}\nll countbc(){\n\tll bc=0;\n\tfor(int i=n+1;i<=sp;++i){\n\t\tll cntin=0,cntx=0;\n\t\tif(T[i].size()<=2){\n\t\t\tcontinue;\n\t\t}\n\t\tcntin=T[i].size();\n\t\tfor(int v:T[i]){\n\t\t\tif(G[v].size()>2){\n\t\t\t\tcntx+=G[v].size()-2;\n\t\t\t}\n\t\t}\n\t\tll cnt0=m-cntin-cntx;\n\t\tdebug(cnt0);debug(cntin);debug(cntx);cout_n;\n\t\tll re=0,P=qpow(inv[2],T[i].size());\n\t\tre+=cntin*P%M;re%=M;\n\t\tre+=inv[2]*cntx%M*P%M;re%=M;\n\t\tre+=cnt0*inv[4]%M*P%M;re%=M;\n\t\tbc=(bc+re)%M;\n\t}\n\tdebug(bc);cout_n;\n\treturn bc;\n}\n\nint main() {\n\tios::sync_with_stdio(false);cin.tie(0);cout.tie(0);\n#ifdef _DEBUG_\n\tfreopen(\"F.in\",\"r\",stdin);\n\tfreopen(\"F.out\",\"w\",stdout);\n\tclock_t _BEGIN_T=clock();\n#endif\n\tinitInv();\n\tcin>>n>>m;sp=n;\n\tfor(int i=1;i<=m;++i){\n\t\tcin>>es[i][0]>>es[i][1];G[es[i][0]].pb(es[i][1]);G[es[i][1]].pb(es[i][0]);\n\t\t++d[es[i][0]];++d[es[i][1]];\n\t}\n\tdcdfs(1);\n\tll ans=0;\n\tans=(counta2()+countb2()+countc2()-2*countab()-2*countbc()+2*countac()-qpow(countEX(),2))%M;\n\tif(ans<0)ans+=M;\n\tcout<<ans<<'\\n';\n#ifdef _DEBUG_\n\tclock_t _END_T=clock();\n\tcerr<<\"TIME: \"<<(double)(_END_T-_BEGIN_T)/CLOCKS_PER_SEC*1000.0<<\"mS\"<<endl;\n#endif\n\treturn 0;\n}\n \t\t\t\t\t  \t\t \t\t     \t  \t  \t   \t"
+}

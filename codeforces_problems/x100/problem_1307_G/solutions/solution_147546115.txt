@@ -1,0 +1,37 @@
+{
+    "id": 147546115,
+    "contestId": 1307,
+    "creationTimeSeconds": 1645689448,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "Macesuted-Moe"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 2150400,
+    "source": "/**\r\n * @file 1307G.cpp\r\n * @author Macesuted ([email\u00a0protected])\r\n * @date 2022-02-24\r\n *\r\n * @copyright Copyright (c) 2022\r\n *\r\n */\r\n\r\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define MP make_pair\r\n#define MT make_tuple\r\n\r\nnamespace io {\r\n#define SIZE (1 << 20)\r\nchar ibuf[SIZE], *iS, *iT, obuf[SIZE], *oS = obuf, *oT = oS + SIZE - 1, c, qu[55];\r\nint f, qr;\r\ninline void flush(void) { return fwrite(obuf, 1, oS - obuf, stdout), oS = obuf, void(); }\r\ninline char getch(void) {\r\n    return (iS == iT ? (iT = (iS = ibuf) + fread(ibuf, 1, SIZE, stdin), (iS == iT ? EOF : *iS++)) : *iS++);\r\n}\r\nvoid putch(char x) {\r\n    *oS++ = x;\r\n    if (oS == oT) flush();\r\n    return;\r\n}\r\nstring getstr(void) {\r\n    string s = \"\";\r\n    char c = getch();\r\n    while (c == ' ' || c == '\\n' || c == '\\r' || c == '\\t' || c == EOF) c = getch();\r\n    while (!(c == ' ' || c == '\\n' || c == '\\r' || c == '\\t' || c == EOF)) s.push_back(c), c = getch();\r\n    return s;\r\n}\r\nvoid putstr(string str, int begin = 0, int end = -1) {\r\n    if (end == -1) end = str.size();\r\n    for (int i = begin; i < end; i++) putch(str[i]);\r\n    return;\r\n}\r\ntemplate <typename T>\r\nT read() {\r\n    T x = 0;\r\n    for (f = 1, c = getch(); c < '0' || c > '9'; c = getch())\r\n        if (c == '-') f = -1;\r\n    for (x = 0; c <= '9' && c >= '0'; c = getch()) x = x * 10 + (c & 15);\r\n    return x * f;\r\n}\r\ntemplate <typename T>\r\nvoid write(const T& t) {\r\n    T x = t;\r\n    if (!x) putch('0');\r\n    if (x < 0) putch('-'), x = -x;\r\n    while (x) qu[++qr] = x % 10 + '0', x /= 10;\r\n    while (qr) putch(qu[qr--]);\r\n    return;\r\n}\r\nstruct Flusher_ {\r\n    ~Flusher_() { flush(); }\r\n} io_flusher_;\r\n}  // namespace io\r\nusing io::getch;\r\nusing io::getstr;\r\nusing io::putch;\r\nusing io::putstr;\r\nusing io::read;\r\nusing io::write;\r\n\r\nbool mem1;\r\n\r\n#define maxn 55\r\n#define maxm 2505\r\n\r\ntypedef pair<long long, int> pli;\r\n\r\nclass Dinic {\r\n   private:\r\n    struct Edge {\r\n        int to, cap, cost, rev;\r\n    };\r\n\r\n    vector<vector<Edge>> graph;\r\n    vector<vector<Edge>::iterator> cur;\r\n    vector<long long> dist;\r\n    vector<bool> vis;\r\n    queue<int> que;\r\n    int n, S, T;\r\n\r\n    bool bfs(void) {\r\n        for (int i = 1; i <= n; i++) cur[i] = graph[i].begin(), dist[i] = numeric_limits<int>::max(), vis[i] = false;\r\n        que.push(S), dist[S] = 0;\r\n        while (!que.empty()) {\r\n            int p = que.front();\r\n            que.pop();\r\n            vis[p] = false;\r\n            for (auto i : graph[p])\r\n                if (i.cap && dist[i.to] > dist[p] + i.cost) {\r\n                    dist[i.to] = dist[p] + i.cost;\r\n                    if (!vis[i.to]) vis[i.to] = true, que.push(i.to);\r\n                }\r\n        }\r\n        return dist[T] != numeric_limits<int>::max();\r\n    }\r\n    int dfs(int p, int rest) {\r\n        if (p == T || !rest) return rest;\r\n        int use = 0, c;\r\n        for (auto i = cur[p]; i != graph[p].end() && rest > use; i++) {\r\n            cur[p] = i;\r\n            if (dist[i->to] != dist[p] + i->cost || !i->cap) continue;\r\n            if (!(c = dfs(i->to, min(rest, i->cap)))) dist[i->to] = -1;\r\n            use += c, i->cap -= c, graph[i->to][i->rev].cap += c;\r\n        }\r\n        return use;\r\n    }\r\n\r\n   public:\r\n    void resize(int _n) { return n = _n, graph.resize(n + 1), cur.resize(n + 1), vis.resize(n + 1), dist.resize(n + 1); }\r\n    void addEdge(int from, int to, int cap, int cost) {\r\n        return graph[from].push_back(Edge{to, cap, cost, (int)graph[to].size()}),\r\n               graph[to].push_back(Edge{from, 0, cost, (int)graph[from].size() - 1});\r\n    }\r\n    pli maxFlow(int _S, int _T) {\r\n        S = _S, T = _T;\r\n        if (!bfs()) return {0, 0};\r\n        return {dist[T], dfs(S, numeric_limits<int>::max())};\r\n    }\r\n} net;\r\n\r\nlong long cost[maxm], lim[maxm];\r\n\r\nvoid solve(void) {\r\n    int n = read<int>(), m = read<int>();\r\n    net.resize(n);\r\n    for (int i = 1, x, y, c; i <= m; i++) {\r\n        x = read<int>(), y = read<int>(), c = read<int>();\r\n        net.addEdge(x, y, 1, c);\r\n    }\r\n    int flow = 0;\r\n    pli ret = net.maxFlow(1, n);\r\n    while (ret != pli{0LL, 0}) {\r\n        for (int i = flow + 1; i <= flow + ret.second; i++) cost[i] = cost[i - 1] + ret.first;\r\n        flow += ret.second;\r\n        ret = net.maxFlow(1, n);\r\n    }\r\n    for (int i = 1; i < flow; i++) lim[i] = cost[i + 1] * i - cost[i] * (i - 1);\r\n    cout << setprecision(8);\r\n    int q = read<int>();\r\n    while (q--) {\r\n        int x = read<int>(), p = lower_bound(lim + 1, lim + flow, x) - lim;\r\n        cout << 1. * (cost[p] + x) / p << endl;\r\n    }\r\n    return;\r\n}\r\n\r\nbool mem2;\r\n\r\nint main() {\r\n#ifdef MACESUTED\r\n    cerr << \"Memory: \" << abs(&mem1 - &mem2) / 1024. / 1024. << \"MB\" << endl;\r\n#endif\r\n\r\n    int _ = 1;\r\n    while (_--) solve();\r\n\r\n#ifdef MACESUTED\r\n    cerr << \"Time: \" << clock() * 1000. / CLOCKS_PER_SEC << \"ms\" << endl;\r\n#endif\r\n    return 0;\r\n}\r\n"
+}

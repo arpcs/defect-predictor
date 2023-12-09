@@ -1,0 +1,38 @@
+{
+    "id": 196214257,
+    "contestId": 639,
+    "creationTimeSeconds": 1678082944,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 639,
+        "index": "F",
+        "name": "Bear and Chemistry",
+        "type": "PROGRAMMING",
+        "points": 3000.0,
+        "rating": 3300,
+        "tags": [
+            "data structures",
+            "dfs and similar",
+            "graphs",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 639,
+        "members": [
+            {
+                "handle": "__stick"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1459182900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 77,
+    "timeConsumedMillis": 1668,
+    "memoryConsumedBytes": 103014400,
+    "source": "// Problem: Bear and Chemistry\r\n// Contest: Luogu\r\n// URL: https://www.luogu.com.cn/problem/CF639F\r\n// Memory Limit: 250 MB\r\n// Time Limit: 6000 ms\r\n// time: 2023-03-06 10:02:10\r\n\r\n#include<bits/stdc++.h>\r\n#pragma GCC optimize(\"Ofast\")\r\nusing namespace std;\r\ntemplate<typename T>\r\ninline bool cmax(T&x,const T& y){return x<y?x=y,1:0;}\r\ntemplate<typename T>\r\ninline bool cmin(T&x,const T& y){return y<x?x=y,1:0;}\r\ntypedef long long ll;\r\ntypedef pair<int,int> pii;\r\ntypedef pair<ll,ll> pll;\r\ntypedef vector<int> vi;\r\ntypedef vector<vector<int> > vii; \r\ntypedef unsigned long long ull;\r\n#define sz(x) (int(x.size()))\r\n#define all(x) (x).begin(),(x).end()\r\n#define pb push_back\r\n#define eb emplace_back\r\n#define em emplace\r\n#define X first\r\n#define Y second\r\nconst int MAXN=1e6+10;\r\nstruct node\r\n{\r\n    int son[2],fa;\r\n    bool rev,f;\r\n   int add,mmin,w;\r\n}t[MAXN];\r\n#define ls t[p].son[0]\r\n#define rs t[p].son[1]\r\ninline void rev(int p){swap(ls,rs),t[p].rev^=1;}\r\ninline void ADD(int p,int k)\r\n{\r\n    t[p].add+=k,t[p].mmin+=k,t[p].w+=k;\r\n}\r\ninline void push_up(int p)\r\n{\r\n    t[p].mmin=t[p].f?t[p].w:0x3f3f3ff3;\r\n    if(ls)cmin(t[p].mmin,t[ls].mmin);\r\n    if(rs)cmin(t[p].mmin,t[rs].mmin);\r\n}\r\ninline void push_down(int p)\r\n{\r\n    if(t[p].rev)\r\n    {\r\n        if(ls)rev(ls);\r\n        if(rs)rev(rs);\r\n        t[p].rev=0;\r\n    }\r\n    if(t[p].add)\r\n    {\r\n        if(ls)ADD(ls,t[p].add);\r\n        if(rs)ADD(rs,t[p].add);\r\n        t[p].add=0;\r\n    }\r\n}\r\ninline bool isroot(int p)\r\n{\r\n\treturn t[t[p].fa].son[0]!=p&&t[t[p].fa].son[1]!=p;\r\n}\r\ninline void rotate(int x)\r\n{\r\n\tint y=t[x].fa,z=t[y].fa;\r\n\tif(!isroot(y)) t[z].son[y==t[z].son[1]]=x;\r\n\tint r=x==t[y].son[1];\r\n\tt[x].fa=z;\r\n\tz=t[x].son[r^1];\r\n\tt[z].fa=y,t[y].son[r]=z;\r\n\tt[x].son[r^1]=y,t[y].fa=x;\r\n\tpush_up(y);\r\n}\r\ninline void splay(int p)\r\n{\r\n    static int s[MAXN],top;\r\n    s[top=1]=p;int x=p;\r\n    while(!isroot(p))s[++top]=p=t[p].fa;\r\n    while(top)push_down(s[top--]);\r\n    while(!isroot(x))\r\n    {\r\n        int y=t[x].fa;\r\n        if(!isroot(y))rotate(((x==t[y].son[0])==(y==t[t[y].fa].son[0]))?y:x);\r\n        rotate(x);\r\n    }\r\n    push_up(x);\r\n}\r\ninline void access(int p)\r\n{\r\n    for(int i=0;p;p=t[i=p].fa)splay(p),rs=i,push_up(p);\r\n}\r\ninline void makeroot(int p){access(p),splay(p),rev(p);}\r\ninline void link(int x,int y)\r\n{\r\n    makeroot(x),t[x].fa=y;\r\n}\r\ninline void cut(int x,int y)\r\n{\r\n    makeroot(x),access(y),splay(y);\r\n    t[y].son[0]=t[x].fa=0;\r\n    push_up(y);\r\n}\r\ninline int findroot(int p)\r\n{\r\n    access(p),splay(p);\r\n    while(ls){push_down(p),p=ls;}\r\n    splay(p);\r\n    return p;\r\n}\r\nbool vis[MAXN];\r\n\r\nstruct edge{int from,v;}e[MAXN*2];\r\nint head[MAXN],cnt=1,n,m;\r\ninline void add(int u,int v)\r\n{e[++cnt]=(edge){head[u],v},head[u]=cnt;}\r\n#define tree(u) for(int i=head[u],v=e[i].v;i;i=e[i].from,v=e[i].v)\r\nint tt;\r\nvector<pii>ve;\r\nvoid dfs(int u,int from)\r\n{\r\n    vis[u]=1;\r\n    tree(u)if(!vis[v])\r\n    {\r\n        dfs(v,i);\r\n        t[v].fa=++tt;\r\n        t[tt].f=1;t[tt].fa=u;\r\n    }\r\n    else if(i!=(from^1))\r\n    {\r\n    \tve.eb(min(u,v),max(u,v));\r\n    }\r\n}\r\ninline void split(int x,int y){makeroot(x),access(y),splay(y);}\r\nint la=0;\r\nint a[MAXN];\r\ninline int ask(int u,int v)\r\n{\r\n\tsplit(u,v);return t[v].mmin;\r\n}\r\ninline bool ck(int u,int v)\r\n{\r\n\tif(findroot(u)!=findroot(v))return 0;\r\n\tsplit(u,v);\r\n\t//cerr<<u<<' '<<v<<'\\n';\r\n\treturn t[v].mmin;\r\n}\r\ninline void get(int&x){x+=la,x%=n;if(!x)x=n;}\r\ninline void solve(int id)\r\n{\r\n    int n,m;\r\n    cin>>n>>m;\r\n    for(int i=1;i<=n;i++)cin>>a[i],get(a[i]);\r\n    vector<tuple<int,int,bool> >ed;\r\n    int p;\r\n    for(int i=1;i<=m;i++)\r\n    {\r\n        int u,v;\r\n        cin>>u>>v;get(u),get(v);\r\n      //  cout<<u<<' '<<v<<'\\n';\r\n        if(findroot(u)==findroot(v))\r\n        {\r\n            split(u,v),ADD(v,1);\r\n            ed.eb(u,v,1);\r\n        }\r\n        else \r\n        {\r\n        \ttt++,p=tt,t[p].f=1,ls=rs=t[p].fa=t[p].mmin=t[p].w=t[p].add=0,link(u,tt),link(tt,v);\r\n        \ted.eb(u,v,0);\r\n        }\r\n        \r\n    }\r\n    bool flag=1;\r\n    for(int i=1;i<n;i++)\r\n    {\r\n        if(!ck(a[i],a[i+1]))\r\n        {\r\n            flag=0;break;\r\n        }\r\n    }\r\n    if(flag)\r\n    {\r\n        cout<<\"YES\\n\";\r\n        (la+=id)%=::n;\r\n    }\r\n    else cout<<\"NO\\n\";\r\n    reverse(all(ed));\r\n    for(auto&[u,v,op]:ed)\r\n    {\r\n        if(!op)cut(u,tt),cut(tt,v),tt--;\r\n        else split(u,v),ADD(v,-1);\r\n    }\r\n}\r\nint main()\r\n{\r\n\tios::sync_with_stdio(0),cin.tie(0),cout.tie(0);cout<<fixed<<setprecision(10);\r\n\tint m,T;\r\n    cin>>n>>m>>T;tt=n;\r\n    for(int i=1;i<=m;i++)\r\n    {\r\n        int u,v;\r\n        cin>>u>>v;\r\n        add(u,v),add(v,u);\r\n    }\r\n    for(int i=1;i<=n;i++)if(!vis[i])dfs(i,0);\r\n    sort(all(ve)),ve.erase(unique(all(ve)),ve.end());\r\n    for(auto&p:ve)\r\n    {\r\n        int u=p.X,v=p.Y;\r\n        split(u,v);\r\n        ADD(v,1);        \r\n    }\r\n    for(int i=1;i<=T;i++)\r\n    {\r\n        solve(i);\r\n    }\r\n\treturn 0;\r\n} \r\n"
+}

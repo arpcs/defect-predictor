@@ -1,0 +1,35 @@
+{
+    "id": 204228344,
+    "contestId": 444,
+    "creationTimeSeconds": 1683030830,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 444,
+        "index": "C",
+        "name": "DZY Loves Colors",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2400,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 444,
+        "members": [
+            {
+                "handle": "__AA"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1404651900
+    },
+    "programmingLanguage": "Java 8",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 93,
+    "memoryConsumedBytes": 0,
+    "source": "// LUOGU_RID: 109425584\n\r\nimport java.io.*;\r\nimport java.util.*;\r\n\r\npublic class Main {\r\n\r\n    public static StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));\r\n    public static int nextInt() throws Exception { in.nextToken(); return (int)in.nval; };\r\n    public static double nextDouble() throws Exception { in.nextToken(); return (double)in.nval; };\r\n    public static String nextString() throws Exception { in.nextToken(); return in.sval; };\r\n    public static PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));\r\n\r\n//    public static String[] rd;\r\n//    public static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\r\n    //\tpublic static BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));\r\n    final static int N = 100010, M = 500, INF = Integer.MAX_VALUE >> 1, MOD = (int)1e9 + 7, D = 1000;\r\n    final static double EPS = 1e-5;\r\n\r\n    static int n, m, idx;\r\n    static int[] col = new int[N];\r\n    static long[] s = new long[N], sum = new long[N], d = new long[N];\r\n    static int[] L = new int[M], R = new int[M], pos = new int[M], f = new int[M];\r\n//    static int[] h = new int[N], e = new int[M], w = new int[M], ne = new int[M];\r\n    public static void main(String[] args) throws Exception {\r\n        n = nextInt();\r\n        m = nextInt();\r\n\r\n        for (int i = 1; i <= n; i++) {\r\n            col[i] = i;\r\n        }\r\n\r\n        int t = (int) Math.sqrt(n);\r\n        int len = n / t;\r\n        for (int i = 1; i <= t; i++) {\r\n            L[i] = (i - 1) * len + 1;\r\n            R[i] = i * len;\r\n        }\r\n        R[t] = n;\r\n\r\n        for (int i = 1; i <= t; i++)\r\n            for (int u = L[i]; u <= R[i]; u++) {\r\n                pos[u] = i;\r\n            }\r\n\r\n        while (m-- > 0) {\r\n            int ty = nextInt();\r\n            int l = nextInt(), r = nextInt();\r\n            if (ty == 1) {\r\n                int c = nextInt();\r\n                modify(l, r, c);\r\n            } else {\r\n                out.println(query(l, r));\r\n            }\r\n        }\r\n        out.close();\r\n    }\r\n    static void modify(int l, int r, int c) {\r\n        int p = pos[l], q = pos[r];\r\n        if (p == q) {\r\n            for (int i = l; i <= r; i++) {\r\n                if (f[p] != 0) {\r\n                    s[i] += Math.abs(f[p] - c);\r\n                    sum[p] += Math.abs(f[p] - c);\r\n                } else {\r\n                    s[i] += Math.abs(col[i] - c);\r\n                    sum[p] += Math.abs(col[i] - c);\r\n                }\r\n                col[i] = c;\r\n            }\r\n            f[p] = 0;\r\n        } else {\r\n            int x = p + 1, y = q - 1;\r\n            for (int i = x; i <= y; i++) {\r\n                if (f[i] != 0) {\r\n                    sum[i] += (R[i] - L[i] + 1l) * Math.abs(f[i] - c);\r\n                    d[i] += Math.abs(f[i] - c);\r\n                } else {\r\n                    for (int u = L[i]; u <= R[i]; u++) {\r\n                        s[u] += Math.abs(col[u] - c);\r\n                        sum[i] += Math.abs(col[u] - c);\r\n                    }\r\n                }\r\n                f[i] = c;\r\n            }\r\n            for (int i = l; i <= R[p]; i++) {\r\n                if (f[p] != 0) {\r\n                    s[i] += Math.abs(f[p] - c);\r\n                    sum[p] += Math.abs(f[p] - c);\r\n                } else {\r\n                    s[i] += Math.abs(col[i] - c);\r\n                    sum[p] += Math.abs(col[i] - c);\r\n                }\r\n                col[i] = c;\r\n            }\r\n            for (int i = L[q]; i <= r; i++) {\r\n                if (f[q] != 0) {\r\n                    s[i] += Math.abs(f[q] - c);\r\n                    sum[q] += Math.abs(f[q] - c);\r\n                } else {\r\n                    s[i] += Math.abs(col[i] - c);\r\n                    sum[q] += Math.abs(col[i] - c);\r\n                }\r\n                col[i] = c;\r\n            }\r\n            f[p] = f[q] = 0;\r\n        }\r\n    }\r\n    static long query(int l, int r) {\r\n        int p = pos[l], q = pos[r];\r\n        long ans = 0;\r\n\r\n        if (p == q) {\r\n            for (int i = l; i <= r; i++) {\r\n                ans += s[i] + d[p];\r\n            }\r\n        } else {\r\n            int x = p + 1, y = q - 1;\r\n            for (int i = x; i <= y; i++) {\r\n                ans += sum[i];\r\n            }\r\n            for (int i = l; i <= R[p]; i++) {\r\n                ans += d[p] + s[i];\r\n            }\r\n            for (int i = L[q]; i <= r; i++) {\r\n                ans += d[q] + s[i];\r\n            }\r\n        }\r\n        return ans;\r\n    }\r\n//    static void add(int a, int b, int c) {\r\n//        e[idx] = b; w[idx] = c; ne[idx] = h[a]; h[a] = idx++;\r\n//    }\r\n}"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 214586804,
+    "contestId": 1178,
+    "creationTimeSeconds": 1689842171,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1178,
+        "index": "H",
+        "name": "Stock Exchange",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "binary search",
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1178,
+        "members": [
+            {
+                "handle": "251Sec"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1563636900
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 137,
+    "timeConsumedMillis": 3400,
+    "memoryConsumedBytes": 8499200,
+    "source": "// LUOGU_RID: 116610725\n#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define L(i) (i)\r\n#define VL(i) ((i) + n * 2)\r\n#define VR(i) ((i) + n * 4)\r\n#define R(i) ((i) + n * 6)\r\n#define S (n * 8 + 1)\r\n#define T (n * 8 + 2)\r\ntypedef long long ll;\r\nconst ll inf = 1e8;\r\nint n, m;\r\nstruct Edge {\r\n    int to, next;\r\n    ll w, c;\r\n    Edge() {}\r\n    Edge(int to, int next, ll w, ll c) : to(to), next(next), w(w), c(c) {}\r\n} e[300005];\r\nint head[20005], len;\r\nvoid Insert(int u, int v, ll w, ll c) {\r\n    e[++len] = Edge(v, head[u], w, c);\r\n    head[u] = len;\r\n}\r\nvoid InsertF(int u, int v, ll w, ll c) {\r\n    if (!len) len = 1;\r\n    Insert(u, v, w, c); Insert(v, u, 0, -c);\r\n}\r\nll dis[20005], fl[20005];\r\nint pat[20005];\r\nbool vis[20005];\r\nbool SPFA() {\r\n    memset(dis, 0x3f, sizeof(dis));\r\n    queue<int> q;\r\n    q.push(S); dis[S] = 0; fl[S] = inf;\r\n    while (!q.empty()) {\r\n        int u = q.front(); vis[u] = false; q.pop();\r\n        for (int i = head[u]; i; i = e[i].next) {\r\n            int v = e[i].to;\r\n            if (e[i].w && dis[u] + e[i].c < dis[v]) {\r\n                dis[v] = dis[u] + e[i].c;\r\n                pat[v] = i; fl[v] = min(fl[u], e[i].w);\r\n                if (!vis[v]) q.push(v), vis[v] = true;\r\n            }\r\n        }\r\n    }\r\n    return dis[T] < 0x3f3f3f3f3f3f3f3f;\r\n}\r\nll minc, maxf;\r\nvoid EK() {\r\n    while (SPFA()) {\r\n        minc += dis[T] * fl[T];\r\n        maxf += fl[T];\r\n        for (int i = T; i != S; i = e[pat[i] ^ 1].to) {\r\n            e[pat[i]].w -= fl[T];\r\n            e[pat[i] ^ 1].w += fl[T];\r\n        }\r\n    }\r\n}\r\nll a[20005], b[20005];\r\nstruct Stock {\r\n    ll val;\r\n    int id;\r\n    bool operator<(const Stock &o) const { return val < o.val; }\r\n} ls[5005], rs[5005];\r\nll lt[5005], rt[5005], wt[5005];\r\nll LW(int i, ll x) { return b[i]; }\r\nll RW(int i, ll x) { return a[i] * x + b[i]; }\r\nll ansc;\r\nbool Chk(ll x) {\r\n    for (int i = 1; i <= n * 2; i++) ls[i] = { LW(i, x), i };\r\n    for (int i = 1; i <= n * 2; i++) rs[i] = { RW(i, x), i };\r\n    sort(ls + 1, ls + n * 2 + 1); sort(rs + 1, rs + n * 2 + 1);\r\n    for (int i = 1; i <= n * 2; i++) wt[i] = max(wt[i - 1], RW(ls[i].id, x));\r\n    for (int i = 1; i <= n; i++) {\r\n        int p = upper_bound(ls + 1, ls + n * 2 + 1, (Stock){ LW(i, x), i }) - ls - 1;\r\n        lt[i] = wt[p];\r\n    }\r\n    for (int i = n + 1; i <= n * 2; i++) rt[i - n] = RW(i, x);\r\n    sort(lt + 1, lt + n + 1); sort(rt + 1, rt + n + 1);\r\n    for (int i = 1; i <= n; i++) if (lt[i] < rt[i]) return false;\r\n    return true;\r\n}\r\nvoid CalcC(ll x) {\r\n    for (int i = 1; i <= n * 2; i++) ls[i] = { LW(i, x), i };\r\n    for (int i = 1; i <= n * 2; i++) rs[i] = { RW(i, x), i };\r\n    sort(ls + 1, ls + n * 2 + 1); sort(rs + 1, rs + n * 2 + 1);\r\n    for (int i = 1; i <= n; i++) InsertF(S, L(i), 1, 0);\r\n    for (int i = 1; i <= n * 2; i++) {\r\n        if (i > 1) InsertF(VL(i), VL(i - 1), inf, 0);\r\n        InsertF(VL(i), L(ls[i].id), inf, 0);\r\n    }\r\n    for (int i = 1; i <= n * 2; i++) {\r\n        int p = upper_bound(ls + 1, ls + n * 2 + 1, (Stock){ LW(i, x), i }) - ls - 1;\r\n        InsertF(L(i), VL(p), inf, 1);\r\n    }\r\n    for (int i = 1; i <= n * 2; i++) InsertF(L(i), R(i), inf, 0);\r\n    for (int i = 1; i <= n * 2; i++) {\r\n        if (i > 1) InsertF(VR(i), VR(i - 1), inf, 0);\r\n        InsertF(VR(i), R(rs[i].id), inf, 0);\r\n    }\r\n    for (int i = 1; i <= n * 2; i++) {\r\n        int p = upper_bound(rs + 1, rs + n * 2 + 1, (Stock){ RW(i, x), i }) - rs - 1;\r\n        InsertF(R(i), VR(p), inf, 1);\r\n    }\r\n    for (int i = n + 1; i <= n * 2; i++) InsertF(R(i), T, 1, 0);\r\n    EK();\r\n    ansc = minc;\r\n}\r\nint main() {\r\n    scanf(\"%d\", &n);\r\n    for (int i = 1; i <= n * 2; i++) scanf(\"%lld%lld\", a + i, b + i);\r\n    ll l = 0, r = 1e9, res = -1;\r\n    while (l <= r) {\r\n        ll mid = l + r >> 1;\r\n        if (Chk(mid)) {\r\n            r = mid - 1;\r\n            res = mid;\r\n        }\r\n        else {\r\n            l = mid + 1;\r\n        }\r\n    }\r\n    if (!~res) return puts(\"-1\"), 0;\r\n    CalcC(res);\r\n    printf(\"%lld %lld\\n\", res, ansc);\r\n    return 0;\r\n}"
+}

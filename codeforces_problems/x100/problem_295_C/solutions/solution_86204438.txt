@@ -1,0 +1,38 @@
+{
+    "id": 86204438,
+    "contestId": 295,
+    "creationTimeSeconds": 1594128926,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "ngpin04"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 6451200,
+    "source": "#include <bits/stdc++.h>\r\n#define fi first\r\n#define se second\r\n#define mp make_pair\r\n#define int long long\r\nusing namespace std;\r\ntypedef pair <int, int> pii;\r\nconst int mod = 1e9 + 7;\r\nconst int oo = 1e9;\r\n\r\npair <pii, int> Q[100005];\r\n\r\npii dp[105][105][2];\r\n\r\nint cnt[105];\r\nint gt[105];\r\nint inv[105];\r\nint n,k;\r\n\r\nint pw(int n, int k)\r\n{\r\n    if (!k) return 1;\r\n    int res = pw(n, k >> 1);\r\n    res = res * res % mod;\r\n    if (k & 1) return res * n % mod;\r\n    return res;\r\n}\r\n\r\nvoid init()\r\n{\r\n    gt[0] = 1;\r\n    for (int i = 1; i <= n; i++)\r\n    {\r\n        gt[i] = gt[i - 1] * i % mod;\r\n    }\r\n    inv[n] = pw(gt[n], mod - 2);\r\n    for (int i = n - 1; i >= 0; i--)\r\n    {\r\n        inv[i] = inv[i + 1] * (i + 1) % mod;\r\n    }\r\n    for (int i = 0; i <= n; i++)\r\n    for (int j = 0; j <= n; j++)\r\n    for (int k = 0; k <= 1; k++)\r\n    {\r\n        dp[i][j][k] = mp(-1, 0);\r\n    }\r\n}\r\n\r\nint C(int k, int n)\r\n{\r\n    return gt[n] * inv[k] % mod * inv[n - k] % mod;\r\n}\r\n\r\nvoid solve()\r\n{\r\n    int f = 0;\r\n    int r = 0;\r\n    Q[++r] = mp(mp(cnt[50], cnt[100]), 0);\r\n    dp[cnt[50]][cnt[100]][0] = mp(0, 1);\r\n    while (r > f)\r\n    {\r\n        f++;\r\n        pair <pii, int> res = Q[f];\r\n        int x = res.fi.fi;\r\n        int y = res.fi.se;\r\n        int cur = res.se;\r\n        for (int i = 0; i <= x; i++)\r\n        for (int j = 0; j <= y; j++)\r\n        {\r\n            if (!i && !j) continue;\r\n            if (50 * i + 100 * j > k) break;\r\n            int new_x = cnt[50] - x + i;\r\n            int new_y = cnt[100] - y + j;\r\n            pii &now = dp[new_x][new_y][!cur];\r\n            pii pre = dp[x][y][cur];\r\n            if (now.fi == -1)\r\n            {\r\n                now = pre;\r\n                now.se = now.se * C(i, x) % mod * C(j, y) % mod;\r\n                now.fi++;\r\n                Q[++r] = mp(mp(new_x, new_y), !cur);\r\n            } else if (pre.fi + 1 == now.fi) {\r\n                now.se += pre.se * C(i, x) % mod * C(j, y) % mod;\r\n                if (now.se >= mod) now.se -= mod;\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\nsigned main()\r\n{\r\n    //freopen(\"file.inp\",\"r\",stdin);\r\n    cin >> n >> k;\r\n    for (int i = 1; i <= n; i++)\r\n    {\r\n        int x;\r\n        cin >> x;\r\n        cnt[x]++;\r\n    }\r\n    init();\r\n    solve();\r\n    pii ans = dp[cnt[50]][cnt[100]][1];\r\n    cout << ans.fi << \"\\n\" << ans.se;\r\n    return 0;\r\n}\r\n"
+}

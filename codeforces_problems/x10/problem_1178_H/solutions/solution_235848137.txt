@@ -1,0 +1,37 @@
+{
+    "id": 235848137,
+    "contestId": 1178,
+    "creationTimeSeconds": 1701781172,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1178,
+        "index": "H",
+        "name": "Stock Exchange",
+        "type": "PROGRAMMING",
+        "points": 4000.0,
+        "rating": 3500,
+        "tags": [
+            "binary search",
+            "flows",
+            "graphs"
+        ]
+    },
+    "author": {
+        "contestId": 1178,
+        "members": [
+            {
+                "handle": "zhouhuanyi"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1563636900
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 9,
+    "timeConsumedMillis": 561,
+    "memoryConsumedBytes": 3686400,
+    "source": "#include<iostream>\r\n#include<cstdio>\r\n#include<algorithm>\r\n#include<cmath>\r\n#include<queue>\r\n#include<vector>\r\n#define N 6000\r\n#define M 200000\r\nusing namespace std;\r\nconst int inf=(int)(1e9);\r\nint read()\r\n{\r\n\tchar c=0;\r\n\tint sum=0;\r\n\twhile (c<'0'||c>'9') c=getchar();\r\n\twhile ('0'<=c&&c<='9') sum=sum*10+c-'0',c=getchar();\r\n\treturn sum;\r\n}\r\nstruct node\r\n{\r\n\tint v,data,cost,nxt;\r\n};\r\nnode edge[M+1];\r\nint n,s,t,length,len=1,head[N+1],cur[N+1],a[N+1],b[N+1],p[N+1],p2[N+1],depth[N+1],ans=-1,ans2,dis[N+1];\r\nlong long maxn[N+1],delta[N+1],d[N+1];\r\nbool vis[N+1];\r\nvector<int>E[N+1];\r\nvoid add(int x,int y,int z,int w)\r\n{\r\n\tedge[++len]=(node){y,z,w,head[x]},head[x]=len;\r\n\tedge[++len]=(node){x,0,-w,head[y]},head[y]=len;\r\n\treturn;\r\n}\r\nbool check(int x)\r\n{\r\n    bool op=1;\r\n\tfor (int i=1;i<=n;++i)\r\n\t{\r\n\t\tmaxn[i]=0;\r\n\t\tfor (int j=1;j<=(n<<1);++j)\r\n\t\t\tif (b[i]>=b[j])\r\n\t\t\t\tmaxn[i]=max(maxn[i],1ll*x*a[j]+b[j]);\r\n\t}\r\n\tfor (int i=n+1;i<=(n<<1);++i) delta[i-n]=1ll*x*a[i]+b[i];\r\n\tsort(maxn+1,maxn+n+1),sort(delta+1,delta+n+1);\r\n\tfor (int i=1;i<=n;++i) op&=(maxn[i]>=delta[i]);\r\n\treturn op;\r\n}\r\nbool dijkstra()\r\n{\r\n\tint top;\r\n\tdeque<int>q;\r\n\tfor (int i=s;i<=t;++i) dis[i]=inf;\r\n\tq.push_back(s),dis[s]=0;\r\n\twhile (!q.empty())\r\n\t{\r\n\t\ttop=q.front(),q.pop_front();\r\n\t\tfor (int i=head[top];i>0;i=edge[i].nxt)\r\n\t\t\tif (edge[i].data&&dis[edge[i].v]>dis[top]+edge[i].cost+d[top]-d[edge[i].v])\r\n\t\t\t{\r\n\t\t\t\tdis[edge[i].v]=dis[top]+edge[i].cost+d[top]-d[edge[i].v];\r\n\t\t\t\tif (!(edge[i].cost+d[top]-d[edge[i].v])) q.push_front(edge[i].v);\r\n\t\t\t\telse q.push_back(edge[i].v);\r\n\t\t\t}\r\n\t}\r\n\tfor (int i=s;i<=t;++i) d[i]+=dis[i];\r\n\treturn dis[t]!=inf;\r\n}\r\nint dinic(int x,int flow)\r\n{\r\n\tif (x==t) return flow;\r\n\tint k;\r\n\tvis[x]=1;\r\n\tfor (int &i=cur[x];i>0;i=edge[i].nxt)\r\n\t\tif (edge[i].data&&d[edge[i].v]==d[x]+edge[i].cost&&!vis[edge[i].v])\r\n\t\t{\r\n\t\t\tk=dinic(edge[i].v,min(flow,edge[i].data));\r\n\t\t\tif (k)\r\n\t\t\t{\r\n\t\t\t\tedge[i].data-=k,edge[i^1].data+=k,vis[x]=0;\r\n\t\t\t\treturn k;\r\n\t\t\t}\r\n\t\t}\r\n\tvis[x]=0;\r\n\treturn 0;\r\n}\r\nbool cmp(int x,int y)\r\n{\r\n\treturn b[x]<b[y];\r\n}\r\nbool cmp2(int x,int y)\r\n{\r\n\treturn delta[x]<delta[y];\r\n}\r\nbool cmp3(int x,int y)\r\n{\r\n\treturn maxn[x]<maxn[y];\r\n}\r\nvoid solve(int x)\r\n{\r\n\tint ps=0,pv=0,flow;\r\n\tfor (int i=1;i<=n;++i)\r\n\t{\r\n\t\tmaxn[i]=0;\r\n\t\tfor (int j=1;j<=(n<<1);++j)\r\n\t\t\tif (b[i]>=b[j])\r\n\t\t\t\tmaxn[i]=max(maxn[i],1ll*x*a[j]+b[j]);\r\n\t}\r\n\tfor (int i=1;i<=(n<<1);++i) delta[i]=1ll*x*a[i]+b[i];\r\n\tfor (int i=1;i<=n;++i) p[i]=i,p2[i]=i+n;\r\n\tsort(p+1,p+n+1,cmp),sort(p2+1,p2+n+1,cmp);\r\n\tfor (int i=1;i<=n;++i)\r\n\t{\r\n\t\twhile (ps+1<=n&&b[p[i]]>=b[p2[ps+1]])\r\n\t\t{\r\n\t\t\t++ps;\r\n\t\t\tif (!pv) pv=p2[ps];\r\n\t\t\telse ++length,add(length,pv,inf,0),add(length,p2[ps],1,0),pv=length;\r\n\t\t}\r\n\t\tif (pv) add(p[i],pv,1,0);\r\n\t}\r\n\tsort(p+1,p+n+1,cmp2),sort(p2+1,p2+n+1,cmp2),pv=ps=0;\r\n\tfor (int i=1;i<=n;++i)\r\n\t{\r\n\t\twhile (ps+1<=n&&delta[p[i]]>=delta[p2[ps+1]])\r\n\t\t{\r\n\t\t\t++ps;\r\n\t\t\tif (!pv) pv=p2[ps];\r\n\t\t\telse ++length,add(length,pv,inf,0),add(length,p2[ps],1,0),pv=length;\r\n\t\t}\r\n\t\tif (pv) add(p[i],pv,1,0);\r\n\t}\r\n\tsort(p+1,p+n+1,cmp3),pv=ps=0;\r\n\tfor (int i=1;i<=n;++i)\r\n\t{\r\n\t\twhile (ps+1<=n&&maxn[p[i]]>=delta[p2[ps+1]])\r\n\t\t{\r\n\t\t\t++ps;\r\n\t\t\tif (!pv) pv=p2[ps];\r\n\t\t\telse ++length,add(length,pv,inf,0),add(length,p2[ps],1,0),pv=length;\r\n\t\t}\r\n\t\tif (pv) add(p[i],pv,1,1);\r\n\t}\r\n\tt=length+1;\r\n\tfor (int i=1;i<=n;++i) add(s,i,1,0),add(i+n,t,1,0);\r\n\tans2=n;\r\n\twhile (dijkstra())\r\n\t{\r\n\t\tfor (int i=s;i<=t;++i) cur[i]=head[i];\r\n\t\twhile (flow=dinic(s,inf)) ans2+=flow*d[t];\r\n\t}\r\n\treturn;\r\n}\r\nint main()\r\n{\r\n    n=read(),length=n<<1;\r\n\tfor (int i=1;i<=(n<<1);++i) a[i]=read(),b[i]=read();\r\n\tfor (int i=log(inf+1)/log(2);i>=0;--i)\r\n\t\tif (ans+(1<<i)<=inf&&!check(ans+(1<<i)))\r\n\t\t\tans+=(1<<i);\r\n\tif (ans==inf) puts(\"-1\");\r\n\telse ans++,solve(ans),printf(\"%d %d\\n\",ans,ans2);\r\n\treturn 0;\r\n}\r\n"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 223367937,
+    "contestId": 1007,
+    "creationTimeSeconds": 1694703107,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1007,
+        "index": "D",
+        "name": "Ants",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "2-sat",
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1007,
+        "members": [
+            {
+                "handle": "Rosmontispes"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1531492500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 78,
+    "timeConsumedMillis": 499,
+    "memoryConsumedBytes": 257228800,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n#define N 200000 + 200\r\nint n,tot,dtt,clt,dft,rt,tt;\r\nint siz[N],top[N],pa[N],dep[N],p0[N],p1[N];\r\nint dfn[16 * N],low[16 * N],cl[16 * N],pre[4 * N],fpre[4 * N];\r\nvector<int>r[N];\r\nvector<int>adj[16 * N],poi[4 * N];\r\nvector<int>stk;\r\nstruct node\r\n{\r\n    int ls,rs,fa;\r\n    node():ls(0),rs(0),fa(0){}\r\n}tree[4 * N];\r\nvoid build(int l,int r,int &x)\r\n{\r\n    if(!x)\r\n        x = ++ tot;\r\n    if(l == r)\r\n        return;\r\n    int mid = (l + r) / 2;\r\n    build(l,mid,tree[x].ls);\r\n    build(mid + 1,r,tree[x].rs);\r\n    tree[tree[x].ls].fa = x;\r\n    tree[tree[x].rs].fa = x;\r\n}\r\nvoid modify(int l,int r,int x,int L,int R,int v)\r\n{\r\n    if(L <= l && R >= r)\r\n    {\r\n        poi[x].push_back(v);\r\n        return;\r\n    }\r\n    int mid = (l + r) / 2;\r\n    if(R <= mid)\r\n        modify(l,mid,tree[x].ls,L,R,v);\r\n    else\r\n    {\r\n        if(L > mid)\r\n            modify(mid + 1,r,tree[x].rs,L,R,v);\r\n        else\r\n            modify(l,mid,tree[x].ls,L,mid,v),modify(mid + 1,r,tree[x].rs,mid + 1,R,v);\r\n    }\r\n}\r\nvoid dfs(int x,int fa)\r\n{\r\n    siz[x] = 1;\r\n    if(fa != 0)\r\n        r[x].erase(find(r[x].begin(),r[x].end(),fa));\r\n    for(auto &v:r[x])\r\n    {\r\n        dfs(v,x);\r\n        siz[x] += siz[v];\r\n        if(siz[v] > siz[r[x][0]])\r\n            swap(v,r[x][0]);\r\n    }\r\n}\r\nvoid dfsHLD(int x,int fa)\r\n{\r\n    dfn[x] = ++ dft;\r\n    pa[x] = fa;\r\n    dep[x] = dep[fa] + 1;\r\n    for(auto v:r[x])\r\n    {\r\n        if(v == r[x][0])\r\n            top[v] = top[x];\r\n        else\r\n            top[v] = v;\r\n        dfsHLD(v,x);\r\n    }\r\n}\r\nvoid buildg(int l,int r,int x)\r\n{\r\n    pre[x] = tt ++;\r\n    fpre[x] = tt ++;\r\n    if(tree[x].fa)\r\n    {\r\n        adj[pre[tree[x].fa]].push_back(pre[x]);\r\n        adj[fpre[x]].push_back(fpre[tree[x].fa]);\r\n        for(auto v:poi[tree[x].fa])\r\n            adj[v].push_back(pre[x]);\r\n        for(auto v:poi[x])\r\n            adj[v].push_back(fpre[tree[x].fa]);\r\n    }\r\n    for(int i = 0;i < (int)poi[x].size();i ++)\r\n    {\r\n        adj[tt].push_back(poi[x][i] ^ 1);\r\n        if(i > 0)\r\n            adj[tt].push_back(tt - 1),adj[poi[x][i]].push_back(tt - 1);\r\n        tt ++;\r\n    }\r\n    for(int i = (int)poi[x].size() - 1;i >= 0;i --)\r\n    {\r\n        adj[tt].push_back(poi[x][i] ^ 1);\r\n        if(i < (int)poi[x].size() - 1)\r\n            adj[tt].push_back(tt - 1),adj[poi[x][i]].push_back(tt - 1);\r\n        tt ++;\r\n    }\r\n    for(auto v:poi[x])\r\n        adj[pre[x]].push_back(v ^ 1),adj[fpre[x]].push_back(v ^ 1);\r\n    if(l == r)\r\n        return;\r\n    int mid = (l + r) / 2;\r\n    buildg(l,mid,tree[x].ls);\r\n    buildg(mid + 1,r,tree[x].rs);\r\n}\r\nvoid addedge(int u,int v,int p)\r\n{\r\n    while(top[u] != top[v])\r\n    {\r\n        if(dep[top[u]] < dep[top[v]])\r\n            swap(u,v);\r\n        modify(1,n,rt,dfn[top[u]],dfn[u],p);\r\n        u = pa[top[u]];\r\n    }\r\n    if(dep[u] > dep[v])\r\n        swap(u,v);\r\n    if(u != v)\r\n        modify(1,n,rt,dfn[u] + 1,dfn[v],p);\r\n}\r\nvoid tarjan(int x)\r\n{\r\n    dfn[x] = low[x] = ++ dtt;\r\n    stk.push_back(x);\r\n    for(auto v:adj[x])\r\n    {\r\n        if(!dfn[v])\r\n        {\r\n            tarjan(v);\r\n            low[x] = min(low[x],low[v]);\r\n        }\r\n        else\r\n            if(!cl[v])\r\n                low[x] = min(low[x],dfn[v]);\r\n    }\r\n    if(low[x] == dfn[x])\r\n    {\r\n        ++clt;\r\n        for(;;)\r\n        {\r\n            int res = stk.back();\r\n            stk.pop_back();\r\n            cl[res] = clt;\r\n            if(res == x)\r\n                break;\r\n        }\r\n    }\r\n}\r\nint main()\r\n{\r\n    std::ios::sync_with_stdio(false);\r\n    std::cin.tie(nullptr);\r\n    cin>>n;\r\n    for(int i = 1;i <= n - 1;i ++)\r\n    {\r\n        int u,v;\r\n        cin>>u>>v;\r\n        r[u].push_back(v);\r\n        r[v].push_back(u);\r\n    }\r\n    dfs(1,0);\r\n    dfsHLD(1,0);\r\n    build(1,n,rt);\r\n    int m;\r\n    cin>>m;\r\n    for(int i = 1;i <= m;i ++)\r\n    {\r\n        p0[i] = tt ++;\r\n        p1[i] = tt ++;\r\n        int ui,vi,ut,vt;\r\n        cin>>ui>>vi>>ut>>vt;\r\n        addedge(ui,vi,p0[i]);\r\n        addedge(ut,vt,p1[i]);\r\n    }\r\n    buildg(1,n,rt);\r\n    for(int i = 1;i <= tt;i ++)\r\n        dfn[i] = 0;\r\n    for(int i = 1;i <= tt;i ++)\r\n        if(!cl[i])\r\n            tarjan(i);\r\n    for(int i = 1;i <= m;i ++)\r\n    {\r\n        if(cl[p0[i]] == cl[p1[i]])\r\n        {\r\n            cout<<\"NO\\n\";\r\n            return 0;\r\n        }\r\n    }\r\n    cout<<\"YES\\n\";\r\n    for(int i = 1;i <= m;i ++)\r\n    {\r\n        if(cl[p0[i]] < cl[p1[i]])\r\n            cout<<1<<\"\\n\";\r\n        else\r\n            cout<<2<<\"\\n\";\r\n    }\r\n}\r\n"
+}

@@ -1,0 +1,35 @@
+{
+    "id": 203180977,
+    "contestId": 975,
+    "creationTimeSeconds": 1682272292,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 975,
+        "index": "E",
+        "name": "Hag's Khashba",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2600,
+        "tags": [
+            "geometry"
+        ]
+    },
+    "author": {
+        "contestId": 975,
+        "members": [
+            {
+                "handle": "propane"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1525183500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing LL = long long;\r\nusing point_t = long double; //\u5168\u5c40\u6570\u636e\u7c7b\u578b\uff0c\u53ef\u4fee\u6539\u4e3a long long \u7b49\r\n\r\nconst point_t eps = 1e-8;\r\nconst long double PI = numbers::pi_v<long double>;\r\n\r\n// \u70b9\u4e0e\u5411\u91cf\r\ntemplate <typename T>\r\nstruct point{\r\n    T x, y;\r\n\r\n    bool operator==(const point &a) const { return (abs(x - a.x) <= eps && abs(y - a.y) <= eps); }\r\n    bool operator<(const point &a) const{\r\n        if (abs(x - a.x) <= eps)\r\n            return y < a.y - eps;\r\n        return x < a.x - eps;\r\n    }\r\n    bool operator>(const point &a) const { return !(*this < a || *this == a); }\r\n    point operator+(const point &a) const { return {x + a.x, y + a.y}; }\r\n    point operator-(const point &a) const { return {x - a.x, y - a.y}; }\r\n    point operator-() const { return {-x, -y}; }\r\n    point operator*(const T k) const { return {k * x, k * y}; }\r\n    point operator/(const T k) const { return {x / k, y / k}; }\r\n    T operator*(const point &a) const { return x * a.x + y * a.y; } // \u70b9\u79ef\r\n    T operator^(const point &a) const { return x * a.y - y * a.x; } // \u53c9\u79ef\uff0c\u6ce8\u610f\u4f18\u5148\u7ea7\r\n    int toleft(const point &a) const\r\n    {\r\n        const auto t = (*this) ^ a;\r\n        return (t > eps) - (t < -eps);\r\n    }                                                             // to-left \u6d4b\u8bd5\r\n    T len2() const { return (*this) * (*this); }                  // \u5411\u91cf\u957f\u5ea6\u7684\u5e73\u65b9\r\n    T dis2(const point &a) const { return (a - (*this)).len2(); } // \u4e24\u70b9\u8ddd\u79bb\u7684\u5e73\u65b9\r\n\r\n    // \u6d89\u53ca\u6d6e\u70b9\u6570\r\n    long double len() const { return sqrtl(len2()); }                                                                      // \u5411\u91cf\u957f\u5ea6\r\n    long double dis(const point &a) const { return sqrtl(dis2(a)); }                                                       // \u4e24\u70b9\u8ddd\u79bb\r\n    long double ang(const point &a) const { return acosl(max(-1.0l, min(1.0l, ((*this) * a) / (len() * a.len())))); }      // \u5411\u91cf\u5939\u89d2\r\n    point rot(const long double rad) const { return {x * cosl(rad) - y * sinl(rad), x * sinl(rad) + y * cosl(rad)}; }          // \u9006\u65f6\u9488\u65cb\u8f6c\uff08\u7ed9\u5b9a\u89d2\u5ea6\uff09\r\n    point rot(const long double cosr, const long double sinr) const { return {x * cosr - y * sinr, x * sinr + y * cosr}; } // \u9006\u65f6\u9488\u65cb\u8f6c\uff08\u7ed9\u5b9a\u89d2\u5ea6\u7684\u6b63\u5f26\u4e0e\u4f59\u5f26\uff09\r\n};\r\n\r\nusing Point = point<point_t>;\r\n\r\nint main(){\r\n\r\n#ifdef LOCAL\r\n    freopen(\"data.in\", \"r\", stdin);\r\n    freopen(\"data.out\", \"w\", stdout);\r\n#endif\r\n\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n    ios::sync_with_stdio(0);\r\n    cout << fixed << setprecision(20);\r\n\r\n    int n, m;\r\n    cin >> n >> m;\r\n    vector<Point> p(n);\r\n    for(int i = 0; i < n; i++){\r\n        int x, y;\r\n        cin >> x >> y;\r\n        p[i].x = x, p[i].y = y;\r\n    }\r\n\r\n    auto get_wc = [&](){\r\n        long double sum = 0, sumx = 0, sumy = 0;\r\n        for(int i = 2; i < n; i++){\r\n            auto v1 = p[i] - p[0], v2 = p[i - 1] - p[0];\r\n            long double area = v2 ^ v1;\r\n            sum += area;\r\n            sumx += area * (p[0].x + p[i - 1].x + p[i].x);\r\n            sumy += area * (p[0].y + p[i - 1].y + p[i].y);\r\n        }\r\n        return Point(sumx / sum / 3, sumy / sum / 3);\r\n    };\r\n\r\n    Point wc = get_wc();\r\n    vector<Point> v(n);\r\n    vector<long double> dist(n);\r\n    for(int i = 0; i < n; i++)\r\n        v[i] = p[i] - wc, dist[i] = v[i].len();\r\n    Point curwc = wc;\r\n    long double angle = 0.0L;\r\n\r\n    auto query = [&](int id){\r\n        Point p = v[id].rot(angle);\r\n        return curwc + p;\r\n    };\r\n\r\n    auto get_angle = [&](Point a, Point b){\r\n        return atan2l(a ^ b, a * b);\r\n    };\r\n\r\n    set<int> s{0, 1};\r\n    while(m--){\r\n        int op;\r\n        cin >> op;\r\n        if (op == 1){\r\n            int f, t;\r\n            cin >> f >> t;\r\n            f--, t--;\r\n            s.erase(f);\r\n            auto curpin = query(*s.begin());\r\n            curwc = curpin - Point(0, dist[*s.begin()]);\r\n            angle = get_angle(-v[*s.begin()], {0, -1});\r\n            s.insert(t);\r\n        }\r\n        else{\r\n            int id;\r\n            cin >> id;\r\n            id--;\r\n            auto ans = query(id);\r\n            cout << ans.x << ' ' << ans.y << '\\n';\r\n        }\r\n    }\r\n\r\n}"
+}

@@ -1,0 +1,36 @@
+{
+    "id": 162632673,
+    "contestId": 1000,
+    "creationTimeSeconds": 1656845574,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "cccllf"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 499,
+    "memoryConsumedBytes": 94617600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long ll;\r\nint n,q,tot=1,a[200005],head[200005],d[200005];\r\nll f[200005],f1[200005][21],g[200005],f3[200005][21];\r\nint f2[200005][21];\r\nstruct{\r\n\tint nxt,to,dis;\r\n}e[400005];\r\ninline int read(){\r\n\tint x=0;bool f=1;char ch=getchar();\r\n\twhile(ch<'0'||ch>'9')ch=getchar();\r\n\twhile(ch>='0'&&ch<='9')x=(x<<1)+(x<<3)+ch-'0',ch=getchar();\r\n\treturn x;\r\n}\r\ninline void add(int u,int v,int w){\r\n\te[++tot].to=v;\r\n\te[tot].nxt=head[u];\r\n\te[tot].dis=w;\r\n\thead[u]=tot;\r\n}\r\nvoid dfs(int x,int fa){\r\n\td[x]=d[fa]+1;f[x]=a[x];\r\n\tfor(int i=head[x];i;i=e[i].nxt){\r\n\t\tint y=e[i].to;\r\n\t\tif(y==fa)continue;\r\n\t\tf2[y][0]=x;\r\n\t\tfor(int j=1;j<=20;j++)f2[y][j]=f2[f2[y][j-1]][j-1];\r\n\t\tdfs(y,x);\r\n\t\tf[x]=max(f[x],f[x]-e[i].dis-e[i^1].dis+f[y]);\r\n\t}\r\n//\tcout<<f[x]<<\" \"<<x<<\" 1\"<<\"\\n\";\r\n}\r\nvoid dfs1(int x,int fa,int w){\r\n\tg[x]=max(0ll,f1[x][0]-f[x]-w+g[fa]);\r\n//\tcout<<g[x]<<\" \"<<x<<\" 2\"<<\"\\n\";\r\n\tfor(int i=head[x];i;i=e[i].nxt){\r\n\t\tint y=e[i].to;\r\n\t\tif(y==fa)continue;\r\n\t\tif(f[y]>=e[i].dis+e[i^1].dis)f1[y][0]=f[x]+e[i].dis,f3[y][0]=f[x]+e[i^1].dis;\r\n\t\telse f1[y][0]=f[y]-e[i^1].dis+f[x],f3[y][0]=f[y]-e[i].dis+f[x];\r\n\t\tfor(int j=1;j<=20;j++)f1[y][j]=f1[y][j-1]+f1[f2[y][j-1]][j-1]-f[f2[y][j-1]],f3[y][j]=f3[y][j-1]+f3[f2[y][j-1]][j-1]-f[f2[y][j-1]];\r\n\t\tdfs1(y,x,e[i].dis);\r\n\t}\r\n//\tcout<<f1[x][0]<<\" \"<<x<<\" 3\"<<\"\\n\";\r\n}\r\nint LCA(int x,int y){\r\n\tif(d[x]<d[y])swap(x,y);\r\n\tfor(int i=20;i>=0;i--){\r\n\t\tif(d[f2[x][i]]>=d[y])x=f2[x][i];\r\n\t}\r\n\tif(x==y)return x;\r\n\tfor(int i=20;i>=0;i--){\r\n\t\tif(f2[x][i]!=f2[y][i])x=f2[x][i],y=f2[y][i];\r\n\t}\r\n\treturn f2[x][0];\r\n}\r\nll calc(int x,int y,bool type){\r\n\tll ans=f[x];\r\n\tfor(int i=20;i>=0;i--){\r\n\t\tif(d[f2[x][i]]>=d[y]){\r\n\t\t\tif(!type)ans+=f1[x][i]-f[x];\r\n\t\t\telse ans+=f3[x][i]-f[x];\r\n\t\t\tx=f2[x][i];\r\n\t\t}\r\n\t}\r\n\treturn ans;\r\n}\r\nint main(){\r\n//\tfreopen(\"strawberry.in\",\"r\",stdin);\r\n//\tfreopen(\"strawberry.out\",\"w\",stdout);\r\n\tn=read();q=read();\r\n\tfor(int i=1;i<=n;i++)a[i]=read();\r\n\tfor(int i=1;i<n;i++){\r\n\t\tint x=read(),y=read(),w1=read();\r\n\t\tadd(x,y,w1);add(y,x,w1);\r\n\t}\r\n\tdfs(1,0);\r\n\tdfs1(1,0,0);\r\n\twhile(q--){\r\n\t\tint x=read(),y=read(),lca=LCA(x,y);\r\n\t\tif(x==y)cout<<f[x]+g[x]<<\"\\n\";\r\n\t\telse if(x==lca)cout<<calc(y,x,1)+g[lca]<<\"\\n\";\r\n\t\telse if(y==lca)cout<<calc(x,y,0)+g[lca]<<\"\\n\";\r\n\t\telse cout<<calc(x,lca,0)+calc(y,lca,1)-f[lca]+g[lca]<<\"\\n\";\r\n\t}\r\n}"
+}

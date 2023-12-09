@@ -1,0 +1,36 @@
+{
+    "id": 212795065,
+    "contestId": 587,
+    "creationTimeSeconds": 1688804883,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 587,
+        "index": "F",
+        "name": "Duff is Mad",
+        "type": "PROGRAMMING",
+        "points": 2750.0,
+        "rating": 3000,
+        "tags": [
+            "data structures",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 587,
+        "members": [
+            {
+                "handle": "WHC-MIK-7521X"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1444926600
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 87,
+    "timeConsumedMillis": 1793,
+    "memoryConsumedBytes": 86425600,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int N=2e5+10,B=350;\r\nvector<int>g[N<<1];\r\nstruct node{\r\n    int link,len,to[26];\r\n    node(){\r\n        link=len=0;\r\n        memset(to,0,sizeof to);\r\n    }\r\n};\r\nstruct SAM{\r\n    node t[N<<1];\r\n    int siz;\r\n    SAM(){t[0].len=0,t[0].link=-1;siz=1;}\r\n    int ins(int x,int last){\r\n        if(t[last].to[x]){\r\n            int p=last,q=t[p].to[x];\r\n            if(t[p].len+1==t[q].len)return q;\r\n            else{\r\n                int cl=siz++;\r\n                t[cl]=t[q];\r\n                t[cl].len=t[p].len+1;\r\n                while(p!=-1&&t[p].to[x]==q)t[p].to[x]=cl,p=t[p].link;\r\n                t[q].link=cl;\r\n                return cl;\r\n            }\r\n        }\r\n        int now=siz++;\r\n        t[now].len=t[last].len+1;\r\n        int p=last;\r\n        while(p!=-1&&!t[p].to[x]){\r\n            t[p].to[x]=now;\r\n            p=t[p].link;\r\n        }\r\n        if(p==-1){\r\n            t[now].link=0;\r\n        }\r\n        else{\r\n            int q=t[p].to[x];\r\n            if(t[p].len+1==t[q].len){\r\n                t[now].link=q;\r\n            }\r\n            else{\r\n                int cl=siz++;\r\n                t[cl]=t[q];\r\n                t[cl].len=t[p].len+1;\r\n                while(p!=-1&&t[p].to[x]==q){\r\n                    t[p].to[x]=cl;\r\n                    p=t[p].link;\r\n                }\r\n                t[q].link=t[now].link=cl;\r\n            }\r\n        }\r\n        return now;\r\n    }\r\n    void build(){\r\n        for(int i=1;i<=siz;i++){\r\n            g[i].push_back(t[i].link);\r\n            g[t[i].link].push_back(i);\r\n        }\r\n    }\r\n}ty;\r\nint n,q,pos[N],pd,val[N],dfn[N],siz[N],cc;\r\nlong long sum[N],ans[N],tag[N],a[N];\r\nvector<tuple<int,int,int,int>>qu;\r\nvector<tuple<int,int,int>>re[N];\r\nstring s[N];\r\nvoid dfs(int x,int fa){\r\n    for(int v:g[x])if(v!=fa)dfs(v,x),val[x]+=val[v];\r\n}\r\nvoid solve(int x,int fa){\r\n    dfn[x]=++cc,siz[x]=1;\r\n    for(int v:g[x])if(v!=fa)solve(v,x),siz[x]+=siz[v];\r\n}\r\nvoid add(int l,int r){\r\n    for(int i=l/B+1;i<r/B;i++)tag[i]++;\r\n    if(l/B==r/B){\r\n        for(int i=l;i<=r;i++)a[i]++;\r\n        return;\r\n    }\r\n    for(int i=l;i/B==l/B;i++)a[i]++;\r\n    for(int i=r;i>0&&i/B==r/B;i--)a[i]++;\r\n}\r\nlong long ask(int x){return tag[x/B]+a[x];}\r\nint main(){\r\n    scanf(\"%d%d\",&n,&q);\r\n    for(int i=1;i<=n;i++){\r\n        cin>>s[i];\r\n        int now=0;\r\n        for(char o:s[i])now=ty.ins(o-'a',now);\r\n        pos[i]=now; \r\n    }\r\n    ty.build();\r\n    solve(0,0);\r\n    for(int i=1;i<=q;i++){\r\n        int l,r,k;\r\n        scanf(\"%d%d%d\",&l,&r,&k);\r\n        if((int)s[k].size()>=B)re[k].emplace_back(l,r,i);\r\n        else{\r\n            qu.emplace_back(l-1,i,k,-1);\r\n            qu.emplace_back(r,i,k,1);\r\n        }\r\n    }\r\n    for(int i=1;i<=n;i++){\r\n        if(re[i].size()){\r\n            int now=0;\r\n            memset(val,0,sizeof val);\r\n            for(char o:s[i])now=ty.t[now].to[o-'a'],val[now]++;\r\n            dfs(0,0);\r\n            for(int o=1;o<=n;o++)sum[o]=val[pos[o]]+sum[o-1];\r\n            for(auto [l,r,num]:re[i])ans[num]=sum[r]-sum[l-1];\r\n        }\r\n    }\r\n    sort(qu.begin(),qu.end());\r\n    int kk=0;\r\n    for(auto [x,num,md,w]:qu){\r\n        while(x>kk)++kk,add(dfn[pos[kk]],dfn[pos[kk]]+siz[pos[kk]]-1);\r\n        int now=0;\r\n        long long res=0;\r\n        for(char o:s[md])now=ty.t[now].to[o-'a'],res+=ask(dfn[now]);\r\n        ans[num]+=w*res;    \r\n    }\r\n    for(int i=1;i<=q;i++)printf(\"%lld\\n\",ans[i]);\r\n    return 0;\r\n}"
+}

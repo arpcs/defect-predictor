@@ -1,0 +1,38 @@
+{
+    "id": 233290587,
+    "contestId": 1810,
+    "creationTimeSeconds": 1700309649,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1810,
+        "index": "F",
+        "name": "M-tree",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2800,
+        "tags": [
+            "data structures",
+            "math",
+            "sortings",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1810,
+        "members": [
+            {
+                "handle": "Andreasyan"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1680273300
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 717,
+    "memoryConsumedBytes": 10956800,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n#define m_p make_pair\r\n#define all(x) (x).begin(),(x).end()\r\n#define sz(x) ((int)(x).size())\r\n#define fi first\r\n#define se second\r\ntypedef long long ll;\r\nmt19937 rnd(chrono::steady_clock::now().time_since_epoch().count());\r\nmt19937 rnf(2106);\r\nconst int N = 210005;\r\n\r\nint n, m, qq;\r\nint a[N];\r\n\r\nint maxu[N * 4], minu[N * 4];\r\nint laz[N * 4];\r\n\r\nvoid ave(int pos, int y)\r\n{\r\n    maxu[pos] += y;\r\n    minu[pos] += y;\r\n    laz[pos] += y;\r\n}\r\n\r\nvoid shi(int pos)\r\n{\r\n    if (laz[pos] == 0)\r\n        return;\r\n    ave(pos * 2, laz[pos]);\r\n    ave(pos * 2 + 1, laz[pos]);\r\n    laz[pos] = 0;\r\n}\r\n\r\nvoid ubd(int tl, int tr, int l, int r, int y, int pos)\r\n{\r\n    if (l > r)\r\n        return;\r\n    if (tl == l && tr == r)\r\n    {\r\n        ave(pos, y);\r\n        return;\r\n    }\r\n    shi(pos);\r\n    int m = (tl + tr) / 2;\r\n    ubd(tl, m, l, min(m, r), y, pos * 2);\r\n    ubd(m + 1, tr, max(m + 1, l), r, y, pos * 2 + 1);\r\n    maxu[pos] = max(maxu[pos * 2], maxu[pos * 2 + 1]);\r\n    minu[pos] = min(minu[pos * 2], minu[pos * 2 + 1]);\r\n}\r\n\r\nint qrymx1(int tl, int tr, int l, int r, int pos)\r\n{\r\n    if (l > r)\r\n        return 0;\r\n    if (maxu[pos] == 0)\r\n        return 0;\r\n    if (tl == tr)\r\n        return tl;\r\n    shi(pos);\r\n    int m = (tl + tr) / 2;\r\n    int u = qrymx1(tl, m, l, min(m, r), pos * 2);\r\n    if (u)\r\n        return u;\r\n    return qrymx1(m + 1, tr, max(m + 1, l), r, pos * 2 + 1);\r\n}\r\n\r\nint qrymn1(int tl, int tr, int l, int r, int pos)\r\n{\r\n    if (l > r)\r\n        return 0;\r\n    if (minu[pos] == m - 1)\r\n        return 0;\r\n    if (tl == tr)\r\n        return tl;\r\n    shi(pos);\r\n    int m = (tl + tr) / 2;\r\n    int u = qrymn1(tl, m, l, min(m, r), pos * 2);\r\n    if (u)\r\n        return u;\r\n    return qrymn1(m + 1, tr, max(m + 1, l), r, pos * 2 + 1);\r\n}\r\n\r\nint qryx(int tl, int tr, int l, int r, int pos)\r\n{\r\n    if (l > r)\r\n        return -1;\r\n    if (tl == l && tr == r)\r\n        return maxu[pos];\r\n    shi(pos);\r\n    int m = (tl + tr) / 2;\r\n    return max(qryx(tl, m, l, min(m, r), pos * 2),\r\n               qryx(m + 1, tr, max(m + 1, l), r, pos * 2 + 1));\r\n}\r\n\r\nint qrya(int tl, int tr, int pos)\r\n{\r\n    if (tl == tr)\r\n        return tl;\r\n    shi(pos);\r\n    int m = (tl + tr) / 2;\r\n    if (maxu[pos * 2 + 1])\r\n        return qrya(m + 1, tr, pos * 2 + 1);\r\n    else\r\n        return qrya(tl, m, pos * 2);\r\n}\r\n\r\nvoid solv()\r\n{\r\n    cin >> n >> m >> qq;\r\n    int nn = n + 20;\r\n    for (int i = 1; i <= (nn + 5) * 4; ++i)\r\n        maxu[i] = minu[i] = laz[i] = 0;\r\n    for (int i = 1; i <= n; ++i)\r\n    {\r\n        cin >> a[i];\r\n        ubd(1, nn, a[i], a[i], 1, 1);\r\n        int x = a[i];\r\n        if (qryx(1, nn, x, x, 1) == m)\r\n        {\r\n            int j = qrymn1(1, nn, x + 1, nn, 1);\r\n            ubd(1, nn, x, x, -m, 1);\r\n            ubd(1, nn, x + 1, j - 1, -(m - 1), 1);\r\n            ubd(1, nn, j, j, 1, 1);\r\n        }\r\n    }\r\n\r\n    while (qq--)\r\n    {\r\n        int i, x;\r\n        cin >> i >> x;\r\n\r\n        ubd(1, nn, x, x, 1, 1);\r\n        ubd(1, nn, a[i], a[i], -1, 1);\r\n        if (qryx(1, nn, a[i], a[i], 1) == -1)\r\n        {\r\n            int j = qrymx1(1, nn, a[i] + 1, nn, 1);\r\n            ubd(1, nn, j, j, -1, 1);\r\n            ubd(1, nn, a[i] + 1, j - 1, m - 1, 1);\r\n            ubd(1, nn, a[i], a[i], m, 1);\r\n        }\r\n        a[i] = x;\r\n        if (qryx(1, nn, x, x, 1) == m)\r\n        {\r\n            int j = qrymn1(1, nn, x + 1, nn, 1);\r\n            ubd(1, nn, x, x, -m, 1);\r\n            ubd(1, nn, x + 1, j - 1, -(m - 1), 1);\r\n            ubd(1, nn, j, j, 1, 1);\r\n        }\r\n\r\n        /*for (int i = 1; i <= 10; ++i)\r\n            cout << qryx(1, nn, i, 1) << ' ';\r\n        cout << \"\\n\";\r\n        continue;*/\r\n\r\n        int ans = qrya(1, nn, 1);\r\n        if (qryx(1, nn, 1, ans - 1, 1) > 0)\r\n            ++ans;\r\n        cout << ans << ' ';\r\n    }\r\n    cout << \"\\n\";\r\n}\r\n\r\nint main()\r\n{\r\n    #ifdef SOMETHING\r\n    freopen(\"input.txt\", \"r\", stdin);\r\n    //freopen(\"output.txt\", \"w\", stdout);\r\n    #endif // SOMETHING\r\n    ios_base::sync_with_stdio(false), cin.tie(0);\r\n\r\n    int tt = 1;\r\n    cin >> tt;\r\n    while (tt--)\r\n    {\r\n        solv();\r\n    }\r\n    return 0;\r\n}\r\n"
+}

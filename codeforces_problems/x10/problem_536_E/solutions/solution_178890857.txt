@@ -1,0 +1,37 @@
+{
+    "id": 178890857,
+    "contestId": 536,
+    "creationTimeSeconds": 1667331806,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 536,
+        "index": "E",
+        "name": "Tavas on the Path",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3100,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 536,
+        "members": [
+            {
+                "handle": "AQil"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1429029300
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 436,
+    "memoryConsumedBytes": 18636800,
+    "source": "      #include <bits/stdc++.h>\r\n//   #pragma GCC optimize (\"Ofast,unroll-loops\")\r\n// #pragma GCC target (\"avx2\")\r\n using namespace std;\r\n  typedef long long ll;\r\n   typedef pair<int, int> pp;\r\n     #define per(i,r,l) for(int i = (r); i >= (l); i--)\r\n       #define rep(i,l,r) for(int i = (l); i < (r); i++)\r\n          #define all(x) begin(x), end(x)\r\n             #define sz(x) (int)(x).size()\r\n                 #define pb push_back\r\n                     #define ss second\r\n                          #define ff first\r\n                                  void err(istringstream *iss){}template<typename T,typename ...Args> void err(istringstream *iss,const T &_val, const Args&...args){string _name;*iss>>_name;if(_name.back()==',')_name.pop_back();cerr<<_name<<\" = \"<<_val<<\", \",err(iss,args...);}\r\nvoid IOS(){\r\n     cin.tie(0) -> sync_with_stdio(0);\r\n     #ifndef ONLINE_JUDGE\r\n          #define er(args ...) cerr << __LINE__ << \": \", err(new istringstream(string(#args)), args), cerr << endl\r\n          freopen(\"inp.txt\", \"r\", stdin);\r\n          freopen(\"out.txt\", \"w\", stdout);\r\n     #else\r\n          #define er(args ...) 0\r\n     #endif\r\n}\r\nmt19937 rng(chrono::steady_clock::now().time_since_epoch().count());\r\nconst ll mod = 998244353, maxn = 1e5 + 5, sq = 350, lg = 22, inf = ll(1e18) + 5;\r\nll pw(ll a,ll b,ll md=mod){if(!b)return 1;ll k=pw(a,b>>1ll);return k*k%md*(b&1ll?a:1)%md;}\r\n\r\nint f[maxn], t;\r\n\r\nstruct Node{\r\n     int sum, prf, suf;\r\n     bool al;\r\n};\r\n\r\nNode cmb(Node a, Node b){\r\n     Node c;\r\n     c.al = a.al&b.al;\r\n     c.sum = a.sum + b.sum + (!a.al && !b.al? f[a.suf + b.prf]: 0);\r\n     c.prf = a.prf + (a.al? b.prf: 0);\r\n     c.suf = b.suf + (b.al? a.suf: 0);\r\n     return c;\r\n}\r\n \r\nNode seg[maxn<<2];\r\n\r\nvoid upd(int i, int x = 1, int lx = 0, int rx = t){\r\n     if(lx + 1 == rx){\r\n          seg[x] = {0, 1, 1, true};\r\n          return;\r\n     }\r\n     int mid = (lx + rx)>>1;\r\n     if(i < mid) upd(i, x<<1, lx, mid);\r\n     else upd(i, x<<1|1, mid, rx);\r\n     seg[x] = cmb(seg[x<<1], seg[x<<1|1]);\r\n}\r\n\r\nint get(int l, int r, int& prf, int x = 1, int lx = 0, int rx = t){\r\n     if(l <= lx && r >= rx){\r\n          if(seg[x].al){\r\n               prf += seg[x].prf;\r\n               return 0;\r\n          }\r\n          int res = seg[x].sum + f[prf + seg[x].suf];\r\n          prf = seg[x].prf;\r\n          return res;\r\n     }\r\n     int mid = (lx + rx)>>1;\r\n     int res = 0;\r\n     if(mid < r) res += get(l, r, prf, x<<1|1, mid, rx);\r\n     if(l < mid) res += get(l, r, prf, x<<1, lx, mid);\r\n     return res;\r\n}\r\n\r\nvector<pp> adj[maxn];\r\nint w[maxn], st[maxn], top[maxn], par[maxn], cnt[maxn], h[maxn], pos[maxn];\r\n\r\nvoid dfs(int r, int p){\r\n     cnt[r] = 1;\r\n     par[r] = p;\r\n     for(auto[c, d]: adj[r]) if(c - p){\r\n          cnt[r] += cnt[c];\r\n          w[c] = d, h[c] = h[r] + 1;\r\n          dfs(c, r);\r\n     }\r\n}\r\n\r\nvoid dfsh(int r, int p, int tp){\r\n     top[r] = tp;\r\n     pos[t] = r;\r\n     st[r] = t++;\r\n     pp bst = {-1, -1};\r\n     for(auto[c, d]: adj[r]) if(c - p) bst = max(bst, {cnt[c], c});\r\n     if(bst.ff + 1){\r\n          dfsh(bst.ss, r, tp);\r\n          for(auto[c, d]: adj[r]) if(c - p && c - bst.ss) dfsh(c, r, c);\r\n     }\r\n}\r\n\r\nint query(int u, int v){\r\n     int prf[2] = {0, 0}, res = 0;\r\n     while(top[u] - top[v]){\r\n          if(h[top[u]] < h[top[v]]){\r\n               swap(u, v);\r\n               swap(prf[0], prf[1]);\r\n          }\r\n          res += get(st[top[u]], st[u] + 1, prf[0]);\r\n          u = par[top[u]];\r\n     }\r\n     if(h[u] < h[v]){\r\n          swap(u, v);\r\n          swap(prf[0], prf[1]);\r\n     }\r\n     res += get(st[v] + 1, st[u] + 1, prf[0]) + f[prf[0] + prf[1]];\r\n     return res;\r\n}\r\n\r\nint main(){ IOS();\r\n     int n, q; cin >> n >> q;\r\n     rep(i,1,n) cin >> f[i];\r\n     rep(i,1,n){\r\n          int u, v, w; cin >> u >> v >> w; u--, v--;\r\n          adj[u].pb({v, w}), adj[v].pb({u, w});\r\n     }\r\n     dfs(0, 0), dfsh(0, 0, 0);\r\n     vector<int> u(q), v(q), ans(q);\r\n     vector<pp> srt;\r\n     rep(i,1,n){\r\n          srt.pb({w[i], i});\r\n     }\r\n     rep(i,0,q){\r\n          int l; cin >> u[i] >> v[i] >> l; u[i]--, v[i]--;\r\n          srt.pb({l, -i});\r\n     }\r\n     sort(all(srt));\r\n     while(sz(srt)){\r\n          auto[_, id] = srt.back(); srt.pop_back();\r\n          if(id < 1){\r\n               id = -id;\r\n               ans[id] = query(u[id], v[id]);\r\n          }else{\r\n               upd(pos[id]);\r\n          }\r\n     }\r\n     for(int c: ans) cout << c << '\\n';\r\n     return 0-0;\r\n}"
+}

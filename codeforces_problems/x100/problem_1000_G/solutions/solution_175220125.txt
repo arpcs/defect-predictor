@@ -1,0 +1,36 @@
+{
+    "id": 175220125,
+    "contestId": 1000,
+    "creationTimeSeconds": 1665304997,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "Mikasa_Akkerman"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 249,
+    "memoryConsumedBytes": 121446400,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\nconst int N = 3e5 + 5;\n#define ll long long\nint st[N], tot = 1, n, q, p[N][30], dep[N], to[N], nx[N], zhi[N];\nll dp1[N], a[N], dp2[N][30], g[N];\nvoid add(int u, int v, int w)\n{\n\tto[++ tot] = v;\n\tnx[tot] = st[u];\n\tzhi[tot] = w;\n\tst[u] = tot;\n} //\nvoid dp(int u, int fa)\n{\n\tdp1[u] = a[u];\n\tfor(int i = st[u];i;i = nx[i])\n\t{\n\t\tint v = to[i];\n\t\tif(v == fa) continue;\n\t\tdp(v, u);\n\t\tif(dp1[v] - 2 * zhi[i] > 0) dp1[u] += dp1[v] - zhi[i] * 2;\n\t}\n}\nvoid dfs(int u, int fa)\n{\n\tdep[u] = dep[p[u][0] = fa] + 1;\n\tfor(int i = 1;i <= 25;i++)\n\t{\n\t\tp[u][i] = p[p[u][i - 1]][i - 1];\n\t\tdp2[u][i] = dp2[u][i - 1] + dp2[p[u][i - 1]][i - 1] - dp1[p[u][i - 1]];\n\t}\n\tfor(int i = st[u];i;i = nx[i])\n\t{\n\t\tint v = to[i];\n\t\tif(v == fa) continue;\n\t\tdp2[v][0] = dp1[v] + dp1[u] - zhi[i ^ 1];\n\t\tif(dp1[v] - 2 * zhi[i] > 0) dp2[v][0] -= dp1[v] - 2 * zhi[i];\n\t\tg[v] = max(g[v], g[u] + dp2[v][0] - zhi[i] - dp1[v]);\n\t\tdfs(v, u);\n\t}\n}\nll ask(int u, int v)\n{\n\tll ans = 0;\n\tint a = u, b = v;\n\tif(dep[v] > dep[u])\n\t\tswap(u, v);\n\tfor(int i = 25;i >= 0;i --)\n\t{\n\t\tif(dep[p[u][i]] >= dep[v])\n\t\t{\n\t\t\tans += dp2[u][i] - dp1[u];\n\t\t\tu = p[u][i];\n\t\t}\n\t}\n\t\t\n\tif(u == v)\n\t\treturn ans + ((dep[a] > dep[b]) ? dp1[a] : dp1[b]) + g[u];\n\tfor(int i = 25;i >= 0;i --)\n\t\tif(p[u][i] ^ p[v][i])\n\t\t{\n\t\t\tans += dp2[u][i] - dp1[u] + dp2[v][i] - dp1[v];\n\t\t\tu = p[u][i];\n\t\t\tv = p[v][i];\n\t\t}\n\treturn ans + dp2[u][0] - dp1[u] + dp2[v][0] - dp1[v] - dp1[p[u][0]] + dp1[a] + dp1[b] + g[p[u][0]];\n}\nint main()\n{\n\tscanf(\"%d%d\", &n, &q);\n\tfor(int i = 1;i <= n;i ++) scanf(\"%lld\", &a[i]);\n\tint u, v, w;\n\tfor(int i = 1;i < n;i ++)\n\t{\n\t\tscanf(\"%d%d%d\", &u, &v, &w);\n\t\tadd(u, v, w);\n\t\tadd(v, u, w);\n\t}\n\tdp(1, 0);\n\tdfs(1, 0);\n\twhile(q --)\n\t{\n\t\tscanf(\"%d%d\", &u, &v);\n\t\tprintf(\"%lld\\n\", ask(u, v));\n\t}\n\treturn 0;\n}"
+}

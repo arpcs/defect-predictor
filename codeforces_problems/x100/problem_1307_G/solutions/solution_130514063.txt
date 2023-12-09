@@ -1,0 +1,37 @@
+{
+    "id": 130514063,
+    "contestId": 1307,
+    "creationTimeSeconds": 1633139726,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "froggyzhang"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 140,
+    "memoryConsumedBytes": 4915200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int inf=0x3f3f3f3f;\r\n#define N 233\r\n#define M 5005\r\ntypedef long long ll;\r\nnamespace Maxflow{\r\n\tint head[N],ecnt,S,T,dep[N];\r\n\tstruct Edge{\r\n\t\tint nxt,to,val;\r\n\t}edge[M<<2];\r\n\tvoid add(int a,int b,int c){\r\n\t\tedge[++ecnt]={head[a],b,c};\r\n\t\thead[a]=ecnt;\r\n\t}\r\n\tvoid adde(int a,int b,int c){\r\n\t\tadd(a,b,c),add(b,a,0);\r\n\t}\r\n\tvoid init(int _S,int _T){\r\n\t\tecnt=1;\r\n\t\tmemset(head,0,sizeof(head));\r\n\t\tS=_S,T=_T;\r\n\t}\r\n\tqueue<int> q;\r\n\tbool bfs(){\r\n\t\tmemset(dep,0,sizeof(dep));\r\n\t\tq.push(S);\r\n\t\tdep[S]=1;\r\n\t\twhile(!q.empty()){\r\n\t\t\tint u=q.front();\r\n\t\t\tq.pop();\r\n\t\t\tfor(int i=head[u];i;i=edge[i].nxt){\r\n\t\t\t\tint v=edge[i].to;\r\n\t\t\t\tif(edge[i].val&&!dep[v]){\r\n\t\t\t\t\tdep[v]=dep[u]+1;\r\n\t\t\t\t\tq.push(v);\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn dep[T]>0;\r\n\t}\r\n\tint dfs(int u,int limit){\r\n\t\tif(u==T)return limit;\r\n\t\tint flow=0;\r\n\t\tfor(int i=head[u];i&&limit;i=edge[i].nxt){\r\n\t\t\tint v=edge[i].to;\r\n\t\t\tif(dep[v]==dep[u]+1&&edge[i].val){\r\n\t\t\t\tint k=dfs(v,min(limit,edge[i].val));\r\n\t\t\t\tedge[i].val-=k;\r\n\t\t\t\tedge[i^1].val+=k;\r\n\t\t\t\tflow+=k;\r\n\t\t\t\tlimit-=k;\r\n\t\t\t}\r\n\t\t}\r\n\t\tif(!flow)dep[u]=inf;\r\n\t\treturn flow;\r\n\t}\r\n\tint Dinic(){\r\n\t\tint maxflow=0;\r\n\t\twhile(bfs()){\r\n\t\t\tmaxflow+=dfs(S,inf);\r\n\t\t}\r\n\t\treturn maxflow;\r\n\t}\r\n}\r\nint n,m,dis[N][N],c[M],Q,F[M];\r\nvector<pair<int,int> > G[N];\r\nstruct Link{\r\n\tint x,y,t;\r\n\tfriend bool operator < (const Link &a,const Link &b){\r\n\t\treturn a.t<b.t;\r\n\t}\r\n}E[M];\r\n\r\nint main(){\r\n\tios::sync_with_stdio(false);\r\n\tcin.tie(0);\r\n\tcout.setf(ios::fixed);\r\n\tcout.precision(8);\r\n\tcin>>n>>m;\r\n\tmemset(dis,0x3f,sizeof(dis));\r\n\tfor(int i=1;i<=n;++i){\r\n\t\tdis[i][i]=0;\r\n\t}\r\n\tfor(int i=1;i<=m;++i){\r\n\t\tint u,v,w;\r\n\t\tcin>>u>>v>>w;\r\n\t\tdis[u][v]=min(dis[u][v],w);\r\n\t\tG[u].emplace_back(v,w);\r\n\t}\r\n\tfor(int k=1;k<=n;++k)\r\n\t\tfor(int i=1;i<=n;++i)\r\n\t\t\tfor(int j=1;j<=n;++j)\r\n\t\t\t\tdis[i][j]=min(dis[i][j],dis[i][k]+dis[k][j]);\r\n\tm=0;\r\n\tfor(int u=1;u<=n;++u){\r\n\t\tfor(auto [v,w]:G[u]){\r\n\t\t\tE[++m]={u,v,(dis[1][u]+dis[v][n]+w)-dis[1][n]};\t\t\r\n\t\t}\r\n\t}\r\n\tsort(E+1,E+m+1);\r\n\tMaxflow::init(1,n);\r\n\tint flow=0;\r\n\tfor(int i=1;i<=m;++i){\r\n\t\tMaxflow::adde(E[i].x,E[i].y,1);\r\n\t\tflow+=Maxflow::Dinic();\r\n\t\tF[i]=flow;\r\n\t\tc[i]=c[i-1]+(E[i].t-E[i-1].t)*flow;\r\n\t}\r\n\tcin>>Q;\r\n\twhile(Q--){\r\n\t\tint x;\r\n\t\tcin>>x;\r\n\t\tint p=upper_bound(c+1,c+m+1,x)-c-1;\r\n\t\tcout<<dis[1][n]+E[p].t+(x-c[p])*1.0/F[p]<<'\\n';\r\n\t}\r\n\treturn 0;\r\n}\r\n\r\n\r\n"
+}

@@ -1,0 +1,37 @@
+{
+    "id": 225728161,
+    "contestId": 1186,
+    "creationTimeSeconds": 1695958360,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1186,
+        "index": "E",
+        "name": "Vus the Cossack and a Field",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2500,
+        "tags": [
+            "divide and conquer",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1186,
+        "members": [
+            {
+                "handle": "vjudge2"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1561710000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 33,
+    "timeConsumedMillis": 467,
+    "memoryConsumedBytes": 24268800,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\n#define int long long\n#define pii pair <int, int>\n#define fi first\n#define se second\n#define mp make_pair\n\nconst int NM = 1000;\n\nint n, m, q, c[NM+5][NM+5], f[NM+5][NM+5], g[NM+5][NM+5];\n\nint get(int f[NM+5][NM+5], int x, int y, int u, int v){\n\tif (x > u || y > v) return 0LL;\n\treturn f[u][v]-f[x-1][v]-f[u][y-1]+f[x-1][y-1];\n}\n\npii get_1D(int x){\n\tif (x == 0) return mp(0, 0);\n\tint k = __lg(x);\n\tpii tmp = get_1D(x-(1<<k));\n\tswap(tmp.fi, tmp.se);\n\tif (k == 0){\n\t\ttmp.fi++;\n\t}\n\telse{\n\t\ttmp.fi += (1<<(k-1));\n\t\ttmp.se += (1<<(k-1));\n\t}\n\treturn tmp;\n}\n\npii get_2D(int x, int y){\n\tif (x <= 0 || y <= 0) return mp(0, 0);\n\tpii a = get_1D(x), b = get_1D(y);\n\treturn mp(a.fi*b.fi+a.se*b.se, a.fi*b.se+a.se*b.fi);\n}\n\npii operator - (pii a, pii b){\n\tpii c;\n\tc.fi = a.fi-b.fi;\n\tc.se = a.se-b.se;\n\treturn c;\n}\n\nbool is_invert_1D(int x){\n\tpii tmp = get_1D(x)-get_1D(x-1);\n\tif (tmp.fi == 1) return 0;\n\treturn 1;\n}\n\nbool is_invert_2D(int x, int y){\n\treturn is_invert_1D(x) ^ is_invert_1D(y);\n}\n\nint get_block_row(int x){\n\treturn (x+n-1)/n;\n}\n\nint get_block_col(int x){\n\treturn (x+m-1)/m;\n}\n\nint sum(pii P, int x, int y, int u, int v){\n\treturn P.fi * get(f, x, y, u, v) + P.se * get(g, x, y, u, v);\n}\n\nint solve(int x, int y){\n\tif (x <= 0 || y <= 0) return 0;\n\tint bx = get_block_row(x), by = get_block_col(y);\n\tpii P = get_2D(bx-1, by-1);\n\tint res = sum(P, 1, 1, n, m);\n\t\n\tP = get_1D(by-1);\n\tif (is_invert_1D(bx)) swap(P.fi, P.se);\n\tres += sum(P, 1, 1, x-(bx-1)*n, m);\n\t\n\tP = get_1D(bx-1);\n\tif (is_invert_1D(by)) swap(P.fi, P.se);\n\tres += sum(P, 1, 1, n, y-(by-1)*m);\n\t\n\tif (is_invert_2D(bx, by) == 0) res += get(f, 1, 1, x-(bx-1)*n, y-(by-1)*m);\n\telse res += get(g, 1, 1, x-(bx-1)*n, y-(by-1)*m);\n\t\n\treturn res;\n}\n\nint solve_rect(int x, int y, int u, int v){\n\treturn solve(u, v)-solve(x-1, v)-solve(u, y-1)+solve(x-1, y-1);\n}\n\nsigned main(){\n//\tfreopen(\"TEST.inp\", \"r\", stdin);\n//\tfreopen(\"TEST.out\", \"w\", stdout);\n\tios_base::sync_with_stdio(0);\n\tcin.tie(0);\n\tcout.tie(0);\n\t\n\tcin >> n >> m >> q;\n\tfor (int i = 1; i <= n; i++)\n\t\tfor (int j = 1; j <= m; j++){\n\t\t\tchar ch; cin >> ch;\n\t\t\tc[i][j] = ch-'0';\n\t\t\tf[i][j] = c[i][j]+f[i-1][j]+f[i][j-1]-f[i-1][j-1];\n\t\t\tg[i][j] = 1-c[i][j]+g[i-1][j]+g[i][j-1]-g[i-1][j-1];\n\t\t}\n\twhile (q--){\n\t\tint x, y, u, v;\n\t\tcin >> x >> y >> u >> v;\n\t\tcout << solve_rect(x, y, u, v) << '\\n';\n\t}\n\treturn 0;\n}\n \t  \t  \t\t  \t\t \t    \t \t\t  \t\t  \t\t"
+}

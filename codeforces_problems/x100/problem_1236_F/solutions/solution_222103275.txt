@@ -1,0 +1,38 @@
+{
+    "id": 222103275,
+    "contestId": 1236,
+    "creationTimeSeconds": 1694013762,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "shinzanmono"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 1684,
+    "memoryConsumedBytes": 173260800,
+    "source": "#include<iostream>\r\n#include<algorithm>\r\n#include<vector>\r\n#include<stack>\r\n#include<map>\r\n#include<set>\r\nusing ll=long long;\r\nconst int sz=5e5+10;\r\nconst ll mod=1e9+7;\r\nconst ll half=5e8+4;\r\nstd::vector<int>graph[sz];\r\nstd::set<int>vertex[sz];\r\nint dfn[sz],dpp,low[sz],vdcc,deg[sz],n,m;\r\nstd::map<std::pair<int,int>,int>id;\r\nstd::pair<int,int>edges[sz];\r\nstd::stack<int>s;\r\nvoid tarjan(int u){\r\n    dfn[u]=low[u]=++dpp;\r\n    s.push(u);\r\n    for(int v:graph[u]){\r\n        if(dfn[v]==0){\r\n            tarjan(v),low[u]=std::min(low[u],low[v]);\r\n            if(dfn[u]<=low[v]){\r\n                ++vdcc;\r\n                while(!s.empty()){\r\n                    int p=s.top();\r\n                    s.pop();\r\n                    vertex[vdcc].insert(p);\r\n                    if(p==v)break;\r\n                }\r\n                vertex[vdcc].insert(u);\r\n            }\r\n        }else low[u]=std::min(low[u],dfn[v]);\r\n    }\r\n}\r\nll qpow(ll base,ll exp){\r\n    ll ans=1;\r\n    while(exp!=0){\r\n        if(exp&1)ans=ans*base%mod;\r\n        base=base*base%mod,exp>>=1;\r\n    }\r\n    return ans;\r\n}\r\nll vinv[sz],sum;\r\nll E(){\r\n    ll ans=0;\r\n    for(int i=1;i<=vdcc;i++)\r\n        ans=(ans+qpow(half,vertex[i].size()))%mod;\r\n    ans=(ans+n*half%mod-m*qpow(half,2)%mod+mod)%mod;\r\n    return ans;\r\n}\r\nll aa(){\r\n    return n*(n+1)%mod*qpow(half,2)%mod;\r\n}\r\nll bb(){\r\n    ll ans=0;\r\n    for(int i=1;i<=m;i++){\r\n        int u=edges[i].first,v=edges[i].second;\r\n        ans=(ans+qpow(half,4)*(m-deg[u]-deg[v]+1)%mod)%mod;\r\n        ans=(ans+qpow(half,3)*(deg[u]+deg[v]-2)%mod)%mod;\r\n        ans=(ans+qpow(half,2))%mod;\r\n    }\r\n    return ans;\r\n}\r\nll cc(){\r\n    ll ans=0;\r\n    for(int i=1;i<=vdcc;i++){\r\n        ll p=qpow(half,vertex[i].size()),s=sum-p;\r\n        for(int u:vertex[i]){\r\n            ans=(ans+(vinv[u]-p)*p*2%mod)%mod;\r\n\t\t\ts=(s-vinv[u]+p+mod)%mod;\r\n        }\r\n        ans=(ans+p*s%mod+p)%mod;\r\n    }\r\n    return ans;\r\n}\r\nll ab(){\r\n    ll ans=0;\r\n    for(int i=1;i<=n;i++)\r\n        ans=(ans+deg[i]*qpow(half,2)%mod+(m-deg[i])*qpow(half,3)%mod)%mod;\r\n    return ans;\r\n}\r\nll ac(){\r\n    ll ans=0;\r\n    for(int i=1;i<=n;i++)\r\n        ans=(ans+vinv[i]+(sum-vinv[i])*half%mod+mod)%mod;\r\n    return ans;\r\n}\r\nll bc(){\r\n    ll ans=0;\r\n    for(int i=1;i<=vdcc;i++){\r\n        ll dsum=0,p=qpow(half,vertex[i].size());\r\n        for(int u:vertex[i])dsum=(dsum+deg[u])%mod;\r\n        dsum=(dsum-vertex[i].size()*2+mod)%mod;\r\n        ans=(ans+p*(m-dsum-vertex[i].size())%mod*qpow(half,2)%mod)%mod;\r\n        ans=(ans+p*vertex[i].size()%mod)%mod;\r\n        ans=(ans+p*dsum%mod*half%mod)%mod;\r\n    }\r\n    return ans;\r\n}\r\nint main(){\r\n    std::ios::sync_with_stdio(false);\r\n    std::cin.tie(nullptr);\r\n    std::cin>>n>>m;\r\n    for(int i=1,u,v;i<=m;i++){\r\n        std::cin>>u>>v,deg[u]++,deg[v]++;\r\n        edges[i]=std::make_pair(u,v);\r\n        id[std::make_pair(u,v)]=id[std::make_pair(v,u)]=i;\r\n        graph[u].push_back(v),graph[v].push_back(u);\r\n    }\r\n    tarjan(1);\r\n    for(int i=1;i<=vdcc;i++){\r\n        sum=(sum+qpow(half,vertex[i].size()))%mod;\r\n        for(int u:vertex[i])\r\n            vinv[u]=(vinv[u]+qpow(half,vertex[i].size()))%mod;\r\n    }\r\n    ll ans=(aa()+bb()+cc()-2*ab()-2*bc()+2*ac()-E()*E()%mod+6*mod)%mod;\r\n    std::cout<<ans<<\"\\n\";\r\n    return 0;\r\n}"
+}

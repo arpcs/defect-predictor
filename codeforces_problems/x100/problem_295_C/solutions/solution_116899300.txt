@@ -1,0 +1,38 @@
+{
+    "id": 116899300,
+    "contestId": 295,
+    "creationTimeSeconds": 1621588264,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "TrungNotChung"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 10,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 307200,
+    "source": "//TrungNotChung\r\n#include <bits/stdc++.h>\r\n#define pii pair<int , int>\r\n#define fi first\r\n#define se second\r\n#define mp make_pair\r\n#define pb push_back\r\n#define BIT(x,i) (1&((x)>>(i)))\r\n#define OFF(x,i) ((x)^(1<<(i)))\r\n#define ON(x,i)  ((x)|(1<<(i)))\r\n#define CNT(x) __builtin_popcountll(x)\r\n#define task \"Codeforces\"\r\nusing namespace std;\r\nconst int N = 51;\r\nconst int M = 1001;\r\nconst int mod = (int)1e9+7;\r\nconst int INF = (int)1e9;\r\nvoid add(int &x , const int &y)\r\n{\r\n    x += y;\r\n    if(x >= mod) x -= mod;\r\n}\r\n#define PRODUCT(x,y) (1LL*(x)*(y)%mod)\r\nint n = 0 , m = 0 , k;\r\nint f[N][N] , id[N][N];\r\nint d[M] , cnt[M];\r\nvector<pii> g[M];\r\nvoid inp()\r\n{\r\n    int c;\r\n    scanf(\"%d%d\" , &c , &k);\r\n    for(int i=1 ; i<=c ; ++i)\r\n    {\r\n        int tmp; scanf(\"%d\" , &tmp);\r\n        if(tmp == 50) ++n;\r\n        else ++m;\r\n    }\r\n}\r\nvoid addEdge(int i , int j , int c1 , int c2)\r\n{\r\n    int _i = n-(i - c1) , _j = m-(j - c2);\r\n    int tmp = PRODUCT(f[i][c1] , f[j][c2]);\r\n    int u , v;\r\n    u = id[i][j] , v = id[_i][_j] + 500;\r\n    g[u].pb(mp(v , tmp));\r\n    u += 500 , v -= 500;\r\n    g[u].pb(mp(v , tmp));\r\n}\r\npriority_queue<pii , vector<pii> , greater<pii>> pq;\r\nvoid dijkstra()\r\n{\r\n    for(int i=0 ; i<=999 ; ++i) d[i] = INF;\r\n    d[id[n][m]] = 0 , cnt[id[n][m]] = 1;\r\n    pq.push(mp(0 , id[n][m]));\r\n    while(pq.size())\r\n    {\r\n        int u = pq.top().se;\r\n        int c = pq.top().fi;\r\n        // cout << u << \" \" << c << '\\n';\r\n        pq.pop();\r\n        if(d[u] != c) continue;\r\n        for(int i=0 ; i<(int)g[u].size() ; ++i)\r\n        {\r\n            int v = g[u][i].fi , tmp = PRODUCT(g[u][i].se , cnt[u]);\r\n            if(d[v] > d[u] + 1)\r\n            {\r\n                d[v] = d[u] + 1;\r\n                cnt[v] = tmp;\r\n                pq.push(mp(d[v] , v));\r\n            }\r\n            else if(d[v] == d[u] + 1)\r\n            {\r\n                add(cnt[v] , tmp);\r\n            }\r\n        }\r\n    }\r\n}\r\nvoid solve()\r\n{\r\n    f[0][0] = 1;\r\n    for(int i=1 ; i<=50 ; ++i)\r\n    {\r\n        f[i][0] = 1;\r\n        for(int j=1 ; j<=i ; ++j)\r\n        {\r\n            f[i][j] = f[i-1][j] + f[i-1][j-1];\r\n            if(f[i][j] >= mod) f[i][j] -= mod;\r\n        }\r\n    }\r\n    int pos = 0;\r\n    for(int i=0 ; i<=n ; ++i)\r\n    {\r\n        for(int j=0 ; j<=m ; ++j)\r\n        {\r\n            id[i][j] = ++pos;\r\n        }\r\n    }\r\n    for(int i=0 ; i<=n ; ++i)\r\n    {\r\n        for(int j=0 ; j<=m ; ++j)\r\n        {\r\n            for(int c1 = 0 ; c1 <= i ; ++c1)\r\n            {\r\n                for(int c2 = 0 ; c2 <= j ; ++c2)\r\n                {\r\n                    if(c1 == 0 && c2 == 0) continue;\r\n                    if(c1 * 50 + c2 * 100 > k) continue;\r\n                    addEdge(i , j , c1 , c2);\r\n                }\r\n            }\r\n        }\r\n    }\r\n    dijkstra();\r\n    int res = d[id[n][m]+500];\r\n    if(res == INF)\r\n    {\r\n        printf(\"-1\\n0\");\r\n        return;\r\n    }\r\n    printf(\"%d\\n%d\" , res , cnt[id[n][m]+500]);\r\n}\r\nint main()\r\n{\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    cout.tie(0);\r\n    //freopen(task\".inp\" , \"r\" , stdin);\r\n    //freopen(task\".out\" , \"w\" , stdout);\r\n    inp();\r\n    solve();\r\n    return 0;\r\n}\r\n"
+}

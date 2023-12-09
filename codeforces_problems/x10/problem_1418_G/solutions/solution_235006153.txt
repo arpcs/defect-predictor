@@ -1,0 +1,37 @@
+{
+    "id": 235006153,
+    "contestId": 1418,
+    "creationTimeSeconds": 1701321248,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1418,
+        "index": "G",
+        "name": "Three Occurrences",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "data structures",
+            "divide and conquer",
+            "hashing",
+            "two pointers"
+        ]
+    },
+    "author": {
+        "contestId": 1418,
+        "members": [
+            {
+                "handle": "ImmortalPhoenix"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1600094100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 92,
+    "timeConsumedMillis": 1201,
+    "memoryConsumedBytes": 70144000,
+    "source": "#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\nusing ll = long long;\r\n\r\nconst int N = (1 << 19);\r\n\r\nstruct node {\r\n    int mn = 0;\r\n    int cn = 0;\r\n    int up = 0;\r\n};\r\n\r\nint n;\r\nnode t[2 * N];\r\n\r\nnode combine(node a, node b) {\r\n    node rs;\r\n    rs.mn = min(a.mn, b.mn);\r\n    rs.cn = a.cn * (a.mn == rs.mn) + b.cn * (b.mn == rs.mn);\r\n    return rs;\r\n}\r\nvoid setpush(int v, int x) {\r\n    t[v].mn += x;\r\n    t[v].up += x;\r\n}\r\nvoid push(int v) {\r\n    if(v >= N || !t[v].up) return;\r\n    setpush(2 * v, t[v].up);\r\n    setpush(2 * v + 1, t[v].up);\r\n    t[v].up = 0;\r\n}\r\n\r\nvoid update(int ql, int qr, int ad, int l = 0, int r = N - 1, int v = 1) {\r\n    if(r < ql || l > qr) return;\r\n    if(ql <= l && r <= qr) {\r\n        setpush(v, ad);\r\n        return;\r\n    }\r\n    push(v);\r\n    int m = (l + r) / 2;\r\n    update(ql, qr, ad, l, m, 2 * v);\r\n    update(ql, qr, ad, m + 1, r, 2 * v + 1);\r\n    t[v] = combine(t[2 * v], t[2 * v + 1]);\r\n}\r\nnode get(int ql, int qr, int l = 0, int r = N - 1, int v = 1) {\r\n    if(r < ql || l > qr) return {10000000, 0, 0};\r\n    if(ql <= l && r <= qr) {\r\n        return t[v];\r\n    }\r\n    push(v);\r\n    int m = (l + r) / 2;\r\n    return combine(get(ql, qr, l, m, 2 * v), get(ql, qr, m + 1, r, 2 * v + 1));\r\n}\r\nll ans = 0;\r\n\r\nvector<int> in[N];\r\nvector<pair<int, int>> bad[N];\r\nint lev(int v) {\r\n    return __builtin_clz(v) - 12;\r\n}\r\nint main() {\r\n    ios::sync_with_stdio(0);\r\n    cin.tie(0);cout.tie(0);\r\n    for(int i = 1; i < 2 * N; i++) {\r\n        t[i].mn = 0;\r\n        t[i].cn = (1 << lev(i));\r\n    }\r\n    for(int i = 0; i < N; i++)\r\n        in[i].push_back(0),\r\n        in[i].push_back(0),\r\n        in[i].push_back(0),\r\n        in[i].push_back(0);\r\n    \r\n    cin >> n;\r\n    for(int i = 1; i <= n; i++) {\r\n        int a;\r\n        cin >> a;\r\n        for(auto [x, y] : bad[a]) {\r\n            if(x > y) continue;\r\n            update(x, y, -1);\r\n        }\r\n        bad[a].clear();\r\n        \r\n        in[a].push_back(i);\r\n        int m = (int)in[a].size();\r\n        bad[a].push_back({1, in[a][m - 4]});\r\n        bad[a].push_back({in[a][m - 3] + 1, in[a][m - 1]});\r\n        \r\n        for(auto [x, y] : bad[a]) {\r\n            if(x > y) continue;\r\n            update(x, y, +1);\r\n        }\r\n        node cur = get(1, i);\r\n        if(!cur.mn) \r\n            ans += cur.cn; \r\n    }\r\n    cout << ans;\r\n}\r\n"
+}

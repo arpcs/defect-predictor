@@ -1,0 +1,36 @@
+{
+    "id": 162499285,
+    "contestId": 1000,
+    "creationTimeSeconds": 1656729259,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "Mitsukasa_Ayase"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 1278,
+    "memoryConsumedBytes": 67686400,
+    "source": "//\u03bc's forever\r\n#include <bits/stdc++.h>\r\n#define ll long long\r\n#define N 300005\r\n//#define getchar nc\r\nusing namespace std;\r\ninline char nc(){\r\n    static char buf[100000],*p1=buf,*p2=buf;\r\n    return p1==p2&&(p2=(p1=buf)+fread(buf,1,100000,stdin),p1==p2)?EOF:*p1++;\r\n}\r\ninline int read()\r\n{\r\n    register int x=0,f=1;register char ch=getchar();\r\n    while(ch<'0'||ch>'9'){if(ch=='-')f=-1;ch=getchar();}\r\n    while(ch>='0'&&ch<='9')x=(x<<3)+(x<<1)+ch-'0',ch=getchar();\r\n    return x*f;\r\n}\r\ninline void write(register int x)\r\n{\r\n    if(!x)putchar('0');if(x<0)x=-x,putchar('-');\r\n    static int sta[20];register int tot=0;\r\n    while(x)sta[tot++]=x%10,x/=10;\r\n    while(tot)putchar(sta[--tot]+48);\r\n}\r\nint n,q,a[N];\r\nstruct edge{\r\n    int to,nxt,w;\r\n}e[N<<1];\r\nint head[N],cnt;\r\nvoid add(int u,int v,int w){\r\n    e[++cnt]=(edge){v,head[u],w}; head[u]=cnt;\r\n}\r\nint fa[N][20],dep[N];\r\nll cf1[N],cf2[N],cf3[N],cf4[N];\r\nll f[N],g[N];\r\nvoid dfs1(int x,int pa){\r\n    fa[x][0]=pa,dep[x]=dep[pa]+1;\r\n    for(int i=1;i<=19;++i) fa[x][i]=fa[fa[x][i-1]][i-1];\r\n    f[x]=a[x];\r\n    for(int i=head[x];i;i=e[i].nxt){\r\n        int v=e[i].to;\r\n        if(v==pa) cf2[x]=cf2[pa]+e[i].w;\r\n    }\r\n    for(int i=head[x];i;i=e[i].nxt){\r\n        int v=e[i].to;\r\n        if(v==pa) continue;\r\n        cf1[v]=cf1[x]+e[i].w;\r\n        dfs1(v,x);\r\n        f[x]+=max(0ll,f[v]-(cf1[v]-cf1[x])-(cf2[v]-cf2[x]));\r\n    }\r\n}\r\nvoid dfs2(int x){\r\n    ll sm=f[x]+g[x];\r\n    for(int i=head[x];i;i=e[i].nxt){\r\n        int v=e[i].to;\r\n        if(v==fa[x][0]) continue;\r\n        g[v]=max(0ll,sm-max(0ll,f[v]-(cf1[v]-cf1[x])-(cf2[v]-cf2[x]))-(cf1[v]-cf1[x])-(cf2[v]-cf2[x]));\r\n        dfs2(v);\r\n    }\r\n}\r\nint getlca(int x,int y){\r\n    if(dep[x]<dep[y]) swap(x,y);\r\n    for(int i=19;i>=0;--i) if(dep[x]-(1<<i)>=dep[y]) x=fa[x][i];\r\n    for(int i=19;i>=0;--i) if(fa[x][i]!=fa[y][i]) x=fa[x][i],y=fa[y][i];\r\n    return x==y?x:fa[x][0];\r\n}\r\nvoid dfs3(int x){\r\n    for(int i=head[x];i;i=e[i].nxt){\r\n        int v=e[i].to;\r\n        if(v==fa[x][0]) continue;\r\n        cf3[v]=cf3[x]+f[v];\r\n        cf4[v]=cf4[x]+max(0ll,f[v]-(cf1[v]-cf1[x])-(cf2[v]-cf2[x]));\r\n        dfs3(v);\r\n    }\r\n}\r\nint main()\r\n{\r\n    // freopen(\"strawberry.in\",\"r\",stdin);\r\n    // freopen(\"strawberry.out\",\"w\",stdout);\r\n    n=read(),q=read();\r\n    for(int i=1;i<=n;++i) a[i]=read();\r\n    for(int i=1;i<n;++i){\r\n        int u=read(),v=read(),w1=read(),w2=w1;\r\n        add(u,v,w1);\r\n        add(v,u,w2);\r\n    }\r\n    dfs1(1,0);\r\n    dfs2(1);\r\n    cf3[1]=f[1];\r\n    dfs3(1);\r\n    // for(int i=1;i<=n;++i)\r\n    //     cerr<<cf2[i]<<\" \";\r\n    // cerr<<endl;\r\n    for(int i=1;i<=q;++i){\r\n        int u=read(),v=read();\r\n        int lca=getlca(u,v);\r\n        ll ans=0;\r\n        // cerr<<u<<\" \"<<v<<\" \"<<lca<<endl;\r\n        // cerr<<cf2[u]-cf2[lca]<<\" \"<<cf1[v]-cf1[lca]<<endl;\r\n        // cerr<<cf2[u]-cf2[lca]+cf1[v]-cf1[lca]<<endl;\r\n        // cerr<<cf3[u]+cf3[v]-cf3[lca]-cf3[fa[lca][0]]<<endl;\r\n        // cerr<<cf4[u]+cf4[v]-2*cf4[lca]<<endl;\r\n        // cerr<<g[lca]<<endl;\r\n        ans-=cf2[u]-cf2[lca]+cf1[v]-cf1[lca];\r\n        ans+=cf3[u]+cf3[v]-cf3[lca]-cf3[fa[lca][0]];\r\n        ans-=cf4[u]+cf4[v]-2*cf4[lca];\r\n        ans+=g[lca];\r\n        printf(\"%lld\\n\",ans);\r\n    }\r\n    return 0;\r\n}\r\n"
+}

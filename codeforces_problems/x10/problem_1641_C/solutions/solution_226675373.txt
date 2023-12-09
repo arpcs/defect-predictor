@@ -1,0 +1,40 @@
+{
+    "id": 226675373,
+    "contestId": 1641,
+    "creationTimeSeconds": 1696474682,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1641,
+        "index": "C",
+        "name": "Anonymity Is Important",
+        "type": "PROGRAMMING",
+        "points": 1250.0,
+        "rating": 2200,
+        "tags": [
+            "binary search",
+            "brute force",
+            "data structures",
+            "dsu",
+            "greedy",
+            "sortings"
+        ]
+    },
+    "author": {
+        "contestId": 1641,
+        "members": [
+            {
+                "handle": "chinawcp"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1645611000
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "#include<bits/stdc++.h>\r\n#define ll long long \r\n#define ill __int128 \r\n#define ull unsigned long long\r\n#define ld long double\r\n#define yes \"YES\"\r\n#define no \"NO\"\r\nusing namespace std;\r\nconst int inf = 1e9;\r\nconst ll linf = 1e18;\r\nconst int maxn = 1e6 + 5;\r\nconst int N = 2e7 + 5;\r\nconst double eps = 1e-8;\r\nconst int mod = 1e9 + 7;\r\nconst double pi = acos(-1);\r\nconst int prime_bas = 2333;\r\n\r\nint sgn(double x){\r\n    if (fabs(x) < eps)\r\n        return 0;\r\n    if (x < 0)\r\n        return -1;\r\n    else\r\n        return 1;\r\n}\r\nll power(ll x, ll k, int mod = mod){\r\n    if(k == 1) return x;\r\n    if(k == 0) return 1;\r\n    ll tmp = power(x, k / 2, mod);\r\n    if(k & 1) return tmp * tmp % mod * x % mod;\r\n    return tmp * tmp % mod;\r\n}\r\nbool Mbe; double Tim;\r\ntemplate<size_t size>\r\nstruct Binary_Indexed_Tree_RMQ{\r\n    int a[size], c[size];\r\n    int lowbit(int x){\r\n        return x & -x;\r\n    }\r\n    void init(int op){\r\n        if(op == 1) memset(c, 0xc0, sizeof(c)), memset(a, 0xc0, sizeof(a));\r\n        else memset(c, 0x3f, sizeof(c)), memset(a, 0x3f, sizeof(a));\r\n    }\r\n    void modify_max(int x, int v){\r\n        a[x] = v;\r\n        if(x == 0) return;\r\n        while(x < (int)size){\r\n            c[x] = a[x];\r\n            for(int i = 1; i < lowbit(x); i <<= 1){\r\n                c[x] = max(c[x], c[x - i]);\r\n            }\r\n            x += lowbit(x);\r\n        }\r\n    }\r\n    void modify_min(int x, int v){\r\n        a[x] = v;\r\n        if(x == 0) return;\r\n        while(x < (int)size){\r\n            c[x] = a[x];\r\n            for(int i = 1; i < lowbit(x); i <<= 1){\r\n                c[x] = min(c[x], c[x - i]);\r\n            }\r\n            x += lowbit(x);\r\n        }\r\n    }\r\n    int query_max(int l, int r){\r\n        if(l > r) return 0;\r\n        int ans = -1e9 ;\r\n        while(r >= l){\r\n            ans = max(a[r], ans);\r\n            r --;\r\n            for(; r - lowbit(r) >= l; r -= lowbit(r)){\r\n                ans = max(c[r], ans);\r\n            } \r\n        }\r\n        return ans;\r\n    }\r\n    int query_min(int l, int r){\r\n        if(l > r) return 0;\r\n        int ans = 1e9;\r\n        while(r >= l){\r\n            ans = min(a[r], ans);\r\n            r --;\r\n            for(; r - lowbit(r) >= l; r -= lowbit(r)){\r\n                ans = min(c[r], ans);\r\n            }\r\n        }\r\n        return ans;\r\n    }\r\n};\r\nBinary_Indexed_Tree_RMQ<maxn> bir;\r\nint L[maxn], R[maxn], val[maxn], laz[maxn];\r\nvoid pushup(int x){\r\n    val[x] = val[x << 1] + val[x << 1 | 1];\r\n}\r\nvoid spread(int x){\r\n    if(laz[x]){\r\n        val[x << 1] = R[x << 1] - L[x << 1] + 1;\r\n        val[x << 1 | 1] = R[x << 1 | 1] - L[x << 1 | 1] + 1;\r\n        laz[x << 1] = laz[x << 1 | 1] = 1;\r\n        laz[x] = 0;\r\n    }\r\n}\r\nvoid build(int l, int r, int x){\r\n    L[x] = l, R[x] = r;\r\n    if(l == r) return;\r\n    int mid = (l + r) >> 1;\r\n    build(l, mid, x << 1);\r\n    build(mid + 1, r, x << 1 | 1);\r\n}\r\nvoid modify(int l, int r, int x){\r\n    if(l <= L[x] && R[x] <= r){\r\n        if(val[x] == R[x] - L[x] + 1) return;\r\n        val[x] = R[x] - L[x] + 1, laz[x] = 1;\r\n        return;\r\n    }\r\n    spread(x);\r\n    int mid = (L[x] + R[x]) >> 1;\r\n    if(l <= mid) modify(l, r, x << 1);\r\n    if(r > mid) modify(l, r, x << 1 | 1);\r\n    pushup(x);\r\n}\r\nbool query(int l, int r, int x){\r\n    if(l <= L[x] && R[x] <= r){\r\n        if(val[x] != R[x] - L[x] + 1) return false;\r\n        return true;\r\n    }\r\n    spread(x);\r\n    bool flag = true;\r\n    int mid = (L[x] + R[x]) >> 1;\r\n    if(l <= mid) if(! query(l, r, x << 1)) flag = false;\r\n    if(r > mid) if(! query(l, r, x << 1 | 1)) flag = false;\r\n    pushup(x);\r\n    return flag;\r\n}\r\nint cnt = 0;\r\nvoid slove(){\r\n    int n, q; cin >> n >> q;\r\n    build(1, n, 1);\r\n    bir.init(0);\r\n    for(int i = 1; i <= q; i ++){\r\n        int op; cin >> op;\r\n        if(op == 0){\r\n            int l, r, x; cin >> l >> r >> x;\r\n            if(x == 0){\r\n                modify(l, r, 1);\r\n            }\r\n            else{\r\n                bir.modify_min(l, r);\r\n            }\r\n        }   \r\n        else{\r\n            cnt ++;\r\n            int x; cin >> x;\r\n            if(query(x, x, 1)){\r\n                cout << no << '\\n';\r\n            }\r\n            else{\r\n                int l = 1, r = x - 1, res = x, res2 = x;\r\n                while(l <= r){\r\n                    int mid = (l + r) >> 1;\r\n                    if(query(x - mid, x - 1, 1)){\r\n                        l = mid + 1;\r\n                        res = x - mid;\r\n                    }\r\n                    else{\r\n                        r = mid - 1;\r\n                    }\r\n                }\r\n                l = 1, r = n - x;\r\n                while(l <= r){\r\n                    int mid = (l + r) >> 1;\r\n                    if(query(x + 1, x + mid, 1)){\r\n                        l = mid + 1;\r\n                        res2 = x + mid;\r\n                    }\r\n                    else{\r\n                        r = mid - 1;\r\n                    }\r\n                }\r\n                int tmp = bir.query_min(res, x);\r\n                if(cnt == 1511){\r\n                    cout << res << \"!\" << res2 << \"!\" << tmp << \"!\" < bir.query(res, x) << \"!\" << bir.query(x + 1, res2) << '\\n';\r\n                    return;\r\n                }\r\n                if(tmp <= res2){\r\n                    cout << yes << '\\n';\r\n                }\r\n                else{\r\n                    cout << \"N/A\" << '\\n';\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\nbool Med;\r\nint main()\r\n{\r\n    fprintf(stderr, \"%.3lf MB\\n\", (&Med - &Mbe) / 1048576.0);\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(0), cout.tie(0);\r\n    int t = 1, flag = 1;\r\n    // cin >> t, Tim = clock(), flag = 0;\r\n    while(t --){\r\n        if(flag) Tim = clock(), flag = 0;\r\n        slove();\r\n    }\r\n    cerr << '\\n' << 1e3 * (clock() - Tim) / CLOCKS_PER_SEC << \" ms\";\r\n}"
+}

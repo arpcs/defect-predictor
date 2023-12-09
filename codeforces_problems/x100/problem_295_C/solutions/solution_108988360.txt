@@ -1,0 +1,38 @@
+{
+    "id": 108988360,
+    "contestId": 295,
+    "creationTimeSeconds": 1614760485,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 295,
+        "index": "C",
+        "name": "Greg and Friends",
+        "type": "PROGRAMMING",
+        "points": 1500.0,
+        "rating": 2100,
+        "tags": [
+            "combinatorics",
+            "dp",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 295,
+        "members": [
+            {
+                "handle": "black_white_tony"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1365694200
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 44,
+    "timeConsumedMillis": 62,
+    "memoryConsumedBytes": 16896000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define rep(i, a, b) for (int i = (a), i##end = (b); i < i##end; ++i)\r\n#define per(i, a, b) for (int i = (a) - 1, i##end = (b); i >= i##end; --i)\r\n#define REP(i, a) rep(i, 0, a)\r\n#define PER(i, a) per(i, a, 0)\r\n\r\nnamespace IO {\r\n\tconst int MAXIOSIZE = 1 << 24 | 1;\r\n\tunsigned char buf[MAXIOSIZE], *p1, *p2;\r\n\t#define gc (p1 == p2 && (p2 = (p1 = buf) + fread(buf, 1, 1 << 24, stdin), p1 == p2) ? EOF : *p1++)\r\n\ttemplate <typename T> void read(T& x) {\r\n\t\tx = 0; char ch = gc; bool flg = false;\r\n\t\tfor (; ch < '0' || '9' < ch; ch = gc) if (ch == '-') flg |= true;\r\n\t\tfor (; '0' <= ch && ch <= '9'; ch = gc) x = x * 10 + ch - '0';\r\n\t\tflg ? x = -x : 0;\r\n\t}\r\n\ttemplate <typename T> void out(const T& x) { if (x > 9) out(x / 10); putchar(x % 10 + '0'); }\r\n\ttemplate <typename T> inline void write(const T& x, const char& ed = ' ') { if (x < 0) putchar('-'), out(-x); else out(x); putchar(ed); }\r\n}\r\n\r\nconst int MAXN = 50 + 10;\r\nconst int P = 1e9 + 7;\r\n\r\nint n, K, combine[MAXN][MAXN], cnt[2], dis[MAXN][MAXN][2], ans[MAXN][MAXN][2];\r\n\r\nbool chkmin(int& a, int b) { return a > b ? a = b, true : false; }\r\nvoid add(int& a, int b) { a = a + b >= P ? a + b - P : a + b; }\r\n\r\nstruct Node {\r\n\tint a, b, c;\r\n\tNode() {}\r\n\tNode(int _a, int _b, int _c) { a = _a, b = _b, c = _c; }\r\n\tint& operator [](const int& x) {\r\n\t\treturn x == 0 ? a : (x == 1 ? b : c);\r\n\t}\r\n\tbool operator ==(const Node& _) {\r\n\t\treturn a == _.a && b == _.b && c == _.c;\r\n\t}\r\n};\r\n\r\nint main() {\r\n\t#ifdef LOCAL\r\n\t\tfreopen(\"in.txt\", \"r\", stdin);\r\n\t#endif\r\n\tIO::read(n), IO::read(K);\r\n\tREP(i, n) {\r\n\t\tint x; IO::read(x);\r\n\t\tcnt[x == 100]++;\r\n\t}\r\n\tcombine[0][0] = 1;\r\n\trep(i, 1, n + 1) {\r\n\t\tcombine[i][0] = 1;\r\n\t\trep(j, 1, i + 1) combine[i][j] = (combine[i - 1][j] + combine[i - 1][j - 1]) % P;\r\n\t}\r\n\tqueue<Node> q;\r\n\tmemset(dis, 0x3f, sizeof dis);\r\n\tq.push(Node(0, 0, 0)); dis[0][0][0] = 0, ans[0][0][0] = 1;\r\n\t\r\n\twhile (!q.empty()) {\r\n\t\tNode u = q.front(); q.pop();\r\n\t\tint cur[2] = { cnt[0] - u[0], cnt[1] - u[1] };\r\n \t\tint& disu = dis[u[0]][u[1]][u[2]], ansu = ans[u[0]][u[1]][u[2]];\r\n\t\tif (u[2] == 0) {\r\n\t\t\tREP(i, min(cur[1] + 1, K / 100 + 1)) {\r\n\t\t\t\tint mj = min((K - i * 100) / 50, cur[0]);\r\n\t\t\t\tREP(j, mj + 1) {\r\n\t\t\t\t\tif (i == 0 && j == 0) continue;\r\n\t\t\t\t\tint& disv = dis[u[0] + j][u[1] + i][1];\r\n\t\t\t\t\tint& ansv = ans[u[0] + j][u[1] + i][1];\r\n\t\t\t\t\tif (disv == disu + 1) {\r\n\t\t\t\t\t\tadd(ansv, 1ll * ansu * combine[cur[0]][j] % P * combine[cur[1]][i] % P);\r\n//\t\t\t\t\t\tq.push(Node(u[0] + j, u[1] + i, 1));\r\n\t\t\t\t\t} else if (chkmin(disv, disu + 1)) {\r\n\t\t\t\t\t\tansv = 1ll * ansu * combine[cur[0]][j] % P * combine[cur[1]][i] % P;\r\n\t\t\t\t\t\tq.push(Node(u[0] + j, u[1] + i, 1));\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t} else {\r\n\t\t\tREP(i, min(u[1] + 1, K / 100 + 1)) {\r\n\t\t\t\tint mj = min((K - i * 100) / 50, u[0]);\r\n\t\t\t\tREP(j, mj + 1) {\r\n\t\t\t\t\tif (i == 0 && j == 0) continue;\r\n\t\t\t\t\tint& disv = dis[u[0] - j][u[1] - i][0];\r\n\t\t\t\t\tint& ansv = ans[u[0] - j][u[1] - i][0];\r\n\t\t\t\t\tif (disv == disu + 1) {\r\n\t\t\t\t\t\tadd(ansv, 1ll * ansu * combine[u[0]][j] % P * combine[u[1]][i] % P);\r\n//\t\t\t\t\t\tq.push(Node(u[0] - j, u[1] - i, 0));\r\n\t\t\t\t\t} else if (chkmin(disv, disu + 1)) {\r\n\t\t\t\t\t\tansv = 1ll * ansu * combine[u[0]][j] % P * combine[u[1]][i] % P;\r\n\t\t\t\t\t\tq.push(Node(u[0] - j, u[1] - i, 0));\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\tif (dis[cnt[0]][cnt[1]][1] >= 1e9) return puts(\"-1\\n0\");\r\n\tIO::write(dis[cnt[0]][cnt[1]][1], '\\n');\r\n\tIO::write(ans[cnt[0]][cnt[1]][1]);\r\n\treturn 0;\r\n}\r\n"
+}

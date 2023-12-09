@@ -1,0 +1,40 @@
+{
+    "id": 208097494,
+    "contestId": 1307,
+    "creationTimeSeconds": 1685650054,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "E",
+        "name": "Cow and Treats",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2500,
+        "tags": [
+            "binary search",
+            "combinatorics",
+            "dp",
+            "greedy",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "JunBinLiang"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "\r\n#include <iostream>\r\n#include <cstring>\r\n#include <algorithm>\r\n#include <cmath>\r\n#include <vector>\r\n#include <set>\r\n#include <map>\r\n#include <unordered_map>\r\n#include <set>\r\n#include <unordered_set>\r\n#include <queue>\r\n#include <deque>\r\n\r\nusing ll = long long;\r\n#define pb push_back\r\n#define ve vector\r\n#define FOR(i, a, b) for (int i = a; i < b; ++i)\r\nusing namespace std;\r\n\r\ntemplate <typename T>\r\nostream& operator <<(ostream& out, const vector<T>& a) {\r\n  out << \"[\"; bool first = true;\r\n  for (auto v : a) { out << (first ? \"\" : \", \"); out << v; first = 0;} \r\n  out << \"]\";\r\n  return out;\r\n}\r\n\r\nconst int N = 5050, mod = 1e9 + 7;\r\nint n, m;\r\nint a[N];\r\nvector<int> g[N];\r\nint p[N][N];\r\nint get(int f[], int l, int r) {\r\n  if(l > r) {\r\n    return 0;\r\n  }\r\n  if(l == 0) return f[r];\r\n  return f[r] - f[l - 1];\r\n}\r\n\r\nint find(vector<int>& a, int v) {\r\n  int l = 0, r = a.size() - 1;\r\n  while(l <= r) {\r\n    int mid = l + (r - l) / 2;\r\n    if(a[mid] == v) {\r\n      return mid;\r\n    } else if(a[mid] > v) {\r\n      r = mid - 1;\r\n    } else {\r\n      l = mid + 1;\r\n    }\r\n  }\r\n  return -1;\r\n}\r\n\r\nint lowb(vector<int>& a, int v) {\r\n  int res = -1;\r\n  int l = 0, r = a.size() - 1;\r\n  while(l <= r) {\r\n    int mid = l + (r - l) / 2;\r\n    if(a[mid] <= v) {\r\n      res = mid;\r\n      l = mid + 1;\r\n    } else {\r\n      r = mid - 1;\r\n    }\r\n  }\r\n  return res + 1;\r\n}\r\n\r\npair<int, ll> cal(int rev) {\r\n  memset(p, 0, sizeof p);\r\n  if(rev) {\r\n    vector<int> b;\r\n    for(int i = 1; i <= n; i++) b.push_back(a[i]);\r\n    reverse(b.begin(), b.end());\r\n    for(int i = 1; i <= n; i++) a[i] = b[i];\r\n  }\r\n\r\n  for(int i = 1; i <= n; i++) {\r\n    p[a[i]][i]++;\r\n    if(!i) continue;\r\n    for(int j = 0; j < N; j++) {\r\n      p[j][i] += p[j][i - 1];\r\n    }\r\n  }\r\n\r\n  int mx = -1; ll res = 1;\r\n    for(int i = 0; i <= n; i++) {\r\n      int color = a[i], cnt = 0, ways = 1;\r\n      int idx = find(g[color], get(p[color], 1, i));\r\n      if(idx == -1 && i != 0) continue;\r\n      \r\n      if(i == 0) {\r\n          color = -1;\r\n      } else {\r\n          //deal with a[i] spesifically\r\n        cnt++;\r\n        int c = lowb(g[color], get(p[color], i + 1, n));\r\n        if(c != 0) {\r\n            if(c >= idx + 1) {\r\n                c--;\r\n                if(c > 0) {\r\n                    cnt++;\r\n                    ways *= c;\r\n                }\r\n            } else {\r\n              cnt++;\r\n              ways *= c;\r\n            }\r\n        }\r\n      }\r\n      \r\n      for(int j = 0; j < N; j++) {\r\n        if(j == color || !g[j].size()) continue;\r\n        int lsz = get(p[j], 1, i), rsz = get(p[j], i + 1, n);\r\n        if(g[j].size() == 1) {\r\n          if(g[j][0] <= max(lsz, rsz)) {\r\n            cnt++;\r\n            ll w = 0;\r\n            if(g[j][0] <= lsz) w++;\r\n            if(g[j][0] <= rsz) w++;\r\n            ways *= w;\r\n          }\r\n        } else {\r\n          int v1 = g[j][0], v2 = g[j][1];\r\n          if(lsz > rsz) swap(lsz, rsz);\r\n          if(v1 <= lsz && v2 <= rsz) {\r\n            int c1 = lowb(g[j], lsz), c2 = lowb(g[j], rsz);\r\n            ll w = (c2 - c1 + 0ll) * c1;\r\n            w += (c1 + 0ll) * (c1 - 1);\r\n            ways *= w;\r\n            ways %=mod;\r\n            cnt += 2;\r\n          } else if(v1 <= rsz) {\r\n            cnt++;\r\n            ll w = lowb(g[j], rsz) + lowb(g[j], lsz);\r\n            ways *= max(w, 1);\r\n            ways %= mod;\r\n          }\r\n        }\r\n      }\r\n\r\n      if(cnt > mx) {\r\n        mx = cnt;\r\n        res = ways;\r\n      } else if(cnt == mx) {\r\n        res += ways;\r\n        res %= mod;\r\n      }\r\n      //cout << i << \"    |\" <<  \"  \" << get(p[color], i + 1, n) << \"  \" << cnt << \" \" << ways << endl;\r\n    }\r\n    return {mx, res};\r\n}\r\n\r\nvoid solve() {\r\n    memset(p, 0, sizeof p);\r\n\r\n    cin >> n >> m;\r\n    for(int i = 1; i <= n; i++) {\r\n      cin >> a[i];\r\n    }\r\n\r\n    for(int i = 0; i < m; i++) {\r\n      int f, h;\r\n      cin >> f >> h;\r\n      g[f].push_back(h);\r\n    }\r\n\r\n    for(int i = 0; i < N; i++) {\r\n      sort(g[i].begin(), g[i].end());\r\n    }\r\n\r\n    ///////////////////////////////////////////////\r\n\r\n    pair<int, ll> p1 = cal(0);\r\n    //cout << \"_________________\" << endl;\r\n    cout << p1.first << \" \" << p1.second << endl;\r\n    //cout << p2.first  << \" \"  << p2.second << endl;\r\n\r\n    \r\n}\r\n\r\nint main()\r\n{   \r\n    int t = 1;\r\n    //cin >> t;\r\n    while(t--) {\r\n        solve();\r\n    }\r\n    return 0;\r\n}\r\n\r\n\r\n/*\r\n6 4\r\n1 1 1 2 2 2\r\n1 1\r\n1 2\r\n2 1\r\n2 2\r\n\r\n3 8\r\n_________________________\r\n5 4\r\n1 2 1 2 1\r\n1 1\r\n1 2\r\n2 2\r\n2 1\r\n\r\n3 6\r\n*/"
+}

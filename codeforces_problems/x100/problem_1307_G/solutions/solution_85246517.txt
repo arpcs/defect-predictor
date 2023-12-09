@@ -1,0 +1,37 @@
+{
+    "id": 85246517,
+    "contestId": 1307,
+    "creationTimeSeconds": 1593293012,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "G",
+        "name": "Cow and Exercise",
+        "type": "PROGRAMMING",
+        "points": 3500.0,
+        "rating": 3100,
+        "tags": [
+            "flows",
+            "graphs",
+            "shortest paths"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "risujiroh"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 53,
+    "timeConsumedMillis": 186,
+    "memoryConsumedBytes": 5632000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#ifdef LOCAL\r\n#include \"debug.h\"\r\n#else\r\n#define DEBUG(...)\r\n#endif\r\n\r\ntemplate <class U, class C> struct ssp {\r\n  struct edge {\r\n    int to;\r\n    U cap;\r\n    C cost;\r\n  };\r\n  static constexpr inline U inf = numeric_limits<U>::max(), eps = 1e-10;\r\n  int n, s, t;\r\n  vector<edge> es;\r\n  vector<vector<int>> g;\r\n  vector<C> d;\r\n  vector<int> pe;\r\n  ssp(int _n, int _s, int _t) : n(_n), s(_s), t(_t), g(n), d(n), pe(n) {}\r\n  void add(int from, int to, U cap, C cost) {\r\n    g[from].push_back(size(es)), es.push_back({to, cap, cost});\r\n    g[to].push_back(size(es)), es.push_back({from, 0, -cost});\r\n  }\r\n  bool spfa() {\r\n    static vector<bool> in(n);\r\n    static vector<int> que;\r\n    fill(begin(d), end(d), numeric_limits<C>::max());\r\n    que.clear();\r\n    d[s] = 0, in[s] = true, que.push_back(s);\r\n    for (int bg = 0; bg < (int)size(que); ) {\r\n      int v = que[bg++];\r\n      in[v] = false;\r\n      for (int id : g[v]) {\r\n        auto&& e = es[id];\r\n        if (e.cap > eps and d[v] + e.cost < d[e.to]) {\r\n          d[e.to] = d[v] + e.cost, pe[e.to] = id;\r\n          if (not in[e.to]) in[e.to] = true, que.push_back(e.to);\r\n        }\r\n      }\r\n    }\r\n    return d[t] < numeric_limits<C>::max();\r\n  }\r\n  vector<pair<U, C>> min_cost_max_flow() {\r\n    U flow = 0;\r\n    C cost = 0;\r\n    vector<pair<U, C>> res;\r\n    while (spfa()) {\r\n      U df = inf;\r\n      for (int v = t; v != s; v = es[pe[v] ^ 1].to) df = min(df, es[pe[v]].cap);\r\n      for (int v = t; v != s; v = es[pe[v] ^ 1].to)\r\n        es[pe[v]].cap -= df, es[pe[v] ^ 1].cap += df;\r\n      flow += df, cost += df * d[t];\r\n      res.emplace_back(flow, cost);\r\n    }\r\n    return res;\r\n  }\r\n};\r\n\r\nint main() {\r\n  cin.tie(nullptr);\r\n  ios::sync_with_stdio(false);\r\n  cout << fixed << setprecision(20);\r\n  int n, m;\r\n  cin >> n >> m;\r\n  ssp<int, int> g(n, 0, n - 1);\r\n  while (m--) {\r\n    int v, w, c;\r\n    cin >> v >> w >> c;\r\n    --v, --w;\r\n    g.add(v, w, 1, c);\r\n  }\r\n  auto points = g.min_cost_max_flow();\r\n  constexpr int lim = 1e5;\r\n  vector<double> res(lim + 1);\r\n  auto it = begin(points);\r\n  for (int i = 0; i <= lim; ++i) {\r\n    auto eval = [&](auto p) {\r\n      double x, y;\r\n      tie(x, y) = p;\r\n      return (y + i) / x;\r\n    };\r\n    while (next(it) != end(points) and eval(*it) > eval(*next(it))) {\r\n      ++it;\r\n    }\r\n    res[i] = eval(*it);\r\n  }\r\n  int q;\r\n  cin >> q;\r\n  while (q--) {\r\n    int i;\r\n    cin >> i;\r\n    cout << res[i] << '\\n';\r\n  }\r\n}\r\n"
+}

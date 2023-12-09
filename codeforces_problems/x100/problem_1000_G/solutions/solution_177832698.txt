@@ -1,0 +1,36 @@
+{
+    "id": 177832698,
+    "contestId": 1000,
+    "creationTimeSeconds": 1666678136,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "realskc"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 48,
+    "timeConsumedMillis": 1918,
+    "memoryConsumedBytes": 54886400,
+    "source": "// LUOGU_RID: 91453042\n#include<bits/stdc++.h>\r\nusing namespace std;\r\nconstexpr int N=300000;\r\nstruct EDGE{\r\n\tint to,next,w;\r\n}e[(N<<1)+10];\r\nint head[N+10],etop;\r\nvoid adde(int u,int v,int w){\r\n\te[etop].to=v;\r\n\te[etop].next=head[u];\r\n\te[etop].w=w;\r\n\thead[u]=etop++;\r\n}\r\nint fa[N+10],dep[N+10],f[19][N+10];\r\nlong long a[N+10],w[N+10],dp[N+10],dp1[N+10],F[N+10];\r\nvoid dfs(int x){\r\n\tint i;\r\n\tfor(i=head[x];~i;i=e[i].next){\r\n\t\tif(e[i].to==fa[x]) continue;\r\n\t\tfa[e[i].to]=x;\r\n\t\tdep[e[i].to]=dep[x]+1;\r\n\t\tw[e[i].to]=e[i].w;\r\n\t\tdfs(e[i].to);\r\n\t\tdp[e[i].to]=max(0ll,dp[e[i].to]+a[e[i].to]-e[i].w*2);\r\n\t\tdp[x]+=dp[e[i].to];\r\n\t}\r\n}\r\nvoid dfs1(int x){\r\n\tlong long sum=dp1[x];\r\n\tint i;\r\n\tfor(i=head[x];~i;i=e[i].next){\r\n\t\tif(e[i].to==fa[x]) continue;\r\n\t\tsum+=dp[e[i].to];\r\n\t}\r\n\tfor(i=head[x];~i;i=e[i].next){\r\n\t\tif(e[i].to==fa[x]) continue;\r\n\t\tdp1[e[i].to]=max(0ll,sum-dp[e[i].to]+a[x]-e[i].w*2);\r\n\t\tdfs1(e[i].to);\r\n\t}\r\n}\r\nint lca(int u,int v){\r\n\tif(dep[u]<dep[v]) swap(u,v);\r\n\tint i;\r\n\tfor(i=18;i>=0;--i) if(dep[f[i][u]]>=dep[v]) u=f[i][u];\r\n\tfor(i=18;i>=0;--i){\r\n\t\tif(f[i][u]!=f[i][v]) u=f[i][u],v=f[i][v];\r\n\t}\r\n\tif(u==v) return u;\r\n\treturn f[0][u];\r\n}\r\nvoid dfs2(int x){\r\n\tint i;\r\n\tfor(i=head[x];~i;i=e[i].next){\r\n\t\tif(e[i].to==fa[x]) continue;\r\n\t\tdp[e[i].to]+=dp[x];\r\n\t\tF[e[i].to]+=F[x];\r\n\t\ta[e[i].to]+=a[x];\r\n\t\tw[e[i].to]+=w[x];\r\n\t\tdfs2(e[i].to);\r\n\t}\r\n}\r\nint main(){\r\n\tmemset(head,255,sizeof(head));\r\n\tios::sync_with_stdio(0);\r\n\tcin.tie(0);\r\n\tint n,q;\r\n\tcin>>n>>q;\r\n\tint i;\r\n\tfor(i=1;i<=n;++i) cin>>a[i];\r\n\tfor(i=1;i<n;++i){\r\n\t\tint u,v,w;\r\n\t\tcin>>u>>v>>w;\r\n\t\tadde(u,v,w);\r\n\t\tadde(v,u,w);\r\n\t}\r\n\tdep[1]=1;\r\n\tdfs(1);\r\n\tdfs1(1);\r\n\tfor(i=1;i<=n;++i) f[0][i]=fa[i];\r\n\tfor(int ii=1;ii<19;++ii) for(i=1;i<=n;++i) f[ii][i]=f[ii-1][f[ii-1][i]];\r\n\tfor(i=1;i<=n;++i){\r\n\t\tfor(int j=head[i];~j;j=e[j].next){\r\n\t\t\tif(e[j].to==fa[i]) continue;\r\n\t\t\tF[i]+=dp[e[j].to];\r\n\t\t}\r\n\t}\r\n\tdfs2(1);\r\n\tfor(i=1;i<=q;++i){\r\n\t\tint u,v;\r\n\t\tcin>>u>>v;\r\n\t\tint t=lca(u,v);\r\n\t\tlong long ans=F[u]+F[v]-F[t]-F[fa[t]];\r\n\t\tans-=dp[u]+dp[v]-dp[t]-dp[t];\r\n\t\tans+=dp1[t];\r\n\t\tans+=a[u]+a[v]-a[t]-a[fa[t]];\r\n\t\tans-=w[u]+w[v]-w[t]-w[t];\r\n\t\tcout<<ans<<'\\n';\r\n\t}\r\n\treturn 0;\r\n}\r\n"
+}

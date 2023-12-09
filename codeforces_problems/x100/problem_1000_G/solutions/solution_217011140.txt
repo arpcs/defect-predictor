@@ -1,0 +1,36 @@
+{
+    "id": 217011140,
+    "contestId": 1000,
+    "creationTimeSeconds": 1691076785,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "cqbzzhy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 8,
+    "timeConsumedMillis": 233,
+    "memoryConsumedBytes": 72089600,
+    "source": "// LUOGU_RID: 118892495\n#include <cstdio>\r\n#include <algorithm>\r\n#define int long long \r\n \r\nusing namespace std;\r\n\r\nconst int N = 2e5 + 5, M = 30;\r\n\r\nint n, q, head[N], tot = 1, a[N], f[N], g[N], dep[N], log1[N], fa[N][M], up[N], down[N], g_[N];\r\nstruct Edge {\r\n\tint to, next, w;\r\n} edge[N << 1];\r\n\r\ninline void add(int u, int v, int w) {\r\n\tedge[++tot].to = v, edge[tot].w = w;\r\n\tedge[tot].next = head[u], head[u] = tot;\r\n} \r\n\r\ninline void dfs1(int x, int u) {\r\n\tf[u] = a[u];\r\n\tfor (int i = head[u]; i; i = edge[i].next) {\r\n\t\tint v = edge[i].to, w1 = edge[i].w, w2 = edge[i ^ 1].w;\r\n\t\tif (v == x)\r\n\t\t\tcontinue;\r\n\t\tdfs1(u, v);\r\n\t\tif (f[v] - w1 - w2 > 0)\r\n\t\t\tf[u] += f[v] - w1 - w2;\r\n\t}\r\n}\r\n\r\ninline void dfs2(int x, int u) {\r\n\tg[u] = f[u];\r\n\tfor (int i = head[u]; i; i = edge[i].next) {\r\n\t\tint v = edge[i].to, w1 = edge[i].w, w2 = edge[i ^ 1].w;\r\n\t\tif (v == x)\r\n\t\t\tcontinue;\r\n\t\tint fu = f[u];\r\n\t\tg_[v] = g_[u];\r\n\t\tif (f[v] - w1 - w2 > 0)\r\n\t\t\tf[u] -= f[v] - w1 - w2, g_[v] += w1 + w2;\r\n\t\telse\r\n\t\t\tg_[v] += f[v];\r\n\t\tif (f[u] - w1 - w2 > 0)\r\n\t\t\tf[v] += f[u] - w1 - w2;\r\n\t\tdfs2(u, v);\r\n\t\tf[u] = fu;\r\n\t}\r\n}\r\n\r\ninline void dfs(int x, int u) {\r\n\tfor (int i = head[u]; i; i = edge[i].next) {\r\n\t\tint v = edge[i].to, w1 = edge[i].w, w2 = edge[i ^ 1].w;\r\n\t\tif (v == x)\r\n\t\t\tcontinue;\r\n\t\tdep[v] = dep[u] + 1, fa[v][0] = u;\r\n\t\tfor (int j = 1; j <= log1[dep[v]]; j++) {\r\n\t\t\tfa[v][j] = fa[fa[v][j - 1]][j - 1];\r\n\t\t}\r\n\t\tdown[v] = down[u] + w1, up[v] = up[u] + w2;\r\n\t\tdfs(u, v);\r\n\t}\r\n}\r\n\r\ninline int LCA(int u, int v) {\r\n\tif (dep[u] < dep[v])\r\n\t\tswap(u, v);\r\n\twhile (dep[u] > dep[v])\r\n\t\tu = fa[u][log1[dep[u] - dep[v]]];\r\n\tif (u == v)\r\n\t\treturn u;\r\n\tfor (int i = log1[dep[u]]; ~i; i--)\r\n\t\tif (fa[u][i] != fa[v][i])\r\n\t\t\tu = fa[u][i], v = fa[v][i];\r\n\treturn fa[u][0];\r\n}\r\n\r\nsigned main() {\r\n\tscanf(\"%lld %lld\", &n, &q);\r\n\tfor (int i = 1; i <= n; i++)\r\n\t\tscanf(\"%lld\", &a[i]);\r\n\tfor (int i = 1, u, v, w1; i < n; i++) {\r\n\t\tscanf(\"%lld %lld %lld\", &u, &v, &w1);\r\n\t\tadd(u, v, w1), add(v, u, w1);\r\n\t}\r\n\tfor (int i = 2; i <= n; i++)\r\n\t\tlog1[i] = log1[i >> 1] + 1;\r\n\tdfs1(0, 1);\r\n\tdfs2(0, 1);\r\n\tdfs(0, 1);\r\n\tfor (int i = 1, u, v; i <= q; i++) {\r\n\t\tscanf(\"%lld %lld\", &u, &v);\r\n\t\tint xx = LCA(u, v);\r\n\t\tprintf(\"%lld\\n\", g[xx] + g_[u] + g_[v] - 2 * g_[xx] - (up[u] + down[v] - up[xx] - down[xx])); \r\n\t}\r\n\treturn 0;\r\n}"
+}

@@ -1,0 +1,38 @@
+{
+    "id": 167500503,
+    "contestId": 1192,
+    "creationTimeSeconds": 1659954359,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "B",
+        "name": "Dynamic Diameter",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "data structures",
+            "dfs and similar",
+            "divide and conquer",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "Jekyll-Y"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 102,
+    "timeConsumedMillis": 452,
+    "memoryConsumedBytes": 151040000,
+    "points": 100.0,
+    "source": "#include<bits/stdc++.h>\r\n#define ll long long\r\nusing namespace std;\r\nconst int N=5e5+10;\r\nint n,q;\r\nll w;\r\nll ans;\r\nint fa[N],tot;\r\nint dfn[N],in[N],out[N];\r\nint id[N],pos[N];\r\nll depth[N];\r\nint cnt,head[N];\r\nstruct edge{\r\n    int to,nxt;\r\n    ll cost;\r\n}e[N<<1];\r\nvoid add(int u,int v,ll c,int i)\r\n{\r\n    cnt++;\r\n    e[cnt].to=v;\r\n    e[cnt].nxt=head[u];\r\n    e[cnt].cost=c;\r\n    head[u]=cnt;\r\n    id[cnt]=i;\r\n}\r\nvoid dfs(int x,int father)\r\n{\r\n    fa[x]=father;\r\n    dfn[++tot]=x;\r\n    in[x]=tot;\r\n    for(int i=head[x];i;i=e[i].nxt)\r\n    {\r\n        int v=e[i].to;ll c=e[i].cost;\r\n        if(v==father)continue;\r\n        depth[v]=depth[x]+c;\r\n        pos[id[i]]=v;\r\n        dfs(v,x);\r\n        dfn[++tot]=x;\r\n    }\r\n    out[x]=tot;\r\n}\r\nstruct Segmentree{\r\n    int l,r;\r\n    ll d,lca,lmax,rmax,_max;\r\n    ll add;\r\n    #define ls(p) (p<<1)\r\n    #define rs(p) (p<<1|1)\r\n}t[N<<2];\r\nvoid add_tag(int p,ll k)\r\n{\r\n    t[p].d+=k;\r\n    t[p].lca-=2*k;\r\n    t[p].lmax-=k;\r\n    t[p].rmax-=k;\r\n    t[p].add+=k;\r\n}\r\nvoid push_up(int p)\r\n{   \r\n    t[p].d=max(t[ls(p)].d,t[rs(p)].d);\r\n    t[p].lca=max(t[ls(p)].lca,t[rs(p)].lca);\r\n    t[p].lmax=max({t[ls(p)].lmax,t[rs(p)].lmax,t[ls(p)].d+t[rs(p)].lca});\r\n    t[p].rmax=max({t[ls(p)].rmax,t[rs(p)].rmax,t[rs(p)].d+t[ls(p)].lca});\r\n    t[p]._max=max({t[ls(p)]._max,t[rs(p)]._max,t[ls(p)].lmax+t[rs(p)].d,t[rs(p)].rmax+t[ls(p)].d});\r\n}\r\nvoid push_down(int p)\r\n{\r\n    ll k=t[p].add;\r\n    add_tag(ls(p),k);\r\n    add_tag(rs(p),k);\r\n    t[p].add=0;\r\n}\r\nvoid build(int l,int r,int p)\r\n{\r\n    t[p].l=l,t[p].r=r;\r\n    if(l==r)\r\n    {\r\n        t[p].d=depth[dfn[l]];\r\n        t[p].lca=-2*depth[dfn[l]];\r\n        t[p].lmax=t[p].d+t[p].lca;\r\n        t[p].rmax=t[p].d+t[p].lca;\r\n        t[p]._max=0;\r\n        return;\r\n    }\r\n    int mid=(l+r)>>1;\r\n    build(l,mid,ls(p));\r\n    build(mid+1,r,rs(p));\r\n    push_up(p);\r\n}\r\nvoid add(int l,int r,int p,int x,int y,ll k)\r\n{\r\n    if(x<=l&&r<=y)\r\n    {\r\n        add_tag(p,k);\r\n        return;\r\n    }\r\n    push_down(p);\r\n    int mid=(l+r)>>1;\r\n    if(x<=mid)\r\n        add(l,mid,ls(p),x,y,k);\r\n    if(mid<y)\r\n        add(mid+1,r,rs(p),x,y,k);\r\n    push_up(p);\r\n}\r\nint main()\r\n{\r\n    scanf(\"%d%d%lld\",&n,&q,&w);\r\n    for(int i=1;i<n;i++)\r\n    {\r\n        int x,y;ll z;\r\n        scanf(\"%d%d%lld\",&x,&y,&z);\r\n        add(x,y,z,i),add(y,x,z,i);\r\n    }\r\n    dfs(1,0);\r\n    build(1,tot,1);\r\n    for(int i=1;i<=q;i++)\r\n    {\r\n        int x;\r\n        ll y;\r\n        scanf(\"%d%lld\",&x,&y);\r\n        x=(x+ans)%(n-1)+1;\r\n        y=(y+ans)%w;\r\n        add(1,tot,1,in[pos[x]],out[pos[x]],y-e[x*2].cost);\r\n        e[x*2].cost=y;\r\n        ans=t[1]._max;\r\n        printf(\"%lld\\n\",ans);\r\n    }\r\n    return 0;\r\n}"
+}

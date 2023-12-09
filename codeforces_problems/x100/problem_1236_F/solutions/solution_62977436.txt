@@ -1,0 +1,38 @@
+{
+    "id": 62977436,
+    "contestId": 1236,
+    "creationTimeSeconds": 1571562449,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "hjc20032003"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 2,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 44134400,
+    "source": "#include<bits/stdc++.h>\r\n#define REP(i,s,t) for(int i=s;i<=t;i++)\r\nusing namespace std;\r\nconst int Mod=1e9+7,maxn=1e6+5;\r\nstruct Edge{int nxt,to;}e[maxn];\r\nint hd[maxn],e_cnt=1;\r\nvoid add(int u,int v){\r\n\te[++e_cnt]=(Edge){hd[u],v};\r\n\thd[u]=e_cnt;\r\n}\r\nvector<int> pts[maxn];\r\nint n,m,scc_cnt,dfn[maxn],low[maxn],clk,deg[maxn],p_inv[maxn],sum[maxn],inv2,inv4,inv8,inv16;\r\nstack<int> stk;\r\nvoid tarjan(int u){\r\n\tstk.push(u);\r\n\tdfn[u]=low[u]=++clk;\r\n\tfor(int i=hd[u];i;i=e[i].nxt)\r\n\t\tif(!dfn[e[i].to]){\r\n\t\t\ttarjan(e[i].to);\r\n\t\t\tlow[u]=min(low[u],low[e[i].to]);\r\n\t\t\tif(low[e[i].to]>=dfn[u]){\r\n\t\t\t\tscc_cnt++;\r\n\t\t\t\twhile(stk.top()!=u){\r\n\t\t\t\t\tpts[scc_cnt].push_back(stk.top());\r\n\t\t\t\t\tstk.pop();\r\n\t\t\t\t}\r\n\t\t\t\tpts[scc_cnt].push_back(u);\r\n\t\t\t\tif(pts[scc_cnt].size()>2) for(int j:pts[scc_cnt]) sum[j]=(sum[j]+p_inv[pts[scc_cnt].size()])%Mod;\r\n\t\t\t}\r\n\t\t}else low[u]=min(low[u],dfn[e[i].to]);\r\n}\r\nint power(int b,int e){\r\n\tif(!e) return 1;\r\n\tint tmp=power(b,e>>1);\r\n\ttmp=1ll*tmp*tmp%Mod;\r\n\tif(e&1) tmp=1ll*tmp*b%Mod;\r\n\treturn tmp;\r\n}\r\nint main(){\r\n#ifdef LOCAL\r\n\tfreopen(\"F.in\",\"r\",stdin);\r\n#endif\r\n\tp_inv[0]=1; inv2=power(2,Mod-2); inv4=power(4,Mod-2); inv8=power(8,Mod-2); inv16=power(16,Mod-2);\r\n\tREP(i,1,5e5) p_inv[i]=1ll*inv2*p_inv[i-1]%Mod;\r\n\tcin>>n>>m;\r\n\tif(n==1){cout<<inv2; return 0;}\r\n\tREP(i,1,m){\r\n\t\tint a,b; cin>>a>>b;\r\n\t\tadd(a,b); add(b,a);\r\n\t\tdeg[a]++; deg[b]++;\r\n\t}\r\n\ttarjan(1);\r\n\tint ans=1ll*n*(n+1)%Mod*inv4%Mod;\r\n\tREP(i,1,n) for(int j=hd[i];j;j=e[j].nxt) if(i<e[j].to){\r\n\t\tint cnt=deg[i]+deg[e[j].to]-2;\r\n\t\tans=(ans+1ll*inv16*(m-cnt-1)+1ll*inv8*cnt+inv4)%Mod;\r\n\t}\r\n\tint tot=0;\r\n\tREP(i,1,scc_cnt) if(pts[i].size()>2) tot=(tot+p_inv[pts[i].size()])%Mod;\r\n\tREP(i,1,scc_cnt) if(pts[i].size()>2){\r\n\t\tint tmp=0;\r\n\t\tfor(int j:pts[i]) tmp=((tmp+sum[j]-p_inv[pts[i].size()])%Mod+Mod)%Mod;\r\n\t\tans=((ans+1ll*p_inv[pts[i].size()]*(tot-p_inv[pts[i].size()]+tmp+1))%Mod+Mod)%Mod;\r\n\t}\r\n\tint a1=(inv2+1ll*(n-2)*inv8)%Mod*m%Mod,a2=0,a3=0;\r\n\tREP(i,1,scc_cnt) if(pts[i].size()>2){\r\n\t\tint siz=pts[i].size(),tmp=0;\r\n\t\ta2=(a2+1ll*p_inv[siz]*siz+1ll*p_inv[siz]*inv2%Mod*(n-siz))%Mod;\r\n\t\tfor(int j:pts[i]) tmp+=deg[j]-2;\r\n\t\ta3=(a3+1ll*p_inv[siz]*inv4%Mod*(m-tmp-siz)+1ll*p_inv[siz]*inv2%Mod*tmp+1ll*p_inv[siz]*siz)%Mod;\r\n\t}\r\n\tans=((ans-2ll*a1+2ll*a2-2ll*a3)%Mod+Mod)%Mod;\r\n\tint E=((1ll*n*inv2-1ll*m*inv4)%Mod+Mod)%Mod;\r\n\tREP(i,1,scc_cnt) if(pts[i].size()>2) E=(E+p_inv[pts[i].size()])%Mod;\r\n\tcout<<((ans-1ll*E*E)%Mod+Mod)%Mod<<endl;\r\n\treturn 0;\r\n}"
+}

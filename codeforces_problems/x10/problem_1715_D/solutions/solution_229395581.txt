@@ -1,0 +1,38 @@
+{
+    "id": 229395581,
+    "contestId": 1715,
+    "creationTimeSeconds": 1698052251,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1715,
+        "index": "D",
+        "name": "2+ doors",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 1900,
+        "tags": [
+            "2-sat",
+            "bitmasks",
+            "graphs",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1715,
+        "members": [
+            {
+                "handle": "KasodaniKyouko"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1661006100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "// LUOGU_RID: 131202941\n#include <cmath>\n#include <cassert>\n#include <iostream>\n#include <vector>\n#include <algorithm>\n\nint main() {\n    std::ios::sync_with_stdio(false);\n    std::cin.tie(nullptr);\n    \n    int n, m;\n    std::cin >> n >> m;\n    \n    struct Edge {\n        int u, v, w;\n        Edge() = default;\n    };\n    std::vector<Edge> edge;\n    edge.reserve(m);\n    std::vector<int> ans(n);\n    for (int i = 0; i < m; i += 1) {\n        int u, v, w;\n        std::cin >> u >> v >> w;\n        u -= 1; v -= 1;\n        if (u == v) {\n            ans[u] = w;\n        } else {\n            edge.push_back({u, v, w});\n        }\n    }\n    \n    std::vector adj(n * 2, std::vector<int>{});\n    std::vector<bool> vis(n * 2);\n    std::vector<int> stk;\n    \n    auto work = [&](int bit) {\n        for (int i = 0; i < n * 2; i += 1) {\n            vis[i] = false;\n            adj[i].clear();\n        }\n        for (auto [u, v, w] : edge) {\n            auto d = (w >> bit) & 1;\n            if (!d) continue;\n            adj[u * 2].emplace_back(v * 2 + d);\n            adj[v * 2].emplace_back(u * 2 + d);\n        }\n        \n        auto dfs = [&](auto &dfs, int from) -> bool {\n            if (vis[from ^ 1]) {\n                return false;\n            } else if (vis[from]) {\n                return true;\n            }\n            vis[from] = true;\n            stk.emplace_back(from);\n            for (auto to : adj[from]) {\n                if (!dfs(dfs, to)) {\n                    return false;\n                }\n            }\n            return true;\n        };\n        for (int i = 0; i < n; i += 1) {\n            if (vis[i * 2] || vis[i * 2 + 1]) {\n                continue;\n            }\n            stk.clear();\n            if (!dfs(dfs, i * 2)) {\n                while (!stk.empty()) {\n                    vis[stk.back()] = false;\n                    stk.pop_back();\n                }\n                auto ret = dfs(dfs, i * 2 + 1);\n                assert(ret);\n            }\n        }\n        for (int i = 0; i < n; i += 1) {\n            if (vis[i * 2]) {\n                ans[i] |= 0 << bit;\n            } else if (vis[i * 2 + 1]) {\n                ans[i] |= 1 << bit;\n            }\n        }\n    };\n    for (int bit = 0; bit < 30; bit += 1) {\n        work(bit);\n    }  \n    for (int i = 0; i < n; i += 1) {\n        std::cout << ans[i] << \" \\n\"[i + 1 == n];\n    }\n}"
+}

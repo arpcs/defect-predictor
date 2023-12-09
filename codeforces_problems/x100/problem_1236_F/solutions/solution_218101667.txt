@@ -1,0 +1,38 @@
+{
+    "id": 218101667,
+    "contestId": 1236,
+    "creationTimeSeconds": 1691639570,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "DaiRuiChen007"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "RUNTIME_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 8396800,
+    "source": "// LUOGU_RID: 120031423\n#include<bits/stdc++.h>\r\n#define int long long\r\nusing namespace std;\r\nconst int MAXN=1e5+5,MOD=1e9+7;\r\nstruct Edge { int u,v; };\r\nint dsu[MAXN];\r\ninline int find(int x) { while(x^dsu[x]) x=dsu[x]=dsu[dsu[x]]; return x; }\r\nvector <int> G[MAXN];\r\nint Fa[MAXN],dep[MAXN];\r\ninline void dfs(int u,int fa) {\r\n\tdep[u]=dep[fa]+1,Fa[u]=fa;\r\n\tfor(int v:G[u]) if(v^fa) dfs(v,u);\r\n}\r\nint n,m,k,siz[MAXN],deg[MAXN],inv[MAXN];\r\nvector <int> cyc[MAXN],nod[MAXN];\r\ninline int V2() { //E[ |V|^2 ]\r\n\treturn n*(n+1)%MOD*inv[2]%MOD;\r\n}\r\ninline int E2() { //E[ |E|^2 ]\r\n\tint ans=m*m%MOD*inv[4]%MOD;\r\n\tans=(ans+m*(inv[2]+MOD-inv[4])%MOD)%MOD;\r\n\tfor(int i=1;i<=n;++i) {\r\n\t\tans=(ans+deg[i]*(deg[i]-1)%MOD*inv[4])%MOD;\r\n\t}\r\n\treturn ans;\r\n}\r\ninline int C2() { //E[ |C|^2 ]\r\n\tint ans=0,sum=0;\r\n\tfor(int i=1;i<=k;++i) sum=(sum+inv[siz[i]])%MOD;\r\n\tans=sum*sum%MOD;\r\n\tfor(int i=1;i<=k;++i) {\r\n\t\tans=(ans+inv[siz[i]]+MOD-inv[siz[i]]*inv[siz[i]]%MOD)%MOD;\r\n\t}\r\n\tfor(int i=1;i<=n;++i) {\r\n\t\tint tmp=0;\r\n\t\tfor(int j:cyc[i]) tmp=(tmp+inv[siz[j]])%MOD;\r\n\t\tans=(ans+tmp*tmp%MOD)%MOD;\r\n\t\tfor(int j:cyc[i]) ans=(ans+MOD-inv[siz[j]]*inv[siz[j]]%MOD)%MOD;\r\n\t}\r\n\treturn ans;\r\n}\r\ninline int VC() { //E[ |V|*|C| ]\r\n\tint ans=0;\r\n\tfor(int i=1;i<=k;++i) {\r\n\t\tans=(ans+siz[i]*inv[siz[i]]%MOD)%MOD;\r\n\t\tans=(ans+(n-siz[i])*inv[siz[i]+1]%MOD)%MOD;\r\n\t}\r\n\treturn ans;\r\n}\r\ninline int VE() { //E[ |V|*|E| ]\r\n\tint ans=0;\r\n\tfor(int i=1;i<=n;++i) {\r\n\t\tans=(ans+deg[i]*inv[2]%MOD)%MOD;\r\n\t\tans=(ans+(m-deg[i])*inv[3]%MOD)%MOD;\r\n\t}\r\n\treturn ans;\r\n}\r\ninline int EC() { //E[ |E|*|C| ]\r\n\tint ans=0;\r\n\tfor(int i=1;i<=k;++i) {\r\n\t\tans=(ans+siz[i]*inv[siz[i]]%MOD)%MOD;\r\n\t\tint tot=m-siz[i];\r\n\t\tfor(int j:nod[i]) {\r\n\t\t\ttot-=deg[j]-2; \r\n\t\t\tans=(ans+(deg[j]-2)*inv[siz[i]+1]%MOD)%MOD;\r\n\t\t}\r\n\t\tans=(ans+tot*inv[siz[i]+2]%MOD)%MOD;\r\n\t}\r\n\treturn ans;\r\n}\r\ninline int V() {\r\n\treturn n*inv[1]%MOD;\r\n}\r\ninline int E() {\r\n\treturn m*inv[2]%MOD;\r\n}\r\ninline int C() {\r\n\tint ans=0;\r\n\tfor(int i=1;i<=k;++i) ans=(ans+inv[siz[i]])%MOD;\r\n\treturn ans;\r\n}\r\nsigned main() {\r\n\tscanf(\"%lld%lld\",&n,&m);\r\n\tinv[0]=1;\r\n\tfor(int i=1;i<MAXN;++i) inv[i]=(MOD+1)/2*inv[i-1]%MOD;\r\n\tvector <Edge> Edges;\r\n\tiota(dsu+1,dsu+n+1,1);\r\n\tfor(int i=1,u,v;i<=m;++i) {\r\n\t\tscanf(\"%lld%lld\",&u,&v);\r\n\t\t++deg[u],++deg[v];\r\n\t\tint x=find(u),y=find(v);\r\n\t\tif(x==y) Edges.push_back({u,v});\r\n\t\telse {\r\n\t\t\tG[u].push_back(v);\r\n\t\t\tG[v].push_back(u);\r\n\t\t\tdsu[x]=y;\r\n\t\t}\r\n\t}\r\n\tdfs(1,0);\r\n\tfor(auto e:Edges) {\r\n\t\t++k;\r\n\t\tint u=e.u,v=e.v;\r\n\t\twhile(u^v) {\r\n\t\t\tif(dep[u]<dep[v]) swap(u,v);\r\n\t\t\tcyc[u].push_back(k);\r\n\t\t\tnod[k].push_back(u);\r\n\t\t\t++siz[k],u=Fa[u];\r\n\t\t}\r\n\t\t++siz[k];\r\n\t\tcyc[u].push_back(k);\r\n\t\tnod[k].push_back(u);\r\n\t}\r\n\tint ex=(V2()+C2()+E2())%MOD,ep=(VC()+MOD-VE()+MOD-EC())%MOD,e=(V()+C()+MOD-E())%MOD;\r\n\tprintf(\"%lld\\n\",(ex+ep*2+MOD-e*e%MOD)%MOD);\r\n\treturn 0;\r\n}\r\n"
+}

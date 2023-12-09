@@ -1,0 +1,38 @@
+{
+    "id": 221422095,
+    "contestId": 822,
+    "creationTimeSeconds": 1693557664,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 822,
+        "index": "E",
+        "name": "Liar",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 2400,
+        "tags": [
+            "binary search",
+            "dp",
+            "hashing",
+            "string suffix structures"
+        ]
+    },
+    "author": {
+        "contestId": 822,
+        "members": [
+            {
+                "handle": "Feng_D"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1499011500
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 172,
+    "timeConsumedMillis": 295,
+    "memoryConsumedBytes": 43110400,
+    "source": "#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nstruct SA {\r\n    struct ST_table {\r\n        vector<vector<int>> f;\r\n        vector<int> lg;\r\n        int colcnt;\r\n\r\n        void init(int _n, vector<int> height) {\r\n            f.resize(_n + 1);\r\n            lg.resize(_n + 1);\r\n            //\u6ce8\u610f\u8fd9\u91cc\u7684lg\u6570\u7ec4\u662f\u4ee52\u4e3a\u5e95\u6570\u7684\r\n            lg[1] = 0;\r\n            for(int i = 2; i <= _n; i++) lg[i] = lg[i / 2] + 1;\r\n            colcnt = lg[_n] + 1;//\r\n            for(int k = 0; k < _n + 1; ++k)f[k].resize(colcnt);\r\n            for(int k = 0; k <= colcnt; ++k)\r\n                for(int i = 1; i + (1 << k) - 1 <= _n; ++i) {\r\n                    if(!k) {\r\n//                        assert(i <= height.size() + 10);\r\n//                        assert(k <= 50);\r\n                        f[i][k] = height[i];\r\n                    }\r\n                    else f[i][k] = min(f[i][k - 1], f[i + (1 << (k - 1))][k - 1]);\r\n                }\r\n        }\r\n\r\n        int query(int l, int r) {\r\n            if(l > r)return 0;\r\n            int k = lg[r - l + 1];\r\n            return min(f[l][k], f[r - (1 << k) + 1][k]);\r\n        }\r\n    };\r\n\r\n    vector<int> sa, cnt, px, id, height;\r\n    vector<int> rk, oldrk;\r\n//    vector<__int128> rk, oldrk;\r\n    int n;\r\n\r\n    ST_table st;\r\n\r\n    bool cmp(int x, int y, int w) {\r\n        return oldrk[x] == oldrk[y] && oldrk[x + w] == oldrk[y + w];\r\n    }\r\n\r\n    SA(string s) {\r\n        int n = s.length() - 1, m = 300;\r\n        this->n = n;\r\n        oldrk.resize(max(m + 1, 2 * n + 1), 0);\r\n        sa.resize(max(m + 1, n + 1), 0);\r\n        rk.resize(max(m + 1, 2 * n + 1), 0);\r\n        cnt.resize(max(m + 1, n + 1), 0);\r\n        height.resize(max(m + 1, n + 1), 0);\r\n        px.resize(max(m + 1, n + 1), 0);\r\n        id.resize(max(m + 1, n + 1), 0);\r\n        for(int i = 1; i <= n; ++i)\r\n            ++cnt[rk[i] = s[i]];\r\n        for(int i = 1; i <= m; ++i)\r\n            cnt[i] += cnt[i - 1];\r\n        for(int i = n; i >= 1; --i)\r\n            sa[cnt[rk[i]]--] = i;\r\n        for(int w = 1, p;; w <<= 1, m = p) {\r\n            p = 0;\r\n            for(int i = n; i > n - w; --i)\r\n                id[++p] = i;\r\n            for(int i = 1; i <= n; ++i)\r\n                if(sa[i] > w)\r\n                    id[++p] = sa[i] - w;\r\n            fill(cnt.begin(), cnt.end(), 0);\r\n            for(int i = 1; i <= n; ++i)\r\n                ++cnt[px[i] = rk[id[i]]];\r\n            for(int i = 1; i <= m; ++i)\r\n                cnt[i] += cnt[i - 1];\r\n            for(int i = n; i >= 1; --i)\r\n                sa[cnt[px[i]]--] = id[i];\r\n            copy(rk.begin(), rk.end(), oldrk.begin());\r\n            p = 0;\r\n            for(int i = 1; i <= n; ++i)\r\n                rk[sa[i]] = cmp(sa[i], sa[i - 1], w) ? p : ++p;\r\n            if(p == n) {\r\n                for(int i = 1; i <= n; ++i)\r\n                    sa[rk[i]] = i;\r\n                break;\r\n            }\r\n        }\r\n        for(int i = 1, k = 0; i <= n; ++i) {\r\n            if(rk[i] == 0)\r\n                continue;\r\n            if(k)\r\n                --k;\r\n            while(s[i + k] == s[sa[rk[i] - 1] + k])\r\n                ++k;\r\n            height[rk[i]] = k;\r\n        }\r\n\r\n        st.init(n, height);\r\n    }\r\n\r\n    //\u67e5\u8be2\u539f\u4e32\u4e2d\u5206\u522b\u4ee5x\u548cy\u4f4d\u7f6e\u5f00\u5934\u7684\u540e\u7f00\u7684lcp\r\n    int lcp(int x, int y) {\r\n//        assert(x <= rk.size() + 10);\r\n//        assert(y <= rk.size() + 10);\r\n        int rkx = rk[x], rky = rk[y];\r\n        if(rkx > rky) swap(rkx, rky);\r\n        rkx++;\r\n        return st.query(rkx, rky);\r\n    }\r\n};\r\n\r\nconst int MAXN = 1e5 + 10;\r\nstring s, t;\r\nint n, m, f[MAXN][32];\r\n\r\nvoid solve() {\r\n    cin >> n >> s >> m >> t;\r\n    s = \" \" + s;\r\n    s = s + \"|\" + t;\r\n    SA sa(s);\r\n\r\n\r\n    int x;\r\n    cin >> x;\r\n    bool ok = 0;\r\n    for(int i = 0; i < n; i++) {\r\n        for(int j = 0; j <= x; j++) {\r\n            int pos_t = f[i][j] + 1;\r\n            f[i + 1][j] = max(f[i + 1][j], f[i][j]);\r\n            int L = sa.lcp(i + 1, n + 1 + pos_t);\r\n            f[i + L][j + (L != 0)] = max(f[i + L][j + (L != 0)], f[i][j] + L);\r\n        }\r\n    }\r\n    for(int i = x; i >= 0; i--) {\r\n        if(f[n][i] >= m) {\r\n            ok = true;\r\n        }\r\n    }\r\n    ok ? cout << \"YES\\n\" : cout << \"NO\\n\";\r\n}\r\n\r\nsigned main() {\r\n#ifdef Feng_D\r\n    freopen(\"../input.txt\", \"r\", stdin);\r\n#endif\r\n    ios::sync_with_stdio(false);\r\n    cin.tie(nullptr), cout.tie(nullptr);\r\n    int T = 1;\r\n    while(T--)solve();\r\n}"
+}

@@ -1,0 +1,34 @@
+{
+    "id": 57773472,
+    "contestId": 1192,
+    "creationTimeSeconds": 1564107284,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1192,
+        "index": "A",
+        "name": "Building Skyscrapers",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special"
+        ]
+    },
+    "author": {
+        "contestId": 1192,
+        "members": [
+            {
+                "handle": "ecnerwala"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1564063500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 185,
+    "timeConsumedMillis": 390,
+    "memoryConsumedBytes": 92876800,
+    "points": 100.0,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\n\r\nconst int mx[8] = {\r\n\t1, 1, 0, -1, -1, -1, 0, 1\r\n};\r\nconst int my[8] = {\r\n\t0, 1, 1, 1, 0, -1, -1, -1\r\n};\r\n\r\nconst int MAXN = 1.6e5;\r\nint N, T;\r\npair<int, int> P[MAXN];\r\nint ind[MAXN];\r\n\r\nconst int MAXV = MAXN * 9;\r\nint V;\r\npair<int, int> pts[MAXV];\r\nstruct {\r\n\tbool reachable = false;\r\n\tbool visible = false;\r\n\tbool inQueue = false;\r\n\tbool removed = false;\r\n\tint adj[8];\r\n\tint id;\r\n} verts[MAXV];\r\nint par[MAXV];\r\nvoid reset() {\r\n\tmemset(par, -1, sizeof(par));\r\n}\r\nint getpar(int a) {\r\n\treturn par[a] == -1 ? a : (par[a] = getpar(par[a]));\r\n}\r\nbool merge(int a, int b) {\r\n\ta = getpar(a), b = getpar(b);\r\n\tif (a == b) return false;\r\n\tpar[a] = b;\r\n\treturn true;\r\n}\r\n\r\nbool isPossible() {\r\n\tstack<int> q;\r\n\tverts[ind[0]].reachable = true;\r\n\tq.push(ind[0]);\r\n\tint cnt = 0;\r\n\twhile (!q.empty()) {\r\n\t\tint cur = q.top(); q.pop();\r\n\t\t//cerr << \"reach \" << cur << '\\n';\r\n\t\tcnt++;\r\n\t\tfor (int d = 0; d < 8; d++) {\r\n\t\t\tint nxt = verts[cur].adj[d];\r\n\t\t\tassert(nxt != -1);\r\n\t\t\tif (verts[nxt].id == -1) continue;\r\n\t\t\t//cerr << nxt << '\\n';\r\n\t\t\tif (verts[nxt].reachable) continue;\r\n\t\t\tverts[nxt].reachable = true;\r\n\t\t\tq.push(nxt);\r\n\t\t}\r\n\t}\r\n\treturn cnt == N;\r\n}\r\n\r\npriority_queue<int> q;\r\n\r\nvoid flood(int cur) {\r\n\tif (cur == -1) return;\r\n\tif (verts[cur].visible) {\r\n\t\treturn;\r\n\t}\r\n\tverts[cur].visible = true;\r\n\r\n\tif (verts[cur].id != -1) {\r\n\t\tif (!verts[cur].inQueue) {\r\n\t\t\tverts[cur].inQueue = true;\r\n\t\t\tq.push(verts[cur].id);\r\n\t\t}\r\n\t\treturn;\r\n\t}\r\n\r\n\t// evens only\r\n\tfor (int d = 0; d < 8; d += 2) {\r\n\t\tflood(verts[cur].adj[d]);\r\n\t}\r\n}\r\n\r\nint main() {\r\n\tios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);\r\n\tcin >> N >> T;\r\n\tfor (int i = 0; i < N; i++) {\r\n\t\tcin >> P[i].first >> P[i].second;\r\n\t}\r\n\r\n\tV = 0;\r\n\tfor (int i = 0; i < N; i++) {\r\n\t\tpts[V++] = P[i];\r\n\t\tfor (int d = 0; d < 8; d++) {\r\n\t\t\tpts[V++] = {P[i].first + mx[d], P[i].second + my[d]};\r\n\t\t}\r\n\t}\r\n\tsort(pts, pts + V);\r\n\tV = int(unique(pts, pts + V) - pts);\r\n\r\n\tfor (int v = 0; v < V; v++) { verts[v].id = -1; }\r\n\tfor (int i = 0; i < N; i++) {\r\n\t\tind[i] = int(lower_bound(pts, pts + V, P[i]) - pts);\r\n\t\tverts[ind[i]].id = i;\r\n\t}\r\n\r\n\tfor (int v = 0; v < V; v++) {\r\n\t\tmemset(verts[v].adj, -1, sizeof(verts[v].adj));\r\n\t}\r\n\tfor (int d = 0; d < 8; d++) {\r\n\t\tfor (int v = 0, u = 0; v < V && u < V; ) {\r\n\t\t\tpair<int, int> cnd(pts[v].first + mx[d], pts[v].second + my[d]);\r\n\t\t\tif (cnd == pts[u]) {\r\n\t\t\t\tverts[v].adj[d] = u;\r\n\t\t\t\tv++, u++;\r\n\t\t\t} else if (cnd < pts[u]) {\r\n\t\t\t\tv++;\r\n\t\t\t} else {\r\n\t\t\t\tu++;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\r\n\t/*\r\n\tfor (int v = 0; v < V; v++) {\r\n\t\tcerr << v << \": \" << \"(\" << pts[v].first << \", \" << pts[v].second << \")\" << ' ';\r\n\t\tcerr << verts[v].id << \" \";\r\n\t\tcerr << \"[\"; for (int d = 0; d < 8; d++) { cerr << verts[v].adj[d] << \", \"; } cerr << \"]\" << '\\n';\r\n\t}\r\n\t*/\r\n\r\n\tif (isPossible()) {\r\n\t\tcout << \"YES\" << '\\n';\r\n\t} else {\r\n\t\tcout << \"NO\" << '\\n';\r\n\t\texit(0);\r\n\t}\r\n\r\n\treset();\r\n\tfor (int v = 0; v < V; v++) {\r\n\t\tif (verts[v].id != -1) continue;\r\n\t\tfor (int d = 0; d < 8; d += 2) {\r\n\t\t\tint u = verts[v].adj[d];\r\n\t\t\tif (u == -1) continue;\r\n\t\t\tif (verts[u].id != -1) continue;\r\n\t\t\tmerge(u, v);\r\n\t\t}\r\n\t}\r\n\r\n\tflood(0);\r\n\r\n\tauto doesntSplit = [] (int cur) {\r\n\t\tassert(verts[cur].id != -1);\r\n\t\tint numClosed = 0;\r\n\t\tfor (int d = 0; d < 8; d++) {\r\n\t\t\tnumClosed += (verts[verts[cur].adj[d]].id != -1);\r\n\t\t}\r\n\r\n\t\tfor (int a = 0; a < 8; a += 2) {\r\n\t\t\tif (verts[verts[cur].adj[a]].id != -1) continue;\r\n\t\t\tfor (int b = a + 2; b < 8; b += 2) {\r\n\t\t\t\tif (verts[verts[cur].adj[b]].id != -1) continue;\r\n\t\t\t\tif (getpar(verts[cur].adj[a]) != getpar(verts[cur].adj[b])) continue;\r\n\t\t\t\tint midClosed = 0;\r\n\t\t\t\tfor (int c = a+1; c < b; c++) {\r\n\t\t\t\t\tmidClosed += (verts[verts[cur].adj[c]].id != -1);\r\n\t\t\t\t}\r\n\t\t\t\tif (midClosed == 0 || midClosed == numClosed) {\r\n\t\t\t\t\t// it's fine\r\n\t\t\t\t} else {\r\n\t\t\t\t\treturn false;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t\treturn true;\r\n\t};\r\n\r\n\tvector<int> ans;\r\n\twhile (!q.empty()) {\r\n\t\tint cur = ind[q.top()]; q.pop();\r\n\t\t//cerr << cur << '\\n';\r\n\t\tverts[cur].inQueue = false;\r\n\t\tif (!doesntSplit(cur)) {\r\n\t\t\tcontinue;\r\n\t\t}\r\n\r\n\t\tans.push_back(verts[cur].id);\r\n\t\tverts[cur].id = -1;\r\n\t\tfor (int d = 0; d < 8; d += 2) {\r\n\t\t\tint nxt = verts[cur].adj[d];\r\n\t\t\tif (verts[nxt].id != -1) continue;\r\n\t\t\tmerge(cur, nxt);\r\n\t\t}\r\n\r\n\t\tverts[cur].visible = false;\r\n\t\tflood(cur);\r\n\t\tfor (int d = 0; d < 8; d++) {\r\n\t\t\tint nxt = verts[cur].adj[d];\r\n\t\t\tif (verts[nxt].id != -1 && verts[nxt].visible && !verts[nxt].inQueue) {\r\n\t\t\t\tverts[nxt].inQueue = true;\r\n\t\t\t\tq.push(verts[nxt].id);\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n\r\n\treverse(ans.begin(), ans.end());\r\n\tfor (int i : ans) { cout << i+1 << '\\n'; }\r\n\r\n\treturn 0;\r\n}\r\n"
+}

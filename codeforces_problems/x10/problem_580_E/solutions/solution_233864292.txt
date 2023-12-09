@@ -1,0 +1,37 @@
+{
+    "id": 233864292,
+    "contestId": 580,
+    "creationTimeSeconds": 1700716312,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 580,
+        "index": "E",
+        "name": "Kefa and Watch",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2500,
+        "tags": [
+            "data structures",
+            "hashing",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 580,
+        "members": [
+            {
+                "handle": "Kaleem_Raza_Syed"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1442939400
+    },
+    "programmingLanguage": "GNU C++17",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 80,
+    "timeConsumedMillis": 249,
+    "memoryConsumedBytes": 18739200,
+    "source": "#include<bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nconst int N = 1e5+5, base = 747, mod = 1e9+9;\r\nint n, q;\r\nstring str;\r\n\r\nlong long pw[N][11];\r\n\r\nstruct node\r\n{\r\n  long long hsh, sz;\r\n  char lazy;\r\n} seg[N << 2];\r\n\r\nnode merge(const node &a, const node &b)\r\n{\r\n  return node{\r\n    (a.hsh + (b.hsh * pw[a.sz][0]) % mod)%mod,\r\n    a.sz + b.sz,\r\n    ' ',\r\n  };\r\n}\r\n\r\nvoid build(int s = 0, int e = n, int v = 1)\r\n{\r\n  if(e - s == 1)\r\n    {\r\n      seg[v].hsh = pw[1][str[s] - '0' + 1];\r\n      seg[v].sz = 1;\r\n      seg[v].lazy = ' ';\r\n      return;\r\n    }\r\n  int mid = (s + e) / 2, lc = 2 * v, rc = 2 * v + 1;\r\n  build(s, mid, lc);\r\n  build(mid, e, rc);\r\n  seg[v] = merge(seg[lc], seg[rc]);\r\n}\r\n\r\nvoid push(int v)\r\n{\r\n  int lc = 2 * v, rc = 2 * v + 1;\r\n  char c = seg[v].lazy;\r\n  seg[lc].hsh = pw[seg[lc].sz][c - '0' + 1];\r\n  seg[rc].hsh = pw[seg[rc].sz][c - '0' + 1];\r\n  seg[lc].lazy = seg[rc].lazy = c;\r\n  seg[v].lazy = ' ';\r\n}\r\n\r\nvoid update(int l, int r, char c, int s = 0, int e = n, int v = 1)\r\n{\r\n  if(r <= s || e <= l) return;\r\n\r\n  if(l <= s && e <= r)\r\n    {\r\n      seg[v].hsh = pw[seg[v].sz][c - '0' + 1];\r\n      seg[v].lazy = c;\r\n      return;\r\n    }\r\n\r\n  if(seg[v].lazy != ' ')\r\n    push(v);\r\n  \r\n  int mid = (s + e) / 2, lc = 2 * v, rc = 2 * v + 1;\r\n  update(l, r, c, s, mid, lc);\r\n  update(l, r, c, mid, e, rc);\r\n  seg[v] = merge(seg[lc], seg[rc]);\r\n}\r\nnode get(int l, int r, int s = 0, int e = n, int v = 1)\r\n{\r\n  if(r <= s || e <= l) return node{0, 0, ' '};\r\n  if(l <= s && e <= r) return seg[v];\r\n\r\n  if(seg[v].lazy != ' ')\r\n    push(v);\r\n\r\n  int mid = (s + e) / 2, lc = 2 * v, rc = 2 * v + 1;\r\n  return merge(get(l, r, s, mid, lc),\r\n\t       get(l, r, mid, e, rc));\r\n}\r\n\r\nint main()\r\n{\r\n  ios::sync_with_stdio(false);\r\n  cin.tie(0), cout.tie(0);\r\n  \r\n  int m, k;\r\n  cin >> n >> m >> k;\r\n\r\n  pw[0][0] = 1;\r\n  for(int i = 1; i <= n; i++)\r\n    pw[i][0] = pw[i-1][0] * base % mod;\r\n\r\n  for(char c = '0'; c <= '9'; c++)\r\n    for(int i = 1; i <= n; i++)\r\n      pw[i][c -'0' + 1] = (pw[i-1][c - '0' + 1] + pw[i][0] * c % mod) % mod;\r\n  \r\n  q = m + k;\r\n  cin >> str;\r\n  build();\r\n  while(q--)\r\n    {\r\n      int t, l, r;\r\n      cin >> t >> l >> r;\r\n      l--;\r\n      if(t == 1)\r\n\t{\r\n\t  char c;\r\n\t  cin >> c;\r\n\t  update(l, r, c);\r\n\t}\r\n      else\r\n\t{\r\n\t  int d;\r\n\t  cin >> d;\r\n\t  if(get(l, r - d).hsh == get(l + d, r).hsh)\r\n\t    cout << \"YES\\n\";\r\n\t  else\r\n\t    cout << \"NO\\n\";\r\n\t  \r\n\t}\r\n      \r\n    }\r\n  return 0;\r\n}"
+}

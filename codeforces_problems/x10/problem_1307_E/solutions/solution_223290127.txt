@@ -1,0 +1,40 @@
+{
+    "id": 223290127,
+    "contestId": 1307,
+    "creationTimeSeconds": 1694657871,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1307,
+        "index": "E",
+        "name": "Cow and Treats",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 2500,
+        "tags": [
+            "binary search",
+            "combinatorics",
+            "dp",
+            "greedy",
+            "implementation",
+            "math"
+        ]
+    },
+    "author": {
+        "contestId": 1307,
+        "members": [
+            {
+                "handle": "Man_CCNU"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1581953700
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 58,
+    "timeConsumedMillis": 31,
+    "memoryConsumedBytes": 3481600,
+    "source": "#include <cstdio>\r\n#include <vector>\r\n#include <algorithm>\r\n#include <cassert>\r\n\r\nconst int MOD=1e9+7;\r\n\r\nint modexp(int base,int exp){\r\n  int ac=1;\r\n  for(;exp;exp>>=1){\r\n    if(exp&1) ac=1LL*ac*base%MOD;\r\n    base=1LL*base*base%MOD;\r\n  }\r\n  return ac;\r\n}\r\n\r\nint inverse(int x){\r\n  return modexp(x,MOD-2);\r\n}\r\n\r\nint fs[100005];\r\nint left[100005],right[100005];\r\nstd::vector<int> cows[100005];//cows[f]: hunger of cows that like flavor f \r\nint asleep[100005];\r\nint ways[100005];\r\nint total_asleep=0,total_ways=1;\r\n\r\nvoid calc_ways(int f){\r\n  int a=std::upper_bound(cows[f].begin(),cows[f].end(),left[f])-cows[f].begin();\r\n  int b=std::upper_bound(cows[f].begin(),cows[f].end(),right[f])-cows[f].begin();\r\n  if(a>b) std::swap(a,b);\r\n  long long cnt2=1LL*a*b-a;\r\n  int cnt1=a+b;\r\n  cnt2%=MOD;\r\n  if(cnt2>0){\r\n    asleep[f]=2;\r\n    ways[f]=cnt2;\r\n  }else if(cnt1>0){\r\n    asleep[f]=1;\r\n    ways[f]=cnt1;\r\n  }else{\r\n    asleep[f]=0;\r\n    ways[f]=1;\r\n  }\r\n}\r\n\r\n//fixed left cow, with hunger left[i]\r\n//precondition: such cow exists\r\nvoid calc_ways_stuck(int f){\r\n  int b=std::upper_bound(cows[f].begin(),cows[f].end(),right[f])-cows[f].begin();\r\n  if(right[f]>=left[f])\r\n    b--;\r\n  int cnt2=b;\r\n  if(cnt2>0){\r\n    asleep[f]=2;\r\n    ways[f]=cnt2;\r\n  }else{\r\n    asleep[f]=1;\r\n    ways[f]=1;\r\n  }\r\n}\r\n\r\nint ans_asleep=0,ans_ways=0;\r\n\r\nvoid add_to_ans(int asleep,int ways){\r\n  if(asleep>ans_asleep){\r\n    ans_asleep=asleep;\r\n    ans_ways=0;\r\n  }\r\n  if(asleep==ans_asleep)\r\n    ans_ways=(ans_ways+ways)%MOD;\r\n}\r\n\r\nint main(){\r\n  int N,M;\r\n  scanf(\"%d %d\",&N,&M);\r\n  for(int i=1;i<=N;i++){\r\n    scanf(\"%d\",&fs[i]);\r\n    right[fs[i]]++;\r\n  }\r\n  for(int i=0;i<M;i++){\r\n    int F,H;\r\n    scanf(\"%d %d\",&F,&H);\r\n    cows[F].push_back(H);\r\n  }\r\n  for(int f=1;f<=N;f++)\r\n    std::sort(cows[f].begin(),cows[f].end());\r\n  for(int f=1;f<=N;f++){\r\n    calc_ways(f);\r\n    total_asleep+=asleep[f];\r\n    total_ways=1LL*total_ways*ways[f]%MOD;\r\n  }\r\n  add_to_ans(total_asleep,total_ways);\r\n  for(int i=1;i<=N;i++){\r\n    total_asleep-=asleep[fs[i]];\r\n    total_ways=1LL*total_ways*inverse(ways[fs[i]])%MOD;\r\n    right[fs[i]]--;\r\n    left[fs[i]]++;\r\n    if(std::binary_search(cows[fs[i]].begin(),cows[fs[i]].end(),left[fs[i]])){\r\n      calc_ways_stuck(fs[i]);\r\n      int here_asleep=total_asleep+asleep[fs[i]];\r\n      int here_ways=1LL*total_ways*ways[fs[i]]%MOD;\r\n      add_to_ans(here_asleep,here_ways);\r\n    }\r\n    calc_ways(fs[i]);\r\n    total_asleep+=asleep[fs[i]];\r\n    total_ways=1LL*total_ways*ways[fs[i]]%MOD;\r\n  }\r\n  printf(\"%d %d\\n\",ans_asleep,ans_ways);\r\n}"
+}

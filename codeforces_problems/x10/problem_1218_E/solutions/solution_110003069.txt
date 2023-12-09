@@ -1,0 +1,35 @@
+{
+    "id": 110003069,
+    "contestId": 1218,
+    "creationTimeSeconds": 1615769660,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1218,
+        "index": "E",
+        "name": "Product Tuples",
+        "type": "PROGRAMMING",
+        "rating": 2500,
+        "tags": [
+            "divide and conquer",
+            "fft"
+        ]
+    },
+    "author": {
+        "contestId": 1218,
+        "members": [
+            {
+                "handle": "slgdsxw"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1568554500
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 36,
+    "timeConsumedMillis": 2089,
+    "memoryConsumedBytes": 1945600,
+    "source": "#include <cstring>\n#include <cstdio>\n#include <cstring>\n#include <algorithm>\n#include <vector>\nusing namespace std;\nconst int N=70000,P=998244353;\nint n,m,K;\nint F[N],G[N];\nvoid m1(int &x){if(x>=P)x-=P;}\nint ksm(int a,int b){int x=1;for(;b;b&1?x=1ll*x*a%P:0,a=1ll*a*a%P,b>>=1);return x;}\n\nnamespace Poly\n{\n\tconst int WN=3;\n\tint len;\n\tint tr[N],w[N],A[N],B[N];\n\tvoid pret(int l)\n\t{\n\t\tfor(len=1;len<l;len<<=1);\n\t\tfor(int i=0;i<len;i++)tr[i]=(tr[i>>1]>>1)|(i&1?len>>1:0);\n\t}\n\tvoid prew(int l)\n\t{\n\t\tfor(len=1;len<l;len<<=1);\n\t\tfor(int mid=1;mid<len;mid<<=1)\n\t\t{\n\t\t\tint wn=ksm(WN,(P-1)/(2*mid));\n\t\t\tw[mid]=1;\n\t\t\tfor(int j=1;j<mid;j++)w[mid+j]=1ll*w[mid+j-1]*wn%P;\n\t\t}\n\t}\n\tvoid ntt(int *f,int ty)\n\t{\n\t\tif(!ty)reverse(f+1,f+len);\n\t\tfor(int i=0;i<len;i++)\n\t\t\tif(i<tr[i])swap(f[i],f[tr[i]]);\n\t\tfor(int mid=1;mid<len;mid<<=1)\n\t\t\tfor(int i=0;i<len;i+=mid<<1)\n\t\t\t\tfor(int j=0;j<mid;j++)\n\t\t\t\t{\n\t\t\t\t\tint x=f[i+j],y=1ll*f[i+j+mid]*w[mid+j]%P;\n\t\t\t\t\tm1(f[i+j]=x+y);m1(f[i+j+mid]=x-y+P);\n\t\t\t\t}\n\t\tif(ty)return;\n\t\tint invl=ksm(len,P-2);\n\t\tfor(int i=0;i<len;i++)f[i]=1ll*f[i]*invl%P;\n\t}\n}\nusing namespace Poly;\n\nvector<int> ans;\nvoid solve(int l,int r,vector<int> &x)\n{\n\tif(l==r){x.push_back(1);x.push_back(G[l]);return;}\n\tint mid=(l+r)>>1;\n\tsolve(l,mid,x);\n\tvector<int> rx;\n\tsolve(mid+1,r,rx);\n\tint L=x.size()+rx.size()-1;\n\tpret(L<<1);\n\tmemset(A,0,len<<2);for(int i=0;i<x.size();i++)A[i]=x[i];\n\tmemset(B,0,len<<2);for(int i=0;i<rx.size();i++)B[i]=rx[i];\n\tntt(A,1);ntt(B,1);\n\tfor(int i=0;i<len;i++)A[i]=1ll*A[i]*B[i]%P;\n\tntt(A,0);\n\tx.resize(L);\n\tfor(int i=0;i<L;i++)x[i]=A[i];\n}\nint main()\n{\n\tscanf(\"%d%d\",&n,&K);\n\tprew(n+1<<1);\n\tfor(int i=1;i<=n;i++)scanf(\"%d\",&F[i]);\n\tscanf(\"%d\",&m);\n\twhile(m--)\n\t{\n\t\tint ty,q,x,y;\n\t\tscanf(\"%d%d%d%d\",&ty,&q,&x,&y);\n\t\tmemcpy(G,F,n+1<<2);\n\t\tans.clear();\n\t\tif(ty==1)G[x]=y;\n\t\telse\n\t\t{\n\t\t\tint d;\n\t\t\tscanf(\"%d\",&d);\n\t\t\tfor(int i=x;i<=y;i++)m1(G[i]+=d);\n\t\t}\n\t\tfor(int i=1;i<=n;i++)m1(G[i]=q-G[i]+P);\n\t\tsolve(1,n,ans);\n\t\tprintf(\"%d\\n\",ans[K]);\n\t}\n\treturn 0;\n}"
+}

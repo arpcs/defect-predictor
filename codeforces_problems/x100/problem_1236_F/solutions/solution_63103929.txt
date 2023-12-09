@@ -1,0 +1,38 @@
+{
+    "id": 63103929,
+    "contestId": 1236,
+    "creationTimeSeconds": 1571713657,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1236,
+        "index": "F",
+        "name": "Alice and the Cactus",
+        "type": "PROGRAMMING",
+        "points": 2500.0,
+        "rating": 3000,
+        "tags": [
+            "dfs and similar",
+            "graphs",
+            "math",
+            "probabilities"
+        ]
+    },
+    "author": {
+        "contestId": 1236,
+        "members": [
+            {
+                "handle": "what_IT"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1571319300
+    },
+    "programmingLanguage": "GNU C++11",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 6,
+    "timeConsumedMillis": 810,
+    "memoryConsumedBytes": 44339200,
+    "source": "#include<bits/stdc++.h>\r\nusing namespace std;\r\nconst int maxn=5e5+10;\r\ntypedef long long ll;\r\nconst ll mod=1e9+7;\r\nvector<int> g[maxn],cpt[maxn];\r\nint d[maxn];\r\nint dfn[maxn],low[maxn],cnt,clk;\r\nbool vis[maxn];\r\nstack<int> q;\r\nll tot=0;\r\nll inv[17],binv[maxn],sum[maxn];\r\nll qpow(ll x,ll p){\r\n\tll y=1;\r\n\twhile(p){\r\n\t\tif(p&1) y=y*x%mod;\r\n\t\tx=x*x%mod,p>>=1;\r\n\t}\r\n\treturn y;\r\n}\r\nvoid Mod(ll &x){\r\n\tif(x<0)\tx+=mod;\r\n\tif(x>mod)\tx-=mod;\r\n}\r\nvoid tarjan(int x){\r\n\tdfn[x]=low[x]=++clk;\r\n\tq.push(x);\tvis[x]=1;\r\n\tfor(auto to:g[x]) \r\n\t\tif(!dfn[to]){\r\n\t\t\ttarjan(to);\r\n\t\t\tlow[x]=min(low[x],low[to]);\r\n\t\t\tif(low[to]>=dfn[x]){\r\n\t\t\t\tcnt++;\r\n\t\t\t\tint cur;\r\n\t\t\t\tdo{\r\n\t\t\t\t\tcur=q.top(); q.pop();\r\n\t\t\t\t\tcpt[cnt].push_back(cur);\r\n\t\t\t\t}while(cur!=to);\r\n\t\t\t\tcpt[cnt].push_back(x);\r\n\t\t\t\tint sz=cpt[cnt].size();\r\n\t\t\t\tif(sz>2){\r\n\t\t\t\t\tfor(int j:cpt[cnt]) sum[j]=(sum[j]+binv[sz])%mod;\r\n\t\t\t\t\ttot+=binv[sz];\t\r\n\t\t\t\t}\r\n\t\t\t\t \r\n\t\t\t}\r\n\t\t}else low[x]=min(low[x],dfn[to]);\r\n}\r\n\r\nint main(){\r\n    #ifndef ONLINE_JUDGE\r\n    freopen(\"in\",\"r\",stdin);\r\n    //freopen(\"add2.out\",\"w\",stdout);\r\n    #endif\r\n    ios_base::sync_with_stdio(false);\r\n    cin.tie(0);\r\n    binv[0]=1;\r\n    for(int i=1;i<=16;i++)\tinv[i]=qpow(i,mod-2);\r\n    for(int i=1;i<maxn;i++)\tbinv[i]=binv[i-1]*inv[2]%mod;\r\n    int n,m;\tcin>>n>>m;\r\n    for(int i=1;i<=m;i++){\r\n    \tint x,y;\tcin>>x>>y;\r\n    \tg[x].push_back(y);\r\n    \tg[y].push_back(x);\r\n    \td[x]++,d[y]++;\r\n\t}\r\n\tif(n==1){\r\n\t\tcout<<inv[4]<<'\\n';\r\n\t\treturn 0;\r\n\t}\r\n\ttarjan(1);\t\r\n\tll ans=1ll*n*(n+1)%mod*inv[4]%mod;\r\n\tfor(int i=1;i<=n;i++)\r\n\t\tfor(auto j:g[i]){\r\n\t\t\tif(i<j)\tcontinue;\r\n\t\t\tint num=d[i]+d[j]-2;\r\n\t\t\tans+=inv[16]*(m-num-1)+inv[8]*num+inv[4];\r\n\t\t\tans%=mod;\r\n\t\t}\r\n\tll ab=(inv[8]*(n-2)%mod*m%mod+m*inv[2]%mod)%mod,ac=0,bc=0;\r\n\tfor(int i=1;i<=cnt;i++){\r\n\t\tint sz=cpt[i].size();\r\n\t\tif(sz<=2)\tcontinue;\r\n\t\tll now=0,tmp=0;\r\n\t\tfor(auto j:cpt[i])\tnow+=sum[j]-binv[sz],tmp+=d[j]-2;\r\n\t\tMod(now%=mod);\r\n\t\tans+=binv[sz]*(tot-binv[sz]+now+1);\t\tans%=mod;\r\n\t\tac+=binv[sz]*(n-sz)%mod*inv[2]%mod+binv[sz]*sz%mod;\t\tac%=mod;\r\n\t\tbc+=binv[sz]*(m-tmp-sz)%mod*inv[4]+binv[sz]*tmp%mod*inv[2]+binv[sz]*sz%mod;\tbc%=mod;\r\n\t}//cout<<ans+mod<<' '<<ab<<' '<<ac<<' '<<bc<<'\\n';\r\n\tans=ans-2*ab-2*bc+2*ac;\tans%=mod;\r\n\tll E=(n*inv[2]-m*inv[4]+tot)%mod;\r\n\tans=ans-E*E;\tMod(ans%=mod);\r\n\tcout<<ans<<'\\n';\r\n    return 0;\r\n} //875000017 375000007 500000004 218750002\r\n//671875005"
+}

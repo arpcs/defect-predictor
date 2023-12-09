@@ -1,0 +1,35 @@
+{
+    "id": 120461089,
+    "contestId": 1170,
+    "creationTimeSeconds": 1624551047,
+    "relativeTimeSeconds": 167,
+    "problem": {
+        "contestId": 1170,
+        "index": "F",
+        "name": "Wheels",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "binary search",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1170,
+        "members": [
+            {
+                "handle": "kinnikuma"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1559054100
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 374,
+    "memoryConsumedBytes": 20582400,
+    "source": "fun getSumRange(l: Int, r: Int, sum: LongArray): Long {\r\n    return sum[r] - sum[l-1]\r\n}\r\n \r\nfun getNum(l: Int, r: Int): Int {\r\n    return r - l + 1\r\n}\r\n \r\nfun check(pos: Int, n: Int, m: Int, k: Int, a: IntArray, sum: LongArray, start: Int, end: Int, right: Int, w: Int): Long {\r\n    var inc = pos.toLong() * getNum(start, w).toLong() - getSumRange(start, w, sum)\r\n    var dec = 0L\r\n    if (w + 1 <= right) {\r\n        dec = getSumRange(w + 1, right, sum) - pos.toLong() * getNum(w + 1, right).toLong()\r\n    }\r\n    if (inc <= k) return inc + dec\r\n    return -1\r\n}\r\n \r\nfun main(args: Array<String>) {\r\n    var (n, m, k) = readLine()!!.split(\" \").map({it.toInt()})\r\n    var arr = readLine()!!.split(\" \").map({it.toInt()}).sorted().toIntArray()\r\n    var a = IntArray(n + 1)\r\n    var sum = LongArray(n + 1)\r\n    sum[0] = 0\r\n    a[0] = 0\r\n \r\n    for (i in 1..n) {\r\n        a[i] = arr[i-1]\r\n    }\r\n \r\n    for (i in 1..n) {\r\n        sum[i] = sum[i-1] + a[i]\r\n    }\r\n \r\n    var res = 1000000000000000000L\r\n    for (start in 1..(n-m+1)) {\r\n        var end = start + m - 1\r\n        var middle = (start + end) / 2\r\n \r\n        var inc = a[middle].toLong() * getNum(start, middle).toLong() - getSumRange(start, middle, sum)\r\n        var dec = getSumRange(middle, end, sum) - a[middle].toLong() * getNum(middle, end).toLong()\r\n        // println(\"$inc $dec\")\r\n        if (inc <= k) {\r\n            res = minOf(res, inc + dec)\r\n            continue\r\n        }\r\n \r\n        var dau = start\r\n        var cuoi = middle\r\n        while (dau <= cuoi) {\r\n            var mid = (dau + cuoi) / 2\r\n            inc = a[mid].toLong() * getNum(start, mid).toLong() - getSumRange(start, mid, sum)\r\n            if (inc <= k) dau = mid+1\r\n            else cuoi = mid-1\r\n        }\r\n        var w = cuoi\r\n \r\n        dau = a[cuoi]\r\n        cuoi = a[cuoi+1]\r\n        while (dau <= cuoi) {\r\n            var mid = (dau + cuoi) / 2\r\n            if (check(mid, n, m, k, a, sum, start, middle, end, w) >= 0) dau = mid+1\r\n            else cuoi = mid-1\r\n        }\r\n \r\n        var x = check(cuoi, n, m, k, a, sum, start, middle, end, w)\r\n        // println(\"$x $cuoi\")\r\n        \r\n        res = minOf(res, x)\r\n    }\r\n    println(res)\r\n    \r\n}\r\n"
+}

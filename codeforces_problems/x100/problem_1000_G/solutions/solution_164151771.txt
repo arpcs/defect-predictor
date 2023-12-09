@@ -1,0 +1,36 @@
+{
+    "id": 164151771,
+    "contestId": 1000,
+    "creationTimeSeconds": 1657804911,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "Windycaution"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 91033600,
+    "source": "//fuckLJS\r\n#include<bits/stdc++.h>\r\nusing namespace std;\r\ntypedef long long LL;\r\nchar buf[1<<21],*p1=buf,*p2=buf;\r\n#define getchar() (p1==p2 && (p2=(p1=buf)+fread(buf,1,1<<21,stdin),p1==p2)?EOF:*p1++)\r\nLL read()\r\n{\r\n    LL x=0,f=1;\r\n    char c=getchar();\r\n    while(c<'0' || c>'9')   f=(c=='-'?-1:f),c=getchar();\r\n    while(c>='0' && c<='9') x=(x<<1)+(x<<3)+(c^'0'),c=getchar();\r\n    return x*f;\r\n}\r\nvoid write(LL x)\r\n{\r\n    if(x<0) putchar('-'),x=-x;\r\n    if(x>9) write(x/10);\r\n    putchar(x%10+'0');\r\n}\r\nvector<LL> G[300005];\r\nLL n,a[300005],sum[300005],sd[300005],U[300005],V[300005],Z1[300005],Z2[300005],dep[300005],fa[19][300005],lgs[300005],sz1[300005],sz2[300005],dp[300005],dp1[300005],dp2[300005],rev[300005];\r\nvoid dfs(LL now,LL pre)\r\n{\r\n    fa[0][now]=pre;\r\n    dep[now]=dep[pre]+1;\r\n    for(auto st:G[now]) if(st^pre)  dfs(st,now);\r\n}\r\nLL LCA(LL u,LL v)\r\n{\r\n    if(dep[u]>dep[v])   swap(u,v);\r\n    while(dep[u]<dep[v])    v=fa[lgs[dep[v]-dep[u]]][v];\r\n    if(u==v)    return u;\r\n    for(LL i=18;~i;--i) if(fa[i][u]!=fa[i][v])  u=fa[i][u],v=fa[i][v];\r\n    return fa[0][u];\r\n}\r\nLL queKth(LL u,LL ac)\r\n{\r\n    LL ret=0;\r\n    for(LL i=18;~i;--i) if(dep[fa[i][u]]>=dep[ac])  u=fa[i][u],ret|=(1<<i);\r\n    return ret;\r\n}\r\nLL getKth(LL u,LL kt)\r\n{\r\n    for(LL i=18;~i;--i) if((kt>>i)&1)   u=fa[i][u];\r\n    return u;\r\n}\r\nvoid dfs1(LL now,LL pre)\r\n{\r\n    sum[now]=dp[now]=a[now];\r\n    for(auto st:G[now]) if(st^pre)  dfs1(st,now);\r\n    for(auto st:G[now]) if(st^pre)  dp[now]+=max(dp[st]-Z1[rev[st]]-Z2[rev[st]],0ll);\r\n    for(auto st:G[now]) if(st^pre)  sd[st]=dp1[st]=dp[now]-max(dp[st]-Z1[rev[st]]-Z2[rev[st]],0ll)-a[now];\r\n}\r\nvoid dfs2(LL now,LL pre)\r\n{\r\n    if(!pre)    dp2[now]=dp[now];\r\n    else    dp2[now]=max(0ll,dp2[pre]-max(dp[now]-Z1[rev[now]]-Z2[rev[now]],0ll)-Z1[rev[now]]-Z2[rev[now]])+dp[now];\r\n    for(auto st:G[now]) if(st^pre)  dfs2(st,now);\r\n}\r\nvoid maintain(LL now,LL pre){for(auto st:G[now])    if(st^pre)  sum[st]+=sum[now],sd[st]+=sd[now],sz1[st]+=sz1[now],sz2[st]+=sz2[now],maintain(st,now);}\r\nint main(){\r\n    n=read();\r\n    LL q=read();\r\n    for(LL i=1;i<=n;++i)    a[i]=read();\r\n    for(LL i=1;i<n;++i) U[i]=read(),V[i]=read(),Z1[i]=Z2[i]=read(),G[U[i]].push_back(V[i]),G[V[i]].push_back(U[i]);\r\n    dfs(1,0);\r\n    for(LL i=1;i<n;++i) if(dep[U[i]]<dep[V[i]]) swap(U[i],V[i]),swap(Z1[i],Z2[i]);\r\n    for(LL i=1;i<=18;++i)   for(LL j=1;j<=n;++j)    fa[i][j]=fa[i-1][fa[i-1][j]];\r\n    for(LL i=2;i<=n;++i)    lgs[i]=lgs[i>>1]+1;\r\n    for(LL i=1;i<n;++i) rev[U[i]]=i,sz1[U[i]]=Z1[i],sz2[U[i]]=Z2[i];\r\n    dfs1(1,0);\r\n    dfs2(1,0);\r\n    maintain(1,0);\r\n    while(q-->0)\r\n    {\r\n        LL u=read(),v=read(),lca=LCA(u,v);\r\n        if(u==v)    write(dp2[u]),puts(\"\");\r\n        else if(u!=lca && v!=lca)\r\n        {\r\n            LL disu=queKth(u,lca),disv=queKth(v,lca);\r\n            --disu,--disv;\r\n            LL xu=getKth(u,disu),xv=getKth(v,disv);\r\n            LL ans=dp[u]+dp[v]-a[u]-a[v]-a[lca]+sum[u]+sum[v]-sum[lca]-sum[fa[0][lca]]+sd[u]+sd[v]-sd[xu]-sd[xv]+dp2[lca]-max(0ll,dp[xu]-Z1[rev[xu]]-Z2[rev[xu]])-max(0ll,dp[xv]-Z1[rev[xv]]-Z2[rev[xv]])-sz1[u]-sz2[v]+sz1[lca]+sz2[lca];\r\n            write(ans),puts(\"\");\r\n        }\r\n        else\r\n        {\r\n            LL down=dep[u]>dep[v]?u:v;\r\n            LL disu=queKth(down,lca);\r\n            --disu;\r\n            LL xu=getKth(down,disu);\r\n            LL ans=dp[down]-a[down]+sd[down]-sd[lca]+dp2[lca]-max(0ll,dp[xu]-Z1[rev[xu]]-Z2[rev[xu]]);\r\n            if(down==u) ans-=sz1[u]-sz1[v];\r\n            else    ans-=sz2[v]-sz2[u];\r\n            ans+=sum[down]-sum[fa[0][lca]];\r\n            ans-=a[lca];\r\n            write(ans),puts(\"\");\r\n        }\r\n    }\r\n    return 0;\r\n}"
+}

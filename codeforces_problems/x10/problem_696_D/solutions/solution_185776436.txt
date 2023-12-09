@@ -1,0 +1,38 @@
+{
+    "id": 185776436,
+    "contestId": 696,
+    "creationTimeSeconds": 1671359891,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 696,
+        "index": "D",
+        "name": "Legen...",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2500,
+        "tags": [
+            "data structures",
+            "dp",
+            "matrices",
+            "strings"
+        ]
+    },
+    "author": {
+        "contestId": 696,
+        "members": [
+            {
+                "handle": "LunarLing"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1468514100
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 47,
+    "timeConsumedMillis": 514,
+    "memoryConsumedBytes": 2457600,
+    "source": "#include \"bits/stdc++.h\"\r\n\r\nusing matrix = std::vector<std::vector<int64_t>>;\r\n\r\nmatrix operator * (matrix lhs, matrix rhs) {\r\n  int n = int(lhs.size()), m = int(rhs[0].size());\r\n  assert(int(lhs[0].size()) == int(rhs.size()));\r\n\r\n  matrix res(n, std::vector<int64_t>(m, int64_t(-1) << 60));\r\n  for (int i = 0; i < n; i++) {\r\n    for (int j = 0; j < m; j++) {\r\n      for (int k = 0; k < int(rhs.size()); k++) {\r\n        res[i][j] = std::max(res[i][j], lhs[i][k] + rhs[k][j]);\r\n      }\r\n    }\r\n  }\r\n\r\n  return res;\r\n}\r\n\r\nsigned main() {\r\n  using namespace std;\r\n\r\n#ifdef DEBUG\r\n  freopen(\"Input.txt\", \"r\", stdin);\r\n#else\r\n  std::ios::sync_with_stdio(false);\r\n  std::cin.tie(nullptr);\r\n#endif\r\n\r\n  static int n, f = 1;\r\n  std::cin >> n;\r\n\r\n  static int64_t m;\r\n  std::cin >> m;\r\n\r\n  static std::vector<int> a(n);\r\n  for (int i = 0; i < n; i++) {\r\n    std::cin >> a[i];\r\n  }\r\n\r\n  static std::vector<std::vector<int>> g(1, std::vector<int>(26, -1));\r\n  static std::vector<int> value(1), fail(1);\r\n\r\n  struct function {\r\n    static void add(int u, int x) {\r\n      g[u][x] = f++;\r\n      g.emplace_back(std::vector<int>(26, -1));\r\n      value.emplace_back(0), fail.emplace_back(0);\r\n    }\r\n  };\r\n\r\n  for (int i = 0; i < n; i++) {\r\n    std::string s;\r\n    std::cin >> s;\r\n\r\n    int current = 0;\r\n    for (char c : s) {\r\n      int x = int(c - 'a');\r\n      if (g[current][x] == -1) {\r\n        function::add(current, x);\r\n      }\r\n      current = g[current][x];\r\n    }\r\n    value[current] += a[i];\r\n  }\r\n\r\n  static std::queue<int> que;\r\n  for (int i = 0; i < 26; i++) {\r\n    if (g[0][i] == -1) {\r\n      g[0][i] = 0;\r\n    }\r\n    else {\r\n      fail[g[0][i]] = 0;\r\n      que.emplace(g[0][i]);\r\n    }\r\n  }\r\n\r\n  while (!que.empty()) {\r\n    int u = que.front();\r\n    que.pop();\r\n\r\n    value[u] += value[fail[u]];\r\n    for (int i = 0; i < 26; i++) {\r\n      if (g[u][i] == -1) {\r\n        g[u][i] = g[fail[u]][i];\r\n      }\r\n      else {\r\n        fail[g[u][i]] = g[fail[u]][i];\r\n        que.emplace(g[u][i]);\r\n      }\r\n    }\r\n  }\r\n\r\n  matrix trans(f, std::vector<int64_t>(f, int64_t(-1) << 60));\r\n\r\n  for (int u = 0; u < f; u++) {\r\n    for (int w = 0; w < 26; w++) {\r\n      int v = g[u][w];\r\n      trans[u][v] = value[v];\r\n    }\r\n  }\r\n\r\n  matrix s(f, std::vector<int64_t>(f, int64_t(-1) << 60));\r\n  for (int i = 0; i < f; i++) {\r\n    s[i][i] = 0;\r\n  }\r\n\r\n  for (matrix x = trans; m > 0; m >>= 1, x = x * x) {\r\n    if (m % 2 == 1) {\r\n      s = s * x;\r\n    }\r\n  }\r\n\r\n  static int64_t res = *std::max_element(s[0].begin(), s[0].end());\r\n\r\n  std::cout << res << \"\\n\";\r\n\r\n  return 0;\r\n}"
+}

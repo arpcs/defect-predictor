@@ -1,0 +1,36 @@
+{
+    "id": 162530641,
+    "contestId": 1000,
+    "creationTimeSeconds": 1656756024,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1000,
+        "index": "G",
+        "name": "Two-Paths",
+        "type": "PROGRAMMING",
+        "rating": 2700,
+        "tags": [
+            "data structures",
+            "dp",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1000,
+        "members": [
+            {
+                "handle": "20Ti_ntson"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1530110100
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 3,
+    "timeConsumedMillis": 15,
+    "memoryConsumedBytes": 91340800,
+    "source": "/// Author : Nguy\u1ec5n Th\u00e1i S\u01a1n - Ti20 - THPT chuy\u00ean L\u01b0\u01a1ng Th\u1ebf Vinh\r\n\r\n#include<bits/stdc++.h>\r\n//#pragma GCC optimize(\"Ofast\")\r\n\r\n#define fi first\r\n#define se second\r\n#define TASK \"test\"\r\n#define pb push_back\r\n#define EL cout << endl\r\n#define Ti20_ntson int main()\r\n#define in(x) cout << x << endl\r\n#define all(x) (x).begin(),(x).end()\r\n#define getbit(x, i) (((x) >> (i)) & 1)\r\n#define cntbit(x) __builtin_popcount(x)\r\n#define FOR(i,l,r) for (int i = l; i <= r; i++)\r\n#define FORD(i,l,r) for (int i = l; i >= r; i--)\r\n#define Debug(a,n) for (int i = 1; i <= n; i++) cout << a[i] << \" \"; cout << endl\r\n\r\nusing namespace std;\r\n\r\ntypedef long long ll;\r\ntypedef vector<int> vi;\r\ntypedef pair<int,int> vii;\r\ntypedef unsigned long long ull;\r\ntypedef vector<vector<int>> vvi;\r\n\r\nconst int N = 3e5 + 5;\r\nconst int oo = INT_MAX;\r\nconst int mod = 1e9 + 7;\r\nconst int d4x[4] = {-1, 0, 1, 0} , d4y[4] = {0, 1, 0, -1};\r\nconst int d8x[8] = {-1, -1, 0, 1, 1, 1, 0, -1}, d8y[8] = {0, 1, 1, 1, 0, -1, -1, -1};\r\n\r\nint n, m, a[N];\r\nvector<vii> dsk[N];\r\n\r\ninline void Read_Input() {\r\n    cin >> n >> m;\r\n    FOR(i, 1, n) cin >> a[i];\r\n    FOR(i, 2, n) {\r\n        register int u, v, w;\r\n        cin >> u >> v >> w;\r\n        dsk[u].push_back(vii(v, w));\r\n        dsk[v].push_back(vii(u, w));\r\n    }\r\n}\r\n\r\nint h[N], par[N][22], Dis[N];\r\nlong long ST[N][22];\r\nlong long f[N], getPar[N];\r\n\r\ninline void dfs(int u, int far) {\r\n    for (vii v : dsk[u])\r\n        if (v.fi != far) {\r\n            h[v.fi] = h[u] + 1;\r\n            Dis[v.fi] = v.se;\r\n            par[v.fi][0] = u;\r\n            dfs(v.fi, u);\r\n            f[u] = max(f[u], f[u] + f[v.fi] - 2 * v.se);\r\n    }\r\n//    cout << \"VER\" << u << \" \" << f[u] << endl;\r\n    for (vii v : dsk[u])\r\n        if (v.fi != far) {\r\n            ST[v.fi][0] = f[u] - max(0ll, f[v.fi] - 2 * v.se);\r\n//            cout << ST[v.fi][0] << \" \" << a[v.fi] - v.se << \" \";\r\n            ST[v.fi][0] += (a[v.fi] - v.se);\r\n//            cout << v.fi << \" \" << ST[v.fi][0] << endl;\r\n        }\r\n    f[u] += a[u];\r\n}\r\n\r\ninline int LCA(int u, int v) {\r\n    if (h[u] < h[v]) swap(u, v);\r\n    int LOGG = log2(h[u]);\r\n    FORD(i, LOGG, 0)\r\n        if (h[u] - (1 << i) >= h[v]) u = par[u][i];\r\n    if (u == v) return u;\r\n    FORD(i, LOGG, 0)\r\n        if (par[u][i] != par[v][i])\r\n            u = par[u][i],\r\n            v = par[v][i];\r\n    return par[u][0];\r\n}\r\n\r\ninline void DFS(int u, int p) {\r\n    for (vii v : dsk[u])\r\n        if (v.fi != p) {\r\n            getPar[v.fi] = getPar[u] + f[u] - max(0ll, f[v.fi] - 2 * v.se) - 2 * v.se;\r\n            getPar[v.fi] = max(0ll, getPar[v.fi]);\r\n            DFS(v.fi, u);\r\n        }\r\n}\r\n\r\ninline void Solve() {\r\n    dfs(1, 1);\r\n    DFS(1, 1);\r\n    FOR(i, 1, 20)\r\n        FOR(j, 1, n)\r\n            par[j][i] = par[par[j][i - 1]][i - 1],\r\n            ST[j][i] = ST[j][i - 1] + ST[j + par[j][i - 1]][i - 1];\r\n//    cout << ST[4][0];\r\n    while (m -- ) {\r\n        register int u, v;\r\n        cin >> u >> v;\r\n        if (u == v) {\r\n            cout << f[u] + getPar[u] << '\\n';\r\n            continue;\r\n        }\r\n        int cc = LCA(u, v);\r\n        ll ans = getPar[cc] + a[cc];\r\n        bool oke = false;\r\n        if (u != cc && v != cc) oke = true;\r\n        if (u != cc) {\r\n            ans += max(0ll, f[u] - a[u]);\r\n            int Dep = h[u] - h[cc] - oke;\r\n            FORD(i, 20, 0)\r\n                if (Dep - (1 << i) >= 0) {\r\n                    Dep -= (1 << i);\r\n                    ans += ST[u][i];\r\n                    u = par[u][i];\r\n                }\r\n            if (oke) ans += a[u] - Dis[u],\r\n                     ans -= max(0ll, f[u] - Dis[u] * 2);\r\n        }\r\n        u = v;\r\n        if (u != cc) {\r\n            ans += max(0ll, f[u] - a[u]);\r\n            int Dep = h[u] - h[cc] - oke;\r\n            FORD(i, 20, 0)\r\n                if (Dep - (1 << i) >= 0) {\r\n                    Dep -= (1 << i);\r\n                    ans += ST[u][i];\r\n                    u = par[u][i];\r\n                }\r\n            if (oke) ans += a[u] - Dis[u],\r\n                     ans -= max(0ll, f[u] - Dis[u] * 2);\r\n        }\r\n        if (oke) ans += f[cc] - a[cc];\r\n        cout << ans << \"\\n\";\r\n    }\r\n}\r\n\r\nTi20_ntson {\r\n//    freopen(TASK\".INP\",\"r\",stdin);\r\n//    freopen(TASK\".OUT\",\"w\",stdout);\r\n    ios_base::sync_with_stdio(false); cin.tie(0); cout.tie(0);\r\n    int T = 1;\r\n    while (T -- ) {\r\n        Read_Input();\r\n        Solve();\r\n    }\r\n}\r\n\r\n"
+}

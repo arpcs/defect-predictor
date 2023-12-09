@@ -1,0 +1,35 @@
+{
+    "id": 227297809,
+    "contestId": 1209,
+    "creationTimeSeconds": 1696842796,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1209,
+        "index": "G2",
+        "name": "Into Blocks (hard version)",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "data structures"
+        ]
+    },
+    "author": {
+        "contestId": 1209,
+        "members": [
+            {
+                "handle": "bkifhr6"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1568466300
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 25,
+    "timeConsumedMillis": 919,
+    "memoryConsumedBytes": 37888000,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\nint n,M=200000,a[200005];\nstruct xds{int l,r,mi,lmx,rmx,mx,ans,lz;}t[800005];\nvoid push_up(int i)\n{\n\tt[i].mx=max(t[i*2].mx,t[i*2+1].mx);\n\tif(t[i*2].mi<t[i*2+1].mi)\n\t{\n\t\tt[i].mi=t[i*2].mi;\n\t\tt[i].rmx=max(t[i*2].rmx,t[i*2+1].mx);\n\t\tt[i].lmx=t[i*2].lmx;t[i].ans=t[i*2].ans;\n\t}\n\telse if(t[i*2].mi>t[i*2+1].mi)\n\t{\n\t\tt[i].mi=t[i*2+1].mi;\n\t\tt[i].lmx=max(t[i*2+1].lmx,t[i*2].mx);\n\t\tt[i].rmx=t[i*2+1].rmx;t[i].ans=t[i*2+1].ans;\n\t}\n\telse\n\t{\n\t\tt[i].mi=t[i*2].mi;\n\t\tt[i].lmx=t[i*2].lmx;t[i].rmx=t[i*2+1].rmx;\n\t\tt[i].ans=t[i*2].ans+t[i*2+1].ans+max(t[i*2].rmx,t[i*2+1].lmx);\n\t}\n}\nvoid push_down(int i)\n{\n\tif(!t[i].lz) return;\n\tt[i*2].mi+=t[i].lz;t[i*2+1].mi+=t[i].lz;\n\tt[i*2].lz+=t[i].lz;t[i*2+1].lz+=t[i].lz;\n\tt[i].lz=0;\n}\nvoid build(int i,int L,int R)\n{\n\tt[i].l=L;t[i].r=R;t[i].mi=0;\n\tif(L==R) return;int mid=(L+R)>>1;\n\tbuild(i*2,L,mid);build(i*2+1,mid+1,R);\n\tpush_up(i);\n}\nvoid upd(int i,int l,int r,int val)\n{\n\tif(t[i].l>=l&&t[i].r<=r)\n\t{t[i].lz+=val;t[i].mi+=val;return;}\n\tint mid=(t[i].l+t[i].r)>>1;push_down(i);\n\tif(l<=mid) upd(i*2,l,r,val);\n\tif(r>mid) upd(i*2+1,l,r,val);\n\tpush_up(i);\n}\nvoid getval(int i,int pos,int val)\n{\n\tif(t[i].l==t[i].r)\n\t{\n\t\tt[i].ans=t[i].rmx=0;\n\t\tt[i].mx+=val;t[i].lmx=t[i].mx;\n\t\treturn;\n\t}\n\tint mid=(t[i].l+t[i].r)>>1;push_down(i);\n\tgetval(pos<=mid?i*2:i*2+1,pos,val);\n\tpush_up(i);\n}\nset<int>s[200005];\nvoid add(int pos,int val)\n{\n\tif(s[val].size()>0)\n\t{\n\t\tif(pos>*s[val].rbegin()) upd(1,*s[val].rbegin(),pos-1,1);\n\t\tif(pos<*s[val].begin()) upd(1,pos,*s[val].begin()-1,1);\n\t}\n\tgetval(1,*s[val].begin(),-s[val].size());\n\ts[val].insert(pos);\n\tgetval(1,*s[val].begin(),s[val].size());\n}\nvoid del(int pos,int val)\n{\n\tset<int>::iterator it;\n\tif(s[val].size()!=1)\n\t{\n\t\tif(pos==*s[val].rbegin())\n\t\t{\n\t\t\tit=s[val].end();it--;it--;\n\t\t\tupd(1,*it,pos-1,-1);\n\t\t}\n\t\tif(pos==*s[val].begin())\n\t\t{\n\t\t\tit=s[val].begin();it++;\n\t\t\tupd(1,pos,*it-1,-1);\n\t\t}\n\t}\n\tgetval(1,*s[val].begin(),-s[val].size());\n\ts[val].erase(s[val].find(pos));\n\tgetval(1,*s[val].begin(),s[val].size());\n}\nvoid print(int i)\n{\n\tif(t[i].l==t[i].r){cout<<t[i].mi<<\" \";return;}\n\tpush_down(i);print(i*2);print(i*2+1);\n}\nint main()\n{\n\tint q,x,p;cin>>n>>q;\n\tfor(int i=1;i<=n;i++) scanf(\"%d\",&a[i]),s[a[i]].insert(i);\n\tbuild(1,1,n);\n\tfor(int i=1;i<=M;i++)\n\t{\n\t\tif(!s[i].size()) continue;\n\t\tint ls=*s[i].begin(),rs=*s[i].rbegin();\n\t\tif(ls!=rs) upd(1,ls,rs-1,1);\n\t\tgetval(1,ls,(int)s[i].size());\n\t}\n\tprintf(\"%d\\n\",n-(t[1].ans+t[1].lmx+t[1].rmx));\n\twhile(q--)\n\t{\n\t\tscanf(\"%d%d\",&p,&x);\n\t\tif(a[p]!=x) del(p,a[p]),a[p]=x,add(p,a[p]);\n\t\tprintf(\"%d\\n\",n-(t[1].ans+t[1].lmx+t[1].rmx));\n\t}\n\treturn 0;\n}\n\t\t\t  \t \t\t\t\t\t \t     \t \t\t    \t\t\t\t"
+}

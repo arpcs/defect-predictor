@@ -1,0 +1,37 @@
+{
+    "id": 232091989,
+    "contestId": 377,
+    "creationTimeSeconds": 1699543342,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 377,
+        "index": "C",
+        "name": "Captains Mode",
+        "type": "PROGRAMMING",
+        "points": 1000.0,
+        "rating": 2200,
+        "tags": [
+            "bitmasks",
+            "dp",
+            "games"
+        ]
+    },
+    "author": {
+        "contestId": 377,
+        "members": [
+            {
+                "handle": "hocky"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1388331000
+    },
+    "programmingLanguage": "GNU C++20 (64)",
+    "verdict": "COMPILATION_ERROR",
+    "testset": "TESTS",
+    "passedTestCount": 0,
+    "timeConsumedMillis": 0,
+    "memoryConsumedBytes": 0,
+    "source": "\n#include \"bits/stdc++.h\"\nusing namespace std;\n\n#define rep(i,a,b) for(int i = a;i < b;i++)\n#define pb push_back\n#define all(v) v.begin(), v.end()\n#define sz(v) (int) v.size()\n#define trav(nx, v) for(auto &nx : v)\n#define endl '\\n'\n#define fi first\n#define se second\ntypedef pair<bool, bool> TBI;\nvector <int> isi;\nvector <TBI> action;\ntypedef int LL;\n\nconst int nMax = 20;\nconst int LIM = (1<<nMax);\nbool vis[nMax + 1][LIM + 1];\nLL memo[nMax + 1][LIM + 1];\nint n;\ntemplate <int pos> // 2 instances: <0, 2> and <1, 2>\ninline LL dp(int mask){\n  // if(__builtin_popcount(mask) > pos) assert(0);\n  if(pos == n) return 0;\n  LL &ret = memo[pos][mask];\n  if(vis[pos][mask]) return ret;\n  vis[pos][mask] = 1;\n  if(action[pos].se == 0) ret = INT_MIN;\n  else ret = INT_MAX;\n  if(action[pos].fi == 1){\n    // miss ban\n    if(action[pos].se == 0) {\n      ret = max(ret, dp<pos>(mask));\n      // cout << pos << \" \" << mask << \" \" << ret << endl;\n    }else ret = min(ret, dp<pos + 1>(mask));\n  }\n  for(int i = 0;i < n;i++){\n    if((mask>>i) & 1) continue;\n    // try to do action on this one\n    if(action[pos].fi == 0){\n      // pick\n      int cost = isi[i];\n      if(action[pos].se == 1) cost = -cost;\n      LL nx = dp<pos + 1>(mask|(1<<i)) + cost;\n      if(action[pos].se == 0){\n        ret = max(ret, nx);\n      } else {\n        // minimize\n        ret = min(ret, nx);\n      }\n    } else {\n      // ban\n      LL nx = dp<pos + 1>(mask|(1<<i));\n      if(action[pos].se == 0) {\n        ret = max(ret, nx);\n      } else {\n        ret = min(ret, nx);\n      }\n    }\n  }\n  return ret;\n}\n\nint main(){\n  cin.tie(0)->sync_with_stdio(0);\n  cout.tie(0);\n  cin >> n;\n  isi.resize(n);\n  trav(cur, isi) cin >> cur;\n  sort(all(isi));\n  reverse(all(isi));\n  cin >> n;\n  isi.resize(n);\n  action.resize(n);\n  trav(cur, action){\n    char ch; cin >> ch;\n    cur.fi = (ch == 'b');\n    int tmp; cin >> tmp;\n    cur.se = (tmp == 2);\n  }\n  cout << dp<0>(0) << endl;\n}"
+}

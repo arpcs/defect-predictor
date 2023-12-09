@@ -1,0 +1,37 @@
+{
+    "id": 175845100,
+    "contestId": 1007,
+    "creationTimeSeconds": 1665646815,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1007,
+        "index": "D",
+        "name": "Ants",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "2-sat",
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1007,
+        "members": [
+            {
+                "handle": "CharlieV"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1531492500
+    },
+    "programmingLanguage": "GNU C++17 (64)",
+    "verdict": "WRONG_ANSWER",
+    "testset": "TESTS",
+    "passedTestCount": 10,
+    "timeConsumedMillis": 264,
+    "memoryConsumedBytes": 643379200,
+    "source": "#include <bits/stdc++.h>\r\n#define For(i,a,b) for(int i=a;i<=b;i++)\r\n#define Rev(i,a,b) for(int i=a;i>=b;i--)\r\n#define Fin(file) freopen(file,\"r\",stdin)\r\n#define Fout(file) freopen(file,\"w\",stdout)\r\nusing namespace std;\r\nconst int N=2e5+5,M=1.5e7+5; typedef long long ll;\r\n#define k1 k<<1\r\n#define k2 k<<1|1\r\nint n,m,dep[N],top[N],siz[N],son[N],pos[N],pcnt,raw[N],fa[N]; vector<int> to[N],cp[M];\r\nint in[N<<2][2],out[N<<2][2],tot,dfn[M],low[M],dfscnt,st[M],ins[M],tp,num[N],ccnt;\r\nvoid dfs1(int u,int pa){\r\n    siz[u]=1; for(int v:to[u]) if(v!=pa) { dep[v]=dep[u]+1; fa[v]=u; dfs1(v,u); siz[v]+=siz[u]; if(siz[v]>siz[son[u]]) son[u]=v; }\r\n}\r\nvoid dfs2(int u,int pa){\r\n    raw[pos[u]=++pcnt]=u;\r\n    if(son[u]) { top[son[u]]=top[u]; dfs2(son[u],u); }\r\n    for(int v:to[u]) if(v!=pa&&v!=son[u]) { top[v]=v; dfs2(v,u); }\r\n}\r\n// vector<int> lis[N];\r\nint ed[N<<2][2],sum[N<<2],fas[N<<2];\r\nvoid add(int k,int l,int r,int ql,int qr,int id){\r\n    if(ql<=l&&r<=qr){\r\n        if(ed[k][0]) cp[ed[k][0]].push_back(id^1);\r\n        if(ed[k][1]) cp[id].push_back(ed[k][1]);\r\n        tot++; if(ed[k][0]){cp[ed[k][0]].push_back(tot);} cp[id].push_back(tot); ed[k][0]=tot;\r\n        tot++; if(ed[k][1]){cp[tot].push_back(ed[k][1]);} cp[tot].push_back(id^1); ed[k][1]=tot;\r\n        return;\r\n    }\r\n    int mid=(l+r)>>1; if(ql<=mid) add(k1,l,mid,ql,qr,id);  if(mid+1<=qr) add(k2,mid+1,r,ql,qr,id);\r\n}\r\nvoid work(int x,int y,int id){\r\n    // printf(\"work(%d,%d,%d)\\n\",x,y,id);\r\n    while(top[x]!=top[y]){\r\n        if(dep[top[x]]<dep[top[y]]) swap(x,y);\r\n        add(1,1,n,pos[top[x]],pos[x],id)/*,printf(\"add(%d,%d,%d)\\n\",pos[top[x]],pos[x],id)*/; x=fa[top[x]];\r\n    }\r\n    if(dep[x]<dep[y]) swap(x,y);\r\n    if(x!=y) add(1,1,n,pos[y]+1,pos[x],id)/*,printf(\"add(%d,%d,%d)\\n\",pos[y]+1,pos[x],id)*/;\r\n}\r\nvoid addall(int k,int l,int r){\r\n    if(l==r) { sum[k]=++tot; if(ed[k][0]) { cp[sum[k]].push_back(ed[k][1]); }  return; }\r\n    int mid=(l+r)>>1;\r\n    fas[k1]=++tot; cp[fas[k1]].push_back(fas[k]); if(ed[k1][1]) { assert(ed[k1][0]); cp[fas[k1]].push_back(ed[k1][1]); cp[ed[k1][0]].push_back(fas[k]); }\r\n    fas[k2]=++tot; cp[fas[k2]].push_back(fas[k]); if(ed[k2][1]) { assert(ed[k2][0]); cp[fas[k2]].push_back(ed[k2][1]); cp[ed[k2][0]].push_back(fas[k]); }\r\n    addall(k1,l,mid); addall(k2,mid+1,r);\r\n    assert(sum[k1]&&sum[k2]);\r\n    sum[k]=++tot; cp[sum[k]].push_back(sum[k1]); cp[sum[k]].push_back(sum[k2]);\r\n    if(ed[k][0]){ assert(ed[k][1]);\r\n        cp[sum[k]].push_back(ed[k][1]);\r\n        cp[ed[k][0]].push_back(sum[k1]);\r\n        cp[ed[k][0]].push_back(sum[k2]);\r\n    }\r\n}\r\nvoid dfs(int u){\r\n    dfn[u]=low[u]=++dfscnt; st[++tp]=u; ins[u]=1;\r\n    for(int v:cp[u]){\r\n        if(!dfn[v]) { dfs(v); low[u]=min(low[u],low[v]); }\r\n        else if(ins[v]) { low[u]=min(low[u],dfn[v]); }\r\n    }\r\n    if(low[u]==dfn[u]){\r\n        ccnt++; int z; do{\r\n            z=st[tp--]; ins[z]=0; num[z]=ccnt;\r\n        }while(z!=u);\r\n    }\r\n}\r\nsigned main(){\r\n    // Fin(\"hh.in\");\r\n    ios::sync_with_stdio(false); cin.tie(0); cout.tie(0);\r\n    cin>>n; For(i,1,n-1) { int x,y; cin>>x>>y; to[x].push_back(y); to[y].push_back(x); }\r\n    dep[1]=1; dfs1(1,0); top[1]=1; dfs2(1,0); assert(pcnt==n);\r\n    cin>>m; tot=2*m+1;\r\n    // For(i,1,n) cerr<<raw[i]<<' '; cerr<<endl;\r\n    // For(i,1,n) cerr<<top[i]<<' '; cerr<<endl;\r\n    For(i,1,m){\r\n        int x1,y1,x2,y2; cin>>x1>>y1>>x2>>y2;\r\n        work(x1,y1,i*2); work(x2,y2,i*2+1);\r\n    }\r\n    fas[1]=++tot; if(ed[1][1]) cp[fas[1]].push_back(ed[1][1]);\r\n    addall(1,1,n);\r\n    // For(u,2,tot) for(int v:cp[u]) printf(\"%d %d\\n\",u,v);\r\n    For(i,2,tot) if(!dfn[i]) dfs(i);\r\n    For(i,1,m) if(num[i*2]==num[i*2+1]) { cout<<\"NO\\n\"; return 0; }\r\n    cout<<\"YES\\n\";\r\n    For(i,1,m){\r\n        if(num[i*2]<num[i*2+1]) cout<<\"1\\n\"; else cout<<\"2\\n\";\r\n    }\r\n    cerr<<\"Time = \"<<clock()<<\" ms\"<<endl;\r\n    return 0;\r\n}\r\n\r\n// START TYPING IF YOU DON'T KNOW WHAT TO DO\r\n\r\n        // if(cur[k][0]) { cp[id].push_back(cur[k][1]); cp[cur[k][0]].push_back(id^1); }\r\n        // tot++; if(cur[k][0]) { cp[tot].push_back(cur[k][0]);cp[cur[k][0]].push_back(tot); } cp[tot].push_back(id); cp[id].push_back(tot); cur[k][0]=tot;\r\n        // tot++; if(cur[k][1]) { cp[tot].push_back(cur[k][1]);cp[cur[k][1]].push_back(tot); } cp[tot].push_back(id^1); cp[id^1].push_back(tot); cur[k][1]=tot;\r\n        // if(in[k][0]) { cp[in[k][0]].push_back(id^1); cp[in[k][1]].push_back(id); }\r\n        // if(out[k][0]) { cp[id].push_back(out[k][1]); cp[id^1].push_back(out[k][0]); }\r\n        // tot++; if(in[k][0]) { cp[in[k][0]].push_back(tot); } cp[id].push_back(tot); in[k][0]=tot;\r\n        // tot++; if(in[k][1]) { cp[in[k][1]].push_back(tot); } cp[id^1].push_back(tot); in[k][1]=tot;\r\n        // tot++; if(out[k][0]) { cp[tot].push_back(out[k][0]); } cp[tot].push_back(id); out[k][0]=tot;\r\n        // tot++; if(out[k][1]) { cp[tot].push_back(out[k][1]); } cp[tot].push_back(id^1); out[k][1]=tot;\r\n        // for(int x:lis[k][0]) { cp[x].push_back(id^1); cp[id^1].push_back(x); printf(\"(%d,%d)\\n(%d,%d)\\n\",x,id^1,id^1,x); }\r\n        // for(int x:lis[k][1]) { cp[x].push_back(id); cp[id].push_back(x); printf(\"(%d,%d)\\n(%d,%d)\\n\",x,id,id,x); }\r\n        // lis[k][0].push_back(id); lis[k][1].push_back(id^1);\r\n        // for(int x:lis[k]) { cp[id].push_back(x^1); cp[x].push_back(id^1); }\r\n        // lis[k].push_back(id);"
+}

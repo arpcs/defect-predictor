@@ -1,0 +1,37 @@
+{
+    "id": 188890219,
+    "contestId": 1007,
+    "creationTimeSeconds": 1673445903,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1007,
+        "index": "D",
+        "name": "Ants",
+        "type": "PROGRAMMING",
+        "points": 2250.0,
+        "rating": 3200,
+        "tags": [
+            "2-sat",
+            "data structures",
+            "trees"
+        ]
+    },
+    "author": {
+        "contestId": 1007,
+        "members": [
+            {
+                "handle": "johnsonloy"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1531492500
+    },
+    "programmingLanguage": "GNU C++14",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 78,
+    "timeConsumedMillis": 655,
+    "memoryConsumedBytes": 530944000,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\n\r\n#define ll long long\r\n#define fi first\r\n#define se second\r\n#define pii pair<int, int>\r\n#define mp make_pair\r\nconst int maxn = 6e6 + 10;\r\nconst int maxm = 6e6 + 10;\r\nconst int mod = 1e9 + 7;\r\nconst ll inf = 0x3f3f3f3f3f3f3f3f;\r\n\r\nnamespace IO {\r\nvoid openfile() {\r\n#ifndef ONLINE_JUDGE\r\n    freopen(\"in.in\", \"r\", stdin);\r\n    freopen(\"out.out\", \"w\", stdout);\r\n#endif\r\n}\r\n\r\ninline int read() {\r\n    int x = 0, f = 0;\r\n    char c = getchar();\r\n    while (!isdigit(c))\r\n        f |= c == '-', c = getchar();\r\n    while (isdigit(c))\r\n        x = x * 10 + c - '0', c = getchar();\r\n    if (f)\r\n        x = -x;\r\n    return x;\r\n}\r\n}  // namespace IO\r\nusing namespace IO;\r\n\r\nint n, m;\r\nint fa[maxn], siz[maxn], dep[maxn], son[maxn], top[maxn], dfn[maxm], tim;\r\nint sta[maxn], tp, vis[maxn], low[maxm], c[maxm];\r\nint tot, cnt;\r\nvector<int> e[maxm], g[maxn], node[maxn];\r\n\r\nvoid add(int x, int y) {\r\n    e[x].push_back(y);\r\n    e[y ^ 1].push_back(x ^ 1);\r\n}\r\n\r\nvoid dfs1(int x, int f) {\r\n    fa[x] = f;\r\n    siz[x] = 1;\r\n    dep[x] = dep[f] + 1;\r\n    for (auto v : g[x]) {\r\n        if (v == f)\r\n            continue;\r\n        dfs1(v, x);\r\n        siz[x] += siz[v];\r\n        if (siz[v] > siz[son[x]])\r\n            son[x] = v;\r\n    }\r\n}\r\n\r\nvoid dfs2(int x, int tp) {\r\n    top[x] = tp;\r\n    dfn[x] = ++tim;\r\n    if (son[x])\r\n        dfs2(son[x], tp);\r\n    for (auto v : g[x]) {\r\n        if (v == son[x] || v == fa[x])\r\n            continue;\r\n        dfs2(v, v);\r\n    }\r\n}\r\n\r\nvoid change(int rt, int l, int r, int x, int y, int id) {\r\n    if (x <= l && r <= y) {\r\n        node[rt].push_back(id);\r\n        return;\r\n    }\r\n    int mid = (l + r) >> 1;\r\n    if (x <= mid)\r\n        change(rt << 1, l, mid, x, y, id);\r\n    if (y > mid)\r\n        change(rt << 1 | 1, mid + 1, r, x, y, id);\r\n}\r\n\r\nvoid addtag(int x, int y, int id) {\r\n    while (top[x] != top[y]) {\r\n        if (dep[top[x]] < dep[top[y]])\r\n            swap(x, y);\r\n        change(1, 2, n, dfn[top[x]], dfn[x], id);\r\n        x = fa[top[x]];\r\n    }\r\n    if (dep[x] > dep[y])\r\n        swap(x, y);\r\n    if (dfn[x] < dfn[y])\r\n        change(1, 2, n, dfn[x] + 1, dfn[y], id);\r\n}\r\n\r\nvoid build(int rt, int l, int r, int lst) {\r\n    int ql = ++tot, qr = (tot += node[rt].size());\r\n    if (ql != qr)\r\n        add(qr << 1 | 1, qr - 1 << 1 | 1);\r\n    else if (lst)\r\n        add(ql << 1 | 1, lst << 1 | 1);\r\n    for (int i = 0; i < node[rt].size(); i++) {\r\n        int id = node[rt][i];\r\n        if (i)\r\n            add(ql + i << 1 | 1, ql + i - 1 << 1 | 1);\r\n        else if (lst)\r\n            add(ql << 1 | 1, lst << 1 | 1);\r\n        add(id, ql + i << 1);\r\n        if (i)\r\n            add(ql + i - 1 << 1, id ^ 1);\r\n        else if (lst)\r\n            add(lst << 1, id ^ 1);\r\n    }\r\n    if (l < r) {\r\n        int mid = (l + r) >> 1;\r\n        build(rt << 1, l, mid, qr);\r\n        build(rt << 1 | 1, mid + 1, r, qr);\r\n    }\r\n}\r\n\r\nvoid tarjan(int x) {\r\n    sta[++tp] = x;\r\n    vis[x] = 1;\r\n    low[x] = dfn[x] = ++tim;\r\n    for (auto v : e[x]) {\r\n        if (!dfn[v])\r\n            tarjan(v), low[x] = min(low[x], low[v]);\r\n        else if (vis[v])\r\n            low[x] = min(low[x], dfn[v]);\r\n    }\r\n    if (dfn[x] == low[x]) {\r\n        ++cnt;\r\n        int y;\r\n        do {\r\n            y = sta[tp--];\r\n            c[y] = cnt;\r\n            vis[y] = 0;\r\n        } while (y != x);\r\n    }\r\n}\r\n\r\nsigned main() {\r\n    openfile();\r\n    n = read();\r\n    for (int i = 1; i < n; i++) {\r\n        int x = read(), y = read();\r\n        g[x].push_back(y), g[y].push_back(x);\r\n    }\r\n    dfs1(1, 0), dfs2(1, 1);\r\n    tot = m = read();\r\n    for (int i = 1; i <= m; i++) {\r\n        int x = read(), y = read();\r\n        addtag(x, y, i << 1);\r\n        x = read(), y = read();\r\n        addtag(x, y, i << 1 | 1);\r\n    }\r\n    build(1, 2, n, 0);\r\n    memset(dfn, 0, sizeof(dfn));\r\n    tim = 0;\r\n    for (int i = 2; i <= tot * 2 + 1; i++)\r\n        if (!dfn[i])\r\n            tarjan(i);\r\n    for (int i = 1; i <= m; i++)\r\n        if (c[i << 1] == c[i << 1 | 1]) {\r\n            puts(\"NO\");\r\n            return 0;\r\n        }\r\n    puts(\"YES\");\r\n    for (int i = 1; i <= m; i++) {\r\n        printf(\"%d\\n\", c[i << 1] < c[i << 1 | 1] ? 1 : 2);\r\n    }\r\n    cerr << 1.0 * clock() / CLOCKS_PER_SEC << '\\n';\r\n    return 0;\r\n}"
+}

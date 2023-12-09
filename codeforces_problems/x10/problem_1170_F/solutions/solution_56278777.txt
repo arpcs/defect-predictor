@@ -1,0 +1,35 @@
+{
+    "id": 56278777,
+    "contestId": 1170,
+    "creationTimeSeconds": 1561822742,
+    "relativeTimeSeconds": 2147483647,
+    "problem": {
+        "contestId": 1170,
+        "index": "F",
+        "name": "Wheels",
+        "type": "PROGRAMMING",
+        "tags": [
+            "*special",
+            "binary search",
+            "greedy"
+        ]
+    },
+    "author": {
+        "contestId": 1170,
+        "members": [
+            {
+                "handle": "sekti"
+            }
+        ],
+        "participantType": "PRACTICE",
+        "ghost": false,
+        "startTimeSeconds": 1559054100
+    },
+    "programmingLanguage": "Kotlin 1.4",
+    "verdict": "OK",
+    "testset": "TESTS",
+    "passedTestCount": 51,
+    "timeConsumedMillis": 467,
+    "memoryConsumedBytes": 21094400,
+    "source": "import kotlin.math.min\r\n\r\nfun readInts() = readLine()!!.split(\" \").map { it.toLong() }\r\nfun readInt() = readLine()!!.toLong()\r\nfun readLenAndInts() = readLine()!!.split(\" \").drop(1).map { it.toLong() }\r\nfun prefixSum(L : List<Long>) : List<Long> {\r\n    val LPS = mutableListOf<Long>(0)\r\n    L.map { LPS.add(LPS.last()+it) }\r\n    return LPS\r\n}\r\nfun main() {\r\n    val (_,m,k) = readInts()\r\n    val wheels = readInts().sorted()\r\n    val wheelsPS = prefixSum(wheels)\r\n\r\n    var i : Int = 0\r\n    var nextUnpumped : Int = 0\r\n    var medianIdx : Int = (m.toInt()-1) / 2\r\n\r\n    var bestTime : Long? = null\r\n    var air : Long = k\r\n    var pressure : Long = 0\r\n    while(i+m <= wheels.size) {\r\n        // 1. pump with all the air you got\r\n        while(nextUnpumped <= medianIdx && air >= nextUnpumped - i) {\r\n            if (nextUnpumped == i) {\r\n                pressure = wheels[nextUnpumped++]\r\n            } else {\r\n                val numPump : Long = (nextUnpumped - i).toLong()\r\n                val canPump : Long = air / numPump\r\n                val maxPump : Long = wheels[nextUnpumped] - pressure\r\n                if (canPump >= maxPump) {\r\n                    pressure = wheels[nextUnpumped]\r\n                    air -= numPump*maxPump\r\n                    nextUnpumped++\r\n                } else {\r\n                    pressure += canPump\r\n                    air -= canPump*numPump\r\n                }\r\n            }\r\n        }\r\n        // 2. compute time in minutes\r\n        val airInOverfull : Long = wheelsPS[i+m.toInt()] - wheelsPS[nextUnpumped]\r\n        val time : Long = (k - air) + (airInOverfull - (i+m-nextUnpumped)*pressure)\r\n        bestTime = bestTime?.let { min(it,time) } ?: time\r\n        // 3. move on\r\n        air += pressure - wheels[i]\r\n        medianIdx++\r\n        i++\r\n    }\r\n    println(bestTime)\r\n}"
+}
