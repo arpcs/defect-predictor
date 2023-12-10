@@ -90,6 +90,8 @@ def fix_fields(file_path):
             if newfield != field.lower():
                 changed = True
         if changed:
+            print(f"Fixing file: {file_path}")
+            print(f"From: {json_data['defect_evaluation_gpt4_v4']} to {new_data}")
             json_data['defect_evaluation_gpt4_v4'] = new_data
             try:
                 with open(file_path, 'w', encoding='utf-8') as file:
