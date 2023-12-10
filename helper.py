@@ -74,8 +74,42 @@ def solution_getter():
   ret = solution_path_iterator(lambda _, full_path, _3: read_json(full_path))
   return ret
 
+def fix_fields(file_path):
+  try:
+    with open(file_path, 'r', encoding='utf-8') as file:
+        json_data = json.load(file)
+        new_data = {}
+        changed = False
+        for field, val  in json_data['defect_evaluation_gpt4_v4'].items():
+            newfield = field.lower()
+            newfield = newfield if newfield != "good_solution" else "good solution"
+            newfield = newfield if newfield != "wrong_solution" else "wrong solution"
+            newfield = newfield if newfield != "compilation_error" else "compilation error"
+            newfield = newfield if newfield != "runtime_error" else "runtime error"
+            new_data[newfield] = val
+            if newfield != field.lower():
+                changed = True
+        if changed:
+            json_data['defect_evaluation_gpt4_v4'] = new_data
+            try:
+                with open(file_path, 'w', encoding='utf-8') as file:
+                    json.dump(json_data, file, indent=4)
+                    pass
+
+            except FileNotFoundError:
+                print(f"File not found: {file_path}")
+            except json.JSONDecodeError:
+                print(f"Error decoding JSON from file: {file_path}")
+            except Exception as e:
+                print(f"An error occurred: {e}")
+  except Exception as e:
+    pass
+  return None
 
 def clean_files():
+    solution_path_iterator(lambda _, full_path, _3: delete_non_json(full_path))
+    problem_path_iterator(lambda _, full_path, _3: delete_non_json(full_path))
+    solution_path_iterator(lambda _, full_path, _3: fix_fields(full_path))
     solution_path_iterator(lambda _, full_path, _3: delete_non_json(full_path))
     problem_path_iterator(lambda _, full_path, _3: delete_non_json(full_path))
 
