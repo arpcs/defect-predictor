@@ -366,19 +366,24 @@ def main():
     defect_evaluation_gpt_4_count = count_filed_defect_evaluation_gpt_4(solutions)
     print(f"Already filled defect gpt4 evaluations: {defect_evaluation_gpt_4_count}")
 
+    print("Filling suggested categories for problems")
     fill_suggested_categories(50 - problem_suggested_categories_count, problems, problem_paths, "problem")
 
+    print("Filling suggested categories for solutions")
     fill_suggested_categories(50 - solution_suggested_categories_count, solutions, solution_paths, "solution")
 
-    #problem_packs = pick_problem_packs(problem_solution_container, 15, 10, 5, 30)
+    print("Getting problem packs")
     problem_packs = pick_problem_packs(problem_solution_container, 1, 10, 9, 10)
 
+    print("Doing category evaluations")
     do_category_evaluations(problem_solution_container, problem_packs)
 
+    print("Doing defect evaluations GPT 3.5")
     do_defect_evaluations(problem_solution_container, problem_packs, False)
-
+    
     problem_packs = pick_problem_packs(problem_solution_container, 1, 10, 2, 10)
 
+    print("Doing defect evaluations GPT 4")
     do_defect_evaluations(problem_solution_container, problem_packs, True)
 
 if __name__ == "__main__":
